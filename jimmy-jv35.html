@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Оренда пилососа від пилових кліщів Jimmy JV35 у Полтаві – чистота і здоров’я за 300 грн/день. Швидка доставка, ідеальний результат!">
+    <meta name="keywords" content="оренда Jimmy JV35 Полтава, пилосос від пилових кліщів, чистка матраців, дезінфекція, видалення алергенів, техніка для дому">
+    <title>Оренда Jimmy JV35 у Полтаві – Здоров’я без пилу | VAcleaner</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Секція hero */
+        .hero { padding: 40px 20px; text-align: center; }
+        .promo-banner { background: #c9a77d; color: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        .hero-content { display: flex; align-items: center; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        .hero-video { width: 40%; max-width: 400px; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3); }
+        .hero-text h1 { font-size: 36px; color: #f0d6b0; margin-bottom: 15px; text-shadow: 0 0 5px rgba(222, 188, 150, 0.3); }
+        .hero-text p { font-size: 18px; color: #f0d6b0; margin-bottom: 20px; }
+        .cta-btn.primary { background: #c9a77d; color: #fff; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: 500; transition: background 0.3s ease; }
+        .cta-btn.primary:hover { background: #debc96; }
+        
+        /* Переваги */
+        .benefits-section { padding: 40px 0; text-align: center; }
+        .section-title { font-size: 28px; color: #f0d6b0; margin-bottom: 30px; font-weight: 600; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .benefit-item { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #2a2a2a; border-radius: 10px; transition: transform 0.3s ease; }
+        .benefit-item:hover { transform: scale(1.05); }
+        .benefit-item i { font-size: 32px; color: #c9a77d; margin-bottom: 15px; }
+        .benefit-item h3 { font-size: 20px; color: #f0d6b0; margin-bottom: 10px; }
+        .benefit-item p { font-size: 14px; color: #d3d3d3; margin: 0; }
+
+        /* Опис */
+        .equipment-description { padding: 40px 20px; text-align: center; }
+        .equipment-description p { font-size: 16px; color: #ccc; max-width: 800px; margin: 0 auto 15px; }
+
+        /* Технічні характеристики */
+        .equipment-specs { padding: 40px 20px; text-align: center; }
+        .specs-list { list-style: none; padding: 0; max-width: 600px; margin: 0 auto; }
+        .specs-list li { font-size: 16px; color: #ccc; margin-bottom: 10px; }
+
+        /* Сценарії використання */
+        .usage-scenarios { padding: 40px 20px; text-align: center; }
+        .scenarios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .scenario-item { padding: 20px; background: #2a2a2a; border-radius: 10px; transition: transform 0.3s ease; }
+        .scenario-item:hover { transform: scale(1.05); }
+        .scenario-item i { font-size: 32px; color: #c9a77d; margin-bottom: 15px; }
+        .scenario-item h3 { font-size: 20px; color: #f0d6b0; margin-bottom: 10px; }
+        .scenario-item p { font-size: 14px; color: #ccc; }
+
+        /* Поради */
+        .usage-tips { padding: 40px 20px; text-align: center; }
+        .usage-tips p { font-size: 16px; color: #ccc; margin-bottom: 15px; }
+
+        /* Відгуки */
+        .testimonials { padding: 40px 20px; text-align: center; }
+        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .testimonial-card { background: #2a2a2a; padding: 20px; border-radius: 10px; }
+        .testimonial-img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; }
+        .testimonial-card p { font-size: 16px; color: #ccc; margin-bottom: 10px; }
+        .testimonial-card cite { font-size: 14px; color: #f0d6b0; }
+
+        /* Заклик до дії */
+        .cta-section { padding: 40px 20px; text-align: center; background: #2a2a2a; border-radius: 10px; }
+        .cta-section p { font-size: 18px; color: #ccc; margin-bottom: 20px; }
+
+        /* Пов’язана техніка */
+        .related-equipment { padding: 40px 20px; text-align: center; }
+        .equipment-links { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .equipment-link { padding: 10px 20px; background: #2a2a2a; color: #f0d6b0; text-decoration: none; border-radius: 25px; transition: background 0.3s ease; }
+        .equipment-link:hover { background: #c9a77d; color: #fff; }
+
+        /* Футер */
+        footer { padding: 30px 0; background: linear-gradient(45deg, #000000, #333333); text-align: center; }
+        .footer-content { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .footer-content p { margin: 0; color: #f0d6b0; }
+        .footer-content div { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .footer-link { color: #f0d6b0; text-decoration: none; font-size: 16px; transition: color 0.3s ease; }
+        .footer-link:hover { color: #c9a77d; }
+        .instagram-feed { margin-top: 20px; }
+        .instagram-feed h3 { font-size: 20px; color: #f0d6b0; margin-bottom: 15px; }
+        .insta-posts { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+        .insta-img { width: 100px; height: 100px; border-radius: 10px; transition: transform 0.3s ease; }
+        .insta-img:hover { transform: scale(1.1); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <a href="index.html"><img src="images/логотипу.png" alt="VAcleaner – оренда техніки в Полтаві" class="logo-img"></a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Головна</a>
+                <a href="services.html" class="nav-link">Послуги</a>
+                <a href="equipment.html" class="nav-link active">Техніка</a>
+                <a href="testimonials.html" class="nav-link">Нас рекомендують</a>
+                <a href="blog.html" class="nav-link">Блог</a>
+                <a href="faq.html" class="nav-link">FAQ</a>
+                <a href="how-to-order.html" class="nav-link">Як замовити</a>
+                <a href="contact.html" class="nav-link">Контакти</a>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <div class="promo-banner">
+                <p>Знижка 10% на першу оренду! Код: VACLEANER10 – Замови прямо зараз!</p>
+            </div>
+            <div class="hero-content">
+                <video class="hero-video" controls poster="images/jimmy-jv35-poster.jpg">
+                    <source src="videos/jimmy-jv35-work.mp4" type="video/mp4">
+                    Ваш браузер не підтримує відео.
+                </video>
+                <div class="hero-text">
+                    <h1>Jimmy JV35 – Здоров’я без пилу!</h1>
+                    <p>Забудь про пилових кліщів, алергени та мікроби – цей потужний пилосос очистить матраци, подушки та меблі на глибокому рівні! Ідеальне рішення для алергіків та сімей з дітьми. Оренда в Полтаві – лише 300 грн/день.</p>
+                    <a href="https://t.me/+380953919569" class="cta-btn primary">Замовити зараз</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="benefits-section">
+            <h2 class="section-title">Чому варто обрати Jimmy JV35?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Дезінфекція</h3>
+                    <p>УФ-лампа вбиває 99% бактерій.</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-wind"></i>
+                    <h3>Потужне всмоктування</h3>
+                    <p>14 кПа – пилу немає шансів.</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-feather"></i>
+                    <h3>Легкий дизайн</h3>
+                    <p>2.6 кг – зручно для всіх.</p>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    <h3>Доставка до дверей</h3>
+                    <p>Привеземо в Полтаві за день.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="equipment-description">
+            <h2 class="section-title">Jimmy JV35 – Захист від алергії</h2>
+            <p>Прокидаєшся з чханням? Дитина кашляє від пилу? Jimmy JV35 знищує пилових кліщів і алергени на матрацах, подушках і диванах завдяки УФ-лампі та потужному всмоктуванню.</p>
+            <p>Компактний, легкий і простий у використанні – ідеально для дому! Орендуй за 300 грн/день і дихай вільно вже сьогодні!</p>
+        </section>
+
+        <section class="equipment-specs">
+            <h2 class="section-title">Технічні характеристики</h2>
+            <ul class="specs-list">
+                <li><strong>Потужність:</strong> 700 Вт – працює на результат</li>
+                <li><strong>Всмоктування:</strong> 14 кПа – забирає все</li>
+                <li><strong>Пилозбірник:</strong> 0.5 л – легко чистити</li>
+                <li><strong>Вага:</strong> 2.6 кг – зручно тримати</li>
+                <li><strong>Кабель:</strong> 5 м – свобода рухів</li>
+            </ul>
+        </section>
+
+        <section class="usage-scenarios">
+            <h2 class="section-title">Де використовувати Jimmy JV35?</h2>
+            <div class="scenarios-grid">
+                <div class="scenario-item">
+                    <i class="fas fa-bed"></i>
+                    <h3>Для спальні</h3>
+                    <p>Чисті матраци та подушки.</p>
+                </div>
+                <div class="scenario-item">
+                    <i class="fas fa-child"></i>
+                    <h3>Для дітей</h3>
+                    <p>Безпека від алергенів.</p>
+                </div>
+                <div class="scenario-item">
+                    <i class="fas fa-couch"></i>
+                    <h3>Для меблів</h3>
+                    <p>Дивани без пилу.</p>
+                </div>
+                <div class="scenario-item">
+                    <i class="fas fa-allergies"></i>
+                    <h3>Для алергіків</h3>
+                    <p>Свіже повітря щодня.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="usage-tips">
+            <h2 class="section-title">Як отримати максимум від Jimmy JV35?</h2>
+            <p>Використовуй УФ-лампу на сухих поверхнях.</p>
+            <p>Очищай пилозбірник після кожного прибирання.</p>
+            <p>Рухай повільно для кращого результату.</p>
+            <p>Провітрюй кімнату після дезінфекції.</p>
+        </section>
+
+        <section class="testimonials">
+            <h2 class="section-title">Що кажуть наші клієнти?</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <img src="images/user1.jpg" alt="Марія" class="testimonial-img">
+                    <p>"Дитина перестала чхати вночі – це просто магія! Легкий і зручний."</p>
+                    <cite>Марія, 29 років, Полтава</cite>
+                </div>
+                <div class="testimonial-card">
+                    <img src="images/user2.jpg" alt="Олег" class="testimonial-img">
+                    <p>"Матрац як новий, пил зник. За 300 грн – супер!"</p>
+                    <cite>Олег, 35 років, Полтава</cite>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <h2 class="section-title">Час економити час!</h2>
+            <p>Орендуй Jimmy JV35 за 300 грн/день і забудь про пил. Тисни кнопку – доставимо сьогодні!</p>
+            <a href="https://t.me/+380953919569" class="cta-btn primary">Замовити зараз</a>
+        </section>
+
+        <section class="related-equipment">
+            <h2 class="section-title">Інша техніка в оренду</h2>
+            <div class="equipment-links">
+                <a href="karcher-sc2.html" class="equipment-link">KARCHER SC 2 Deluxe – пароочисник</a>
+                <a href="abir-wd8.html" class="equipment-link">ABIR WD8 – робот для вікон</a>
+                <a href="karcher-puzzi.html" class="equipment-link">Kärcher Puzzi 8/1 – миючий пилосос</a>
+            </div>
+        </section>
+
+        <footer>
+            <div class="footer-content">
+                <p>© 2025 VAcleaner. Усі права захищено.</p>
+                <div>
+                    <a href="privacy.html" class="footer-link">Політика конфіденційності</a>
+                    <a href="terms.html" class="footer-link">Умови використання</a>
+                    <a href="faq.html" class="footer-link">FAQ</a>
+                    <a href="how-to-order.html" class="footer-link">Як замовити</a>
+                </div>
+            </div>
+            <div class="instagram-feed">
+                <h3>Ми в Instagram</h3>
+                <div class="insta-posts">
+                    <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
+                        <img src="insta-post1.jpg" alt="Миючий пилосос KARCHER у роботі" class="insta-img" loading="lazy">
+                        <p>Наша техніка в дії</p>
+                    </a>
+                    <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
+                        <img src="insta-post2.jpeg" alt="Робот для вікон ABIR в дії" class="insta-img" loading="lazy">
+                        <p>Чистота з VAcleaner</p>
+                    </a>
+                </div>
+                <p>Діліться своїми фото з #VAcleaner!</p>
+            </div>
+        </footer>
+    </div>
+
+    <div class="chat-bot">
+        <a href="https://t.me/+380953919569" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+    </div>
+
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91db45b6cef16789',t:'MTc0MTUzMDY0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91dbc0d15d014525',t:'MTc0MTUzNTY5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>

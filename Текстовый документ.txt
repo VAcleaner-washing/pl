@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Оренда пилососа від пилових кліщів Jimmy JV35 у Полтаві. Дезінфекція та очищення матраців і меблів за доступною ціною.">
+    <meta name="keywords" content="Jimmy JV35, оренда пилососа Полтава, пилові кліщі, дезінфекція">
+    <title>Jimmy JV35 – VAcleaner</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Шапка -->
+        <header class="header">
+            <a href="index.html"><img src="логотипу.png" alt="Логотип VAcleaner – оренда техніки в Полтаві" class="logo-img"></a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Головна</a>
+                <a href="services.html" class="nav-link">Послуги</a>
+                <a href="equipment.html" class="nav-link">Техніка</a>
+                <a href="testimonials.html" class="nav-link">Відгуки</a>
+                <a href="blog.html" class="nav-link">Блог</a>
+                <a href="faq.html" class="nav-link">FAQ</a>
+                <a href="how-to-order.html" class="nav-link">Як замовити</a>
+                <a href="contact.html" class="nav-link">Контакти</a>
+            </nav>
+        </header>
+
+        <!-- Опис техніки -->
+        <section class="rental-equipment">
+            <h2 class="section-title">Пилосос від пилових кліщів Jimmy JV35</h2>
+            <div class="equipment-grid">
+                <article class="equipment-card">
+                    <img src="джимми.jpg" alt="Пилосос від пилових кліщів Jimmy JV35 у роботі" class="equipment-img">
+                    <div class="equipment-content">
+                        <h3 class="equipment-title">Здоров’я вашої родини з Jimmy JV35</h3>
+                        <p>Позбудьтеся пилових кліщів та алергенів раз і назавжди! Jimmy JV35 – це компактний, але потужний пилосос із ультрафіолетовою лампою для дезінфекції. Він ідеально підходить для очищення матраців, ковдр та м’яких меблів, забезпечуючи чистоту та безпеку для вашої родини.</p>
+                        <p>Переваги Jimmy JV35:</p>
+                        <ul class="benefits">
+                            <li class="benefit-item"><i class="fas fa-check-circle"></i> Ультрафіолетова дезінфекція</li>
+                            <li class="benefit-item"><i class="fas fa-check-circle"></i> Потужне всмоктування алергенів</li>
+                            <li class="benefit-item"><i class="fas fa-check-circle"></i> Компактний та зручний у використанні</li>
+                        </ul>
+                        <p class="equipment-price">Ціна: 300 грн/день <a href="https://t.me/+380953919569" class="details-link">(Деталі в Telegram)</a></p>
+                        <p class="urgency">Залишилась лише 1 одиниця на сьогодні! Не пропустіть!</p>
+                        <a href="https://t.me/+380953919569" class="cta-btn secondary">Замовити зараз</a>
+                    </div>
+                </article>
+            </div>
+            <div class="share-buttons">
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https://vacleaner.com/jimmy-jv35.html" target="_blank" class="share-btn"><i class="fab fa-facebook"></i></a>
+                <a href="https://telegram.me/share/url?url=https://vacleaner.com/jimmy-jv35.html" target="_blank" class="share-btn"><i class="fab fa-telegram"></i></a>
+                <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" class="share-btn"><i class="fab fa-instagram"></i></a>
+            </div>
+            <p class="section-footer">Дізнайтесь більше про інші наші пристрої:</p>
+            <div class="equipment-grid">
+                <a href="karcher-puzzi.html" class="nav-link">Миючий пилосос KARCHER Puzzi 8/1</a>
+                <a href="karcher-sc2.html" class="nav-link">Пароочисник KARCHER SC 2 Deluxe</a>
+                <a href="abir-wd8.html" class="nav-link">Робот для миття вікон ABIR WD8</a>
+            </div>
+        </section>
+
+        <!-- Футер -->
+        <footer>
+            <div class="footer-content">
+                <p>© 2025 VAcleaner. Усі права захищено.</p>
+                <div>
+                    <a href="privacy.html" class="footer-link">Політика конфіденційності</a>
+                    <a href="terms.html" class="footer-link">Умови використання</a>
+                    <a href="faq.html" class="footer-link">FAQ</a>
+                    <a href="how-to-order.html" class="footer-link">Як замовити</a>
+                </div>
+            </div>
+            <div class="instagram-feed">
+                <h3>Ми в Instagram</h3>
+                <div class="insta-posts">
+                    <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
+                        <img src="insta-post1.jpg" alt="Миючий пилосос KARCHER у роботі" class="insta-img">
+                        <p>Наша техніка в дії</p>
+                    </a>
+                    <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
+                        <img src="insta-post2.jpeg" alt="Робот для вікон ABIR в дії" class="insta-img">
+                        <p>Чистота з VAcleaner</p>
+                    </a>
+                </div>
+                <p>Діліться своїми фото з #VAcleaner!</p>
+            </div>
+            <p class="copyright">Створено з любов’ю до техніки та чистоти</p>
+        </footer>
+    </div>
+
+    <!-- Чат-бот -->
+    <div class="chat-bot">
+        <a href="https://t.me/+380953919569" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+    </div>
+</body>
+</html>
