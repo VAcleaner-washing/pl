@@ -81,7 +81,7 @@
             </div>
         </section>
 
-        <section class="recommendations">
+         <section class="recommendations">
             <div class="recommendation-grid">
                 <div class="recommendation-card">
                     <video class="recommendation-video" controls poster="review1-poster.jpg">
@@ -112,32 +112,32 @@
             <a href="https://t.me/+380953919569" class="cta-btn primary">Замовити зараз</a>
         </section>
 
-        <footer>
-            <div class="footer-content">
-                <p>© 2025 VAcleaner. Усі права захищено.</p>
-                <div>
-                    <a href="privacy.html" class="footer-link">Політика конфіденційності</a>
-                    <a href="terms.html" class="footer-link">Умови використання</a>
-                    <a href="faq.html" class="footer-link">FAQ</a>
-                    <a href="how-to-order.html" class="footer-link">Як замовити</a>
-                </div>
-            </div>
-            <div class="instagram-feed">
-                <h3>Ми в Instagram</h3>
-                <div class="insta-posts">
-                    <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
-                        <img src="insta-post1.jpg" alt="Миючий пилосос KARCHER у роботі" class="insta-img" loading="lazy">
-                        <p>Наша техніка в дії</p>
-                    </a>
-                    <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
-                        <img src="insta-post2.jpeg" alt="Робот для вікон ABIR в дії" class="insta-img" loading="lazy">
-                        <p>Чистота з VAcleaner</p>
-                    </a>
-                </div>
-                <p>Діліться своїми фото з #VAcleaner!</p>
-            </div>
-            <p class="copyright">Створено з любов’ю до техніки та чистоти</p>
-        </footer>
+<footer>
+    <div class="footer-content">
+        <p>© 2025 VAcleaner. Усі права захищено.</p>
+        <div>
+            <a href="privacy.html" class="footer-link">Політика конфіденційності</a>
+            <a href="terms.html" class="footer-link">Умови використання</a>
+            <a href="faq.html" class="footer-link">FAQ</a>
+            <a href="how-to-order.html" class="footer-link">Як замовити</a>
+        </div>
+    </div>
+    <div class="instagram-feed">
+        <h3>Ми в Instagram</h3>
+        <div class="insta-posts">
+            <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
+                <img src="insta-post1.jpg" alt="Миючий пилосос KARCHER у роботі" class="insta-img" loading="lazy">
+                <p>Наша техніка в дії</p>
+            </a>
+            <a href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank">
+                <img src="insta-post2.jpeg" alt="Робот для вікон ABIR в дії" class="insta-img" loading="lazy">
+                <p>Чистота з VAcleaner</p>
+            </a>
+        </div>
+        <p>Діліться своїми фото з #VAcleaner!</p>
+    </div>
+    <p class="copyright">Створено з любов’ю до техніки та чистоти</p>
+</footer>
     </div>
 
     <div class="chat-bot">
@@ -162,5 +162,16 @@
         "priceRange": "300-700 UAH"
     }
     </script>
-</body>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const benefits = document.querySelectorAll('.benefit-item');
+            benefits.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('animate');
+                }, index * 500);
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91ddaaa05cc3ed87',t:'MTc0MTU1NTc1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
