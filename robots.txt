@@ -1,4 +1,3 @@
 User-agent: *
 Allow: /
-
-Sitemap: https://vacleaner-washing.github.io/pl/sitemap.xml
+Sitemap: https://vacleaner.netlify.app/sitemap.xml
