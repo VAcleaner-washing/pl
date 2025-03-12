@@ -57,23 +57,16 @@ a:hover {
 .nav {
     margin-top: 20px;
 }
-
 .nav-link {
     color: #f0d6b0;
-    margin: 0 20px; /* Збільшуємо відстань між елементами */
+    margin: 0 15px;
     font-size: 16px;
     font-weight: 500;
-    padding: 12px 20px; /* Збільшуємо padding для розміру > 48x48 пікселів */
+    padding: 8px 12px;
     border-radius: 8px;
-    transition: all 0.3s ease; /* Зберігаємо анімацію */
+    transition: all 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
-    display: inline-block;
-    min-width: 48px;
-    min-height: 48px;
-    box-sizing: border-box;
 }
-
-/* Додаємо :hover лише для конкретного елемента */
 .nav-link:hover {
     color: #000000;
     background-color: #f0d6b0;
@@ -83,14 +76,6 @@ a:hover {
 .nav-link.active {
     background-color: #f0d6b0;
     color: #000000;
-}
-
-/* Розширена сенсорна зона */
-.nav-link::after {
-    content: '';
-    position: absolute;
-    top: -5px; right: -5px; bottom: -5px; left: -5px;
-    z-index: 0;
 }
 
 /* Загальні стилі для секцій */
