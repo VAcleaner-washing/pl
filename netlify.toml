@@ -1,0 +1,4 @@
+[[plugins]]  
+package = "@netlify/sitemaps"  
+[plugins[0].inputs]  
+buildDir = "public"
