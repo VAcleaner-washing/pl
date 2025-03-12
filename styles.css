@@ -56,7 +56,11 @@ a:hover {
 
 .nav {
     margin-top: 20px;
+    display: flex; /* Використовуємо flex для кращого розташування */
+    flex-wrap: wrap; /* Дозволяємо перенос на новий рядок */
+    justify-content: center; /* Центруємо кнопки */
 }
+
 .nav-link {
     color: #f0d6b0;
     margin: 0 15px;
@@ -66,7 +70,10 @@ a:hover {
     border-radius: 8px;
     transition: all 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
+    display: inline-block;
+    box-sizing: border-box;
 }
+
 .nav-link:hover {
     color: #000000;
     background-color: #f0d6b0;
@@ -78,6 +85,100 @@ a:hover {
     color: #000000;
 }
 
+/* Мобільні телефони (до 767px) */
+@media (max-width: 767px) {
+    .nav {
+        margin-top: 10px; /* Зменшуємо відступ для компактності */
+    }
+
+    .nav-link {
+        margin: 5px 10px; /* Додаємо вертикальний відступ, зменшуємо горизонтальний */
+        padding: 12px 20px; /* Збільшуємо padding для розміру > 48x48 */
+        min-width: 48px;
+        min-height: 48px;
+        font-size: 14px; /* Зменшуємо шрифт для компактності */
+    }
+
+    /* Прибираємо hover для сенсорних пристроїв */
+    .nav-link:hover {
+        color: #f0d6b0;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    /* Ефект при натисканні */
+    .nav-link:active {
+        color: #000000;
+        background-color: #f0d6b0;
+        box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
+    }
+
+    /* Розширена сенсорна зона */
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        top: -5px; right: -5px; bottom: -5px; left: -5px;
+        z-index: 0;
+    }
+}
+
+/* Планшети (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .nav {
+        margin-top: 15px; /* Трохи зменшуємо відступ */
+    }
+
+    .nav-link {
+        margin: 0 15px;
+        padding: 10px 16px; /* Збільшуємо padding, але менше, ніж на мобільних */
+        min-width: 48px;
+        min-height: 48px;
+        font-size: 15px; /* Трохи зменшуємо шрифт */
+    }
+
+    /* Прибираємо hover для сенсорних пристроїв */
+    .nav-link:hover {
+        color: #f0d6b0;
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    /* Ефект при натисканні */
+    .nav-link:active {
+        color: #000000;
+        background-color: #f0d6b0;
+        box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
+    }
+
+    /* Розширена сенсорна зона */
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        top: -5px; right: -5px; bottom: -5px; left: -5px;
+        z-index: 0;
+    }
+}
+
+/* Десктоп (1024px і більше) */
+@media (min-width: 1024px) {
+    .nav {
+        margin-top: 20px;
+    }
+
+    .nav-link {
+        margin: 0 20px; /* Збільшуємо відстань для десктопу */
+        padding: 8px 12px; /* Зберігаємо оригінальний padding */
+        min-width: 48px; /* Гарантуємо розмір */
+        min-height: 48px;
+    }
+
+    /* Зберігаємо ефект hover для десктопу */
+    .nav-link:hover {
+        color: #000000;
+        background-color: #f0d6b0;
+        box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
+    }
+}
 /* Загальні стилі для секцій */
 .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
     padding: 60px 0;
