@@ -59,29 +59,21 @@ a:hover {
 }
 
 .nav-link {
-    color: #f0d6b0; /* Зберігаємо колір */
-    margin: 0 20px; /* Збільшуємо горизонтальну відстань між елементами */
-    font-size: 16px; /* Зберігаємо розмір шрифту */
-    font-weight: 500; /* Зберігаємо вагу шрифту */
-    padding: 12px 20px; /* Збільшуємо внутрішні відступи для мінімального розміру 48x48 */
-    border-radius: 8px; /* Зберігаємо закруглення */
-    text-shadow: 0 0 5px rgba(222, 188, 150, 0.3); /* Зберігаємо тінь */
-    display: inline-block; /* Забезпечуємо правильне відображення розміру */
-    min-width: 48px; /* Мінімальна ширина для сенсорної зони */
-    min-height: 48px; /* Мінімальна висота для сенсорної зони */
-    box-sizing: border-box; /* Враховуємо padding у розмірах */
-    /* Оптимізація анімації: виключаємо "all" для кращої продуктивності */
-    transition: background-color 0.3s ease, color 0.3s ease; /* Обмежуємо анімацію лише потрібними властивостями */
+    color: #f0d6b0;
+    margin: 0 20px; /* Збільшуємо відстань між елементами */
+    font-size: 16px;
+    font-weight: 500;
+    padding: 12px 20px; /* Збільшуємо padding для розміру > 48x48 пікселів */
+    border-radius: 8px;
+    transition: all 0.3s ease; /* Зберігаємо анімацію */
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
+    display: inline-block;
+    min-width: 48px;
+    min-height: 48px;
+    box-sizing: border-box;
 }
 
-/* Додатковий псевдоелемент для розширення сенсорної зони (невидимої) */
-.nav-link::after {
-    content: '';
-    position: absolute;
-    top: -5px; right: -5px; bottom: -5px; left: -5px; /* Розширена область */
-    z-index: 0; /* Не перекриває вміст */
-}
-
+/* Додаємо :hover лише для конкретного елемента */
 .nav-link:hover {
     color: #000000;
     background-color: #f0d6b0;
@@ -91,6 +83,14 @@ a:hover {
 .nav-link.active {
     background-color: #f0d6b0;
     color: #000000;
+}
+
+/* Розширена сенсорна зона */
+.nav-link::after {
+    content: '';
+    position: absolute;
+    top: -5px; right: -5px; bottom: -5px; left: -5px;
+    z-index: 0;
 }
 
 /* Загальні стилі для секцій */
