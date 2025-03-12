@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://vacleaner.netlify.app/</loc>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/services</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/equipment</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/testimonials</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/blog</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/faq</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/how-to-order</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/contact</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/privacy</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/terms</loc>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/karcher-puzzi</loc>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/jimmy-jv35</loc>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/karcher-sc2</loc>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://vacleaner.netlify.app/abir-wd8</loc>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>
