@@ -808,3 +808,8 @@ footer {
         height: 180px;
     }
 }
+
+.promo-block {
+    text-align: center;
+    margin-top: 20px;
+}
