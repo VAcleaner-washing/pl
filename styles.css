@@ -294,25 +294,25 @@ a:hover {
 }
 
 .hero-usp {
-    font-size: 22px; /* Зменшуємо розмір для кращої читабельності */
+    font-size: 1.25rem; /* 20px */
     color: #c9a77d;
     font-weight: 500;
     margin-bottom: 20px;
-    max-width: 500px; /* Обмеження ширини */
-    text-align: center; /* Центрування тексту */
-    line-height: 1.4; /* Комфортна висота рядка */
-    white-space: pre-wrap; /* Дозволяє переносити текст */
+    max-width: 500px;
+    text-align: center;
+    line-height: 1.4;
+    white-space: pre-wrap;
 }
 
 .hero-subtitle {
-    font-size: 16px; /* Явний розмір для підзаголовка */
+    font-size: 1.125rem; /* 18px — збільшуємо з 16px */
     color: #f0d6b0;
     margin-bottom: 20px;
-    max-width: 600px; /* Обмеження ширини */
-    text-align: center; /* Центрування */
-    line-height: 1.6; /* Комфортна висота рядка */
-    white-space: pre-wrap; /* Дозволяє переносити текст */
-    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3); /* Додаємо тінь для стилю */
+    max-width: 600px;
+    text-align: center;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
 }
 
 .hero-text {
@@ -320,18 +320,31 @@ a:hover {
     min-width: 300px;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Центрування контенту всередині */
+    align-items: center;
+}
+
+.why-card h3 {
+    font-size: 1.125rem; /* 18px — зберігаємо узгодженість */
+    margin-bottom: 15px;
 }
 
 @media (max-width: 768px) {
     .hero-usp {
-        font-size: 18px;
+        font-size: 1.125rem; /* 18px */
         max-width: 90%;
     }
 
     .hero-subtitle {
-        font-size: 14px;
+        font-size: 1rem; /* 16px — адаптивне зменшення */
         max-width: 90%;
+    }
+
+    .why-card h3 {
+        font-size: 1rem; /* 16px — адаптивне зменшення */
+    }
+
+    .hero-text {
+        min-width: 100%;
     }
 }
 
