@@ -323,7 +323,17 @@ a:hover {
     align-items: center; /* Центрування контенту всередині */
 }
 
+@media (max-width: 768px) {
+    .hero-usp {
+        font-size: 18px;
+        max-width: 90%;
+    }
 
+    .hero-subtitle {
+        font-size: 14px;
+        max-width: 90%;
+    }
+}
 
 .benefits {
     list-style: none;
