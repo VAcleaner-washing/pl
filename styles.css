@@ -306,10 +306,14 @@ a:hover {
 
 .promo-text {
     font-size: 18px;
-    font-weight: 500;
-    color: #c9a77d;
-    text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
+    font-weight: 600; /* Збільшуємо вагу шрифту */
+    color: #f0d6b0; /* Світліший колір для кращого контрасту */
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.6); /* Посилюємо тінь */
     margin-bottom: 20px;
+    padding: 10px 20px; /* Додаємо внутрішні відступи */
+    background: rgba(201, 167, 125, 0.2); /* Легкий бежевий фон */
+    border-radius: 10px; /* Заокруглені краї */
+    display: inline-block; /* Щоб фон обгортав тільки текст */
 }
 
 .benefits {
