@@ -340,6 +340,8 @@ a:hover {
     margin-top: 30px;
 }
 
+
+
 .why-card {
     background: linear-gradient(135deg, rgba(222, 188, 150, 0.05), rgba(222, 188, 150, 0.1));
     padding: 20px;
@@ -350,8 +352,27 @@ a:hover {
 
 .why-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(222, 188, 150, 0.5);
+    box-shadow: 0 15px 40px rgba(222, 188, 150, 0.6);
+    background: linear-gradient(135deg, rgba(222, 188, 150, 0.15), rgba(222, 188, 150, 0.25));
 }
+
+.recommendation-card {
+    background: linear-gradient(135deg, rgba(222, 188, 150, 0.1), rgba(222, 188, 150, 0.15));
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
+    transition: all 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(222, 188, 150, 0.6);
+    background: linear-gradient(135deg, rgba(222, 188, 150, 0.15), rgba(222, 188, 150, 0.25));
+}
+
+
+
+
 
 .why-card h3 {
     font-size: 22px;
@@ -366,17 +387,6 @@ a:hover {
     margin-top: 30px;
 }
 
-.recommendation-card {
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.1), rgba(222, 188, 150, 0.15));
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
-}
-
-.recommendation-card:hover {
-    transform: translateY(-10px);
-}
 
 .recommendation-video {
     width: 100%;
