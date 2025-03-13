@@ -839,6 +839,8 @@ footer {
     width: 100%;
     max-width: 450px;
     height: auto;
+    max-widht:1280px;
+    aspect-ratio: 16 / 9;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
     position: relative;
