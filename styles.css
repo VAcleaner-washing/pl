@@ -54,11 +54,11 @@ a:hover {
     transform: scale(1.05);
 }
 
+/* Залишаємо ваші існуючі стилі для великих екранів */
 .nav {
     margin-top: 20px;
-    display: flex; /* Для кращого розташування */
-    flex-wrap: wrap; /* Дозволяємо перенос */
-    justify-content: center; /* Центруємо */
+    display: flex;
+    justify-content: center;
 }
 
 .nav-link {
@@ -70,9 +70,6 @@ a:hover {
     border-radius: 8px;
     transition: all 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
-    display: inline-block;
-    box-sizing: border-box;
-    text-decoration: none; /* Уникаємо підкреслення */
 }
 
 .nav-link:hover {
@@ -86,73 +83,145 @@ a:hover {
     color: #000000;
 }
 
-/* Мобільні телефони (до 767px) */
-@media (max-width: 767px) {
+/* Нові стилі для гамбургер-меню та анімації */
+.menu-toggle-input {
+    display: none;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 1001;
+    transition: transform 0.3s ease;
+}
+
+.hamburger {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: #f0d6b0;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.hamburger::before,
+.hamburger::after {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 3px;
+    background: #f0d6b0;
+    transition: all 0.3s ease;
+}
+
+.hamburger::before {
+    top: -8px;
+}
+
+.hamburger::after {
+    top: 8px;
+}
+
+/* Анімація гамбургера */
+#menu-toggle:checked ~ .menu-toggle .hamburger {
+    background: transparent;
+}
+
+#menu-toggle:checked ~ .menu-toggle .hamburger::before {
+    transform: rotate(45deg) translate(5px, 5px);
+}
+
+#menu-toggle:checked ~ .menu-toggle .hamburger::after {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Адаптивне меню з анімацією */
+@media (max-width: 768px) {
+    .header {
+        position: relative; /* Додаємо для правильного позиціонування .menu-toggle */
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
     .nav {
-        margin-top: 10px;
+        display: none; /* Приховуємо за замовчуванням */
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(5px);
+        padding: 20px;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+        z-index: 1000;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-in-out;
+    }
+
+    #menu-toggle:checked ~ .nav {
+        display: flex;
+        max-height: 500px; /* Достатня висота для всіх пунктів */
     }
 
     .nav-link {
-        margin: 5px 10px; /* Додаємо вертикальний відступ */
-        padding: 12px 20px; /* Збільшуємо padding для розміру > 48x48 */
-        min-width: 48px;
-        min-height: 48px;
-        font-size: 14px; /* Зменшуємо шрифт */
+        margin: 10px 0;
+        font-size: 18px;
+        width: 100%;
+        text-align: center;
+        padding: 15px;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
     }
+
+    #menu-toggle:checked ~ .nav .nav-link {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
 
     .nav-link:hover {
-        color: #f0d6b0;
-        background-color: transparent;
-        box-shadow: none;
-    }
-
-    .nav-link:active {
-        color: #000000;
-        background-color: #f0d6b0;
-        box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
+        background-color: rgba(240, 214, 176, 0.2);
+        color: #c9a77d;
     }
 }
 
-/* Планшети (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* Стилі для великих екранів */
+@media (min-width: 769px) {
     .nav {
-        margin-top: 15px;
-    }
-
-    .nav-link {
-        margin: 0 15px;
-        padding: 10px 16px; /* Трохи більший padding */
-        min-width: 48px;
-        min-height: 48px;
-        font-size: 15px;
-    }
-
-    .nav-link:hover {
-        color: #f0d6b0;
-        background-color: transparent;
-        box-shadow: none;
-    }
-
-    .nav-link:active {
-        color: #000000;
-        background-color: #f0d6b0;
-        box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
-    }
-}
-
-/* Десктоп (1024px і більше) */
-@media (min-width: 1024px) {
-    .nav {
+        display: flex;
         margin-top: 20px;
+        justify-content: center;
     }
 
-    .nav-link {
-        margin: 0 20px;
-        padding: 8px 12px;
-        min-width: 48px;
-        min-height: 48px;
+    .menu-toggle {
+        display: none;
     }
 }
+
+
+
+
 /* Загальні стилі для секцій */
 .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
     padding: 60px 0;
