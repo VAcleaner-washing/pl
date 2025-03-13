@@ -303,6 +303,15 @@ a:hover {
     margin-bottom: 20px;
 }
 
+
+.promo-text {
+    font-size: 18px;
+    font-weight: 500;
+    color: #c9a77d;
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
+    margin-bottom: 20px;
+}
+
 .benefits {
     list-style: none;
     display: flex;
