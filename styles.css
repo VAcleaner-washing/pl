@@ -812,4 +812,14 @@ footer {
 .promo-block {
     text-align: center;
     margin-top: 20px;
+    background: rgba(201, 167, 125, 0.1); /* Легкий бежевий фон */
+    padding: 10px; /* Внутрішні відступи для комфорту */
+    border-radius: 10px; /* Заокруглені краї для стилю */
+}
+.promo-text {
+    font-size: 18px;
+    font-weight: 600; /* Жирний шрифт для виділення */
+    color: #f0d6b0; /* Світлий бежевий колір для кращого контрасту */
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.4); /* Легка тінь для ефекту */
+    margin-bottom: 20px;
 }
