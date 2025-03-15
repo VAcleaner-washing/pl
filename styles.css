@@ -40,12 +40,12 @@ a:hover {
     padding: 30px 0; /* Залишаємо відступи для навігації */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
-    background-size: contain; /* Зберігаємо пропорції логотипу без обрізки */
+    background-size: contain; /* Зберігаємо пропорції логотипу */
     background-position: center; /* Центруємо зображення */
     background-repeat: no-repeat; /* Без повторення */
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-    min-height: 400px; /* Зменшуємо висоту до 400px для кращої гармонії на 16:9 */
+    min-height: 400px; /* Базова висота для десктопів */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -71,6 +71,13 @@ a:hover {
     transition: all 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
     background: rgba(0, 0, 0, 0.5); /* Напівпрозорий фон для кращої читабельності */
+    position: relative; /* Для контролю псевдоелементів */
+}
+
+/* Прибираємо можливі галочки чи маркери */
+.nav-link::before,
+.nav-link::after {
+    content: none; /* Прибираємо будь-які псевдоелементи, які могли додати галочку */
 }
 
 /* Ефект при наведенні */
@@ -80,30 +87,62 @@ a:hover {
     box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
 }
 
+/* Стиль для активного посилання */
 .nav-link.active {
     background-color: #f0d6b0;
     color: #000000;
 }
 
+/* Приховуємо чекбокс для гамбургер-меню */
+.menu-toggle-input {
+    display: none; /* Переконуємося, що чекбокс не видно */
+}
+
 /* Адаптивність для екранів із шириною від 1024px до 1920px (ноутбуки 16:9) */
 @media (min-width: 1024px) and (max-width: 1920px) {
     .header {
-        min-height: 350px; /* Зменшуємо висоту для ноутбуків */
-        background-size: contain; /* Зберігаємо пропорції логотипу */
-        background-position: center; /* Центруємо */
+        min-height: 350px; /* Висота для ноутбуків */
+        background-size: contain; /* Зберігаємо пропорції */
+        background-position: center;
     }
 
     .nav-link {
-        font-size: 14px; /* Трохи зменшуємо розмір тексту для гармонії */
-        margin: 0 10px; /* Зменшуємо відступи між посиланнями */
+        font-size: 14px;
+        margin: 0 10px;
     }
 }
 
-/* Адаптивність для малих екранів */
+/* Адаптивність для планшетів (768px–1023px) */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .header {
+        min-height: 300px; /* Зменшуємо висоту для планшетів */
+        background-size: contain;
+        background-position: center;
+    }
+
+    .nav {
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 14px;
+        margin: 0 8px;
+        padding: 8px 10px;
+    }
+
+    .menu-toggle {
+        display: none; /* Ховаємо гамбургер-меню для планшетів */
+    }
+}
+
+/* Адаптивність для телефонів (менше 768px) */
 @media (max-width: 768px) {
     .header {
-        min-height: 300px; /* Залишаємо як є для телефонів */
+        min-height: 250px; /* Зменшуємо висоту для телефонів */
         padding: 20px 0;
+        background-size: contain; /* Зберігаємо пропорції */
+        background-position: center;
     }
 
     .nav {
@@ -132,10 +171,10 @@ a:hover {
 
     .nav-link {
         margin: 10px 0;
-        font-size: 18px;
+        font-size: 16px;
         width: 100%;
         text-align: center;
-        padding: 15px;
+        padding: 12px;
         background: rgba(0, 0, 0, 0.7);
     }
 }
@@ -146,7 +185,6 @@ a:hover {
         min-height: 500px; /* Збільшуємо висоту для великих екранів */
     }
 }
-
 
 
 }
