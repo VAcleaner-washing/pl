@@ -37,7 +37,7 @@ a:hover {
 /* Шапка */
 .header {
     position: relative; /* Для коректного позиціонування дочірніх елементів */
-    padding: 30px 0 50px 0; /* Збільшуємо відступ знизу для більшого простору */
+    padding: 30px 0; /* Відступи для гармонії */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
     background-size: contain; /* Зберігаємо пропорції логотипу */
@@ -46,21 +46,17 @@ a:hover {
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
     min-height: 400px; /* Базова висота для десктопів */
-    display: flex;
-    flex-direction: column; /* Робимо колонку */
-    justify-content: flex-end; /* Навігація внизу */
-    align-items: center; /* Центруємо по горизонталі */
 }
 
 /* Навігація */
 .nav {
-    margin-top: 20px; /* Відступ зверху для гармонії */
-    margin-bottom: 10px; /* Зменшуємо відступ знизу, щоб опустити ще нижче */
+    position: absolute; /* Фіксуємо внизу */
+    bottom: 0; /* Притискаємо до нижнього краю */
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
-    position: relative; /* Для коректного відображення */
     z-index: 2; /* Щоб навігація була поверх фону */
-    width: 100%; /* Займає всю ширину */
     padding: 10px 0; /* Додаємо відступи для вигляду */
 }
 
@@ -78,11 +74,60 @@ a:hover {
     position: relative;
 }
 
+/* Прибираємо можливі галочки чи маркери */
+.nav-link::before,
+.nav-link::after {
+    content: none !important; /* Примусово прибираємо псевдоелементи */
+}
+
+/* Ефект при наведенні */
+.nav-link:hover {
+    color: #000000;
+    background-color: #f0d6b0;
+    box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
+}
+
+/* Стиль для активного посилання */
+.nav-link.active {
+    background-color: #f0d6b0;
+    color: #000000;
+}
+
+/* Приховуємо чекбокс для гамбургер-меню */
+.menu-toggle-input {
+    display: none !important; /* Повністю приховуємо чекбокс */
+}
+
+/* Стилі для гамбургер-меню */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 1001;
+    transition: transform 0.3s ease;
+}
+
+/* Додатково прибираємо будь-які системні маркери */
+.nav {
+    list-style: none; /* Прибираємо можливі маркери списку */
+}
+
 /* Адаптивність для екранів із шириною від 1024px до 1920px (ноутбуки 16:9) */
 @media (min-width: 1024px) and (max-width: 1920px) {
     .header {
         min-height: 350px; /* Висота для ноутбуків */
-        padding-bottom: 40px; /* Зменшуємо відступ для ноутбуків */
+        background-size: contain;
+        background-position: center;
+    }
+
+    .nav-link {
+        font-size: 14px;
+        margin: 0 10px;
     }
 }
 
@@ -90,11 +135,27 @@ a:hover {
 @media (min-width: 769px) and (max-width: 1023px) {
     .header {
         min-height: 300px; /* Зменшуємо висоту для планшетів */
-        padding-bottom: 30px;
+        background-size: contain;
+        background-position: center;
     }
 
     .nav {
-        margin-bottom: 5px; /* Ще нижче на планшетах */
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 14px;
+        margin: 0 8px;
+        padding: 8px 10px;
+    }
+
+    .menu-toggle {
+        display: none; /* Ховаємо гамбургер-меню для планшетів */
     }
 }
 
@@ -103,7 +164,12 @@ a:hover {
     .header {
         min-height: 250px; /* Зменшуємо висоту для телефонів */
         padding: 20px 0;
-        padding-bottom: 20px;
+        background-size: contain;
+        background-position: center;
+    }
+
+    .menu-toggle {
+        display: block; /* Показуємо гамбургер-меню */
     }
 
     .nav {
@@ -129,13 +195,14 @@ a:hover {
         display: flex;
         max-height: 500px;
     }
-}
 
-/* Для дуже широких екранів */
-@media (min-width: 1921px) {
-    .header {
-        min-height: 500px; /* Збільшуємо висоту для великих екранів */
-        padding-bottom: 60px;
+    .nav-link {
+        margin: 10px 0;
+        font-size: 16px;
+        width: 100%;
+        text-align: center;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.7);
     }
 }
 
@@ -145,7 +212,6 @@ a:hover {
         min-height: 500px; /* Збільшуємо висоту для великих екранів */
     }
 }
-
 
 
 
