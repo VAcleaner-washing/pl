@@ -37,7 +37,7 @@ a:hover {
 /* Шапка */
 .header {
     position: relative; /* Для коректного позиціонування дочірніх елементів */
-    padding: 30px 0; /* Залишаємо відступи для навігації */
+    padding: 30px 0; /* Залишаємо відступи для шапки */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
     background-size: contain; /* Зберігаємо пропорції логотипу */
@@ -47,17 +47,20 @@ a:hover {
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
     min-height: 400px; /* Базова висота для десктопів */
     display: flex;
+    flex-direction: column; /* Змінюємо на колонку, щоб навігація була внизу */
     align-items: center;
-    justify-content: center;
+    justify-content: space-between; /* Навігація буде внизу */
 }
 
 /* Навігація */
 .nav {
-    margin-top: 0; /* Прибираємо верхній відступ */
+    margin-top: 20px; /* Відступ зверху для відокремлення від логотипу */
     display: flex;
     justify-content: center;
-    position: relative; /* Для коректного відображення поверх фону */
+    position: relative; /* Для коректного відображення */
     z-index: 2; /* Щоб навігація була поверх фону */
+    width: 100%; /* Щоб займати всю ширину */
+    padding: 10px 0; /* Додаємо відступи для гармонії */
 }
 
 /* Стилі для посилань у навігації */
@@ -77,7 +80,7 @@ a:hover {
 /* Прибираємо можливі галочки чи маркери */
 .nav-link::before,
 .nav-link::after {
-    content: none; /* Прибираємо будь-які псевдоелементи, які могли додати галочку */
+    content: none; /* Прибираємо будь-які псевдоелементи */
 }
 
 /* Ефект при наведенні */
@@ -102,7 +105,7 @@ a:hover {
 @media (min-width: 1024px) and (max-width: 1920px) {
     .header {
         min-height: 350px; /* Висота для ноутбуків */
-        background-size: contain; /* Зберігаємо пропорції */
+        background-size: contain;
         background-position: center;
     }
 
@@ -112,7 +115,7 @@ a:hover {
     }
 }
 
-/* Адаптивність для планшетів (768px–1023px) */
+/* Адаптивність для планшетів (769px–1023px) */
 @media (min-width: 769px) and (max-width: 1023px) {
     .header {
         min-height: 300px; /* Зменшуємо висоту для планшетів */
@@ -141,8 +144,9 @@ a:hover {
     .header {
         min-height: 250px; /* Зменшуємо висоту для телефонів */
         padding: 20px 0;
-        background-size: contain; /* Зберігаємо пропорції */
+        background-size: contain;
         background-position: center;
+        justify-content: flex-start; /* Логотип зверху, навігація під ним */
     }
 
     .nav {
@@ -185,6 +189,11 @@ a:hover {
         min-height: 500px; /* Збільшуємо висоту для великих екранів */
     }
 }
+
+
+
+
+
 
 
 }
