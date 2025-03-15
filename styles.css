@@ -218,43 +218,7 @@ a:hover {
         display: block; /* Показуємо гамбургер-меню */
     }
 
-    .nav {
-        display: none; /* Приховуємо за замовчуванням */
-        flex-direction: column;
-        align-items: center;
-        position: absolute;
-        top: 100%; /* Розташовуємо під шапкою */
-        left: 0;
-        right: 0;
-        background: rgba(0, 0, 0, 0.95);
-        backdrop-filter: blur(5px);
-        padding: 20px;
-        border-radius: 0 0 15px 15px;
-        box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-        z-index: 1000;
-        max-height: none; /* Прибираємо обмеження висоти */
-        height: auto; /* Дозволяємо меню адаптуватися до вмісту */
-        overflow: visible; /* Дозволяємо вмісту виходити за межі */
-        transition: transform 0.5s ease-in-out; /* Змінюємо анімацію на transform */
-        transform: translateY(-100%); /* Ховаємо меню за межами екрану */
-    }
-
-    #menu-toggle-input:checked ~ .nav {
-        display: flex;
-        max-height: none; /* Без обмеження */
-        height: auto; /* Адаптивна висота */
-        transform: translateY(0); /* Показуємо меню */
-    }
-
-    .nav-link {
-        margin: 10px 0;
-        font-size: 16px;
-        width: 100%;
-        text-align: center;
-        padding: 12px;
-        background: rgba(0, 0, 0, 0.7);
-    }
-}
+   
 
 /* Для дуже широких екранів */
 @media (min-width: 1921px) {
@@ -328,11 +292,17 @@ a:hover {
 /* Адаптивне меню з анімацією */
 @media (max-width: 768px) {
     .header {
-        position: relative; /* Додаємо для правильного позиціонування .menu-toggle */
+        min-height: 150px; /* Зменшуємо висоту для телефонів */
+        padding: 15px 0; /* Зменшуємо відступи */
+        background-size: cover; /* Перемикаємо на cover для заповнення простору */
+        background-position: center center; /* Центруємо логотип */
+        position: relative; /* Для правильного позиціонування .menu-toggle */
     }
 
     .menu-toggle {
         display: block;
+        right: 15px; /* Коректне позиціонування */
+        top: 15px;
     }
 
     .nav {
@@ -340,7 +310,7 @@ a:hover {
         flex-direction: column;
         align-items: center;
         position: absolute;
-        top: 80px;
+        top: 100%; /* Розташовуємо під шапкою */
         left: 0;
         right: 0;
         background: rgba(0, 0, 0, 0.95);
@@ -349,14 +319,15 @@ a:hover {
         border-radius: 0 0 15px 15px;
         box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
         z-index: 1000;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease-in-out;
+        max-height: 0; /* Початкова висота для анімації */
+        overflow: hidden; /* Ховаємо вміст, коли закрите */
+        transition: max-height 0.5s ease-in-out; /* Анімація через max-height */
     }
 
-    #menu-toggle:checked ~ .nav {
+    #menu-toggle-input:checked ~ .nav {
         display: flex;
-        max-height: 500px; /* Достатня висота для всіх пунктів */
+        max-height: 600px; /* Збільшуємо, щоб умістити всі пункти */
+        overflow-y: auto; /* Додаємо прокрутку, якщо вміст перевищує */
     }
 
     .nav-link {
@@ -365,24 +336,25 @@ a:hover {
         width: 100%;
         text-align: center;
         padding: 15px;
+        background: rgba(0, 0, 0, 0.7);
         opacity: 0;
         transform: translateY(-20px);
         transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    #menu-toggle:checked ~ .nav .nav-link {
+    #menu-toggle-input:checked ~ .nav .nav-link {
         opacity: 1;
         transform: translateY(0);
     }
 
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
 
     .nav-link:hover {
         background-color: rgba(240, 214, 176, 0.2);
