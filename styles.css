@@ -40,12 +40,12 @@ a:hover {
     padding: 30px 0; /* Залишаємо відступи для навігації */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
-    background-size: cover; /* Заповнюємо весь блок, обрізаючи зайве */
+    background-size: contain; /* Зберігаємо пропорції логотипу без обрізки */
     background-position: center; /* Центруємо зображення */
     background-repeat: no-repeat; /* Без повторення */
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-    min-height: 500px; /* Збільшуємо висоту до 500px (можна спробувати 400px або 600px) */
+    min-height: 400px; /* Зменшуємо висоту до 400px для кращої гармонії на 16:9 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,7 +53,7 @@ a:hover {
 
 /* Навігація */
 .nav {
-    margin-top: 0; /* Прибираємо верхній відступ, якщо він був */
+    margin-top: 0; /* Прибираємо верхній відступ */
     display: flex;
     justify-content: center;
     position: relative; /* Для коректного відображення поверх фону */
@@ -85,11 +85,25 @@ a:hover {
     color: #000000;
 }
 
+/* Адаптивність для екранів із шириною від 1024px до 1920px (ноутбуки 16:9) */
+@media (min-width: 1024px) and (max-width: 1920px) {
+    .header {
+        min-height: 350px; /* Зменшуємо висоту для ноутбуків */
+        background-size: contain; /* Зберігаємо пропорції логотипу */
+        background-position: center; /* Центруємо */
+    }
+
+    .nav-link {
+        font-size: 14px; /* Трохи зменшуємо розмір тексту для гармонії */
+        margin: 0 10px; /* Зменшуємо відступи між посиланнями */
+    }
+}
+
 /* Адаптивність для малих екранів */
 @media (max-width: 768px) {
     .header {
-        min-height: 300px; /* Зменшуємо висоту для мобільних до 300px */
-        padding: 20px 0; /* Зменшуємо відступи */
+        min-height: 300px; /* Залишаємо як є для телефонів */
+        padding: 20px 0;
     }
 
     .nav {
@@ -100,7 +114,7 @@ a:hover {
         top: 100%; /* Розташовуємо під шапкою */
         left: 0;
         right: 0;
-        background: rgba(0, 0, 0, 0.95); /* Напівпрозорий фон для адаптивного меню */
+        background: rgba(0, 0, 0, 0.95);
         backdrop-filter: blur(5px);
         padding: 20px;
         border-radius: 0 0 15px 15px;
@@ -113,7 +127,7 @@ a:hover {
 
     #menu-toggle:checked ~ .nav {
         display: flex;
-        max-height: 500px; /* Достатня висота для всіх пунктів */
+        max-height: 500px;
     }
 
     .nav-link {
@@ -122,22 +136,16 @@ a:hover {
         width: 100%;
         text-align: center;
         padding: 15px;
-        background: rgba(0, 0, 0, 0.7); /* Напівпрозорий фон для кращої видимості */
+        background: rgba(0, 0, 0, 0.7);
     }
 }
 
-/* Стилі для великих екранів */
-@media (min-width: 769px) {
-    .nav {
-        display: flex;
-        justify-content: center;
-    }
-
-    .menu-toggle {
-        display: none;
+/* Для дуже широких екранів */
+@media (min-width: 1921px) {
+    .header {
+        min-height: 500px; /* Збільшуємо висоту для великих екранів */
     }
 }
-
 
 
 
