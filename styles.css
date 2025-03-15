@@ -45,7 +45,7 @@ a:hover {
     background-repeat: no-repeat; /* Без повторення */
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-    min-height: 200px; /* Задаємо мінімальну висоту для блока */
+    min-height: 500px; /* Збільшуємо висоту до 500px (можна спробувати 400px або 600px) */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -88,7 +88,7 @@ a:hover {
 /* Адаптивність для малих екранів */
 @media (max-width: 768px) {
     .header {
-        min-height: 150px; /* Зменшуємо висоту для мобільних */
+        min-height: 300px; /* Зменшуємо висоту для мобільних до 300px */
         padding: 20px 0; /* Зменшуємо відступи */
     }
 
@@ -136,6 +136,11 @@ a:hover {
     .menu-toggle {
         display: none;
     }
+}
+
+
+
+
 }
 /* Нові стилі для гамбургер-меню та анімації */
 .menu-toggle-input {
