@@ -37,7 +37,7 @@ a:hover {
 /* Шапка */
 .header {
     position: relative; /* Для коректного позиціонування дочірніх елементів */
-    padding: 30px 0; /* Відступи для гармонії */
+    padding: 30px 0 50px 0; /* Збільшуємо відступ знизу для більшого простору */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
     background-size: contain; /* Зберігаємо пропорції логотипу */
@@ -55,7 +55,7 @@ a:hover {
 /* Навігація */
 .nav {
     margin-top: 20px; /* Відступ зверху для гармонії */
-    margin-bottom: 20px; /* Відступ знизу, щоб не притискатися до краю */
+    margin-bottom: 10px; /* Зменшуємо відступ знизу, щоб опустити ще нижче */
     display: flex;
     justify-content: center;
     position: relative; /* Для коректного відображення */
@@ -78,55 +78,11 @@ a:hover {
     position: relative;
 }
 
-/* Прибираємо можливі галочки чи маркери */
-.nav-link::before,
-.nav-link::after {
-    content: none;
-}
-
-/* Ефект при наведенні */
-.nav-link:hover {
-    color: #000000;
-    background-color: #f0d6b0;
-    box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
-}
-
-/* Стиль для активного посилання */
-.nav-link.active {
-    background-color: #f0d6b0;
-    color: #000000;
-}
-
-/* Приховуємо чекбокс для гамбургер-меню */
-.menu-toggle-input {
-    display: none;
-}
-
-/* Стилі для гамбургер-меню */
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 10px;
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    z-index: 1001;
-    transition: transform 0.3s ease;
-}
-
 /* Адаптивність для екранів із шириною від 1024px до 1920px (ноутбуки 16:9) */
 @media (min-width: 1024px) and (max-width: 1920px) {
     .header {
         min-height: 350px; /* Висота для ноутбуків */
-        background-size: contain;
-        background-position: center;
-    }
-
-    .nav-link {
-        font-size: 14px;
-        margin: 0 10px;
+        padding-bottom: 40px; /* Зменшуємо відступ для ноутбуків */
     }
 }
 
@@ -134,23 +90,11 @@ a:hover {
 @media (min-width: 769px) and (max-width: 1023px) {
     .header {
         min-height: 300px; /* Зменшуємо висоту для планшетів */
-        background-size: contain;
-        background-position: center;
+        padding-bottom: 30px;
     }
 
     .nav {
-        display: flex;
-        justify-content: center;
-    }
-
-    .nav-link {
-        font-size: 14px;
-        margin: 0 8px;
-        padding: 8px 10px;
-    }
-
-    .menu-toggle {
-        display: none; /* Ховаємо гамбургер-меню для планшетів */
+        margin-bottom: 5px; /* Ще нижче на планшетах */
     }
 }
 
@@ -159,12 +103,7 @@ a:hover {
     .header {
         min-height: 250px; /* Зменшуємо висоту для телефонів */
         padding: 20px 0;
-        background-size: contain;
-        background-position: center;
-    }
-
-    .menu-toggle {
-        display: block; /* Показуємо гамбургер-меню */
+        padding-bottom: 20px;
     }
 
     .nav {
@@ -190,14 +129,13 @@ a:hover {
         display: flex;
         max-height: 500px;
     }
+}
 
-    .nav-link {
-        margin: 10px 0;
-        font-size: 16px;
-        width: 100%;
-        text-align: center;
-        padding: 12px;
-        background: rgba(0, 0, 0, 0.7);
+/* Для дуже широких екранів */
+@media (min-width: 1921px) {
+    .header {
+        min-height: 500px; /* Збільшуємо висоту для великих екранів */
+        padding-bottom: 60px;
     }
 }
 
