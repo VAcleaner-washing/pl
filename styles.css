@@ -37,7 +37,7 @@ a:hover {
 /* Шапка */
 .header {
     position: relative; /* Для коректного позиціонування дочірніх елементів */
-    padding: 30px 0; /* Відступи для гармонії */
+    padding: 15px 0; /* Зменшені відступи для телефонів і гармонії */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
     background-size: contain; /* Зберігаємо пропорції логотипу */
@@ -103,16 +103,56 @@ a:hover {
 
 /* Стилі для гамбургер-меню */
 .menu-toggle {
-    display: none;
+    display: none; /* За замовчуванням приховане */
     background: none;
     border: none;
     cursor: pointer;
     padding: 10px;
     position: absolute;
-    right: 20px;
-    top: 20px;
+    right: 15px; /* Зменшуємо відступ для меншої висоти */
+    top: 15px; /* Зменшуємо відступ для меншої висоти */
     z-index: 1001;
     transition: transform 0.3s ease;
+}
+
+.hamburger {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: #f0d6b0;
+    position: relative;
+}
+
+.hamburger::before,
+.hamburger::after {
+    content: '';
+    position: absolute;
+    width: 25px;
+    height: 3px;
+    background: #f0d6b0;
+    transition: all 0.3s ease;
+}
+
+.hamburger::before {
+    top: -8px;
+}
+
+.hamburger::after {
+    bottom: -8px;
+}
+
+#menu-toggle-input:checked + .menu-toggle .hamburger {
+    background: transparent;
+}
+
+#menu-toggle-input:checked + .menu-toggle .hamburger::before {
+    transform: rotate(45deg);
+    top: 0;
+}
+
+#menu-toggle-input:checked + .menu-toggle .hamburger::after {
+    transform: rotate(-45deg);
+    bottom: 0;
 }
 
 /* Додатково прибираємо будь-які системні маркери */
@@ -197,9 +237,9 @@ a:hover {
         transition: max-height 0.5s ease-in-out;
     }
 
-    #menu-toggle:checked ~ .nav {
+    #menu-toggle-input:checked ~ .nav {
         display: flex;
-        max-height: 500px;
+        max-height: 500px; /* Достатня висота для всіх пунктів */
     }
 
     .nav-link {
