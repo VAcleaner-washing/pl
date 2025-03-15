@@ -35,23 +35,41 @@ a:hover {
 }
 
 /* Шапка */
+/* Шапка */
 .header {
     text-align: center;
-    padding: 30px 0;
+    padding: 0; /* Прибираємо відступи, щоб логотип заповнював увесь блок */
     background: #000000;
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+    position: relative; /* Зберігаємо для коректного позиціонування гамбургер-меню */
+    overflow: hidden; /* Якщо логотип обрізається, це сховає зайве */
 }
 
+/* Логотип */
 .logo-img {
-    width: 600px;
-    height: auto;
-    object-fit: contain;
+    width: 100%; /* Займає всю ширину блока .header */
+    height: 100%; /* Займає всю висоту блока .header */
+    object-fit: cover; /* Заповнює блок із обрізкою, якщо пропорції не співпадають */
+    /* object-fit: contain; - якщо хочете зберегти весь логотип без обрізки */
+    display: block; /* Усуває можливі пробіли під зображенням */
     transition: transform 0.3s ease;
 }
 
-.logo-img:hover {
-    transform: scale(1.05);
+/* Додаємо мінімальну висоту для .header, щоб логотип виглядав коректно */
+.header {
+    min-height: 200px; /* Адаптуйте під розміри вашого логотипу */
+}
+
+/* Адаптивність для менших екранів */
+@media (max-width: 768px) {
+    .header {
+        min-height: 150px; /* Зменшуємо висоту для мобільних */
+    }
+
+    .logo-img {
+        object-fit: cover; /* Забезпечуємо заповнення */
+    }
 }
 
 /* Залишаємо ваші існуючі стилі для великих екранів */
