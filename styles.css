@@ -232,14 +232,18 @@ a:hover {
         border-radius: 0 0 15px 15px;
         box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
         z-index: 1000;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease-in-out;
+        max-height: none; /* Прибираємо обмеження висоти */
+        height: auto; /* Дозволяємо меню адаптуватися до вмісту */
+        overflow: visible; /* Дозволяємо вмісту виходити за межі */
+        transition: transform 0.5s ease-in-out; /* Змінюємо анімацію на transform */
+        transform: translateY(-100%); /* Ховаємо меню за межами екрану */
     }
 
     #menu-toggle-input:checked ~ .nav {
         display: flex;
-        max-height: 500px; /* Достатня висота для всіх пунктів */
+        max-height: none; /* Без обмеження */
+        height: auto; /* Адаптивна висота */
+        transform: translateY(0); /* Показуємо меню */
     }
 
     .nav-link {
