@@ -37,7 +37,7 @@ a:hover {
 /* Шапка */
 .header {
     position: relative; /* Для коректного позиціонування дочірніх елементів */
-    padding: 30px 0; /* Залишаємо відступи для шапки */
+    padding: 30px 0; /* Відступи для логотипу */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
     background-size: contain; /* Зберігаємо пропорції логотипу */
@@ -46,21 +46,16 @@ a:hover {
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
     min-height: 400px; /* Базова висота для десктопів */
-    display: flex;
-    flex-direction: column; /* Змінюємо на колонку, щоб навігація була внизу */
-    align-items: center;
-    justify-content: space-between; /* Навігація буде внизу */
 }
 
 /* Навігація */
 .nav {
-    margin-top: 20px; /* Відступ зверху для відокремлення від логотипу */
     display: flex;
     justify-content: center;
-    position: relative; /* Для коректного відображення */
-    z-index: 2; /* Щоб навігація була поверх фону */
-    width: 100%; /* Щоб займати всю ширину */
-    padding: 10px 0; /* Додаємо відступи для гармонії */
+    background: rgba(0, 0, 0, 0.95); /* Додаємо фон для навігації */
+    padding: 10px 0; /* Відступи для гармонії */
+    border-radius: 0 0 15px 15px; /* Заокруглення знизу */
+    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
 }
 
 /* Стилі для посилань у навігації */
@@ -74,13 +69,13 @@ a:hover {
     transition: all 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
     background: rgba(0, 0, 0, 0.5); /* Напівпрозорий фон для кращої читабельності */
-    position: relative; /* Для контролю псевдоелементів */
+    position: relative;
 }
 
 /* Прибираємо можливі галочки чи маркери */
 .nav-link::before,
 .nav-link::after {
-    content: none; /* Прибираємо будь-які псевдоелементи */
+    content: none;
 }
 
 /* Ефект при наведенні */
@@ -98,7 +93,21 @@ a:hover {
 
 /* Приховуємо чекбокс для гамбургер-меню */
 .menu-toggle-input {
-    display: none; /* Переконуємося, що чекбокс не видно */
+    display: none;
+}
+
+/* Стилі для гамбургер-меню */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 1001;
+    transition: transform 0.3s ease;
 }
 
 /* Адаптивність для екранів із шириною від 1024px до 1920px (ноутбуки 16:9) */
@@ -146,7 +155,10 @@ a:hover {
         padding: 20px 0;
         background-size: contain;
         background-position: center;
-        justify-content: flex-start; /* Логотип зверху, навігація під ним */
+    }
+
+    .menu-toggle {
+        display: block; /* Показуємо гамбургер-меню */
     }
 
     .nav {
@@ -189,7 +201,6 @@ a:hover {
         min-height: 500px; /* Збільшуємо висоту для великих екранів */
     }
 }
-
 
 
 
