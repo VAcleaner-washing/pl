@@ -35,50 +35,32 @@ a:hover {
 }
 
 /* Шапка */
-/* Шапка */
 .header {
-    text-align: center;
-    padding: 0; /* Прибираємо відступи, щоб логотип заповнював увесь блок */
-    background: #000000;
+    position: relative; /* Для коректного позиціонування дочірніх елементів */
+    padding: 30px 0; /* Залишаємо відступи для навігації */
+    background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
+    background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
+    background-size: cover; /* Заповнюємо весь блок, обрізаючи зайве */
+    background-position: center; /* Центруємо зображення */
+    background-repeat: no-repeat; /* Без повторення */
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-    position: relative; /* Зберігаємо для коректного позиціонування гамбургер-меню */
-    overflow: hidden; /* Якщо логотип обрізається, це сховає зайве */
-}
-
-/* Логотип */
-.logo-img {
-    width: 100%; /* Займає всю ширину блока .header */
-    height: 100%; /* Займає всю висоту блока .header */
-    object-fit: cover; /* Заповнює блок із обрізкою, якщо пропорції не співпадають */
-    /* object-fit: contain; - якщо хочете зберегти весь логотип без обрізки */
-    display: block; /* Усуває можливі пробіли під зображенням */
-    transition: transform 0.3s ease;
-}
-
-/* Додаємо мінімальну висоту для .header, щоб логотип виглядав коректно */
-.header {
-    min-height: 200px; /* Адаптуйте під розміри вашого логотипу */
-}
-
-/* Адаптивність для менших екранів */
-@media (max-width: 768px) {
-    .header {
-        min-height: 150px; /* Зменшуємо висоту для мобільних */
-    }
-
-    .logo-img {
-        object-fit: cover; /* Забезпечуємо заповнення */
-    }
-}
-
-/* Залишаємо ваші існуючі стилі для великих екранів */
-.nav {
-    margin-top: 20px;
+    min-height: 200px; /* Задаємо мінімальну висоту для блока */
     display: flex;
+    align-items: center;
     justify-content: center;
 }
 
+/* Навігація */
+.nav {
+    margin-top: 0; /* Прибираємо верхній відступ, якщо він був */
+    display: flex;
+    justify-content: center;
+    position: relative; /* Для коректного відображення поверх фону */
+    z-index: 2; /* Щоб навігація була поверх фону */
+}
+
+/* Стилі для посилань у навігації */
 .nav-link {
     color: #f0d6b0;
     margin: 0 15px;
@@ -88,8 +70,10 @@ a:hover {
     border-radius: 8px;
     transition: all 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
+    background: rgba(0, 0, 0, 0.5); /* Напівпрозорий фон для кращої читабельності */
 }
 
+/* Ефект при наведенні */
 .nav-link:hover {
     color: #000000;
     background-color: #f0d6b0;
@@ -101,6 +85,58 @@ a:hover {
     color: #000000;
 }
 
+/* Адаптивність для малих екранів */
+@media (max-width: 768px) {
+    .header {
+        min-height: 150px; /* Зменшуємо висоту для мобільних */
+        padding: 20px 0; /* Зменшуємо відступи */
+    }
+
+    .nav {
+        display: none; /* Приховуємо за замовчуванням */
+        flex-direction: column;
+        align-items: center;
+        position: absolute;
+        top: 100%; /* Розташовуємо під шапкою */
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.95); /* Напівпрозорий фон для адаптивного меню */
+        backdrop-filter: blur(5px);
+        padding: 20px;
+        border-radius: 0 0 15px 15px;
+        box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+        z-index: 1000;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-in-out;
+    }
+
+    #menu-toggle:checked ~ .nav {
+        display: flex;
+        max-height: 500px; /* Достатня висота для всіх пунктів */
+    }
+
+    .nav-link {
+        margin: 10px 0;
+        font-size: 18px;
+        width: 100%;
+        text-align: center;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.7); /* Напівпрозорий фон для кращої видимості */
+    }
+}
+
+/* Стилі для великих екранів */
+@media (min-width: 769px) {
+    .nav {
+        display: flex;
+        justify-content: center;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+}
 /* Нові стилі для гамбургер-меню та анімації */
 .menu-toggle-input {
     display: none;
