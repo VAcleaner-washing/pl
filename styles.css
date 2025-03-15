@@ -37,7 +37,7 @@ a:hover {
 /* Шапка */
 .header {
     position: relative; /* Для коректного позиціонування дочірніх елементів */
-    padding: 30px 0; /* Відступи для логотипу */
+    padding: 30px 0; /* Відступи для гармонії */
     background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
     background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
     background-size: contain; /* Зберігаємо пропорції логотипу */
@@ -46,16 +46,22 @@ a:hover {
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
     min-height: 400px; /* Базова висота для десктопів */
+    display: flex;
+    flex-direction: column; /* Робимо колонку */
+    justify-content: flex-end; /* Навігація внизу */
+    align-items: center; /* Центруємо по горизонталі */
 }
 
 /* Навігація */
 .nav {
+    margin-top: 20px; /* Відступ зверху для гармонії */
+    margin-bottom: 20px; /* Відступ знизу, щоб не притискатися до краю */
     display: flex;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.95); /* Додаємо фон для навігації */
-    padding: 10px 0; /* Відступи для гармонії */
-    border-radius: 0 0 15px 15px; /* Заокруглення знизу */
-    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+    position: relative; /* Для коректного відображення */
+    z-index: 2; /* Щоб навігація була поверх фону */
+    width: 100%; /* Займає всю ширину */
+    padding: 10px 0; /* Додаємо відступи для вигляду */
 }
 
 /* Стилі для посилань у навігації */
@@ -201,7 +207,6 @@ a:hover {
         min-height: 500px; /* Збільшуємо висоту для великих екранів */
     }
 }
-
 
 
 
