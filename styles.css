@@ -266,17 +266,21 @@ a:hover {
 }
 
 /* Анімація гамбургера */
-#menu-toggle:checked ~ .menu-toggle .hamburger {
+#menu-toggle-input:checked + .menu-toggle .hamburger {
     background: transparent;
 }
 
-#menu-toggle:checked ~ .menu-toggle .hamburger::before {
-    transform: rotate(45deg) translate(5px, 5px);
+#menu-toggle-input:checked + .menu-toggle .hamburger::before {
+    transform: rotate(45deg);
+    top: 0;
 }
 
-#menu-toggle:checked ~ .menu-toggle .hamburger::after {
-    transform: rotate(-45deg) translate(7px, -7px);
+#menu-toggle-input:checked + .menu-toggle .hamburger::after {
+    transform: rotate(-45deg);
+    bottom: 0;
 }
+
+
 
 /* Адаптивне меню з анімацією */
 @media (max-width: 768px) {
