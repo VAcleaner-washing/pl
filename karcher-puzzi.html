@@ -6,108 +6,822 @@
     <meta name="description" content="Оренда миючого пилососа Kärcher Puzzi 8/1 у Полтаві – глибока чистота килимів і меблів за 600 грн/день. Швидка доставка, ідеальний результат!">
     <meta name="keywords" content="оренда Kärcher Puzzi 8/1 Полтава, миючий пилосос, чистка килимів, чистка меблів, техніка для дому">
     <title>Оренда Kärcher Puzzi 8/1 у Полтаві – Глибоке очищення | VAcleaner</title>
-    <link rel="icon" type="image/ico" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* Секція hero */
-        .hero { padding: 40px 20px; text-align: center; }
-        .promo-banner { background: #c9a77d; color: #fff; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
-        .hero-content { display: flex; align-items: center; gap: 30px; flex-wrap: wrap; justify-content: center; }
-        .hero-video { width: 40%; max-width: 400px; height: auto; border-radius: 10px; box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3); }
-        .hero-text h1 { font-size: 36px; color: #f0d6b0; margin-bottom: 15px; text-shadow: 0 0 5px rgba(222, 188, 150, 0.3); }
-        .hero-text p { font-size: 18px; color: #f0d6b0; margin-bottom: 20px; }
-        .cta-btn.primary { background: #c9a77d; color: #fff; padding: 12px 25px; border-radius: 25px; text-decoration: none; font-weight: 500; transition: background 0.3s ease; }
-        .cta-btn.primary:hover { background: #debc96; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            color: #f0d6b0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: #f0d6b0;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: #c9a77d;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(222, 188, 150, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Шапка */
+        .header {
+            position: relative;
+            padding: 15px 0;
+            background: #000000;
+            background-image: url('логотипу.webp');
+            background-size: contain;
+            background-position: center center;
+            background-repeat: no-repeat;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+            padding-bottom: 33.33%;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .nav {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 2;
+        }
+
+        .nav-link {
+            color: #f0d6b0;
+            margin: 0 20px;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 6px 12px;
+            position: relative;
+            transition: color 0.3s ease, transform 0.3s ease;
+            text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background: #c9a77d;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+
+        .nav-link:hover {
+            color: #c9a77d;
+            transform: scale(1.05);
+        }
+
+        .nav-link.active {
+            color: #c9a77d;
+            font-weight: 600;
+            border-bottom: 2px solid #c9a77d;
+        }
+
+        .menu-toggle-input {
+            display: none;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            z-index: 1003;
+            transition: transform 0.3s ease;
+        }
+
+        .hamburger {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #f0d6b0;
+            position: relative;
+            transition: background 0.3s ease;
+        }
+
+        .hamburger::before,
+        .hamburger::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 3px;
+            background: #f0d6b0;
+            transition: transform 0.4s ease, top 0.4s ease;
+        }
+
+        .hamburger::before {
+            top: -8px;
+        }
+
+        .hamburger::after {
+            top: 8px;
+        }
+
+        #menu-toggle-input:checked + .menu-toggle .hamburger {
+            background: transparent;
+        }
+
+        #menu-toggle-input:checked + .menu-toggle .hamburger::before {
+            top: 0;
+            transform: rotate(45deg);
+            background: #c9a77d;
+        }
+
+        #menu-toggle-input:checked + .menu-toggle .hamburger::after {
+            top: 0;
+            transform: rotate(-45deg);
+            background: #c9a77d;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                min-height: 150px;
+                background-size: contain;
+                background-position: center 20%;
+                padding-bottom: 33.33%;
+                z-index: 998;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(5px);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transform: translateY(-100%);
+                transition: transform 0.4s ease-in-out;
+                z-index: 1002;
+                padding: 0;
+            }
+
+            #menu-toggle-input:checked ~ .nav {
+                transform: translateY(0);
+            }
+
+            .nav-link {
+                margin: 15px 0;
+                font-size: 20px;
+                width: 80%;
+                text-align: center;
+                padding: 15px;
+            }
+
+            .nav-link::after {
+                display: none;
+            }
+        }
+
+        /* Hero секція */
+        .hero {
+            padding: 40px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(34, 34, 34, 0.8));
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(222, 188, 150, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(222, 188, 150, 0.15), transparent);
+            animation: glow-rotate 15s infinite linear;
+            z-index: 0;
+        }
+
+        @keyframes glow-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .promo-banner {
+            background: linear-gradient(45deg, #f0d6b0, #c9a77d);
+            color: #000000;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+            font-size: 16px;
+            line-height: 1.5;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-video {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 3 / 4;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .hero-video:hover {
+            transform: scale(1.02);
+        }
+
+        .hero-text {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-text h1 {
+            font-size: 36px;
+            color: #f0d6b0;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(222, 188, 150, 0.5);
+        }
+
+        .hero-text p {
+            font-size: 18px;
+            color: #d3d3d3;
+            margin-bottom: 15px;
+            max-width: 500px;
+        }
+
+        .hero-text strong {
+            color: #c9a77d;
+            font-weight: 600;
+        }
+
+        .hero-highlight {
+            font-size: 20px;
+            color: #f0d6b0;
+            background: linear-gradient(45deg, #c9a77d, #f0d6b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .cta-btn.primary {
+            background: linear-gradient(45deg, #f0d6b0, #c9a77d);
+            color: #000000;
+            padding: 14px 30px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 15px rgba(222, 188, 150, 0.4);
+        }
+
+        .cta-btn.primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(222, 188, 150, 0.6);
+            background: linear-gradient(45deg, #c9a77d, #f0d6b0);
+        }
+
         /* Переваги */
-        .benefits-section { padding: 40px 0; text-align: center; }
-        .section-title { font-size: 28px; color: #f0d6b0; margin-bottom: 30px; font-weight: 600; }
-        .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .benefit-item { display: flex; flex-direction: column; align-items: center; padding: 20px; background: #2a2a2a; border-radius: 10px; transition: transform 0.3s ease; }
-        .benefit-item:hover { transform: scale(1.05); }
-        .benefit-item i { font-size: 32px; color: #c9a77d; margin-bottom: 15px; }
-        .benefit-item h3 { font-size: 20px; color: #f0d6b0; margin-bottom: 10px; }
-        .benefit-item p { font-size: 14px; color: #d3d3d3; margin: 0; }
+        .benefits-section {
+            padding: 60px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            position: relative;
+        }
 
-        /* Опис */
-        .equipment-description { padding: 40px 20px; text-align: center; }
-        .equipment-description p { font-size: 16px; color: #ccc; max-width: 800px; margin: 0 auto 15px; }
+        .section-title {
+            font-size: 36px;
+            color: #f0d6b0;
+            margin-bottom: 40px;
+            font-weight: 600;
+            text-shadow: 0 0 10px rgba(222, 188, 150, 0.5);
+            position: relative;
+        }
 
-        /* Технічні характеристики */
-        .equipment-specs { padding: 40px 20px; text-align: center; }
-        .specs-list { list-style: none; padding: 0; max-width: 600px; margin: 0 auto; }
-        .specs-list li { font-size: 16px; color: #ccc; margin-bottom: 10px; }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, #c9a77d, transparent);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: width 0.3s ease;
+        }
 
-        /* Сценарії використання */
-        .usage-scenarios { padding: 40px 20px; text-align: center; }
-        .scenarios-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .scenario-item { padding: 20px; background: #2a2a2a; border-radius: 10px; transition: transform 0.3s ease; }
-        .scenario-item:hover { transform: scale(1.05); }
-        .scenario-item i { font-size: 32px; color: #c9a77d; margin-bottom: 15px; }
-        .scenario-item h3 { font-size: 20px; color: #f0d6b0; margin-bottom: 10px; }
-        .scenario-item p { font-size: 14px; color: #ccc; }
+        .section-title:hover::after {
+            width: 120px;
+        }
 
-        /* Поради */
-        .usage-tips { padding: 40px 20px; text-align: center; }
-        .usage-tips p { font-size: 16px; color: #ccc; margin-bottom: 15px; }
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .benefit-item {
+            padding: 20px;
+            background: rgba(34, 34, 34, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(222, 188, 150, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(222, 188, 150, 0.4);
+        }
+
+        .benefit-item i {
+            font-size: 32px;
+            color: #c9a77d;
+            margin-bottom: 15px;
+        }
+
+        .benefit-item h3 {
+            font-size: 20px;
+            color: #f0d6b0;
+            margin-bottom: 10px;
+        }
+
+        .benefit-item p {
+            font-size: 14px;
+            color: #d3d3d3;
+            margin: 0;
+        }
+
+        /* Секція "Сила технологій" */
+        .specs-section {
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(222, 188, 150, 0.3);
+            text-align: center;
+            position: relative;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .spec-item {
+            background: rgba(34, 34, 34, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(222, 188, 150, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .spec-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(222, 188, 150, 0.4);
+        }
+
+        .spec-item strong {
+            color: #c9a77d;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .spec-item span {
+            color: #d3d3d3;
+            font-size: 16px;
+        }
+
+        /* Секція "Сценарії використання" */
+        .usage-scenarios {
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+
+        .scenarios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .scenario-item {
+            padding: 20px;
+            background: rgba(34, 34, 34, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(222, 188, 150, 0.2);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .scenario-item:hover {
+            transform: translateY(-5px);
+            background: rgba(50, 50, 50, 0.9);
+        }
+
+        .scenario-item i {
+            font-size: 32px;
+            color: #c9a77d;
+            margin-bottom: 15px;
+        }
+
+        .scenario-item h3 {
+            font-size: 20px;
+            color: #f0d6b0;
+            margin-bottom: 10px;
+        }
+
+        .scenario-item p {
+            font-size: 14px;
+            color: #d3d3d3;
+        }
+
+        /* Секція "Секрети майстерності" */
+        .tips-section {
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(34, 34, 34, 0.8));
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(222, 188, 150, 0.3);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tips-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://via.placeholder.com/1200x800?text=Subtle+Tech+Pattern') no-repeat center;
+            opacity: 0.05;
+            z-index: 0;
+        }
+
+        .tips-list {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tip-item {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(222, 188, 150, 0.2);
+            font-size: 16px;
+            color: #d3d3d3;
+            position: relative;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .tip-item::before {
+            content: '✨';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: #c9a77d;
+        }
+
+        .tip-item:hover {
+            transform: translateX(10px);
+            background: rgba(34, 34, 34, 0.9);
+        }
+
+        .tip-item strong {
+            color: #f0d6b0;
+            font-weight: 600;
+        }
 
         /* Відгуки */
-        .testimonials { padding: 40px 20px; text-align: center; }
-        .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .testimonial-card { background: #2a2a2a; padding: 20px; border-radius: 10px; }
-        .testimonial-img { width: 80px; height: 80px; border-radius: 50%; margin-bottom: 15px; }
-        .testimonial-card p { font-size: 16px; color: #ccc; margin-bottom: 10px; }
-        .testimonial-card cite { font-size: 14px; color: #f0d6b0; }
+        .testimonials {
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .testimonial-card {
+            background: rgba(34, 34, 34, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(222, 188, 150, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(222, 188, 150, 0.4);
+        }
+
+        .testimonial-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            border: 2px solid #c9a77d;
+        }
+
+        .testimonial-card p {
+            font-size: 16px;
+            color: #d3d3d3;
+            margin-bottom: 10px;
+        }
+
+        .testimonial-card cite {
+            font-size: 14px;
+            color: #f0d6b0;
+            font-style: normal;
+        }
 
         /* Заклик до дії */
-        .cta-section { padding: 40px 20px; text-align: center; background: #2a2a2a; border-radius: 10px; }
-        .cta-section p { font-size: 18px; color: #ccc; margin-bottom: 20px; }
+        .cta-section {
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(34, 34, 34, 0.8));
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(222, 188, 150, 0.3);
+            position: relative;
+        }
 
-        /* Пов’язана техніка */
-        .related-equipment { padding: 40px 20px; text-align: center; }
-        .equipment-links { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .equipment-link { padding: 10px 20px; background: #2a2a2a; color: #f0d6b0; text-decoration: none; border-radius: 25px; transition: background 0.3s ease; }
-        .equipment-link:hover { background: #c9a77d; color: #fff; }
+        .cta-section p {
+            font-size: 18px;
+            color: #d3d3d3;
+            margin-bottom: 20px;
+        }
+
+        /* Інша техніка */
+        .related-equipment {
+            padding: 60px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .equipment-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .equipment-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            background: rgba(34, 34, 34, 0.9);
+            color: #f0d6b0;
+            border-radius: 25px;
+            transition: background 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 5px 20px rgba(222, 188, 150, 0.2);
+        }
+
+        .equipment-link img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .equipment-link:hover {
+            background: linear-gradient(45deg, #c9a77d, #f0d6b0);
+            color: #000000;
+            transform: translateY(-5px);
+        }
+
+        .equipment-link:hover img {
+            transform: scale(1.1);
+        }
 
         /* Футер */
-        footer { padding: 30px 0; background: linear-gradient(45deg, #000000, #333333); text-align: center; }
-        .footer-content { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .footer-content p { margin: 0; color: #f0d6b0; }
-        .footer-content div { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
-        .footer-link { color: #f0d6b0; text-decoration: none; font-size: 16px; transition: color 0.3s ease; }
-        .footer-link:hover { color: #c9a77d; }
-        .instagram-feed { margin-top: 20px; }
-        .instagram-feed h3 { font-size: 20px; color: #f0d6b0; margin-bottom: 15px; }
-        .insta-posts { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-        .insta-img { width: 100px; height: 100px; border-radius: 10px; transition: transform 0.3s ease; }
-        .insta-img:hover { transform: scale(1.1); }
+        footer {
+            padding: 30px 0;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 0 0 15px 15px;
+            margin-top: 20px;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .footer-content p {
+            margin: 0;
+            color: #f0d6b0;
+        }
+
+        .footer-content div {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .footer-link {
+            color: #f0d6b0;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: #c9a77d;
+        }
+
+        .instagram-feed {
+            margin-top: 20px;
+        }
+
+        .instagram-feed h3 {
+            font-size: 20px;
+            color: #f0d6b0;
+            margin-bottom: 15px;
+        }
+
+        .insta-posts {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .insta-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(222, 188, 150, 0.2);
+        }
+
+        .insta-img:hover {
+            transform: scale(1.1);
+        }
+
+        /* Чат-бот */
+        .chat-bot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .chat-bot a {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #f0d6b0, #c9a77d);
+            color: #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 15px rgba(222, 188, 150, 0.4);
+        }
+
+        .chat-bot a:hover {
+            transform: scale(1.1);
+        }
+
+        /* Адаптивність */
+        @media (max-width: 768px) {
+            .hero-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .hero-video {
+                max-width: 300px;
+            }
+            .hero-text h1 {
+                font-size: 28px;
+            }
+            .hero-text p {
+                font-size: 16px;
+            }
+            .section-title {
+                font-size: 28px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header class="header">
-    <a href="index.html"><img src="логотипу.png" alt="Логотип VAcleaner – оренда техніки в Полтаві" class="logo-img"></a>
-    <input type="checkbox" id="menu-toggle" class="menu-toggle-input">
-    <label for="menu-toggle" class="menu-toggle" aria-label="Toggle navigation">
-        <span class="hamburger"></span>
-    </label>
-    <nav class="nav">
-        <a href="index.html" class="nav-link">Головна</a> <!-- без active -->
-        <a href="services.html" class="nav-link">Послуги</a> <!-- active тут -->
-        <a href="equipment.html" class="nav-link active">Техніка</a>
-        <a href="testimonials.html" class="nav-link">Нас рекомендують</a>
-        <a href="blog.html" class="nav-link">Блог</a>
-        <a href="faq.html" class="nav-link">FAQ</a>
-        <a href="how-to-order.html" class="nav-link">Як замовити</a>
-        <a href="contact.html" class="nav-link">Контакти</a>
-    </nav>
-</header>
+            <input type="checkbox" id="menu-toggle-input" class="menu-toggle-input">
+            <label for="menu-toggle-input" class="menu-toggle" aria-label="Toggle navigation">
+                <span class="hamburger"></span>
+            </label>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Головна</a>
+                <a href="services.html" class="nav-link">Послуги</a>
+                <a href="equipment.html" class="nav-link active">Техніка</a>
+                <a href="testimonials.html" class="nav-link">Нас рекомендують</a>
+                <a href="blog.html" class="nav-link">Блог</a>
+                <a href="faq.html" class="nav-link">FAQ</a>
+                <a href="how-to-order.html" class="nav-link">Як замовити</a>
+                <a href="contact.html" class="nav-link">Контакти</a>
+            </nav>
+        </header>
 
         <section class="hero">
             <div class="promo-banner">
-                <p>Знижка 10% на першу оренду! Код: VACLEANER10 – Замови прямо зараз!</p>
+                <p>Знижка 10% на першу оренду! Код: VACLEANER10</p>
             </div>
             <div class="hero-content">
                 <video class="hero-video" controls poster="puzzi-8-1-poster.jpg">
@@ -116,7 +830,9 @@
                 </video>
                 <div class="hero-text">
                     <h1>Kärcher Puzzi 8/1 – Глибоке очищення!</h1>
-                    <p>Забудь про брудні килими та меблі – миючий пилосос зробить усе за тебе! Видаляє плями, освіжає тканини та знищує пилових кліщів. Ідеальний вибір для дому, офісу чи авто! Оренда в Полтаві – лише 600 грн/день.</p>
+                    <p>Забудь про брудні килими та меблі: <strong>інжекція-екстракція</strong> видаляє плями та пил із глибини волокон! Kärcher Puzzi 8/1 освіжає тканини та знищує пилових кліщів.</p>
+                    <p>Достатньо одного руху: увімкнув – і все як нове! <strong>Професійна чистота</strong> у твоєму домі.</p>
+                    <span class="hero-highlight">Оренда – 600 грн/день. Час повертати свіжість!</span>
                     <a href="https://t.me/+380953919569" class="cta-btn primary">Замовити зараз</a>
                 </div>
             </div>
@@ -148,21 +864,30 @@
             </div>
         </section>
 
-        <section class="equipment-description">
-            <h2 class="section-title">Kärcher Puzzi 8/1 – Професійна чистота</h2>
-            <p>Брудні килими чи дивани? Kärcher Puzzi 8/1 видаляє плями та пил завдяки технології інжекції-екстракції. Вода з миючим засобом проникає вглиб волокон і одразу всмоктується разом із брудом.</p>
-            <p>Компактний і потужний – ідеальний для дому, офісу чи авто! Орендуй за 600 грн/день і поверни свіжість своїм речам!</p>
-        </section>
-
-        <section class="equipment-specs">
-            <h2 class="section-title">Технічні характеристики</h2>
-            <ul class="specs-list">
-                <li><strong>Потужність:</strong> 1200 Вт – для сильного всмоктування</li>
-                <li><strong>Бак чистої води:</strong> 8 л – для тривалої роботи</li>
-                <li><strong>Бак брудної води:</strong> 7 л – легко спорожнити</li>
-                <li><strong>Вага:</strong> 9.8 кг – зручно транспортувати</li>
-                <li><strong>Кабель:</strong> 7.5 м – велика зона дії</li>
-            </ul>
+        <section class="specs-section">
+            <h2 class="section-title">Сила технологій Kärcher Puzzi 8/1</h2>
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <strong>Потужність</strong>
+                    <span>1200 Вт – для сильного всмоктування</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Бак чистої води</strong>
+                    <span>8 л – для тривалої роботи</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Бак брудної води</strong>
+                    <span>7 л – легко спорожнити</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Вага</strong>
+                    <span>9.8 кг – зручно транспортувати</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Кабель</strong>
+                    <span>7.5 м – велика зона дії</span>
+                </div>
+            </div>
         </section>
 
         <section class="usage-scenarios">
@@ -191,12 +916,22 @@
             </div>
         </section>
 
-        <section class="usage-tips">
-            <h2 class="section-title">Як отримати максимум від Kärcher Puzzi 8/1?</h2>
-            <p>Використовуй рекомендований миючий засіб.</p>
-            <p>Очищай баки після кожного використання.</p>
-            <p>Пройдися повільно для глибокого очищення.</p>
-            <p>Провітрюй після прибирання.</p>
+        <section class="tips-section">
+            <h2 class="section-title">Секрети майстерності з Kärcher Puzzi 8/1</h2>
+            <div class="tips-list">
+                <div class="tip-item">
+                    <p><strong>Використовуй засіб:</strong> Рекомендований миючий засіб для кращого результату.</p>
+                </div>
+                <div class="tip-item">
+                    <p><strong>Очищай баки:</strong> Після кожного використання для довговічності.</p>
+                </div>
+                <div class="tip-item">
+                    <p><strong>Рухай повільно:</strong> Для глибокого очищення волокон.</p>
+                </div>
+                <div class="tip-item">
+                    <p><strong>Провітрюй після:</strong> Дай поверхням висохнути природним шляхом.</p>
+                </div>
+            </div>
         </section>
 
         <section class="testimonials">
@@ -224,9 +959,18 @@
         <section class="related-equipment">
             <h2 class="section-title">Інша техніка в оренду</h2>
             <div class="equipment-links">
-                <a href="jimmy-jv35.html" class="equipment-link">Jimmy JV35 – пилосос від пилових кліщів</a>
-                <a href="karcher-sc2.html" class="equipment-link">KARCHER SC 2 Deluxe – пароочисник</a>
-                <a href="abir-wd8.html" class="equipment-link">ABIR WD8 – робот для вікон</a>
+                <a href="jimmy-jv35.html" class="equipment-link">
+                    <img src="jimmy-jv35-poster.jpg" alt="Jimmy JV35">
+                    Jimmy JV35 – пилосос від пилових кліщів
+                </a>
+                <a href="karcher-sc2.html" class="equipment-link">
+                    <img src="karcher-sc2-poster.jpg" alt="KARCHER SC 2 Deluxe">
+                    KARCHER SC 2 Deluxe – пароочисник
+                </a>
+                <a href="abir-wd8.html" class="equipment-link">
+                    <img src="abir-wd8-poster.jpg" alt="ABIR WD8">
+                    ABIR WD8 – робот для вікон
+                </a>
             </div>
         </section>
 
@@ -260,8 +1004,5 @@
     <div class="chat-bot">
         <a href="https://t.me/+380953919569" target="_blank"><i class="fab fa-telegram-plane"></i></a>
     </div>
-
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91db45b6cef16789',t:'MTc0MTUzMDY0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91dbc0d15d014525',t:'MTc0MTUzNTY5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'91ddb45f5d5d677d',t:'MTc0MTU1NjE1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>

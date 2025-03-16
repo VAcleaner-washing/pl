@@ -36,54 +36,78 @@ a:hover {
 
 /* Шапка */
 .header {
-    text-align: center;
-    padding: 30px 0;
+    position: relative;
+    padding: 15px 0;
     background: #000000;
+    background-image: url('логотипу.webp');
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+    padding-bottom: 33.33%;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.logo-img {
-    width: 600px;
-    height: auto;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-}
-
-.logo-img:hover {
-    transform: scale(1.05);
-}
-
-/* Залишаємо ваші існуючі стилі для великих екранів */
+/* Навігація для всіх розмірів екранів */
 .nav {
-    margin-top: 20px;
+    position: absolute;
+    bottom: 15px;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 2;
 }
 
+/* Стилі для посилань у навігації */
 .nav-link {
     color: #f0d6b0;
-    margin: 0 15px;
+    margin: 0 20px;
     font-size: 16px;
     font-weight: 500;
-    padding: 8px 12px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
+    padding: 6px 12px;
+    position: relative;
+    transition: color 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
 }
 
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background: #c9a77d;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+    left: 0;
+}
+
 .nav-link:hover {
-    color: #000000;
-    background-color: #f0d6b0;
-    box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
+    color: #c9a77d;
 }
 
 .nav-link.active {
-    background-color: #f0d6b0;
-    color: #000000;
+    color: #c9a77d;
+    font-weight: 600;
+    border-bottom: 2px solid #c9a77d;
 }
 
-/* Нові стилі для гамбургер-меню та анімації */
+/* Стилі для гамбургер-меню */
 .menu-toggle-input {
     display: none;
 }
@@ -95,9 +119,9 @@ a:hover {
     cursor: pointer;
     padding: 10px;
     position: absolute;
-    right: 20px;
-    top: 20px;
-    z-index: 1001;
+    right: 15px;
+    top: 15px;
+    z-index: 1003;
     transition: transform 0.3s ease;
 }
 
@@ -107,7 +131,7 @@ a:hover {
     height: 3px;
     background: #f0d6b0;
     position: relative;
-    transition: all 0.3s ease;
+    transition: background 0.3s ease;
 }
 
 .hamburger::before,
@@ -117,7 +141,7 @@ a:hover {
     width: 25px;
     height: 3px;
     background: #f0d6b0;
-    transition: all 0.3s ease;
+    transition: transform 0.4s ease, top 0.4s ease, opacity 0.3s ease;
 }
 
 .hamburger::before {
@@ -128,23 +152,40 @@ a:hover {
     top: 8px;
 }
 
-/* Анімація гамбургера */
-#menu-toggle:checked ~ .menu-toggle .hamburger {
+#menu-toggle-input:checked + .menu-toggle .hamburger {
     background: transparent;
 }
 
-#menu-toggle:checked ~ .menu-toggle .hamburger::before {
-    transform: rotate(45deg) translate(5px, 5px);
+#menu-toggle-input:checked + .menu-toggle .hamburger::before {
+    top: 0;
+    transform: rotate(45deg);
+    opacity: 1;
+    background: #c9a77d;
+    animation: foldIn 0.4s ease forwards;
 }
 
-#menu-toggle:checked ~ .menu-toggle .hamburger::after {
-    transform: rotate(-45deg) translate(7px, -7px);
+#menu-toggle-input:checked + .menu-toggle .hamburger::after {
+    top: 0;
+    transform: rotate(-45deg);
+    opacity: 1;
+    background: #c9a77d;
+    animation: foldIn 0.4s ease forwards;
 }
 
-/* Адаптивне меню з анімацією */
+@keyframes foldIn {
+    0% { transform: scaleX(1) rotate(0deg); opacity: 0.5; }
+    50% { transform: scaleX(0.5) rotate(0deg); opacity: 0.8; }
+    100% { transform: scaleX(1) rotate(45deg); opacity: 1; }
+}
+
+/* Адаптивність для мобільних пристроїв */
 @media (max-width: 768px) {
     .header {
-        position: relative; /* Додаємо для правильного позиціонування .menu-toggle */
+        min-height: 150px;
+        background-size: contain;
+        background-position: center 20%;
+        padding-bottom: 33.33%;
+        z-index: 998;
     }
 
     .menu-toggle {
@@ -152,66 +193,86 @@ a:hover {
     }
 
     .nav {
-        display: none; /* Приховуємо за замовчуванням */
-        flex-direction: column;
-        align-items: center;
-        position: absolute;
-        top: 80px;
+        position: fixed;
+        top: 0;
         left: 0;
-        right: 0;
+        width: 100%;
+        height: 100vh;
         background: rgba(0, 0, 0, 0.95);
         backdrop-filter: blur(5px);
-        padding: 20px;
-        border-radius: 0 0 15px 15px;
-        box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-        z-index: 1000;
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.5s ease-in-out;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transform: translateY(-100%);
+        transition: transform 0.4s ease-in-out;
+        z-index: 1002;
+        bottom: auto;
+        padding: 0;
     }
 
-    #menu-toggle:checked ~ .nav {
-        display: flex;
-        max-height: 500px; /* Достатня висота для всіх пунктів */
+    #menu-toggle-input:checked ~ .nav {
+        transform: translateY(0);
     }
 
     .nav-link {
-        margin: 10px 0;
-        font-size: 18px;
-        width: 100%;
+        margin: 15px 0;
+        font-size: 20px;
+        width: 80%;
         text-align: center;
         padding: 15px;
-        opacity: 0;
-        transform: translateY(-20px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
+        border-radius: 8px;
+        background: none;
+        transition: color 0.3s ease, transform 0.3s ease;
     }
 
-    #menu-toggle:checked ~ .nav .nav-link {
+    .nav-link:hover {
+        color: #c9a77d;
+        transform: scale(1.05);
+    }
+
+    .nav-link::after {
+        display: none;
+    }
+
+    #menu-toggle-input:checked ~ .nav .nav-link {
         opacity: 1;
         transform: translateY(0);
     }
 
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
-    #menu-toggle:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
-
-    .nav-link:hover {
-        background-color: rgba(240, 214, 176, 0.2);
-        color: #c9a77d;
-    }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
 }
 
-/* Стилі для великих екранів */
-@media (min-width: 769px) {
+/* Для планшетів (769px–1023px) */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .header {
+        min-height: 200px;
+        background-size: contain;
+        background-position: center center;
+        padding-bottom: 33.33%;
+    }
+
     .nav {
-        display: flex;
-        margin-top: 20px;
+        position: absolute;
+        bottom: 15px;
+        transform: none;
+        height: auto;
+        background: transparent;
+        padding: 0;
+        flex-direction: row;
         justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 14px;
+        margin: 0 8px;
+        padding: 8px 10px;
     }
 
     .menu-toggle {
@@ -219,18 +280,100 @@ a:hover {
     }
 }
 
+/* Для великих екранів типу iPhone 14 Pro Max (до 1290px ширини) */
+@media (min-width: 1024px) and (max-width: 1290px) {
+    .header {
+        min-height: 250px;
+        background-size: contain;
+        background-position: center 15%;
+        padding-bottom: 33.33%;
+    }
 
+    .nav {
+        position: absolute;
+        bottom: 20px;
+        transform: none;
+        height: auto;
+        background: transparent;
+        padding: 0;
+        flex-direction: row;
+        justify-content: center;
+    }
 
+    .nav-link {
+        font-size: 16px;
+        margin: 0 15px;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+}
+
+/* Для десктопів (від 1024px) */
+@media (min-width: 1024px) {
+    .header {
+        min-height: 200px;
+        background-size: contain;
+        background-position: center center;
+        padding-bottom: 33.33%;
+    }
+
+    .nav {
+        position: absolute;
+        bottom: 20px;
+        transform: none;
+        height: auto;
+        background: transparent;
+        padding: 0;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 16px;
+        margin: 0 15px;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+}
+
+/* Для дуже широких екранів */
+@media (min-width: 1921px) {
+    .header {
+        min-height: 300px;
+        background-size: contain;
+        background-position: center center;
+        padding-bottom: 33.33%;
+    }
+
+    .nav {
+        bottom: 30px;
+    }
+}
 
 /* Загальні стилі для секцій */
 .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
-    padding: 60px 0;
-    border-top: 1px solid rgba(222, 188, 150, 0.2);
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 15px;
-    margin: 20px 0;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.2);
+    padding: 60px 20px 30px; /* Зменшуємо padding-bottom з 60px до 30px */
+    margin: 10px 0; /* Зменшуємо margin з 20px до 10px */
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    position: relative;
+    border-top: none;
     text-align: center;
+}
+
+/* Секція Hero */
+.hero {
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+    padding: 80px 20px 40px; /* Зменшуємо padding-bottom з 80px до 40px */
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
 }
 
 .section-title {
@@ -239,6 +382,23 @@ a:hover {
     margin-bottom: 20px;
     font-weight: 600;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+.section-title:hover::after {
+    width: 100px;
 }
 
 .section-subtitle {
@@ -249,18 +409,7 @@ a:hover {
     text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
 }
 
-.section-footer {
-    font-size: 18px;
-    color: #f0d6b0;
-    margin-top: 20px;
-    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
-}
-
-/* Герой */
-.hero {
-    background: linear-gradient(135deg, #000000, #1a1a1a);
-}
-
+/* Промо-банер */
 .promo-banner {
     background: linear-gradient(45deg, #f0d6b0, #c9a77d);
     color: #000000;
@@ -278,41 +427,16 @@ a:hover {
     justify-content: center;
 }
 
-.hero-video {
+.hero-video, .recommendation-video, .service-img, .equipment-img, .insta-img {
     width: 100%;
-    max-width: 450px;
     height: auto;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
 }
 
-
-
-.hero-title {
-    font-size: 40px;
-    margin-bottom: 20px;
-}
-
-.hero-usp {
-    font-size: 1.25rem; /* 20px */
-    color: #c9a77d;
-    font-weight: 500;
-    margin-bottom: 20px;
-    max-width: 500px;
-    text-align: center;
-    line-height: 1.4;
-    white-space: pre-wrap;
-}
-
-.hero-subtitle {
-    font-size: 1.125rem; /* 18px — збільшуємо з 16px */
-    color: #f0d6b0;
-    margin-bottom: 20px;
-    max-width: 600px;
-    text-align: center;
-    line-height: 1.6;
-    white-space: pre-wrap;
-    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
+.hero-video:hover, .recommendation-video:hover, .service-img:hover, .equipment-img:hover, .insta-img:hover {
+    transform: scale(1.02);
 }
 
 .hero-text {
@@ -323,29 +447,18 @@ a:hover {
     align-items: center;
 }
 
-.why-card h3 {
-    font-size: 1.125rem; /* 18px — зберігаємо узгодженість */
-    margin-bottom: 15px;
+.hero-title {
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: #f0d6b0;
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
 }
 
-@media (max-width: 768px) {
-    .hero-usp {
-        font-size: 1.125rem; /* 18px */
-        max-width: 90%;
-    }
-
-    .hero-subtitle {
-        font-size: 1rem; /* 16px — адаптивне зменшення */
-        max-width: 90%;
-    }
-
-    .why-card h3 {
-        font-size: 1rem; /* 16px — адаптивне зменшення */
-    }
-
-    .hero-text {
-        min-width: 100%;
-    }
+.hero-usp, .hero-subtitle {
+    font-size: 20px;
+    color: #f0d6b0;
+    margin-bottom: 20px;
+    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
 }
 
 .benefits {
@@ -383,43 +496,40 @@ a:hover {
     margin-top: 30px;
 }
 
-
-
 .why-card {
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.05), rgba(222, 188, 150, 0.1));
+    background: rgba(0, 0, 0, 0.7);
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .why-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(222, 188, 150, 0.6);
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.15), rgba(222, 188, 150, 0.25));
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(222, 188, 150, 0.3);
 }
-
-.recommendation-card {
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.1), rgba(222, 188, 150, 0.15));
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
-}
-
-.recommendation-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 40px rgba(222, 188, 150, 0.6);
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.15), rgba(222, 188, 150, 0.25));
-}
-
-
-
-
 
 .why-card h3 {
     font-size: 22px;
+    color: #f0d6b0;
     margin-bottom: 15px;
+    position: relative;
+}
+
+.why-card h3::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.why-card:hover h3::after {
+    width: 50%;
 }
 
 /* Нас рекомендують */
@@ -430,6 +540,41 @@ a:hover {
     margin-top: 30px;
 }
 
+.recommendation-card {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(222, 188, 150, 0.3);
+}
+
+.recommendation-card h3 {
+    font-size: 22px;
+    color: #f0d6b0;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.recommendation-card h3::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.recommendation-card:hover h3::after {
+    width: 50%;
+}
 
 .recommendation-video {
     width: 100%;
@@ -461,17 +606,39 @@ a:hover {
 }
 
 .service-card {
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.05), rgba(222, 188, 150, 0.1));
+    background: rgba(0, 0, 0, 0.7);
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .service-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(222, 188, 150, 0.3);
+}
+
+.service-card h3 {
+    font-size: 22px;
+    color: #f0d6b0;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.service-card h3::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.service-card:hover h3::after {
+    width: 50%;
 }
 
 .service-img {
@@ -479,11 +646,6 @@ a:hover {
     height: 200px;
     object-fit: cover;
     border-radius: 10px;
-    margin-bottom: 15px;
-}
-
-.service-title {
-    font-size: 22px;
     margin-bottom: 15px;
 }
 
@@ -496,20 +658,39 @@ a:hover {
 }
 
 .blog-card {
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.05), rgba(222, 188, 150, 0.1));
+    background: rgba(0, 0, 0, 0.7);
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .blog-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(222, 188, 150, 0.3);
 }
 
 .blog-card h3 {
     font-size: 22px;
+    color: #f0d6b0;
     margin-bottom: 15px;
+    position: relative;
+}
+
+.blog-card h3::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.blog-card:hover h3::after {
+    width: 50%;
 }
 
 /* Техніка */
@@ -521,17 +702,39 @@ a:hover {
 }
 
 .equipment-card {
-    display: flex;
-    flex-direction: column;
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.05), rgba(222, 188, 150, 0.1));
+    background: rgba(0, 0, 0, 0.7);
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .equipment-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(222, 188, 150, 0.3);
+}
+
+.equipment-card h3 {
+    font-size: 22px;
+    color: #f0d6b0;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.equipment-card h3::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.equipment-card:hover h3::after {
+    width: 50%;
 }
 
 .equipment-img {
@@ -540,11 +743,6 @@ a:hover {
     object-fit: cover;
     border-radius: 10px;
     margin-bottom: 15px;
-}
-
-.equipment-title {
-    font-size: 22px;
-    margin-bottom: 10px;
 }
 
 .equipment-price {
@@ -566,23 +764,39 @@ a:hover {
 }
 
 .faq-item {
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.05), rgba(222, 188, 150, 0.1));
+    background: rgba(0, 0, 0, 0.7);
     padding: 20px;
-    margin: 15px 0;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
-    text-align: left;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .faq-item:hover {
     transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(222, 188, 150, 0.3);
 }
 
 .faq-item h3 {
-    font-size: 20px;
-    margin-bottom: 10px;
-    cursor: pointer;
+    font-size: 22px;
+    color: #f0d6b0;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.faq-item h3::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.faq-item:hover h3::after {
+    width: 50%;
 }
 
 .faq-answer {
@@ -592,7 +806,7 @@ a:hover {
 }
 
 .faq-item.active .faq-answer {
-    max-height: 200px; /* Адаптуйте під вміст */
+    max-height: 200px;
 }
 
 /* Як замовити */
@@ -604,24 +818,39 @@ a:hover {
 }
 
 .step-card {
-    background: linear-gradient(135deg, rgba(222, 188, 150, 0.05), rgba(222, 188, 150, 0.1));
+    background: rgba(0, 0, 0, 0.7);
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
-    transition: all 0.3s ease;
-    text-align: left;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .step-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(222, 188, 150, 0.3);
 }
 
 .step-card h3 {
-    font-size: 20px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-size: 22px;
+    color: #f0d6b0;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.step-card h3::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.step-card:hover h3::after {
+    width: 50%;
 }
 
 /* Контакти */
@@ -638,6 +867,15 @@ a:hover {
     gap: 10px;
 }
 
+/* Секція футера */
+.section-footer {
+    margin-top: 40px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #f0d6b0;
+    text-align: center;
+}
+
 .social-links {
     display: flex;
     justify-content: center;
@@ -652,78 +890,76 @@ a:hover {
 /* CTA кнопки */
 .cta-btn {
     display: inline-block;
-    padding: 16px 32px;
+    padding: 14px 30px;
     margin: 10px;
-    border-radius: 12px;
+    border-radius: 10px;
     font-size: 18px;
     font-weight: 600;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
 }
 
 .cta-btn.primary {
     background: linear-gradient(45deg, #f0d6b0, #c9a77d);
     color: #000000;
-    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.6);
+    box-shadow: 0 4px 15px rgba(222, 188, 150, 0.4);
 }
 
 .cta-btn.primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(222, 188, 150, 0.8);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(222, 188, 150, 0.6);
     background: linear-gradient(45deg, #c9a77d, #f0d6b0);
 }
 
 .cta-btn.secondary {
-    background: linear-gradient(45deg, #333333, #1a1a1a);
+    background: transparent;
     color: #f0d6b0;
     border: 2px solid #f0d6b0;
-    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.4);
+    box-shadow: 0 4px 15px rgba(222, 188, 150, 0.3);
 }
 
 .cta-btn.secondary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 20px rgba(222, 188, 150, 0.8);
-    background: linear-gradient(45deg, #1a1a1a, #333333);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(222, 188, 150, 0.5);
+    background: rgba(222, 188, 150, 0.1);
 }
 
 footer {
     padding: 30px 0;
-    background: linear-gradient(45deg, #000000, #333333);
+    background: rgba(0, 0, 0, 0.8);
     border-radius: 0 0 15px 15px;
-    margin-top: 20px;
-    box-shadow: 0 -5px 15px rgba(222, 188, 150, 0.3);
+    margin-top: 10px; /* Зменшуємо margin-top з 20px до 10px */
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
     text-align: center;
-}
-
-.footer-content {
-    display: flex;
-    flex-direction: column; /* Змінюємо на колонку для чіткого центрування */
-    align-items: center;
-    gap: 20px;
-    width: 100%;
-}
-
-.footer-content p {
-    margin: 0;
-    width: 100%;
-}
-
-.footer-content div {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
+    backdrop-filter: blur(5px);
 }
 
 .footer-link {
     margin: 0 15px;
     font-size: 16px;
     font-weight: 500;
-    transition: all 0.3s ease;
+    color: #f0d6b0;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.footer-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background: #c9a77d;
+    bottom: -2px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.footer-link:hover::after {
+    width: 100%;
 }
 
 .footer-link:hover {
     color: #c9a77d;
-    text-decoration: underline;
 }
 
 .instagram-feed {
@@ -762,6 +998,7 @@ footer {
     margin-top: 15px;
     width: 100%;
 }
+
 /* Чат-бот */
 .chat-bot {
     position: fixed;
@@ -781,11 +1018,11 @@ footer {
     justify-content: center;
     font-size: 30px;
     transition: transform 0.3s ease;
-    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.6);
+    box-shadow: 0 4px 15px rgba(222, 188, 150, 0.4);
 }
 
 .chat-bot a:hover {
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.1);
 }
 
 /* Кнопки шейрингу */
@@ -814,40 +1051,47 @@ footer {
 
 /* Медіа-запити */
 @media (max-width: 768px) {
-    .logo-img {
-        width: 300px;
-    }
-    .nav-link {
-        margin: 0 10px;
-        font-size: 14px;
-    }
     .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
-        padding: 40px 0;
+        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
+        margin: 5px 0; /* Зменшуємо margin до 5px */
     }
+
+    .hero {
+        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
+    }
+
     .section-title {
         font-size: 28px;
     }
+
     .section-subtitle {
         font-size: 16px;
     }
+
     .hero-content {
         flex-direction: column;
     }
+
     .hero-video {
         max-width: 300px;
     }
+
     .hero-title {
         font-size: 28px;
     }
+
     .hero-usp {
         font-size: 18px;
     }
+
     .benefit-item {
         font-size: 16px;
     }
+
     .why-grid, .recommendation-grid, .service-grid, .blog-grid, .equipment-grid, .how-to-order-steps {
         grid-template-columns: 1fr;
     }
+
     .equipment-img, .service-img {
         height: 150px;
     }
@@ -865,24 +1109,23 @@ footer {
 .promo-block {
     text-align: center;
     margin-top: 20px;
-    background: rgba(201, 167, 125, 0.1); /* Легкий бежевий фон */
-    padding: 10px; /* Внутрішні відступи для комфорту */
-    border-radius: 10px; /* Заокруглені краї для стилю */
-}
-.promo-text {
-    font-size: 18px;
-    font-weight: 600; /* Жирний шрифт для виділення */
-    color: #f0d6b0; /* Світлий бежевий колір для кращого контрасту */
-    text-shadow: 0 0 5px rgba(222, 188, 150, 0.4); /* Легка тінь для ефекту */
-    margin-bottom: 20px;
+    background: rgba(201, 167, 125, 0.1);
+    padding: 10px;
+    border-radius: 10px;
 }
 
+.promo-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f0d6b0;
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
+    margin-bottom: 20px;
+}
 
 .hero-video, .recommendation-video {
     width: 100%;
     max-width: 450px;
     height: auto;
-    max-widht:1280px;
     aspect-ratio: 9 / 16;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
@@ -909,6 +1152,3 @@ footer {
 video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::before {
     display: none;
 }
-
-
-
