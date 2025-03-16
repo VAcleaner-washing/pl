@@ -205,18 +205,7 @@ a:hover {
     }
 }
 
-/* Адаптивність для телефонів (менше 768px) */
-@media (max-width: 768px) {
-    .header {
-        min-height: 150px; /* Зменшуємо висоту для телефонів */
-        padding: 15px 0; /* Зменшуємо відступи */
-        background-size: cover; /* Перемикаємо на cover для заповнення простору */
-        background-position: center center; /* Центруємо логотип */
-    }
 
-    .menu-toggle {
-        display: block; /* Показуємо гамбургер-меню */
-    }
 
    
 
