@@ -36,34 +36,31 @@ a:hover {
 
 /* Шапка */
 .header {
-    position: relative; /* Для коректного позиціонування дочірніх елементів */
-    padding: 15px 0; /* Зменшені відступи для телефонів і гармонії */
-    background: #000000; /* Колір фону на випадок, якщо логотип не завантажиться */
-    background-image: url('логотипу.webp'); /* Додаємо логотип як фон */
-    background-size: contain; /* Зберігаємо пропорції логотипу */
-    background-position: center; /* Центруємо зображення */
-    background-repeat: no-repeat; /* Без повторення */
+    text-align: center;
+    padding: 30px 0;
+    background: #000000;
     border-radius: 15px 15px 0 0;
     box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-    min-height: 400px; /* Базова висота для десктопів */
 }
 
-/* Навігація */
+.logo-img {
+    width: 600px;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.05);
+}
+
+/* Залишаємо ваші існуючі стилі для великих екранів */
 .nav {
-    position: absolute; /* Фіксуємо внизу */
-    bottom: 0; /* Притискаємо до нижнього краю */
-    left: 0;
-    right: 0;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
-    z-index: 2; /* Щоб навігація була поверх фону */
-    padding: 10px 0; /* Додаємо відступи для вигляду */
-    background: rgba(0, 0, 0, 0.7); /* Напівпрозорий чорний фон для виділення */
-    backdrop-filter: blur(8px); /* Збільшуємо розмиття для м’якшого ефекту */
-    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3); /* М’якша тінь зверху */
 }
 
-/* Стилі для посилань у навігації */
 .nav-link {
     color: #f0d6b0;
     margin: 0 15px;
@@ -73,153 +70,19 @@ a:hover {
     border-radius: 8px;
     transition: all 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
-    background: rgba(0, 0, 0, 0.5); /* Напівпрозорий фон для посилань */
-    position: relative;
 }
 
-/* Прибираємо можливі галочки чи маркери */
-.nav-link::before,
-.nav-link::after {
-    content: none !important; /* Примусово прибираємо псевдоелементи */
-}
-
-/* Ефект при наведенні */
 .nav-link:hover {
     color: #000000;
     background-color: #f0d6b0;
     box-shadow: 0 0 15px rgba(222, 188, 150, 0.8);
 }
 
-/* Стиль для активного посилання */
 .nav-link.active {
     background-color: #f0d6b0;
     color: #000000;
 }
 
-/* Приховуємо чекбокс для гамбургер-меню */
-.menu-toggle-input {
-    display: none !important; /* Повністю приховуємо чекбокс */
-}
-
-/* Стилі для гамбургер-меню */
-.menu-toggle {
-    display: none; /* За замовчуванням приховане */
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 10px;
-    position: absolute;
-    right: 15px; /* Зменшуємо відступ для меншої висоти */
-    top: 15px; /* Зменшуємо відступ для меншої висоти */
-    z-index: 1001;
-    transition: transform 0.3s ease;
-}
-
-.hamburger {
-    display: block;
-    width: 25px;
-    height: 3px;
-    background: #f0d6b0;
-    position: relative;
-}
-
-.hamburger::before,
-.hamburger::after {
-    content: '';
-    position: absolute;
-    width: 25px;
-    height: 3px;
-    background: #f0d6b0;
-    transition: all 0.3s ease;
-}
-
-.hamburger::before {
-    top: -8px;
-}
-
-.hamburger::after {
-    bottom: -8px;
-}
-
-#menu-toggle-input:checked + .menu-toggle .hamburger {
-    background: transparent;
-}
-
-#menu-toggle-input:checked + .menu-toggle .hamburger::before {
-    transform: rotate(45deg);
-    top: 0;
-}
-
-#menu-toggle-input:checked + .menu-toggle .hamburger::after {
-    transform: rotate(-45deg);
-    bottom: 0;
-}
-
-/* Додатково прибираємо будь-які системні маркери */
-.nav {
-    list-style: none; /* Прибираємо можливі маркери списку */
-}
-
-/* Адаптивність для екранів із шириною від 1024px до 1920px (ноутбуки 16:9) */
-@media (min-width: 1024px) and (max-width: 1920px) {
-    .header {
-        min-height: 350px; /* Висота для ноутбуків */
-        background-size: contain;
-        background-position: center;
-    }
-
-    .nav-link {
-        font-size: 14px;
-        margin: 0 10px;
-    }
-}
-
-/* Адаптивність для планшетів (769px–1023px) */
-@media (min-width: 769px) and (max-width: 1023px) {
-    .header {
-        min-height: 300px; /* Зменшуємо висоту для планшетів */
-        background-size: contain;
-        background-position: center;
-    }
-
-    .nav {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        display: flex;
-        justify-content: center;
-        background: rgba(0, 0, 0, 0.7);
-        backdrop-filter: blur(8px);
-        box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .nav-link {
-        font-size: 14px;
-        margin: 0 8px;
-        padding: 8px 10px;
-    }
-
-    .menu-toggle {
-        display: none; /* Ховаємо гамбургер-меню для планшетів */
-    }
-}
-
-
-
-   
-
-/* Для дуже широких екранів */
-@media (min-width: 1921px) {
-    .header {
-        min-height: 500px; /* Збільшуємо висоту для великих екранів */
-    }
-}
-
-
-
-
-}
 /* Нові стилі для гамбургер-меню та анімації */
 .menu-toggle-input {
     display: none;
@@ -266,36 +129,26 @@ a:hover {
 }
 
 /* Анімація гамбургера */
-#menu-toggle-input:checked + .menu-toggle .hamburger {
+#menu-toggle:checked ~ .menu-toggle .hamburger {
     background: transparent;
 }
 
-#menu-toggle-input:checked + .menu-toggle .hamburger::before {
-    transform: rotate(45deg);
-    top: 0;
+#menu-toggle:checked ~ .menu-toggle .hamburger::before {
+    transform: rotate(45deg) translate(5px, 5px);
 }
 
-#menu-toggle-input:checked + .menu-toggle .hamburger::after {
-    transform: rotate(-45deg);
-    bottom: 0;
+#menu-toggle:checked ~ .menu-toggle .hamburger::after {
+    transform: rotate(-45deg) translate(7px, -7px);
 }
-
-
 
 /* Адаптивне меню з анімацією */
 @media (max-width: 768px) {
     .header {
-        min-height: 150px; /* Зменшуємо висоту для телефонів */
-        padding: 15px 0; /* Зменшуємо відступи */
-        background-size: cover; /* Перемикаємо на cover для заповнення простору */
-        background-position: center center; /* Центруємо логотип */
-        position: relative; /* Для правильного позиціонування .menu-toggle */
+        position: relative; /* Додаємо для правильного позиціонування .menu-toggle */
     }
 
     .menu-toggle {
         display: block;
-        right: 15px; /* Коректне позиціонування */
-        top: 15px;
     }
 
     .nav {
@@ -303,7 +156,7 @@ a:hover {
         flex-direction: column;
         align-items: center;
         position: absolute;
-        top: 100%; /* Розташовуємо під шапкою */
+        top: 80px;
         left: 0;
         right: 0;
         background: rgba(0, 0, 0, 0.95);
@@ -312,15 +165,14 @@ a:hover {
         border-radius: 0 0 15px 15px;
         box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
         z-index: 1000;
-        max-height: 0; /* Початкова висота для анімації */
-        overflow: hidden; /* Ховаємо вміст, коли закрите */
-        transition: max-height 0.5s ease-in-out; /* Анімація через max-height */
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-in-out;
     }
 
-    #menu-toggle-input:checked ~ .nav {
+    #menu-toggle:checked ~ .nav {
         display: flex;
-        max-height: 600px; /* Збільшуємо, щоб умістити всі пункти */
-        overflow-y: auto; /* Додаємо прокрутку, якщо вміст перевищує */
+        max-height: 500px; /* Достатня висота для всіх пунктів */
     }
 
     .nav-link {
@@ -329,25 +181,24 @@ a:hover {
         width: 100%;
         text-align: center;
         padding: 15px;
-        background: rgba(0, 0, 0, 0.7);
         opacity: 0;
         transform: translateY(-20px);
         transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    #menu-toggle-input:checked ~ .nav .nav-link {
+    #menu-toggle:checked ~ .nav .nav-link {
         opacity: 1;
         transform: translateY(0);
     }
 
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
+    #menu-toggle:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
 
     .nav-link:hover {
         background-color: rgba(240, 214, 176, 0.2);
