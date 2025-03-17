@@ -1,7 +1,0 @@
-[[plugins]]
-  package = "@netlify/plugin-sitemap"
-  [plugins.inputs]
-    # Вкажіть базовий URL, якщо потрібно
-    baseUrl = "https://vacleaner.pp.ua/"
-    # Ігноруйте певні файли, якщо потрібно
-    exclude = ["/*.pdf", "/*.jpg"]
