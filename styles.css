@@ -182,6 +182,71 @@ a:hover {
 
 /* Адаптивність для мобільних пристроїв */
 @media (max-width: 768px) {
+    
+    
+    @media (max-width: 768px) {
+    .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
+        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
+        margin: 5px 0; /* Зменшуємо margin до 5px */
+    }
+
+    .hero {
+        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
+    }
+
+    .hero-content {
+        flex-direction: column;
+    }
+
+    .hero-text {
+        max-width: 90%; /* Обмежуємо ширину тексту до 90% контейнера */
+        margin: 0 auto; /* Центруємо текстовий блок */
+        padding: 0 10px; /* Додаємо горизонтальні відступи */
+    }
+
+    .hero-title {
+        font-size: 24px; /* Ще більше зменшуємо розмір заголовка */
+        line-height: 1.2; /* Зменшуємо міжрядковий інтервал */
+        word-wrap: break-word; /* Переносимо слова, якщо вони не вміщаються */
+    }
+
+    .hero-usp {
+        font-size: 16px; /* Зменшуємо розмір USP */
+        line-height: 1.4;
+    }
+
+    .hero-subtitle {
+        font-size: 14px; /* Зменшуємо розмір підзаголовка */
+        line-height: 1.5;
+    }
+
+    .hero-video {
+        max-width: 300px;
+    }
+
+    .section-title {
+        font-size: 28px;
+    }
+
+    .section-subtitle {
+        font-size: 16px;
+    }
+
+    .benefit-item {
+        font-size: 16px;
+    }
+
+    .why-grid, .recommendation-grid, .service-grid, .blog-grid, .equipment-grid, .how-to-order-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .equipment-img, .service-img {
+        height: 150px;
+    }
+}
+    
+    
+    
     .header {
         min-height: 150px;
         background-size: contain;
