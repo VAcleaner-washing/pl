@@ -7,7 +7,7 @@
 }
 
 body {
-    background-color: #000000;
+    background-color: #000000 !important;
     color: #f0d6b0;
     line-height: 1.6;
     overflow-x: hidden;
