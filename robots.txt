@@ -1,6 +1,5 @@
 User-agent: *
 Disallow: /admin/
 Disallow: /login/
-Allow: /
 
 Sitemap: https://vacleaner.pp.ua/sitemap.xml
