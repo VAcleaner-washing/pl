@@ -358,12 +358,14 @@ a:hover {
 
 /* Загальні стилі для секцій */
 .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
-    padding: 60px 20px 30px; /* Зменшуємо padding-bottom з 60px до 30px */
-    margin: 10px 0; /* Зменшуємо margin з 20px до 10px */
+    padding: 60px 20px 30px;
+    margin: 10px 0;
     background: rgba(0, 0, 0, 0.6);
+    background-color: #1a1a1a; /* Запасний фон */
     border-radius: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
     position: relative;
     border-top: none;
     text-align: center;
