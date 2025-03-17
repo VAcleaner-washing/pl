@@ -1152,3 +1152,43 @@ footer {
 video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::before {
     display: none;
 }
+
+/* Кнопка "На верх" */
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    left: 20px; /* Змінюємо right на left */
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, #f0d6b0, #c9a77d);
+    color: #000000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    border: none;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 15px rgba(222, 188, 150, 0.4);
+    z-index: 1000;
+}
+
+.scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.scroll-to-top:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(222, 188, 150, 0.6);
+}
+
+/* Показуємо кнопку тільки на мобільних пристроях */
+@media (min-width: 769px) {
+    .scroll-to-top {
+        display: none;
+    }
+}
