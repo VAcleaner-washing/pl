@@ -3,4 +3,4 @@ Disallow: /admin/
 Disallow: /login/
 Allow: /
 
-Sitemap: http://vacleaner.pp.ua/sitemap.xml
+Sitemap: https://vacleaner.pp.ua/sitemap.xml
