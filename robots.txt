@@ -3,4 +3,4 @@ Disallow: /admin/
 Disallow: /login/
 Allow: /
 
-Sitemap: https://vacleaner.netlify.app/sitemap.xml
+Sitemap: http://vacleaner.pp.ua/sitemap.xml
