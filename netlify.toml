@@ -19,4 +19,4 @@
   [headers.values]
     Content-Type = "application/xml"
     Cache-Control = "public, max-age=0, must-revalidate"
-    Content-Encoding = "identity"  # Вимикаємо Brotli
+    Content-Encoding = "gzip"  # Вимикаємо Brotli
