@@ -8,3 +8,8 @@
     buildDir = "."  # файли в корені
     baseUrl = "https://vacleaner.pp.ua"  # ваша URL
     filePath = "sitemap.xml"  # шлях до карти
+
+    [[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
