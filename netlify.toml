@@ -6,10 +6,11 @@
   package = "@netlify/plugin-sitemap"
   [plugins.inputs]
     buildDir = "."  # файли в корені
-    baseUrl = "https://vacleaner.pp.ua"  # ваша URL
+    baseUrl = "https://vacleaner.pp.ua"  # твоя URL
     filePath = "sitemap.xml"  # шлях до карти
 
-    [[redirects]]
+# Переносимо редирект окремо
+[[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
   status = 200
