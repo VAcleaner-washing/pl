@@ -7,18 +7,16 @@
   [plugins.inputs]
     buildDir = "."  # файли в корені
     baseUrl = "https://vacleaner.pp.ua"  # твоя URL
-    filePath = "sitemap.xml"  # шлях до карти
+    filePath = "sitemap_index.xml"  # змінив назву на індекс
 
-# Редирект для сайтмапу (але він тут не обов'язковий)
 [[redirects]]
   from = "/sitemap.xml"
-  to = "/sitemap.xml"
+  to = "/sitemap_index.xml"
   status = 200
 
-# Встановлюємо правильні заголовки для сайтмапу
 [[headers]]
-  for = "/sitemap.xml"
+  for = "/sitemap_index.xml"
   [headers.values]
     Content-Type = "application/xml"
     Cache-Control = "public, max-age=0, must-revalidate"
-    Content-Encoding = "identity"  # Вимикаємо Brotli (br)
+    Content-Encoding = "identity"  # Вимикаємо Brotli
