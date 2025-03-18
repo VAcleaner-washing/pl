@@ -1,0 +1,10 @@
+[build]
+  publish = "."  # файли в корені
+  command = ""  # без збірки
+
+[[plugins]]
+  package = "@netlify/plugin-sitemap"
+  [plugins.inputs]
+    buildDir = "."  # файли в корені
+    baseUrl = "https://vacleaner.pp.ua"  # ваша URL
+    filePath = "sitemap.xml"  # шлях до карти
