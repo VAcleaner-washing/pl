@@ -13,3 +13,10 @@
   from = "/sitemap.xml"
   to = "/sitemap.xml"
   status = 200
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    X-Robots-Tag = "all"
