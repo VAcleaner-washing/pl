@@ -9,8 +9,16 @@
     baseUrl = "https://vacleaner.pp.ua"  # твоя URL
     filePath = "sitemap.xml"  # шлях до карти
 
-# Переносимо редирект окремо
+# Редирект для сайтмапу (але він тут не обов'язковий)
 [[redirects]]
   from = "/sitemap.xml"
   to = "/sitemap.xml"
   status = 200
+
+# Встановлюємо правильні заголовки для сайтмапу
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml"
+    Cache-Control = "public, max-age=0, must-revalidate"
+    Content-Encoding = "identity"  # Вимикаємо Brotli (br)
