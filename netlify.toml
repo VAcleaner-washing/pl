@@ -1,22 +1,10 @@
 [build]
-  publish = "."  # файли в корені
-  command = ""  # без збірки
+  publish = "public"
+  command = "npx netlify-plugin-sitemap"  # Примусово створює сайтмап
 
 [[plugins]]
   package = "@netlify/plugin-sitemap"
   [plugins.inputs]
-    buildDir = "."  # файли в корені
-    baseUrl = "https://vacleaner.pp.ua"  # твоя URL
-    filePath = "sitemap_index.xml"  # змінив назву на індекс
-
-[[redirects]]
-  from = "/sitemap.xml"
-  to = "/sitemap_index.xml"
-  status = 200
-
-[[headers]]
-  for = "/sitemap_index.xml"
-  [headers.values]
-    Content-Type = "application/xml"
-    Cache-Control = "public, max-age=0, must-revalidate"
-    Content-Encoding = "gzip"  # Вимикаємо Brotli
+    buildDir = "public"  # Шлях до статичних файлів
+    baseUrl = "https://vacleaner.pp.ua"
+    filePath = "public/sitemap.xml"
