@@ -467,7 +467,7 @@ a:hover {
     justify-content: center;
 }
 
-.hero-video, .recommendation-video, .service-img, .equipment-img, .insta-img {
+.recommendation-video, .service-img, .equipment-img, .insta-img {
     width: 100%;
     height: auto;
     border-radius: 15px;
@@ -1118,7 +1118,7 @@ footer {
     /* Зміни для відео на мобільних (як на ABIR WD8) */
     .hero-video {
         width: auto; /* Прибираємо width: 100%, щоб відео не розтягувалося */
-        max-width: 300px; /* Чітко обмежуємо ширину, як на ABIR WD8 */
+        max-width: 300px !important; /* Чітко обмежуємо ширину, як на ABIR WD8 */
         height: auto; /* Висота автоматична, щоб зберегти пропорції */
         object-fit: cover; /* Забезпечуємо, що постер не спотворюється */
         display: block; /* Для коректного центрування */
@@ -1171,7 +1171,17 @@ footer {
     margin-bottom: 20px;
 }
 
-.hero-video, .recommendation-video {
+.hero-video {
+    width: auto; /* Замість width: 100%, щоб не розтягувалося */
+    max-width: 450px;
+    height: auto;
+    aspect-ratio: 9 / 16;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
+    position: relative;
+}
+
+.recommendation-video {
     width: 100%;
     max-width: 450px;
     height: auto;
