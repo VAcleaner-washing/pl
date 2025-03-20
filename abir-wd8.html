@@ -918,29 +918,30 @@
 <body>
     <div class="container">
         <header class="header">
-            <input type="checkbox" id="menu-toggle-input" class="menu-toggle-input">
-            <label for="menu-toggle-input" class="menu-toggle" aria-label="Toggle navigation">
-                <span class="hamburger"></span>
-            </label>
-            <nav class="nav">
-                <a href="index.html" class="nav-link">Головна</a>
-                <a href="services.html" class="nav-link">Послуги</a>
-                <div class="dropdown">
-                    <a href="equipment.html" class="nav-link dropdown-toggle active">Техніка</a>
-                    <div class="dropdown-content">
-                        <a href="abir-wd8.html" class="nav-link">ABIR WD8 – Робот для вікон</a>
-                        <a href="jimmy-jv35.html" class="nav-link">Jimmy JV35 – Пилосос</a>
-                        <a href="karcher-sc2.html" class="nav-link">KARCHER SC 2 Deluxe – Пароочисник</a>
-                        <a href="karcher-puzzi.html" class="nav-link">Kärcher Puzzi 8/1 – Миючий пилосос</a>
-                    </div>
-                </div>
-                <a href="testimonials.html" class="nav-link">Відгуки</a>
-                <a href="blog.html" class="nav-link">Блог</a>
-                <a href="faq.html" class="nav-link">FAQ</a>
-                <a href="how-to-order.html" class="nav-link">Як замовити</a>
-                <a href="contact.html" class="nav-link">Контакти</a>
-            </nav>
-        </header>
+    <input type="checkbox" id="menu-toggle-input" class="menu-toggle-input">
+    <label for="menu-toggle-input" class="menu-toggle" aria-label="Toggle navigation">
+        <span class="hamburger"></span>
+    </label>
+    <nav class="nav">
+        <a href="index.html" class="nav-link">Головна</a>
+        <a href="services.html" class="nav-link">Послуги</a>
+        <div class="dropdown">
+            <a href="equipment.html" class="nav-link dropdown-toggle active">Техніка</a>
+            <div class="dropdown-content">
+                <a href="equipment.html" class="nav-link">Уся техніка</a>
+                <a href="abir-wd8.html" class="nav-link">ABIR WD8 – Робот для вікон</a>
+                <a href="jimmy-jv35.html" class="nav-link">Jimmy JV35 – Пилосос</a>
+                <a href="karcher-sc2.html" class="nav-link">KARCHER SC 2 Deluxe – Пароочисник</a>
+                <a href="karcher-puzzi.html" class="nav-link">Kärcher Puzzi 8/1 – Миючий пилосос</a>
+            </div>
+        </div>
+        <a href="testimonials.html" class="nav-link">Відгуки</a>
+        <a href="blog.html" class="nav-link">Блог</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+        <a href="how-to-order.html" class="nav-link">Як замовити</a>
+        <a href="contact.html" class="nav-link">Контакти</a>
+    </nav>
+</header>
 
         <section class="hero">
             <div class="promo-banner">
@@ -1122,13 +1123,15 @@
         </footer>
     </div>
 
-    <div class="chat-bot">
+       <div class="chat-bot">
         <a href="https://t.me/+380953919569" target="_blank"><i class="fab fa-telegram-plane"></i></a>
     </div>
 
     <button id="scrollToTopBtn" class="scroll-to-top" title="Повернутися на верх">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <script src="scrollToTop.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -1144,7 +1147,6 @@
                 });
             });
 
-            // Scroll to top button
             const scrollToTopBtn = document.getElementById('scrollToTopBtn');
             window.addEventListener('scroll', function () {
                 if (window.scrollY > 300) {
@@ -1159,5 +1161,7 @@
             });
         });
     </script>
+
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9234a3e8db66456c',t:'MTc0MjQ2NzYyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
