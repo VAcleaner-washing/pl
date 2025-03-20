@@ -25,7 +25,6 @@
             padding: 0 15px;
         }
 
-        /* Стилі шапки */
         .header {
             background: #fff;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -55,7 +54,6 @@
             color: #007bff;
         }
 
-        /* Гамбургер-меню */
         .menu-toggle-input {
             display: none;
         }
@@ -76,11 +74,6 @@
             transition: all 0.3s ease;
         }
 
-        .hamburger:nth-child(2) {
-            margin: 5px 0;
-        }
-
-        /* Dropdown (для десктопу) */
         .dropdown {
             position: relative;
         }
@@ -103,7 +96,6 @@
             padding: 10px;
         }
 
-        /* Адаптивність для телефонів */
         @media (max-width: 768px) {
             .menu-toggle {
                 display: flex;
@@ -131,7 +123,6 @@
                 transform: translateX(0);
             }
 
-            /* Анімація гамбургера в хрестик */
             .menu-toggle-input:checked + .menu-toggle .hamburger:nth-child(1) {
                 transform: rotate(45deg) translate(5px, 5px);
             }
@@ -157,16 +148,14 @@
             }
 
             .dropdown:hover .dropdown-content {
-                display: none; /* Вимикаємо hover для мобільних */
+                display: none;
             }
 
-            /* Показуємо dropdown при кліку */
             .dropdown.active .dropdown-content {
                 display: block;
             }
         }
 
-        /* Решта стилів (для прикладу, скорочено) */
         .hero {
             padding: 80px 0 20px;
             text-align: center;
@@ -197,6 +186,34 @@
             text-decoration: none;
             border-radius: 5px;
         }
+
+        .benefits-section, .specs-section, .usage-scenarios, .tips-section, .testimonials, .cta-section, .related-equipment {
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .benefits-grid, .specs-grid, .scenarios-grid, .tips-list, .testimonial-grid, .equipment-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .benefit-item, .spec-item, .scenario-item, .tip-item, .testimonial-card, .equipment-link {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        footer {
+            background: #f8f8f8;
+            padding: 20px 0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -214,7 +231,7 @@
                 <div class="dropdown">
                     <a href="equipment.html" class="nav-link dropdown-toggle active">Техніка</a>
                     <div class="dropdown-content">
-                        <a href="abir-wd8.html" class="nav-link">ABIR WD8 – Робот для вікон</a>
+                        <a href="abir-wd8.html" class="nav-link active">ABIR WD8 – Робот для вікон</a>
                         <a href="jimmy-jv35.html" class="nav-link">Jimmy JV35 – Пилосос</a>
                         <a href="karcher-sc2.html" class="nav-link">KARCHER SC 2 Deluxe – Пароочисник</a>
                         <a href="karcher-puzzi.html" class="nav-link">Kärcher Puzzi 8/1 – Миючий пилосос</a>
@@ -236,17 +253,54 @@
                 </video>
                 <div class="hero-text">
                     <h1>ABIR WD8 – Чисті вікна без зусиль!</h1>
-                    <p>Забудь про виснажливе миття вікон: <strong>роботизована технологія</strong> зробить їх ідеально чистими!</p>
+                    <p>Забудь про виснажливе миття вікон: <strong>роботизована технологія</strong> зробить їх ідеально чистими! ABIR WD8 – ідеальний для дому та офісу.</p>
+                    <p>Оренда – 350 грн/день.</p>
                     <a href="https://t.me/+380953919569" class="cta-btn primary">Замовити зараз</a>
                 </div>
             </div>
         </section>
 
-        <!-- Решта контенту скорочена для прикладу -->
+        <section class="benefits-section">
+            <h2 class="section-title">Чому варто обрати ABIR WD8?</h2>
+            <div class="benefits-grid">
+                <div class="benefit-item"><i class="fas fa-robot"></i><h3>Автоматизація</h3><p>Працює без вашої участі.</p></div>
+                <div class="benefit-item"><i class="fas fa-shield-alt"></i><h3>Безпека</h3><p>Надійне кріплення до скла.</p></div>
+                <div class="benefit-item"><i class="fas fa-window-maximize"></i><h3>Універсальність</h3><p>Для вікон і дзеркал.</p></div>
+                <div class="benefit-item"><i class="fas fa-shipping-fast"></i><h3>Доставка</h3><p>Привеземо в Полтаві.</p></div>
+            </div>
+        </section>
+
+        <section class="specs-section">
+            <h2 class="section-title">Технічні характеристики</h2>
+            <div class="specs-grid">
+                <div class="spec-item"><strong>Потужність</strong><span>80 Вт</span></div>
+                <div class="spec-item"><strong>Швидкість</strong><span>4 м²/хв</span></div>
+                <div class="spec-item"><strong>Акумулятор</strong><span>30 хв</span></div>
+                <div class="spec-item"><strong>Вага</strong><span>2.5 кг</span></div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <h2 class="section-title">Замовляйте зараз!</h2>
+            <p>Оренда ABIR WD8 за 350 грн/день – чистота без зусиль!</p>
+            <a href="https://t.me/+380953919569" class="cta-btn primary">Замовити</a>
+        </section>
+
+        <section class="related-equipment">
+            <h2 class="section-title">Інша техніка</h2>
+            <div class="equipment-links">
+                <a href="jimmy-jv35.html" class="equipment-link">Jimmy JV35</a>
+                <a href="karcher-sc2.html" class="equipment-link">KARCHER SC 2 Deluxe</a>
+                <a href="karcher-puzzi.html" class="equipment-link">Kärcher Puzzi 8/1</a>
+            </div>
+        </section>
+
+        <footer>
+            <p>© 2025 VAcleaner. Усі права захищено.</p>
+        </footer>
     </div>
 
     <script>
-        // Додаємо JS для активації dropdown на мобільних пристроях
         document.querySelectorAll('.dropdown-toggle').forEach(item => {
             item.addEventListener('click', function(e) {
                 if (window.innerWidth <= 768) {
