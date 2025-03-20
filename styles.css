@@ -469,10 +469,11 @@ a:hover {
 }
 
 .hero-video, .recommendation-video, .service-img, .equipment-img, .insta-img {
-    width: 100%;
-    height: auto;
+     width: 100%;
+    max-width: 450px; / Максимальна ширина на великих екранах /
+    aspect-ratio: 9 / 16; / Співвідношення сторін, як у ABIR WD8 */
     border-radius: 15px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3);
     transition: transform 0.3s ease;
 }
 
@@ -1114,7 +1115,22 @@ footer {
 
     .hero-content {
         flex-direction: column;
+ gap: 20px; / 
     }
+
+ .hero-text {
+        padding: 0; /* Прибрати внутрішні відступи для кращої адаптації */
+    }
+}
+
+/* Загальні стилі для hero-content */
+.hero-content {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
 
     .hero-video {
         max-width: 300px;
