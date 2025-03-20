@@ -119,6 +119,81 @@
             border-bottom: 2px solid #c9a77d;
         }
 
+/* Стилі для dropdown-меню */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    padding: 6px 12px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    min-width: 200px;
+    z-index: 1001;
+    top: 100%;
+    left: 0;
+    padding: 10px 0;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content .nav-link {
+    display: block;
+    margin: 0;
+    padding: 10px 20px;
+    font-size: 16px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.3); /* Зберігаємо твій ефект */
+}
+
+.dropdown-content .nav-link:hover {
+    background: rgba(34, 34, 34, 0.9);
+    color: #c9a77d;
+}
+
+.dropdown-content .nav-link.active {
+    color: #c9a77d;
+    font-weight: 600;
+    border-bottom: 2px solid #c9a77d; /* Зберігаємо твою підсвітку */
+}
+
+/* Адаптивність для мобільних */
+@media (max-width: 768px) {
+    .dropdown-content {
+        position: static;
+        display: none;
+        background: none;
+        box-shadow: none;
+        padding: 0;
+        width: 100%;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: none;
+    }
+
+    #menu-toggle-input:checked ~ .nav .dropdown .dropdown-content {
+        display: block;
+    }
+
+    .dropdown-content .nav-link {
+        padding: 15px;
+        text-align: center;
+    }
+}
+
         .menu-toggle-input {
             display: none;
         }
@@ -846,22 +921,30 @@
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <input type="checkbox" id="menu-toggle-input" class="menu-toggle-input">
-            <label for="menu-toggle-input" class="menu-toggle" aria-label="Toggle navigation">
-                <span class="hamburger"></span>
-            </label>
-            <nav class="nav">
-                <a href="index.html" class="nav-link">Головна</a>
-                <a href="services.html" class="nav-link">Послуги</a>
-                <a href="equipment.html" class="nav-link active">Техніка</a>
-                <a href="testimonials.html" class="nav-link">Нас рекомендують</a>
-                <a href="blog.html" class="nav-link">Блог</a>
-                <a href="faq.html" class="nav-link">FAQ</a>
-                <a href="how-to-order.html" class="nav-link">Як замовити</a>
-                <a href="contact.html" class="nav-link">Контакти</a>
-            </nav>
-        </header>
+              <header class="header">
+    <input type="checkbox" id="menu-toggle-input" class="menu-toggle-input">
+    <label for="menu-toggle-input" class="menu-toggle" aria-label="Toggle navigation">
+        <span class="hamburger"></span>
+    </label>
+    <nav class="nav">
+        <a href="index.html" class="nav-link">Головна</a>
+        <a href="services.html" class="nav-link">Послуги</a>
+        <div class="dropdown">
+            <a href="equipment.html" class="nav-link dropdown-toggle active">Техніка</a>
+            <div class="dropdown-content">
+                <a href="abir-wd8.html" class="nav-link">ABIR WD8 – Робот для вікон</a>
+                <a href="jimmy-jv35.html" class="nav-link">Jimmy JV35 – Пилосос</a>
+                <a href="karcher-sc2.html" class="nav-link">KARCHER SC 2 Deluxe – Пароочисник</a>
+                <a href="karcher-puzzi.html" class="nav-link">Kärcher Puzzi 8/1 – Миючий пилосос</a>
+            </div>
+        </div>
+        <a href="testimonials.html" class="nav-link">Відгуки</a>
+        <a href="blog.html" class="nav-link">Блог</a>
+        <a href="faq.html" class="nav-link">FAQ</a>
+        <a href="how-to-order.html" class="nav-link">Як замовити</a>
+        <a href="contact.html" class="nav-link">Контакти</a>
+    </nav>
+</header>
 
         <section class="hero">
             <div class="promo-banner">
@@ -882,31 +965,56 @@
             </div>
         </section>
 
-        <section class="benefits-section">
-            <h2 class="section-title">Чому варто обрати KARCHER SC 2 Deluxe?</h2>
-            <div class="benefits-grid">
-                <div class="benefit-item">
-                    <i class="fas fa-leaf"></i>
-                    <h3>Екологічність</h3>
-                    <p>Чистота без хімії.</p>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-shield-alt"></i>
-                    <h3>Дезінфекція</h3>
-                    <p>99% бактерій гинуть.</p>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-tools"></i>
-                    <h3>Універсальність</h3>
-                    <p>Для кухні, ванни, підлоги.</p>
-                </div>
-                <div class="benefit-item">
-                    <i class="fas fa-shipping-fast"></i>
-                    <h3>Доставка до дверей</h3>
-                    <p>Привеземо в Полтаві за день.</p>
-                </div>
-            </div>
-        </section>
+      <section class="benefits-section">
+    <h2 class="section-title">Чому варто обрати KARCHER SC 2 Deluxe?</h2>
+    <div class="benefits-grid">
+        <div class="benefit-item">
+            <i class="fas fa-leaf"></i>
+            <h3>Екологічність</h3>
+            <p>Чистота без хімії.</p>
+        </div>
+        <div class="benefit-item">
+            <i class="fas fa-shield-alt"></i>
+            <h3>Дезінфекція</h3>
+            <p>99% бактерій гинуть.</p>
+        </div>
+        <div class="benefit-item">
+            <i class="fas fa-tools"></i>
+            <h3>Універсальність</h3>
+            <p>Для кухні, ванни, підлоги.</p>
+        </div>
+        <div class="benefit-item">
+            <i class="fas fa-shipping-fast"></i>
+            <h3>Доставка до дверей</h3>
+            <p>Привеземо в Полтаві за день.</p>
+        </div>
+    </div>
+</section>
+
+<style>
+    .benefits-grid .benefit-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 20px;
+    }
+    .benefit-item i {
+        font-size: 32px;
+        color: #c9a77d;
+        margin-bottom: 15px;
+    }
+    .benefit-item h3 {
+        font-size: 20px;
+        color: #f0d6b0;
+        margin-bottom: 10px;
+    }
+    .benefit-item p {
+        font-size: 14px;
+        color: #d3d3d3;
+        margin: 0;
+    }
+</style>
 
         <section class="specs-section">
             <h2 class="section-title">Сила технологій KARCHER SC 2 Deluxe</h2>

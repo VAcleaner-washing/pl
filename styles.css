@@ -109,6 +109,50 @@ a:hover {
     border-bottom: 2px solid #c9a77d;
 }
 
+/* Стилі для dropdown-меню */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-toggle {
+    padding: 6px 12px;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    min-width: 200px;
+    z-index: 1001;
+    top: 100%;
+    left: 0;
+    padding: 10px 0;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.dropdown-content .nav-link {
+    display: block;
+    margin: 0;
+    padding: 10px 20px;
+    font-size: 16px;
+    width: 100%;
+    text-align: left;
+    background: none;
+    text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
+}
+
+.dropdown-content .nav-link:hover {
+    background: rgba(34, 34, 34, 0.9);
+    color: #c9a77d;
+}
+
 /* Стилі для гамбургер-меню */
 .menu-toggle-input {
     display: none;
@@ -124,7 +168,6 @@ a:hover {
     right: 15px;
     top: 15px;
     z-index: 1003;
-    transition: transform 0.3s ease;
 }
 
 .hamburger {
@@ -143,7 +186,7 @@ a:hover {
     width: 25px;
     height: 3px;
     background: #f0d6b0;
-    transition: transform 0.4s ease, top 0.4s ease, opacity 0.3s ease;
+    transition: transform 0.4s ease, top 0.4s ease;
 }
 
 .hamburger::before {
@@ -161,100 +204,29 @@ a:hover {
 #menu-toggle-input:checked + .menu-toggle .hamburger::before {
     top: 0;
     transform: rotate(45deg);
-    opacity: 1;
     background: #c9a77d;
-    animation: foldIn 0.4s ease forwards;
 }
 
 #menu-toggle-input:checked + .menu-toggle .hamburger::after {
     top: 0;
     transform: rotate(-45deg);
-    opacity: 1;
     background: #c9a77d;
-    animation: foldIn 0.4s ease forwards;
 }
 
-@keyframes foldIn {
-    0% { transform: scaleX(1) rotate(0deg); opacity: 0.5; }
-    50% { transform: scaleX(0.5) rotate(0deg); opacity: 0.8; }
-    100% { transform: scaleX(1) rotate(45deg); opacity: 1; }
+/* Анімація появи пунктів меню */
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Адаптивність для мобільних пристроїв */
 @media (max-width: 768px) {
-    
-    
-    @media (max-width: 768px) {
-    .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
-        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
-        margin: 5px 0; /* Зменшуємо margin до 5px */
-    }
-
-    .hero {
-        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
-    }
-
-    .hero-content {
-        flex-direction: column;
-    }
-
-    .hero-text {
-        max-width: 90%; /* Обмежуємо ширину тексту до 90% контейнера */
-        margin: 0 auto; /* Центруємо текстовий блок */
-        padding: 0 10px; /* Додаємо горизонтальні відступи */
-    }
-
-    .hero-title {
-        font-size: 24px; /* Ще більше зменшуємо розмір заголовка */
-        line-height: 1.2; /* Зменшуємо міжрядковий інтервал */
-        word-wrap: break-word; /* Переносимо слова, якщо вони не вміщаються */
-    }
-
-    .hero-usp {
-        font-size: 16px; /* Зменшуємо розмір USP */
-        line-height: 1.4;
-    }
-
-    .hero-subtitle {
-        font-size: 14px; /* Зменшуємо розмір підзаголовка */
-        line-height: 1.5;
-    }
-
-    .hero-video {
-        max-width: 300px;
-    }
-
-    .section-title {
-        font-size: 28px;
-    }
-
-    .section-subtitle {
-        font-size: 16px;
-    }
-
-    .benefit-item {
-        font-size: 16px;
-    }
-
-    .why-grid, .recommendation-grid, .service-grid, .blog-grid, .equipment-grid, .how-to-order-steps {
-        grid-template-columns: 1fr;
-    }
-
-    .equipment-img, .service-img {
-        height: 150px;
-    }
-}
-    
-    
-    
-    .header {
-        min-height: 150px;
-        background-size: contain;
-        background-position: center 20%;
-        padding-bottom: 33.33%;
-        z-index: 998;
-    }
-
     .menu-toggle {
         display: block;
     }
@@ -273,7 +245,6 @@ a:hover {
         transform: translateY(-100%);
         transition: transform 0.4s ease-in-out;
         z-index: 1002;
-        bottom: auto;
         padding: 0;
     }
 
@@ -284,37 +255,38 @@ a:hover {
     .nav-link {
         margin: 15px 0;
         font-size: 20px;
-        width: 80%;
         text-align: center;
         padding: 15px;
-        border-radius: 8px;
-        background: none;
-        transition: color 0.3s ease, transform 0.3s ease;
-    }
-
-    .nav-link:hover {
-        color: #c9a77d;
-        transform: scale(1.05);
-    }
-
-    .nav-link::after {
-        display: none;
+        opacity: 0;
+        transform: translateY(-20px);
     }
 
     #menu-toggle-input:checked ~ .nav .nav-link {
-        opacity: 1;
-        transform: translateY(0);
+        animation: slideIn 0.3s ease forwards;
     }
 
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(1) { transition-delay: 0.1s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(2) { transition-delay: 0.2s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(3) { transition-delay: 0.3s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(4) { transition-delay: 0.4s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(5) { transition-delay: 0.5s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(6) { transition-delay: 0.6s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(7) { transition-delay: 0.7s; }
-    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(8) { transition-delay: 0.8s; }
-}
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(1) { animation-delay: 0.1s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(2) { animation-delay: 0.2s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(3) { animation-delay: 0.3s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(4) { animation-delay: 0.4s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(5) { animation-delay: 0.5s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(6) { animation-delay: 0.6s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(7) { animation-delay: 0.7s; }
+    #menu-toggle-input:checked ~ .nav .nav-link:nth-child(8) { animation-delay: 0.8s; }
+
+    .dropdown-content {
+        display: none; /* Ховаємо підменю на мобільних */
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: none; /* Не показуємо при наведенні на мобільних */
+    }
+
+    .nav-link::after {
+        display: none; /* Прибираємо підкреслення на мобільних */
+    }
+}    
+    
 
 /* Для планшетів (769px–1023px) */
 @media (min-width: 769px) and (max-width: 1023px) {
@@ -509,6 +481,9 @@ a:hover {
 }
 
 .hero-text {
+width: 100%;
+        padding: 0 20px;
+        box-sizing: border-box;
     flex: 1;
     min-width: 300px;
     display: flex;
