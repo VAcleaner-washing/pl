@@ -188,6 +188,11 @@
     #menu-toggle-input:checked ~ .nav .dropdown .dropdown-content {
         display: block;
     }
+.dropdown-content.active {
+        display: block;
+    }
+}
+
 
     .dropdown-content .nav-link {
         padding: 15px;
@@ -1165,20 +1170,18 @@
         <a href="https://t.me/+380953919569" target="_blank"><i class="fab fa-telegram-plane"></i></a>
     </div>
 
-<!-- Кнопка "На верх" -->
-<button id="scrollToTopBtn" class="scroll-to-top" title="Повернутися на верх">
-    <i class="fas fa-arrow-up"></i>
-</button>
+    <button id="scrollToTopBtn" class="scroll-to-top" title="Повернутися на верх">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
-<script src="scrollToTop.js"></script>
+    <script src="scrollToTop.js"></script>
 
-<script>
+    <script>
         document.addEventListener('DOMContentLoaded', function () {
             const dropdowns = document.querySelectorAll('.dropdown');
             dropdowns.forEach(dropdown => {
                 const toggle = dropdown.querySelector('.dropdown-toggle');
                 const content = dropdown.querySelector('.dropdown-content');
-                
                 toggle.addEventListener('click', function (e) {
                     if (window.innerWidth <= 768) {
                         e.preventDefault();
@@ -1186,11 +1189,22 @@
                     }
                 });
             });
+
+            const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 300) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            });
+
+            scrollToTopBtn.addEventListener('click', function () {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
         });
     </script>
 
-    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9234819f9a33bfbd',t:'MTc0MjQ2NjMzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-</body>
-
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9234a3e8da9bb047',t:'MTc0MjQ2NzYyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
