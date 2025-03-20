@@ -1125,6 +1125,39 @@ footer {
         margin: 0 auto; /* Центруємо відео */
     }
 
+.recommendation-video {
+        width: auto; /* Як у hero-video */
+        max-width: 300px !important; /* Чітке обмеження ширини, як у hero-video */
+        height: auto; /* Зберігаємо пропорції */
+        aspect-ratio: 9 / 16; /* Вертикальний формат */
+        object-fit: cover; /* Забезпечуємо коректне відображення контенту */
+        display: block; /* Для центрування */
+        margin: 0 auto; /* Центруємо відео, як у hero-video */
+        border-radius: 15px; /* Зберігаємо округлі кути */
+        box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3); /* Така ж тінь */
+    }
+
+    .recommendation-video:hover {
+        transform: scale(1.02); /* Зберігаємо ефект наведення */
+    }
+
+    .recommendation-video::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" stroke="%23f0d6b0" stroke-width="10" fill="none" stroke-dasharray="251.2" stroke-dashoffset="0"><animate attributeName="stroke-dashoffset" from="0" to="251.2" dur="1s" repeatCount="indefinite"/></circle></svg>') no-repeat center;
+        border-radius: 15px;
+        z-index: 1;
+        animation: fadeOut 1s forwards 2s; /* Така ж анімація завантаження */
+    }
+
+    video[loaded] + .recommendation-video::before {
+        display: none; /* Приховуємо після завантаження */
+    }
+    
     .hero-title {
         font-size: 28px;
     }
