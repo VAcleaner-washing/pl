@@ -64,6 +64,10 @@
         }
 
         .nav {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -157,7 +161,7 @@
             color: #c9a77d;
         }
 
-        /* Гамбургер-меню для мобільних */
+        /* Гамбургер-меню */
         .menu-toggle {
             display: none;
             background: none;
@@ -218,14 +222,13 @@
             display: none;
         }
 
-        /* Мобільна адаптація */
+        /* Мобільна адаптація (тільки для мобільних) */
         @media (max-width: 768px) {
             .header {
                 min-height: 150px;
                 background-size: contain;
                 background-position: center 20%;
                 padding-bottom: 33.33%;
-                z-index: 998;
             }
 
             .menu-toggle {
@@ -282,8 +285,7 @@
                 width: 100%;
             }
 
-            #menu-toggle-input:checked ~ .nav .dropdown:hover .dropdown-content,
-            .dropdown-content.active {
+            #menu-toggle-input:checked ~ .nav .dropdown-content.active {
                 display: block;
             }
 
@@ -838,9 +840,7 @@
         .chat-bot a {
             width: 60px;
             height: 60px;
-            background: linear-gradient(45deg, #f0d6b0,ाचार
-
-            #c9a77d);
+            background: linear-gradient(45deg, #f0d6b0, #c9a77d);
             color: #000000;
             border-radius: 50%;
             display: flex;
