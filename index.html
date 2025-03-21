@@ -34,13 +34,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </head>
 
 
-<div id="header"></div>
-<script>
-  fetch('header.html')
-    .then(response => response.text())
-    .then(data => document.getElementById('header').innerHTML = data);
-</script>
-
     
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -49,6 +42,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
     <div class="container">
 
+       <div id="header"></div>
+<script>
+  fetch('header.html')
+    .then(response => response.text())
+    .then(data => document.getElementById('header').innerHTML = data);
+</script> 
         
         <section class="hero">
             <div class="promo-banner">
