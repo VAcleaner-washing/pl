@@ -1284,68 +1284,6 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
         display: none;
     }
 
-/* Стилі для клікабельного логотипу */
-.logo-link {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    text-decoration: none;
-    display: block;
-}
 
-.logo-placeholder {
-    display: block;
-    width: 100%;
-    height: 100%;
-    /* Прибираємо background-image звідси */
-    opacity: 0; /* Залишаємо порожнім, якщо не потрібен ефект */
-}
-
-.header {
-    position: relative;
-    padding: 15px 0;
-    background: #000000 url('логотипу.webp'); /* Додаємо логотип явно */
-    background-size: contain;
-    background-position: center center;
-    background-repeat: no-repeat;
-    border-radius: 15px 15px 0 0;
-    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
-    padding-bottom: 33.33%;
-    min-height: 150px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
-/* Прибираємо ефект наведення, якщо він не потрібен */
-.logo-link:hover .logo-placeholder {
-    /* opacity: 0.9; */ /* Закоментуємо або видалимо */
-}
-
-/* Адаптація для мобільних */
-@media (max-width: 768px) {
-    .logo-link {
-        z-index: 1002;
-        pointer-events: auto;
-    }
-    .menu-toggle {
-        z-index: 1003;
-        top: 15px;
-        right: 15px;
-        padding: 12px;
-        width: 45px;
-        height: 45px;
-        pointer-events: auto;
-    }
-    .hamburger, .hamburger::before, .hamburger::after {
-        pointer-events: none;
-    }
-    .nav {
-        z-index: 1001;
-    }
-}
     
 }
