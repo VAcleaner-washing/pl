@@ -1328,4 +1328,33 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
 .logo-link:hover .logo-placeholder {
     opacity: 0.9; /* Легке затемнення при наведенні, якщо потрібно */
 }
+
+
+/* Адаптація для мобільних */
+@media (max-width: 768px) {
+    .logo-link {
+        z-index: 1002; /* Вище навігації, але нижче гамбургера */
+        pointer-events: auto; /* Гарантуємо, що кліки працюють */
+    }
+
+    .menu-toggle {
+        z-index: 1003; /* Залишаємо поверх усього */
+        top: 15px;
+        right: 15px;
+        padding: 12px;
+        width: 45px; /* Обмежуємо розмір гамбургера */
+        height: 45px;
+        pointer-events: auto; /* Кліки тільки в межах гамбургера */
+    }
+
+    .hamburger, .hamburger::before, .hamburger::after {
+        pointer-events: none; /* Уникаємо перехоплення кліків поза гамбургером */
+    }
+
+    .nav {
+        z-index: 1001; /* Нижче логотипу */
+    }
+}
+
+    
 }
