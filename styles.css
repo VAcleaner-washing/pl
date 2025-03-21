@@ -1283,4 +1283,38 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
     .scroll-to-top {
         display: none;
     }
+/* Стилі для клікабельного логотипу */
+.logo-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Переконайтеся, що посилання поверх інших елементів */
+    text-decoration: none; /* Прибираємо підкреслення */
+    display: block; /* Щоб посилання займало всю область */
+}
+
+.logo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-image: url('логотипу.webp');
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0; /* Приховуємо плейсхолдер, щоб не дублювати логотип */
+}
+
+/* Адаптація для мобільних */
+@media (max-width: 768px) {
+    .logo-link {
+        z-index: 2; /* Переконайтеся, що посилання поверх гамбургер-меню */
+    }
+
+    .menu-toggle {
+        z-index: 3; /* Гамбургер-меню залишається доступним */
+        top: 10px; /* Зсув, щоб уникнути накладання */
+        right: 10px;
+    }
 }
