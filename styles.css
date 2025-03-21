@@ -1291,27 +1291,23 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 1; /* Переконайтеся, що посилання поверх інших елементів */
-    text-decoration: none; /* Прибираємо підкреслення */
-    display: block; /* Щоб посилання займало всю область */
+    z-index: 1;
+    text-decoration: none;
+    display: block;
 }
 
 .logo-placeholder {
     display: block;
     width: 100%;
     height: 100%;
-    /* Зберігаємо фонове зображення з .header */
-    background-image: url('логотипу.webp');
-    background-size: contain;
-    background-position: center center;
-    background-repeat: no-repeat;
-    opacity: 0; /* Приховуємо плейсхолдер, щоб не дублювати логотип */
+    /* Прибираємо background-image звідси */
+    opacity: 0; /* Залишаємо порожнім, якщо не потрібен ефект */
 }
 
 .header {
-    position: relative; /* Для правильного позиціонування .logo-link */
+    position: relative;
     padding: 15px 0;
-    background: #000000;
+    background: #000000 url('логотипу.webp'); /* Додаємо логотип явно */
     background-size: contain;
     background-position: center center;
     background-repeat: no-repeat;
@@ -1324,37 +1320,32 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
     justify-content: space-between;
 }
 
-/* Додаємо перехід для інтерактивності (опціонально) */
+/* Прибираємо ефект наведення, якщо він не потрібен */
 .logo-link:hover .logo-placeholder {
-    opacity: 0.9; /* Легке затемнення при наведенні, якщо потрібно */
+    /* opacity: 0.9; */ /* Закоментуємо або видалимо */
 }
-
 
 /* Адаптація для мобільних */
 @media (max-width: 768px) {
     .logo-link {
-        z-index: 1002; /* Вище навігації, але нижче гамбургера */
-        pointer-events: auto; /* Гарантуємо, що кліки працюють */
+        z-index: 1002;
+        pointer-events: auto;
     }
-
     .menu-toggle {
-        z-index: 1003; /* Залишаємо поверх усього */
+        z-index: 1003;
         top: 15px;
         right: 15px;
         padding: 12px;
-        width: 45px; /* Обмежуємо розмір гамбургера */
+        width: 45px;
         height: 45px;
-        pointer-events: auto; /* Кліки тільки в межах гамбургера */
+        pointer-events: auto;
     }
-
     .hamburger, .hamburger::before, .hamburger::after {
-        pointer-events: none; /* Уникаємо перехоплення кліків поза гамбургером */
+        pointer-events: none;
     }
-
     .nav {
-        z-index: 1001; /* Нижче логотипу */
+        z-index: 1001;
     }
 }
-
     
 }
