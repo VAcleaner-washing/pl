@@ -32,37 +32,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+
+
+<div id="header"></div>
+<script>
+  fetch('header.html')
+    .then(response => response.text())
+    .then(data => document.getElementById('header').innerHTML = data);
+</script>
+
+    
 <body>
     <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KC8FF7FB"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
     <div class="container">
-
- <header class="header">
-    <input type="checkbox" id="menu-toggle-input" class="menu-toggle-input">
-    <label for="menu-toggle-input" class="menu-toggle" aria-label="Toggle navigation">
-        <span class="hamburger"></span>
-    </label>
-    <nav class="nav">
-        <a href="index.html" class="nav-link active">Головна</a>
-        <a href="services.html" class="nav-link">Послуги</a>
-        <div class="dropdown">
-            <a href="equipment.html" class="nav-link dropdown-toggle">Техніка</a>
-            <div class="dropdown-content">
-                <a href="abir-wd8.html" class="nav-link">ABIR WD8 – Робот для вікон</a>
-                <a href="jimmy-jv35.html" class="nav-link">Jimmy JV35 – Пилосос</a>
-                <a href="karcher-sc2.html" class="nav-link">KARCHER SC 2 Deluxe – Пароочисник</a>
-                <a href="karcher-puzzi.html" class="nav-link">Kärcher Puzzi 8/1 – Миючий пилосос</a>
-            </div>
-        </div>
-        <a href="testimonials.html" class="nav-link">Відгуки</a>
-        <a href="blog.html" class="nav-link">Блог</a>
-        <a href="faq.html" class="nav-link">FAQ</a>
-        <a href="how-to-order.html" class="nav-link">Як замовити</a>
-        <a href="contact.html" class="nav-link">Контакти</a>
-    </nav>
-</header>
 
         
         <section class="hero">
