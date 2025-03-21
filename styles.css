@@ -1283,6 +1283,7 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
     .scroll-to-top {
         display: none;
     }
+
 /* Стилі для клікабельного логотипу */
 .logo-link {
     position: absolute;
@@ -1299,6 +1300,7 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
     display: block;
     width: 100%;
     height: 100%;
+    /* Зберігаємо фонове зображення з .header */
     background-image: url('логотипу.webp');
     background-size: contain;
     background-position: center center;
@@ -1306,15 +1308,24 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
     opacity: 0; /* Приховуємо плейсхолдер, щоб не дублювати логотип */
 }
 
-/* Адаптація для мобільних */
-@media (max-width: 768px) {
-    .logo-link {
-        z-index: 2; /* Переконайтеся, що посилання поверх гамбургер-меню */
-    }
+.header {
+    position: relative; /* Для правильного позиціонування .logo-link */
+    padding: 15px 0;
+    background: #000000;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+    padding-bottom: 33.33%;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-    .menu-toggle {
-        z-index: 3; /* Гамбургер-меню залишається доступним */
-        top: 10px; /* Зсув, щоб уникнути накладання */
-        right: 10px;
-    }
+/* Додаємо перехід для інтерактивності (опціонально) */
+.logo-link:hover .logo-placeholder {
+    opacity: 0.9; /* Легке затемнення при наведенні, якщо потрібно */
+}
 }
