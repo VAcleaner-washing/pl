@@ -1099,6 +1099,10 @@ footer {
         margin: 5px 0; /* Зменшуємо margin до 5px */
     }
 
+.faq-item.active .faq-answer {
+        max-height: 350px; /* Збільшуємо висоту для вміщення більшого тексту */
+    }
+    
     .hero {
         padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
     }
