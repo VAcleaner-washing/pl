@@ -849,7 +849,7 @@ a:hover {
 }
 
 .faq-item.active .faq-answer {
-    max-height: 200px;
+    max-height: 350px;
 }
 
 /* Як замовити */
