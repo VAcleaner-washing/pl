@@ -491,14 +491,23 @@ a:hover {
 }
 
 .hero-title {
-    font-size: 40px;
+    font-size: 28px !important;
+    line-height: 1.25 !important;
     margin-bottom: 20px;
     color: #f0d6b0;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
 }
 
-.hero-usp, .hero-subtitle {
-    font-size: 20px;
+.hero-usp, {
+    font-size: 18px !important;
+    line-height: 1.35 !important;
+    color: #f0d6b0;
+    margin-bottom: 20px;
+    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
+}
+hero-subtitle {
+    font-size: 16px !important;
+    line-height: 1.45 !important;
     color: #f0d6b0;
     margin-bottom: 20px;
     text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
@@ -512,7 +521,10 @@ a:hover {
     justify-content: center;
     margin-bottom: 40px;
 }
-
+.benefits li {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+}
 .benefit-item {
     padding: 12px 20px;
     background: rgba(222, 188, 150, 0.1);
@@ -936,7 +948,7 @@ a:hover {
     padding: 14px 30px;
     margin: 10px;
     border-radius: 10px;
-    font-size: 18px;
+    font-size: 16px !important;
     font-weight: 600;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: none;
