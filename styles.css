@@ -1359,6 +1359,15 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
 }
 
 
+@media (min-width: 1024px) {
+    .hero {
+        padding-top: 40px; /* було 80px — тому все з'їжджало вниз */
+    }
+
+    .hero-content {
+        margin-top: -20px; /* легенько підтягуємо блок вгору */
+    }
+}
 
     
     
