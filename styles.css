@@ -455,7 +455,8 @@ a:hover {
     color: #000000;
     padding: 15px;
     border-radius: 10px;
-   margin-bottom: 20px;
+    margin-top: 0;          /* підняли впритул до верху секції */
+    margin-bottom: 20px;
     font-weight: 500;
 }
 
@@ -490,9 +491,17 @@ a:hover {
     flex-direction: column;
     align-items: center;
 }
+.hero-text p {
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.hero-text p:last-child {
+    margin-bottom: 0;
+}
 
 .hero-title {
-    font-size: 28px !important;
+    font-size: 29px !important;
     line-height: 1.25 !important;
     margin-bottom: 20px;
     color: #f0d6b0;
@@ -1108,15 +1117,14 @@ footer {
 /* Медіа-запити */
 @media (max-width: 768px) {
     .hero, .why-choose-us, .recommendations, .services, .contact, .rental-equipment, .blog, .faq, .how-to-order {
-        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
-        margin: 5px 0; /* Зменшуємо margin до 5px */
+        padding: 40px 20px 20px;  /* повертаємо відступи зліва/справа */
+        margin: 5px 0;
     }
 
-
-    
     .hero {
-        padding: 40px 0 20px; /* Зменшуємо padding-bottom до 20px */
+        padding: 40px 20px 20px;  /* те ж саме для hero */
     }
+
 
     .section-title {
         font-size: 28px;
@@ -1205,7 +1213,7 @@ footer {
 
 .promo-block {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 10px;
     background: rgba(201, 167, 125, 0.1);
     padding: 10px;
     border-radius: 10px;
