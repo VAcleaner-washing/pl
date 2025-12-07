@@ -491,14 +491,14 @@ a:hover {
 }
 
 .hero-title {
-    font-size: 32px;
+    font-size: 30px;
     margin-bottom: 20px;
     color: #f0d6b0;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
 }
 
 .hero-usp {
-    font-size: 17px;
+    font-size: 16px;
     color: #f0d6b0;
     margin-bottom: 20px;
     text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
@@ -1205,7 +1205,7 @@ footer {
 }
 
 .promo-text {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     color: #f0d6b0;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
