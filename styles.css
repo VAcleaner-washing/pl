@@ -455,9 +455,14 @@ a:hover {
     color: #000000;
     padding: 15px;
     border-radius: 10px;
-    margin-top: 10px;
-    margin-bottom: 20px;
+   margin-bottom: 20px;
     font-weight: 500;
+}
+
+@media screen and (min-width: 1024px) {
+    .promo-banner {
+        margin-top: 0; /* підняли блок */
+    }
 }
 
 .hero-content {
