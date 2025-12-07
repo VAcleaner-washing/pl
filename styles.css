@@ -1339,6 +1339,24 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
 }
 
 
+/* Виправлення для десктопів (ширина від 1024px) */
+@media (min-width: 1024px) {
+    .hero-text p {
+        margin-bottom: 18px !important; /* адекватні абзаци */
+        line-height: 1.55 !important;   /* читається краще */
+        text-align: center !important;  /* вирівнювання як на телефоні */
+        max-width: 750px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .section-subtitle, 
+    .hero-subtitle, 
+    .hero-usp {
+        margin-bottom: 22px !important;
+        line-height: 1.55 !important;
+    }
+}
 
 
 
