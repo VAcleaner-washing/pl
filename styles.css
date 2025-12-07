@@ -491,14 +491,14 @@ a:hover {
 }
 
 .hero-title {
-    font-size: 40px;
+    font-size: 32px;
     margin-bottom: 20px;
     color: #f0d6b0;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
 }
 
 .hero-usp, .hero-subtitle {
-    font-size: 20px;
+    font-size: 17px;
     color: #f0d6b0;
     margin-bottom: 20px;
     text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
