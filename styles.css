@@ -409,10 +409,10 @@ a:hover {
 
 /* Секція Hero */
 .hero {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.8));
-    padding: 60px 20px 40px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+    padding: 80px 20px 40px; /* Зменшуємо padding-bottom з 80px до 40px */
     border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(5px);
 }
 
@@ -424,14 +424,6 @@ a:hover {
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
     position: relative;
 }
-
-.hero-video {
-    width: 100%;
-    max-width: 520px;
-    border-radius: 18px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-}
-
 
 .section-title::after {
     content: '';
@@ -470,11 +462,9 @@ a:hover {
 .hero-content {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 30px;
     flex-wrap: wrap;
-    max-width: 1160px;
-    margin: 0 auto;
+    justify-content: center;
 }
 
 .recommendation-video, .service-img, .equipment-img, .insta-img {
@@ -491,70 +481,56 @@ a:hover {
 
 .hero-text {
     width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
     flex: 1;
     min-width: 300px;
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    gap: 12px;
+    align-items: center;
 }
 
 .hero-title {
-    font-size: 32px;
-    line-height: 1.2;
-    margin-bottom: 8px;
+    font-size: 40px;
+    margin-bottom: 20px;
     color: #f0d6b0;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
 }
 
-.hero-usp {
-    font-size: 17px;
+.hero-usp, .hero-subtitle {
+    font-size: 20px;
     color: #f0d6b0;
-    margin-bottom: 6px;
-}
-
-.hero-subtitle {
-    font-size: 15px;
-    line-height: 1.6;
-    color: #e3d2b9;
-    max-width: 640px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
 }
 
 .benefits {
     list-style: none;
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    justify-content: flex-start;
-    margin: 10px 0 16px;
-    padding: 0;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 40px;
 }
 
 .benefit-item {
-    padding: 8px 14px;
-    background: rgba(222, 188, 150, 0.08);
-    border-radius: 999px;
-    box-shadow: 0 3px 10px rgba(222, 188, 150, 0.18);
-    display: inline-flex;
+    padding: 12px 20px;
+    background: rgba(222, 188, 150, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.2);
+    transition: transform 0.3s ease;
+    display: flex;
     align-items: center;
-    font-size: 14px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-
 .benefit-item i {
-    margin-right: 8px;
-    font-size: 14px;
+    margin-right: 10px;
 }
 
 .benefit-item:hover {
-    transform: translateY(-2px);
-    background: rgba(222, 188, 150, 0.14);
-    box-shadow: 0 5px 15px rgba(222, 188, 150, 0.3);
+    transform: translateY(-5px);
 }
+
 /* Чому обирають нас */
 .why-grid {
     display: grid;
@@ -956,44 +932,40 @@ a:hover {
 
 /* CTA кнопки */
 .cta-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 26px;
-    margin: 6px 8px 0 0;
-    border-radius: 999px;
-    font-size: 15px;
+    display: inline-block;
+    padding: 14px 30px;
+    margin: 10px;
+    border-radius: 10px;
+    font-size: 18px;
     font-weight: 600;
-    text-decoration: none;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
 }
 
 .cta-btn.primary {
-    background: #f0d6b0;
-    color: #121212;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    background: linear-gradient(45deg, #f0d6b0, #c9a77d);
+    color: #000000;
+    box-shadow: 0 4px 15px rgba(222, 188, 150, 0.4);
 }
 
 .cta-btn.primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(222, 188, 150, 0.6);
+    background: linear-gradient(45deg, #c9a77d, #f0d6b0);
 }
-
 
 .cta-btn.secondary {
     background: transparent;
     color: #f0d6b0;
-    border: 1px solid #f0d6b0;
-    box-shadow: 0 4px 18px rgba(222, 188, 150, 0.25);
+    border: 2px solid #f0d6b0;
+    box-shadow: 0 4px 15px rgba(222, 188, 150, 0.3);
 }
 
 .cta-btn.secondary:hover {
-    transform: translateY(-2px);
-    background: rgba(222, 188, 150, 0.08);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(222, 188, 150, 0.5);
+    background: rgba(222, 188, 150, 0.1);
 }
-
 
 footer {
     padding: 30px 0;
@@ -1346,55 +1318,6 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
 }
 
 
-/* Мобільна оптимізація HERO */
-@media (max-width: 768px) {
-    .hero-content {
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
-        padding: 0 20px !important;
-    }
-
-    .hero-text {
-        max-width: 650px;
-        width: 100%;
-        padding: 0 20px !important;
-        text-align: center !important;
-        margin: 0 auto !important;
-    }
-
-    .hero-title {
-        font-size: 28px !important;
-        line-height: 1.25 !important;
-        margin-bottom: 18px !important;
-    }
-
-    .hero-usp, .hero-subtitle {
-        font-size: 18px !important;
-        line-height: 1.45 !important;
-        margin-bottom: 18px !important;
-    }
-
-    .benefits {
-        margin-top: 20px !important;
-        padding: 0 !important;
-    }
-
-    .benefit-item {
-        font-size: 18px !important;
-        padding: 12px 16px !important;
-        text-align: left !important;
-        margin-bottom: 10px !important;
-    }
-
-    .cta-btn {
-        width: 100%;
-        max-width: 320px;
-        margin: 10px auto !important;
-        font-size: 18px !important;
-        padding: 14px !important;
-    }
-}
 
 
     
