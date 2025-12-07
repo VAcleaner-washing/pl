@@ -497,13 +497,19 @@ a:hover {
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.4);
 }
 
-.hero-usp, .hero-subtitle {
+.hero-usp {
     font-size: 17px;
     color: #f0d6b0;
     margin-bottom: 20px;
     text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
 }
 
+.hero-subtitle {
+    font-size: 15px;
+    color: #f0d6b0;
+    margin-bottom: 20px;
+    text-shadow: 0 0 3px rgba(222, 188, 150, 0.3);
+}
 .benefits {
     list-style: none;
     display: flex;
