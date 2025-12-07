@@ -1359,7 +1359,11 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
 }
 
 
-
+@media (max-width: 768px) {
+    .recommendation-video {
+        margin-bottom: 25px !important;
+    }
+}
 
     
     
