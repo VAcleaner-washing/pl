@@ -1155,7 +1155,7 @@ footer {
         aspect-ratio: 9 / 16; /* Вертикальний формат */
         object-fit: cover; /* Забезпечуємо коректне відображення контенту */
         display: block; /* Для центрування */
-        margin: 0 auto; /* Центруємо відео, як у hero-video */
+        margin: 0 auto 24px; /* Центруємо відео, як у hero-video */
         border-radius: 15px; /* Зберігаємо округлі кути */
         box-shadow: 0 10px 30px rgba(222, 188, 150, 0.3); /* Така ж тінь */
     }
@@ -1359,11 +1359,7 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
 }
 
 
-@media (max-width: 768px) {
-    .recommendation-video {
-        margin-bottom: 25px !important;
-    }
-}
+
 
     
     
