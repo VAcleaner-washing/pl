@@ -1359,7 +1359,31 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
 }
 
 
+.hero-video {
+    width: 100% !important;
+    max-width: 450px !important;
+    aspect-ratio: 9 / 16 !important;
+    height: auto !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    display: block !important;
+    margin: 0 auto !important;
+    border-radius: 15px !important;
+    background: #000 !important;
+}
 
+.recommendation-video {
+    width: 100% !important;
+    max-width: 450px !important;
+    aspect-ratio: 9 / 16 !important;
+    height: auto !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    display: block !important;
+    margin: 0 auto 15px !important;
+    border-radius: 15px !important;
+    background: #000 !important;
+}
 
     
     
