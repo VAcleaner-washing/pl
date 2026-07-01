@@ -66,6 +66,7 @@
     justify-content: space-between;
 }
 
+/* Навігація для всіх розмірів екранів */
 .nav {
     position: absolute;
     bottom: 15px;
@@ -82,6 +83,7 @@
     z-index: 2;
 }
 
+/* Стилі для посилань у навігації */
 .nav-link {
     color: #f0d6b0;
     margin: 0 20px;
@@ -89,7 +91,7 @@
     font-weight: 500;
     padding: 6px 12px;
     position: relative;
-    transition: color 0.3s ease, transform 0.3s ease;
+    transition: color 0.3s ease;
     text-shadow: 0 0 5px rgba(222, 188, 150, 0.3);
 }
 
@@ -111,7 +113,6 @@
 
 .nav-link:hover {
     color: #c9a77d;
-    transform: scale(1.05);
 }
 
 .nav-link.active {
@@ -119,7 +120,6 @@
     font-weight: 600;
     border-bottom: 2px solid #c9a77d;
 }
-
 /* Dropdown-меню */
 .dropdown {
     position: relative;
