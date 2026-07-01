@@ -912,85 +912,6 @@
     }
 }
 
-    
-
-/* FINAL MOBILE MENU — VAcleaner compact premium version */
-@media (max-width: 768px) {
-    .nav {
-        justify-content: flex-start !important;
-        align-items: center !important;
-        padding: 68px 0 26px !important;
-        overflow-y: auto !important;
-        gap: 0 !important;
-    }
-
-    .nav-link {
-        width: 82% !important;
-        margin: 6px auto !important;
-        padding: 8px 10px !important;
-        font-size: 18px !important;
-        line-height: 1.2 !important;
-        text-align: center !important;
-    }
-
-    .dropdown {
-        width: 82% !important;
-        margin: 7px auto 13px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-    }
-
-    .dropdown-toggle {
-        width: 100% !important;
-        margin: 0 auto 8px !important;
-        padding: 6px 10px 9px !important;
-        text-align: center !important;
-        pointer-events: auto !important;
-        font-size: 20px !important;
-        font-weight: 600 !important;
-        border-bottom: none !important;
-    }
-
-    .dropdown-content {
-        position: static !important;
-        display: block !important;
-        width: 100% !important;
-        margin: 0 auto 6px !important;
-        padding: 10px 0 12px !important;
-        background: rgba(0, 0, 0, 0.46) !important;
-        border-radius: 14px !important;
-        border-top: 2px solid rgba(201, 167, 125, 0.76) !important;
-        box-shadow: inset 0 2px 0 rgba(240, 214, 176, 0.34), inset 0 0 0 1px rgba(201, 167, 125, 0.08) !important;
-        backdrop-filter: blur(4px) !important;
-    }
-
-    .dropdown-content .nav-link {
-        display: block !important;
-        width: 100% !important;
-        margin: 3px auto !important;
-        padding: 6px 10px !important;
-        font-size: 15.5px !important;
-        line-height: 1.25 !important;
-        text-align: center !important;
-        opacity: 0.92 !important;
-        background: transparent !important;
-        white-space: normal !important;
-        transform: none !important;
-    }
-
-    .dropdown-content .nav-link:hover,
-    .dropdown-content .nav-link:active {
-        color: #c9a77d !important;
-        background: transparent !important;
-        transform: none !important;
-    }
-
-    * {
-        -webkit-tap-highlight-color: transparent !important;
-    }
-}
-
     </style>
 </head>
 <body>
@@ -1006,6 +927,7 @@
         <div class="dropdown">
             <a href="equipment.html" class="nav-link dropdown-toggle active">Техніка</a>
             <div class="dropdown-content">
+                <a href="equipment.html" class="nav-link">ВСЯ ТЕХНІКА</a>
                 <a href="abir-wd8.html" class="nav-link">Робот для вікон</a>
                 <a href="jimmy-jv35.html" class="nav-link">Пиловий пилосос</a>
                 <a href="karcher-sc2.html" class="nav-link">Пароочисник</a>
@@ -1088,6 +1010,136 @@
         color: #d3d3d3;
         margin: 0;
     }
+
+
+/* FINAL MOBILE BURGER MENU ONLY — desktop styles above are not touched */
+@media (max-width: 768px) {
+    .nav {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100vh;
+        min-height: 100vh;
+        background: rgba(0, 0, 0, 0.96);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 94px 0 34px;
+        overflow-y: auto;
+        transition: left 0.4s ease-in-out;
+        z-index: 1002;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    #menu-toggle-input:checked ~ .nav {
+        left: 0;
+    }
+
+    .nav > .nav-link {
+        width: 82%;
+        margin: 6px 0;
+        padding: 8px 10px;
+        font-size: 20px;
+        line-height: 1.25;
+        text-align: center;
+        color: #f0d6b0;
+        text-shadow: 0 0 7px rgba(222, 188, 150, 0.42);
+        transform: none;
+        border-bottom: none;
+    }
+
+    .nav-link::after {
+        display: none;
+    }
+
+    .dropdown {
+        width: 82%;
+        margin: 8px 0 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .dropdown-toggle,
+    .dropdown-toggle.active {
+        width: 100%;
+        margin: 0 0 13px;
+        padding: 7px 10px;
+        font-size: 22px;
+        line-height: 1.2;
+        font-weight: 600;
+        text-align: center;
+        color: #c9a77d;
+        border-bottom: none;
+        pointer-events: auto;
+        transform: none;
+        text-shadow: 0 0 8px rgba(222, 188, 150, 0.45);
+    }
+
+    .dropdown-content {
+        position: static;
+        display: block !important;
+        width: 100%;
+        min-width: 0;
+        margin: 0 auto;
+        padding: 20px 0 22px;
+        background: rgba(0, 0, 0, 0.42);
+        border: 1px solid rgba(201, 167, 125, 0.58);
+        border-top: 3px solid rgba(201, 167, 125, 0.72);
+        border-radius: 14px;
+        box-shadow:
+            0 0 18px rgba(201, 167, 125, 0.10),
+            inset 0 1px 0 rgba(240, 214, 176, 0.20);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    .dropdown-content a[href="equipment.html"] {
+        display: none !important;
+    }
+
+    .dropdown-content .nav-link {
+        display: block;
+        width: 100%;
+        margin: 0 auto 12px;
+        padding: 0 14px;
+        font-size: 18px;
+        line-height: 1.3;
+        font-weight: 400;
+        text-align: center;
+        color: #f0d6b0;
+        background: transparent;
+        opacity: 1;
+        white-space: normal;
+        transform: none;
+        text-shadow: 0 0 7px rgba(222, 188, 150, 0.38);
+    }
+
+    .dropdown-content .nav-link:last-child {
+        margin-bottom: 0;
+    }
+
+    .dropdown-content .nav-link:hover,
+    .dropdown-content .nav-link:active {
+        background: transparent;
+        color: #c9a77d;
+        transform: none;
+    }
+
+    .menu-toggle {
+        display: block;
+        z-index: 1003;
+    }
+
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+}
 </style>
 
         <section class="specs-section">
