@@ -270,30 +270,64 @@
     }
 
     .dropdown {
-        width: 100%;
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 15px 0;
     }
 
     .dropdown-toggle {
         width: 100%;
         text-align: center;
+        margin: 0 auto 6px;
+        pointer-events: none;
     }
 
     .dropdown-content {
         position: static;
-        display: none;
-        background: none;
+        display: block !important;
+        background: transparent;
         box-shadow: none;
-        padding: 0;
+        padding: 8px 0 0;
         width: 100%;
-    }
-
-    .dropdown-content.active {
-        display: block;
+        margin: 0 auto 8px;
+        border-top: 1px solid rgba(201, 167, 125, 0.65);
+        border-radius: 0;
     }
 
     .dropdown-content .nav-link {
-        padding: 10px;
-        font-size: 18px;
+        display: block;
+        width: 100%;
+        margin: 3px auto;
+        padding: 7px 8px;
+        font-size: 15px;
+        line-height: 1.25;
+        text-align: center;
+        opacity: 0.9;
+        white-space: normal;
+    }
+
+    * {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Додаткові стилі для hero (залишаємо як є) */
+    .hero-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .hero-video {
+        max-width: 300px;
+    }
+    .hero-text h1 {
+        font-size: 28px;
+    }
+    .hero-text p {
+        font-size: 16px;
+    }
+    .section-title {
+        font-size: 28px;
     }
 }
         /* Hero секція */
@@ -928,10 +962,10 @@
             <a href="equipment.html" class="nav-link dropdown-toggle active">Техніка</a>
             <div class="dropdown-content">
                 <a href="equipment.html" class="nav-link">ВСЯ ТЕХНІКА</a>
-                <a href="abir-wd8.html" class="nav-link">ABIR WD8 – Робот для вікон</a>
-                <a href="jimmy-jv35.html" class="nav-link">Jimmy JV35 – Пиловий пилосос</a>
-                <a href="karcher-sc2.html" class="nav-link">KARCHER SC 2 Deluxe – Пароочисник</a>
-                <a href="karcher-puzzi.html" class="nav-link">Kärcher Puzzi 8/1 – Миючий пилосос</a>
+                <a href="abir-wd8.html" class="nav-link">Робот для вікон</a>
+                <a href="jimmy-jv35.html" class="nav-link">Пиловий пилосос</a>
+                <a href="karcher-sc2.html" class="nav-link">Пароочисник</a>
+                <a href="karcher-puzzi.html" class="nav-link">Миючий пилосос</a>
             </div>
         </div>
         <a href="testimonials.html" class="nav-link">Говорять про нас</a>
