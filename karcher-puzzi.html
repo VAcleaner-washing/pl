@@ -913,6 +913,68 @@
     .scroll-to-top {
         display: none;
     }
+
+
+   /* Для великих екранів типу iPhone 14 Pro Max (до 1290px ширини) */
+@media (min-width: 1024px) and (max-width: 1290px) {
+    .header {
+        min-height: 250px;
+        background-size: contain;
+        background-position: center 15%;
+        padding-bottom: 33.33%;
+    }
+
+    .nav {
+        position: absolute;
+        bottom: 20px;
+        transform: none;
+        height: auto;
+        background: transparent;
+        padding: 0;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 16px;
+        margin: 0 15px;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+}
+
+/* Для десктопів (від 1024px) */
+@media (min-width: 1024px) {
+    .header {
+        min-height: 200px;
+        background-size: contain;
+        background-position: center center;
+        padding-bottom: 33.33%;
+    }
+
+    .nav {
+        position: absolute;
+        bottom: 20px;
+        transform: none;
+        height: auto;
+        background: transparent;
+        padding: 0;
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .nav-link {
+        font-size: 16px;
+        margin: 0 15px;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+}
+
 }
     </style>
 </head>
