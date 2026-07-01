@@ -1389,7 +1389,58 @@ video[loaded] + .hero-video::before, video[loaded] + .recommendation-video::befo
     
 }
 
+.hero-proof {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 18px 0 24px;
+}
 
+.proof-item {
+    min-width: 130px;
+    padding: 10px 14px;
+    border: 1px solid rgba(240, 214, 176, 0.35);
+    border-radius: 14px;
+    background: rgba(240, 214, 176, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    text-align: center;
+}
+
+.proof-item strong {
+    display: block;
+    font-size: 20px;
+    line-height: 1.1;
+    color: #f0d6b0;
+    font-weight: 700;
+}
+
+.proof-item span {
+    display: block;
+    margin-top: 4px;
+    font-size: 13px;
+    color: #d8cbb8;
+}
+
+@media (max-width: 768px) {
+    .hero-proof {
+        gap: 8px;
+        margin: 16px 0 22px;
+    }
+
+    .proof-item {
+        min-width: 30%;
+        padding: 9px 8px;
+    }
+
+    .proof-item strong {
+        font-size: 18px;
+    }
+
+    .proof-item span {
+        font-size: 12px;
+    }
+}
 
 
 
