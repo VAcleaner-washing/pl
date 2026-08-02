@@ -28,6 +28,24 @@
       group?.querySelectorAll("details[open]").forEach((other) => { if (other !== item) other.open = false; });
     });
   });
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a");
+    if (!link) return;
+    const href = link.getAttribute("href") || "";
+    let eventName = "";
+    if (href.includes("t.me/")) eventName = "contact_telegram";
+    else if (href.includes("instagram.com/")) eventName = "contact_instagram";
+    else if (href.startsWith("tel:")) eventName = "contact_phone";
+    else if (href.includes("rishennia/")) eventName = "view_solution";
+    if (!eventName) return;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: eventName,
+      link_text: (link.textContent || "").trim().slice(0, 80),
+      link_url: href,
+      page_path: window.location.pathname,
+    });
+  });
   const items = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries) => {

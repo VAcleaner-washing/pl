@@ -4067,7 +4067,7 @@ footer {
 .product-image video{min-height:560px}
 .review-story-image video{aspect-ratio:9/16}
 .product-image::after,.review-story-image::after{pointer-events:none}
-.mobile-booking{grid-template-columns:1fr 1fr}
+.mobile-booking{grid-template-columns:2fr 1fr}
 .mobile-booking a:last-child{background:#181b1e;color:var(--text);border-left:1px solid rgba(255,255,255,.12)}
 .package-rates{display:grid;grid-template-columns:1.2fr repeat(3,1fr);gap:1px;margin:0;padding:0 5.5vw 110px;background:var(--ink)}
 .package-rates>p,.package-rates>div{margin:0;padding:28px;background:var(--surface)}
@@ -4094,6 +4094,8 @@ footer {
 .v21-choice-help span{color:#686761;font-size:11px;line-height:1.55}
 .v21-choice-help>a{display:inline-flex;min-height:46px;flex:0 0 auto;align-items:center;gap:18px;padding:0 18px;color:#fff;background:var(--v21-black);font-size:11px;font-weight:700;transition:background .25s ease,transform .25s ease}
 .v21-choice-help>a:hover{background:#24272a;transform:translateY(-2px)}
+.icon-arrow{width:1em;height:1em;flex:0 0 auto;overflow:visible;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round;transition:transform .22s ease}
+a:hover .icon-arrow{transform:translate(2px,-2px)}
 
 @media (max-width:620px){
   .v21-hero h1{font-size:clamp(47px,14.2vw,66px);line-height:.94}
