@@ -1,87 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset
-      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
-
-
-<url>
-  <loc>https://vacleaner.pp.ua/</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>1.00</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/index.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/services.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/equipment.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/abir-wd8.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/jimmy-jv35.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/karcher-sc2.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/karcher-puzzi.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/testimonials.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/blog.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/faq.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/how-to-order.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/contact.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/privacy.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://vacleaner.pp.ua/terms.html</loc>
-  <lastmod>2025-07-09T10:55:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-
-
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://vacleaner.pp.ua/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://vacleaner.pp.ua/rishennia/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/rishennia/textile/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/rishennia/steam/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/rishennia/mattress/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/rishennia/windows/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/komplekty/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/yak-tse-pratsiuie/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/vidhuky/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/faq/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/kontakty/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://vacleaner.pp.ua/umovy/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>

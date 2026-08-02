@@ -1,0 +1,16 @@
+{
+  "name": "VAcleaner",
+  "short_name": "VAcleaner",
+  "lang": "uk",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#080a0c",
+  "theme_color": "#080a0c",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ]
+}
