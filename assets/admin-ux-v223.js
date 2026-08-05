@@ -65,6 +65,23 @@
       bookingsTab.classList.toggle('has-new-bookings',count>0);
     }
 
+    const headerActions=document.querySelector('.admin-pwa-header-actions');
+    if(headerActions){
+      const bell=[...headerActions.querySelectorAll(':scope > button')][0];
+      if(bell){
+        bell.classList.add('admin-header-notification-button');
+        let bellBadge=bell.querySelector('.admin-header-notification-badge');
+        if(!bellBadge){
+          bellBadge=document.createElement('span');
+          bellBadge.className='admin-header-notification-badge';
+          bellBadge.setAttribute('aria-label','Кількість нових заявок');
+          bell.append(bellBadge);
+        }
+        bellBadge.textContent=String(count);
+        bellBadge.hidden=count===0;
+      }
+    }
+
     const topline=document.querySelector('.admin-pwa-topline');
     if(topline){
       let alert=topline.querySelector('.admin-new-bookings-alert');
