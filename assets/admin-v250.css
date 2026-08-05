@@ -388,3 +388,18 @@ html,body{overflow-x:hidden!important}
  .booking-toolbar{padding-right:4px!important}
  .notification-row{align-items:stretch;flex-direction:column}.notification-row .btn{width:100%}.notification-card{padding:16px}
 }
+
+
+/* v2.8.3 mobile interaction fixes */
+html,body{max-width:100%;overflow-x:hidden}
+button,a,input,select,textarea{touch-action:manipulation}
+@media(max-width:760px){
+  input,select,textarea{font-size:16px!important}
+  .issue-form{height:100%;min-height:0;overflow:hidden}
+  .issue-form>header,.issue-form>footer{flex:0 0 auto}
+  .issue-form .issue-booking-head{flex:0 0 auto}
+  .issue-form .modal-layout{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;display:block!important;padding:12px 10px 110px!important;-webkit-overflow-scrolling:touch}
+  .issue-form .modal-summary{margin-top:12px}
+  .issue-form>footer{position:absolute!important;left:0;right:0;bottom:0;z-index:20;background:#0d1316!important}
+  .detail-top .back{width:100%;min-height:48px;font-size:15px}
+}
