@@ -1,0 +1,68 @@
+/* VAcleaner Manager UX refinements v2.2.4 */
+.admin-pwa{font-size:16px}
+.admin-pwa button,.admin-pwa input,.admin-pwa select,.admin-pwa textarea{font-size:16px}
+.admin-pwa-header small,.admin-booking-card header span,.admin-booking-meta small,.admin-booking-meta span,.admin-detail,.admin-section-heading p,.admin-day-card header span{font-size:13px!important;line-height:1.45!important}
+.admin-booking-card h2{font-size:20px!important;line-height:1.25!important}
+.admin-booking-meta strong,.admin-booking-meta a{font-size:15px!important;line-height:1.4!important}
+.admin-booking-actions button{min-height:42px;padding:10px 14px!important}
+.admin-filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.admin-filters::-webkit-scrollbar{display:none}
+.admin-filters button{white-space:nowrap;display:inline-flex;align-items:center;gap:7px;min-height:40px}
+.admin-filter-count{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:rgba(0,0,0,.08);font-size:12px;font-weight:800}
+.admin-filters button.is-active .admin-filter-count{background:rgba(255,255,255,.2)}
+.admin-search-wrap{position:relative;margin:0 0 14px}
+.admin-search-wrap input{width:100%;min-height:50px;border:1px solid rgba(43,42,40,.18);border-radius:14px;background:#fff;padding:0 48px 0 46px;color:#2b2a28;outline:none;box-shadow:0 8px 28px rgba(43,42,40,.05)}
+.admin-search-wrap input:focus{border-color:#6d7b6d;box-shadow:0 0 0 3px rgba(109,123,109,.12)}
+.admin-search-icon{position:absolute;left:17px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.6;pointer-events:none}
+.admin-search-clear{position:absolute;right:8px;top:7px;width:36px;height:36px;border:0!important;border-radius:10px;background:transparent!important;font-size:22px!important;padding:0!important;display:none}
+.admin-search-wrap.has-value .admin-search-clear{display:block}
+.admin-search-empty{padding:28px 18px;text-align:center;border:1px dashed rgba(43,42,40,.18);border-radius:16px;color:#68645f;background:rgba(255,255,255,.55)}
+.admin-resource-row span{min-width:76px!important;padding:7px 9px!important;text-align:center;font-size:12px!important;font-weight:750;border-radius:9px}
+.admin-resource-row span.is-zero{background:#f5e9e7!important;color:#9f4038!important}
+.admin-resource-row span:not(.is-zero){background:#eaf1ea!important;color:#36513a!important}
+.admin-calendar-legend{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;font-size:13px;color:#66615d}
+.admin-calendar-legend span{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.75)}
+.admin-calendar-legend i{width:9px;height:9px;border-radius:50%;background:#6d7b6d}
+.admin-calendar-legend span:last-child i{background:#b75a50}
+.admin-confirm-note{font-size:12px;color:#7a736c;margin-top:8px}
+.admin-pwa-header-actions details{position:relative}
+.admin-pwa-header-actions summary{list-style:none;cursor:pointer;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:9px 12px;font-weight:700}
+.admin-pwa-header-actions summary::-webkit-details-marker{display:none}
+.admin-pwa-more-panel{position:absolute;right:0;top:calc(100% + 8px);z-index:30;min-width:170px;padding:7px;border-radius:13px;background:#fff;box-shadow:0 16px 40px rgba(0,0,0,.18);border:1px solid rgba(0,0,0,.08)}
+.admin-pwa-more-panel button{display:block;width:100%;color:#2b2a28!important;background:transparent!important;border:0!important;text-align:left;padding:11px 12px!important;border-radius:9px}
+.admin-pwa-more-panel button:hover{background:#f4efe9!important}
+@media(max-width:720px){
+ .admin-pwa-shell{padding-left:14px!important;padding-right:14px!important}
+ .admin-pwa-header{padding:12px 14px!important}
+ .admin-pwa-header-actions>button{font-size:0!important;width:42px;height:42px;padding:0!important}
+ .admin-pwa-header-actions>button:first-child:after{content:'🔔';font-size:18px}
+ .admin-pwa-topline{align-items:flex-end!important;gap:12px}
+ .admin-create-button{min-height:48px;padding:11px 14px!important}
+ .admin-booking-card{padding:16px!important}
+ .admin-booking-meta{gap:12px!important}
+ .admin-booking-meta p{padding:12px!important}
+ .admin-booking-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:8px!important}
+ .admin-booking-actions button{width:100%;margin:0!important}
+ .admin-booking-actions .danger{grid-column:1/-1}
+ .admin-day-card{min-width:260px!important}
+}
+@media(display-mode:standalone){.admin-install-action{display:none!important}}
+
+/* New booking attention layer v2.2.5 */
+.admin-pwa-tabs button{display:inline-flex!important;align-items:center;justify-content:center;gap:8px}
+.admin-new-badge{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#c7473d;color:#fff;font-size:12px;font-weight:850;line-height:1;box-shadow:0 0 0 3px rgba(199,71,61,.12)}
+.admin-new-badge[hidden]{display:none!important}
+.admin-pwa-tabs button.has-new-bookings:not(.is-active){font-weight:800}
+.admin-new-bookings-alert{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:9px 13px!important;border:1px solid rgba(199,71,61,.22)!important;border-radius:12px!important;background:#fff7f5!important;color:#8f2f28!important;box-shadow:0 8px 24px rgba(120,45,38,.08);white-space:nowrap}
+.admin-new-bookings-alert:hover{background:#fff0ed!important}
+.admin-new-bookings-alert[hidden]{display:none!important}
+.admin-new-bookings-dot{width:9px;height:9px;border-radius:50%;background:#c7473d;box-shadow:0 0 0 5px rgba(199,71,61,.12);animation:vacleanerPulse 1.8s ease-in-out infinite}
+.admin-new-bookings-alert strong{font-size:13px;line-height:1.2}
+.admin-booking-card:has(.status-pending){border-color:rgba(199,71,61,.28)!important;box-shadow:0 12px 34px rgba(130,54,47,.09)!important}
+@keyframes vacleanerPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.82);opacity:.65}}
+@media(max-width:720px){
+ .admin-pwa-topline{flex-wrap:wrap}
+ .admin-new-bookings-alert{order:3;width:100%;justify-content:center;margin-top:2px}
+ .admin-new-badge{min-width:20px;height:20px;font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){.admin-new-bookings-dot{animation:none}}
