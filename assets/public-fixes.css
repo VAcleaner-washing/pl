@@ -1,37 +1,18 @@
-
-/* v2.8.9.1 public visual fixes */
+/* Public booking form fixes */
 .booking-contact-grid>label{align-content:start;align-self:start}
 .booking-contact-grid input{height:54px;min-height:54px;max-height:54px}
 .booking-contact-grid .public-loyalty-status{margin-top:12px}
-@media(max-width:760px){
-  .v21-anna-media,.v21-anna-media img,.v21-anna-placeholder{height:360px!important;min-height:360px!important}
-  .v21-anna-placeholder:before{inset:34px!important}.v21-anna-placeholder:after{inset:62px!important}
-  .v21-anna-placeholder strong{font-size:72px!important}
-  .mobile-booking{display:grid!important;grid-template-columns:minmax(0,1.45fr) minmax(110px,.75fr)!important;gap:0!important;padding:8px!important}
-  .mobile-booking a{height:52px!important;font-size:12px!important}
-  .mobile-booking a:last-child{border-left:1px solid rgba(255,255,255,.12)!important}
-  .home-v21{padding-bottom:78px!important}
-}
 
-/* v2.9.2 hero restoration */
-@media(max-width:760px){.home-v21 .v21-hero{display:grid!important;grid-template-columns:1fr!important;min-height:auto!important;position:relative!important;overflow:hidden!important}.home-v21 .v21-hero-copy{order:1!important;position:relative!important;z-index:2!important;padding:38px 20px 28px!important}.home-v21 .v21-hero-media{order:2!important;position:relative!important;height:320px!important;min-height:320px!important;max-height:320px!important;overflow:hidden!important}.home-v21 .v21-hero-media img{width:100%!important;height:100%!important;object-fit:cover!important}.home-v21 .v21-founder,.home-v21 [class*="founder"]{position:relative!important;inset:auto!important;transform:none!important;min-height:auto!important}.home-v21 .mobile-booking{display:grid!important;grid-template-columns:1fr 1fr!important;left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important}.home-v21{padding-bottom:116px!important}}
-
-/* v2.9.3 mobile home rebuild */
-@media(max-width:760px){
-  html,body{overflow-x:hidden!important}
-  .home-v21 .v21-hero{display:flex!important;flex-direction:column!important;min-height:0!important;height:auto!important;overflow:visible!important}
-  .home-v21 .v21-hero-copy{order:1!important;padding:32px 20px 24px!important;min-height:0!important}
-  .home-v21 .v21-hero-media{order:2!important;height:360px!important;min-height:360px!important;max-height:360px!important;margin:0!important}
-  .home-v21 .v21-hero-copy h1{font-size:clamp(48px,14vw,74px)!important;line-height:.92!important;margin:20px 0 24px!important}
-  .home-v21 .v21-lead{font-size:18px!important;line-height:1.55!important}
-  .home-v21 .v21-actions{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
-  .home-v21 .v21-primary,.home-v21 .v21-secondary{width:100%!important;min-height:58px!important;display:flex!important;align-items:center!important;justify-content:center!important}
-  .home-v21 .v21-action-note{margin:14px 0 0!important;position:static!important}
-  .home-v21 .v21-included{margin-top:26px!important;flex-wrap:wrap!important;gap:9px!important}
-  .home-v21 .v21-anna{display:grid!important;grid-template-columns:1fr!important}
-  .home-v21 .v21-anna-media{order:2!important;height:420px!important;min-height:420px!important}
-  .home-v21 .v21-anna-copy{order:1!important;padding:32px 20px!important}
-  .home-v21 .mobile-booking{position:fixed!important;left:10px!important;right:10px!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;z-index:80!important;grid-template-columns:1.25fr .75fr!important;padding:0!important;border:1px solid rgba(255,255,255,.12)!important;background:#0b0e12!important;box-shadow:0 12px 36px rgba(0,0,0,.45)!important}
-  .home-v21 .mobile-booking a{height:58px!important;font-size:13px!important;padding:0 10px!important}
-  .home-v21{padding-bottom:88px!important}
+/* Keep the original responsive homepage layout. Only stabilize the mobile CTA. */
+@media(max-width:620px){
+  html,body{overflow-x:hidden}
+  .home-v21{padding-bottom:86px}
+  .mobile-booking{
+    grid-template-columns:minmax(0,1.2fr) minmax(108px,.8fr)!important;
+    left:10px!important;right:10px!important;
+    bottom:calc(8px + env(safe-area-inset-bottom))!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  .mobile-booking a{min-width:0;height:56px!important;padding:0 12px!important;font-size:12px!important;text-align:center}
 }
