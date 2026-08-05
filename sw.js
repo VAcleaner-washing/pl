@@ -1,4 +1,4 @@
-const CACHE='vacleaner-manager-v2887';
+const CACHE='vacleaner-manager-v2920';
 const CORE=['/admin/bronuvannia/','/assets/admin-v250.css?v=2840','/assets/admin-v250.js?v=2840','/manifest.webmanifest','/icon-192.png','/icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
@@ -19,3 +19,12 @@ self.addEventListener('fetch',event=>{
 });
 
 self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const c of list){if('focus' in c)return c.focus()}if(clients.openWindow)return clients.openWindow(event.notification.data?.url||'/admin/bronuvannia/')}))});
+
+
+self.addEventListener('push',event=>{
+  let data={};
+  try{data=event.data?event.data.json():{}}catch{data={body:event.data?event.data.text():''}}
+  const title=data.title||'VAcleaner';
+  const options={body:data.body||'Нова подія в адмінці',icon:'/icon-192.png',badge:'/icon-192.png',tag:data.tag||'vacleaner-notification',renotify:true,data:data.data||{url:'/admin/bronuvannia/'}};
+  event.waitUntil(self.registration.showNotification(title,options));
+});

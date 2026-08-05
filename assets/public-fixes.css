@@ -1,0 +1,17 @@
+
+/* v2.8.9.1 public visual fixes */
+.booking-contact-grid>label{align-content:start;align-self:start}
+.booking-contact-grid input{height:54px;min-height:54px;max-height:54px}
+.booking-contact-grid .public-loyalty-status{margin-top:12px}
+@media(max-width:760px){
+  .v21-anna-media,.v21-anna-media img,.v21-anna-placeholder{height:360px!important;min-height:360px!important}
+  .v21-anna-placeholder:before{inset:34px!important}.v21-anna-placeholder:after{inset:62px!important}
+  .v21-anna-placeholder strong{font-size:72px!important}
+  .mobile-booking{display:grid!important;grid-template-columns:minmax(0,1.45fr) minmax(110px,.75fr)!important;gap:0!important;padding:8px!important}
+  .mobile-booking a{height:52px!important;font-size:12px!important}
+  .mobile-booking a:last-child{border-left:1px solid rgba(255,255,255,.12)!important}
+  .home-v21{padding-bottom:78px!important}
+}
+
+/* v2.9.2 hero restoration */
+@media(max-width:760px){.home-v21 .v21-hero{display:grid!important;grid-template-columns:1fr!important;min-height:auto!important;position:relative!important;overflow:hidden!important}.home-v21 .v21-hero-copy{order:1!important;position:relative!important;z-index:2!important;padding:38px 20px 28px!important}.home-v21 .v21-hero-media{order:2!important;position:relative!important;height:320px!important;min-height:320px!important;max-height:320px!important;overflow:hidden!important}.home-v21 .v21-hero-media img{width:100%!important;height:100%!important;object-fit:cover!important}.home-v21 .v21-founder,.home-v21 [class*="founder"]{position:relative!important;inset:auto!important;transform:none!important;min-height:auto!important}.home-v21 .mobile-booking{display:grid!important;grid-template-columns:1fr 1fr!important;left:10px!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important}.home-v21{padding-bottom:116px!important}}
