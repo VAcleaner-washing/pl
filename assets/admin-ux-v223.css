@@ -96,3 +96,9 @@
  .admin-day-times,.admin-resource-row{grid-template-columns:minmax(66px,1fr) minmax(78px,.72fr) minmax(78px,.72fr)!important;gap:5px!important}
  .admin-resource-row span{font-size:11px!important;padding-left:3px!important;padding-right:3px!important}
 }
+
+/* v2.2.8 — nearest bookings live in their own tab */
+.admin-today-bookings[hidden]{display:none!important}
+@media(max-width:720px){
+ .admin-pwa-tabs{position:sticky!important;top:0!important;z-index:20!important;background:#0b0e10!important;padding-top:8px!important;padding-bottom:8px!important}
+}

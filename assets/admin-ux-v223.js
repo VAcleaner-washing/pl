@@ -237,3 +237,24 @@
   observer.observe(document.documentElement,{childList:true,subtree:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance);else enhance();
 })();
+
+/* VAcleaner Manager v2.2.8 — bookings tab and safe Telegram copy */
+(()=>{
+  'use strict';
+
+  const renameBookingsTab=()=>{
+    document.querySelectorAll('.admin-pwa-tabs button').forEach(button=>{
+      const own=[...button.childNodes].find(node=>node.nodeType===Node.TEXT_NODE);
+      if(own && own.textContent.trim()==='Заявки') own.textContent='Бронювання ';
+    });
+  };
+
+  const hideCalendarDuplicate=()=>{
+    document.querySelectorAll('.admin-today-bookings').forEach(section=>section.hidden=true);
+  };
+
+  const maintain=()=>{renameBookingsTab();hideCalendarDuplicate();};
+  const observer=new MutationObserver(()=>requestAnimationFrame(maintain));
+  observer.observe(document.documentElement,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',maintain);else maintain();
+})();
