@@ -503,3 +503,9 @@ body.detail-open .detail{overflow-y:auto!important;overflow-x:hidden!important;-
 @media(max-width:760px){
  .clients-head{display:none}.client-row{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:13px 15px;min-height:76px}.client-row .client-name{grid-column:1/-1}.client-row a{font-size:13px}.client-row strong:nth-of-type(1)::after{content:' ор.'}.client-row strong:nth-of-type(2){display:none}.client-row>span:last-child{font-size:12px;text-align:right}
 }
+
+
+/* v2.8.8.6 — upcoming extras badge + completed-only analytics */
+.upcoming-extra{display:inline-flex;align-items:center;max-width:100%;margin-top:9px;padding:6px 9px;border:1px solid rgba(214,164,95,.28);border-radius:999px;background:rgba(214,164,95,.09);color:#e8bd79;font-size:12px;font-weight:650;line-height:1.25}
+.upcoming-money em{display:block;margin-top:6px;color:#e8bd79;font-size:11px;font-style:normal;font-weight:650;white-space:nowrap}
+@media(max-width:760px){.upcoming-extra{white-space:normal;border-radius:10px}.upcoming-money em{display:none}}
