@@ -239,7 +239,7 @@
 })();
 
 
-/* VAcleaner Manager v2.2.9 — three clear workspaces */
+/* VAcleaner Manager v2.2.10 — three clear workspaces */
 (()=>{
   'use strict';
   const maintain=()=>{
