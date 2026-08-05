@@ -333,3 +333,41 @@ html,body{overflow-x:hidden!important}
   .detail-shell{padding:12px 10px calc(110px + env(safe-area-inset-bottom))!important}.detail-top{top:6px!important;grid-template-columns:1fr auto!important;padding:9px!important}.detail-top-meta{display:none!important}.detail-quick{display:none!important}.detail-hero{min-height:0!important;padding:18px 16px!important}.detail-hero h1{font-size:26px!important}.detail-title-row{max-width:100%!important}.hero-images{display:none!important}.flow-compact{grid-template-columns:1fr!important;padding:15px!important}.steps{overflow-x:auto!important;padding-bottom:4px!important}.info-grid{grid-template-columns:1fr!important}.finance-panel{position:relative!important}.detail-actions{position:sticky!important;bottom:calc(72px + env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:1fr 1fr!important}.detail-actions .btn{width:100%!important}.detail-actions .primary,.detail-actions .green,.detail-actions .danger{grid-column:1/-1!important}
   .modal-card{width:100vw!important;height:100dvh!important}.modal-form>header h2{font-size:25px!important}.rental-moment{grid-template-columns:1fr!important}.window-choice{grid-template-columns:1fr 1fr!important}.time-chip-list{display:grid!important;grid-template-columns:repeat(3,1fr)!important}.time-chip{width:100%!important;min-width:0!important}.fields{grid-template-columns:1fr!important}.field.wide,.switch.wide{grid-column:auto!important}
 }
+
+/* v2.7.2 — booking defaults + issue confirmation visual rebuild */
+.issue-form .issue-booking-head{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin:18px 28px 0;overflow:hidden;border:1px solid var(--line);border-radius:15px;background:var(--line)}
+.issue-form .issue-booking-head>div{min-width:0;padding:15px 18px;background:#10171b}
+.issue-form .issue-booking-head small{display:block;margin-bottom:6px;color:var(--muted);font-size:11px;letter-spacing:.09em;text-transform:uppercase}
+.issue-form .issue-booking-head strong{display:block;overflow:hidden;color:#f3f1eb;font-size:20px;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
+.issue-form .modal-layout{align-items:stretch}
+.issue-form .modal-section,.issue-form .modal-summary{min-height:330px}
+.issue-confirm{display:flex;flex-direction:column}
+.issue-amount{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:16px;padding:18px;border:1px solid var(--line);border-radius:14px;background:#0d1418}
+.issue-amount span{color:var(--muted);font-size:14px}
+.issue-amount strong{color:var(--gold);font-size:30px;white-space:nowrap}
+.issue-check{margin:0!important;grid-column:auto!important}
+.issue-form .note{margin-top:auto}
+.issue-form footer{position:sticky;bottom:0;z-index:4;border-top:1px solid var(--line);background:#0d1418}
+.booking-form input[name="depositAmount"]{font-variant-numeric:tabular-nums}
+@media(max-width:760px){
+ .issue-form .issue-booking-head{grid-template-columns:1fr;margin:12px 16px 0}.issue-form .issue-booking-head strong{font-size:17px;white-space:normal}.issue-form .modal-section,.issue-form .modal-summary{min-height:0}.issue-amount strong{font-size:24px}.issue-form footer{padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+}
+
+/* v2.8.0 — audit-driven manager workflow */
+.compact-toggle{margin-left:auto;min-height:38px;padding:0 13px;border:1px solid var(--line);border-radius:10px;background:#10171b;color:#c8ced1;font:inherit;font-size:12px;cursor:pointer}
+.booking-extra{display:flex;align-items:center;gap:12px;padding:10px 18px;border-top:1px solid var(--line);background:rgba(214,164,95,.045);font-size:13px}.booking-extra span{color:var(--muted)}.booking-extra strong{color:#e7d1ae;font-weight:580}
+.booking-list.compact{gap:7px!important}.booking-list.compact .booking-row-head{padding:12px 16px 10px!important}.booking-list.compact .booking-identity h2{font-size:18px;margin:3px 0}.booking-list.compact .booking-row-body>div{padding:10px 14px!important}.booking-list.compact .booking-note,.booking-list.compact .booking-extra{padding:8px 14px}.booking-list.compact .booking-actions{padding:8px 14px!important}.booking-list.compact .booking-actions .btn{min-height:36px!important}
+.slot.full{background:#11181c!important;color:#8e989d!important;border-color:#202a2f!important}.slot.low{background:rgba(214,164,95,.13)!important;color:#e5b971!important;border-color:rgba(214,164,95,.38)!important}.slot.zero{background:rgba(198,76,76,.12)!important;color:#e98d8d!important;border-color:rgba(198,76,76,.35)!important}.slot:not(:disabled){cursor:pointer}.slot:not(:disabled):hover{transform:translateY(-1px);border-color:var(--gold)}
+.upcoming-time i{display:grid;place-items:center;width:28px;height:28px;margin-bottom:4px;border-radius:50%;font-style:normal;font-size:18px}.upcoming-row.issue .upcoming-time i{background:rgba(214,164,95,.13);color:#e5b971}.upcoming-row.return .upcoming-time i{background:rgba(43,173,116,.13);color:#69d8a2}
+.extras-check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.extra-check{display:flex;align-items:center;gap:12px;min-height:60px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#0b1115;cursor:pointer}.extra-check:hover{border-color:rgba(214,164,95,.4)}.extra-check input{width:19px;height:19px;accent-color:#d7a45e}.extra-check span{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%}.extra-check b{font-size:13px;font-weight:580}.extra-check small{color:var(--gold-2);white-space:nowrap}.extra-check:has(input:checked){background:rgba(214,164,95,.075);border-color:rgba(214,164,95,.5)}
+.extras-panel>div{display:flex;justify-content:space-between;gap:18px;padding:10px 0;border-top:1px solid var(--line)}.extras-panel>div:first-of-type{border-top:0}.extras-panel span{color:var(--muted)}.extras-panel strong{font-weight:600;color:#e8d2ae}.analytics-line span small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+.issue-form .modal-layout{grid-template-columns:minmax(0,1fr) minmax(360px,.8fr)!important}.issue-form .issue-booking-head{margin:18px 28px 0!important}.issue-form .modal-section,.issue-form .modal-summary{min-height:0!important}.issue-form .issue-confirm{gap:14px}.issue-form .note{margin-top:0!important}.issue-form footer{position:relative!important}
+.secondary-danger{opacity:.72}.booking-finance strong:has(+ span){font-size:18px}.booking-finance span:has(+ em){color:#9ca5a9}.booking-finance em.neutral{opacity:.5}.money-row strong:where(:not(.balance strong)){font-weight:600}
+@media(max-width:900px){.extras-check-grid{grid-template-columns:1fr}.issue-form .modal-layout{grid-template-columns:1fr!important}.issue-form .issue-booking-head{grid-template-columns:1fr 1fr!important}}
+@media(max-width:760px){
+ .compact-toggle{order:-1;position:sticky;left:8px;flex:0 0 auto}.booking-list.compact .booking-row-body{display:grid!important;grid-template-columns:1fr 1fr!important}.booking-list.compact .booking-row-body>.booking-time{grid-column:1/-1}.booking-list.compact .booking-row-body>div{padding:9px 11px!important}.booking-list.compact .booking-person,.booking-list.compact .booking-delivery{font-size:12px}.booking-extra{align-items:flex-start;flex-direction:column;gap:4px;padding:10px 14px}.booking-extra strong{line-height:1.45}
+ .upcoming-row{grid-template-columns:72px minmax(0,1fr)!important}.upcoming-money{display:none!important}.upcoming-actions{grid-column:1/-1;display:grid!important;grid-template-columns:1fr 1fr!important}.upcoming-actions .btn:last-child{grid-column:1/-1}.upcoming-time{padding-right:8px}
+ .extras-check-grid{grid-template-columns:1fr}.extra-check{min-height:56px;padding:11px 12px}.extra-check span{align-items:flex-start}.extra-check b{line-height:1.35}
+ .issue-form .issue-booking-head{grid-template-columns:1fr!important;margin:10px 12px 0!important}.issue-form .modal-layout{padding:12px!important}.issue-form .modal-section,.issue-form .modal-summary{padding:14px!important}.issue-amount{padding:14px}.issue-amount strong{font-size:23px}.issue-form footer{position:sticky!important;bottom:0!important}
+ .day-row{grid-template-columns:78px 1fr 1fr!important}.day-row .slot{font-size:11px;padding:0 5px}.calendar-grid{gap:10px}
+}
