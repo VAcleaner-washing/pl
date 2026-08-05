@@ -1,5 +1,5 @@
-const CACHE='vacleaner-manager-v2810';
-const CORE=['/admin/bronuvannia/','/assets/admin-v250.css?v=2810','/assets/admin-v250.js?v=2810','/manifest.webmanifest','/icon-192.png','/icon-512.png'];
+const CACHE='vacleaner-manager-v2820';
+const CORE=['/admin/bronuvannia/','/assets/admin-v250.css?v=2820','/assets/admin-v250.js?v=2820','/manifest.webmanifest','/icon-192.png','/icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
@@ -17,3 +17,5 @@ self.addEventListener('fetch',event=>{
   }
   event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));
 });
+
+self.addEventListener('notificationclick',event=>{event.notification.close();event.waitUntil(clients.matchAll({type:'window',includeUncontrolled:true}).then(list=>{for(const c of list){if('focus' in c)return c.focus()}if(clients.openWindow)return clients.openWindow(event.notification.data?.url||'/admin/bronuvannia/')}))});
