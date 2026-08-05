@@ -174,3 +174,39 @@
 @media(max-width:720px){
  .admin-booking-meta p:first-child strong{font-size:17px!important}
 }
+
+/* v2.2.13 — finance, chemistry and analytics */
+.admin-pwa-tabs-four{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+.admin-finance-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:14px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.025)}
+.admin-finance-summary>div{min-width:0;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.035)}
+.admin-finance-summary span{display:block;margin-bottom:4px;color:rgba(255,255,255,.55);font-size:10px;font-weight:750;text-transform:uppercase;letter-spacing:.08em}
+.admin-finance-summary strong{display:block;font-size:14px;line-height:1.25}
+.admin-finance-summary .is-refund{background:rgba(62,123,89,.18)}.admin-finance-summary .is-due{background:rgba(199,71,61,.14)}
+.admin-booking-actions .action-finance{min-height:50px!important;padding:0 18px!important;border-color:rgba(210,164,100,.42)!important;background:rgba(210,164,100,.12)!important;color:#e4bd82!important;font-size:14px!important;font-weight:800!important}
+.admin-finance-intro{display:flex;justify-content:space-between;gap:14px;margin:0 0 18px;padding:14px;border-radius:12px;background:rgba(255,255,255,.04)}.admin-finance-intro span{color:rgba(255,255,255,.62)}
+.admin-live-calculation{display:grid;gap:0;margin-top:18px;border:1px solid rgba(255,255,255,.1);border-radius:14px;overflow:hidden}
+.admin-live-calculation>div{display:flex;justify-content:space-between;gap:18px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08)}.admin-live-calculation>div:last-child{border-bottom:0}.admin-live-calculation span{color:rgba(255,255,255,.62)}
+.admin-live-calculation .admin-balance{padding:16px 14px;background:rgba(255,255,255,.045);font-size:17px}.admin-live-calculation .is-refund{background:rgba(62,123,89,.2)}.admin-live-calculation .is-due{background:rgba(199,71,61,.16)}
+.admin-analytics-section{padding:22px 0 50px}.admin-analytics-period{min-height:44px;padding:0 14px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#12171a;color:#fff;font-weight:700}
+.admin-kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin:20px 0}.admin-kpi-grid article{padding:18px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(255,255,255,.025)}.admin-kpi-grid span{display:block;margin-bottom:9px;color:rgba(255,255,255,.56);font-size:12px}.admin-kpi-grid strong{font-size:25px;letter-spacing:-.03em}
+.admin-analytics-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}.admin-analytics-grid>article{padding:20px;border:1px solid rgba(255,255,255,.09);border-radius:16px;background:rgba(255,255,255,.025)}.admin-analytics-grid h3{margin:0 0 18px;font-size:19px}
+.admin-product-stat{margin:0 0 14px}.admin-product-stat>div,.admin-status-stat{display:flex;justify-content:space-between;gap:12px;margin-bottom:7px}.admin-product-stat span,.admin-status-stat span{color:rgba(255,255,255,.72)}.admin-product-stat i{display:block;height:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}.admin-product-stat em{display:block;height:100%;border-radius:inherit;background:#d2a464}.admin-status-stat{padding:11px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+@media(max-width:900px){.admin-kpi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.admin-finance-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.admin-pwa-tabs-four{grid-template-columns:repeat(4,minmax(0,1fr))!important}.admin-pwa-tabs-four button{font-size:11px!important;padding:10px 2px!important}.admin-finance-summary{grid-template-columns:1fr 1fr;padding:9px}.admin-finance-summary>div:last-child{grid-column:1/-1}.admin-booking-actions .action-finance{grid-column:1/-1!important;width:100%!important;font-size:15px!important}.admin-finance-intro{flex-direction:column}.admin-kpi-grid{grid-template-columns:1fr 1fr}.admin-kpi-grid article{padding:15px}.admin-kpi-grid strong{font-size:21px}.admin-analytics-grid{grid-template-columns:1fr}.admin-analytics-section .admin-section-heading{align-items:flex-start;gap:12px}.admin-analytics-period{width:125px}.admin-live-calculation>div{font-size:14px}}
+
+
+/* v2.2.14 — lock mobile modal to viewport and prevent horizontal drift */
+html,body{max-width:100%;overflow-x:hidden!important}
+.admin-pwa,.admin-pwa-shell,.admin-modal,.admin-modal-backdrop{max-width:100vw!important}
+.admin-modal{position:fixed!important;inset:0!important;width:100vw!important;overflow-x:hidden!important;overscroll-behavior:contain!important}
+.admin-modal .admin-booking-form{box-sizing:border-box!important;width:min(720px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;min-width:0!important;margin-inline:auto!important;overflow-x:hidden!important}
+.admin-modal .admin-booking-form *, .admin-modal .admin-form-grid>*{box-sizing:border-box!important;min-width:0!important;max-width:100%!important}
+.admin-modal input,.admin-modal select,.admin-modal textarea{width:100%!important;max-width:100%!important;min-width:0!important}
+@media(max-width:720px){
+ .admin-modal{align-items:flex-end!important;padding:0!important}
+ .admin-modal .admin-booking-form{width:100vw!important;max-width:100vw!important;margin:0!important;border-radius:22px 22px 0 0!important;max-height:calc(100dvh - env(safe-area-inset-top) - 8px)!important;overflow-y:auto!important;overflow-x:hidden!important}
+ .admin-modal .admin-form-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;overflow:hidden!important}
+ .admin-modal .admin-booking-form>header,.admin-modal .admin-booking-form>footer{width:100%!important;max-width:100%!important}
+ .admin-modal .admin-booking-form footer{position:sticky!important;bottom:0!important;z-index:3!important;padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;background:#11161a!important}
+ .admin-modal .admin-booking-form footer button{min-width:0!important}
+}
