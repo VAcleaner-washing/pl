@@ -484,3 +484,22 @@ button,a,input,select,textarea{touch-action:manipulation}
   .day-row>b{font-size:14px!important}
   .day-row>.slot{width:100%!important;min-height:34px!important;padding:5px 6px!important;font-size:11px!important;white-space:normal!important}
 }
+
+
+/* v2.8.8.2 — single scroll in booking detail */
+html.detail-open,body.detail-open{height:100dvh!important;overflow:hidden!important;overscroll-behavior:none}
+body.detail-open .detail{overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
+
+
+/* v2.8.8.4 — compact clients list */
+.clients-table{overflow:hidden;padding:0}
+.clients-head,.client-row{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(160px,1fr) 90px 130px 90px;gap:16px;align-items:center}
+.clients-head{padding:13px 20px;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.client-row{width:100%;min-height:68px;padding:12px 20px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);text-align:left;cursor:pointer}
+.client-row:last-child{border-bottom:0}.client-row:hover{background:rgba(255,255,255,.025)}
+.client-row a{color:var(--gold-2);text-decoration:none}.client-row strong{font-size:14px;font-weight:650}.client-row>span:last-child{color:var(--muted)}
+.client-name{display:grid;gap:4px}.client-name b{font-size:15px}.client-name small{color:var(--muted);font-size:12px;font-weight:400}
+.clients-empty{padding:28px}
+@media(max-width:760px){
+ .clients-head{display:none}.client-row{grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;padding:13px 15px;min-height:76px}.client-row .client-name{grid-column:1/-1}.client-row a{font-size:13px}.client-row strong:nth-of-type(1)::after{content:' ор.'}.client-row strong:nth-of-type(2){display:none}.client-row>span:last-child{font-size:12px;text-align:right}
+}
