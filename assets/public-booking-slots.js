@@ -9,8 +9,10 @@ function apply(){
     const morning=options.find(o=>/Ранок/.test(o.textContent||''));
     const evening=options.find(o=>/Вечір/.test(o.textContent||''));
     if(!morning||!evening)return;
-    morning.textContent=label('morning');
-    evening.textContent=label('evening');
+    const morningLabel=label('morning');
+    const eveningLabel=label('evening');
+    if(morning.textContent!==morningLabel) morning.textContent=morningLabel;
+    if(evening.textContent!==eveningLabel) evening.textContent=eveningLabel;
     const isMorning=sel.value==='morning';
     const field=sel.closest('label')?.nextElementSibling?.querySelector?.('input[type="time"]');
     if(field){field.min=isMorning?slots.morningStart:slots.eveningStart;field.max=isMorning?slots.morningEnd:slots.eveningEnd}
@@ -66,5 +68,17 @@ function bindLoyalty(){
   });
 }
 
-fetch(API,{cache:'no-store'}).then(r=>r.json()).then(d=>{if(d?.slots)slots={...slots,...d.slots};apply();bindLoyalty();new MutationObserver(()=>{apply();bindLoyalty()}).observe(document.documentElement,{subtree:true,childList:true})}).catch(()=>apply());
+let refreshAttempts=0;
+function refreshBindings(){
+  apply();
+  bindLoyalty();
+  if(refreshAttempts<12){
+    refreshAttempts+=1;
+    setTimeout(refreshBindings,500);
+  }
+}
+fetch(API,{cache:'no-store'})
+  .then(r=>r.ok?r.json():Promise.reject(new Error('settings_failed')))
+  .then(d=>{if(d?.slots)slots={...slots,...d.slots};refreshBindings()})
+  .catch(()=>refreshBindings());
 })();
