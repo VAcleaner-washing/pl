@@ -1,5 +1,19 @@
-const CACHE='vacleaner-manager-v2520';
-const CORE=['/admin/bronuvannia/','/assets/admin-v250.css?v=2500','/assets/admin-v250.js?v=2500','/manifest.webmanifest','/icon-192.png','/icon-512.png'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);if(u.origin!==location.origin)return;if(u.pathname.startsWith('/admin/bronuvannia')||u.pathname.startsWith('/assets/admin-v240')){e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request)));return}e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))});
+const CACHE='vacleaner-manager-v2530';
+const CORE=['/admin/bronuvannia/','/assets/admin-v250.css?v=2530','/assets/admin-v250.js?v=2530','/manifest.webmanifest','/icon-192.png','/icon-512.png'];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET') return;
+  const url=new URL(event.request.url);
+  if(url.origin!==self.location.origin) return;
+  const isAdmin=url.pathname.startsWith('/admin/bronuvannia')||url.pathname.startsWith('/assets/admin-v250');
+  if(isAdmin){
+    event.respondWith(fetch(event.request,{cache:'no-store'}).then(response=>{
+      const copy=response.clone();
+      caches.open(CACHE).then(cache=>cache.put(event.request,copy));
+      return response;
+    }).catch(()=>caches.match(event.request)));
+    return;
+  }
+  event.respondWith(caches.match(event.request).then(cached=>cached||fetch(event.request)));
+});

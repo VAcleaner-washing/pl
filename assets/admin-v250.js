@@ -1,4 +1,6 @@
 (()=>{'use strict';
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js?v=2530').then(r=>r.update()).catch(()=>{});}
+
 const SUPABASE='https://yweluzclearwrazdkahu.supabase.co',API=SUPABASE+'/functions/v1/vacleaner-admin-bookings-v2',KEY='sb_publishable_-UdAKDf5jzIP6N9rBp927g_VhyJKeog';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const money=v=>new Intl.NumberFormat('uk-UA').format(Number(v)||0)+' грн';
