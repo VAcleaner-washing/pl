@@ -20,7 +20,7 @@ function apply(){
 }
 
 
-const LOYALTY_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v4';
+const LOYALTY_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5';
 let loyaltyTimer=0;
 function normalizePhone(value){
   const digits=String(value||'').replace(/\D/g,'');
