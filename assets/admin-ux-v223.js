@@ -233,9 +233,8 @@
     }
   },true);
 
-  const observer=new MutationObserver(()=>requestAnimationFrame(enhance));
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance);else enhance();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance,{once:true});else enhance();
+  setTimeout(enhance,800);
 })();
 
 
@@ -247,9 +246,8 @@
     const tabs=document.querySelector('.admin-pwa-tabs');
     if(tabs) tabs.classList.add('admin-pwa-tabs-three');
   };
-  const observer=new MutationObserver(()=>requestAnimationFrame(maintain));
-  observer.observe(document.documentElement,{childList:true,subtree:true});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',maintain);else maintain();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',maintain,{once:true});else maintain();
+  setTimeout(maintain,900);
 })();
 
 /* VAcleaner Manager v2.2.13 — finance, chemistry and owner analytics */
@@ -349,7 +347,7 @@
       <div class="admin-balance ${c.refund?'is-refund':c.due?'is-due':''}"><span>${c.refund?'Повернути клієнту':c.due?'Клієнт має доплатити':'Розрахунок закрито'}</span><strong>${money(c.refund||c.due)}</strong></div>`;};
     form.addEventListener('input',update);update();
     modal.querySelectorAll('[data-close],.admin-modal-backdrop').forEach(x=>x.addEventListener('click',()=>modal.remove()));
-    form.addEventListener('submit',async e=>{e.preventDefault();const save=form.querySelector('[type="submit"]');save.disabled=true;save.textContent='Зберігаємо…';try{await invoke({action:'save_finance',bookingId:b.id,issuePayment:Number(form.issue.value||0),usedPackets:isPuzzi(b)?Number(form.used.value||0):0,storyMention:isPuzzi(b)&&form.story.checked});await loadBookings(true);modal.remove();location.reload();}catch(err){save.disabled=false;save.textContent='Зберегти розрахунок';alert(err.message||'Не вдалося зберегти');}});
+    form.addEventListener('submit',async e=>{e.preventDefault();const save=form.querySelector('[type="submit"]');save.disabled=true;save.textContent='Зберігаємо…';try{await invoke({action:'save_finance',bookingId:b.id,issuePayment:Number(form.issue.value||0),usedPackets:isPuzzi(b)?Number(form.used.value||0):0,storyMention:isPuzzi(b)&&form.story.checked});await loadBookings(true);modal.remove();run();}catch(err){save.disabled=false;save.textContent='Зберегти розрахунок';alert(err.message||'Не вдалося зберегти');}});
   }
   function analyticsData(items,days=30){
     const since=days?Date.now()-days*86400000:0;
@@ -384,8 +382,8 @@
   }
   document.addEventListener('click',async e=>{const btn=e.target.closest('.action-finance');if(!btn)return;e.preventDefault();e.stopPropagation();try{const items=await loadBookings();const b=items.find(x=>x.booking_code===btn.dataset.bookingCode);if(b)openFinance(b);}catch(err){alert(err.message||'Не вдалося відкрити розрахунок');}},true);
   let queued=false;const run=()=>{if(queued)return;queued=true;requestAnimationFrame(async()=>{queued=false;enhanceTabs();await enhanceCards();});};
-  new MutationObserver(run).observe(document.documentElement,{childList:true,subtree:true});
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
+  setTimeout(run,1000);
 })();
 
 
