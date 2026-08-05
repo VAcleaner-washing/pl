@@ -37,3 +37,5 @@
  .admin-booking-actions .action-primary{grid-column:1/-1;font-size:15px}
  .admin-booking-actions button.danger{grid-column:1/-1}
 }
+
+.public-loyalty-status{display:grid;gap:4px;margin-top:10px;padding:12px 14px;border:1px solid rgba(112,120,124,.22);border-radius:12px;background:rgba(20,25,27,.04);font-size:13px;line-height:1.4}.public-loyalty-status strong{font-size:13px}.public-loyalty-status span{color:#6f6a63}.public-loyalty-status.active{border-color:rgba(171,126,65,.35);background:rgba(171,126,65,.08);color:#8c642f}.public-loyalty-status.checking,.public-loyalty-status.neutral{color:#77716a}@media(max-width:760px){.public-loyalty-status{padding:11px 12px;font-size:12px}}
