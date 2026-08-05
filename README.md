@@ -1,45 +1,108 @@
-# VAcleaner 2.0.8
+# vinext-starter
 
-Готовий статичний сайт для GitHub Pages.
+A clean full-stack starter running on
+[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
+Drizzle support.
 
-Оновлення 2.0.8: синхронізовано актуальні тарифи HOME RESET, прибрано їх
-дублювання, додано вибір набору насадок для SC 2, уніфіковано кнопки
-бронювання, готовий текст Telegram-заявки, уточнення про передплату, GTM та
-мобільні виправлення. Повний список — у `CHANGELOG.md`.
+## Prerequisites
 
-Оновлення 2.0.6: фірмовий фавікон VA для браузера й телефона, Jimmy JV35 у
-контенті та структурованих даних, монохромні SVG-стрілки замість синіх emoji,
-статичний hero без старих написів у відео, чесніша подача процесу без вигаданих
-цитат, пріоритет Telegram у мобільній панелі та події контактних переходів у
-`dataLayer` для підключення аналітики.
+- Node.js `>=22.13.0`
+- Linux with `flock`, `curl`, and GNU `timeout`
 
-Оновлення 2.0.5: посилено продажний сценарій головної без агресивних обіцянок —
-новий гачок на першому екрані, прямий шлях у Telegram, допомога з вибором,
-коротша структура без повторного сервісного блока та сильніша роль Анни.
+## Sites Lifecycle
 
-Оновлення 2.0.3: статична головна знову використовує повну дизайн-систему
-`home-v21`, тому її світлі секції, кольори, контраст і відступи збігаються з
-живою версією сайту.
+The Sites lifecycle CLI runs the locked dependency install before returning this checkout. Edit the source under `app/`, then checkpoint when a coherent milestone is ready to inspect or share. The remote Sites builder runs `npm run build` against the pushed commit. Do not repeat install or build as a normal pre-checkpoint step.
 
-Оновлення 2.0.2: усі внутрішні сторінки, стилі, шрифти, фото, відео та скрипти
-працюють як після публікації на GitHub Pages, так і при локальному відкритті
-`index.html` безпосередньо з папки на ПК.
+This starter does not use `wrangler.jsonc`.
 
-Оновлення 2.0.4: у блоці про сервіс виправлено ім’я та роль засновниці — Анна.
+`install:ci` is intentionally a single, non-retrying `npm ci`. It refuses a concurrent install for the same project, consumes a matching image-seeded npm cache with `--prefer-offline` while retaining registry fallback for a missing cache object, otherwise downloads and verifies the complete vinext tarball recorded in `package-lock.json`, limits npm to one socket, and terminates a stalled install. `build` applies a short timeout and then validates the Sites artifact. These helpers target Linux and use GNU `timeout`; they are not native macOS scripts.
 
-Зміни 2.0.1 також збережені: прямий CTA у Telegram, блок про Анну та гігієну
-техніки, уніфіковане оформлення цін і оптимізовані відео.
+Scripts that need writable project-scoped home, npm, XDG, and temporary paths use `scripts/sites-env.sh`. The `dev` and `start` scripts honor the caller's runtime environment and keep Wrangler logs inside the checkout. The generated `.sites-runtime/` directory is disposable and ignored by Git.
 
-## Публікація
+## Included Shape
 
-1. Завантажте **весь вміст цієї папки** у корінь репозиторію GitHub.
-2. У Settings → Pages виберіть Deploy from a branch, гілку main та папку /(root).
-3. Файл CNAME вже містить домен vacleaner.pp.ua.
+- edit site code under `app/`
+- `app/chatgpt-auth.ts` provides optional dispatch-owned ChatGPT sign-in helpers
+- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
+- `vite.config.ts` simulates declared bindings for local development
+- `db/index.ts` reads the D1 binding from the Cloudflare Worker environment
+- `db/schema.ts` starts intentionally empty
+- `examples/d1/` contains an optional D1 example surface
+- `drizzle.config.ts` supports local migration generation when needed
 
-Сайт не потребує npm, збірки або серверної бази даних.
+## Workspace Auth Headers
 
-## Перевірка на ПК
+OpenAI workspace sites can read the current user's email from
+`oai-authenticated-user-email`.
 
-Розпакуйте ZIP повністю, не виймаючи `index.html` з папки. Після цього відкрийте
-`index.html` подвійним кліком — дизайн, медіа й переходи між сторінками працюють
-локально без запуску сервера.
+SIWC-authenticated workspace sites may also receive
+`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
+`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
+`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
+
+Treat the full name as optional and fall back to email when it is absent:
+
+```tsx
+import { headers } from "next/headers";
+
+export default async function Home() {
+  const requestHeaders = await headers();
+  const email = requestHeaders.get("oai-authenticated-user-email");
+  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
+  const fullName =
+    encodedFullName &&
+    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
+      "percent-encoded-utf-8"
+      ? decodeURIComponent(encodedFullName)
+      : null;
+
+  const displayName = fullName ?? email;
+  // ...
+}
+```
+
+## Optional Dispatch-Owned ChatGPT Sign-In
+
+Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
+optional or required ChatGPT sign-in:
+
+- Use `getChatGPTUser()` for optional signed-in UI.
+- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
+  anonymous visitors through Sign in with ChatGPT.
+- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
+  browser links or actions.
+- Pass a same-origin relative `returnTo` path for the destination after sign-in
+  or sign-out. The helper validates and safely encodes it.
+- Mark protected pages with `export const dynamic = "force-dynamic"` because
+  they depend on per-request identity headers.
+
+Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
+OAuth cookies, and identity header injection. Do not implement app routes for
+those reserved paths. Routes that do not import and call the helper remain
+anonymous-compatible.
+
+SIWC establishes identity only; it does not prove workspace membership. Use the
+Sites hosting platform's access policy controls for workspace-wide restrictions,
+or enforce explicit server-side membership or allowlist checks.
+
+Use SIWC for account pages, user-specific dashboards, saved records, and write
+actions tied to the current ChatGPT user. Leave public content anonymous.
+
+## Diagnostic Commands
+
+- `npm run install:ci`: perform the one bounded lockfile install
+- `npm run dev`: start the Vite/Vinext development server
+- `npm run build`: build and validate the deployable Sites artifact
+- `npm run start`: start the built Vinext application
+- `npm test`: build, validate, and verify the rendered development-preview metadata
+- `npm run validate:artifact`: recheck an existing artifact's manifest and ESM `default.fetch` export
+- `npm run db:generate`: generate Drizzle migrations after schema changes
+
+Use build and validation commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
+
+The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
+
+## Learn More
+
+- [vinext Documentation](https://github.com/cloudflare/vinext)
+- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
