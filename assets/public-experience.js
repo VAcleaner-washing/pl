@@ -1,8 +1,10 @@
 (()=>{
   'use strict';
 
-  const VERSION='2.9.8.0';
+  const VERSION='2.9.10.0';
   const INSTAGRAM='https://www.instagram.com/vacleaner_washing.pl/';
+  const REVIEW_HIGHLIGHT_1='https://www.instagram.com/stories/highlights/18130438687549534/';
+  const REVIEW_HIGHLIGHT_2='https://www.instagram.com/stories/highlights/18303073276178357/';
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
   const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
   const dateState=new WeakMap();
@@ -189,7 +191,7 @@
   }
 
   function proofMarkup(){
-    return `<section class="vx-proof" data-vx-proof="${VERSION}" aria-labelledby="vx-proof-title"><div class="vx-proof__inner"><div><p class="vx-proof__eyebrow">Оригінальні відгуки · Instagram Highlights</p><h2 id="vx-proof-title">Не кілька цитат. <em>Майже 100 реальних відгуків.</em></h2><p class="vx-proof__lead">У профілі VAcleaner збережено дві повні добірки повідомлень клієнтів. Ми не переписуємо їх «красивими словами» — відкривайте оригінальні сторіс і дивіться досвід людей із Полтави.</p><div class="vx-proof__actions"><a class="vx-proof__cta" href="${INSTAGRAM}" target="_blank" rel="noreferrer">Дивитися відгуки в Instagram ↗</a><a class="vx-proof__secondary" href="/bronuvannia">Перевірити вільну дату</a></div></div><div class="vx-proof__panel"><div class="vx-proof__count"><span class="vx-proof__number">≈100</span><span class="vx-proof__count-copy">живих повідомлень про техніку, сервіс, доставку та результат прибирання</span></div><a class="vx-highlight" href="${INSTAGRAM}" target="_blank" rel="noreferrer"><span class="vx-highlight__ring"><span>01</span></span><span><strong>Відгуки · частина I</strong><small>Перший Highlight у профілі VAcleaner</small></span></a><a class="vx-highlight" href="${INSTAGRAM}" target="_blank" rel="noreferrer"><span class="vx-highlight__ring"><span>02</span></span><span><strong>Відгуки · частина II</strong><small>Продовження добірки реальних сторіс</small></span></a><p class="vx-proof__note">Instagram відкриється у новій вкладці. Прямі посилання на Highlights залежать від Instagram, тому кнопки ведуть у профіль, де обидві добірки закріплені зверху.</p></div></div></section>`;
+    return `<section class="vx-proof" data-vx-proof="${VERSION}" aria-labelledby="vx-proof-title"><div class="vx-proof__inner"><div><p class="vx-proof__eyebrow">Оригінальні відгуки · Instagram Highlights</p><h2 id="vx-proof-title">Не кілька цитат. <em>Близько сотні реальних відгуків.</em></h2><p class="vx-proof__lead">У профілі VAcleaner збережено дві великі добірки повідомлень клієнтів. Ми не переписуємо їх «красивими словами» — відкривайте оригінальні сторіс і дивіться досвід людей із Полтави.</p><div class="vx-proof__actions"><a class="vx-proof__cta" href="${REVIEW_HIGHLIGHT_1}" target="_blank" rel="noreferrer">Відкрити першу добірку ↗</a><a class="vx-proof__secondary" href="/bronuvannia">Перевірити вільну дату</a></div></div><div class="vx-proof__panel"><div class="vx-proof__count"><span class="vx-proof__number">02</span><span class="vx-proof__count-copy">повні добірки реальних відгуків у Instagram Highlights</span></div><a class="vx-highlight" href="${REVIEW_HIGHLIGHT_1}" target="_blank" rel="noreferrer" aria-label="Відкрити першу добірку відгуків в Instagram"><span class="vx-highlight__ring"><span>01</span></span><span><strong>Відгуки · частина I</strong><small>Відкрити перший Highlight з відгуками</small></span></a><a class="vx-highlight" href="${REVIEW_HIGHLIGHT_2}" target="_blank" rel="noreferrer" aria-label="Відкрити другу добірку відгуків в Instagram"><span class="vx-highlight__ring"><span>02</span></span><span><strong>Відгуки · частина II</strong><small>Відкрити другий Highlight з відгуками</small></span></a><p class="vx-proof__note">Кожна картка відкриває відповідну добірку відгуків без переходу через профіль.</p></div></div></section>`;
   }
   function injectProof(){
     if(document.querySelector('[data-vx-proof]'))return;
