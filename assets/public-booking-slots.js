@@ -2,6 +2,7 @@
 'use strict';
 const API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
 let slots={morningStart:'07:00',morningEnd:'09:30',eveningStart:'17:30',eveningEnd:'20:00'};
+let depositRules={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
 const label=(kind)=>kind==='morning'?`Ранок · ${slots.morningStart}–${slots.morningEnd}`:`Вечір · ${slots.eveningStart}–${slots.eveningEnd}`;
 function apply(){
   document.querySelectorAll('select').forEach(sel=>{
@@ -18,6 +19,45 @@ function apply(){
     if(field){field.min=isMorning?slots.morningStart:slots.eveningStart;field.max=isMorning?slots.morningEnd:slots.eveningEnd}
   });
   window.dispatchEvent(new CustomEvent('vacleaner:slots-updated'));
+}
+
+
+const productCodes=[
+  [/HOME RESET/i,'elite'],[/Генеральне/i,'general'],[/Ідеальні вікна/i,'ideal_windows'],[/Тариф «Комбо»|Комбо/i,'combo'],[/Puzzi \+ Jimmy/i,'puzzi_jimmy'],[/Puzzi \+ робот/i,'puzzi_abir'],[/Kärcher SC 2/i,'sc2'],[/Робот для вікон/i,'abir'],[/Kärcher Puzzi/i,'puzzi']
+];
+function selectedProductCode(){
+  const selected=document.querySelector('.booking-products button.is-selected');
+  const text=selected?.textContent||'';
+  return productCodes.find(([re])=>re.test(text))?.[1]||'';
+}
+function fullWeekend(start,finish){
+  if(!start||!finish)return false;
+  let d=new Date(start+'T12:00:00Z'),end=new Date(finish+'T12:00:00Z'),sat=false,sun=false;
+  for(let guard=0;d<=end&&guard<32;guard+=1){if(d.getUTCDay()===6)sat=true;if(d.getUTCDay()===0)sun=true;d=new Date(d.getTime()+86400000)}
+  return sat&&sun;
+}
+function depositGroup(code){if(code==='elite')return'elite';if(code==='general')return'general';if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';return'oneUnit'}
+function depositAmount(){
+  const code=selectedProductCode(),dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')];
+  if(!code||!dates[0]?.value||!dates[1]?.value)return 0;
+  const row=depositRules[depositGroup(code)];return Number(fullWeekend(dates[0].value,dates[1].value)?row.weekend:row.day)||0;
+}
+function formatMoney(v){return new Intl.NumberFormat('uk-UA').format(Number(v)||0)+' грн'}
+function renderDeposit(){
+  const amount=depositAmount(),summary=document.querySelector('.booking-summary'),mobile=document.querySelector('.booking-mobile-summary');
+  if(summary){
+    let row=summary.querySelector('.vx-booking-deposit');
+    if(!row){row=document.createElement('div');row.className='vx-booking-deposit';const total=summary.querySelector('.booking-summary-total');(total||summary.querySelector('p'))?.insertAdjacentElement('beforebegin',row)}
+    row.innerHTML=`<span>Залог при видачі <small>повертається</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
+  }
+  if(mobile){
+    let note=mobile.querySelector('.vx-mobile-deposit');if(!note){note=document.createElement('small');note.className='vx-mobile-deposit';mobile.querySelector('div')?.appendChild(note)}
+    note.textContent=amount?`Залог при видачі: ${formatMoney(amount)}`:'Залог з’явиться після вибору';
+  }
+  const conditions=document.querySelector('.booking-conditions ul');
+  if(conditions&&conditions.children[0])conditions.children[0].textContent='Передплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у суму оренди.';
+  if(conditions&&conditions.children[1])conditions.children[1].textContent='Новий клієнт надсилає документ менеджеру приватно. Повторному клієнту, чиї дані вже є в базі, повторно надсилати документ не потрібно.';
+  if(conditions&&conditions.children[2])conditions.children[2].textContent=amount?`Залоговий платіж ${formatMoney(amount)} вноситься при передачі техніки, не входить у ціну та повертається після перевірки.`:'Залоговий платіж вноситься при передачі техніки й повертається після перевірки.';
 }
 
 
@@ -73,6 +113,7 @@ let refreshAttempts=0;
 function refreshBindings(){
   apply();
   bindLoyalty();
+  renderDeposit();
   if(refreshAttempts<12){
     refreshAttempts+=1;
     setTimeout(refreshBindings,500);
@@ -80,6 +121,8 @@ function refreshBindings(){
 }
 fetch(API,{cache:'no-store'})
   .then(r=>r.ok?r.json():Promise.reject(new Error('settings_failed')))
-  .then(d=>{if(d?.slots)slots={...slots,...d.slots};refreshBindings()})
+  .then(d=>{if(d?.slots)slots={...slots,...d.slots};if(d?.depositRules)depositRules={...depositRules,...d.depositRules};refreshBindings()})
   .catch(()=>refreshBindings());
+const depositObserver=new MutationObserver(()=>requestAnimationFrame(renderDeposit));
+document.addEventListener('DOMContentLoaded',()=>{depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',renderDeposit,true);document.addEventListener('click',()=>setTimeout(renderDeposit,0),true)});
 })();

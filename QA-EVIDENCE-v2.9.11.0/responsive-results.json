@@ -1,0 +1,114 @@
+[
+  {
+    "width": 390,
+    "overflow": {
+      "sw": 390,
+      "iw": 390,
+      "small": 0
+    },
+    "process": {
+      "right": 390,
+      "iw": 390,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "footer": true
+    },
+    "issue": {
+      "scrollWidth": 358,
+      "clientWidth": 358,
+      "footer": true,
+      "blocks": 2
+    },
+    "settings": {
+      "scrollWidth": 370,
+      "clientWidth": 370,
+      "fields": 8,
+      "more": "flex"
+    },
+    "errors": []
+  },
+  {
+    "width": 768,
+    "overflow": {
+      "sw": 768,
+      "iw": 768,
+      "small": 0
+    },
+    "process": {
+      "right": 751,
+      "iw": 768,
+      "scrollWidth": 734,
+      "clientWidth": 734,
+      "footer": true
+    },
+    "issue": {
+      "scrollWidth": 734,
+      "clientWidth": 734,
+      "footer": true,
+      "blocks": 2
+    },
+    "settings": {
+      "scrollWidth": 740,
+      "clientWidth": 740,
+      "fields": 8,
+      "more": "flex"
+    },
+    "errors": []
+  },
+  {
+    "width": 1280,
+    "overflow": {
+      "sw": 1280,
+      "iw": 1280,
+      "small": 0
+    },
+    "process": {
+      "right": 1159,
+      "iw": 1280,
+      "scrollWidth": 1038,
+      "clientWidth": 1038,
+      "footer": true
+    },
+    "issue": {
+      "scrollWidth": 1038,
+      "clientWidth": 1038,
+      "footer": true,
+      "blocks": 2
+    },
+    "settings": {
+      "scrollWidth": 976,
+      "clientWidth": 976,
+      "fields": 8,
+      "more": "none"
+    },
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "overflow": {
+      "sw": 1440,
+      "iw": 1440,
+      "small": 0
+    },
+    "process": {
+      "right": 1239,
+      "iw": 1440,
+      "scrollWidth": 1038,
+      "clientWidth": 1038,
+      "footer": true
+    },
+    "issue": {
+      "scrollWidth": 1038,
+      "clientWidth": 1038,
+      "footer": true,
+      "blocks": 2
+    },
+    "settings": {
+      "scrollWidth": 1136,
+      "clientWidth": 1136,
+      "fields": 8,
+      "more": "none"
+    },
+    "errors": []
+  }
+]

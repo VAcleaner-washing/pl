@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
 
-  const VERSION='2.9.10.0';
+  const VERSION='2.9.11.0';
   const INSTAGRAM='https://www.instagram.com/vacleaner_washing.pl/';
   const REVIEW_HIGHLIGHT_1='https://www.instagram.com/stories/highlights/18130438687549534/';
   const REVIEW_HIGHLIGHT_2='https://www.instagram.com/stories/highlights/18303073276178357/';
@@ -174,6 +174,25 @@
     updateSlots(select);
   }
 
+
+  function arrowIcon(){return '<svg class="vx-review-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4"></path></svg>'}
+  function enhanceReviewLinks(){
+    document.querySelectorAll('.mobile-menu nav a[href="/vidhuky"]').forEach(a=>{
+      a.classList.add('vx-mobile-review-link');
+      if(!a.querySelector('.vx-review-arrow'))a.insertAdjacentHTML('beforeend',arrowIcon());
+    });
+  }
+  function termsMarkup(){
+    return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для бронювання</h2><span>Передплата входить у ціну. Залог повертається окремо після перевірки техніки.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та повністю входить у вартість оренди.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залог при передачі</h3><p>Оплачується окремо під час отримання техніки, не входить у вартість оренди та повертається після перевірки комплектності й стану.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>повний вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>повний вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>повний вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>повний вікенд · 4 000 грн</small></span></div></div></article></div><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
+  }
+  function injectTerms(){
+    const path=location.pathname.replace(/\/+$/,'')||'/';
+    if(path!=='/umovy'||document.querySelector('[data-vx-rental-terms]'))return;
+    const box=document.createElement('div');box.innerHTML=termsMarkup();
+    const section=box.firstElementChild,footer=document.querySelector('footer'),cta=document.querySelector('.final-cta');
+    if(cta)cta.insertAdjacentElement('beforebegin',section);else footer?.insertAdjacentElement('beforebegin',section);
+  }
+
   function replacePublicLabels(root=document){
     const replacements=new Map([
       ['Робот ABIR','Робот для вікон'],
@@ -214,9 +233,11 @@
     if(location.pathname.startsWith('/admin/'))return;
     replacePublicLabels();
     document.querySelectorAll('a[href="/vidhuky"]').forEach(a=>{if(a.textContent.trim()==='Процес')a.textContent='Відгуки'});
+    enhanceReviewLinks();
     document.querySelectorAll('.booking-date-grid input[type="date"]').forEach(enhanceDate);
     document.querySelectorAll('.booking-date-grid select').forEach(enhanceSelect);
     injectProof();
+    injectTerms();
   }
 
   let queued=false;
