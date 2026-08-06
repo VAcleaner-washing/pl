@@ -1,7 +1,7 @@
 (()=>{
   'use strict';
 
-  const VERSION='2.9.13.0';
+  const VERSION='2.9.13.1';
   const INSTAGRAM='https://www.instagram.com/vacleaner_washing.pl/';
   const REVIEW_HIGHLIGHT_1='https://www.instagram.com/stories/highlights/18130438687549534/';
   const REVIEW_HIGHLIGHT_2='https://www.instagram.com/stories/highlights/18303073276178357/';
@@ -258,19 +258,27 @@
   }
 
   function replacePublicLabels(root=document){
-    const replacements=new Map([
-      ['Робот ABIR','Робот для вікон'],
-      ['Puzzi + робот ABIR','Puzzi + робот для вікон'],
-      ['SC 2 + ABIR','SC 2 + робот для вікон'],
-      ['Puzzi + SC 2 + Jimmy + ABIR','Puzzi + SC 2 + Jimmy + робот для вікон'],
-      ['ABIR WD8','Робот для вікон · ABIR WD8']
-    ]);
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){
-      const p=node.parentElement;if(!p||['SCRIPT','STYLE','TEXTAREA'].includes(p.tagName))return NodeFilter.FILTER_REJECT;
-      return [...replacements.keys()].some(x=>node.nodeValue?.includes(x))?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+      const p=node.parentElement;
+      if(!p||['SCRIPT','STYLE','TEXTAREA','NOSCRIPT'].includes(p.tagName))return NodeFilter.FILTER_REJECT;
+      const value=node.nodeValue||'';
+      return /Робот ABIR|Puzzi \+ робот ABIR|SC 2 \+ ABIR|Puzzi \+ SC 2 \+ Jimmy \+ ABIR|ABIR WD8/.test(value)
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_REJECT;
     }});
     const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-    nodes.forEach(node=>{let value=node.nodeValue;replacements.forEach((to,from)=>{value=value.split(from).join(to)});node.nodeValue=value});
+    nodes.forEach(node=>{
+      const original=node.nodeValue||'';
+      let value=original
+        .split('Puzzi + SC 2 + Jimmy + ABIR').join('Puzzi + SC 2 + Jimmy + робот для вікон')
+        .split('Puzzi + робот ABIR').join('Puzzi + робот для вікон')
+        .split('SC 2 + ABIR').join('SC 2 + робот для вікон')
+        .split('Робот ABIR').join('Робот для вікон');
+      if(value.includes('ABIR WD8')&&!value.includes('Робот для вікон · ABIR WD8')){
+        value=value.split('ABIR WD8').join('Робот для вікон · ABIR WD8');
+      }
+      if(value!==original)node.nodeValue=value;
+    });
   }
 
   function proofMarkup(){
@@ -312,7 +320,7 @@
   });
   document.addEventListener('DOMContentLoaded',()=>{
     loadDepositRules();
-    enhance();observer.observe(document.body,{childList:true,subtree:true,characterData:true});
+    enhance();observer.observe(document.body,{childList:true,subtree:true});
   });
   window.addEventListener('vacleaner:slots-updated',()=>document.querySelectorAll('.booking-date-grid select').forEach(updateSlots));
   document.addEventListener('click',e=>{if(e.target.closest('.booking-products button'))requestAnimationFrame(enhanceDepositSummary)});
