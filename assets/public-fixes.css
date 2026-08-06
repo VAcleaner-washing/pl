@@ -16,3 +16,11 @@
   }
   .mobile-booking a{min-width:0;height:56px!important;padding:0 12px!important;font-size:12px!important;text-align:center}
 }
+
+/* === v2.9.5.1 merged audit fixes: public booking === */
+@media (max-width:620px){
+  input[type=text],input[type=tel],input[type=email],input[type=number],
+  input[type=date],input[type=time],select,textarea{font-size:16px!important}
+  main{padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}
+  h1,h2,h3,[id]{scroll-margin-top:84px}
+}

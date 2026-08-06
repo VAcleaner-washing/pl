@@ -597,7 +597,7 @@ body.detail-open .detail{overflow-y:auto!important;overflow-x:hidden!important;-
   .modal-card label:has(input[type="checkbox"]){min-height:44px!important}
 }
 
-/* v2.9.4.6 — mobile navigation + phantom vertical scroll fix */
+/* v2.9.5.0 — mobile navigation + phantom vertical scroll fix */
 .more-nav{display:none}
 .mobile-more-sheet{position:fixed;inset:0;z-index:140;display:none}
 @media(max-width:760px){
@@ -616,4 +616,68 @@ body.detail-open .detail{overflow-y:auto!important;overflow-x:hidden!important;-
   .mobile-more-head{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 12px}.mobile-more-head strong{font-size:20px}.mobile-more-close{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:#0b1115;color:#fff;font-size:27px}
   .mobile-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mobile-more-grid button{min-height:82px;border:1px solid var(--line);border-radius:15px;background:#0c1317;color:#d8dcde;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:13px}.mobile-more-grid button.active{border-color:rgba(214,164,95,.4);background:rgba(214,164,95,.11);color:var(--gold-2)}.mobile-more-grid svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8}
   body.menu-open{overflow:hidden!important}
+}
+
+/* v2.9.5.0 — verified responsive shell and interaction consolidation */
+:where(button,a,input,select,textarea){touch-action:manipulation}
+.booking-toolbar,.time-chip-list{overscroll-behavior-inline:contain}
+
+/* Frequent controls must be comfortably tappable */
+.booking-toolbar .chip,.calendar-grid .slot,.upcoming-card a[href^="tel:"],.client-card a[href^="tel:"],
+.client-sort button,.mobile-compact,.logout,.upcoming-card .btn{min-height:44px!important}
+.upcoming-card a[href^="tel:"],.client-card a[href^="tel:"]{display:inline-flex!important;align-items:center!important;padding:8px 0!important}
+.calendar-grid .slot{display:flex!important;align-items:center!important;justify-content:center!important}
+.search input{font-size:16px!important}
+
+/* Tablet: use the same thumb-friendly shell instead of squeezing desktop sidebar */
+@media (min-width:761px) and (max-width:900px){
+  :root{--sidebar:0px;--topbar:72px}
+  html,body{height:100dvh!important;overflow:hidden!important}
+  .app{height:100dvh!important;min-height:0!important;padding-left:0!important;padding-bottom:0!important;overflow:hidden!important}
+  .sidebar{position:fixed!important;left:0!important;right:0!important;top:auto!important;bottom:0!important;width:100%!important;height:74px!important;border-right:0!important;border-top:1px solid var(--line)!important;z-index:90!important}
+  .brand,.sidebar-footer{display:none!important}
+  .nav{height:100%!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;gap:4px!important;overflow:hidden!important}
+  .nav button{height:60px!important;min-width:0!important;padding:4px 3px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;gap:4px!important;font-size:10px!important;text-align:center!important}
+  .nav button[data-view="clients"],.nav button[data-view="analytics"],.nav button[data-view="chemistry"],.nav button[data-view="settings"]{display:none!important}
+  .nav .more-nav{display:flex!important}
+  .topbar{left:0!important;padding:0 14px!important}
+  .main{height:100dvh!important;min-height:0!important;padding:92px 14px calc(94px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch}
+  .booking-grid,.calendar-grid,.equipment-grid,.client-grid,.chem-grid,.kpi-grid,.analytics-grid{grid-template-columns:1fr!important}
+  .upcoming-row,.settings-card,.client-card{max-width:100%!important;min-width:0!important}
+  .mobile-more-sheet{display:block}
+}
+
+@media(max-width:760px){
+  /* One controlled scroll area: prevents Safari from scrolling into a blank document tail. */
+  html,body{width:100%!important;height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;overscroll-behavior:none!important}
+  body{position:fixed!important;inset:0!important}
+  .app{width:100%!important;height:100dvh!important;min-height:0!important;padding:0!important;overflow:hidden!important}
+  .topbar{position:fixed!important;top:0!important}
+  .sidebar{position:fixed!important;bottom:0!important}
+  .main{position:absolute!important;inset:0!important;width:100%!important;height:100dvh!important;min-height:0!important;padding:88px 10px calc(92px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+  .main::-webkit-scrollbar{display:none!important}
+  #view{height:auto!important;min-height:0!important;padding:0!important;margin:0!important}
+  .booking-toolbar{overflow-x:auto!important;overflow-y:hidden!important;overscroll-behavior-inline:contain!important;padding-bottom:6px!important}
+  .booking-toolbar .chip{min-height:44px!important}
+  .mobile-compact{min-width:44px!important;min-height:44px!important}
+  .calendar-grid .slot{min-height:44px!important}
+  .client-sort{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+  .client-sort button{height:auto!important;white-space:normal!important;line-height:1.2!important}
+  .client-card{overflow:hidden!important}
+  .client-card h3,.client-card p,.client-card a{overflow-wrap:anywhere!important}
+  .mobile-more-card{max-height:calc(100dvh - 110px - env(safe-area-inset-bottom))!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+}
+
+/* v2.9.5.0 — final tap-target pass */
+.btn,#view a[href^="tel:"],#view a[href^="https://t.me"],.booking-actions button,.detail-actions button,.client-sort button{min-height:44px!important}
+#view a[href^="tel:"],#view a[href^="https://t.me"]{display:inline-flex!important;align-items:center!important;padding-block:8px!important}
+.search input{height:100%!important;min-height:44px!important}
+@media(max-width:900px){.topbar .search{min-height:44px!important}.new-btn,.icon-btn{min-width:44px!important;min-height:44px!important}}
+
+/* === v2.9.5.1 merged audit fixes: admin === */
+.search input{font-size:16px!important}
+@media (min-width:901px){
+  .upcoming-row{grid-template-columns:104px minmax(200px,1fr) 130px minmax(0,auto)!important}
+  .upcoming-row>*{min-width:0!important}
+  .upcoming-actions{flex-wrap:wrap!important;justify-content:flex-end!important;row-gap:8px}
 }
