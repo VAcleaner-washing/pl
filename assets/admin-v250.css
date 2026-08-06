@@ -681,3 +681,8 @@ body.detail-open .detail{overflow-y:auto!important;overflow-x:hidden!important;-
   .upcoming-row>*{min-width:0!important}
   .upcoming-actions{flex-wrap:wrap!important;justify-content:flex-end!important;row-gap:8px}
 }
+
+/* v2.9.5.2 — ensure mobile “Ще” is never hidden by legacy nth-child rule */
+@media(max-width:900px){
+  .nav button.more-nav:nth-child(n){display:flex!important}
+}
