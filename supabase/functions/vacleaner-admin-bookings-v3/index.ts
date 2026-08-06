@@ -126,20 +126,25 @@ Deno.serve(async (request: Request) => {
     if (action === "save_finance") {
       const bookingId = String(body.bookingId ?? "");
       if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
-      const usedPackets = cleanInt(body.usedPackets, 100);
-      const storyMention = body.storyMention === true;
-      const issuePayment = cleanInt(body.issuePayment, 100000);
-      const issuePaid = body.issuePaid === true || issuePayment > 0;
-      const freePackets = storyMention ? 2 : 0;
-      const paidPackets = Math.max(0, usedPackets - freePackets);
-      const chemistryAmount = paidPackets * 50;
       const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single();
       if (currentError || !current) return json({ error: "invalid_booking" }, 404);
+      const usedPackets = cleanInt(body.usedPackets, 100);
+      const storyMention = body.storyMention === true;
+      const freePackets = storyMention ? 2 : 0;
+      const paidPackets = Math.max(0, usedPackets - freePackets);
+      const chemistryAmount = paidPackets * Number(catalog?.puzziPacketPrice || 50);
+      const depositAmount = cleanInt(body.depositAmount ?? current.deposit_amount, 100000);
       const depositPaid = body.depositPaid === true || current.deposit_paid === true;
       const currentExtras = current.extras && typeof current.extras === "object" ? current.extras as Record<string, any> : {};
       const selectedAmount = Array.isArray(currentExtras.selected_items)
         ? currentExtras.selected_items.reduce((sum: number, item: Record<string, any>) => sum + Number(item.price || 0), 0)
         : 0;
+      const totalExtras = selectedAmount + chemistryAmount;
+      const totalAmount = Number(current.base_amount || 0) + Number(current.delivery_amount || 0) + totalExtras;
+      const prepaymentAmount = Number(current.prepayment_paid ? current.prepayment_amount || 200 : 0);
+      const receivedAmount = prepaymentAmount + (depositPaid ? depositAmount : 0);
+      const balance = receivedAmount - totalAmount;
+      const now = new Date().toISOString();
       const extras = {
         ...currentExtras,
         chemistry: {
@@ -147,24 +152,30 @@ Deno.serve(async (request: Request) => {
           story_mention: storyMention,
           free_packets: freePackets,
           paid_packets: paidPackets,
-          price_per_packet: 50,
+          price_per_packet: Number(catalog?.puzziPacketPrice || 50),
           amount: chemistryAmount,
         },
+        settlement: {
+          model: "prepayment_plus_deposit",
+          prepayment_amount: prepaymentAmount,
+          deposit_amount: depositPaid ? depositAmount : 0,
+          received_amount: receivedAmount,
+          expenses_amount: totalAmount,
+          refund_amount: Math.max(0, balance),
+          due_amount: Math.max(0, -balance),
+          calculated_at: now,
+        },
       };
-      const totalExtras = selectedAmount + chemistryAmount;
-      const totalAmount = Number(current.base_amount || 0) + Number(current.delivery_amount || 0) + totalExtras;
-      const receivedAmount = Number(current.prepayment_paid ? current.prepayment_amount || 200 : 0) + (issuePaid ? issuePayment : 0);
-      const balance = receivedAmount - totalAmount;
-      const now = new Date().toISOString();
       const { data, error } = await supabase.from("vacleaner_bookings").update({
         extras,
         extras_amount: totalExtras,
         total_amount: totalAmount,
-        issue_payment_amount: issuePayment,
-        issue_payment_paid: issuePaid,
-        issue_payment_paid_at: issuePaid ? (current.issue_payment_paid_at || now) : null,
+        deposit_amount: depositAmount,
         deposit_paid: depositPaid,
         deposit_paid_at: depositPaid ? (current.deposit_paid_at || now) : null,
+        issue_payment_amount: 0,
+        issue_payment_paid: false,
+        issue_payment_paid_at: null,
         updated_at: now,
       }).eq("id", bookingId).select("*").single();
       if (error) throw error;
@@ -172,20 +183,9 @@ Deno.serve(async (request: Request) => {
       return json({
         booking: data,
         finance: {
-          usedPackets,
-          storyMention,
-          freePackets,
-          paidPackets,
-          chemistryAmount,
-          selectedExtrasAmount: selectedAmount,
-          issuePayment,
-          issuePaid,
-          securityDeposit: Number(current.deposit_amount || 0),
-          depositPaid,
-          receivedAmount,
-          totalAmount,
-          refundAmount: Math.max(0, balance),
-          dueAmount: Math.max(0, -balance),
+          usedPackets, storyMention, freePackets, paidPackets, chemistryAmount,
+          selectedExtrasAmount: selectedAmount, prepaymentAmount, securityDeposit: depositAmount,
+          depositPaid, receivedAmount, totalAmount, refundAmount: Math.max(0, balance), dueAmount: Math.max(0, -balance),
         },
       });
     }
@@ -194,13 +194,30 @@ Deno.serve(async (request: Request) => {
       const bookingId = String(body.bookingId ?? "");
       if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const returned = body.returned === true;
-      const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("deposit_paid").eq("id", bookingId).single();
+      const refundAmount = cleanInt(body.refundAmount, 100000);
+      const dueAmount = cleanInt(body.dueAmount, 100000);
+      const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("deposit_paid,extras").eq("id", bookingId).single();
       if (currentError || !current) return json({ error: "invalid_booking" }, 404);
       if (returned && current.deposit_paid !== true) return json({ error: "deposit_not_received" }, 409);
       const now = new Date().toISOString();
+      const currentExtras = current.extras && typeof current.extras === "object" ? current.extras as Record<string, any> : {};
+      const extras = {
+        ...currentExtras,
+        settlement: {
+          ...(currentExtras.settlement || {}),
+          refund_amount: refundAmount,
+          due_amount: dueAmount,
+          completed: returned,
+          completed_at: returned ? now : null,
+        },
+      };
       const { data, error } = await supabase.from("vacleaner_bookings").update({
+        extras,
         deposit_returned: returned,
         deposit_returned_at: returned ? now : null,
+        return_payment_amount: dueAmount,
+        return_payment_paid: returned && dueAmount > 0,
+        return_payment_paid_at: returned && dueAmount > 0 ? now : null,
         updated_at: now,
       }).eq("id", bookingId).select("*").single();
       if (error) throw error;
