@@ -46,18 +46,18 @@ function formatMoney(v){return new Intl.NumberFormat('uk-UA').format(Number(v)||
 function renderDeposit(){
   const amount=depositAmount(),summary=document.querySelector('.booking-summary'),mobile=document.querySelector('.booking-mobile-summary');
   if(summary){
-    let row=summary.querySelector('.vx-booking-deposit');
-    if(!row){row=document.createElement('div');row.className='vx-booking-deposit';const total=summary.querySelector('.booking-summary-total');(total||summary.querySelector('p'))?.insertAdjacentElement('beforebegin',row)}
-    row.innerHTML=`<span>Залог при видачі <small>повертається</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
+    let row=summary.querySelector('.vx-summary-deposit,.vx-booking-deposit');
+    if(!row){row=document.createElement('div');row.className='vx-summary-deposit vx-booking-deposit';const total=summary.querySelector('.booking-summary-total');(total||summary.querySelector('p'))?.insertAdjacentElement('beforebegin',row)}
+    row.innerHTML=`<span>Залог при видачі <small>базова сума; фактичну фіксує менеджер</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
   }
   if(mobile){
     let note=mobile.querySelector('.vx-mobile-deposit');if(!note){note=document.createElement('small');note.className='vx-mobile-deposit';mobile.querySelector('div')?.appendChild(note)}
-    note.textContent=amount?`Залог при видачі: ${formatMoney(amount)}`:'Залог з’явиться після вибору';
+    note.textContent=amount?`Базовий залог при видачі: ${formatMoney(amount)}`:'Залог з’явиться після вибору';
   }
   const conditions=document.querySelector('.booking-conditions ul');
   if(conditions&&conditions.children[0])conditions.children[0].textContent='Передплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у суму оренди.';
   if(conditions&&conditions.children[1])conditions.children[1].textContent='Новий клієнт надсилає документ менеджеру приватно. Повторному клієнту, чиї дані вже є в базі, повторно надсилати документ не потрібно.';
-  if(conditions&&conditions.children[2])conditions.children[2].textContent=amount?`Залоговий платіж ${formatMoney(amount)} вноситься при передачі техніки, не входить у ціну та повертається після перевірки.`:'Залоговий платіж вноситься при передачі техніки й повертається після перевірки.';
+  if(conditions&&conditions.children[2])conditions.children[2].textContent=amount?`Базовий залог ${formatMoney(amount)} вноситься при передачі. При поверненні з передоплати та фактичного залогу віднімаються оренда, доставка, додаткові засоби й хімія; решту повертаємо або клієнт доплачує різницю.`:'Залог вноситься при передачі й входить у фінальний взаєморозрахунок разом із передоплатою.';
 }
 
 
