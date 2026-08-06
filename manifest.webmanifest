@@ -1,14 +1,12 @@
 {
-  "name": "VAcleaner Manager",
+  "name": "VAcleaner — оренда техніки для прибирання",
   "short_name": "VAcleaner",
-  "description": "Календар техніки та керування бронюваннями VAcleaner",
-  "start_url": "/admin/bronuvannia/",
+  "description": "Підбір і бронювання техніки для прибирання у Полтаві",
+  "start_url": "/",
   "scope": "/",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#070b0e",
-  "theme_color": "#070b0e",
-  "lang": "uk",
+  "display": "browser",
+  "background_color": "#f4efe9",
+  "theme_color": "#2f3031",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -18,11 +16,6 @@
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "/apple-touch-icon.png",
-      "sizes": "180x180",
       "type": "image/png"
     }
   ]

@@ -101,7 +101,7 @@ Deno.serve(async (request: Request) => {
       const storyMention = body.storyMention === true;
       const issuePayment = cleanInt(body.issuePayment, 100000);
       const issuePaid = body.issuePaid === true || issuePayment > 0;
-      const depositPaid = body.depositPaid === true;
+      const depositPaid = body.depositPaid === true || current.deposit_paid === true;
       const freePackets = storyMention ? 2 : 0;
       const paidPackets = Math.max(0, usedPackets - freePackets);
       const chemistryAmount = paidPackets * 50;
@@ -164,6 +164,9 @@ Deno.serve(async (request: Request) => {
       const bookingId = String(body.bookingId ?? "");
       if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const returned = body.returned === true;
+      const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("deposit_paid").eq("id", bookingId).single();
+      if (currentError || !current) return json({ error: "invalid_booking" }, 404);
+      if (returned && current.deposit_paid !== true) return json({ error: "deposit_not_received" }, 409);
       const now = new Date().toISOString();
       const { data, error } = await supabase.from("vacleaner_bookings").update({
         deposit_returned: returned,
