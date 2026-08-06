@@ -1,10 +1,15 @@
 (()=>{
   'use strict';
 
-  const VERSION='2.9.11.0';
+  const VERSION='2.9.13.0';
   const INSTAGRAM='https://www.instagram.com/vacleaner_washing.pl/';
   const REVIEW_HIGHLIGHT_1='https://www.instagram.com/stories/highlights/18130438687549534/';
   const REVIEW_HIGHLIGHT_2='https://www.instagram.com/stories/highlights/18303073276178357/';
+  const SETTINGS_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
+  const DEFAULT_DEPOSIT_RULES={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
+  const PRODUCT_ALIASES={'Kärcher Puzzi':'puzzi','Kärcher Puzzi 8/1':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Puzzi + робот для вікон':'puzzi_abir','Puzzi + робот ABIR':'puzzi_abir','Kärcher SC 2':'sc2','Kärcher SC 2 Deluxe':'sc2','Робот для вікон':'abir','Робот ABIR':'abir','Тариф «Комбо»':'combo','Комбо · Puzzi + SC 2':'combo','Генеральне':'general','Генеральне прибирання':'general','Ідеальні вікна':'ideal_windows','HOME RESET':'elite'};
+  let depositRules=structuredClone(DEFAULT_DEPOSIT_RULES);
+  let calendarReturnFocus=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
   const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
   const dateState=new WeakMap();
@@ -76,7 +81,7 @@
     layer.className='vx-calendar-layer';
     layer.innerHTML=`<section class="vx-calendar-dialog" role="dialog" aria-modal="true" aria-labelledby="vx-calendar-title">
       <header class="vx-calendar-top"><div><span class="vx-calendar-kicker">VAcleaner · дата бронювання</span><h2 class="vx-calendar-title" id="vx-calendar-title">Оберіть дату</h2></div><button type="button" class="vx-calendar-close" aria-label="Закрити">×</button></header>
-      <div class="vx-calendar-toolbar"><button type="button" class="vx-calendar-nav vx-calendar-prev" aria-label="Попередній місяць">‹</button><div class="vx-calendar-month"></div><button type="button" class="vx-calendar-nav vx-calendar-next" aria-label="Наступний місяць">›</button></div>
+      <div class="vx-calendar-toolbar"><button type="button" class="vx-calendar-nav vx-calendar-prev" aria-label="Попередній місяць">‹</button><div class="vx-calendar-month" aria-live="polite"></div><button type="button" class="vx-calendar-nav vx-calendar-next" aria-label="Наступний місяць">›</button></div>
       <div class="vx-calendar-weekdays">${weekdays.map(x=>`<span>${x}</span>`).join('')}</div><div class="vx-calendar-grid"></div>
       <footer class="vx-calendar-footer"><span class="vx-calendar-meta">Доступні дати враховують обмеження форми</span><button type="button" class="vx-calendar-today">Сьогодні</button></footer>
     </section>`;
@@ -93,11 +98,20 @@
       chooseDate(today);
     });
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&layer.classList.contains('is-open'))closeCalendar()});
+    document.addEventListener('keydown',e=>{
+      if(!layer.classList.contains('is-open')||e.key!=='Tab')return;
+      const focusable=[...layer.querySelectorAll('button:not(:disabled),[href],input:not(:disabled),[tabindex]:not([tabindex="-1"])')];
+      if(!focusable.length)return;
+      const first=focusable[0],last=focusable[focusable.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}
+    });
     return layer;
   }
 
   function openCalendar(input){
     activeDateInput=input;
+    calendarReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
     const selected=parseDate(input.value);
     const min=parseDate(input.min);
     viewDate=selected||min||new Date();
@@ -107,13 +121,15 @@
     renderCalendar();
     layer.classList.add('is-open');
     document.documentElement.style.overflow='hidden';
-    setTimeout(()=>layer.querySelector('.vx-calendar-close')?.focus(),20);
+    setTimeout(()=>layer.querySelector('.vx-calendar-day.is-selected:not(:disabled),.vx-calendar-day.is-today:not(:disabled),.vx-calendar-day:not(:disabled),.vx-calendar-close')?.focus(),20);
   }
   function closeCalendar(){
     const layer=document.querySelector('.vx-calendar-layer');
     layer?.classList.remove('is-open');
     document.documentElement.style.overflow='';
     activeDateInput=null;
+    const back=calendarReturnFocus;calendarReturnFocus=null;
+    if(back&&document.contains(back))requestAnimationFrame(()=>back.focus());
   }
   function chooseDate(date){
     if(!activeDateInput)return;
@@ -141,7 +157,23 @@
       cells.push(`<button type="button" class="vx-calendar-day${outside?' is-outside':''}${sameDay(d,today)?' is-today':''}${sameDay(d,selected)?' is-selected':''}" data-date="${isoDate(d)}" ${disabled?'disabled':''} aria-label="${new Intl.DateTimeFormat('uk-UA',{day:'numeric',month:'long',year:'numeric'}).format(d)}">${d.getDate()}</button>`);
     }
     grid.innerHTML=cells.join('');
-    grid.querySelectorAll('.vx-calendar-day:not(:disabled)').forEach(btn=>btn.addEventListener('click',()=>chooseDate(parseDate(btn.dataset.date))));
+    const enabled=[...grid.querySelectorAll('.vx-calendar-day:not(:disabled)')];
+    enabled.forEach(btn=>{
+      btn.addEventListener('click',()=>chooseDate(parseDate(btn.dataset.date)));
+      btn.addEventListener('keydown',e=>{
+        const current=enabled.indexOf(btn);let next=current;
+        if(e.key==='ArrowLeft')next=current-1;
+        else if(e.key==='ArrowRight')next=current+1;
+        else if(e.key==='ArrowUp')next=current-7;
+        else if(e.key==='ArrowDown')next=current+7;
+        else if(e.key==='Home')next=Math.max(0,current-(current%7));
+        else if(e.key==='End')next=Math.min(enabled.length-1,current+(6-current%7));
+        else if(e.key==='PageUp'){e.preventDefault();viewDate=new Date(year,month-1,1,12);renderCalendar();requestAnimationFrame(()=>document.querySelector('.vx-calendar-day.is-selected:not(:disabled),.vx-calendar-day:not(:disabled)')?.focus());return}
+        else if(e.key==='PageDown'){e.preventDefault();viewDate=new Date(year,month+1,1,12);renderCalendar();requestAnimationFrame(()=>document.querySelector('.vx-calendar-day.is-selected:not(:disabled),.vx-calendar-day:not(:disabled)')?.focus());return}
+        else return;
+        e.preventDefault();enabled[Math.max(0,Math.min(enabled.length-1,next))]?.focus();
+      });
+    });
   }
 
   function slotParts(text){
@@ -182,6 +214,38 @@
       if(!a.querySelector('.vx-review-arrow'))a.insertAdjacentHTML('beforeend',arrowIcon());
     });
   }
+  function mergeDepositRules(value){
+    if(!value||typeof value!=='object')return;
+    for(const key of Object.keys(DEFAULT_DEPOSIT_RULES)){
+      const src=value[key];if(!src||typeof src!=='object')continue;
+      depositRules[key]={day:Number(src.day)||DEFAULT_DEPOSIT_RULES[key].day,weekend:Number(src.weekend)||DEFAULT_DEPOSIT_RULES[key].weekend};
+    }
+  }
+  function depositGroup(code){
+    if(code==='elite')return'elite';if(code==='general')return'general';
+    if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';
+    return'oneUnit';
+  }
+  function fullWeekend(start,finish){
+    const a=parseDate(start),b=parseDate(finish);if(!a||!b)return false;
+    let sat=false,sun=false,d=new Date(a);for(let i=0;d<=b&&i<32;i++,d=new Date(d.getTime()+86400000)){if(d.getDay()===6)sat=true;if(d.getDay()===0)sun=true}return sat&&sun;
+  }
+  function selectedProductCode(){
+    const btn=document.querySelector('.booking-products button[aria-pressed="true"],.booking-products button.is-selected,.booking-products button.selected');
+    const title=btn?.querySelector('strong')?.textContent?.trim()||'';return PRODUCT_ALIASES[title]||'';
+  }
+  function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')];return{start:dates[0]?.value||'',finish:dates[1]?.value||''}}
+  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates(),group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish)?rule.weekend:rule.day)||0}
+  function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
+  function enhanceDepositSummary(){
+    const summary=document.querySelector('.booking-summary');if(!summary)return;
+    let row=summary.querySelector('.vx-summary-deposit');
+    if(!row){row=document.createElement('div');row.className='vx-summary-deposit';row.innerHTML='<span>Поворотний залог<small>окремо при передачі</small></span><strong>—</strong>';const total=summary.querySelector('.booking-summary-total');total?.insertAdjacentElement('beforebegin',row)}
+    const value=currentDeposit(),strong=row.querySelector('strong');if(strong)strong.textContent=value?formatMoney(value):'—';
+    const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
+    let note=summary.querySelector('.vx-summary-deposit-note');if(!note){note=document.createElement('p');note.className='vx-summary-deposit-note';note.textContent='Залог не входить у вартість оренди та повертається після перевірки техніки.';row.insertAdjacentElement('afterend',note)}
+  }
+  async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.depositRules){mergeDepositRules(d.depositRules);enhanceDepositSummary()}}catch{}}
   function termsMarkup(){
     return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для бронювання</h2><span>Передплата входить у ціну. Залог повертається окремо після перевірки техніки.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та повністю входить у вартість оренди.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залог при передачі</h3><p>Оплачується окремо під час отримання техніки, не входить у вартість оренди та повертається після перевірки комплектності й стану.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>повний вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>повний вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>повний вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>повний вікенд · 4 000 грн</small></span></div></div></article></div><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
   }
@@ -238,6 +302,7 @@
     document.querySelectorAll('.booking-date-grid select').forEach(enhanceSelect);
     injectProof();
     injectTerms();
+    enhanceDepositSummary();
   }
 
   let queued=false;
@@ -246,7 +311,10 @@
     requestAnimationFrame(()=>{queued=false;enhance()});
   });
   document.addEventListener('DOMContentLoaded',()=>{
+    loadDepositRules();
     enhance();observer.observe(document.body,{childList:true,subtree:true,characterData:true});
   });
   window.addEventListener('vacleaner:slots-updated',()=>document.querySelectorAll('.booking-date-grid select').forEach(updateSlots));
+  document.addEventListener('click',e=>{if(e.target.closest('.booking-products button'))requestAnimationFrame(enhanceDepositSummary)});
+  document.addEventListener('change',e=>{if(e.target.matches('.booking-date-grid input[type="date"],.booking-date-grid select'))requestAnimationFrame(enhanceDepositSummary)});
 })();

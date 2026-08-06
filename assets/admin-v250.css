@@ -1296,3 +1296,15 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   .finance-form .live-deposit strong{grid-column:1;font-size:17px}
   .finance-form .live-deposit small{grid-column:1;line-height:1.35}
 }
+
+
+/* v2.9.13.0 — P1 settings hierarchy, modal accessibility and issue spacing */
+.settings-grid{grid-template-areas:"deposits deposits" "slots notifications" "finance finance";align-items:start}
+#depositRulesForm{grid-area:deposits;position:relative;overflow:hidden;border-color:rgba(226,177,103,.26);background:linear-gradient(145deg,rgba(226,177,103,.075),rgba(255,255,255,.018) 42%,rgba(255,255,255,.012))}
+#depositRulesForm:before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,#a87431,#edc47d,transparent 78%)}
+#slotsForm{grid-area:slots}.notification-card{grid-area:notifications}.financial-rules-card{grid-area:finance}
+.deposit-settings-card .settings-head h2:before{content:"₴";display:inline-grid;place-items:center;width:34px;height:34px;margin-right:10px;border-radius:11px;background:rgba(226,177,103,.14);color:#e7bd7a;font-size:17px;vertical-align:middle}
+.modal-card:focus{outline:none}
+.modal-form>footer{z-index:20}
+.issue-form .modal-layout,.finance-form .modal-layout{padding-bottom:24px}
+@media(max-width:900px){.settings-grid{grid-template-areas:"deposits" "slots" "notifications" "finance"}.deposit-settings-card{margin-top:0}.issue-form .modal-layout,.finance-form .modal-layout{padding-bottom:calc(110px + env(safe-area-inset-bottom))}}
