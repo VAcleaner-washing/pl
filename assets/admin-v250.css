@@ -1143,3 +1143,88 @@ body.detail-open .detail { overflow-y: auto; overflow-x: hidden; -webkit-overflo
   .catalog-scroll { padding: 14px 12px 104px; }
   .equipment-image img { filter: brightness(1.28) contrast(1.04) saturate(1.04); }
 }
+
+
+/* v2.9.9.0 — premium admin system pass */
+html.modal-open,body.modal-open { height: 100dvh; overflow: hidden; overscroll-behavior: none; }
+input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button { margin: 0; -webkit-appearance: none; display: none; }
+
+/* Profile moved to topbar so the desktop menu always fits. */
+.top-profile { flex: 0 0 auto; min-height: 50px; display: flex; align-items: center; gap: 10px; padding: 5px 7px 5px 6px; border: 1px solid rgba(255,255,255,.11); border-radius: 14px; background: linear-gradient(145deg,#131c21,#0b1216); box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
+.top-profile .avatar { width: 38px; height: 38px; flex: 0 0 38px; }
+.top-profile-copy { min-width: 0; padding-right: 4px; line-height: 1.15; }
+.top-profile-copy strong { display: block; color: #f2eee7; font-size: 13px; font-weight: 700; }
+.top-profile-copy small { display: block; margin-top: 4px; color: #879095; font-size: 10px; letter-spacing: .03em; }
+.top-logout { width: 36px; height: 36px; display: grid; place-items: center; flex: 0 0 36px; border: 0; border-left: 1px solid rgba(255,255,255,.08); background: transparent; color: #9ca4a8; }
+.top-logout:hover { color: var(--gold-2); }
+.top-logout svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.sidebar-footer { display: none; }
+.nav { padding-bottom: 20px; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+
+/* Stronger but restrained surface hierarchy across the admin. */
+#view .card,.modal-section,.modal-summary,.form-section { border-color: rgba(255,255,255,.115); background: linear-gradient(145deg,rgba(22,32,38,.96),rgba(12,19,23,.98)); box-shadow: inset 0 1px 0 rgba(255,255,255,.03),0 18px 42px rgba(0,0,0,.16); }
+.modal-card { background: radial-gradient(circle at 88% 0,rgba(214,164,95,.055),transparent 34%),#0c1317; }
+.modal-form>header { background: linear-gradient(180deg,rgba(255,255,255,.018),transparent); }
+.modal-form>footer { position: relative; z-index: 12; background: #0c1317; box-shadow: 0 -18px 40px rgba(0,0,0,.28); }
+.field input,.field select,.field textarea { border-color: rgba(255,255,255,.13); background: linear-gradient(180deg,#0d1519,#0a1014); box-shadow: inset 0 1px 0 rgba(255,255,255,.02); }
+
+/* Issue / finance modals: 4 explicit grid rows keep the action buttons visible. */
+.issue-form,.finance-form { grid-template-rows: auto auto minmax(0,1fr) auto; }
+.modal-card:has(.issue-form) { width: min(1040px,calc(100vw - 32px)); height: min(760px,calc(100dvh - 32px)); }
+.issue-form .modal-layout,.finance-form .modal-layout { min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+.issue-form .modal-layout::-webkit-scrollbar,.finance-form .modal-layout::-webkit-scrollbar,.process-grid::-webkit-scrollbar,.booking-form-scroll::-webkit-scrollbar,.catalog-scroll::-webkit-scrollbar { display: none; }
+.process-grid,.booking-form-scroll,.catalog-scroll { scrollbar-width: none; }
+.issue-form>footer,.finance-form>footer { position: relative; left: auto; right: auto; bottom: auto; display: flex; flex: 0 0 auto; }
+.issue-form>footer .primary,.finance-form>footer .primary { min-width: 230px; }
+
+.issue-payment-field { gap: 8px; }
+.issue-money-control { min-height: 58px; display: grid; grid-template-columns: 48px minmax(0,1fr) 52px; align-items: center; overflow: hidden; border: 1px solid rgba(214,164,95,.34); border-radius: 14px; background: radial-gradient(circle at 10% 50%,rgba(214,164,95,.13),transparent 38%),linear-gradient(180deg,#10191e,#0b1216); box-shadow: inset 0 1px 0 rgba(255,255,255,.035); transition: .18s ease; }
+.issue-money-control:focus-within { border-color: rgba(239,199,127,.72); box-shadow: 0 0 0 4px rgba(214,164,95,.09),inset 0 1px 0 rgba(255,255,255,.04); }
+.issue-money-control i { height: 100%; display: grid; place-items: center; border-right: 1px solid rgba(255,255,255,.07); color: var(--gold-2); font-size: 22px; font-style: normal; font-family: Georgia,serif; }
+.issue-money-control input { width: 100%; min-width: 0; height: 56px; padding: 0 10px 0 14px; border: 0; background: transparent; color: #f1c77f; outline: 0; font-size: 25px; font-weight: 760; font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+.issue-money-control em { color: #8e979b; font-size: 12px; font-style: normal; text-transform: uppercase; letter-spacing: .06em; }
+.issue-quick button { border-color: rgba(255,255,255,.12); background: linear-gradient(180deg,#151e23,#0e1519); box-shadow: inset 0 1px 0 rgba(255,255,255,.025); }
+.issue-quick button:hover { transform: translateY(-1px); }
+
+/* Analytics status dashboard instead of a plain text list. */
+.analytics-status-panel { grid-column: 1/-1; padding: 22px; }
+.status-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 17px; }
+.status-panel-head h3 { margin: 0 0 4px; font-size: 20px; }
+.status-panel-head p { margin: 0; color: var(--muted); font-size: 12px; }
+.status-panel-head>strong { min-width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid rgba(214,164,95,.24); border-radius: 14px; background: rgba(214,164,95,.09); color: var(--gold-2); font-size: 20px; }
+.status-dashboard { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.analytics-status-item { --status-color:#aeb4b7; padding: 13px 14px; border: 1px solid rgba(255,255,255,.08); border-radius: 13px; background: rgba(5,10,13,.32); }
+.status-row-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.status-row-top span { display: inline-flex; align-items: center; gap: 9px; color: #dce0e1; font-size: 13px; font-weight: 620; }
+.status-row-top span i { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; background: var(--status-color); box-shadow: 0 0 0 5px color-mix(in srgb,var(--status-color) 13%,transparent); }
+.status-row-top strong { min-width: 32px; color: var(--status-color); text-align: right; font-size: 17px; }
+.status-progress { height: 5px; margin-top: 11px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.055); }
+.status-progress b { display: block; height: 100%; min-width: 0; border-radius: inherit; background: linear-gradient(90deg,color-mix(in srgb,var(--status-color) 72%,#6d4a26),var(--status-color)); }
+.status-pending { --status-color:#efc77f; }
+.status-waiting_payment { --status-color:#83c5ff; }
+.status-confirmed { --status-color:#73dda0; }
+.status-issued { --status-color:#e6ba72; }
+.status-completed { --status-color:#b3bdc2; }
+.status-cancelled,.status-declined { --status-color:#ff8f87; }
+
+@media (min-width:901px) {
+  .issue-form .modal-layout,.finance-form .modal-layout { padding-bottom: 18px; }
+}
+@media (max-width:1180px) and (min-width:901px) {
+  .top-profile-copy { display: none; }
+  .top-profile { gap: 4px; padding-right: 4px; }
+}
+@media (max-width:900px) {
+  .top-profile { display: none; }
+  .issue-form>footer,.finance-form>footer { position: absolute; left: 0; right: 0; bottom: 0; }
+  .status-dashboard { grid-template-columns: 1fr; }
+}
+@media (max-width:600px) {
+  .issue-form>footer,.finance-form>footer { display: grid; }
+  .issue-form>footer .primary,.finance-form>footer .primary { min-width: 0; }
+  .issue-money-control { grid-template-columns: 42px minmax(0,1fr) 46px; }
+}
+/* v2.9.9.0 tap-target correction */
+.top-logout { width: 44px; height: 44px; flex-basis: 44px; }
