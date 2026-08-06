@@ -73,6 +73,19 @@ function calculateDeposit(productCode: string, startDate: string, returnDate: st
   const group = depositGroup(productCode, catalog) as keyof typeof rules;
   return rules[group][includesFullWeekend(startDate, returnDate) ? "weekend" : "day"];
 }
+
+function normalizeSelectedExtras(value: unknown, productCode: string, catalog: any) {
+  const codes = Array.isArray(value) ? [...new Set(value.map(String))] : [];
+  const items = codes.flatMap((code) => {
+    const item = catalog?.extras?.[code] || defaultCatalog.extras?.[code];
+    if (!item) return [];
+    const requires = Array.isArray(item.requires) ? item.requires.map(String) : [];
+    if (requires.length && !requires.includes(productCode)) return [];
+    return [{ code, label: String(item.label || code), price: Math.max(0, Number(item.price || 0)) }];
+  });
+  return { items, amount: items.reduce((sum, item) => sum + item.price, 0) };
+}
+
 async function tagAudit(supabase: ReturnType<typeof createClient>, bookingId: string, actorId: string, source: string, since: string) {
   if (!validBookingId(bookingId)) return;
   const { error } = await supabase.from("vacleaner_booking_audit").update({ actor_id: actorId, source })
@@ -294,11 +307,20 @@ Deno.serve(async (request: Request) => {
         const product = catalog?.products?.[productCode] || defaultCatalog.products[productCode as keyof typeof defaultCatalog.products];
         const days = rentalDays(startDate, returnDate, String(body.pickupWindow ?? booking.pickup_window ?? "morning"), String(body.returnWindow ?? booking.return_window ?? "morning"));
         const baseAmount = product && days > 0 ? calculateBase(product, startDate, days) : Number(booking.base_amount || 0);
-        const extrasAmount = Number(booking.extras_amount || 0), deliveryAmount = Number(booking.delivery_amount || 0);
+        const selected = normalizeSelectedExtras(body.selectedExtras, productCode, catalog);
+        const deliveryAmount = Number(booking.delivery_amount || 0);
+        const currentExtras = booking.extras && typeof booking.extras === "object" ? booking.extras as Record<string, any> : {};
+        const extras = {
+          ...currentExtras,
+          selected_items: selected.items,
+          selected_items_amount: selected.amount,
+        };
         const { data, error } = await supabase.from("vacleaner_bookings").update({
           product_label: product?.label || booking.product_label,
+          extras,
           base_amount: baseAmount,
-          total_amount: baseAmount + extrasAmount + deliveryAmount,
+          extras_amount: selected.amount,
+          total_amount: baseAmount + selected.amount + deliveryAmount,
           prepayment_paid: prepaymentPaid,
           prepayment_amount: 200,
           deposit_amount: depositAmount,

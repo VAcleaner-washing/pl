@@ -1,0 +1,103 @@
+{
+  "capturedAt": "2026-08-06T19:41:47Z",
+  "projectRef": "yweluzclearwrazdkahu",
+  "frontendEntrypoints": {
+    "publicBooking": "vacleaner-booking-v5",
+    "adminBookings": "vacleaner-admin-bookings-v3",
+    "settings": "vacleaner-settings",
+    "push": "vacleaner-push"
+  },
+  "dependencyGraph": {
+    "vacleaner-booking-v5": [
+      "vacleaner-booking-v4"
+    ],
+    "vacleaner-admin-bookings-v3": [
+      "vacleaner-admin-bookings-v2"
+    ],
+    "vacleaner-admin-bookings-v2": [
+      "vacleaner-admin-bookings"
+    ]
+  },
+  "functions": [
+    {
+      "slug": "vacleaner-booking",
+      "version": 6,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "66c6d9c806248d8b95b51231e40e693378e5d3630d908e101ef6e6d190005fdf",
+      "role": "legacy public base"
+    },
+    {
+      "slug": "vacleaner-admin-bookings",
+      "version": 3,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "fbc91e93c650f1a5ae9d8b2f6d45f37e1bc01e68a565367ecff871c37ef0557f",
+      "role": "legacy admin base"
+    },
+    {
+      "slug": "vacleaner-push",
+      "version": 1,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "b24d1d93bf5d6355a7fc1607b1dfa92e2ded72dc3db6e7851d9318a4dd15b6e6",
+      "role": "active push service"
+    },
+    {
+      "slug": "vacleaner-admin-bookings-v2",
+      "version": 7,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "c8a7c7e1ebeb95c092e62a2856cd5ed5829050b657a7cb057f0496a90b3b871a",
+      "role": "active dependency of admin v3"
+    },
+    {
+      "slug": "vacleaner-settings",
+      "version": 4,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "b263aebc1458bd2e806d627bf85a6e53c6cf411afdc5914a204501c4c64ebc6c",
+      "role": "active shared settings"
+    },
+    {
+      "slug": "vacleaner-booking-v2",
+      "version": 1,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "78935f4246f2b0dd91d4b1008b17b7cba9f8b8f9b17db393da88eaabd8fc020e",
+      "role": "legacy"
+    },
+    {
+      "slug": "vacleaner-booking-v3",
+      "version": 1,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "965a36ba27f4b28718945b19bde7f671923f6fc1d22348c581825cc55e3cd1ca",
+      "role": "legacy"
+    },
+    {
+      "slug": "vacleaner-booking-v4",
+      "version": 1,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "455cb4a2d311f04cad965d88c6e62d58bba62b82b42321fa92aca79ba24d9621",
+      "role": "active dependency of booking v5"
+    },
+    {
+      "slug": "vacleaner-admin-bookings-v3",
+      "version": 11,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "6b6fb3321f060933144a287fa15dcda304a1d780292c244161fba144817fefb3",
+      "role": "active admin entrypoint; current-catalog extras normalization"
+    },
+    {
+      "slug": "vacleaner-booking-v5",
+      "version": 4,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "088faadd6e76a7125f42864168ea733c04e0eb9ebf913ed579b153953faae20a",
+      "role": "active public entrypoint; current-catalog extras persistence"
+    }
+  ]
+}

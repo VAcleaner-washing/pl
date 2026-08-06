@@ -14,6 +14,7 @@
   const PRODUCT_ALIASES=CORE?.productAliases||FALLBACK_ALIASES;
   let depositRules=clone(DEFAULT_DEPOSIT_RULES);
   let calendarReturnFocus=null;
+  let calendarScrollLock=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
   const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
   const dateState=new WeakMap();
@@ -113,6 +114,23 @@
     return layer;
   }
 
+  function lockCalendarScroll(){
+    if(calendarScrollLock)return;
+    const root=document.documentElement;
+    const beforeWidth=root.clientWidth;
+    const basePadding=parseFloat(getComputedStyle(root).paddingRight)||0;
+    calendarScrollLock={overflow:root.style.overflow,paddingRight:root.style.paddingRight};
+    root.style.overflow='hidden';
+    const releasedGutter=Math.max(0,root.clientWidth-beforeWidth);
+    if(releasedGutter>0)root.style.paddingRight=`${basePadding+releasedGutter}px`;
+  }
+  function unlockCalendarScroll(){
+    if(!calendarScrollLock)return;
+    const root=document.documentElement;
+    root.style.overflow=calendarScrollLock.overflow;
+    root.style.paddingRight=calendarScrollLock.paddingRight;
+    calendarScrollLock=null;
+  }
   function openCalendar(input){
     activeDateInput=input;
     calendarReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
@@ -123,14 +141,14 @@
     const layer=ensureCalendar();
     layer.querySelector('.vx-calendar-title').textContent=`Дата ${dateRole(input)}`;
     renderCalendar();
+    lockCalendarScroll();
     layer.classList.add('is-open');
-    document.documentElement.style.overflow='hidden';
     setTimeout(()=>layer.querySelector('.vx-calendar-day.is-selected:not(:disabled),.vx-calendar-day.is-today:not(:disabled),.vx-calendar-day:not(:disabled),.vx-calendar-close')?.focus(),20);
   }
   function closeCalendar(){
     const layer=document.querySelector('.vx-calendar-layer');
     layer?.classList.remove('is-open');
-    document.documentElement.style.overflow='';
+    unlockCalendarScroll();
     activeDateInput=null;
     const back=calendarReturnFocus;calendarReturnFocus=null;
     if(back&&document.contains(back))requestAnimationFrame(()=>back.focus());

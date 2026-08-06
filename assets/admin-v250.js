@@ -1,6 +1,6 @@
 (()=>{'use strict';
 const CORE=window.VACLEANER_CORE;if(!CORE)throw new Error('VAcleaner core is missing');
-if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(list=>list.forEach(r=>{if(r.scope===location.origin+'/')r.unregister()})).catch(()=>{});navigator.serviceWorker.register('/admin/sw.js?v=3010',{scope:'/admin/'}).then(r=>r.update()).catch(()=>{});}
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(list=>list.forEach(r=>{if(r.scope===location.origin+'/')r.unregister()})).catch(()=>{});navigator.serviceWorker.register('/admin/sw.js?v=3012',{scope:'/admin/'}).then(r=>r.update()).catch(()=>{});}
 
 const SUPABASE='https://yweluzclearwrazdkahu.supabase.co',API=SUPABASE+'/functions/v1/vacleaner-admin-bookings-v3',SETTINGS_API=SUPABASE+'/functions/v1/vacleaner-settings',KEY='sb_publishable_-UdAKDf5jzIP6N9rBp927g_VhyJKeog';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];

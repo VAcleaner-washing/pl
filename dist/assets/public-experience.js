@@ -14,6 +14,7 @@
   const PRODUCT_ALIASES=CORE?.productAliases||FALLBACK_ALIASES;
   let depositRules=clone(DEFAULT_DEPOSIT_RULES);
   let calendarReturnFocus=null;
+  let calendarScrollLock=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
   const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
   const dateState=new WeakMap();
@@ -113,6 +114,23 @@
     return layer;
   }
 
+  function lockCalendarScroll(){
+    if(calendarScrollLock)return;
+    const root=document.documentElement;
+    const beforeWidth=root.clientWidth;
+    const basePadding=parseFloat(getComputedStyle(root).paddingRight)||0;
+    calendarScrollLock={overflow:root.style.overflow,paddingRight:root.style.paddingRight};
+    root.style.overflow='hidden';
+    const releasedGutter=Math.max(0,root.clientWidth-beforeWidth);
+    if(releasedGutter>0)root.style.paddingRight=`${basePadding+releasedGutter}px`;
+  }
+  function unlockCalendarScroll(){
+    if(!calendarScrollLock)return;
+    const root=document.documentElement;
+    root.style.overflow=calendarScrollLock.overflow;
+    root.style.paddingRight=calendarScrollLock.paddingRight;
+    calendarScrollLock=null;
+  }
   function openCalendar(input){
     activeDateInput=input;
     calendarReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
@@ -123,14 +141,14 @@
     const layer=ensureCalendar();
     layer.querySelector('.vx-calendar-title').textContent=`Дата ${dateRole(input)}`;
     renderCalendar();
+    lockCalendarScroll();
     layer.classList.add('is-open');
-    document.documentElement.style.overflow='hidden';
     setTimeout(()=>layer.querySelector('.vx-calendar-day.is-selected:not(:disabled),.vx-calendar-day.is-today:not(:disabled),.vx-calendar-day:not(:disabled),.vx-calendar-close')?.focus(),20);
   }
   function closeCalendar(){
     const layer=document.querySelector('.vx-calendar-layer');
     layer?.classList.remove('is-open');
-    document.documentElement.style.overflow='';
+    unlockCalendarScroll();
     activeDateInput=null;
     const back=calendarReturnFocus;calendarReturnFocus=null;
     if(back&&document.contains(back))requestAnimationFrame(()=>back.focus());
@@ -243,16 +261,24 @@
   function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
   function enhanceDepositSummary(){
     const summary=document.querySelector('.booking-summary');if(!summary)return;
-    const legacy=[...summary.children].filter(el=>/Поворотний залог|Залог при видачі/i.test(el.textContent||''));
-    let row=summary.querySelector('.vx-summary-deposit')||legacy.shift();
-    legacy.filter(el=>el!==row).forEach(el=>el.remove());
-    if(!row){row=document.createElement('div');const total=summary.querySelector('.booking-summary-total');total?.insertAdjacentElement('beforebegin',row)}
-    row.className='vx-summary-deposit';
-    row.innerHTML='<span>Поворотний залог —<small>Сплачується під час отримання техніки.</small></span><strong>—</strong>';
-    const value=currentDeposit(),strong=row.querySelector('strong');if(strong)strong.textContent=value?formatMoney(value):'—';
+    const value=currentDeposit();
+    const total=summary.querySelector('.booking-summary-total');
+    if(!total)return;
+    summary.querySelectorAll('.vx-summary-prepayment,.vx-summary-deposit').forEach(el=>el.remove());
+    const prepayment=document.createElement('div');
+    prepayment.className='vx-summary-prepayment vx-summary-finance-row';
+    prepayment.innerHTML='<span><b>Бронювання дати</b><small>Сплачується після підтвердження заявки.</small></span><strong>200 грн</strong>';
+    total.insertAdjacentElement('beforebegin',prepayment);
+    const deposit=document.createElement('div');
+    deposit.className='vx-summary-deposit vx-summary-finance-row';
+    deposit.innerHTML=`<span><b>Поворотний залог</b><small>Сплачується під час отримання техніки.</small></span><strong>${value?formatMoney(value):'—'}</strong>`;
+    total.insertAdjacentElement('beforebegin',deposit);
     const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
-    summary.querySelectorAll('.vx-summary-prepayment,.vx-summary-deposit-note').forEach(el=>el.remove());
-    const note=summary.querySelector(':scope > p');if(note)note.textContent='Передоплата 200 грн вноситься після підтвердження заявки та входить у фінальний взаєморозрахунок.';
+    let note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
+    if(note){
+      note.className='vx-summary-deposit-note';
+      note.textContent='Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
+    }
   }
   async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.depositRules){mergeDepositRules(d.depositRules);enhanceDepositSummary()}}catch{}}
   function termsMarkup(){

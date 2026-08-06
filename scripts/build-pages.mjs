@@ -2,11 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd(),dist=path.join(root,'dist');
 fs.rmSync(dist,{recursive:true,force:true});
-const excludedTop=new Set(['.git','.github','config','scripts','supabase','dist','QA-EVIDENCE-v2.9.11.0']);
+const excludedTop=new Set(['.git','.github','config','scripts','supabase','dist','test-results','playwright-report','QA-EVIDENCE-v2.9.11.0']);
 const excludedRoot=new Set(['package.json','release.json','manifest.webmanifest','sw.js']);
 function copy(src,dst,depth=0){
  for(const entry of fs.readdirSync(src,{withFileTypes:true})){
-   if(depth===0&&(excludedTop.has(entry.name)||excludedRoot.has(entry.name)||entry.name.endsWith('.md')))continue;
+   if(depth===0&&(excludedTop.has(entry.name)||entry.name.startsWith('test-results')||entry.name.startsWith('playwright-report')||excludedRoot.has(entry.name)||entry.name.endsWith('.md')))continue;
    const from=path.join(src,entry.name),to=path.join(dst,entry.name);
    if(entry.isDirectory()){fs.mkdirSync(to,{recursive:true});copy(from,to,depth+1)}
    else fs.copyFileSync(from,to);

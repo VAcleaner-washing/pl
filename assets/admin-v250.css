@@ -1,3 +1,4 @@
+html{scrollbar-gutter:stable;color-scheme:dark;}
 .hidden{display: none !important;}
 *{box-sizing: border-box;}
 body::-webkit-scrollbar,.scroll-area::-webkit-scrollbar,.modal-card::-webkit-scrollbar{width: 8px; height: 8px;}
@@ -130,11 +131,16 @@ a{color: inherit;}
 .field{display: grid; gap: 8px;}
 .field.wide{grid-column: 1/-1;}
 .field span{font-size: 14px; font-weight: 750;}
-.field input,.field select{height: 52px; padding: 0 14px;}
+.field input{height:52px;padding:0 14px}.field select{height:52px;padding:0 46px 0 14px}
 .field input:focus,.field select:focus,.field textarea:focus{border-color: rgba(214,164,95,.55); box-shadow: 0 0 0 4px rgba(214,164,95,.08);}
-.switch{grid-column: 1/-1; display: grid; grid-template-columns: auto 1fr; gap: 13px; align-items: flex-start; padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: #0e1417;}
-.switch input{width: 20px; height: 20px;}
-.switch small{display: block; color: var(--muted); margin-top: 4px;}
+ .switch{grid-column:1/-1;display:grid;grid-template-columns:auto 1fr;gap:13px;align-items:flex-start;padding:15px;border:1px solid var(--line);border-radius:14px;background:#0e1417;cursor:pointer;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+.switch:hover{border-color:rgba(214,164,95,.34);background:#11191d}
+.switch:has(input:checked){border-color:rgba(214,164,95,.52);background:linear-gradient(145deg,rgba(214,164,95,.105),rgba(14,20,23,.96))}
+.switch:has(input:focus-visible){border-color:rgba(231,189,122,.72);box-shadow:0 0 0 4px rgba(214,164,95,.11)}
+.switch input{margin:1px 0 0}
+.switch span{min-width:0}
+.switch b{line-height:1.35}
+.switch small{display:block;color:var(--muted);margin-top:4px;line-height:1.45}
 .note{margin-top: 16px; padding: 15px 17px; border-radius: 14px; background: rgba(214,164,95,.08); border: 1px solid rgba(214,164,95,.14); color: #ddd8ce;}
 .live{display: grid; border: 1px solid var(--line); border-radius: 15px; overflow: hidden; background: #0e1417;}
 .live>div{display: flex; justify-content: space-between; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--line);}
@@ -397,11 +403,12 @@ body.modal-open{overflow: hidden;}
 .extras-check-grid{display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px;}
 .extra-check{display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #0b1115; cursor: pointer;}
 .extra-check:hover{border-color: rgba(214,164,95,.4);}
-.extra-check input{width: 19px; height: 19px; accent-color: #d7a45e;}
+.extra-check input{margin:0;flex:0 0 auto;}
 .extra-check span{display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;}
 .extra-check b{font-size: 13px; font-weight: 580;}
 .extra-check small{color: var(--gold-2); white-space: nowrap;}
-.extra-check:has(input:checked){background: rgba(214,164,95,.075); border-color: rgba(214,164,95,.5);}
+.extra-check:has(input:checked){background:linear-gradient(145deg,rgba(214,164,95,.105),rgba(11,17,21,.98));border-color:rgba(214,164,95,.52);box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}
+.extra-check:has(input:focus-visible){border-color:rgba(231,189,122,.72);box-shadow:0 0 0 4px rgba(214,164,95,.11)}
 .extras-panel>div{display: flex; justify-content: space-between; gap: 18px; padding: 10px 0; border-top: 1px solid var(--line);}
 .extras-panel>div:first-of-type{border-top: 0;}
 .extras-panel span{color: var(--muted);}
@@ -488,7 +495,7 @@ body.detail-open .detail{overflow-y: auto; overflow-x: hidden; -webkit-overflow-
 .clients-toolbar>div{color: var(--muted);}
 .clients-toolbar>div strong{color: var(--gold); font-size: 20px;}
 .clients-toolbar label{display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px;}
-.clients-toolbar select{height: 40px; min-width: 190px; padding: 0 34px 0 12px; border: 1px solid var(--line-2); border-radius: 10px; background: #0b1115; color: #fff; font: inherit;}
+.clients-toolbar select{height:40px;min-width:190px;padding:0 42px 0 12px;border:1px solid var(--line-2);border-radius:10px;color:#fff;font:inherit;}
 .client-row{width: 100%; min-height: 68px; padding: 12px 20px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--text); text-align: left; cursor: default;}
 .detail-top{justify-content: space-between; color: var(--muted); margin-bottom: 18px; display: grid; grid-template-columns: auto 1fr auto; gap: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; border-color: rgba(255,255,255,.11); backdrop-filter: none; -webkit-backdrop-filter: none; position: sticky; top: 10px; z-index: 30; margin: 0 0 16px; background: #0d1418; box-shadow: 0 12px 30px rgba(0,0,0,.35); align-items: center;}
 .detail-top-meta{display: flex; align-items: center; gap: 12px; min-width: 0; margin-left: auto;}
@@ -533,7 +540,14 @@ body.detail-open .detail{overflow-y: auto; overflow-x: hidden; -webkit-overflow-
 .equipment-image-3{grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;}
 .equipment-image-3 img:first-child{grid-row: 1/-1;}
 .equipment-image-4{grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;}
-.modal-card input[type="checkbox"]{width: 24px; height: 24px; min-width: 24px; min-height: 24px;}
+input[type="checkbox"]{-webkit-appearance:none;appearance:none;width:22px;height:22px;min-width:22px;min-height:22px;border:1px solid rgba(255,255,255,.24);border-radius:6px;background:linear-gradient(180deg,#11191e,#0a1014);box-shadow:inset 0 1px 0 rgba(255,255,255,.035);display:grid;place-items:center;cursor:pointer;transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease}
+input[type="checkbox"]::after{content:"";width:6px;height:10px;border-right:2px solid #15100a;border-bottom:2px solid #15100a;transform:translateY(-1px) rotate(45deg) scale(0);transition:transform .14s ease}
+input[type="checkbox"]:hover{border-color:rgba(231,189,122,.62)}
+input[type="checkbox"]:checked{border-color:#e1ad61;background:linear-gradient(145deg,#f0c57e,#c98b39);box-shadow:0 6px 18px rgba(214,164,95,.22),inset 0 1px 0 rgba(255,255,255,.32)}
+input[type="checkbox"]:checked::after{transform:translateY(-1px) rotate(45deg) scale(1)}
+input[type="checkbox"]:focus-visible{outline:0;box-shadow:0 0 0 4px rgba(214,164,95,.16)}
+input[type="checkbox"]:disabled{opacity:.45;cursor:not-allowed}
+.modal-card input[type="checkbox"]{width:22px;height:22px;min-width:22px;min-height:22px}
 .modal-card a[href^="tel:"]{display: inline-flex; align-items: center; min-height: 44px; padding: 8px 0;}
 .catalog-row input{height: 46px; border: 1px solid var(--line); border-radius: 12px; background: #0d1418; color: #fff; padding: 0 12px; font-size: 16px; display: block; width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; min-height: 44px;}
 .settings-actions{justify-content: flex-end; margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;}
@@ -1019,7 +1033,13 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 #view .card,.modal-section,.modal-summary,.form-section{border-color: rgba(255,255,255,.115); background: linear-gradient(145deg,rgba(22,32,38,.96),rgba(12,19,23,.98)); box-shadow: inset 0 1px 0 rgba(255,255,255,.03),0 18px 42px rgba(0,0,0,.16);}
 .modal-card{position: relative; z-index: 1; border: 1px solid var(--line-2); width: min(1040px,calc(100vw - 32px)); height: min(880px,calc(100dvh - 32px)); max-height: calc(100dvh - 32px); overflow: hidden; border-radius: 22px; background: #0d1418; box-shadow: 0 30px 90px rgba(0,0,0,.55);background: radial-gradient(circle at 88% 0,rgba(214,164,95,.055),transparent 34%),#0c1317}
 .modal-form>header{padding: 22px 26px 17px;background: linear-gradient(180deg,rgba(255,255,255,.018),transparent)}
-.field input,.field select,.field textarea{width: 100%; min-width: 0; border: 1px solid var(--line-2); background: #0d1316; color: #fff; outline: 0; min-height: 48px; border-radius: 11px; font-size: 14px;border-color: rgba(255,255,255,.13); background: linear-gradient(180deg,#0d1519,#0a1014); box-shadow: inset 0 1px 0 rgba(255,255,255,.02)}
+.field input,.field select,.field textarea{width:100%;min-width:0;border:1px solid rgba(255,255,255,.13);color:#fff;outline:0;min-height:48px;border-radius:11px;font-size:14px;background:linear-gradient(180deg,#0d1519,#0a1014);box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
+.field select,.clients-toolbar select{-webkit-appearance:none;appearance:none;color-scheme:dark;background-color:#0d1519;background-image:linear-gradient(45deg,transparent 50%,#d9b676 50%),linear-gradient(135deg,#d9b676 50%,transparent 50%),linear-gradient(180deg,#0d1519,#0a1014);background-position:calc(100% - 20px) calc(50% - 2px),calc(100% - 14px) calc(50% - 2px),0 0;background-size:6px 6px,6px 6px,100% 100%;background-repeat:no-repeat;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease,background-color .18s ease}
+.field select:hover,.clients-toolbar select:hover{border-color:rgba(214,164,95,.4)}
+.field select:focus,.clients-toolbar select:focus{border-color:rgba(214,164,95,.62);box-shadow:0 0 0 4px rgba(214,164,95,.09)}
+.field select:disabled,.clients-toolbar select:disabled{opacity:.5;cursor:not-allowed}
+.field select option,.clients-toolbar select option{background:#10181d;color:#f5f1ea}
+.field select option:checked,.clients-toolbar select option:checked{background:#a87534;color:#fff}
 .issue-form,.finance-form{grid-template-rows: auto auto minmax(0,1fr) auto;}
 .modal-card:has(.issue-form){width: min(1040px,calc(100vw - 32px)); height: min(760px,calc(100dvh - 32px));}
 .issue-form .modal-layout::-webkit-scrollbar,.finance-form .modal-layout::-webkit-scrollbar,.process-grid::-webkit-scrollbar,.booking-form-scroll::-webkit-scrollbar,.catalog-scroll::-webkit-scrollbar{display: none;}
@@ -1322,7 +1342,7 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 @media (max-width:900px){.connection-state{display:none}.operations-bar,.skeleton-ops{display:flex;overflow-x:auto;gap:8px;margin-left:-10px;margin-right:-10px;padding:0 10px 4px;scroll-snap-type:x proximity;scrollbar-width:none}.operations-bar::-webkit-scrollbar,.skeleton-ops::-webkit-scrollbar{display:none}.operation-card,.skeleton-ops i{flex:0 0 150px;min-height:92px;scroll-snap-align:start}.operation-card strong{font-size:24px}.booking-actions .primary-action{width:100%;flex-basis:100%}.results-meta{margin-top:0}.load-state{margin:5vh 2px 0;padding:28px 18px}.upcoming-scope{margin-left:-10px;margin-right:-10px;padding:0 10px}.skeleton-card{height:170px}}
 
 /* v2.9.13.2 — corrected settlement model and passport data */
-.passport-data-group{border:1px solid #2b3940;border-radius:18px;background:linear-gradient(145deg,#111a1f,#0d1418);padding:18px;display:grid;gap:16px}.passport-data-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.passport-data-head b{display:block;font-size:16px}.passport-data-head small{display:block;color:#8f9aa1;margin-top:4px}.passport-data-head>span{padding:7px 10px;border-radius:999px;background:#282419;color:#e9ba68;font-size:12px;font-weight:800;white-space:nowrap}.passport-data-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.passport-verified{margin:0}.received-total,.live-received{background:rgba(226,174,91,.08);border-top:1px solid rgba(226,174,91,.24)!important;border-bottom:1px solid rgba(226,174,91,.24)!important}.live-settlement-note{display:block;padding:14px 16px;color:#9ba5ab;line-height:1.45;border-top:1px solid #273137}.deposit-saved{border-color:rgba(83,191,140,.35)}
+.passport-data-group{border:1px solid rgba(255,255,255,.13);border-radius:18px;background:linear-gradient(145deg,#111a1f,#0d1418);padding:18px;display:grid;gap:16px}.passport-data-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.passport-data-head b{display:block;font-size:16px}.passport-data-head small{display:block;color:#8f9aa1;margin-top:4px}.passport-data-head>span{padding:7px 10px;border-radius:999px;background:#282419;color:#e9ba68;font-size:12px;font-weight:800;white-space:nowrap}.passport-data-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.passport-verified{margin:0;background:#0b1115}.received-total,.live-received{background:rgba(226,174,91,.08);border-top:1px solid rgba(226,174,91,.24)!important;border-bottom:1px solid rgba(226,174,91,.24)!important}.live-settlement-note{display:block;padding:14px 16px;color:#9ba5ab;line-height:1.45;border-top:1px solid #273137}.deposit-saved{border-color:rgba(83,191,140,.35)}
 @media(max-width:620px){.passport-data-group{padding:15px}.passport-data-head{display:grid}.passport-data-head>span{justify-self:start}.passport-data-fields{grid-template-columns:1fr}.issue-form .issue-quick{grid-template-columns:1fr 1fr}.issue-form .issue-quick button:first-child{grid-column:1/-1}}
 
 

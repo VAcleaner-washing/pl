@@ -1,6 +1,8 @@
 /* VAcleaner public experience v2.9.8.0
    Premium date/slot controls + verified Instagram social proof. */
 
+html{scrollbar-gutter:stable;}
+
 :root{
   --vx-ink:#111315;
   --vx-ink-soft:#1a1d1f;

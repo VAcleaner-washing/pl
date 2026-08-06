@@ -46,12 +46,24 @@ function formatMoney(v){return new Intl.NumberFormat('uk-UA').format(Number(v)||
 function renderDeposit(){
   const amount=depositAmount(),summary=document.querySelector('.booking-summary'),mobile=document.querySelector('.booking-mobile-summary');
   if(summary){
-    const depositRows=[...summary.children].filter(el=>/Поворотний залог|Залог при видачі/i.test(el.textContent||''));
-    let row=summary.querySelector('.vx-summary-deposit,.vx-booking-deposit')||depositRows.shift();
-    depositRows.filter(el=>el!==row).forEach(el=>el.remove());
-    if(!row){row=document.createElement('div');const total=summary.querySelector('.booking-summary-total');(total||summary.querySelector('p'))?.insertAdjacentElement('beforebegin',row)}
-    row.className='vx-summary-deposit vx-booking-deposit';
-    row.innerHTML=`<span>Поворотний залог — <small>Сплачується під час отримання техніки.</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
+    const total=summary.querySelector('.booking-summary-total');
+    if(total){
+      summary.querySelectorAll('.vx-summary-prepayment,.vx-summary-deposit').forEach(el=>el.remove());
+      const prepayment=document.createElement('div');
+      prepayment.className='vx-summary-prepayment vx-summary-finance-row';
+      prepayment.innerHTML='<span><b>Бронювання дати</b><small>Сплачується після підтвердження заявки.</small></span><strong>200 грн</strong>';
+      total.insertAdjacentElement('beforebegin',prepayment);
+      const row=document.createElement('div');
+      row.className='vx-summary-deposit vx-summary-finance-row vx-booking-deposit';
+      row.innerHTML=`<span><b>Поворотний залог</b><small>Сплачується під час отримання техніки.</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
+      total.insertAdjacentElement('beforebegin',row);
+      const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
+      const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
+      if(note){
+        note.className='vx-summary-deposit-note';
+        note.textContent='Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
+      }
+    }
   }
   if(mobile){
     let note=mobile.querySelector('.vx-mobile-deposit');if(!note){note=document.createElement('small');note.className='vx-mobile-deposit';mobile.querySelector('div')?.appendChild(note)}

@@ -44,6 +44,21 @@ function depositAmount(code: string, sd: string, rd: string, rules: any, catalog
   const source = rules?.[group] || defaultDepositRules[group as keyof typeof defaultDepositRules];
   return Math.max(0, Number(fullWeekend(sd, rd) ? source.weekend : source.day) || 0);
 }
+function selectedExtras(value: unknown, catalog: any) {
+  const rows = Array.isArray(value) ? value : [];
+  const items: Array<{ code: string; label: string; quantity: number; unitPrice: number; amount: number }> = [];
+  for (const raw of rows) {
+    if (!raw || typeof raw !== "object") continue;
+    const code = String((raw as any).code || "");
+    const quantity = Math.max(0, Math.min(3, Math.floor(Number((raw as any).quantity) || 0)));
+    const item = catalog?.extras?.[code] || defaults.extras?.[code];
+    if (!item || quantity < 1) continue;
+    const unitPrice = Math.max(0, Number(item.price || 0));
+    items.push({ code, label: String(item.label || code), quantity, unitPrice, amount: unitPrice * quantity });
+  }
+  return { items, amount: items.reduce((sum, item) => sum + item.amount, 0) };
+}
+
 
 Deno.serve(async req => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -72,13 +87,8 @@ Deno.serve(async req => {
     if (!product) return json(payload, upstream.status);
     const n = days(body.startDate, body.returnDate, body.pickupWindow, body.returnWindow);
     const rawBase = base(product, body.startDate, n);
-    let extrasAmount = 0;
-    if (Array.isArray(body.extras)) {
-      for (const x of body.extras) {
-        const q = Math.max(0, Number(x?.quantity || 0));
-        extrasAmount += (cat.extras?.[x?.code]?.price ?? defaults.extras[x?.code as keyof typeof defaults.extras]?.price ?? 0) * q;
-      }
-    }
+    const selected = selectedExtras(body.extras, cat);
+    const extrasAmount = selected.amount;
     const deliveryAmount = body.fulfillment === "delivery" ? 250 : 0;
     const percent = Number(payload.loyalty?.percent || payload.estimate?.loyalty?.percent || 0);
     const discount = Math.round(rawBase * percent / 100);
@@ -97,10 +107,21 @@ Deno.serve(async req => {
       depositAmount: securityDeposit,
     };
     if (body.action === "create" && payload.success && payload.bookingCode) {
-      const { data: booking } = await db.from("vacleaner_bookings").select("id").eq("booking_code", payload.bookingCode).maybeSingle();
+      const { data: booking } = await db.from("vacleaner_bookings").select("id,extras").eq("booking_code", payload.bookingCode).maybeSingle();
       if (booking) {
+        const currentExtras = booking.extras && typeof booking.extras === "object" ? booking.extras as Record<string, any> : {};
+        const systemItems = Array.isArray(currentExtras.items)
+          ? currentExtras.items.filter((item: any) => ["carpet_chemistry_kit", "story_mention_bonus"].includes(String(item?.code || "")))
+          : [];
+        const extras = {
+          ...currentExtras,
+          items: [...selected.items, ...systemItems],
+          selected_items: selected.items.map(item => ({ code: item.code, label: item.label, price: item.amount })),
+          selected_items_amount: selected.amount,
+        };
         await db.from("vacleaner_bookings").update({
           product_label: product.label || undefined,
+          extras,
           base_amount: baseAmount,
           extras_amount: extrasAmount,
           delivery_amount: deliveryAmount,

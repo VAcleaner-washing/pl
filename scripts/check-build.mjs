@@ -40,10 +40,27 @@ const bookingHtml=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'ut
 const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
 const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','index.ts'),'utf8');
 const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','settlement.mjs'),'utf8');
+const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w.js'),'utf8');
+const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');
 execFileSync(process.execPath,[path.join(root,'scripts','test-finance.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-session.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-ux.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','check-backend-inventory.mjs')],{stdio:'pipe'});
+try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','e2e_smoke.py')],{stdio:'pipe'})}catch{errors.push('Playwright Python source does not compile')}
+const workflow=fs.readFileSync(path.join(root,'.github','workflows','pages.yml'),'utf8');
+const playwrightInstall=workflow.indexOf('python -m playwright install --with-deps chromium');
+const playwrightRun=workflow.indexOf('npm run test:e2e');
+const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
+if(playwrightInstall<0||playwrightRun<0||pagesUpload<0||!(playwrightInstall<playwrightRun&&playwrightRun<pagesUpload))errors.push('GitHub Pages deploy is not gated by Playwright');
+if(!workflow.includes('python -m py_compile scripts/e2e_smoke.py'))errors.push('GitHub workflow does not validate browser test source');
+const ciRequirements=fs.readFileSync(path.join(root,'requirements-ci.txt'),'utf8');
+if(!/^playwright==\d+\.\d+\.\d+$/m.test(ciRequirements))errors.push('Playwright CI dependency is not pinned');
 const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
+const publicExperienceCss=fs.readFileSync(path.join(root,'assets','public-experience.css'),'utf8');
+const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8');
+for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
+if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
+for(const token of ['color-scheme:dark','appearance:none','input[type="checkbox"]:checked','.switch:has(input:checked)','.field select option'])if(!adminCss.includes(token))errors.push(`admin controls visual missing: ${token}`);
 const requiredCopy=[
  'Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.',
  'Новий клієнт надсилає документ менеджеру приватно.',
@@ -65,6 +82,10 @@ if(!adminRuntime.includes('settlementConfirmed:true')||!adminRuntime.includes('r
 if(/refund_amount\s*:\s*cleanInt\(body\.refundAmount|due_amount\s*:\s*cleanInt\(body\.dueAmount/.test(adminEdge))errors.push('edge function stores client refund or due directly');
 for(const token of ['settlementConfirmation(body, finance)','status: "completed"','cleanInt(body.usedPackets, packetLimit)'])if(!adminEdge.includes(token))errors.push(`edge settlement guard missing: ${token}`);
 for(const token of ['export function settlementFromBooking','export function selectedExtrasAmount','export function settlementConfirmation','Math.min(2, usedPackets)','legacyRefund !== finance.refundAmount','settlement_mismatch'])if(!settlementModule.includes(token))errors.push(`settlement module guard missing: ${token}`);
+
+if(!publicReactBundle.includes('code:"carp_deta"')||!publicReactBundle.includes('Плямовивідник Carp-Deta 30 мл'))errors.push('Carp-Deta is missing from the hydrated public booking bundle');
+if(!bookingEdgeV5.includes('selected_items: selected.items.map')||!bookingEdgeV5.includes('systemItems'))errors.push('booking v5 does not persist selected extras independently of booking v4');
+if(!adminEdge.includes('normalizeSelectedExtras(body.selectedExtras')||!adminEdge.includes('extras_amount: selected.amount'))errors.push('admin v3 does not persist selected extras independently of admin v2');
 for(const file of files.filter(f=>f.endsWith('.html'))){
  const rel=path.relative(root,file).replaceAll('\\','/'),html=fs.readFileSync(file,'utf8');
  for(const match of html.matchAll(/(?:src|href)=["'](\/(?:assets|admin)\/[^"'?#]+)[^"']*["']/g)){

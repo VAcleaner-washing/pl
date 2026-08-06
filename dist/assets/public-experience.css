@@ -1,6 +1,8 @@
 /* VAcleaner public experience v2.9.8.0
    Premium date/slot controls + verified Instagram social proof. */
 
+html{scrollbar-gutter:stable;}
+
 :root{
   --vx-ink:#111315;
   --vx-ink-soft:#1a1d1f;
@@ -296,13 +298,16 @@
 
 
 /* v2.9.13.0 — P1 accessibility, deposit visibility and focus polish */
-.vx-summary-deposit{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0;border-top:1px solid rgba(255,255,255,.10)}
-.vx-summary-deposit>span{display:grid;gap:4px;color:rgba(255,255,255,.72)}
-.vx-summary-deposit small{font-size:11px;line-height:1.35;color:#c9a875;letter-spacing:.02em}
-.vx-summary-deposit strong{color:#e7bd7a;font-size:18px;white-space:nowrap}
-.booking-summary .vx-summary-deposit-note{margin:-5px 0 15px;padding:11px 12px;border:1px solid rgba(226,177,103,.18);border-radius:12px;background:rgba(226,177,103,.055);font-size:12px;line-height:1.5;color:rgba(255,255,255,.62)}
+.vx-summary-finance-row{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:16px 0;border-top:1px solid rgba(255,255,255,.10)}
+.vx-summary-finance-row>span{display:grid;gap:5px;min-width:0;color:rgba(255,255,255,.78)}
+.vx-summary-finance-row b{font-size:15px;line-height:1.2;color:#f5efe6}
+.vx-summary-finance-row small{font-size:11px;line-height:1.42;color:#c7aa78;letter-spacing:.01em}
+.vx-summary-finance-row strong{white-space:nowrap;font-size:18px;line-height:1.1}
+.vx-summary-prepayment strong{color:#f3efe8}
+.vx-summary-deposit strong{color:#e7bd7a}
+.booking-summary .vx-summary-deposit-note{margin:14px 0 16px;padding:12px 13px;border:1px solid rgba(226,177,103,.18);border-radius:14px;background:rgba(226,177,103,.055);font-size:12px;line-height:1.58;color:rgba(255,255,255,.66)}
 .site-header a,.desktop-nav a,.footer-links a,.footer-contact a,.breadcrumbs a,.solution-breadcrumb a,.mobile-menu nav a,.mobile-menu-actions a,.mobile-booking a{min-height:44px;display:inline-flex;align-items:center}
 .menu-button{min-width:44px;min-height:44px}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid #d9a85d;outline-offset:3px}
 .vx-calendar-day:focus-visible{outline:2px solid #17130d;outline-offset:-4px;box-shadow:0 0 0 3px #e5b66f}
-@media(max-width:760px){.footer-links a,.footer-contact a{width:max-content;padding-block:10px}.vx-summary-deposit{padding:15px 0}.vx-summary-deposit strong{font-size:16px}}
+@media(max-width:760px){.footer-links a,.footer-contact a{width:max-content;padding-block:10px}.vx-summary-finance-row{padding:14px 0;gap:14px}.vx-summary-finance-row b{font-size:14px}.vx-summary-finance-row strong{font-size:16px}}
