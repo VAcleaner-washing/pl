@@ -596,3 +596,24 @@ body.detail-open .detail{overflow-y:auto!important;overflow-x:hidden!important;-
   .settings-actions .btn{min-height:50px!important}
   .modal-card label:has(input[type="checkbox"]){min-height:44px!important}
 }
+
+/* v2.9.4.6 — mobile navigation + phantom vertical scroll fix */
+.more-nav{display:none}
+.mobile-more-sheet{position:fixed;inset:0;z-index:140;display:none}
+@media(max-width:760px){
+  html,body{min-height:100%;height:auto!important;overscroll-behavior-y:none}
+  body{min-height:100dvh!important}
+  .app{min-height:100dvh!important;height:auto!important;padding-bottom:0!important;overflow:visible!important}
+  .main{min-height:0!important;height:auto!important;padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}
+  #view{min-height:0!important;height:auto!important}
+  .nav button[data-view="clients"],.nav button[data-view="analytics"],.nav button[data-view="chemistry"],.nav button[data-view="settings"]{display:none!important}
+  .nav button:nth-child(n+6){display:none!important}
+  .nav .more-nav{display:flex!important}
+  .nav{grid-template-columns:repeat(5,minmax(0,1fr))!important;overflow:hidden!important}
+  .mobile-more-sheet{display:block}
+  .mobile-more-backdrop{position:absolute;inset:0;border:0;background:rgba(0,0,0,.58);backdrop-filter:blur(8px)}
+  .mobile-more-card{position:absolute;left:10px;right:10px;bottom:calc(82px + env(safe-area-inset-bottom));padding:14px;border:1px solid var(--line-2);border-radius:22px;background:#10171b;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+  .mobile-more-head{display:flex;align-items:center;justify-content:space-between;padding:2px 2px 12px}.mobile-more-head strong{font-size:20px}.mobile-more-close{width:44px;height:44px;border:1px solid var(--line);border-radius:50%;background:#0b1115;color:#fff;font-size:27px}
+  .mobile-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mobile-more-grid button{min-height:82px;border:1px solid var(--line);border-radius:15px;background:#0c1317;color:#d8dcde;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:13px}.mobile-more-grid button.active{border-color:rgba(214,164,95,.4);background:rgba(214,164,95,.11);color:var(--gold-2)}.mobile-more-grid svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8}
+  body.menu-open{overflow:hidden!important}
+}
