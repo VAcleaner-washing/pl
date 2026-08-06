@@ -14,4 +14,7 @@ for(const file of walk(root).filter(f=>f.endsWith('.html'))){
 const adminSw=path.join(root,'admin','sw.js');
 let sw=fs.readFileSync(adminSw,'utf8').replace(/vacleaner-manager-\d+/g,`vacleaner-manager-${build}`).replace(/\?v=\d+/g,`?v=${build}`);
 fs.writeFileSync(adminSw,sw);
+const adminRuntime=path.join(root,'assets','admin-v250.js');
+let runtime=fs.readFileSync(adminRuntime,'utf8').replace(/(\/admin\/sw\.js)\?v=\d+/g,`$1?v=${build}`);
+fs.writeFileSync(adminRuntime,runtime);
 console.log(`Stamped VAcleaner ${version} (${build})`);

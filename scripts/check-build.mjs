@@ -30,5 +30,8 @@ for(const fn of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bo
  if(!shared.includes(`VACLEANER_SOURCE_HASH="${expected}"`))errors.push(`edge config stale: ${fn}`);
 }
 const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes(`vacleaner-manager-${build}`))errors.push('service worker cache version mismatch');
+const adminRuntime=fs.readFileSync(path.join(root,'assets','admin-v250.js'),'utf8');
+const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)/g)].map(match=>match[1]);
+if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
 console.log(`Build ${release.version} passed ${files.length} file checks. Shared config ${expected}.`);
