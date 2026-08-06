@@ -1,0 +1,275 @@
+/* VAcleaner public experience v2.9.8.0
+   Premium date/slot controls + verified Instagram social proof. */
+
+:root{
+  --vx-ink:#111315;
+  --vx-ink-soft:#1a1d1f;
+  --vx-paper:#f4efe8;
+  --vx-paper-soft:#fbf8f3;
+  --vx-line:rgba(62,54,44,.16);
+  --vx-muted:#706a63;
+  --vx-gold:#c8964c;
+  --vx-gold-light:#e7bd7a;
+  --vx-shadow:0 24px 70px rgba(29,22,15,.18);
+}
+
+/* Keep the original form controls in the DOM for React/form state, but move
+   visual interaction to the custom controls below. */
+.booking-date-grid input[type="date"].vx-native-control,
+.booking-date-grid select.vx-native-control{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  border:0;
+  opacity:0;
+  overflow:hidden;
+  pointer-events:none;
+  clip-path:inset(50%);
+  white-space:nowrap;
+}
+
+.booking-date-grid>label{
+  position:relative;
+  min-width:0;
+}
+
+.vx-date-trigger{
+  width:100%;
+  min-height:64px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 38px;
+  align-items:center;
+  gap:14px;
+  margin-top:10px;
+  padding:0 18px 0 20px;
+  border:1px solid rgba(119,101,76,.25);
+  border-radius:16px;
+  background:linear-gradient(180deg,#fffdf9 0%,#f8f3ec 100%);
+  color:var(--vx-ink);
+  font:inherit;
+  text-align:left;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 8px 22px rgba(55,42,25,.06);
+  cursor:pointer;
+  transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.vx-date-trigger:hover{
+  border-color:rgba(168,119,55,.52);
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 12px 30px rgba(55,42,25,.1);
+}
+.vx-date-trigger:focus-visible{
+  outline:3px solid rgba(200,150,76,.22);
+  outline-offset:2px;
+  border-color:var(--vx-gold);
+}
+.vx-date-trigger:active{transform:translateY(1px)}
+.vx-date-trigger__copy{display:grid;gap:4px;min-width:0}
+.vx-date-trigger__value{font-size:17px;font-weight:750;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vx-date-trigger__hint{font-size:12px;color:#8a8177;font-weight:560}
+.vx-date-trigger__icon{
+  width:38px;height:38px;border-radius:12px;
+  display:grid;place-items:center;
+  background:rgba(200,150,76,.11);color:#8f642d;
+}
+.vx-date-trigger__icon svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8}
+
+.vx-slot-field{grid-column:auto}
+.vx-slot-options{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.vx-slot-option{
+  min-width:0;
+  min-height:64px;
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr);
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border:1px solid rgba(119,101,76,.22);
+  border-radius:16px;
+  background:linear-gradient(180deg,#fffdf9,#f8f3ec);
+  color:var(--vx-ink);
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 1px 0 rgba(255,255,255,.9) inset;
+  transition:border-color .2s ease,background .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.vx-slot-option:hover{border-color:rgba(168,119,55,.48);box-shadow:0 10px 24px rgba(55,42,25,.08)}
+.vx-slot-option:focus-visible{outline:3px solid rgba(200,150,76,.22);outline-offset:2px}
+.vx-slot-option.is-selected{
+  border-color:#b17b35;
+  background:linear-gradient(145deg,#201d18,#30271c);
+  color:#fff8ed;
+  box-shadow:0 13px 28px rgba(38,28,17,.2),0 0 0 1px rgba(231,189,122,.08) inset;
+}
+.vx-slot-option__icon{
+  width:36px;height:36px;border-radius:12px;
+  display:grid;place-items:center;
+  background:rgba(200,150,76,.12);color:#986a2f;
+}
+.vx-slot-option.is-selected .vx-slot-option__icon{background:rgba(231,189,122,.16);color:var(--vx-gold-light)}
+.vx-slot-option__icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8}
+.vx-slot-option__copy{display:grid;gap:2px;min-width:0}
+.vx-slot-option__copy small{font-size:11px;line-height:1.2;text-transform:uppercase;letter-spacing:.1em;font-weight:750;color:#8f867b}
+.vx-slot-option.is-selected small{color:#d3c3ad}
+.vx-slot-option__copy strong{font-size:14px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Calendar modal */
+.vx-calendar-layer{
+  position:fixed;inset:0;z-index:10000;
+  display:grid;place-items:center;
+  padding:24px;
+  background:rgba(14,15,16,.54);
+  backdrop-filter:blur(9px);
+  -webkit-backdrop-filter:blur(9px);
+  opacity:0;visibility:hidden;
+  transition:opacity .18s ease,visibility .18s ease;
+}
+.vx-calendar-layer.is-open{opacity:1;visibility:visible}
+.vx-calendar-dialog{
+  width:min(420px,100%);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:26px;
+  overflow:hidden;
+  background:linear-gradient(160deg,#17191a,#0f1112 72%);
+  color:#f8f3eb;
+  box-shadow:0 40px 110px rgba(0,0,0,.45);
+  transform:translateY(12px) scale(.985);
+  transition:transform .2s ease;
+}
+.vx-calendar-layer.is-open .vx-calendar-dialog{transform:none}
+.vx-calendar-top{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:20px;
+  padding:24px 24px 18px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.vx-calendar-kicker{display:block;margin-bottom:6px;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#d9a85f;font-weight:800}
+.vx-calendar-title{margin:0;font-size:22px;letter-spacing:-.025em}
+.vx-calendar-close{
+  width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.13);
+  background:rgba(255,255,255,.03);color:#fff;font-size:24px;line-height:1;cursor:pointer;
+}
+.vx-calendar-toolbar{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;padding:18px 22px 10px}
+.vx-calendar-nav{
+  width:42px;height:42px;border-radius:13px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.035);color:#fff;font-size:20px;cursor:pointer;
+}
+.vx-calendar-nav:disabled{opacity:.28;cursor:not-allowed}
+.vx-calendar-month{text-align:center;font-weight:760;text-transform:capitalize}
+.vx-calendar-weekdays,.vx-calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:0 22px}
+.vx-calendar-weekdays{padding-top:8px;padding-bottom:7px;color:#8e9295;font-size:11px;text-transform:uppercase;letter-spacing:.08em;text-align:center;font-weight:750}
+.vx-calendar-grid{padding-bottom:18px}
+.vx-calendar-day{
+  aspect-ratio:1;border:0;border-radius:13px;background:transparent;color:#eeece7;
+  font:inherit;font-size:14px;font-weight:650;cursor:pointer;position:relative;
+}
+.vx-calendar-day:hover:not(:disabled){background:rgba(231,189,122,.12);color:#ffd898}
+.vx-calendar-day.is-today:after{content:"";position:absolute;left:50%;bottom:6px;width:4px;height:4px;border-radius:50%;background:#d8a355;transform:translateX(-50%)}
+.vx-calendar-day.is-selected{background:linear-gradient(145deg,#edc37e,#c28a3e);color:#17130e;box-shadow:0 9px 20px rgba(194,138,62,.28)}
+.vx-calendar-day:disabled{color:#505456;cursor:not-allowed}
+.vx-calendar-day.is-outside{opacity:.22}
+.vx-calendar-footer{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:16px 22px 22px;border-top:1px solid rgba(255,255,255,.07)
+}
+.vx-calendar-meta{font-size:12px;color:#969a9d}
+.vx-calendar-today{
+  min-height:42px;padding:0 16px;border-radius:13px;border:1px solid rgba(231,189,122,.35);
+  background:rgba(231,189,122,.08);color:#f2c986;font:inherit;font-weight:700;cursor:pointer;
+}
+
+/* Verified social proof — no invented quotes, direct link to original Highlights. */
+.vx-proof{
+  position:relative;
+  overflow:hidden;
+  margin:0;
+  padding:clamp(62px,7vw,104px) clamp(24px,6vw,92px);
+  background:
+    radial-gradient(circle at 85% 12%,rgba(201,147,72,.16),transparent 28%),
+    linear-gradient(145deg,#121415 0%,#090b0c 100%);
+  color:#f7f2e9;
+}
+.vx-proof:before{content:"";position:absolute;inset:18px;border:1px solid rgba(255,255,255,.065);border-radius:28px;pointer-events:none}
+.vx-proof__inner{position:relative;z-index:1;max-width:1380px;margin:0 auto;display:grid;grid-template-columns:minmax(0,.9fr) minmax(420px,1.1fr);gap:clamp(36px,6vw,90px);align-items:center}
+.vx-proof__eyebrow{margin:0 0 18px;color:#d8a355;font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.vx-proof h2{margin:0;max-width:720px;font-size:clamp(38px,4.6vw,72px);line-height:.98;letter-spacing:-.05em;font-weight:690}
+.vx-proof h2 em{display:block;color:#ddb06d;font-family:Georgia,serif;font-weight:400}
+.vx-proof__lead{max-width:620px;margin:26px 0 0;color:#b7b5b0;font-size:clamp(16px,1.4vw,20px);line-height:1.65}
+.vx-proof__actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.vx-proof__cta,.vx-proof__secondary{
+  min-height:54px;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:0 20px;border-radius:14px;text-decoration:none;font-size:14px;font-weight:760;
+}
+.vx-proof__cta{background:linear-gradient(145deg,#e8bb74,#c58d40);color:#15110c;box-shadow:0 14px 28px rgba(197,141,64,.2)}
+.vx-proof__secondary{border:1px solid rgba(255,255,255,.14);color:#f4eee4;background:rgba(255,255,255,.035)}
+.vx-proof__panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.vx-proof__count{
+  grid-column:1/-1;min-height:164px;padding:26px;border:1px solid rgba(255,255,255,.08);border-radius:24px;
+  background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018));
+  display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.18);
+}
+.vx-proof__number{font-size:clamp(70px,8vw,122px);line-height:.78;letter-spacing:-.08em;color:#e6b66e;font-weight:700}
+.vx-proof__count-copy{max-width:230px;color:#c7c3bc;font-size:14px;line-height:1.5}
+.vx-highlight{
+  min-height:178px;padding:22px;border:1px solid rgba(255,255,255,.08);border-radius:22px;
+  background:rgba(255,255,255,.035);text-decoration:none;color:#fff;
+  display:flex;flex-direction:column;justify-content:space-between;transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+.vx-highlight:hover{transform:translateY(-3px);border-color:rgba(230,182,110,.35);background:rgba(255,255,255,.055)}
+.vx-highlight__ring{width:58px;height:58px;border-radius:50%;padding:2px;background:linear-gradient(135deg,#f0c37b,#8e5a2a 55%,#6d466e);display:grid;place-items:center}
+.vx-highlight__ring span{width:100%;height:100%;border-radius:50%;background:#121415;border:3px solid #121415;display:grid;place-items:center;color:#e9bb75;font-weight:800;font-size:14px}
+.vx-highlight strong{font-size:18px}
+.vx-highlight small{display:block;margin-top:6px;color:#9d9f9f;font-size:12px;line-height:1.45}
+.vx-proof__note{grid-column:1/-1;margin:2px 2px 0;color:#7f8385;font-size:11px;line-height:1.5}
+
+/* Booking page gets a more compact proof block before the footer. */
+.booking-form + .vx-proof{margin-top:0}
+
+@media(max-width:900px){
+  .vx-proof__inner{grid-template-columns:1fr}
+  .vx-proof__panel{max-width:680px}
+}
+
+@media(max-width:620px){
+  .booking-date-grid{gap:18px!important}
+  .vx-date-trigger{min-height:60px;border-radius:15px}
+  .vx-slot-options{grid-template-columns:1fr 1fr;gap:8px}
+  .vx-slot-option{min-height:62px;padding:9px 10px;grid-template-columns:32px minmax(0,1fr);gap:8px}
+  .vx-slot-option__icon{width:32px;height:32px;border-radius:10px}
+  .vx-slot-option__copy strong{font-size:12px}
+  .vx-calendar-layer{place-items:end center;padding:0}
+  .vx-calendar-dialog{width:100%;border-radius:26px 26px 0 0;padding-bottom:env(safe-area-inset-bottom)}
+  .vx-calendar-top{padding:20px 20px 16px}
+  .vx-calendar-toolbar{padding-left:18px;padding-right:18px}
+  .vx-calendar-weekdays,.vx-calendar-grid{padding-left:18px;padding-right:18px}
+  .vx-calendar-day{border-radius:11px}
+  .vx-proof{padding:68px 20px 82px}
+  .vx-proof:before{inset:10px;border-radius:22px}
+  .vx-proof h2{font-size:42px}
+  .vx-proof__panel{grid-template-columns:1fr 1fr;gap:10px}
+  .vx-proof__count{min-height:146px;padding:20px}
+  .vx-proof__number{font-size:76px}
+  .vx-proof__count-copy{font-size:12px;max-width:160px}
+  .vx-highlight{min-height:154px;padding:18px}
+  .vx-highlight__ring{width:50px;height:50px}
+  .vx-highlight strong{font-size:15px}
+  .vx-proof__actions{display:grid;grid-template-columns:1fr}
+}
+
+@media(max-width:380px){
+  .vx-slot-options{grid-template-columns:1fr}
+  .vx-proof__panel{grid-template-columns:1fr}
+  .vx-proof__count,.vx-proof__note{grid-column:auto}
+  .vx-proof__count{display:grid}
+}
+
+/* Prevent Safari/iPad auto-zoom and keep form typography consistent. */
+.booking-form input:not([type="checkbox"]),
+.booking-form select,
+.booking-form textarea{font-size:16px}

@@ -17,6 +17,7 @@ function apply(){
     const field=sel.closest('label')?.nextElementSibling?.querySelector?.('input[type="time"]');
     if(field){field.min=isMorning?slots.morningStart:slots.eveningStart;field.max=isMorning?slots.morningEnd:slots.eveningEnd}
   });
+  window.dispatchEvent(new CustomEvent('vacleaner:slots-updated'));
 }
 
 
