@@ -1,7 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES } from "./config.ts";
-import { productUsesPuzzi, settlementConfirmation, settlementFromBooking } from "./settlement.mjs";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,8 +12,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
   headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
 });
 
-type DepositRules = Record<"oneUnit" | "twoUnits" | "general" | "elite", { day: number; weekend: number }>;
-const defaultDepositRules: DepositRules = structuredClone(DEFAULT_DEPOSIT_RULES) as DepositRules;
+const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultCatalog: any = structuredClone(DEFAULT_CATALOG);
 const cleanInt = (value: unknown, max = 100000) => Math.max(0, Math.min(max, Math.floor(Number(value) || 0)));
 const cleanText = (value: unknown, max: number) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
@@ -69,7 +67,7 @@ function normalizeDepositRules(value: any) {
   }
   return out;
 }
-function calculateDeposit(productCode: string, startDate: string, returnDate: string, rules: DepositRules, catalog: any = defaultCatalog) {
+function calculateDeposit(productCode: string, startDate: string, returnDate: string, rules: typeof defaultDepositRules, catalog: any = defaultCatalog) {
   const group = depositGroup(productCode, catalog) as keyof typeof rules;
   return rules[group][includesFullWeekend(startDate, returnDate) ? "weekend" : "day"];
 }
@@ -130,51 +128,48 @@ Deno.serve(async (request: Request) => {
       if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single();
       if (currentError || !current) return json({ error: "invalid_booking" }, 404);
-      const packetLimit = productUsesPuzzi(String(current.product_code || ""), catalog, defaultCatalog) ? 8 : 0;
-      const usedPackets = cleanInt(body.usedPackets, packetLimit);
-      const storyMention = packetLimit > 0 && body.storyMention === true;
+      const usedPackets = cleanInt(body.usedPackets, 100);
+      const storyMention = body.storyMention === true;
+      const freePackets = storyMention ? 2 : 0;
+      const paidPackets = Math.max(0, usedPackets - freePackets);
+      const chemistryAmount = paidPackets * Number(catalog?.puzziPacketPrice || 50);
       const depositAmount = cleanInt(body.depositAmount ?? current.deposit_amount, 100000);
       const depositPaid = body.depositPaid === true || current.deposit_paid === true;
       const currentExtras = current.extras && typeof current.extras === "object" ? current.extras as Record<string, any> : {};
-      const calculationInput = {
-        ...current,
-        deposit_amount: depositAmount,
-        deposit_paid: depositPaid,
-        extras: {
-          ...currentExtras,
-          chemistry: { used_packets: usedPackets, story_mention: storyMention },
-        },
-      };
-      const finance = settlementFromBooking(calculationInput, catalog, defaultCatalog);
+      const selectedAmount = Array.isArray(currentExtras.selected_items)
+        ? currentExtras.selected_items.reduce((sum: number, item: Record<string, any>) => sum + Number(item.price || 0), 0)
+        : 0;
+      const totalExtras = selectedAmount + chemistryAmount;
+      const totalAmount = Number(current.base_amount || 0) + Number(current.delivery_amount || 0) + totalExtras;
+      const prepaymentAmount = Number(current.prepayment_paid ? current.prepayment_amount || 200 : 0);
+      const receivedAmount = prepaymentAmount + (depositPaid ? depositAmount : 0);
+      const balance = receivedAmount - totalAmount;
       const now = new Date().toISOString();
       const extras = {
         ...currentExtras,
         chemistry: {
-          used_packets: finance.usedPackets,
-          story_mention: finance.storyMention,
-          free_packets: finance.freePackets,
-          paid_packets: finance.paidPackets,
-          price_per_packet: finance.packetPrice,
-          amount: finance.chemistryAmount,
+          used_packets: usedPackets,
+          story_mention: storyMention,
+          free_packets: freePackets,
+          paid_packets: paidPackets,
+          price_per_packet: Number(catalog?.puzziPacketPrice || 50),
+          amount: chemistryAmount,
         },
         settlement: {
-          ...(currentExtras.settlement || {}),
           model: "prepayment_plus_deposit",
-          prepayment_amount: finance.prepaymentAmount,
-          deposit_amount: finance.depositPaid ? finance.securityDeposit : 0,
-          received_amount: finance.receivedAmount,
-          expenses_amount: finance.totalAmount,
-          refund_amount: finance.refundAmount,
-          due_amount: finance.dueAmount,
-          completed: false,
-          completed_at: null,
+          prepayment_amount: prepaymentAmount,
+          deposit_amount: depositPaid ? depositAmount : 0,
+          received_amount: receivedAmount,
+          expenses_amount: totalAmount,
+          refund_amount: Math.max(0, balance),
+          due_amount: Math.max(0, -balance),
           calculated_at: now,
         },
       };
       const { data, error } = await supabase.from("vacleaner_bookings").update({
         extras,
-        extras_amount: finance.totalExtras,
-        total_amount: finance.totalAmount,
+        extras_amount: totalExtras,
+        total_amount: totalAmount,
         deposit_amount: depositAmount,
         deposit_paid: depositPaid,
         deposit_paid_at: depositPaid ? (current.deposit_paid_at || now) : null,
@@ -187,58 +182,47 @@ Deno.serve(async (request: Request) => {
       await tagAudit(supabase, bookingId, userData.user.id, "edge:save_finance", actionStartedAt);
       return json({
         booking: data,
-        finance,
+        finance: {
+          usedPackets, storyMention, freePackets, paidPackets, chemistryAmount,
+          selectedExtrasAmount: selectedAmount, prepaymentAmount, securityDeposit: depositAmount,
+          depositPaid, receivedAmount, totalAmount, refundAmount: Math.max(0, balance), dueAmount: Math.max(0, -balance),
+        },
       });
     }
 
     if (action === "save_deposit_return") {
       const bookingId = String(body.bookingId ?? "");
       if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
-      const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single();
+      const returned = body.returned === true;
+      const refundAmount = cleanInt(body.refundAmount, 100000);
+      const dueAmount = cleanInt(body.dueAmount, 100000);
+      const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("deposit_paid,extras").eq("id", bookingId).single();
       if (currentError || !current) return json({ error: "invalid_booking" }, 404);
-      if (current.deposit_paid !== true) return json({ error: "deposit_not_received" }, 409);
-      if (!["confirmed", "issued", "completed"].includes(String(current.status || ""))) return json({ error: "invalid_transition" }, 409);
-      const finance = settlementFromBooking(current, catalog, defaultCatalog);
-      const confirmation = settlementConfirmation(body, finance);
-      if (!confirmation.ok) return json({ error: confirmation.error, finance }, 409);
-      const { refundPaid, duePaid } = confirmation;
+      if (returned && current.deposit_paid !== true) return json({ error: "deposit_not_received" }, 409);
       const now = new Date().toISOString();
       const currentExtras = current.extras && typeof current.extras === "object" ? current.extras as Record<string, any> : {};
       const extras = {
         ...currentExtras,
         settlement: {
           ...(currentExtras.settlement || {}),
-          model: "prepayment_plus_deposit",
-          prepayment_amount: finance.prepaymentAmount,
-          deposit_amount: finance.depositPaid ? finance.securityDeposit : 0,
-          received_amount: finance.receivedAmount,
-          expenses_amount: finance.totalAmount,
-          refund_amount: finance.refundAmount,
-          due_amount: finance.dueAmount,
-          refund_paid: finance.refundAmount > 0 ? refundPaid : false,
-          due_paid: finance.dueAmount > 0 ? duePaid : false,
-          completed: true,
-          completed_at: now,
-          calculated_at: now,
+          refund_amount: refundAmount,
+          due_amount: dueAmount,
+          completed: returned,
+          completed_at: returned ? now : null,
         },
       };
       const { data, error } = await supabase.from("vacleaner_bookings").update({
         extras,
-        extras_amount: finance.totalExtras,
-        total_amount: finance.totalAmount,
-        deposit_returned: true,
-        deposit_returned_at: now,
-        return_payment_amount: finance.dueAmount,
-        return_payment_paid: finance.dueAmount > 0 ? duePaid : false,
-        return_payment_paid_at: finance.dueAmount > 0 && duePaid ? now : null,
-        status: "completed",
-        completed_at: current.completed_at || now,
-        hold_expires_at: null,
+        deposit_returned: returned,
+        deposit_returned_at: returned ? now : null,
+        return_payment_amount: dueAmount,
+        return_payment_paid: returned && dueAmount > 0,
+        return_payment_paid_at: returned && dueAmount > 0 ? now : null,
         updated_at: now,
       }).eq("id", bookingId).select("*").single();
       if (error) throw error;
       await tagAudit(supabase, bookingId, userData.user.id, "edge:save_deposit_return", actionStartedAt);
-      return json({ booking: data, finance });
+      return json({ booking: data });
     }
 
     const upstream = await fetch(`${supabaseUrl}/functions/v1/vacleaner-admin-bookings-v2`, {

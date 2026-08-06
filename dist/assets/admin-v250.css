@@ -18,7 +18,7 @@ a{color: inherit;}
 .avatar{width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg,#d6a45f,#6d4a26); color: #0c0f11; font-weight: 900;}
 .profile small{display: block; color: var(--muted); margin-top: 3px;}
 .logout{width: 100%; height: 42px; border: 0; background: transparent; color: #adb3b6; text-align: left; padding: 0 10px;}
-.search{width: min(480px,44vw); height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--line-2); border-radius: 12px; background: #0c1216;}
+.search{position: relative; width: min(480px,44vw); height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--line-2); border-radius: 12px; background: #0c1216;}
 .search input::placeholder{color: #757d82;}
 .top-spacer{flex: 1;}
 .icon-btn,.new-btn{height: 46px; border-radius: 11px;}
@@ -1288,6 +1288,38 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .audit-entry-changes{grid-template-columns:1fr}
 .audit-entry-changes>div{display:grid;gap:3px}
 .audit-entry-changes strong{text-align:left}}
+
+
+/* v3.0.9 — operations-first UX */
+.search-clear{width:32px;height:32px;flex:0 0 32px;border:0;border-radius:9px;background:rgba(255,255,255,.055);color:#b8c0c3;font-size:19px;line-height:1;cursor:pointer}
+.search-clear:hover{background:rgba(255,255,255,.1);color:#fff}
+.connection-state{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:999px;color:#aeb7ba;font-size:11px;font-weight:700;white-space:nowrap}
+.connection-state i{width:7px;height:7px;border-radius:50%;background:#5ed395;box-shadow:0 0 0 4px rgba(94,211,149,.1)}
+.connection-state.offline{border-color:rgba(255,143,135,.24);color:#ffaaa4;background:rgba(255,94,83,.07)}
+.connection-state.offline i{background:#ff756c;box-shadow:0 0 0 4px rgba(255,117,108,.1)}
+.operations-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.operation-card{min-width:0;min-height:104px;padding:15px 16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,rgba(19,28,33,.96),rgba(11,17,21,.98));color:#fff;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.operation-card:hover{transform:translateY(-1px);border-color:rgba(214,164,95,.3)}
+.operation-card span{display:block;color:#b8c0c3;font-size:12px;font-weight:650}
+.operation-card strong{display:block;margin:8px 0 5px;font-size:27px;line-height:1;letter-spacing:-.04em}
+.operation-card small{display:block;color:#778186;font-size:11px;line-height:1.35}
+.operation-card.new strong{color:#efc77f}.operation-card.waiting strong{color:#83c5ff}.operation-card.issue strong{color:#73dda0}.operation-card.return strong{color:#e6ba72}
+.operation-card.danger{border-color:rgba(255,117,108,.25);background:linear-gradient(145deg,rgba(61,27,28,.62),rgba(21,14,16,.98))}.operation-card.danger strong,.operation-card.danger small{color:#ffaaa4}
+.results-meta{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:-2px 2px 10px;color:var(--muted);font-size:12px}
+.results-meta b{color:#e2e7e8}.results-meta button{border:0;background:transparent;color:var(--gold-2);font-weight:650;cursor:pointer}
+.booking-time-meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:6px}.booking-time-meta>span{margin:0}
+.schedule-badge{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border:1px solid rgba(255,255,255,.09);border-radius:999px;font-size:10px;font-style:normal;font-weight:750;line-height:1;white-space:nowrap}
+.schedule-badge.today{border-color:rgba(115,221,160,.26);background:rgba(73,190,132,.11);color:#8de0b7}.schedule-badge.soon{border-color:rgba(131,197,255,.24);background:rgba(86,157,218,.1);color:#a8d4f7}.schedule-badge.danger{border-color:rgba(255,117,108,.28);background:rgba(255,94,83,.1);color:#ffaaa4}.schedule-badge.future,.schedule-badge.muted{color:#99a2a6}
+.booking-row.needs-attention{border-color:rgba(255,117,108,.25);box-shadow:inset 3px 0 0 rgba(255,117,108,.62)}
+.booking-actions .primary-action{order:-1}
+.upcoming-scope{display:flex;gap:8px;align-items:center;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}.upcoming-scope::-webkit-scrollbar{display:none}.upcoming-scope .chip{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto}.upcoming-scope .chip b{margin:0;min-width:20px;padding:2px 6px;border-radius:999px;background:rgba(255,255,255,.06);font-size:11px}.upcoming-scope .chip.has-danger:not(.active){border-color:rgba(255,117,108,.3);color:#ffaaa4}
+.upcoming-day.today>header{border-color:rgba(115,221,160,.22)}.upcoming-day.overdue>header{border-color:rgba(255,117,108,.25);background:linear-gradient(145deg,rgba(54,25,27,.72),#0c1215)}.upcoming-row.danger{border-color:rgba(255,117,108,.25)}.upcoming-time .schedule-badge{margin-top:8px;width:max-content}
+.empty-action i{display:grid;place-items:center;width:46px;height:46px;margin:0 auto 13px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035);color:var(--gold-2);font-size:22px;font-style:normal}.empty-action h3{margin:0;color:#e5e9ea;font-size:18px}.empty-action p{margin:7px 0 17px;color:var(--muted)}
+.loading-shell{display:grid;gap:12px}.skeleton-ops{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.skeleton-ops i,.skeleton-card i,.skeleton-card b,.skeleton-card span{display:block;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.075),rgba(255,255,255,.035));background-size:220% 100%;animation:vac-skeleton 1.35s ease-in-out infinite}.skeleton-ops i{height:104px;border:1px solid var(--line)}.skeleton-card{height:190px;padding:20px}.skeleton-card i{width:130px;height:12px}.skeleton-card b{width:42%;height:25px;margin-top:14px}.skeleton-card span{width:75%;height:12px;margin-top:24px}.skeleton-card span:last-child{width:58%;margin-top:10px}@keyframes vac-skeleton{to{background-position:-220% 0}}
+.load-state{max-width:560px;margin:8vh auto 0;padding:34px;text-align:center}.load-state-icon{display:grid;place-items:center;width:54px;height:54px;margin:0 auto 16px;border:1px solid rgba(255,143,135,.25);border-radius:17px;background:rgba(255,94,83,.08);color:#ffaaa4;font-size:25px}.load-state h2{margin:0 0 9px}.load-state p{margin:0 0 20px;color:var(--muted);line-height:1.55}.load-state small{display:block;margin-top:15px;color:#778186}
+.toast{opacity:0;transform:translateY(8px);transition:opacity .18s ease,transform .18s ease}.toast.show{opacity:1;transform:none}.toast.success{border-color:rgba(94,211,149,.25)}.toast.warning{border-color:rgba(255,183,96,.28)}
+@media (max-width:1100px){.operations-bar,.skeleton-ops{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){.connection-state{display:none}.operations-bar,.skeleton-ops{display:flex;overflow-x:auto;gap:8px;margin-left:-10px;margin-right:-10px;padding:0 10px 4px;scroll-snap-type:x proximity;scrollbar-width:none}.operations-bar::-webkit-scrollbar,.skeleton-ops::-webkit-scrollbar{display:none}.operation-card,.skeleton-ops i{flex:0 0 150px;min-height:92px;scroll-snap-align:start}.operation-card strong{font-size:24px}.booking-actions .primary-action{width:100%;flex-basis:100%}.results-meta{margin-top:0}.load-state{margin:5vh 2px 0;padding:28px 18px}.upcoming-scope{margin-left:-10px;margin-right:-10px;padding:0 10px}.skeleton-card{height:170px}}
 
 /* v2.9.13.2 — corrected settlement model and passport data */
 .passport-data-group{border:1px solid #2b3940;border-radius:18px;background:linear-gradient(145deg,#111a1f,#0d1418);padding:18px;display:grid;gap:16px}.passport-data-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.passport-data-head b{display:block;font-size:16px}.passport-data-head small{display:block;color:#8f9aa1;margin-top:4px}.passport-data-head>span{padding:7px 10px;border-radius:999px;background:#282419;color:#e9ba68;font-size:12px;font-weight:800;white-space:nowrap}.passport-data-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.passport-verified{margin:0}.received-total,.live-received{background:rgba(226,174,91,.08);border-top:1px solid rgba(226,174,91,.24)!important;border-bottom:1px solid rgba(226,174,91,.24)!important}.live-settlement-note{display:block;padding:14px 16px;color:#9ba5ab;line-height:1.45;border-top:1px solid #273137}.deposit-saved{border-color:rgba(83,191,140,.35)}

@@ -33,5 +33,44 @@ const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes
 const adminRuntime=fs.readFileSync(path.join(root,'assets','admin-v250.js'),'utf8');
 const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)/g)].map(match=>match[1]);
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
+
+const publicBooking=fs.readFileSync(path.join(root,'assets','public-booking-slots.js'),'utf8');
+const publicExperience=fs.readFileSync(path.join(root,'assets','public-experience.js'),'utf8');
+const bookingHtml=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'utf8');
+const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
+const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','index.ts'),'utf8');
+const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','settlement.mjs'),'utf8');
+execFileSync(process.execPath,[path.join(root,'scripts','test-finance.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-session.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-ux.mjs')],{stdio:'pipe'});
+const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
+const requiredCopy=[
+ 'Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.',
+ 'Новий клієнт надсилає документ менеджеру приватно.',
+ 'Сплачується під час отримання техніки.',
+ 'Що потрібно для оформлення',
+];
+for(const phrase of requiredCopy)if(!businessCopy.includes(phrase))errors.push(`required booking copy missing: ${phrase}`);
+for(const phrase of ['базова сума, фактичну фіксує менеджер','Базова сума; фактичну менеджер фіксує при видачі','залог повертається окремо','оплата оренди при видачі','входить у суму оренди','входить у вартість оренди'])if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
+if(!bookingHtml.includes('7:00–9:30')||!bookingHtml.includes('17:30–20:00'))errors.push('public fallback slots are stale');
+if(!adminHtml.includes('Content-Security-Policy'))errors.push('admin CSP is missing');
+if(!adminRuntime.includes("SESSION_IDLE_MS=30*24*60*60*1000"))errors.push('trusted-device session expiry is missing');
+if(!adminRuntime.includes('primary=state.rememberSession?localStorage:sessionStorage')||!adminRuntime.includes('primary.setItem(SESSION_KEY'))errors.push('persistent/session-only storage modes are incomplete');
+if(!adminRuntime.includes('name=\"remember\"')||!adminRuntime.includes('Запам’ятати цей пристрій'))errors.push('trusted-device login option is missing');
+if(!adminRuntime.includes('saveSession(d,sessionPersistent())'))errors.push('refreshed token does not preserve session mode');
+if(!adminRuntime.includes('safeMarkup(markup)')||!adminRuntime.includes('const escapeHtml='))errors.push('admin output hardening is missing');
+if(!adminRuntime.includes('Math.min(8,packetValue()')||!adminRuntime.includes('const value=Math.min(8,digits(form.used))'))errors.push('chemistry packet UI is not limited to 8');
+if(adminRuntime.includes('refundAmount:result.refund')||adminRuntime.includes('dueAmount:result.due'))errors.push('client still submits calculated refund or due');
+if(!adminRuntime.includes('settlementConfirmed:true')||!adminRuntime.includes('refundPaid:Number(finalFinance.refundAmount||0)>0')||!adminRuntime.includes('duePaid:Number(finalFinance.dueAmount||0)>0'))errors.push('settlement confirmations are incomplete');
+if(/refund_amount\s*:\s*cleanInt\(body\.refundAmount|due_amount\s*:\s*cleanInt\(body\.dueAmount/.test(adminEdge))errors.push('edge function stores client refund or due directly');
+for(const token of ['settlementConfirmation(body, finance)','status: "completed"','cleanInt(body.usedPackets, packetLimit)'])if(!adminEdge.includes(token))errors.push(`edge settlement guard missing: ${token}`);
+for(const token of ['export function settlementFromBooking','export function selectedExtrasAmount','export function settlementConfirmation','Math.min(2, usedPackets)','legacyRefund !== finance.refundAmount','settlement_mismatch'])if(!settlementModule.includes(token))errors.push(`settlement module guard missing: ${token}`);
+for(const file of files.filter(f=>f.endsWith('.html'))){
+ const rel=path.relative(root,file).replaceAll('\\','/'),html=fs.readFileSync(file,'utf8');
+ for(const match of html.matchAll(/(?:src|href)=["'](\/(?:assets|admin)\/[^"'?#]+)[^"']*["']/g)){
+  const local=path.join(root,match[1].replace(/^\//,''));
+  if(!fs.existsSync(local))errors.push(`missing local reference ${match[1]} in ${rel}`);
+ }
+}
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
 console.log(`Build ${release.version} passed ${files.length} file checks. Shared config ${expected}.`);

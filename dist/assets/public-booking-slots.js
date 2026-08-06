@@ -51,14 +51,14 @@ function renderDeposit(){
     depositRows.filter(el=>el!==row).forEach(el=>el.remove());
     if(!row){row=document.createElement('div');const total=summary.querySelector('.booking-summary-total');(total||summary.querySelector('p'))?.insertAdjacentElement('beforebegin',row)}
     row.className='vx-summary-deposit vx-booking-deposit';
-    row.innerHTML=`<span>Поворотний залог <small>сплачується під час отримання техніки</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
+    row.innerHTML=`<span>Поворотний залог — <small>Сплачується під час отримання техніки.</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
   }
   if(mobile){
     let note=mobile.querySelector('.vx-mobile-deposit');if(!note){note=document.createElement('small');note.className='vx-mobile-deposit';mobile.querySelector('div')?.appendChild(note)}
     note.textContent=amount?`Поворотний залог при отриманні: ${formatMoney(amount)}`:'Сума залогу з’явиться після вибору';
   }
   const conditions=document.querySelector('.booking-conditions ul');
-  if(conditions&&conditions.children[0])conditions.children[0].textContent='Передплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у суму оренди.';
+  if(conditions&&conditions.children[0])conditions.children[0].textContent='Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.';
   if(conditions&&conditions.children[1])conditions.children[1].textContent='Новий клієнт надсилає документ менеджеру приватно. Повторному клієнту, чиї дані вже є в базі, повторно надсилати документ не потрібно.';
   if(conditions&&conditions.children[2])conditions.children[2].textContent=amount?`Поворотний залог ${formatMoney(amount)} сплачується під час отримання техніки. Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`:`Поворотний залог сплачується під час отримання техніки. Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`;
 }

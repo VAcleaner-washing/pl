@@ -1,5 +1,5 @@
-const CACHE='vacleaner-manager-3006';
-const CORE=['/admin/bronuvannia/','/assets/vacleaner-core.js?v=3006','/assets/admin-v250.css?v=3006','/assets/admin-v250.js?v=3006','/admin/manifest.webmanifest','/icon-192.png','/icon-512.png'];
+const CACHE='vacleaner-manager-3009';
+const CORE=['/admin/bronuvannia/','/assets/vacleaner-core.js?v=3009','/assets/admin-v250.css?v=3009','/assets/admin-v250.js?v=3009','/admin/manifest.webmanifest','/icon-192.png','/icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{
