@@ -1,0 +1,10 @@
+{
+  "name": "vacleaner-static",
+  "private": true,
+  "version": "3.0.0",
+  "scripts": {
+    "stamp": "node scripts/stamp-build.mjs",
+    "check": "node scripts/check-build.mjs",
+    "build": "node scripts/build-pages.mjs"
+  }
+}

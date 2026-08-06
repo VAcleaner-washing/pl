@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
+import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, VACLEANER_RELEASE_VERSION } from "./config.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -12,38 +13,9 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
   headers: { ...cors, "Content-Type": "application/json; charset=utf-8" },
 });
 
-const defaultSlots = { morningStart: "07:00", morningEnd: "09:30", eveningStart: "17:30", eveningEnd: "20:00" };
-const defaultDepositRules = {
-  oneUnit: { day: 1000, weekend: 2000 },
-  twoUnits: { day: 1500, weekend: 3000 },
-  general: { day: 2000, weekend: 3000 },
-  elite: { day: 3000, weekend: 4000 },
-};
-const defaultCatalog = {
-  products: {
-    puzzi: { label: "Kärcher Puzzi 8/1", weekday: 700, weekend: 800 },
-    puzzi_jimmy: { label: "Puzzi + Jimmy", weekday: 1050, weekend: 1150 },
-    puzzi_abir: { label: "Puzzi + робот для вікон", weekday: 1500, weekend: 1700 },
-    sc2: { label: "Kärcher SC 2 Deluxe", weekday: 500, weekend: 600 },
-    abir: { label: "Робот для вікон", weekday: 800, weekend: 900 },
-    combo: { label: "Комбо · Puzzi + SC 2", weekday: 1000, weekend: 1200, saturdaySunday: 1800 },
-    general: { label: "Генеральне прибирання", weekday: 1300, weekend: 1400, saturdaySunday: 2200 },
-    ideal_windows: { label: "Ідеальні вікна", weekday: 1200, weekend: 1300, saturdaySunday: 1900 },
-    elite: { label: "HOME RESET", weekday: 2300, weekend: 2500, saturdaySunday: 3500 },
-  },
-  extras: {
-    premium_nozzles: { label: "Насадки «Преміум» до SC 2", price: 200 },
-    odour_zero: { label: "Odour Zero", price: 250 },
-    neutralix: { label: "Neutralix · концентрат", price: 250 },
-    shower_care: { label: "Shower Care", price: 250 },
-    soft_degreaser: { label: "Soft Degreaser", price: 250 },
-    grill_force: { label: "Grill Force", price: 250 },
-    scalex_pro: { label: "Scalex Pro", price: 250 },
-    eco_clean: { label: "Eco Clean", price: 250 },
-    glass_perfect: { label: "Glass Perfect Care", price: 150 },
-  },
-  puzziPacketPrice: 50,
-};
+const defaultSlots = structuredClone(DEFAULT_SLOTS);
+const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
+const defaultCatalog: any = structuredClone(DEFAULT_CATALOG);
 
 const validTime = (v: unknown) => typeof v === "string" && /^\d{2}:\d{2}$/.test(v);
 const num = (v: unknown) => {
@@ -104,6 +76,7 @@ Deno.serve(async (req) => {
       slots: normSlots(map.booking_slots) ?? defaultSlots,
       catalog: normCatalog(map.catalog) ?? defaultCatalog,
       depositRules: normDepositRules(map.deposit_rules) ?? defaultDepositRules,
+      version: VACLEANER_RELEASE_VERSION,
     });
   }
 

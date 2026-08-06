@@ -1,14 +1,18 @@
 (()=>{
   'use strict';
 
-  const VERSION='2.9.13.1';
+  const CORE=window.VACLEANER_CORE||null;
+  const VERSION=CORE?.version||'3.0.0';
   const INSTAGRAM='https://www.instagram.com/vacleaner_washing.pl/';
   const REVIEW_HIGHLIGHT_1='https://www.instagram.com/stories/highlights/18130438687549534/';
   const REVIEW_HIGHLIGHT_2='https://www.instagram.com/stories/highlights/18303073276178357/';
   const SETTINGS_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
-  const DEFAULT_DEPOSIT_RULES={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
-  const PRODUCT_ALIASES={'Kärcher Puzzi':'puzzi','Kärcher Puzzi 8/1':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Puzzi + робот для вікон':'puzzi_abir','Puzzi + робот ABIR':'puzzi_abir','Kärcher SC 2':'sc2','Kärcher SC 2 Deluxe':'sc2','Робот для вікон':'abir','Робот ABIR':'abir','Тариф «Комбо»':'combo','Комбо · Puzzi + SC 2':'combo','Генеральне':'general','Генеральне прибирання':'general','Ідеальні вікна':'ideal_windows','HOME RESET':'elite'};
-  let depositRules=structuredClone(DEFAULT_DEPOSIT_RULES);
+  const FALLBACK_DEPOSIT_RULES={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
+  const FALLBACK_ALIASES={'Kärcher Puzzi':'puzzi','Kärcher Puzzi 8/1':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Puzzi + робот для вікон':'puzzi_abir','Puzzi + робот ABIR':'puzzi_abir','Kärcher SC 2':'sc2','Kärcher SC 2 Deluxe':'sc2','Робот для вікон':'abir','Робот ABIR':'abir','Тариф «Комбо»':'combo','Комбо · Puzzi + SC 2':'combo','Генеральне':'general','Генеральне прибирання':'general','Ідеальні вікна':'ideal_windows','HOME RESET':'elite'};
+  const clone=value=>CORE?.clone?CORE.clone(value):JSON.parse(JSON.stringify(value));
+  const DEFAULT_DEPOSIT_RULES=clone(CORE?.depositRules||FALLBACK_DEPOSIT_RULES);
+  const PRODUCT_ALIASES=CORE?.productAliases||FALLBACK_ALIASES;
+  let depositRules=clone(DEFAULT_DEPOSIT_RULES);
   let calendarReturnFocus=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
   const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
@@ -301,6 +305,20 @@
     }
   }
 
+  function retireLegacyPublicPwa(){
+    if(!('serviceWorker' in navigator)||location.pathname.startsWith('/admin/'))return;
+    navigator.serviceWorker.getRegistrations().then(registrations=>{
+      registrations.forEach(registration=>{
+        try{
+          const scopePath=new URL(registration.scope).pathname;
+          const worker=registration.active||registration.waiting||registration.installing;
+          const scriptPath=worker?.scriptURL?new URL(worker.scriptURL).pathname:'';
+          if(scopePath==='/'&&scriptPath==='/sw.js')registration.unregister();
+        }catch{}
+      });
+    }).catch(()=>{});
+  }
+
   function enhance(){
     if(location.pathname.startsWith('/admin/'))return;
     replacePublicLabels();
@@ -319,6 +337,7 @@
     requestAnimationFrame(()=>{queued=false;enhance()});
   });
   document.addEventListener('DOMContentLoaded',()=>{
+    retireLegacyPublicPwa();
     loadDepositRules();
     enhance();observer.observe(document.body,{childList:true,subtree:true});
   });

@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
+import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES } from "./config.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,12 +12,8 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
   headers: { ...corsHeaders, "Content-Type": "application/json; charset=utf-8" },
 });
 
-const defaultDepositRules = {
-  oneUnit: { day: 1000, weekend: 2000 },
-  twoUnits: { day: 1500, weekend: 3000 },
-  general: { day: 2000, weekend: 3000 },
-  elite: { day: 3000, weekend: 4000 },
-};
+const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
+const defaultCatalog: any = structuredClone(DEFAULT_CATALOG);
 const cleanInt = (value: unknown, max = 100000) => Math.max(0, Math.min(max, Math.floor(Number(value) || 0)));
 const cleanText = (value: unknown, max: number) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
 const normalizePhone = (value: unknown) => {
@@ -28,11 +25,23 @@ const normalizePhone = (value: unknown) => {
 const validBookingId = (value: unknown) => /^[0-9a-f-]{36}$/i.test(String(value ?? ""));
 const dateValue = (value: unknown) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
 
-function depositGroup(productCode: string) {
-  if (productCode === "elite") return "elite";
-  if (productCode === "general") return "general";
-  if (["puzzi_jimmy", "puzzi_abir", "combo", "ideal_windows"].includes(productCode)) return "twoUnits";
-  return "oneUnit";
+function depositGroup(productCode: string, catalog: any = defaultCatalog) {
+  return catalog?.products?.[productCode]?.depositGroup || defaultCatalog.products[productCode as keyof typeof defaultCatalog.products]?.depositGroup || "oneUnit";
+}
+function rentalDays(startDate: string, returnDate: string, pickupWindow: string, returnWindow: string) {
+  const start = Date.parse(`${startDate}T12:00:00Z`), finish = Date.parse(`${returnDate}T12:00:00Z`);
+  const calendarDays = Math.round((finish - start) / 86400000);
+  const pickupOrder = pickupWindow === "evening" ? 1 : 0, returnOrder = returnWindow === "evening" ? 1 : 0;
+  return calendarDays === 0 ? (returnOrder > pickupOrder ? 1 : 0) : calendarDays + (returnOrder > pickupOrder ? 1 : 0);
+}
+function calculateBase(product: any, startDate: string, days: number) {
+  if (days === 2 && new Date(`${startDate}T12:00:00Z`).getUTCDay() === 6 && product?.saturdaySunday) return Number(product.saturdaySunday);
+  let total = 0;
+  for (let index = 0; index < days; index += 1) {
+    const day = new Date(Date.parse(`${startDate}T12:00:00Z`) + index * 86400000).getUTCDay();
+    total += Number(day === 0 || day === 6 ? product?.weekend : product?.weekday) || 0;
+  }
+  return total;
 }
 function includesFullWeekend(startDate: string, returnDate: string) {
   if (!startDate || !returnDate) return false;
@@ -58,9 +67,15 @@ function normalizeDepositRules(value: any) {
   }
   return out;
 }
-function calculateDeposit(productCode: string, startDate: string, returnDate: string, rules: typeof defaultDepositRules) {
-  const group = depositGroup(productCode) as keyof typeof rules;
+function calculateDeposit(productCode: string, startDate: string, returnDate: string, rules: typeof defaultDepositRules, catalog: any = defaultCatalog) {
+  const group = depositGroup(productCode, catalog) as keyof typeof rules;
   return rules[group][includesFullWeekend(startDate, returnDate) ? "weekend" : "day"];
+}
+async function tagAudit(supabase: ReturnType<typeof createClient>, bookingId: string, actorId: string, source: string, since: string) {
+  if (!validBookingId(bookingId)) return;
+  const { error } = await supabase.from("vacleaner_booking_audit").update({ actor_id: actorId, source })
+    .eq("booking_id", bookingId).is("actor_id", null).gte("created_at", since);
+  if (error) console.warn("audit_tag_failed", error.message);
 }
 
 Deno.serve(async (request: Request) => {
@@ -83,15 +98,29 @@ Deno.serve(async (request: Request) => {
     const incoming = await request.json() as Record<string, any>;
     const body: Record<string, any> = { ...incoming };
     const action = String(body.action ?? "");
+    const actionStartedAt = new Date(Date.now() - 1500).toISOString();
 
-    const { data: rulesRow } = await supabase.from("vacleaner_settings").select("value").eq("key", "deposit_rules").maybeSingle();
-    const depositRules = normalizeDepositRules(rulesRow?.value);
+    const { data: settingsRows } = await supabase.from("vacleaner_settings").select("key,value").in("key", ["deposit_rules", "catalog"]);
+    const settingsMap = Object.fromEntries((settingsRows ?? []).map((row: any) => [row.key, row.value]));
+    const depositRules = normalizeDepositRules(settingsMap.deposit_rules);
+    const catalog = settingsMap.catalog && typeof settingsMap.catalog === "object" ? settingsMap.catalog : defaultCatalog;
 
     if (["create", "edit"].includes(action)) {
       const productCode = String(body.productCode ?? "");
       const startDate = dateValue(body.startDate);
       const returnDate = dateValue(body.returnDate);
-      if (productCode && startDate && returnDate) body.depositAmount = calculateDeposit(productCode, startDate, returnDate, depositRules);
+      if (productCode && startDate && returnDate) body.depositAmount = calculateDeposit(productCode, startDate, returnDate, depositRules, catalog);
+    }
+
+    if (action === "audit_log") {
+      const bookingId = String(body.bookingId ?? "");
+      if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
+      const limit = Math.max(1, Math.min(100, cleanInt(body.limit, 100) || 60));
+      const { data, error } = await supabase.from("vacleaner_booking_audit")
+        .select("id,booking_id,booking_code,event_type,changed_fields,old_values,new_values,actor_id,source,created_at")
+        .eq("booking_id", bookingId).order("created_at", { ascending: false }).limit(limit);
+      if (error) throw error;
+      return json({ entries: data ?? [] });
     }
 
     if (action === "save_finance") {
@@ -101,12 +130,12 @@ Deno.serve(async (request: Request) => {
       const storyMention = body.storyMention === true;
       const issuePayment = cleanInt(body.issuePayment, 100000);
       const issuePaid = body.issuePaid === true || issuePayment > 0;
-      const depositPaid = body.depositPaid === true || current.deposit_paid === true;
       const freePackets = storyMention ? 2 : 0;
       const paidPackets = Math.max(0, usedPackets - freePackets);
       const chemistryAmount = paidPackets * 50;
       const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single();
       if (currentError || !current) return json({ error: "invalid_booking" }, 404);
+      const depositPaid = body.depositPaid === true || current.deposit_paid === true;
       const currentExtras = current.extras && typeof current.extras === "object" ? current.extras as Record<string, any> : {};
       const selectedAmount = Array.isArray(currentExtras.selected_items)
         ? currentExtras.selected_items.reduce((sum: number, item: Record<string, any>) => sum + Number(item.price || 0), 0)
@@ -139,6 +168,7 @@ Deno.serve(async (request: Request) => {
         updated_at: now,
       }).eq("id", bookingId).select("*").single();
       if (error) throw error;
+      await tagAudit(supabase, bookingId, userData.user.id, "edge:save_finance", actionStartedAt);
       return json({
         booking: data,
         finance: {
@@ -174,6 +204,7 @@ Deno.serve(async (request: Request) => {
         updated_at: now,
       }).eq("id", bookingId).select("*").single();
       if (error) throw error;
+      await tagAudit(supabase, bookingId, userData.user.id, "edge:save_deposit_return", actionStartedAt);
       return json({ booking: data });
     }
 
@@ -183,7 +214,7 @@ Deno.serve(async (request: Request) => {
         "Authorization": authHeader,
         "apikey": serviceRoleKey,
         "Content-Type": "application/json",
-        "x-client-info": request.headers.get("x-client-info") ?? "vacleaner-admin-v3.1",
+        "x-client-info": request.headers.get("x-client-info") ?? "vacleaner-admin-v3.0",
       },
       body: JSON.stringify(body),
     });
@@ -223,11 +254,18 @@ Deno.serve(async (request: Request) => {
       const startDate = dateValue(body.startDate ?? booking.start_date);
       const returnDate = dateValue(body.returnDate ?? booking.return_date);
       const depositAmount = productCode && startDate && returnDate
-        ? calculateDeposit(productCode, startDate, returnDate, depositRules)
+        ? calculateDeposit(productCode, startDate, returnDate, depositRules, catalog)
         : Number(booking.deposit_amount || 0);
       if (validBookingId(bookingId)) {
         const prepaymentPaid = body.prepaymentPaid === true;
+        const product = catalog?.products?.[productCode] || defaultCatalog.products[productCode as keyof typeof defaultCatalog.products];
+        const days = rentalDays(startDate, returnDate, String(body.pickupWindow ?? booking.pickup_window ?? "morning"), String(body.returnWindow ?? booking.return_window ?? "morning"));
+        const baseAmount = product && days > 0 ? calculateBase(product, startDate, days) : Number(booking.base_amount || 0);
+        const extrasAmount = Number(booking.extras_amount || 0), deliveryAmount = Number(booking.delivery_amount || 0);
         const { data, error } = await supabase.from("vacleaner_bookings").update({
+          product_label: product?.label || booking.product_label,
+          base_amount: baseAmount,
+          total_amount: baseAmount + extrasAmount + deliveryAmount,
           prepayment_paid: prepaymentPaid,
           prepayment_amount: 200,
           deposit_amount: depositAmount,
@@ -236,6 +274,8 @@ Deno.serve(async (request: Request) => {
         if (error) throw error;
         payload.booking = { ...booking, ...data };
       }
+
+      if (validBookingId(bookingId)) await tagAudit(supabase, bookingId, userData.user.id, `edge:${action}`, actionStartedAt);
 
       const phone = normalizePhone(body.customerPhone ?? booking.customer_phone);
       if (phone) {
@@ -260,6 +300,10 @@ Deno.serve(async (request: Request) => {
       }
     }
 
+    if (!["list", "calendar", "lookup_customer", "create", "edit"].includes(action)) {
+      const upstreamBookingId = String(payload.booking?.id ?? body.bookingId ?? "");
+      if (validBookingId(upstreamBookingId)) await tagAudit(supabase, upstreamBookingId, userData.user.id, `edge:${action}`, actionStartedAt);
+    }
     return json(payload, upstream.status);
   } catch (error) {
     console.error("vacleaner-admin-bookings-v3", error instanceof Error ? error.message : error);

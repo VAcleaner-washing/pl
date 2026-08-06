@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
+import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES } from "./config.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -10,29 +11,8 @@ const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), {
   status: s,
   headers: { ...cors, "Content-Type": "application/json; charset=utf-8" },
 });
-const defaults = {
-  products: {
-    puzzi: { weekday: 700, weekend: 800 },
-    puzzi_jimmy: { weekday: 1050, weekend: 1150 },
-    puzzi_abir: { weekday: 1500, weekend: 1700 },
-    sc2: { weekday: 500, weekend: 600 },
-    abir: { weekday: 800, weekend: 900 },
-    combo: { weekday: 1000, weekend: 1200, saturdaySunday: 1800 },
-    general: { weekday: 1300, weekend: 1400, saturdaySunday: 2200 },
-    ideal_windows: { weekday: 1200, weekend: 1300, saturdaySunday: 1900 },
-    elite: { weekday: 2300, weekend: 2500, saturdaySunday: 3500 },
-  },
-  extras: {
-    premium_nozzles: { price: 200 }, odour_zero: { price: 250 }, neutralix: { price: 250 }, shower_care: { price: 250 },
-    soft_degreaser: { price: 250 }, grill_force: { price: 250 }, scalex_pro: { price: 250 }, eco_clean: { price: 250 }, glass_perfect: { price: 150 },
-  },
-};
-const defaultDepositRules = {
-  oneUnit: { day: 1000, weekend: 2000 },
-  twoUnits: { day: 1500, weekend: 3000 },
-  general: { day: 2000, weekend: 3000 },
-  elite: { day: 3000, weekend: 4000 },
-};
+const defaults: any = structuredClone(DEFAULT_CATALOG);
+const defaultDepositRules: any = structuredClone(DEFAULT_DEPOSIT_RULES);
 const day = (d: string) => new Date(d + "T12:00:00Z").getUTCDay();
 function days(sd: string, rd: string, pw: string, rw: string) {
   const a = Date.parse(sd + "T12:00:00Z"), b = Date.parse(rd + "T12:00:00Z"), diff = Math.round((b - a) / 86400000), p = pw === "evening" ? 1 : 0, r = rw === "evening" ? 1 : 0;
@@ -56,14 +36,11 @@ function fullWeekend(sd: string, rd: string) {
   }
   return sat && sun;
 }
-function depositGroup(code: string) {
-  if (code === "elite") return "elite";
-  if (code === "general") return "general";
-  if (["puzzi_jimmy", "puzzi_abir", "combo", "ideal_windows"].includes(code)) return "twoUnits";
-  return "oneUnit";
+function depositGroup(code: string, catalog: any) {
+  return catalog?.products?.[code]?.depositGroup || defaults.products[code as keyof typeof defaults.products]?.depositGroup || "oneUnit";
 }
-function depositAmount(code: string, sd: string, rd: string, rules: any) {
-  const group = depositGroup(code);
+function depositAmount(code: string, sd: string, rd: string, rules: any, catalog: any) {
+  const group = depositGroup(code, catalog);
   const source = rules?.[group] || defaultDepositRules[group as keyof typeof defaultDepositRules];
   return Math.max(0, Number(fullWeekend(sd, rd) ? source.weekend : source.day) || 0);
 }
@@ -107,7 +84,7 @@ Deno.serve(async req => {
     const discount = Math.round(rawBase * percent / 100);
     const baseAmount = rawBase - discount;
     const totalAmount = baseAmount + extrasAmount + deliveryAmount;
-    const securityDeposit = depositAmount(String(body.productCode || ""), body.startDate, body.returnDate, rules);
+    const securityDeposit = depositAmount(String(body.productCode || ""), body.startDate, body.returnDate, rules, cat);
     payload.estimate = {
       ...(payload.estimate || {}),
       rentalDays: n,
@@ -123,6 +100,7 @@ Deno.serve(async req => {
       const { data: booking } = await db.from("vacleaner_bookings").select("id").eq("booking_code", payload.bookingCode).maybeSingle();
       if (booking) {
         await db.from("vacleaner_bookings").update({
+          product_label: product.label || undefined,
           base_amount: baseAmount,
           extras_amount: extrasAmount,
           delivery_amount: deliveryAmount,

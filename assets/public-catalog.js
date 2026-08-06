@@ -1,7 +1,36 @@
-(()=>{const API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';const fmt=n=>new Intl.NumberFormat('uk-UA').format(Number(n||0));const aliases={
-'Kärcher Puzzi':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Puzzi + робот ABIR':'puzzi_abir','Puzzi + робот для вікон':'puzzi_abir','Kärcher SC 2':'sc2','Робот ABIR':'abir','Робот для вікон':'abir','Тариф «Комбо»':'combo','Генеральне':'general','Ідеальні вікна':'ideal_windows','HOME RESET':'elite'};
-function apply(c){document.querySelectorAll('.booking-products button').forEach(btn=>{const title=btn.querySelector('strong')?.textContent.trim(),k=aliases[title],p=c.products?.[k];if(!p)return;const small=btn.querySelector('small');if(small)small.textContent=`Будні · ${fmt(p.weekday)} грн  |  1 вихідний · ${fmt(p.weekend)} грн${p.saturdaySunday?`  |  Сб + Нд · ${fmt(p.saturdaySunday)} грн`:''}`});
-const extraMap={"Odour Zero":"odour_zero","Neutralix · концентрат":"neutralix","Shower Care":"shower_care","Soft Degreaser":"soft_degreaser","Grill Force":"grill_force","Scalex Pro":"scalex_pro","Eco Clean":"eco_clean","Glass Perfect Care":"glass_perfect","Насадки «Преміум» до SC 2":"premium_nozzles"};document.querySelectorAll('.booking-extras label').forEach(l=>{const name=l.querySelector('b')?.textContent.trim(),k=extraMap[name],p=c.extras?.[k]?.price;if(p==null)return;const strong=l.querySelector('strong');if(strong)strong.textContent=`+${fmt(p)} грн`});
-}
-let attempts=0;fetch(API,{cache:'no-store'}).then(r=>r.json()).then(d=>{if(!d.catalog)return;apply(d.catalog);const id=setInterval(()=>{apply(d.catalog);if(++attempts>10)clearInterval(id)},500)}).catch(()=>{});
+(()=>{
+  'use strict';
+  const CORE=window.VACLEANER_CORE;
+  if(!CORE||!document.querySelector('.booking-products'))return;
+  const API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
+  const fmt=n=>new Intl.NumberFormat('uk-UA').format(Number(n||0));
+  function apply(catalog){
+    let changed=0;
+    document.querySelectorAll('.booking-products button').forEach(btn=>{
+      const title=btn.querySelector('strong')?.textContent.trim();
+      const code=CORE.productAliases[title];
+      const product=catalog.products?.[code];
+      if(!product)return;
+      const small=btn.querySelector('small');
+      if(!small)return;
+      const text=`Будні · ${fmt(product.weekday)} грн  |  1 вихідний · ${fmt(product.weekend)} грн${product.saturdaySunday?`  |  Сб + Нд · ${fmt(product.saturdaySunday)} грн`:''}`;
+      if(small.textContent!==text){small.textContent=text;changed+=1}
+    });
+    document.querySelectorAll('.booking-extras label').forEach(label=>{
+      const name=label.querySelector('b')?.textContent.trim();
+      const code=CORE.extraAliases[name];
+      const price=catalog.extras?.[code]?.price;
+      const strong=label.querySelector('strong');
+      if(price==null||!strong)return;
+      const text=`+${fmt(price)} грн`;
+      if(strong.textContent!==text){strong.textContent=text;changed+=1}
+    });
+    return changed;
+  }
+  fetch(API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{
+    const catalog=data.catalog||CORE.catalog;
+    apply(catalog);
+    requestAnimationFrame(()=>apply(catalog));
+    setTimeout(()=>apply(catalog),600);
+  }).catch(()=>apply(CORE.catalog));
 })();
