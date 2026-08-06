@@ -1,5 +1,5 @@
 (()=>{'use strict';
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js?v=2891').then(r=>r.update()).catch(()=>{});}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js?v=2960').then(r=>r.update()).catch(()=>{});}
 
 const SUPABASE='https://yweluzclearwrazdkahu.supabase.co',API=SUPABASE+'/functions/v1/vacleaner-admin-bookings-v3',SETTINGS_API=SUPABASE+'/functions/v1/vacleaner-settings',KEY='sb_publishable_-UdAKDf5jzIP6N9rBp927g_VhyJKeog';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -144,5 +144,5 @@ form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),body={act
 }
 function auth(){document.body.innerHTML=`<main class="auth"><section class="card auth-card"><div class="auth-brand"><div class="brand-mark">VA</div><div class="brand-copy"><strong>VAcleaner</strong><span>Manager</span></div></div><h1>Вхід в адмінку</h1><p>Бронювання, календар, клієнти й фінанси в одному місці.</p><form id="authForm"><label class="field"><span>Логін</span><input name="login" value="vacleaner" required></label><label class="field"><span>Пароль</span><input name="password" type="password" required></label><p class="error hidden" id="authError"></p><button class="btn primary" type="submit">Увійти</button></form></section></main>`;$('#authForm').onsubmit=async e=>{e.preventDefault();const f=e.currentTarget,err=$('#authError'),email=f.login.value.trim().toLowerCase()==='vacleaner'?'vahome.aroma@gmail.com':f.login.value.trim();err.classList.add('hidden');try{await login(email,f.password.value);await start()}catch(x){err.textContent=x.message;err.classList.remove('hidden')}}}
 async function start(){state.session=getSession();if(!state.session)return auth();shell();try{await loadGlobalSlots();await load();render()}catch(e){clearSession();auth()}}
-if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});start();
+start();
 })();
