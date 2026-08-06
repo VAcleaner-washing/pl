@@ -243,16 +243,24 @@
   function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
   function enhanceDepositSummary(){
     const summary=document.querySelector('.booking-summary');if(!summary)return;
-    const legacy=[...summary.children].filter(el=>/Поворотний залог|Залог при видачі/i.test(el.textContent||''));
-    let row=summary.querySelector('.vx-summary-deposit')||legacy.shift();
-    legacy.filter(el=>el!==row).forEach(el=>el.remove());
-    if(!row){row=document.createElement('div');const total=summary.querySelector('.booking-summary-total');total?.insertAdjacentElement('beforebegin',row)}
-    row.className='vx-summary-deposit';
-    row.innerHTML='<span>Поворотний залог —<small>Сплачується під час отримання техніки.</small></span><strong>—</strong>';
-    const value=currentDeposit(),strong=row.querySelector('strong');if(strong)strong.textContent=value?formatMoney(value):'—';
+    const value=currentDeposit();
+    const total=summary.querySelector('.booking-summary-total');
+    if(!total)return;
+    summary.querySelectorAll('.vx-summary-prepayment,.vx-summary-deposit').forEach(el=>el.remove());
+    const prepayment=document.createElement('div');
+    prepayment.className='vx-summary-prepayment vx-summary-finance-row';
+    prepayment.innerHTML='<span><b>Бронювання дати</b><small>Сплачується після підтвердження заявки.</small></span><strong>200 грн</strong>';
+    total.insertAdjacentElement('beforebegin',prepayment);
+    const deposit=document.createElement('div');
+    deposit.className='vx-summary-deposit vx-summary-finance-row';
+    deposit.innerHTML=`<span><b>Поворотний залог</b><small>Сплачується під час отримання техніки.</small></span><strong>${value?formatMoney(value):'—'}</strong>`;
+    total.insertAdjacentElement('beforebegin',deposit);
     const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
-    summary.querySelectorAll('.vx-summary-prepayment,.vx-summary-deposit-note').forEach(el=>el.remove());
-    const note=summary.querySelector(':scope > p');if(note)note.textContent='Передоплата 200 грн вноситься після підтвердження заявки та входить у фінальний взаєморозрахунок.';
+    let note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
+    if(note){
+      note.className='vx-summary-deposit-note';
+      note.textContent='Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
+    }
   }
   async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.depositRules){mergeDepositRules(d.depositRules);enhanceDepositSummary()}}catch{}}
   function termsMarkup(){
