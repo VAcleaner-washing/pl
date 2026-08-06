@@ -563,3 +563,36 @@ body.detail-open .detail{overflow-y:auto!important;overflow-x:hidden!important;-
   .catalog-row label{width:100%!important}
   .catalog-row input{height:48px!important;font-size:16px!important}
 }
+
+/* v2.9.4.5 — full mobile audit fixes */
+.analytics-line{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:16px!important}
+.analytics-line>span{min-width:0!important;padding-right:8px!important}
+.analytics-line>strong{flex:0 0 auto!important;min-width:32px!important;text-align:right!important}
+
+.equipment-image{display:grid!important;overflow:hidden;background:#0b1115}
+.equipment-image img{width:100%!important;height:100%!important;min-width:0!important;object-fit:cover!important;display:block!important}
+.equipment-image-1{grid-template-columns:1fr}
+.equipment-image-2{grid-template-columns:1fr 1fr}
+.equipment-image-3{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.equipment-image-3 img:first-child{grid-row:1/-1}
+.equipment-image-4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+
+.modal-card input[type="checkbox"]{width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important}
+.modal-card a[href^="tel:"]{display:inline-flex!important;align-items:center!important;min-height:44px!important;padding:8px 0!important}
+.catalog-row input{min-height:44px!important}
+.settings-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px!important}
+.settings-actions .btn{width:100%!important;min-height:48px!important;white-space:normal!important;line-height:1.2!important}
+.date-control>.premium-control-icon{display:none!important}
+.date-control input{padding-left:16px!important}
+
+@media(max-width:760px){
+  .equipment-card{grid-template-columns:42% minmax(0,1fr)!important}
+  .equipment-image{min-width:0!important;height:auto!important;min-height:100%!important}
+  .equipment-image-2,.equipment-image-3,.equipment-image-4{gap:1px!important}
+  .equipment-body{min-width:0!important}
+  .equipment-body h3{overflow-wrap:anywhere!important}
+  .analytics-line{min-height:44px!important;padding:10px 0!important}
+  .settings-actions{grid-template-columns:1fr!important}
+  .settings-actions .btn{min-height:50px!important}
+  .modal-card label:has(input[type="checkbox"]){min-height:44px!important}
+}
