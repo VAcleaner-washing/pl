@@ -1363,8 +1363,9 @@ body{touch-action:manipulation}
   .booking-form .booking-form-scroll>*{min-width:0}
   .client-no-phone{align-self:center;color:var(--muted)}
   .campaign-panel{padding:14px}.campaign-panel-head{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}.campaign-panel-head .btn{width:100%;min-height:44px}.campaign-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.campaign-row{grid-template-columns:minmax(0,1fr);gap:10px}.campaign-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.campaign-metrics>span{text-align:left}.campaign-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.campaign-actions .btn{width:100%}.campaign-form-body{padding:12px}.campaign-code-list{max-height:none}.campaign-code-list>div{grid-template-columns:minmax(0,1fr)}
-  /* Stable installed-PWA shell: transient visualViewport changes cannot lift the bottom nav. */
-  .app,.topbar,.sidebar,.main{position:absolute}
+  /* v3.0.36 — the shell itself owns the physical viewport; chrome is anchored inside it. */
+  .app{position:fixed}
+  .topbar,.sidebar,.main{position:absolute}
   .nav button[data-view="campaigns"]{display:none}
   .campaign-actions .campaign-archive,.campaign-actions .danger-soft{min-height:44px}
 }

@@ -60,5 +60,5 @@ ok(publicResilience.includes('reg.scope===ROOT_SCOPE'),'public runtime targets o
 ok(publicResilience.includes('reg.unregister()'),'public runtime removes stale root workers');
 
 
-ok(css.includes('.app,.topbar,.sidebar,.main{position:absolute}'),'mobile PWA chrome is layout-viewport anchored during refresh');
+ok(css.includes('.app{position:fixed}')&&css.includes('.topbar,.sidebar,.main{position:absolute}'),'PWA shell fills the physical viewport while chrome is anchored inside it');
 console.log(`PWA static tests passed ${passed} assertions.`);
