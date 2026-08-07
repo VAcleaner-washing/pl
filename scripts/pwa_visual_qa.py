@@ -237,7 +237,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(all(value >= 44 for value in heights), f"{label}: bottom navigation tap targets are at least 44px")
         qa.check(page.locator('.connection-state:visible').count()==0, f"{label}: mobile topbar keeps only search and primary action")
         qa.check(page.locator('.operations-bar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: attention cards never hide in a horizontal carousel")
-        qa.check(page.locator('.booking-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: booking filters wrap instead of being clipped")
+        toolbar_contract=page.locator('.booking-toolbar').evaluate("el=>({position:getComputedStyle(el).position,overflowX:getComputedStyle(el).overflowX,wrap:getComputedStyle(el).flexWrap})")
+        qa.check(toolbar_contract['position']=='sticky' and toolbar_contract['overflowX'] in ('auto','scroll') and toolbar_contract['wrap']=='nowrap', f"{label}: booking filters stay in one compact sticky row")
 
         # Bottom nav must not move when only the app content scrolls.
         nav_before=page.locator('.sidebar').bounding_box()
@@ -246,6 +247,21 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         nav_after=page.locator('.sidebar').bounding_box()
         qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs(nav_after['y']+nav_after['height']-height)<=1, f"{label}: bottom navigation does not walk during content scroll")
         page.locator('.main').evaluate('el=>el.scrollTop=0')
+
+        # Status filters become the sticky control row after the KPI/hero block scrolls away.
+        toolbar_before=page.locator('.booking-toolbar').bounding_box()
+        main_box=page.locator('.main').bounding_box()
+        page.locator('.main').evaluate("el=>el.scrollTop=Math.min(520,Math.max(0,el.scrollHeight-el.clientHeight))")
+        page.wait_for_timeout(60)
+        toolbar_after=page.locator('.booking-toolbar').bounding_box()
+        qa.check(toolbar_before is not None and toolbar_after is not None and main_box is not None and toolbar_after['y']<=main_box['y']+1.5, f"{label}: status filters pin directly below the hero/topbar after scroll")
+        page.locator('.main').evaluate('el=>el.scrollTop=0')
+
+        # Explicit tab navigation clears the global search instead of leaking it into the next view.
+        page.locator('#globalSearch').fill('Белих Елеонора')
+        page.locator('.nav button[data-view="calendar"]').click();page.wait_for_timeout(50)
+        qa.check(page.locator('#globalSearch').input_value()=='' and page.locator('#clearSearch').evaluate('el=>el.classList.contains("hidden")'), f"{label}: search clears when manager changes tabs")
+        open_mobile_view(page,'bookings')
 
         # Walk every admin view, not only the primary four.
         for view in ["bookings","calendar", "upcoming", "equipment", "clients", "analytics", "chemistry", "settings"]:
@@ -344,13 +360,17 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(no_overflow(page), f"{label}: new booking modal has no horizontal overflow")
         header_title=page.locator('#bookingForm>header h2').bounding_box()
         progress=page.locator('#bookingForm .mobile-booking-progress').bounding_box()
+        header_box=page.locator('#bookingForm>header').bounding_box()
         first_section=page.locator('#bookingForm [data-mobile-step="1"]:visible').bounding_box()
         qa.check(header_title is not None and header_title['y']>=safe_top+8, f"{label}: booking header clears Dynamic Island safe area")
-        qa.check(progress is not None and first_section is not None and progress['y']+progress['height']<=first_section['y']+1, f"{label}: booking progress has its own row and never overlaps form content")
+        qa.check(progress is not None and header_box is not None and first_section is not None and progress['y']>=header_title['y'] and progress['y']+progress['height']<=header_box['y']+header_box['height']+1 and first_section['y']>=header_box['y']+header_box['height']-1, f"{label}: booking progress is integrated into the header instead of floating between blocks")
+        qa.check(page.locator('#mobileBookingStepLabel').evaluate('el=>getComputedStyle(el).display')=='none', f"{label}: redundant 'Крок 1 з 4' strip is not rendered between blocks")
         qa.check(page.locator('#bookingForm [data-mobile-step]:visible').count()==1, f"{label}: booking form shows exactly one mobile step")
         qa.check(page.locator('#bookingForm input[name="startDate"]').input_value()=='' and page.locator('#bookingForm input[name="returnDate"]').input_value()=='', f"{label}: new booking never preselects hidden dates")
         footer=page.locator('#bookingForm>footer').bounding_box(); footer_button=page.locator('#bookingForm>footer .btn:visible').last.bounding_box()
         qa.check(footer is not None and abs(footer['y']+footer['height']-height)<=1 and footer_button is not None and footer_button['y']+footer_button['height']<=height-safe_bottom+1, f"{label}: booking footer is pinned and clears Home Indicator")
+        date_tap=page.locator('#bookingForm .date-control').first.evaluate("el=>{const i=el.querySelector('input[type=date]'),r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return{pointer:getComputedStyle(i).pointerEvents,hit:hit===i||i.contains(hit)}}")
+        qa.check(date_tap['pointer']=='auto' and date_tap['hit'], f"{label}: tapping the date field reaches the native calendar input")
         date_before=page.locator('#bookingForm .date-control').first.bounding_box()
         page.locator('#bookingForm input[name="startDate"]').evaluate("el=>{el.value='2026-08-08';el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}")
         page.wait_for_timeout(80)
@@ -444,6 +464,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             footer_action=page.locator(f"{selector}>footer .btn:visible").last.bounding_box()
             qa.check(header_box is not None and header_box["y"] >= safe_top+8, f"{label}: {action} header respects top safe area")
             qa.check(footer_box is not None and abs(footer_box['y']+footer_box['height']-height)<=1 and footer_action is not None and footer_action['y']+footer_action['height']<=height-safe_bottom+1, f"{label}: {action} footer is pinned above Home Indicator")
+            if action in ('issue','complete','finance'):
+                layout_ok=page.locator(f"{selector} .modal-layout").evaluate("el=>{const section=el.querySelector('.modal-section')?.getBoundingClientRect(),summary=el.querySelector('.modal-summary')?.getBoundingClientRect();return !!section&&!!summary&&summary.top>=section.bottom+7}")
+                qa.check(layout_ok, f"{label}: {action} summary starts after the data card and never overlaps it")
             if action=='process':
                 qa.check(page.locator('#processForm .process-grid').evaluate('el=>el.scrollTop')==0, f"{label}: process modal opens at its own top")
                 telegram_href=page.locator('#sendTelegram').get_attribute('href') or ''
@@ -490,7 +513,11 @@ def desktop_suite(browser: Browser, qa: QA) -> None:
             page.wait_for_timeout(90)
             qa.check(no_overflow(page), f"Desktop: {view} view has no horizontal overflow")
             qa.check(page.locator('.main').evaluate('el=>el.scrollTop')==0, f"Desktop: {view} view always opens at the top")
-        page.locator('.nav button[data-view="bookings"]').click()
+        page.locator('.nav button[data-view="bookings"]').click();page.wait_for_timeout(90)
+        main_box=page.locator('.main').bounding_box();page.locator('.main').evaluate("el=>el.scrollTop=Math.min(520,Math.max(0,el.scrollHeight-el.clientHeight))");page.wait_for_timeout(50)
+        desktop_toolbar=page.locator('.booking-toolbar').bounding_box()
+        qa.check(main_box is not None and desktop_toolbar is not None and desktop_toolbar['y']<=main_box['y']+9, "Desktop: status filters stay sticky under the fixed topbar")
+        page.locator('.main').evaluate('el=>el.scrollTop=0')
         page.locator("#newBooking").click()
         page.wait_for_selector("#bookingForm")
         card = page.locator(".modal-card").bounding_box()

@@ -55,7 +55,8 @@ has(css,'.app{position:fixed;inset:0;width:auto;height:auto','mobile app shell f
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
 has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom navigation is physically pinned');
 has(css,'.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region');
-has(css,'.booking-form{grid-template-rows:auto auto minmax(0,1fr) auto}','mobile booking has header/progress/scroll/footer rows');
+has(css,'.booking-form{grid-template-rows:auto minmax(0,1fr) auto}','mobile booking has header-with-progress/scroll/footer rows');
+has(css,'.booking-form>header .mobile-booking-progress{display:grid','mobile booking progress is integrated into the header');
 has(css,'.date-control{position:relative;display:block;width:100%;height:50px','admin dates use fixed geometry');
 has(admin,"classList.toggle('keyboard-open',keyboard)",'keyboard state is explicit');
 lacks(admin,"visualViewport?.addEventListener('scroll'",'visual viewport scroll cannot move app shell');
@@ -114,6 +115,11 @@ has(css,'.flow-compact{display:grid;grid-template-columns:minmax(0,1fr)','mobile
 has(pwaQa,'all booking-progress stages fit without smashed labels','booking progress has direct mobile geometry coverage');
 has(pwaQa,'detail header scrolls naturally and never covers finance/history content','mobile detail header cannot cover scrolled content');
 has(pwaQa,'booking-detail photography never overlaps rental dates','detail hero media/date separation is runtime-gated');
+has(pwaQa,'search clears when manager changes tabs','global search leakage across tabs is runtime-gated');
+has(pwaQa,'tapping the date field reaches the native calendar input','admin mobile calendar tap target is runtime-gated');
+has(pwaQa,'summary starts after the data card and never overlaps it','issue/return summary overlap is runtime-gated');
+has(pwaQa,'status filters pin directly below the hero/topbar after scroll','booking status filters have sticky runtime coverage');
+has(pwaQa,"redundant 'Крок 1 з 4' strip is not rendered between blocks",'booking step label cannot return as an interstitial strip');
 has(admin,'function utilizationFor(bounds)','analytics calculates utilization from occupied half-day slots');
 has(admin,'function repeatMetrics(bounds)','analytics distinguishes new and repeat completed rentals');
 has(admin,"const rentalDate=String(b.return_date||b.start_date||'')",'analytics period uses rental return date, not historical import timestamp');
