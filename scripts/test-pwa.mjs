@@ -42,10 +42,14 @@ ok(runtime.includes("$('.mobile-more-close')||$('.modal-close')"),'Escape closes
 ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail captures main scroll container');
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');
 
+ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
+ok(css.includes('html.pwa-standalone')&&css.includes('--pwa-nav-bottom-pad'),'standalone PWA has its own lower bottom-nav geometry');
+ok(runtime.includes('client-mobile-stats')&&css.includes('.client-mobile-stats'),'mobile client cards expose rental count and spend');
+
 for(const token of [
   '--pwa-safe-top','--pwa-safe-bottom','--mobile-topbar:64px','--mobile-nav:62px',
   '.app{position:fixed;inset:0;width:auto;height:auto',
-  'bottom:calc(var(--mobile-nav) + var(--pwa-safe-bottom))',
+  '--mobile-nav-shell:calc(var(--mobile-nav) + var(--pwa-safe-bottom))',
   '.pwa-update-prompt','--keyboard-viewport-height','--keyboard-viewport-top',
 ]) ok(css.includes(token),`PWA visual token: ${token}`);
 ok(!css.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'),'app shell avoids iOS standalone 100dvh bottom gaps');

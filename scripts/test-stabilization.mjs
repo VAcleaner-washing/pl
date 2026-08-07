@@ -131,6 +131,11 @@ has(pwaQa,'tapping the date field reaches the native calendar input','admin mobi
 has(pwaQa,'summary starts after the data card and never overlaps it','issue/return summary overlap is runtime-gated');
 has(pwaQa,'status filters pin directly below the hero/topbar after scroll','booking status filters have sticky runtime coverage');
 has(pwaQa,"redundant 'Крок 1 з 4' strip is not rendered between blocks",'booking step label cannot return as an interstitial strip');
+has(admin,'id=\"saveProcess\"','processing modal has a separate save action');
+has(admin,"status:'waiting_payment'",'saving initial processing moves a new request into waiting-for-payment');
+has(admin,"status:'confirmed'",'confirmation remains a separate explicit transition');
+has(admin,"processNote.includes('З клієнтом зв’язались')",'saved client-contact state is restored from the server-side booking note');
+has(admin,"processNote.includes('Умови оренди та сума залогового платежу надіслані')",'saved conditions-sent state is restored from the server-side booking note');
 has(admin,'function utilizationFor(bounds)','analytics calculates utilization from occupied half-day slots');
 has(admin,'function repeatMetrics(bounds)','analytics distinguishes new and repeat completed rentals');
 has(admin,"const rentalDate=String(b.return_date||b.start_date||'')",'analytics period uses rental return date, not historical import timestamp');

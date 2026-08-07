@@ -478,6 +478,7 @@ body.detail-open .detail{overflow-y: auto; overflow-x: hidden; -webkit-overflow-
 .client-row:hover{background: rgba(255,255,255,.025);}
 .client-row a{color: var(--gold-2); text-decoration: none;}
 .client-row strong{font-size: 14px; font-weight: 650;}
+.client-mobile-stats{display:none}
 .client-last-date{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
 .client-name{display: grid; gap: 4px;}
 .client-name b{font-size: 15px;}
@@ -1201,6 +1202,7 @@ body{touch-action:manipulation}
     --pwa-safe-right:env(safe-area-inset-right,0px);
     --pwa-safe-bottom:env(safe-area-inset-bottom,0px);
     --pwa-safe-left:env(safe-area-inset-left,0px);
+    --mobile-nav-shell:calc(var(--mobile-nav) + var(--pwa-safe-bottom));
   }
   html{width:100%;height:100%;overflow:hidden;scrollbar-gutter:auto;overscroll-behavior:none}
   body{position:static;inset:auto;width:100%;height:100%;min-height:0;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;background:#070b0e}
@@ -1221,7 +1223,7 @@ body{touch-action:manipulation}
 
   .sidebar{
     position:absolute;right:0;bottom:0;left:0;top:auto;z-index:100;
-    width:100%;height:calc(var(--mobile-nav) + var(--pwa-safe-bottom));
+    width:100%;height:var(--mobile-nav-shell);
     padding:0 max(4px,var(--pwa-safe-right)) var(--pwa-safe-bottom) max(4px,var(--pwa-safe-left));
     border:0;border-top:1px solid var(--line);background:rgba(7,11,14,.99);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden
   }
@@ -1235,7 +1237,7 @@ body{touch-action:manipulation}
   .nav button.active{background:linear-gradient(180deg,rgba(214,164,95,.13),rgba(214,164,95,.035));border-color:rgba(214,164,95,.2);color:var(--gold-2)}
 
   .main{
-    position:absolute;top:calc(var(--mobile-topbar) + var(--pwa-safe-top));right:0;bottom:calc(var(--mobile-nav) + var(--pwa-safe-bottom));left:0;inset-block-start:calc(var(--mobile-topbar) + var(--pwa-safe-top));
+    position:absolute;top:calc(var(--mobile-topbar) + var(--pwa-safe-top));right:0;bottom:var(--mobile-nav-shell);left:0;inset-block-start:calc(var(--mobile-topbar) + var(--pwa-safe-top));
     width:auto;height:auto;min-height:0;max-width:none;padding:18px max(12px,var(--pwa-safe-right)) 18px max(12px,var(--pwa-safe-left));
     overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;overflow-anchor:none;scrollbar-width:none;scroll-padding-top:12px;scroll-padding-bottom:24px
   }
@@ -1283,10 +1285,10 @@ body{touch-action:manipulation}
   .booking-finance>.booking-deposit-state{grid-column:2;grid-row:3;justify-self:stretch;display:flex;align-items:center;min-height:52px;max-width:none;margin:0;padding:9px 11px;border-radius:12px;line-height:1.3;white-space:normal;text-align:left}
 
   .mobile-more-sheet{display:block}
-  .mobile-more-card{position:fixed;right:max(10px,var(--pwa-safe-right));bottom:calc(var(--mobile-nav) + var(--pwa-safe-bottom) + 10px);left:max(10px,var(--pwa-safe-left));z-index:130;width:auto;max-height:calc(100dvh - var(--mobile-topbar) - var(--mobile-nav) - var(--pwa-safe-top) - var(--pwa-safe-bottom) - 24px);overflow-y:auto;border-radius:20px}
+  .mobile-more-card{position:fixed;right:max(10px,var(--pwa-safe-right));bottom:calc(var(--mobile-nav-shell) + 10px);left:max(10px,var(--pwa-safe-left));z-index:130;width:auto;max-height:calc(100dvh - var(--mobile-topbar) - var(--mobile-nav) - var(--pwa-safe-top) - var(--pwa-safe-bottom) - 24px);overflow-y:auto;border-radius:20px}
 
   .catalog-toolbar,.analytics-toolbar{display:grid;grid-template-columns:minmax(0,1fr);align-items:stretch;gap:10px;width:100%;min-width:0;margin-bottom:12px;padding:12px}.catalog-toolbar>div,.analytics-toolbar>div{min-width:0}.catalog-toolbar h2,.analytics-toolbar h2{font-size:22px}.catalog-toolbar p,.analytics-toolbar p{font-size:12px;line-height:1.4;overflow-wrap:anywhere}.catalog-toolbar .btn{width:100%;min-width:0}.analytics-periods{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;justify-content:stretch;width:100%;min-width:0}.analytics-periods .chip{width:100%;min-width:0;padding-inline:7px;font-size:11px}.analytics-panel{min-width:0;padding:14px}.product-analytics-row{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;min-width:0}.product-analytics-row>span:first-child{min-width:0;overflow-wrap:anywhere}.product-stats{display:flex;justify-content:space-between;gap:8px;min-width:0;white-space:normal}.analytics-line{min-width:0}.analytics-line>span{overflow-wrap:anywhere}.analytics-kpis .kpi{min-height:96px}.analytics-panel-head{gap:10px}.analytics-panel-head>strong{font-size:25px}.customer-mix{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.customer-mix>div{padding:10px}.customer-mix strong{font-size:19px}.sleeping-summary{grid-template-columns:minmax(0,1fr) auto;gap:7px}.sleeping-summary .btn{grid-column:1/-1;width:100%}.status-panel-head{align-items:flex-start;gap:10px}.status-panel-head>div{min-width:0}.status-panel-head p{overflow-wrap:anywhere}.status-panel-head>strong{flex:0 0 44px;min-width:44px;width:44px;height:44px}.kpi{min-width:0;padding:14px}.kpi strong{overflow-wrap:anywhere}.equipment-grid,.equipment-card,.equipment-body,.price-grid{width:100%;max-width:100%;min-width:0}.equipment-body p{overflow-wrap:anywhere}.price-grid strong{font-size:14px;overflow-wrap:anywhere}
-  .clients-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;padding:11px 12px}.clients-toolbar>div{align-self:center;margin:0}.clients-toolbar label{display:grid;grid-template-columns:82px minmax(0,1fr);gap:7px;min-width:0}.clients-toolbar label+label{margin-left:0}.clients-toolbar select{width:100%;min-width:0;padding-right:34px}.clients-head{display:none}.client-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:6px 10px;padding:12px}.client-row .client-name{grid-column:1/2}.client-row>a,.client-row>.client-no-phone{grid-column:1/2;grid-row:auto;align-self:center;font-size:12px}.client-row>strong{display:none}.client-last-date{display:block;grid-column:1/2;color:var(--muted);font-size:11px}.client-edit-btn{grid-column:2/3;grid-row:1/4;align-self:center}.client-edit-empty{display:none}.client-editor-scroll{padding:12px}.client-editor-summary{grid-template-columns:minmax(0,1fr)}.client-editor-form .modal-section{padding:14px}
+  .clients-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;padding:11px 12px}.clients-toolbar>div{align-self:center;margin:0}.clients-toolbar label{display:grid;grid-template-columns:82px minmax(0,1fr);gap:7px;min-width:0}.clients-toolbar label+label{margin-left:0}.clients-toolbar select{width:100%;min-width:0;padding-right:34px}.clients-head{display:none}.client-row{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:6px 10px;padding:12px}.client-row .client-name{grid-column:1/2}.client-row>a,.client-row>.client-no-phone{grid-column:1/2;grid-row:auto;align-self:center;font-size:12px}.client-row>strong{display:none}.client-mobile-stats{display:flex;grid-column:1/2;flex-wrap:wrap;gap:6px 14px;color:var(--muted);font-size:11px;line-height:1.35}.client-mobile-stats span{display:inline-flex;align-items:baseline;gap:4px}.client-mobile-stats b{color:var(--text);font-size:12px}.client-last-date{display:block;grid-column:1/2;color:var(--muted);font-size:11px}.client-edit-btn{grid-column:2/3;grid-row:1/5;align-self:center}.client-edit-empty{display:none}.client-editor-scroll{padding:12px}.client-editor-summary{grid-template-columns:minmax(0,1fr)}.client-editor-form .modal-section{padding:14px}
   .settings-grid{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"deposits" "slots" "notifications" "health" "finance";gap:12px;align-items:start}
   .settings-card,.financial-rules-card{width:100%;min-width:0;padding:16px;border-radius:16px}
   .settings-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}.settings-head h2{font-size:21px}.settings-head p{margin:5px 0 14px;font-size:12.5px;line-height:1.45}
@@ -1368,6 +1370,10 @@ body{touch-action:manipulation}
   .topbar,.sidebar,.main{position:absolute}
   .nav button[data-view="campaigns"]{display:none}
   .campaign-actions .campaign-archive,.campaign-actions .danger-soft{min-height:44px}
+  html.pwa-standalone{--pwa-nav-bottom-pad:clamp(8px,calc(var(--pwa-safe-bottom) - 22px),12px);--mobile-nav-shell:calc(var(--mobile-nav) + var(--pwa-nav-bottom-pad))}
+  html.pwa-standalone .sidebar{height:var(--mobile-nav-shell);padding-bottom:var(--pwa-nav-bottom-pad)}
+  html.pwa-standalone .main{bottom:var(--mobile-nav-shell)}
+  html.pwa-standalone .mobile-more-card{bottom:calc(var(--mobile-nav-shell) + 10px)}
 }
 @media (max-width:360px){
   .page-head h1{font-size:24px}.booking-row-head{padding:12px}.booking-identity h2{font-size:18px}.modal-form>header h2{font-size:25px}.window-choice span{padding:9px}.time-chip-list{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-form>header .mobile-booking-progress{grid-template-columns:repeat(4,28px);gap:5px}.mobile-booking-progress span{width:28px;height:28px}
@@ -1391,3 +1397,8 @@ body{touch-action:manipulation}
 
 /* v3.0.35 — dedicated campaigns view + stable PWA shell */
 .campaign-row.ended{opacity:.72;border-style:dashed}.campaign-row.ended>div:first-child>span{color:#8e989e}.campaign-actions .danger-soft{border-color:rgba(225,103,97,.28);color:#ef9892;background:rgba(180,63,57,.06)}.campaign-actions .danger-soft:hover{background:rgba(180,63,57,.12)}.campaign-confirm-body{padding:18px 20px;color:#c8cecf;line-height:1.55}.campaign-confirm-body>p{margin:0}.campaign-confirm-body .note{margin-top:12px}.campaign-archive{border-color:rgba(214,164,95,.22)}
+
+/* v3.0.38 processing workflow: keep save and confirm as distinct actions */
+@media (max-width: 767px){
+  .process-form>footer #confirmProcess{grid-column:1/-1}
+}

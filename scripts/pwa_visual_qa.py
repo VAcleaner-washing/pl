@@ -95,7 +95,7 @@ BOOKINGS = [
 BOOKINGS[0]["customer_telegram"] = ""
 
 
-def init_script(authenticated: bool = True) -> str:
+def init_script(authenticated: bool = True, standalone: bool = False) -> str:
     session = {
         "access_token": "pwa-access",
         "refresh_token": "pwa-refresh",
@@ -120,6 +120,7 @@ def init_script(authenticated: bool = True) -> str:
       Object.defineProperty(navigator,'serviceWorker',{{value:sw,configurable:true}});
       window.__emitSwMessage=data=>window.__swListeners.message?.({{data}});
       Object.defineProperty(navigator,'onLine',{{value:true,writable:true,configurable:true}});
+      Object.defineProperty(navigator,'standalone',{{value:{str(standalone).lower()},configurable:true}});
       window.Notification={{permission:'default',requestPermission:async()=>'default'}};
       window.__bookings={json.dumps(BOOKINGS, ensure_ascii=False)};
       window.__config={json.dumps(config, ensure_ascii=False)};
@@ -166,10 +167,10 @@ class QA:
         page.screenshot(path=str(self.artifacts / name), full_page=True)
 
 
-def render_page(browser: Browser, width: int, height: int, authenticated: bool = True) -> Page:
+def render_page(browser: Browser, width: int, height: int, authenticated: bool = True, standalone: bool = False) -> Page:
     page = browser.new_page(viewport={"width": width, "height": height}, is_mobile=width <= 900)
     page.evaluate("document.head.innerHTML='<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">'")
-    page.evaluate(init_script(authenticated))
+    page.evaluate(init_script(authenticated, standalone))
     page.add_style_tag(content=(ROOT / "assets/admin-v250.css").read_text(encoding="utf-8"))
     page.add_script_tag(content=(ROOT / "assets/vacleaner-core.js").read_text(encoding="utf-8"))
     page.add_script_tag(content=(ROOT / "assets/admin-v250.js").read_text(encoding="utf-8"))
@@ -219,7 +220,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
     height=844
     safe_top=47
     safe_bottom=34
-    page = render_page(browser, width, height)
+    page = render_page(browser, width, height, standalone=True)
     try:
         page.evaluate(f"document.documentElement.style.setProperty('--pwa-safe-top','{safe_top}px');document.documentElement.style.setProperty('--pwa-safe-bottom','{safe_bottom}px')")
         page.wait_for_timeout(80)
@@ -235,7 +236,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         sidebar = page.locator(".sidebar").bounding_box()
         qa.check(topbar is not None and abs(topbar["height"]-(64+safe_top))<=1.5, f"{label}: topbar has one stable safe-area height")
         qa.check(main_head is not None and topbar is not None and main_head["y"] >= topbar["y"] + topbar["height"] + 8, f"{label}: content starts below status bar and topbar")
-        qa.check(sidebar is not None and abs(sidebar["y"] + sidebar["height"] - height) <= 1 and abs(sidebar["height"]-(62+safe_bottom))<=1.5, f"{label}: bottom navigation is pinned to the physical viewport bottom")
+        expected_pwa_pad=max(8,min(12,safe_bottom-22))
+        qa.check(page.locator('html').evaluate("el=>el.classList.contains('pwa-standalone')"), f"{label}: installed mode is detected independently from Safari")
+        qa.check(sidebar is not None and abs(sidebar["y"] + sidebar["height"] - height) <= 1 and abs(sidebar["height"]-(62+expected_pwa_pad))<=1.5, f"{label}: standalone bottom navigation sits lower than the Safari mobile contract")
         heights = page.locator(".nav button:visible").evaluate_all("els=>els.map(el=>el.getBoundingClientRect().height)")
         qa.check(all(value >= 44 for value in heights), f"{label}: bottom navigation tap targets are at least 44px")
         qa.check(page.locator('.nav button[data-view="analytics"]:visible').count()==1 and page.locator('.nav button[data-view="equipment"]:visible').count()==0, f"{label}: analytics replaces equipment in the five primary bottom-nav actions")
@@ -344,6 +347,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('#pageTitle').inner_text().strip()=='Клієнти', f"{label}: searching clients never jumps to bookings")
         qa.check(page.locator('.client-row').count()>=1, f"{label}: client search filters inside clients view")
         qa.check(page.locator('.campaign-panel').count()==0, f"{label}: clients view is free of campaign management")
+        stats=page.locator('.client-mobile-stats:visible').first
+        qa.check(stats.count()==1 and 'оренд' in stats.inner_text() and 'грн' in stats.inner_text(), f"{label}: client card shows rental count and total spend in PWA")
         page.evaluate("()=>document.querySelector('[data-view=campaigns]')?.click()");page.wait_for_timeout(60)
         qa.check(page.locator('.campaign-panel').count()==1, f"{label}: campaigns render in their dedicated view")
         qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible in campaigns view")
@@ -486,8 +491,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 telegram_href=page.locator('#sendTelegram').get_attribute('href') or ''
                 qa.check(telegram_href.startswith('https://t.me/+380') and '?text=' not in telegram_href, f"{label}: Telegram action opens the customer phone chat without a long draft")
                 qa.check('share/url?url=&' not in telegram_href, f"{label}: Telegram action never generates the broken empty share URL")
-                switch_gap=page.locator('#processForm').evaluate("""form=>{const a=form.elements.prepaymentPaid.closest('.switch').getBoundingClientRect(),b=form.elements.confirmationSent.closest('.switch').getBoundingClientRect();return b.top-a.bottom}""")
-                qa.check(switch_gap>=8, f"{label}: prepayment and conditions blocks keep a visible gap")
+                switch_gap=page.locator('#processForm').evaluate("""form=>{const a=form.elements.confirmationSent.closest('.switch').getBoundingClientRect(),b=form.elements.prepaymentPaid.closest('.switch').getBoundingClientRect();return b.top-a.bottom}""")
+                qa.check(switch_gap>=8, f"{label}: conditions and prepayment blocks keep a visible gap")
+                qa.check(page.locator('#saveProcess').count()==1 and page.locator('#confirmProcess').count()==1, f"{label}: processing has separate save and confirm actions")
+                qa.check(page.locator('#confirmProcess').is_disabled(), f"{label}: confirmation stays locked until 200 UAH is marked received")
             if label=='mobile-390': qa.shot(page, f"mobile-390-{action}-modal.png")
             page.locator(f"{selector} .close").click()
         if label=='mobile-390': qa.shot(page, f"{label}-bookings.png")
