@@ -45,8 +45,11 @@ def suite(browser,qa,width,height,label):
         # Issue modal
         target=pwa.BOOKINGS[2]['id']; page.locator(f'.booking-card[data-id="{target}"] [data-action="issue"]').click(); page.wait_for_selector('#issueForm')
         issue=page.locator('.modal-card').bounding_box(); issue_btn=page.locator('#issueForm>footer .btn').last.bounding_box()
-        qa.check(issue and issue['height']<=682, f'{label}: issue modal is compact')
+        qa.check(issue and issue['height']<=728 and issue['y']>=9, f'{label}: issue modal fits compact desktop viewport')
         qa.check(issue_btn and issue_btn['height']>=44, f'{label}: issue action stays 44px+')
+        layout_scroll=page.locator('#issueForm .modal-layout').evaluate('el=>({scrollHeight:el.scrollHeight,clientHeight:el.clientHeight,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth})')
+        qa.check(layout_scroll['scrollHeight']<=layout_scroll['clientHeight']+1, f'{label}: issue modal has no internal vertical scroll')
+        qa.check(layout_scroll['scrollWidth']<=layout_scroll['clientWidth']+1, f'{label}: issue modal layout has no internal horizontal scroll')
         qa.check(pwa.no_overflow(page),f'{label}: issue modal has no horizontal overflow')
         qa.shot(page,f'{label}-issue.png')
         page.locator('#issueForm .close').click(); page.wait_for_timeout(30)

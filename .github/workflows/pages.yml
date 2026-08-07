@@ -29,6 +29,8 @@ jobs:
         run: npm run stamp
       - name: Validate static and backend release
         run: npm run check
+      - name: Verify rental day and deposit policy
+        run: npm run test:deposit-policy
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test source

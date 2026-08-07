@@ -249,16 +249,15 @@
     if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';
     return'oneUnit';
   }
-  function fullWeekend(start,finish){
-    const a=parseDate(start),b=parseDate(finish);if(!a||!b)return false;
-    let sat=false,sun=false,d=new Date(a);for(let i=0;d<=b&&i<32;i++,d=new Date(d.getTime()+86400000)){if(d.getDay()===6)sat=true;if(d.getDay()===0)sun=true}return sat&&sun;
+  function fullWeekend(start,finish,pickupWindow='morning',returnWindow='evening'){
+    return Boolean(CORE?.isWeekendDeposit?.(start,finish,pickupWindow,returnWindow));
   }
   function selectedProductCode(){
     const btn=document.querySelector('.booking-products button[aria-pressed="true"],.booking-products button.is-selected,.booking-products button.selected');
     const title=btn?.querySelector('strong')?.textContent?.trim()||'';return PRODUCT_ALIASES[title]||'';
   }
-  function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')];return{start:dates[0]?.value||'',finish:dates[1]?.value||''}}
-  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish)?rule.weekend:rule.day)||0}
+  function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];return{start:dates[0]?.value||'',finish:dates[1]?.value||'',pickupWindow:windows[0]?.value||'morning',returnWindow:windows[1]?.value||'evening'}}
+  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}
   function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
   function enhanceDepositSummary(){
     const summary=document.querySelector('.booking-summary');if(!summary)return;
@@ -272,18 +271,18 @@
     total.insertAdjacentElement('beforebegin',prepayment);
     const deposit=document.createElement('div');
     deposit.className='vx-summary-deposit vx-summary-finance-row';
-    deposit.innerHTML=`<span><b>Поворотний залог</b><small>Сплачується під час отримання техніки.</small></span><strong>${value?formatMoney(value):'—'}</strong>`;
+    deposit.innerHTML=`<span><b>Залоговий платіж</b><small>Сплачується під час отримання техніки.</small></span><strong>${value?formatMoney(value):'—'}</strong>`;
     total.insertAdjacentElement('beforebegin',deposit);
     const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
     let note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
     if(note){
       note.className='vx-summary-deposit-note';
-      note.textContent='Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
+      note.textContent='Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
     }
   }
   async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.depositRules){mergeDepositRules(d.depositRules);enhanceDepositSummary()}}catch{}}
   function termsMarkup(){
-    return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактичний залог формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Поворотний залог</h3><p>Сплачується під час отримання техніки. Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>повний вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>повний вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>повний вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>повний вікенд · 4 000 грн</small></span></div></div></article></div><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
+    return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактично отриманий залоговий платіж формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залоговий платіж</h3><p>Сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>2+ доби у вікенд · 4 000 грн</small></span></div></div></article></div><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
   }
   function injectTerms(){
     const path=location.pathname.replace(/\/+$/,'')||'/';

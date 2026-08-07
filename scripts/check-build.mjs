@@ -33,7 +33,7 @@ const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes
 const adminRuntime=fs.readFileSync(path.join(root,'assets','admin-v250.js'),'utf8');
 
 const e2eSmoke=fs.readFileSync(path.join(root,'scripts','e2e_smoke.py'),'utf8');
-for(const token of ['def normalized_text(', 'def select_uses_dark_theme(', 'hero_limit = min(700', '#bookingForm header [data-close]'])if(!e2eSmoke.includes(token))errors.push(`E2E CI hardening missing: ${token}`);
+for(const token of ['def normalized_text(', 'def select_uses_dark_theme(', 'hero_limit = min(700', '#bookingForm header [data-close]', 'Saturday morning to Sunday morning keeps 1000 UAH deposit', 'Saturday evening to Sunday evening keeps 1000 UAH deposit', 'Friday evening to Sunday morning uses 2000 UAH weekend deposit', 'Friday evening to Sunday evening uses 2000 UAH weekend deposit', 'Saturday morning to Monday morning uses 2000 UAH weekend deposit'])if(!e2eSmoke.includes(token))errors.push(`E2E CI hardening missing: ${token}`);
 if(e2eSmoke.includes('page.locator("[data-close]").click()'))errors.push('E2E uses ambiguous generic data-close click');
 const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)/g)].map(match=>match[1]);
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
@@ -47,6 +47,7 @@ const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','va
 const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w.js'),'utf8');
 const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');
 execFileSync(process.execPath,[path.join(root,'scripts','test-finance.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-deposit-policy.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-session.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-ux.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-density.mjs')],{stdio:'pipe'});
@@ -73,9 +74,10 @@ const requiredCopy=[
  'Новий клієнт надсилає документ менеджеру приватно.',
  'Сплачується під час отримання техніки.',
  'Що потрібно для оформлення',
+ 'Залоговий платіж',
 ];
 for(const phrase of requiredCopy)if(!businessCopy.includes(phrase))errors.push(`required booking copy missing: ${phrase}`);
-for(const phrase of ['базова сума, фактичну фіксує менеджер','Базова сума; фактичну менеджер фіксує при видачі','залог повертається окремо','оплата оренди при видачі','входить у суму оренди','входить у вартість оренди'])if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
+for(const phrase of ['базова сума, фактичну фіксує менеджер','Базова сума; фактичну менеджер фіксує при видачі','залог повертається окремо','оплата оренди при видачі','входить у суму оренди','входить у вартість оренди','Поворотний залог'])if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
 if(!bookingHtml.includes('7:00–9:30')||!bookingHtml.includes('17:30–20:00'))errors.push('public fallback slots are stale');
 if(!adminHtml.includes('Content-Security-Policy'))errors.push('admin CSP is missing');
 if(!adminRuntime.includes("SESSION_IDLE_MS=30*24*60*60*1000"))errors.push('trusted-device session expiry is missing');
@@ -103,5 +105,12 @@ for(const file of files.filter(f=>f.endsWith('.html'))){
 if(!e2eSmoke.includes('Selecting equipment does not auto-select dates')||!e2eSmoke.includes('Deposit stays unknown until dates are selected'))errors.push('date/deposit preselection regression test missing');
 if(publicReactBundle.includes('b(c(t)),f(c(d(t,1)))'))errors.push('booking page silently preselects dates');
 if(!publicExperience.includes('if(!dates.start||!dates.finish)return 0'))errors.push('public deposit must stay unknown until both dates are selected');
+for(const fn of ['vacleaner-booking-v5','vacleaner-admin-bookings-v3']){
+ const cfg=fs.readFileSync(path.join(root,'supabase','functions',fn,'config.ts'),'utf8');
+ if(!cfg.includes('export function rentalDays')||!cfg.includes('export function isWeekendDeposit'))errors.push(`${fn} does not share paid-day weekend deposit policy`);
+}
+if(!bookingEdgeV5.includes('isWeekendDeposit(sd, rd, pickupWindow, returnWindow)'))errors.push('booking v5 deposit does not include pickup/return windows');
+if(!adminEdge.includes('isWeekendDeposit(startDate, returnDate, pickupWindow, returnWindow)'))errors.push('admin v3 deposit does not include pickup/return windows');
+if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale Saturday→Sunday 2000 UAH E2E rule still present');
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
 console.log(`Build ${release.version} passed ${files.length} file checks. Shared config ${expected}.`);

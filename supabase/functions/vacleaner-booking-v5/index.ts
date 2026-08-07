@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
-import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES } from "./config.ts";
+import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES, rentalDays, isWeekendDeposit } from "./config.ts";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -14,10 +14,6 @@ const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), {
 const defaults: any = structuredClone(DEFAULT_CATALOG);
 const defaultDepositRules: any = structuredClone(DEFAULT_DEPOSIT_RULES);
 const day = (d: string) => new Date(d + "T12:00:00Z").getUTCDay();
-function days(sd: string, rd: string, pw: string, rw: string) {
-  const a = Date.parse(sd + "T12:00:00Z"), b = Date.parse(rd + "T12:00:00Z"), diff = Math.round((b - a) / 86400000), p = pw === "evening" ? 1 : 0, r = rw === "evening" ? 1 : 0;
-  return diff === 0 ? (r > p ? 1 : 0) : diff + (r > p ? 1 : 0);
-}
 function base(product: any, sd: string, n: number) {
   if (n === 2 && day(sd) === 6 && product.saturdaySunday) return product.saturdaySunday;
   let t = 0;
@@ -27,30 +23,13 @@ function base(product: any, sd: string, n: number) {
   }
   return t;
 }
-function fullWeekend(sd: string, rd: string, pickupWindow = "morning", returnWindow = "evening") {
-  if (!sd || !rd) return false;
-  const dayIndex = (value: string) => Math.floor(Date.parse(value + "T12:00:00Z") / 86400000);
-  const startSlot = dayIndex(sd) * 2 + (pickupWindow === "evening" ? 1 : 0);
-  const endSlot = dayIndex(rd) * 2 + (returnWindow === "evening" ? 1 : 0);
-  let d = new Date(sd + "T12:00:00Z"), end = new Date(rd + "T12:00:00Z");
-  for (let guard = 0; d <= end && guard < 32; guard += 1) {
-    if (d.getUTCDay() === 6) {
-      const saturday = d.toISOString().slice(0, 10);
-      const saturdayMorning = dayIndex(saturday) * 2;
-      const sundayEvening = (dayIndex(saturday) + 1) * 2 + 1;
-      if (startSlot <= saturdayMorning && endSlot >= sundayEvening) return true;
-    }
-    d = new Date(d.getTime() + 86400000);
-  }
-  return false;
-}
 function depositGroup(code: string, catalog: any) {
   return catalog?.products?.[code]?.depositGroup || defaults.products[code as keyof typeof defaults.products]?.depositGroup || "oneUnit";
 }
 function depositAmount(code: string, sd: string, rd: string, pickupWindow: string, returnWindow: string, rules: any, catalog: any) {
   const group = depositGroup(code, catalog);
   const source = rules?.[group] || defaultDepositRules[group as keyof typeof defaultDepositRules];
-  return Math.max(0, Number(fullWeekend(sd, rd, pickupWindow, returnWindow) ? source.weekend : source.day) || 0);
+  return Math.max(0, Number(isWeekendDeposit(sd, rd, pickupWindow, returnWindow) ? source.weekend : source.day) || 0);
 }
 function selectedExtras(value: unknown, catalog: any) {
   const rows = Array.isArray(value) ? value : [];
@@ -93,7 +72,7 @@ Deno.serve(async req => {
     if (body.action === "loyalty_lookup") return json(payload, upstream.status);
     const product = cat.products?.[body.productCode] || defaults.products[body.productCode as keyof typeof defaults.products];
     if (!product) return json(payload, upstream.status);
-    const n = days(body.startDate, body.returnDate, body.pickupWindow, body.returnWindow);
+    const n = rentalDays(body.startDate, body.returnDate, body.pickupWindow, body.returnWindow);
     const rawBase = base(product, body.startDate, n);
     const selected = selectedExtras(body.extras, cat);
     const extrasAmount = selected.amount;

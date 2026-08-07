@@ -1641,6 +1641,6 @@ body{touch-action:manipulation}
   .issue-form .live .balance strong{font-size:15px;}
   .issue-form .live .balance span{font-size:14px;}
   .issue-form>footer{padding:8px 20px 10px;gap:10px;}
-  .issue-form>footer .btn{min-height:42px;padding:0 16px;font-size:12.5px;}
+  .issue-form>footer .btn{min-height:44px;padding:0 16px;font-size:12.5px;}
   .issue-form>footer .primary{min-width:200px;}
 }

@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
-import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES } from "./config.ts";
+import { DEFAULT_CATALOG, DEFAULT_DEPOSIT_RULES, rentalDays, isWeekendDeposit } from "./config.ts";
 import { productUsesPuzzi, settlementConfirmation, settlementFromBooking } from "./settlement.mjs";
 
 const corsHeaders = {
@@ -30,12 +30,6 @@ const dateValue = (value: unknown) => typeof value === "string" && /^\d{4}-\d{2}
 function depositGroup(productCode: string, catalog: any = defaultCatalog) {
   return catalog?.products?.[productCode]?.depositGroup || defaultCatalog.products[productCode as keyof typeof defaultCatalog.products]?.depositGroup || "oneUnit";
 }
-function rentalDays(startDate: string, returnDate: string, pickupWindow: string, returnWindow: string) {
-  const start = Date.parse(`${startDate}T12:00:00Z`), finish = Date.parse(`${returnDate}T12:00:00Z`);
-  const calendarDays = Math.round((finish - start) / 86400000);
-  const pickupOrder = pickupWindow === "evening" ? 1 : 0, returnOrder = returnWindow === "evening" ? 1 : 0;
-  return calendarDays === 0 ? (returnOrder > pickupOrder ? 1 : 0) : calendarDays + (returnOrder > pickupOrder ? 1 : 0);
-}
 function calculateBase(product: any, startDate: string, days: number) {
   if (days === 2 && new Date(`${startDate}T12:00:00Z`).getUTCDay() === 6 && product?.saturdaySunday) return Number(product.saturdaySunday);
   let total = 0;
@@ -44,24 +38,6 @@ function calculateBase(product: any, startDate: string, days: number) {
     total += Number(day === 0 || day === 6 ? product?.weekend : product?.weekday) || 0;
   }
   return total;
-}
-function includesFullWeekend(startDate: string, returnDate: string, pickupWindow = "morning", returnWindow = "evening") {
-  if (!startDate || !returnDate) return false;
-  const dayIndex = (value: string) => Math.floor(Date.parse(`${value}T12:00:00Z`) / 86400000);
-  const startSlot = dayIndex(startDate) * 2 + (pickupWindow === "evening" ? 1 : 0);
-  const endSlot = dayIndex(returnDate) * 2 + (returnWindow === "evening" ? 1 : 0);
-  let cursor = new Date(`${startDate}T12:00:00Z`);
-  const end = new Date(`${returnDate}T12:00:00Z`);
-  for (let guard = 0; cursor <= end && guard < 32; guard += 1) {
-    if (cursor.getUTCDay() === 6) {
-      const saturday = cursor.toISOString().slice(0, 10);
-      const saturdayMorning = dayIndex(saturday) * 2;
-      const sundayEvening = (dayIndex(saturday) + 1) * 2 + 1;
-      if (startSlot <= saturdayMorning && endSlot >= sundayEvening) return true;
-    }
-    cursor = new Date(cursor.getTime() + 86400000);
-  }
-  return false;
 }
 function normalizeDepositRules(value: any) {
   const out = structuredClone(defaultDepositRules);
@@ -76,7 +52,7 @@ function normalizeDepositRules(value: any) {
 }
 function calculateDeposit(productCode: string, startDate: string, returnDate: string, pickupWindow: string, returnWindow: string, rules: DepositRules, catalog: any = defaultCatalog) {
   const group = depositGroup(productCode, catalog) as keyof typeof rules;
-  return rules[group][includesFullWeekend(startDate, returnDate, pickupWindow, returnWindow) ? "weekend" : "day"];
+  return rules[group][isWeekendDeposit(startDate, returnDate, pickupWindow, returnWindow) ? "weekend" : "day"];
 }
 
 function normalizeSelectedExtras(value: unknown, productCode: string, catalog: any) {

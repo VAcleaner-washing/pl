@@ -10,6 +10,7 @@ for(const token of [
   '.new-btn{min-height:44px',
   '.top-logout{width:44px;height:44px',
   '.issue-quick button{min-height:44px',
+  '.issue-form>footer .btn{min-height:44px',
   '.pwa-update-prompt button{min-height:44px',
   '.modal-card:has(.issue-form){width:min(1040px',
   '.modal-card:has(.finance-form){height:min(700px',

@@ -1,7 +1,0 @@
-{
-  "passed": 0,
-  "failed": [
-    "Unhandled browser error: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at https://vacleaner.test/bronuvannia/\nCall log:\n  - navigating to \"https://vacleaner.test/bronuvannia/\", waiting until \"networkidle\"\n"
-  ],
-  "status": "failed"
-}

@@ -31,19 +31,7 @@ function selectedProductCode(){
   return productCodes.find(([re])=>re.test(text))?.[1]||'';
 }
 function fullWeekend(start,finish,pickupWindow='morning',returnWindow='evening'){
-  if(!start||!finish)return false;
-  const dayIndex=value=>Math.floor(Date.parse(value+'T12:00:00Z')/86400000);
-  const startSlot=dayIndex(start)*2+(pickupWindow==='evening'?1:0);
-  const endSlot=dayIndex(finish)*2+(returnWindow==='evening'?1:0);
-  let d=new Date(start+'T12:00:00Z'),end=new Date(finish+'T12:00:00Z');
-  for(let guard=0;d<=end&&guard<32;guard+=1){
-    if(d.getUTCDay()===6){
-      const saturday=d.toISOString().slice(0,10),satMorning=dayIndex(saturday)*2,sunEvening=(dayIndex(saturday)+1)*2+1;
-      if(startSlot<=satMorning&&endSlot>=sunEvening)return true;
-    }
-    d=new Date(d.getTime()+86400000);
-  }
-  return false;
+  return Boolean(window.VACLEANER_CORE?.isWeekendDeposit?.(start,finish,pickupWindow,returnWindow));
 }
 function depositGroup(code){if(code==='elite')return'elite';if(code==='general')return'general';if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';return'oneUnit'}
 function depositAmount(){
@@ -65,24 +53,24 @@ function renderDeposit(){
       total.insertAdjacentElement('beforebegin',prepayment);
       const row=document.createElement('div');
       row.className='vx-summary-deposit vx-summary-finance-row vx-booking-deposit';
-      row.innerHTML=`<span><b>Поворотний залог</b><small>Сплачується під час отримання техніки.</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
+      row.innerHTML=`<span><b>Залоговий платіж</b><small>Сплачується під час отримання техніки.</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
       total.insertAdjacentElement('beforebegin',row);
       const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
       const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
       if(note){
         note.className='vx-summary-deposit-note';
-        note.textContent='Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
+        note.textContent='Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
       }
     }
   }
   if(mobile){
     let note=mobile.querySelector('.vx-mobile-deposit');if(!note){note=document.createElement('small');note.className='vx-mobile-deposit';mobile.querySelector('div')?.appendChild(note)}
-    note.textContent=amount?`Поворотний залог при отриманні: ${formatMoney(amount)}`:'Сума залогу з’явиться після вибору';
+    note.textContent=amount?`Залоговий платіж при отриманні: ${formatMoney(amount)}`:'Сума залогового платежу з’явиться після вибору';
   }
   const conditions=document.querySelector('.booking-conditions ul');
   if(conditions&&conditions.children[0])conditions.children[0].textContent='Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.';
   if(conditions&&conditions.children[1])conditions.children[1].textContent='Новий клієнт надсилає документ менеджеру приватно. Повторному клієнту, чиї дані вже є в базі, повторно надсилати документ не потрібно.';
-  if(conditions&&conditions.children[2])conditions.children[2].textContent=amount?`Поворотний залог ${formatMoney(amount)} сплачується під час отримання техніки. Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`:`Поворотний залог сплачується під час отримання техніки. Після повернення техніки із передоплати та залогу вираховується вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`;
+  if(conditions&&conditions.children[2])conditions.children[2].textContent=amount?`Залоговий платіж ${formatMoney(amount)} сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`:`Залоговий платіж сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`;
 }
 
 
