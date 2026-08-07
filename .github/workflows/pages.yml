@@ -43,6 +43,8 @@ jobs:
         run: npm run test:pwa
       - name: Run desktop density visual QA
         run: npm run test:desktop-density
+      - name: Run final desktop visual audit
+        run: npm run test:desktop-final
       - name: Upload browser evidence on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -52,6 +54,7 @@ jobs:
             test-results
             pwa-test-results
             density-test-results
+            final-desktop-test-results
           if-no-files-found: ignore
           retention-days: 14
       - uses: actions/upload-pages-artifact@v3

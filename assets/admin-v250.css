@@ -1570,3 +1570,19 @@ body{touch-action:manipulation}
   .pwa-update-prompt{padding:10px;border-radius:14px;gap:8px}
   .pwa-update-prompt button{min-height:44px}
 }
+
+
+/* v3.0.16 — final desktop visual audit. Local polish only; no global rescale. */
+.settings-grid,.settings-grid>*{min-width:0}
+.window-choice label{position:relative;min-width:0}
+.window-choice input{width:1px!important;height:1px!important;min-width:1px!important;min-height:1px!important;margin:0!important}
+.window-choice input:focus-visible+span{outline:2px solid #d9a85d;outline-offset:2px}
+@media (min-width:901px){
+  .analytics-toolbar h2{font-size:24px;line-height:1.15;margin-bottom:5px}
+}
+@media (min-width:901px) and (max-width:1100px){
+  .settings-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"deposits" "slots" "notifications" "finance"}
+  #depositRulesForm,#slotsForm,.notification-card,.financial-rules-card{grid-column:1;min-width:0;width:auto}
+  .deposit-rules-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .deposit-rules-grid>section,.slot-editor-row>*{min-width:0}
+}
