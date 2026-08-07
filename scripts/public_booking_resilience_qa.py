@@ -35,6 +35,8 @@ def route_handler(route):
         action=body.get('action')
         if action=='loyalty_lookup':
             route.fulfill(status=200,content_type='application/json',body=json.dumps({'loyalty':{'level':'Start','percent':0,'completedOrders':0}})); return
+        if body.get('productCode')=='sc2':
+            route.fulfill(status=200,content_type='application/json',body=json.dumps({'available':True,'remaining':{'sc2':1},'estimate':{'totalAmount':500,'depositAmount':1000,'rentalDays':1}})); return
         payload={'available':False,'remaining':{'puzzi':0},'nextAvailable':{'startDate':'2026-08-08','pickupWindow':'morning','returnDate':'2026-08-09','returnWindow':'morning'},'estimate':{'totalAmount':700,'depositAmount':1000}}
         route.fulfill(status=409 if action=='create' else 200,content_type='application/json',body=json.dumps({'error':'not_available',**payload})); return
     route.continue_()
@@ -51,7 +53,7 @@ def main():
         page.on('pageerror',lambda exc: errors.append(str(exc)))
         page.route('**/*',route_handler)
         page.set_content(HTML,wait_until='domcontentloaded')
-        page.evaluate("""window.__mutationCount=0;window.__qaObserver=new MutationObserver(list=>window.__mutationCount+=list.length);window.__qaObserver.observe(document.body,{childList:true,subtree:true,attributes:true,characterData:true});""")
+        page.evaluate("""window.__mutationCount=0;window.__cardChildMutations=0;window.__qaObserver=new MutationObserver(list=>window.__mutationCount+=list.length);window.__qaObserver.observe(document.body,{childList:true,subtree:true,attributes:true,characterData:true});window.__cardObserver=new MutationObserver(list=>window.__cardChildMutations+=list.filter(m=>m.type==='childList'||m.type==='characterData').length);window.__cardObserver.observe(document.querySelector('.availability-card'),{childList:true,subtree:true,characterData:true});""")
         page.add_script_tag(path=str(ROOT/'assets/vacleaner-core.js'))
         page.add_script_tag(path=str(ROOT/'assets/public-booking-slots.js'))
         page.add_script_tag(path=str(ROOT/'assets/public-experience.js'))
@@ -64,14 +66,27 @@ def main():
         before=page.url
         result=page.evaluate("""async()=>{const r=await fetch('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',productCode:'puzzi',startDate:'2026-08-07',returnDate:'2026-08-08',pickupWindow:'evening',returnWindow:'evening'})});let d={};try{d=await r.clone().json()}catch{};return {status:r.status,data:d}}""")
         page.wait_for_timeout(260)
-        text=page.locator('.availability-card').inner_text()
+        card_text=page.locator('.availability-card').inner_text()
+        panel_text=page.locator('.vx-nearest-availability-panel').inner_text()
         assert result['status']==409, result
-        assert 'На цей час техніка зайнята' in text, text
-        assert '8 серпня' in text, text
+        assert card_text=='Перевірка...', f'React-owned availability card was rewritten: {card_text!r}'
+        assert page.evaluate('window.__cardChildMutations')==0, f"Nearest UX mutated React-owned availability card: {page.evaluate('window.__cardChildMutations')} mutations"
+        assert 'На цей час техніка зайнята' in panel_text, panel_text
+        assert '8 серпня' in panel_text, panel_text
         assert page.locator('.vx-use-nearest').count()==1
+        # Repeated unavailable responses must update one external panel, never duplicate it.
+        page.evaluate("""async()=>{await fetch('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'availability',productCode:'puzzi',startDate:'2026-08-07',returnDate:'2026-08-08',pickupWindow:'evening',returnWindow:'evening'})})}""")
+        page.wait_for_timeout(120)
+        assert page.locator('.vx-nearest-availability-panel').count()==1
+        assert page.evaluate('window.__cardChildMutations')==0
+        # An available response removes only our external suggestion.
+        page.evaluate("""async()=>{await fetch('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'availability',productCode:'sc2',startDate:'2026-08-08',returnDate:'2026-08-09',pickupWindow:'morning',returnWindow:'morning'})})}""")
+        page.wait_for_timeout(120)
+        assert page.locator('.vx-nearest-availability-panel').count()==0
+        assert page.evaluate('window.__cardChildMutations')==0
         assert page.url==before, f'Unavailable flow navigated away: {before} -> {page.url}'
         assert not errors, f'Page errors: {errors}'
-        print(f'Public booking resilience PASS: mutation plateau {first}->{second}; unavailable 409 stays on page and renders nearest window.')
+        print(f'Public booking resilience PASS: mutation plateau {first}->{second}; nearest suggestion never mutates React-owned availability card; unavailable 409 stays on page.')
         browser.close()
 
 if __name__=='__main__': main()

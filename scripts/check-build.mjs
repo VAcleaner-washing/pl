@@ -51,6 +51,8 @@ const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
 
 const publicBooking=fs.readFileSync(path.join(root,'assets','public-booking-slots.js'),'utf8');
+if(/availability-card[\s\S]{0,500}\.innerHTML\s*=/.test(publicBooking)||/card\.innerHTML\s*=/.test(publicBooking))errors.push('nearest availability must never rewrite React-owned availability-card DOM');
+for(const token of ["vx-nearest-availability-panel","card.insertAdjacentElement('afterend',panel)","button.onclick=()=>applySuggestedPeriod(next)"])if(!publicBooking.includes(token))errors.push(`public nearest-availability safe sibling missing: ${token}`);
 const publicResilience=fs.readFileSync(path.join(root,'assets','public-resilience.js'),'utf8');
 
 const publicExperience=fs.readFileSync(path.join(root,'assets','public-experience.js'),'utf8');

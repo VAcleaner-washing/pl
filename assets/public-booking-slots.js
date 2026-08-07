@@ -164,18 +164,45 @@ document.addEventListener('DOMContentLoaded',()=>{depositObserver.observe(docume
     setNativeValue(windows[1],next.returnWindow);
     grid.scrollIntoView({block:'center',behavior:'smooth'});
   }
+  function nearestPanel(){
+    return document.querySelector('.vx-nearest-availability-panel');
+  }
+  function clearNearest(){
+    nearestPanel()?.remove();
+  }
   function renderNearest(next){
-    if(!next?.startDate)return;
-    const paint=()=>{
-      const card=document.querySelector('.availability-card');
-      if(!card)return;
-      const start=dateFmt.format(new Date(next.startDate+'T12:00:00'));
-      card.classList.remove('idle','available');
-      card.classList.add('unavailable','vx-nearest-availability');
-      card.innerHTML=`<strong>На цей час техніка зайнята</strong><span>Найближче вільне вікно для цього комплекту й тієї самої тривалості — <b>${start}, ${windowLabel(next.pickupWindow)}</b>.</span><div class="vx-nearest-actions"><button type="button" class="vx-use-nearest">Обрати ${start} · ${windowLabel(next.pickupWindow)}</button><small>Або виберіть іншу дату вручну.</small></div>`;
-      card.querySelector('.vx-use-nearest')?.addEventListener('click',()=>applySuggestedPeriod(next),{once:true});
-    };
-    requestAnimationFrame(paint);setTimeout(paint,60);setTimeout(paint,180);
+    if(!next?.startDate){clearNearest();return}
+    const card=document.querySelector('.availability-card');
+    if(!card)return;
+    const start=dateFmt.format(new Date(next.startDate+'T12:00:00'));
+    const label=`${start}, ${windowLabel(next.pickupWindow)}`;
+    let panel=nearestPanel();
+    if(!panel){
+      panel=document.createElement('aside');
+      panel.className='vx-nearest-availability-panel';
+      panel.setAttribute('aria-live','polite');
+      const title=document.createElement('strong');
+      title.className='vx-nearest-title';
+      const copy=document.createElement('span');
+      copy.className='vx-nearest-copy';
+      const actions=document.createElement('div');
+      actions.className='vx-nearest-actions';
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='vx-use-nearest';
+      const hint=document.createElement('small');
+      hint.textContent='Або виберіть іншу дату вручну.';
+      actions.append(button,hint);
+      panel.append(title,copy,actions);
+      card.insertAdjacentElement('afterend',panel);
+    }
+    panel.querySelector('.vx-nearest-title').textContent='На цей час техніка зайнята';
+    panel.querySelector('.vx-nearest-copy').textContent=`Найближче вільне вікно для цього комплекту й тієї самої тривалості — ${label}.`;
+    const button=panel.querySelector('.vx-use-nearest');
+    button.textContent=`Обрати ${start} · ${windowLabel(next.pickupWindow)}`;
+    button.onclick=()=>applySuggestedPeriod(next);
+    panel.dataset.startDate=next.startDate;
+    panel.dataset.pickupWindow=next.pickupWindow||'morning';
   }
   window.fetch=async(input,init)=>{
     const response=await originalFetch(input,init);
@@ -187,6 +214,7 @@ document.addEventListener('DOMContentLoaded',()=>{depositObserver.observe(docume
         if(action==='availability'||action==='create'){
           const data=await response.clone().json();
           if(data?.nextAvailable&&data?.available!==true)renderNearest(data.nextAvailable);
+          else if(data?.available===true)clearNearest();
         }
       }
     }catch{}
