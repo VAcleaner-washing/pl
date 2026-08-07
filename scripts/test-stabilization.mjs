@@ -8,6 +8,7 @@ const core=read('assets/vacleaner-core.js');
 const publicExperience=read('assets/public-experience.js');
 const publicSlots=read('assets/public-booking-slots.js');
 const adminEdge=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts');
+const adminDataEdge=read('supabase/functions/vacleaner-admin-data-v1/index.ts');
 const bookingEdge=read('supabase/functions/vacleaner-booking-v5/index.ts');
 const settingsEdge=read('supabase/functions/vacleaner-settings/index.ts');
 const pricing=read('supabase/functions/vacleaner-admin-bookings-v3/pricing.mjs');
@@ -71,8 +72,23 @@ has(pwaQa,'unavailable equipment shows the nearest compatible free window','publ
 has(bookingEdge,'nextAvailable','public backend returns a nearest-compatible alternative');
 has(publicSlots,'vx-nearest-availability','public UI renders nearest-compatible availability');
 has(admin,'function isHistoricalPhone(value)','historical clients without real phones cannot crash the clients view');
+has(admin,"!['bookings','clients'].includes(state.view)",'client search stays in the clients view');
+has(admin,'const dateFullNumeric=v=>','client list has a full numeric date formatter');
+has(admin,'function openClientEditor(client)','client cards have an editor');
+has(adminEdge,'if (action === "clients")','admin API exposes customer profiles');
+has(adminEdge,'.order(\"start_at\", { ascending: false }).limit(1000)','historical import cannot push current bookings out of the admin list');
+has(adminEdge,'if (action === "save_customer")','admin API persists customer-card edits');
+has(admin,'vacleaner-admin-data-v1','client/profile reads use a dedicated non-financial endpoint');
+has(adminDataEdge,'if(action==="list")','admin data endpoint loads complete booking history');
+has(adminDataEdge,'.limit(1000)','admin data endpoint cannot truncate current bookings behind history import');
+has(adminDataEdge,'if(action==="save_customer")','admin data endpoint persists customer card edits');
+lacks(adminDataEdge,'base_amount','admin data endpoint never recalculates rental finance');
+lacks(adminDataEdge,'deposit_amount','admin data endpoint never touches deposits');
+has(css,'.catalog-toolbar,.analytics-toolbar{display:grid!important','320px equipment and analytics toolbars share mobile containment');
+
 has(pwaQa,'settings cards use full mobile width','mobile settings full-width is gated');
 has(e2e,'Selecting equipment does not auto-select dates','hidden auto-dates are forbidden');
+has(e2e,'base = \"http://127.0.0.1:4173\"','browser E2E uses a local origin instead of blocked synthetic DNS');
 lacks(admin,"t.me/+",'invalid direct Telegram phone URL is forbidden');
 has(admin,'https://t.me/share/url?url=&text=','Telegram fallback uses supported share URL');
 

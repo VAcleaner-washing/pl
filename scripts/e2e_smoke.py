@@ -211,12 +211,16 @@ def make_api_handler(config: dict[str, Any]):
             }
         elif "/functions/v1/vacleaner-settings" in url:
             body = {"slots": slots, "depositRules": deposit_rules, "catalog": catalog}
-        elif "/functions/v1/vacleaner-admin-bookings-v3" in url:
+        elif "/functions/v1/vacleaner-admin-bookings-v3" in url or "/functions/v1/vacleaner-admin-data-v1" in url:
             action = payload.get("action")
             if action == "list":
                 body = {"bookings": BOOKINGS}
             elif action == "calendar":
                 body = {"days": calendar_days()}
+            elif action == "clients":
+                body = {"customers": [{"phone": "+380951111111", "name": "Тестовий клієнт", "telegram": "@test_client", "address": "Полтава", "document_type": "ID-картка", "document_number": "000123", "document_verified_at": None}]}
+            elif action == "save_customer":
+                body = {"customer": {"phone": payload.get("customerPhone"), "name": payload.get("customerName")}}
             elif action == "lookup_customer":
                 body = {"customer": None}
             elif action == "audit_log":
@@ -459,7 +463,7 @@ def main() -> int:
     config = json.loads((PROJECT_ROOT / "config" / "vacleaner.json").read_text(encoding="utf-8"))
     checks = Checks(artifacts)
     api_handler = make_api_handler(config)
-    base = "https://vacleaner.test"
+    base = "http://127.0.0.1:4173"
     with sync_playwright() as playwright:
         executable = os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE")
         launch_options = {"headless": True, "args": ["--no-sandbox"]}

@@ -107,9 +107,11 @@ def init_script(authenticated: bool = True) -> str:
         let body={{}};
         const text=String(url);
         if(text.includes('vacleaner-settings'))body={{slots:window.__config.slots,depositRules:window.__config.depositRules,catalog:window.__config.catalog}};
-        else if(text.includes('vacleaner-admin-bookings-v3')){{
+        else if(text.includes('vacleaner-admin-bookings-v3')||text.includes('vacleaner-admin-data-v1')){{
           if(payload.action==='list')body={{bookings:window.__bookings}};
           else if(payload.action==='calendar')body={{days:Array.from({{length:14}},(_,i)=>({{date:new Date(Date.now()+i*86400000).toISOString().slice(0,10),resources:{{puzzi:{{label:'Puzzi',capacity:2,morning:2,evening:1}},sc2:{{label:'SC 2',capacity:2,morning:2,evening:2}},jimmy:{{label:'Jimmy',capacity:2,morning:1,evening:2}},abir:{{label:'ABIR',capacity:2,morning:2,evening:2}}}}}}))}};
+          else if(payload.action==='clients')body={{customers:[{{phone:'+380951111111',name:'Анна Коваленко',telegram:'@anna',address:'Полтава, вул. Соборності, 10',document_type:'ID-картка',document_number:'000123456',document_verified_at:new Date().toISOString()}}]}};
+          else if(payload.action==='save_customer')body={{customer:{{phone:payload.customerPhone,name:payload.customerName,telegram:payload.customerTelegram,address:payload.customerAddress}}}};
           else if(payload.action==='lookup_customer')body={{customer:{{phone:'+380951111111',name:'Анна Коваленко',address:'Полтава, вул. Соборності, 10',documentType:'ID-картка',documentNumber:'000123456',documentVerifiedAt:new Date().toISOString(),hasDocument:true,isRepeatCustomer:true,completedOrders:4,totalOrders:5,totalSpent:4200,lastDate:'{iso(-20)}',lastProduct:'Kärcher Puzzi 8/1',loyalty:{{level:'Regular',percent:5}}}}}};
           else if(payload.action==='audit_log')body={{entries:[{{id:1,booking_id:window.__bookings[0].id,booking_code:window.__bookings[0].booking_code,event_type:'updated',changed_fields:['status'],old_values:{{status:'pending'}},new_values:{{status:'confirmed'}},actor_id:'a',source:'edge:update',created_at:new Date().toISOString()}}]}};
           else body={{booking:window.__bookings.find(x=>x.id===payload.bookingId)||window.__bookings[0],finance:{{refundAmount:350,dueAmount:0,totalAmount:850,receivedAmount:1200}}}};
@@ -231,8 +233,31 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(bool(cards) and all(r['left']>=11 and r['right']<=width-11 for r in cards), f"{label}: settings cards use full mobile width")
                 slot_rows=page.locator('.slot-editor-row:visible').evaluate_all('els=>els.map(el=>({r:el.getBoundingClientRect(),children:[...el.querySelectorAll(".premium-control")].map(x=>x.getBoundingClientRect())}))')
                 qa.check(all(all(c['left']>=row['r']['left']-1 and c['right']<=row['r']['right']+1 for c in row['children']) for row in slot_rows), f"{label}: time-slot controls stay inside settings cards")
+            if view=='equipment':
+                qa.check(page.locator('.catalog-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: equipment toolbar stays inside its own width")
+            if view=='analytics':
+                qa.check(page.locator('.analytics-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics toolbar stays inside its own width")
+                qa.check(page.locator('.analytics-periods').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics period controls never widen 320px viewport")
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
+
+        # Client search is contextual and the card can be edited.
+        open_mobile_view(page,'clients')
+        page.locator('#globalSearch').fill('Анна')
+        page.wait_for_timeout(40)
+        qa.check(page.locator('#pageTitle').inner_text().strip()=='Клієнти', f"{label}: searching clients never jumps to bookings")
+        qa.check(page.locator('.client-row').count()>=1, f"{label}: client search filters inside clients view")
+        last_text=page.locator('.client-last-date').first.inner_text().strip() if page.locator('.client-last-date').count() else ''
+        qa.check(bool(__import__('re').fullmatch(r'\d{2}\.\d{2}\.\d{4}|—',last_text)), f"{label}: client last-rental date includes full year")
+        if page.locator('.client-edit-btn').count():
+            page.locator('.client-edit-btn').first.click();page.wait_for_selector('#clientEditor')
+            qa.check(no_overflow(page), f"{label}: client editor has no horizontal overflow")
+            client_title=page.locator('#clientEditor>header h2').bounding_box();client_footer=page.locator('#clientEditor>footer').bounding_box();client_save=page.locator('#clientEditor>footer .btn').last.bounding_box()
+            qa.check(client_title is not None and client_title['y']>=safe_top+8, f"{label}: client editor header clears Dynamic Island safe area")
+            qa.check(client_footer is not None and abs(client_footer['y']+client_footer['height']-height)<=1 and client_save is not None and client_save['y']+client_save['height']<=height-safe_bottom+1, f"{label}: client editor footer clears Home Indicator")
+            qa.check(page.locator('#clientEditor input[name=customerName]').count()==1 and page.locator('#clientEditor input[name=customerPhone]').count()==1, f"{label}: client editor exposes core contact fields")
+            page.locator('#clientEditor [data-close]').first.click()
+        page.locator('#clearSearch').click();page.wait_for_timeout(30)
 
         # More sheet remains usable and contained.
         page.locator(".more-nav:visible").click()

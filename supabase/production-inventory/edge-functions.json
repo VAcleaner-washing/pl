@@ -1,19 +1,18 @@
 {
-  "capturedAt": "2026-08-06T19:41:47Z",
+  "capturedAt": "2026-08-07T10:56:50Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
     "adminBookings": "vacleaner-admin-bookings-v3",
     "settings": "vacleaner-settings",
-    "push": "vacleaner-push"
+    "push": "vacleaner-push",
+    "adminData": "vacleaner-admin-data-v1"
   },
   "dependencyGraph": {
     "vacleaner-booking-v5": [
       "vacleaner-booking-v4"
     ],
-    "vacleaner-admin-bookings-v3": [
-      "vacleaner-admin-bookings-v2"
-    ],
+    "vacleaner-admin-bookings-v3": [],
     "vacleaner-admin-bookings-v2": [
       "vacleaner-admin-bookings"
     ]
@@ -53,10 +52,10 @@
     },
     {
       "slug": "vacleaner-settings",
-      "version": 4,
+      "version": 5,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "b263aebc1458bd2e806d627bf85a6e53c6cf411afdc5914a204501c4c64ebc6c",
+      "sha256": "2326cd5a06905ebcebf372f5fdacda5236288c708cc6e3cd37456d45b0f188ac",
       "role": "active shared settings"
     },
     {
@@ -85,19 +84,27 @@
     },
     {
       "slug": "vacleaner-admin-bookings-v3",
-      "version": 11,
+      "version": 13,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "6b6fb3321f060933144a287fa15dcda304a1d780292c244161fba144817fefb3",
-      "role": "active admin entrypoint; current-catalog extras normalization"
+      "sha256": "b3013c45f4989571b024dad6d7cf9e87a84e8684190fa1b554a2de089c050825",
+      "role": "active authoritative admin business entrypoint; v3.0.23 discount fix"
     },
     {
       "slug": "vacleaner-booking-v5",
-      "version": 4,
+      "version": 5,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "088faadd6e76a7125f42864168ea733c04e0eb9ebf913ed579b153953faae20a",
-      "role": "active public entrypoint; current-catalog extras persistence"
+      "sha256": "21778c8564037fb1ca0cb5af8a921a568977d825a3da27f07599f87b3323b41a",
+      "role": "active public entrypoint"
+    },
+    {
+      "slug": "vacleaner-admin-data-v1",
+      "version": 1,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "51c614cde66d05a990b52284d32da578787119be1342fb9d4fab98aadd5e5fee",
+      "role": "active non-financial admin list/customer profile endpoint"
     }
   ]
 }

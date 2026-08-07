@@ -34,6 +34,7 @@ for(const fn of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bo
  const shared=fs.readFileSync(path.join(root,'supabase','functions',fn,'config.ts'),'utf8');
  if(!shared.includes(`VACLEANER_SOURCE_HASH="${expected}"`))errors.push(`edge config stale: ${fn}`);
 }
+if(!fs.existsSync(path.join(root,'supabase','functions','vacleaner-admin-data-v1','index.ts')))errors.push('admin data Edge source is missing');
 const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes(`vacleaner-manager-${build}`))errors.push('service worker cache version mismatch');
 const adminRuntime=fs.readFileSync(path.join(root,'assets','admin-v250.js'),'utf8');
 const pwaVisualQa=fs.readFileSync(path.join(root,'scripts','pwa_visual_qa.py'),'utf8');

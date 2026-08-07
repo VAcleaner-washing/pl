@@ -223,7 +223,7 @@ Deno.serve(async (request: Request) => {
     const depositRules = normalizeDepositRules(settingsMap.deposit_rules), catalog = mergeCatalog(settingsMap.catalog), slots = normalizeSlots(settingsMap.booking_slots);
 
     if (action === "list") {
-      const { data, error } = await supabase.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").order("start_at", { ascending: true }).limit(250);
+      const { data, error } = await supabase.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").order("start_at", { ascending: false }).limit(1000);
       if (error) throw error;
       return json({ bookings: (data || []).map((row: any) => safeBooking(row)) });
     }
@@ -252,6 +252,49 @@ Deno.serve(async (request: Request) => {
         return { date, resources };
       });
       return json({ days });
+    }
+
+    if (action === "clients") {
+      const { data, error } = await supabase.from("vacleaner_customers")
+        .select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_updated_at,created_at,updated_at")
+        .order("updated_at", { ascending: false }).limit(1000);
+      if (error) throw error;
+      return json({ customers: data || [] });
+    }
+
+    if (action === "save_customer") {
+      const originalPhone = normalizePhone(body.originalPhone), customerPhone = normalizePhone(body.customerPhone), customerName = cleanText(body.customerName, 120);
+      if (!originalPhone || !customerPhone || customerName.length < 2) return json({ error: "invalid_customer_data" }, 400);
+      const { data: existing, error: existingError } = await supabase.from("vacleaner_customers").select("*").eq("phone", originalPhone).maybeSingle();
+      if (existingError) throw existingError;
+      if (customerPhone !== originalPhone) {
+        const { data: conflict, error: conflictError } = await supabase.from("vacleaner_customers").select("phone").eq("phone", customerPhone).maybeSingle();
+        if (conflictError) throw conflictError;
+        if (conflict) return json({ error: "customer_phone_exists" }, 409);
+      }
+      const now = new Date().toISOString(), documentNumber = cleanText(body.documentNumber, 80), requestedType = cleanText(body.documentType, 40);
+      const documentType = documentNumber && ["Паспорт", "ID-картка", "Водійське посвідчення"].includes(requestedType) ? requestedType : documentNumber ? "Паспорт" : null;
+      const verified = documentNumber && body.identityVerified === true;
+      const row: Record<string, any> = {
+        phone: customerPhone,
+        name: customerName,
+        telegram: cleanText(body.customerTelegram, 80) || null,
+        address: cleanText(body.customerAddress, 220) || null,
+        document_type: documentType,
+        document_number: documentNumber || null,
+        document_verified_at: verified ? (existing?.document_verified_at || now) : null,
+        document_updated_at: documentNumber !== String(existing?.document_number || "") ? now : (existing?.document_updated_at || (documentNumber ? now : null)),
+        updated_at: now,
+      };
+      if (existing) {
+        const { error } = await supabase.from("vacleaner_customers").update(row).eq("phone", originalPhone); if (error) throw error;
+      } else {
+        const { error } = await supabase.from("vacleaner_customers").upsert({ ...row, created_at: now }, { onConflict: "phone" }); if (error) throw error;
+      }
+      const bookingPatch = { customer_name: customerName, customer_phone: customerPhone, customer_telegram: row.telegram, updated_at: now };
+      const { error: bookingsError } = await supabase.from("vacleaner_bookings").update(bookingPatch).eq("customer_phone", originalPhone);
+      if (bookingsError) throw bookingsError;
+      return json({ customer: { phone: customerPhone, name: customerName, telegram: row.telegram, address: row.address, document_type: row.document_type, document_number: row.document_number, document_verified_at: row.document_verified_at, updated_at: now } });
     }
 
     if (action === "lookup_customer") {

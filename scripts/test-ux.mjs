@@ -6,8 +6,8 @@ const publicCss=fs.readFileSync('assets/public-experience.css','utf8');
 const publicFixes=fs.readFileSync('assets/public-fixes.css','utf8');
 const selectPositions=[...js.matchAll(/<select\b/g)].map(match=>match.index);
 const checkboxPositions=[...js.matchAll(/<input[^>]+type="checkbox"/g)].map(match=>match.index);
-const allSelectsCovered=selectPositions.length===6&&selectPositions.every(index=>{const prefix=js.slice(Math.max(0,index-220),index);return prefix.includes('class="field"')||prefix.includes('clients-toolbar')});
-const allCheckboxesCovered=checkboxPositions.length===14&&checkboxPositions.every(index=>{const prefix=js.slice(Math.max(0,index-180),index);return prefix.includes('class="switch')||prefix.includes('class="extra-check')});
+const allSelectsCovered=selectPositions.length===7&&selectPositions.every(index=>{const prefix=js.slice(Math.max(0,index-220),index);return prefix.includes('class="field"')||prefix.includes('clients-toolbar')});
+const allCheckboxesCovered=checkboxPositions.length===15&&checkboxPositions.every(index=>{const prefix=js.slice(Math.max(0,index-180),index);return prefix.includes('class="switch')||prefix.includes('class="extra-check')});
 const checks=[
  ['operations dashboard',js.includes('operationsBar()')&&css.includes('.operations-bar')],
  ['urgent schedule labels',js.includes('scheduleMeta(b)')&&css.includes('.schedule-badge.danger')],
