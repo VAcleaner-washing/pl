@@ -238,6 +238,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(sidebar is not None and abs(sidebar["y"] + sidebar["height"] - height) <= 1 and abs(sidebar["height"]-(62+safe_bottom))<=1.5, f"{label}: bottom navigation is pinned to the physical viewport bottom")
         heights = page.locator(".nav button:visible").evaluate_all("els=>els.map(el=>el.getBoundingClientRect().height)")
         qa.check(all(value >= 44 for value in heights), f"{label}: bottom navigation tap targets are at least 44px")
+        qa.check(page.locator('.nav button[data-view="analytics"]:visible').count()==1 and page.locator('.nav button[data-view="equipment"]:visible').count()==0, f"{label}: analytics replaces equipment in the five primary bottom-nav actions")
+        page.locator('.more-nav:visible').click();page.wait_for_timeout(20)
+        qa.check(page.locator('.mobile-more-card [data-more-view="equipment"]:visible').count()==1 and page.locator('.mobile-more-card [data-more-view="analytics"]:visible').count()==0, f"{label}: equipment lives in More while analytics stays primary")
+        page.locator('.mobile-more-close:visible').click();page.wait_for_timeout(20)
         qa.check(page.locator('.connection-state:visible').count()==0, f"{label}: mobile topbar keeps only search and primary action")
         qa.check(page.locator('.operations-bar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: attention cards never hide in a horizontal carousel")
         toolbar_contract=page.locator('.booking-toolbar').evaluate("el=>({position:getComputedStyle(el).position,overflowX:getComputedStyle(el).overflowX,wrap:getComputedStyle(el).flexWrap})")
@@ -480,7 +484,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             if action=='process':
                 qa.check(page.locator('#processForm .process-grid').evaluate('el=>el.scrollTop')==0, f"{label}: process modal opens at its own top")
                 telegram_href=page.locator('#sendTelegram').get_attribute('href') or ''
-                qa.check(telegram_href.startswith('https://t.me/+380') and '?text=' in telegram_href, f"{label}: Telegram action opens the customer phone deep-link with draft")
+                qa.check(telegram_href.startswith('https://t.me/+380') and '?text=' not in telegram_href, f"{label}: Telegram action opens the customer phone chat without a long draft")
                 qa.check('share/url?url=&' not in telegram_href, f"{label}: Telegram action never generates the broken empty share URL")
                 switch_gap=page.locator('#processForm').evaluate("""form=>{const a=form.elements.prepaymentPaid.closest('.switch').getBoundingClientRect(),b=form.elements.confirmationSent.closest('.switch').getBoundingClientRect();return b.top-a.bottom}""")
                 qa.check(switch_gap>=8, f"{label}: prepayment and conditions blocks keep a visible gap")

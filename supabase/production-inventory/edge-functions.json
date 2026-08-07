@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-07T15:06:30Z",
+  "capturedAt": "2026-08-07T16:05:00Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -7,7 +7,8 @@
     "settings": "vacleaner-settings",
     "push": "vacleaner-push",
     "adminData": "vacleaner-admin-data-v1",
-    "campaignLifecycle": "vacleaner-campaigns-v1"
+    "campaignLifecycle": "vacleaner-campaigns-v1",
+    "reminders": "vacleaner-reminders-v1"
   },
   "dependencyGraph": {
     "vacleaner-booking-v5": [],
@@ -91,11 +92,11 @@
     },
     {
       "slug": "vacleaner-booking-v5",
-      "version": 7,
+      "version": 9,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "fd198547f4d62a322ddc828dab01fabe39eea2d0294de4825df33f6a28535342",
-      "role": "active public entrypoint; direct availability/create + loyalty/promo + client sync + web push"
+      "sha256": "802a1e2716060230b115196c511f6bb543ef40d7423033a57a8008552c5130a3",
+      "role": "active public entrypoint; v9 safe restore, availability/create + loyalty/promo + client sync + legacy push suppressed by PWA"
     },
     {
       "slug": "vacleaner-admin-data-v1",
@@ -112,6 +113,14 @@
       "status": "ACTIVE",
       "sha256": "d27c1145f030c55e380b08ca8a64ed70c75520712c8ae3d631cb68d27878f88c",
       "role": "active authenticated campaign archive/delete lifecycle service"
+    },
+    {
+      "slug": "vacleaner-reminders-v1",
+      "version": 3,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "069eb697b1276d013aa2039759acaeb339c73c6966c2a08c320b1dbaff4f49c8",
+      "role": "active custom-auth server reminder runner for premium new-booking, pickup and return push notifications"
     }
   ]
 }

@@ -53,8 +53,8 @@ has(adminEdge,'if (![\"pending\", \"waiting_payment\", \"confirmed\"].includes(S
 ok((css.match(/@media \(max-width:900px\)\{/g)||[]).length===1,'exactly one primary <=900 mobile layout contract');
 has(css,'.app{position:fixed;inset:0;width:auto;height:auto','mobile app shell fills the fixed viewport by physical insets');
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
-has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom navigation is physically pinned');
-has(css,'.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region');
+has(css,'.sidebar{\n    position:absolute;right:0;bottom:0;left:0;top:auto','bottom navigation is pinned inside the fixed app shell');
+has(css,'.main{\n    position:absolute;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region inside the fixed app shell');
 has(css,'.booking-form{grid-template-rows:auto minmax(0,1fr) auto}','mobile booking has header-with-progress/scroll/footer rows');
 has(css,'.booking-form>header .mobile-booking-progress{display:grid','mobile booking progress is integrated into the header');
 has(css,'.date-control{position:relative;display:block;width:100%;height:52px','admin dates use one base geometry on desktop and PWA');
@@ -107,8 +107,14 @@ has(bookingEdge,'db.from("vacleaner_customers").update(profilePatch)','repeat pu
 has(pwaQa,'settings cards use full mobile width','mobile settings full-width is gated');
 has(e2e,'Selecting equipment does not auto-select dates','hidden auto-dates are forbidden');
 has(e2e,'base = \"http://127.0.0.1:4173\"','browser E2E uses a local origin instead of blocked synthetic DNS');
-has(admin,'https://t.me/+${phone}?text=${draft}','Telegram opens the customer chat by phone when username is absent');
-lacks(admin,'https://t.me/share/url?url=&text=','Telegram share fallback never sends an empty required URL');
+has(admin,'https://t.me/+${phone}','Telegram opens the customer chat by phone without a long draft payload');
+lacks(admin,'t.me/share/url','Telegram no longer uses the share endpoint for client contact');
+has(admin,"const ADMIN_ALIAS_KEY='vac_admin_alias'",'second admin login alias is explicitly tracked');
+has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevidoma share the requested credential');
+has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
+has(css,'.nav button[data-view="equipment"]','mobile primary navigation can move equipment into More');
+has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
+
 has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');
 has(admin,"state.filter=b.dataset.filter;renderBookings();resetViewScroll()",'booking filter changes reset the main scroll owner');
 has(css,'html,body,.app{height:100dvh;min-height:0;overflow:hidden}','desktop shell locks body scrolling');

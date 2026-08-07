@@ -426,13 +426,13 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
             '.nav button[data-view="bookings"]:visible',
             '.nav button[data-view="calendar"]:visible',
             '.nav button[data-view="upcoming"]:visible',
-            '.nav button[data-view="equipment"]:visible',
+            '.nav button[data-view="analytics"]:visible',
             '.more-nav:visible',
         ]
         checks.check(all(page.locator(selector).count() == 1 for selector in mobile_selectors), "Mobile bottom navigation has five primary items")
         page.locator(".more-nav:visible").click()
         more = page.locator(".mobile-more-card")
-        checks.check(more.get_by_text("Клієнти", exact=True).count() == 1 and more.get_by_text("Налаштування", exact=True).count() == 1, "Mobile More contains remaining sections")
+        checks.check(more.get_by_text("Техніка", exact=True).count() == 1 and more.get_by_text("Клієнти", exact=True).count() == 1 and more.get_by_text("Налаштування", exact=True).count() == 1, "Mobile More contains equipment and remaining sections")
         page.keyboard.press("Escape")
         page.evaluate("document.querySelector('.main').scrollTop=600")
         page.locator('.nav button[data-view="calendar"]:visible').click()

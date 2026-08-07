@@ -1,6 +1,6 @@
-const CACHE='vacleaner-manager-3036';
+const CACHE='vacleaner-manager-3037';
 const FALLBACK='/admin/bronuvannia/';
-const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=3036','/assets/admin-v250.css?v=3036','/assets/admin-v250.js?v=3036','/admin/manifest.webmanifest','/icon-192.png','/icon-512.png','/apple-touch-icon.png'];
+const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=3037','/assets/admin-v250.css?v=3037','/assets/admin-v250.js?v=3037','/admin/manifest.webmanifest','/icon-192.png','/icon-512.png','/apple-touch-icon.png'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
@@ -68,6 +68,9 @@ self.addEventListener('notificationclick',event=>{
 self.addEventListener('push',event=>{
   let data={};
   try{data=event.data?event.data.json():{}}catch{data={body:event.data?.text()||''}}
+  // Legacy public-booking push used a technical title/date payload.
+  // Suppress it: the server reminder runner sends the human-friendly new-booking notification.
+  if(data.title==='Нове бронювання VAcleaner')return;
   const notificationData=data.data&&typeof data.data==='object'?data.data:{url:'/admin/bronuvannia/'};
   event.waitUntil(self.registration.showNotification(data.title||'VAcleaner',{
     body:data.body||'Нова подія в адмінці',
