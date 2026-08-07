@@ -558,6 +558,7 @@ input[type="checkbox"]:disabled{opacity:.45;cursor:not-allowed}
 .settings-actions .btn{width: 100%; min-height: 48px; white-space: normal; line-height: 1.2;}
 .date-control>.premium-control-icon{display: none;}
 .more-nav{display: none;}
+.mobile-new-nav{display:none;}
 .mobile-more-sheet{position: fixed; inset: 0; z-index: 140; display: none;}
 :where(button,a,input,select,textarea){touch-action: manipulation;}
 .booking-toolbar,.time-chip-list{overscroll-behavior-inline: contain;}
@@ -1209,7 +1210,7 @@ body{touch-action:manipulation}
 @media (max-width:900px){
   :root{
     --mobile-topbar:64px;
-    --mobile-nav:62px;
+    --mobile-nav:66px;
     --pwa-safe-top:env(safe-area-inset-top,0px);
     --pwa-safe-right:env(safe-area-inset-right,0px);
     --pwa-safe-bottom:env(safe-area-inset-bottom,0px);
@@ -1230,20 +1231,23 @@ body{touch-action:manipulation}
   .search input{width:100%;min-width:0;font-size:16px;text-overflow:ellipsis}
   .search input::placeholder{font-size:14px}
   .top-spacer,.top-status,.top-profile,.icon-btn,.connection-state{display:none}
-  .new-btn{flex:0 0 48px;width:48px;min-width:48px;max-width:48px;height:48px;padding:0;border-radius:13px;font-size:0;display:grid;place-items:center}
-  .new-btn:after{content:"+";font-size:29px;font-weight:500;line-height:1}
+  .new-btn{display:none}
 
   .sidebar{
     position:fixed;right:0;bottom:0;left:0;top:auto;z-index:100;
     width:100%;height:var(--mobile-nav-shell);
     padding:0 max(4px,var(--pwa-safe-right)) var(--pwa-safe-bottom) max(4px,var(--pwa-safe-left));
-    border:0;border-top:1px solid var(--line);background:rgba(7,11,14,.99);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden
+    border:0;border-top:1px solid var(--line);background:rgba(7,11,14,.99);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:visible
   }
   .brand,.sidebar-footer{display:none}
-  .nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;width:100%;height:var(--mobile-nav);padding:4px;overflow:hidden}
+  .nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;width:100%;height:var(--mobile-nav);padding:6px 6px 0;overflow:visible}
   .nav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:100%;height:54px;min-width:0;padding:3px 2px;border:1px solid transparent;border-radius:12px;background:transparent;color:#aeb5b9;font-size:10.5px;line-height:1.05;text-align:center;white-space:nowrap}
-  .nav button[data-view="equipment"],.nav button[data-view="clients"],.nav button[data-view="campaigns"],.nav button[data-view="chemistry"],.nav button[data-view="settings"]{display:none}
+  .nav button[data-view="equipment"],.nav button[data-view="clients"],.nav button[data-view="campaigns"],.nav button[data-view="analytics"],.nav button[data-view="chemistry"],.nav button[data-view="settings"]{display:none}
   .nav .more-nav{display:flex}
+  .nav .mobile-new-nav{display:flex;overflow:visible;height:64px;margin-top:-16px;padding:0;border:0;background:transparent;color:var(--gold-2);gap:2px}
+  .nav .mobile-new-nav:hover,.nav .mobile-new-nav:active{background:transparent;color:var(--gold-2);transform:none}
+  .nav .mobile-new-nav i{display:grid;place-items:center;width:56px;height:56px;min-width:56px;border:1px solid rgba(214,164,95,.62);border-radius:50%;background:linear-gradient(180deg,#17191a,#0d1113);box-shadow:0 8px 22px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.035);color:var(--gold-2);font:300 36px/1 Arial,sans-serif;font-style:normal}
+  .nav .mobile-new-nav span{font-size:10.5px;font-weight:650;line-height:1}
   .nav svg{width:20px;height:20px;flex:0 0 20px}
   .nav .badge{position:absolute;top:2px;right:7px;margin:0}
   .nav button.active{background:linear-gradient(180deg,rgba(214,164,95,.13),rgba(214,164,95,.035));border-color:rgba(214,164,95,.2);color:var(--gold-2)}
@@ -1380,7 +1384,6 @@ body{touch-action:manipulation}
   /* v3.0.36 — the shell itself owns the physical viewport; chrome is anchored inside it. */
   .app{position:fixed}
   .topbar,.main{position:absolute}
-  .nav button[data-view="campaigns"]{display:none}
   .campaign-actions .campaign-archive,.campaign-actions .danger-soft{min-height:44px}
   /* v3.0.42 — match the proven VA HOME mobile-nav contract: fixed to the layout viewport.
      No standalone-specific shell/grid geometry; Safari and installed PWA use the same stable fixed nav. */

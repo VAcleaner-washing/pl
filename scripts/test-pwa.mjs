@@ -48,7 +48,7 @@ ok(!css.includes('grid-template-rows:calc(var(--mobile-topbar) + var(--pwa-safe-
 ok(runtime.includes('client-mobile-stats')&&css.includes('.client-mobile-stats'),'mobile client cards expose rental count and spend');
 
 for(const token of [
-  '--pwa-safe-top','--pwa-safe-bottom','--mobile-topbar:64px','--mobile-nav:62px',
+  '--pwa-safe-top','--pwa-safe-bottom','--mobile-topbar:64px','--mobile-nav:66px',
   '.app{position:fixed;inset:0;width:auto;height:auto',
   '--mobile-nav-shell:calc(var(--mobile-nav) + var(--pwa-safe-bottom))',
   '.pwa-update-prompt','--keyboard-viewport-height','--keyboard-viewport-top',

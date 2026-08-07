@@ -425,14 +425,14 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
         mobile_selectors = [
             '.nav button[data-view="bookings"]:visible',
             '.nav button[data-view="calendar"]:visible',
+            '#mobileNewBooking:visible',
             '.nav button[data-view="upcoming"]:visible',
-            '.nav button[data-view="analytics"]:visible',
             '.more-nav:visible',
         ]
         checks.check(all(page.locator(selector).count() == 1 for selector in mobile_selectors), "Mobile bottom navigation has five primary items")
         page.locator(".more-nav:visible").click()
         more = page.locator(".mobile-more-card")
-        checks.check(more.get_by_text("Техніка", exact=True).count() == 1 and more.get_by_text("Клієнти", exact=True).count() == 1 and more.get_by_text("Налаштування", exact=True).count() == 1, "Mobile More contains equipment and remaining sections")
+        checks.check(more.get_by_text("Техніка", exact=True).count() == 1 and more.get_by_text("Аналітика", exact=True).count() == 1 and more.get_by_text("Налаштування", exact=True).count() == 1, "Mobile More contains equipment, analytics and remaining sections")
         page.keyboard.press("Escape")
         page.evaluate("document.querySelector('.main').scrollTop=600")
         page.locator('.nav button[data-view="calendar"]:visible').click()
@@ -440,7 +440,7 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
         checks.check(page.evaluate("document.querySelector('.main').scrollTop") == 0, "Mobile tab switch returns content to top")
         tap_heights = page.locator(".nav button:visible").evaluate_all("els => els.map(el => el.getBoundingClientRect().height)")
         checks.check(all(height >= 44 for height in tap_heights), "Mobile navigation tap targets are at least 44px")
-        page.locator("#newBooking").click()
+        page.locator("#mobileNewBooking:visible").click()
         page.wait_for_selector("#bookingForm")
         footer = page.locator("#bookingForm footer")
         box = footer.bounding_box()

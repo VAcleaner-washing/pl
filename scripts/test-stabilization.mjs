@@ -115,8 +115,9 @@ has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevid
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
 has(css,'.nav button[data-view="equipment"]','mobile primary navigation can move equipment into More');
 has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
-has(admin,"['equipment','clients','campaigns','chemistry','settings'].includes(v)",'More active state excludes analytics and includes equipment');
-has(pwaQa,'analytics is the only active bottom-nav item on analytics view','analytics cannot highlight More at the same time');
+has(admin,"['equipment','clients','campaigns','analytics','chemistry','settings'].includes(v)",'More active state includes analytics after moving it out of the primary nav');
+has(admin,'id="mobileNewBooking"','mobile navigation has a dedicated centered New action');
+has(pwaQa,'analytics activates More without a second visible active item','analytics correctly maps to More without double highlighting');
 
 has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');
 has(admin,"state.filter=b.dataset.filter;renderBookings();resetViewScroll()",'booking filter changes reset the main scroll owner');
