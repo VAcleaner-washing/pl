@@ -10,7 +10,9 @@ for(const rel of ['scripts/historical-bookings.parsed.json','scripts/historical-
   if(fs.existsSync(path.join(root,rel)))errors.push(`Private historical import payload must not ship: ${rel}`);
 }
 
-if(fs.existsSync(path.join(root,'sw.js')))errors.push('legacy public sw.js still exists');
+const rootSwPath=path.join(root,'sw.js');
+if(!fs.existsSync(rootSwPath))errors.push('root service-worker retirement sentinel is missing');
+else{const rootSw=fs.readFileSync(rootSwPath,'utf8');if(!rootSw.includes('VACLEANER_ROOT_SW_RETIRE'))errors.push('root sw.js must be retirement-only');if(/caches\.(?:open|match)/.test(rootSw))errors.push('root retirement worker must never cache public pages');}
 if(fs.existsSync(path.join(root,'manifest.webmanifest')))errors.push('legacy public manifest still exists');
 for(const file of files.filter(f=>f.endsWith('.html')||f.endsWith('.txt'))){
  const s=fs.readFileSync(file,'utf8'),rel=path.relative(root,file).replaceAll('\\','/');
@@ -21,7 +23,7 @@ for(const file of files.filter(f=>f.endsWith('.html')||f.endsWith('.txt'))){
 for(const file of files.filter(f=>f.endsWith('.js')&&!f.includes(`${path.sep}_next${path.sep}`))){try{execFileSync(process.execPath,['--check',file],{stdio:'pipe'})}catch{errors.push(`JS syntax: ${path.relative(root,file)}`)}}
 for(const file of files.filter(f=>f.endsWith('.html'))){
  const s=fs.readFileSync(file,'utf8'),rel=path.relative(root,file).replaceAll('\\','/');
- for(const m of s.matchAll(/\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|admin-v250|public-fixes|mobile-home-fix)\.(?:js|css)\?v=([^"']+)/g))if(m[1]!==build)errors.push(`asset version ${m[1]} in ${rel}`);
+ for(const m of s.matchAll(/\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|admin-v250|public-fixes|mobile-home-fix)\.(?:js|css)\?v=([^"']+)/g))if(m[1]!==build)errors.push(`asset version ${m[1]} in ${rel}`);
  const hasCore=/vacleaner-core\.js/.test(s), needsCore=rel==='bronuvannia/index.html'||rel.startsWith('admin/');
  if(hasCore!==needsCore)errors.push(`shared core route mismatch: ${rel}`);
  if(rel!=='bronuvannia/index.html'&&/public-catalog\.js/.test(s))errors.push(`catalog runtime on ${rel}`);
@@ -49,6 +51,8 @@ const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
 
 const publicBooking=fs.readFileSync(path.join(root,'assets','public-booking-slots.js'),'utf8');
+const publicResilience=fs.readFileSync(path.join(root,'assets','public-resilience.js'),'utf8');
+
 const publicExperience=fs.readFileSync(path.join(root,'assets','public-experience.js'),'utf8');
 const bookingHtml=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'utf8');
 const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
@@ -74,6 +78,8 @@ if(playwrightInstall<0||playwrightRun<0||pagesUpload<0||!(playwrightInstall<play
 if(!workflow.includes('python -m py_compile scripts/e2e_smoke.py'))errors.push('GitHub workflow does not validate browser test source');
 const ciRequirements=fs.readFileSync(path.join(root,'requirements-ci.txt'),'utf8');
 if(!/^playwright==\d+\.\d+\.\d+$/m.test(ciRequirements))errors.push('Playwright CI dependency is not pinned');
+for(const token of ["reg.scope===ROOT_SCOPE","reg.update()","reg.unregister()"])if(!publicResilience.includes(token))errors.push(`public legacy-SW retirement missing: ${token}`);
+if(!bookingHtml.includes(`/assets/public-resilience.js?v=${build}`))errors.push('booking page does not load public resilience runtime');
 const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
 const publicExperienceCss=fs.readFileSync(path.join(root,'assets','public-experience.css'),'utf8');
 const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8');

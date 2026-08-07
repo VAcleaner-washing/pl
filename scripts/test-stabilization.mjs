@@ -7,6 +7,8 @@ const css=read('assets/admin-v250.css');
 const core=read('assets/vacleaner-core.js');
 const publicExperience=read('assets/public-experience.js');
 const publicSlots=read('assets/public-booking-slots.js');
+const publicResilience=read('assets/public-resilience.js');
+const rootRetireSw=read('sw.js');
 const adminEdge=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts');
 const adminDataEdge=read('supabase/functions/vacleaner-admin-data-v1/index.ts');
 const bookingEdge=read('supabase/functions/vacleaner-booking-v5/index.ts');
@@ -103,6 +105,16 @@ has(admin,'https://t.me/+${phone}?text=${draft}','Telegram opens the customer ch
 lacks(admin,'https://t.me/share/url?url=&text=','Telegram share fallback never sends an empty required URL');
 has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');
 has(admin,"state.filter=b.dataset.filter;renderBookings();resetViewScroll()",'booking filter changes reset the main scroll owner');
+
+
+// Public site must actively retire legacy root-scoped PWA workers. Only /admin/ remains a PWA.
+has(rootRetireSw,'VACLEANER_ROOT_SW_RETIRE','root /sw.js is a retirement sentinel');
+lacks(rootRetireSw,'caches.open','root retirement worker never creates public caches');
+has(rootRetireSw,'self.registration.unregister()','root retirement worker unregisters itself');
+has(publicResilience,'reg.scope===ROOT_SCOPE','public pages target only the legacy root scope');
+has(publicResilience,'reg.update()','public pages ask stale root workers to update immediately');
+has(publicResilience,'reg.unregister()','public pages unregister stale root workers');
+lacks(publicResilience,"'/admin/'",'public cleanup never unregisters the admin PWA by path');
 
 // Public UI must consume the same deposit classification.
 for(const text of [publicExperience,publicSlots])has(text,'isWeekendDeposit?.','public deposit reads shared policy');

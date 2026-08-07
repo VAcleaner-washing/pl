@@ -6,6 +6,8 @@ const sw=fs.readFileSync(new URL('../admin/sw.js',import.meta.url),'utf8');
 const css=fs.readFileSync(new URL('../assets/admin-v250.css',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../admin/bronuvannia/index.html',import.meta.url),'utf8');
 const manifest=JSON.parse(fs.readFileSync(new URL('../admin/manifest.webmanifest',import.meta.url),'utf8'));
+const rootRetireSw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
+const publicResilience=fs.readFileSync(new URL('../assets/public-resilience.js',import.meta.url),'utf8');
 const release=JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.url),'utf8'));
 const build=String(release.build);
 let passed=0;
@@ -48,5 +50,12 @@ for(const token of [
 ok(!css.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'),'app shell avoids iOS standalone 100dvh bottom gaps');
 ok(!css.includes('--pwa-viewport-height'),'legacy app-shell viewport variable is gone');
 ok(!css.includes('--pwa-viewport-top'),'legacy app-shell viewport top variable is gone');
+
+
+ok(rootRetireSw.includes('VACLEANER_ROOT_SW_RETIRE'),'legacy root worker is retirement-only');
+ok(rootRetireSw.includes('self.registration.unregister()'),'legacy root worker unregisters itself');
+ok(!rootRetireSw.includes('caches.open'),'root worker never adds a public cache');
+ok(publicResilience.includes('reg.scope===ROOT_SCOPE'),'public runtime targets only root-scope legacy workers');
+ok(publicResilience.includes('reg.unregister()'),'public runtime removes stale root workers');
 
 console.log(`PWA static tests passed ${passed} assertions.`);

@@ -539,8 +539,10 @@ def public_nearest_availability_suite(browser: Browser, qa: QA) -> None:
         page.add_style_tag(content=(ROOT/'assets/public-fixes.css').read_text(encoding='utf-8'))
         page.add_script_tag(content=(ROOT/'assets/vacleaner-core.js').read_text(encoding='utf-8'))
         page.add_script_tag(content=(ROOT/'assets/public-booking-slots.js').read_text(encoding='utf-8'))
+        before_url=page.url
         page.evaluate("()=>fetch('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5',{method:'POST',body:JSON.stringify({action:'availability'})})")
         page.wait_for_selector('.vx-nearest-availability')
+        qa.check(page.url==before_url, 'Public: unavailable slot is rendered in-place without page navigation')
         text=page.locator('.availability-card').inner_text()
         qa.check('Найближче вільне вікно' in text and '9 серпня' in text, 'Public: unavailable equipment shows the nearest compatible free window')
         qa.check(page.locator('.vx-use-nearest').count()==1, 'Public: nearest availability offers one explicit apply action')

@@ -3,7 +3,7 @@ import path from 'node:path';
 const root=process.cwd(),dist=path.join(root,'dist');
 fs.rmSync(dist,{recursive:true,force:true});
 const excludedTop=new Set(['.git','.github','config','scripts','supabase','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__','QA-EVIDENCE-v2.9.11.0']);
-const excludedRoot=new Set(['package.json','release.json','manifest.webmanifest','sw.js']);
+const excludedRoot=new Set(['package.json','release.json','manifest.webmanifest']);
 function copy(src,dst,depth=0){
  for(const entry of fs.readdirSync(src,{withFileTypes:true})){
    if(depth===0&&(excludedTop.has(entry.name)||entry.name.startsWith('test-results')||entry.name.startsWith('pwa-test-results')||entry.name.startsWith('density-test-results')||entry.name.startsWith('final-desktop-test-results')||entry.name==='final-desktop-audit'||entry.name.startsWith('playwright-report')||excludedRoot.has(entry.name)||entry.name.endsWith('.md')))continue;
