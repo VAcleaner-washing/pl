@@ -15,7 +15,9 @@ for(const token of [
   '.modal-card:has(.issue-form){width:min(1040px',
   '.modal-card:has(.finance-form){height:min(700px',
 ]) if(!css.includes(token))errors.push(`missing desktop density rule: ${token}`);
-const density=css.slice(css.lastIndexOf('/* v3.0.15 — desktop density pass.'));
+const densityStart=css.indexOf('/* v3.0.15 — desktop density pass.');
+const nextReleaseMarker=css.indexOf('/* v3.',densityStart+'/* v3.0.15'.length);
+const density=css.slice(densityStart,nextReleaseMarker>densityStart?nextReleaseMarker:undefined);
 if(/@media\s*\(max-width\s*:\s*900px\)/.test(density))errors.push('desktop density block must not redefine mobile breakpoints');
 if(!density.startsWith('/* v3.0.15')||!density.includes('@media (min-width:901px)'))errors.push('desktop density rules are not isolated to desktop');
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}

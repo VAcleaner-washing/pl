@@ -31,10 +31,13 @@ for(const fn of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bo
 }
 const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes(`vacleaner-manager-${build}`))errors.push('service worker cache version mismatch');
 const adminRuntime=fs.readFileSync(path.join(root,'assets','admin-v250.js'),'utf8');
+const pwaVisualQa=fs.readFileSync(path.join(root,'scripts','pwa_visual_qa.py'),'utf8');
 
 const e2eSmoke=fs.readFileSync(path.join(root,'scripts','e2e_smoke.py'),'utf8');
 for(const token of ['def normalized_text(', 'def select_uses_dark_theme(', 'hero_limit = min(700', '#bookingForm header [data-close]', 'Saturday morning to Sunday morning keeps 1000 UAH deposit', 'Saturday evening to Sunday evening keeps 1000 UAH deposit', 'Friday evening to Sunday morning uses 2000 UAH weekend deposit', 'Friday evening to Sunday evening uses 2000 UAH weekend deposit', 'Saturday morning to Monday morning uses 2000 UAH weekend deposit'])if(!e2eSmoke.includes(token))errors.push(`E2E CI hardening missing: ${token}`);
 if(e2eSmoke.includes('page.locator("[data-close]").click()'))errors.push('E2E uses ambiguous generic data-close click');
+if(/visualViewport\?\.addEventListener\('scroll'/.test(adminRuntime))errors.push('iPhone viewport must not resync on visualViewport scroll');
+for(const token of ["--pwa-viewport-top","classList.toggle('keyboard-open'","keepFocusedControlVisible(target)"])if(!adminRuntime.includes(token))errors.push(`iPhone viewport runtime hardening missing: ${token}`);
 const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)/g)].map(match=>match[1]);
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
 
@@ -66,6 +69,8 @@ if(!/^playwright==\d+\.\d+\.\d+$/m.test(ciRequirements))errors.push('Playwright 
 const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
 const publicExperienceCss=fs.readFileSync(path.join(root,'assets','public-experience.css'),'utf8');
 const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8');
+for(const token of ['.auth-card .field input{font-size:16px!important}','html.keyboard-open .auth','overflow:hidden;\n    overscroll-behavior:none;'])if(!adminCss.includes(token))errors.push(`iPhone login CSS hardening missing: ${token}`);
+for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
 for(const token of ['color-scheme:dark','appearance:none','input[type="checkbox"]:checked','.switch:has(input:checked)','.field select option'])if(!adminCss.includes(token))errors.push(`admin controls visual missing: ${token}`);
