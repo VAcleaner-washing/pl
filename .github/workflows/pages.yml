@@ -37,8 +37,10 @@ jobs:
         run: npm run test:retention
       - name: Build clean Pages artifact
         run: npm run build
-      - name: Validate browser test source
-        run: python -m py_compile scripts/e2e_smoke.py
+      - name: Validate browser test sources
+        run: |
+          python -m py_compile scripts/e2e_smoke.py
+          python -m py_compile scripts/public_booking_resilience_qa.py
       - name: Install Playwright browser tests
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt

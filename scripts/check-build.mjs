@@ -71,15 +71,17 @@ execFileSync(process.execPath,[path.join(root,'scripts','test-pwa.mjs')],{stdio:
 execFileSync(process.execPath,[path.join(root,'scripts','test-css-architecture.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-operational-health.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-retention.mjs')],{stdio:'pipe'});
-try{execFileSync('python',[path.join(root,'scripts','public_booking_resilience_qa.py')],{stdio:'pipe'})}catch{errors.push('public booking resilience QA failed')}
 execFileSync(process.execPath,[path.join(root,'scripts','check-backend-inventory.mjs')],{stdio:'pipe'});
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','e2e_smoke.py')],{stdio:'pipe'})}catch{errors.push('Playwright Python source does not compile')}
+try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','public_booking_resilience_qa.py')],{stdio:'pipe'})}catch{errors.push('public booking resilience source does not compile')}
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','pages.yml'),'utf8');
 const playwrightInstall=workflow.indexOf('python -m playwright install --with-deps chromium');
 const playwrightRun=workflow.indexOf('npm run test:e2e');
+const publicBookingRun=workflow.indexOf('npm run test:public-booking');
 const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
-if(playwrightInstall<0||playwrightRun<0||pagesUpload<0||!(playwrightInstall<playwrightRun&&playwrightRun<pagesUpload))errors.push('GitHub Pages deploy is not gated by Playwright');
+if(playwrightInstall<0||playwrightRun<0||publicBookingRun<0||pagesUpload<0||!(playwrightInstall<playwrightRun&&playwrightRun<publicBookingRun&&publicBookingRun<pagesUpload))errors.push('GitHub Pages deploy is not gated by installed Playwright and public booking resilience QA in the correct order');
 if(!workflow.includes('python -m py_compile scripts/e2e_smoke.py'))errors.push('GitHub workflow does not validate browser test source');
+if(!workflow.includes('python -m py_compile scripts/public_booking_resilience_qa.py'))errors.push('GitHub workflow does not validate public booking resilience test source');
 if(!workflow.includes('npm run test:retention'))errors.push('GitHub workflow does not gate retention rules');
 if(!workflow.includes('npm run test:public-booking'))errors.push('GitHub workflow does not gate public booking resilience');
 const ciRequirements=fs.readFileSync(path.join(root,'requirements-ci.txt'),'utf8');

@@ -1,5 +1,6 @@
 {
-  "version": "3.0.31",
-  "build": "3031",
-  "releasedAt": "2026-08-07"
+  "version": "3.0.32",
+  "build": 3032,
+  "releasedAt": "2026-08-07",
+  "label": "VAcleaner v3.0.32 — CI ORDER REPAIR"
 }
