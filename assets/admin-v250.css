@@ -1384,3 +1384,189 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
   .issue-form>footer{padding:10px 22px 12px}
   .issue-form>footer .btn{min-height:44px}
 }
+
+
+/* v3.0.14 — expert PWA visual QA, safe areas and controlled updates */
+:root{--pwa-viewport-height:100dvh;--pwa-safe-top:env(safe-area-inset-top,0px);--pwa-safe-right:env(safe-area-inset-right,0px);--pwa-safe-bottom:env(safe-area-inset-bottom,0px);--pwa-safe-left:env(safe-area-inset-left,0px)}
+html,body,.app{height:var(--pwa-viewport-height,100dvh);min-height:var(--pwa-viewport-height,100dvh)}
+body{touch-action:manipulation}
+.main{height:var(--pwa-viewport-height,100dvh)}
+.modal,.detail{height:var(--pwa-viewport-height,100dvh);max-height:var(--pwa-viewport-height,100dvh)}
+.modal-card{max-height:calc(var(--pwa-viewport-height,100dvh) - 32px)}
+.pwa-update-prompt{position:fixed;z-index:500;right:max(14px,var(--pwa-safe-right));bottom:calc(18px + var(--pwa-safe-bottom));width:min(560px,calc(100vw - 28px - var(--pwa-safe-left) - var(--pwa-safe-right)));padding:12px;border:1px solid rgba(226,177,103,.36);border-radius:16px;background:linear-gradient(145deg,#172127,#0b1216);box-shadow:0 24px 70px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.04);display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;color:#f4f1eb}
+.pwa-update-prompt>div{min-width:0;display:grid;gap:3px}.pwa-update-prompt b{font-size:14px}.pwa-update-prompt span{color:#9ba4a8;font-size:11px;line-height:1.35}
+.pwa-update-prompt button{min-height:42px;padding:0 13px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#10181d;color:#dde1e2;font:inherit;font-size:12px;font-weight:760;white-space:nowrap}
+.pwa-update-prompt .pwa-update-now{border-color:#e2b167;background:linear-gradient(180deg,#efbd72,#d89d4e);color:#17110a}.pwa-update-prompt.is-updating{pointer-events:none;opacity:.78}
+@media(max-width:900px){
+ html,body,.app,.main,.modal,.detail,.modal-card:has(.finance-form),.finance-form{height:var(--pwa-viewport-height,100dvh);max-height:var(--pwa-viewport-height,100dvh)}
+ body{padding-left:var(--pwa-safe-left);padding-right:var(--pwa-safe-right)}
+ .topbar{top:0;height:calc(64px + var(--pwa-safe-top));padding-top:calc(8px + var(--pwa-safe-top));padding-right:max(10px,var(--pwa-safe-right));padding-left:max(10px,var(--pwa-safe-left));align-items:end}
+ .main{padding-top:calc(88px + var(--pwa-safe-top));padding-right:max(10px,var(--pwa-safe-right));padding-left:max(10px,var(--pwa-safe-left));padding-bottom:calc(92px + var(--pwa-safe-bottom))}
+ .sidebar{height:calc(72px + var(--pwa-safe-bottom));padding-right:var(--pwa-safe-right);padding-bottom:var(--pwa-safe-bottom);padding-left:var(--pwa-safe-left)}
+ .mobile-compact{top:calc(76px + var(--pwa-safe-top));right:max(10px,var(--pwa-safe-right))}
+ .detail-shell{padding-right:max(10px,var(--pwa-safe-right));padding-bottom:calc(104px + var(--pwa-safe-bottom));padding-left:max(10px,var(--pwa-safe-left))}
+ .detail-actions{bottom:calc(66px + var(--pwa-safe-bottom))}
+ .modal{padding:0 var(--pwa-safe-right) 0 var(--pwa-safe-left)}
+ .modal-card{width:100%;height:var(--pwa-viewport-height,100dvh);max-height:var(--pwa-viewport-height,100dvh);border-radius:0}
+ .modal-form>header{padding-top:calc(14px + var(--pwa-safe-top));padding-right:max(14px,var(--pwa-safe-right));padding-left:max(14px,var(--pwa-safe-left))}
+ .modal-form>footer{padding-right:max(10px,var(--pwa-safe-right));padding-bottom:calc(10px + var(--pwa-safe-bottom));padding-left:max(10px,var(--pwa-safe-left))}
+ .booking-form-scroll,.process-grid,.catalog-scroll,.issue-form .modal-layout,.finance-form .modal-layout{scroll-padding-top:88px;scroll-padding-bottom:calc(112px + var(--pwa-safe-bottom))}
+ .mobile-more-card{right:max(10px,var(--pwa-safe-right));bottom:calc(82px + var(--pwa-safe-bottom));left:max(10px,var(--pwa-safe-left));max-height:calc(var(--pwa-viewport-height,100dvh) - 110px - var(--pwa-safe-top) - var(--pwa-safe-bottom))}
+ .toast{right:max(10px,var(--pwa-safe-right));bottom:calc(84px + var(--pwa-safe-bottom));left:max(10px,var(--pwa-safe-left))}
+ .auth{min-height:var(--pwa-viewport-height,100dvh);padding:calc(20px + var(--pwa-safe-top)) max(16px,var(--pwa-safe-right)) calc(20px + var(--pwa-safe-bottom)) max(16px,var(--pwa-safe-left))}
+ .pwa-update-prompt{right:max(10px,var(--pwa-safe-right));bottom:calc(82px + var(--pwa-safe-bottom));left:max(10px,var(--pwa-safe-left));width:auto;grid-template-columns:1fr 1fr;gap:8px}.pwa-update-prompt>div{grid-column:1/-1}.pwa-update-prompt button{width:100%;min-height:44px}
+}
+@media(max-width:360px){.pwa-update-prompt{grid-template-columns:1fr}.pwa-update-prompt>div{grid-column:1}.pwa-update-prompt button{width:100%}}
+@media(display-mode:standalone){body{background:#070b0e}.topbar,.sidebar{user-select:none;-webkit-user-select:none}}
+
+/* v3.0.14 — verified iPhone home-indicator clearance and deep-link identity */
+@media(max-width:900px){
+ .detail-top-meta{display:grid;justify-items:end;gap:2px;min-width:0}
+ .detail-top-meta span{display:block;max-width:132px;overflow:hidden;color:var(--gold-2);font-size:11px;font-weight:820;letter-spacing:.04em;text-overflow:ellipsis;white-space:nowrap}
+ .detail-top-meta small{display:none}
+ .modal-card #bookingForm>footer,
+ .modal-card .process-form>footer,
+ .modal-card .issue-form>footer,
+ .modal-card .finance-form>footer,
+ .modal-card .catalog-form>footer{padding-bottom:calc(10px + var(--pwa-safe-bottom))!important}
+}
+
+/* v3.0.14 — detail screen must never sit under iPhone chrome or cover content */
+@media(max-width:900px){
+ .detail-shell{padding-top:calc(10px + var(--pwa-safe-top))}
+ .detail-actions{position:static;bottom:auto;margin-top:14px}
+}
+
+/* v3.0.14 — consistent full-screen PWA modals and keyboard-safe authentication */
+.auth{height:var(--pwa-viewport-height,100dvh);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-padding-block:24px}
+@media(max-width:900px){
+ .modal-card:has(.issue-form),
+ .modal-card:has(.finance-form),
+ .modal-card:has(.catalog-form){width:100%;height:var(--pwa-viewport-height,100dvh);max-height:var(--pwa-viewport-height,100dvh);border-radius:0;border-right:0;border-left:0}
+}
+@media(max-width:900px) and (max-height:680px){
+ .auth{place-items:start center}
+ .auth-card{margin:auto 0;padding:22px}
+ .auth-brand{margin-bottom:16px}
+ .auth-card h1{font-size:29px}
+}
+
+
+/* v3.0.15 — desktop density pass. Mobile/PWA <=900px intentionally unchanged. */
+@media (min-width:901px){
+  :root{--sidebar:236px;--topbar:80px}
+  body{font-size:14.5px}
+  .brand{padding:0 20px;gap:14px}
+  .brand-copy strong{font-size:17px}
+  .nav{gap:5px;padding:13px 9px 18px}
+  .nav button{height:46px;gap:11px;padding:0 14px;border-radius:11px;font-size:14px}
+  .topbar{gap:13px;padding:0 24px}
+  .search{height:42px;max-width:460px;padding:0 12px;border-radius:11px}
+  .topbar .search{min-height:42px}
+  .top-profile{min-height:44px;border-radius:12px;padding:3px 5px}
+  .top-profile .avatar{width:34px;height:34px;flex-basis:34px}
+  .top-logout{width:44px;height:44px;flex-basis:44px}
+  .new-btn{min-height:44px;padding:0 18px}
+
+  .main{padding:calc(var(--topbar) + 22px) 24px 54px;scroll-margin-top:calc(var(--topbar) + 14px)}
+  .page-head{margin-bottom:18px;padding-bottom:14px}
+  .page-head h1{font-size:32px}
+  .page-head p{margin-top:5px;font-size:14px}
+  .booking-toolbar{top:calc(var(--topbar) + 8px);padding:8px;border-radius:13px}
+  .booking-toolbar .chip{min-height:36px;padding:0 11px;font-size:12px}
+  .operations-bar{gap:9px;margin-bottom:12px}
+  .operation-card{min-height:94px;padding:13px 14px;border-radius:14px}
+  .operation-card strong{margin:6px 0 4px;font-size:25px}
+  .kpi-grid{gap:10px;margin-bottom:14px}
+  .kpi{padding:16px}
+  .kpi strong{margin-top:7px;font-size:24px}
+  .client-grid{gap:12px}
+  .client-card{padding:16px}
+  .settings-card{padding:20px}
+  .notification-card{padding:20px}
+  .settings-head h2{font-size:22px}
+  .settings-head p{margin-bottom:18px}
+
+  .booking-row-head{padding:15px 17px 12px}
+  .booking-identity h2{font-size:20px}
+  .booking-actions{padding:10px 16px}
+  .booking-note{margin:0 16px;padding:10px 0}
+  .btn{min-height:44px;padding:0 13px;border-radius:10px}
+  .calendar-summary{gap:15px;margin-bottom:12px;padding:12px 14px}
+  .calendar-summary strong{font-size:23px}
+  .day-card{padding:13px}
+  .upcoming-day>header{top:100px;padding:15px 14px}
+  .upcoming-day>header span{font-size:25px}
+
+  .modal{padding:14px}
+  .modal-card{width:min(1020px,calc(100vw - 28px));height:min(830px,calc(100dvh - 28px));max-height:calc(100dvh - 28px);border-radius:20px}
+  .modal-form>header{padding:19px 22px 14px}
+  .modal-form>header h2{font-size:28px;line-height:1.08}
+  .modal-form>header p{margin-top:5px;font-size:12px}
+  .modal-intro{margin:14px 22px 0;padding:12px 14px;border-radius:13px}
+  .modal-intro strong{font-size:22px}
+  .booking-form-scroll{padding:14px 20px 20px}
+  .form-section{padding:15px;border-radius:14px}
+  .form-section+.form-section{margin-top:11px}
+  .section-title{gap:10px;margin-bottom:13px}
+  .section-title>span{width:28px;height:28px;border-radius:8px}
+  .section-title h3{font-size:16px}
+  .section-title p{font-size:11px}
+  .fields{gap:11px}
+  .field{gap:6px}
+  .field>span{font-size:11.5px}
+  .field input{height:46px}
+  .field select{height:46px}
+  .field input,.field select,.field textarea{min-height:46px;font-size:14px}
+  .field textarea{min-height:68px;padding:11px 12px}
+  .field-group{gap:9px;padding:11px}
+  .premium-control{grid-template-columns:34px minmax(0,1fr) 34px;height:48px;min-height:48px;border-radius:11px}
+  .premium-control select,.premium-control input{height:46px;font-size:15px}
+  .premium-control-icon svg,.picker-trigger svg{width:17px;height:17px}
+  .date-control{grid-template-columns:minmax(0,1fr) 38px}
+  .date-control .picker-trigger{width:38px;min-width:38px;height:46px;min-height:46px}
+  .modal-form>footer{gap:10px;padding:11px 20px 14px}
+  .modal-form>footer .btn{min-height:44px;padding:0 16px;font-size:12.5px}
+  .process-grid{padding:16px 22px 22px;gap:14px}
+  .catalog-scroll{padding:16px 22px 26px}
+  .modal-section,.modal-summary{padding:18px;border-radius:16px}
+  .modal-section h3,.modal-summary h3{margin-bottom:14px}
+
+  .modal-card:has(.catalog-form){width:min(1120px,calc(100vw - 28px));height:min(790px,calc(100dvh - 28px))}
+  .catalog-item{gap:15px;padding:13px 14px}
+  .catalog-price-control input{height:44px;font-size:15px}
+
+  .modal-card:has(.issue-form){width:min(1040px,calc(100vw - 28px));height:min(680px,calc(100dvh - 24px));max-height:calc(100dvh - 24px)}
+  .issue-form>header{padding:14px 20px 10px}
+  .issue-form>header h2{font-size:27px}
+  .issue-form .issue-booking-head{margin:10px 20px 0}
+  .issue-form .issue-booking-head>div{padding:10px 14px}
+  .issue-form .modal-layout{padding:10px 20px 10px;gap:10px;grid-template-columns:minmax(0,1fr) minmax(310px,.82fr)}
+  .issue-form .modal-section,.issue-form .modal-summary{padding:14px}
+  .issue-form .modal-summary h3,.issue-form .modal-section h3{margin-bottom:10px;font-size:18px}
+  .issue-payment-block{padding:12px;gap:8px}
+  .issue-money-control{min-height:50px;grid-template-columns:40px minmax(0,1fr) 44px}
+  .issue-money-control input{height:48px;font-size:21px}
+  .issue-money-control i{font-size:18px}
+  .issue-quick button{min-height:44px;font-size:12px}
+  .issue-form>footer{padding:9px 20px 11px}
+
+  .modal-card:has(.finance-form){height:min(700px,calc(100dvh - 24px));max-height:calc(100dvh - 24px)}
+  .finance-form>header{padding:15px 21px 11px}
+  .finance-form>header h2{font-size:28px}
+  .finance-form .finance-booking-head{margin:10px 21px 0}
+  .finance-form .finance-booking-head>div{padding:9px 14px}
+  .finance-form .modal-layout{padding:10px 21px 12px;gap:12px}
+  .finance-form .modal-section,.finance-form .modal-summary{padding:14px}
+  .finance-form .modal-section h3,.finance-form .modal-summary h3{margin-bottom:10px;font-size:18px}
+  .finance-form .field input{height:44px;min-height:44px}
+  .finance-form .switch{padding:10px}
+  .finance-form .note{margin-top:8px;padding:10px 12px;font-size:12px}
+  .finance-form .live>div{padding:9px 12px;font-size:13px}
+  .finance-form .live .balance{padding:10px 12px;font-size:16px}
+  .finance-form>footer{padding:10px 21px 12px}
+  .finance-form>footer .btn{min-height:44px}
+
+  .pwa-update-prompt{padding:10px;border-radius:14px;gap:8px}
+  .pwa-update-prompt button{min-height:44px}
+}

@@ -39,12 +39,19 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Run desktop and mobile browser tests
         run: npm run test:e2e
+      - name: Run installed-PWA visual QA
+        run: npm run test:pwa
+      - name: Run desktop density visual QA
+        run: npm run test:desktop-density
       - name: Upload browser evidence on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: vacleaner-browser-test-results
-          path: test-results
+          path: |
+            test-results
+            pwa-test-results
+            density-test-results
           if-no-files-found: ignore
           retention-days: 14
       - uses: actions/upload-pages-artifact@v3

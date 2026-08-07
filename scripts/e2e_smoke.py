@@ -288,10 +288,29 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
     page = context.new_page()
     try:
         page.goto(f"{base}/bronuvannia/", wait_until="networkidle")
+        page.wait_for_selector(".booking-form.vx-mobile-stepper")
         page.wait_for_selector(".booking-mobile-summary")
         checks.check(no_horizontal_overflow(page), "Public mobile has no horizontal overflow")
         checks.check(page.locator(".booking-mobile-summary button").bounding_box()["height"] >= 44, "Public mobile CTA is at least 44px")
+        checks.check(page.locator(".mobile-booking:visible").count() == 0, "Booking page has only one mobile CTA layer")
+        checks.check(page.locator(".booking-step.is-vx-active").count() == 1, "Only one booking step is visible on mobile")
+        checks.check(page.locator("#booking-products.is-vx-active").count() == 1, "Mobile booking starts from equipment step")
+        progress_labels = page.locator(".booking-progress button b:visible")
+        checks.check(progress_labels.count() == 4, "Mobile progress keeps all four step labels")
+        page.locator(".booking-progress button").nth(1).click()
+        page.wait_for_timeout(100)
+        checks.check(page.locator("#booking-dates.is-vx-active").count() == 1 and page.locator("#booking-products:visible").count() == 0, "Progress navigation switches mobile booking step")
         checks.screenshot(page, "public-mobile.png")
+        page.goto(f"{base}/", wait_until="networkidle")
+        page.wait_for_selector(".site-header")
+        brand_box = page.locator(".site-header .brand").bounding_box()
+        menu_box = page.locator(".site-header .menu-button").bounding_box()
+        same_row = brand_box is not None and menu_box is not None and abs((brand_box["y"] + brand_box["height"] / 2) - (menu_box["y"] + menu_box["height"] / 2)) < 4
+        checks.check(same_row, "Mobile header logo and menu stay on one row")
+        checks.check(page.locator(".header-cta:visible").count() == 0, "Mobile header does not duplicate booking CTA")
+        checks.check(page.locator(".mobile-booking:visible").count() == 1, "Regular pages keep one bottom CTA")
+        checks.check(page.locator(".v21-hero-copy").bounding_box()["height"] <= 560, "Mobile home hero copy is compact")
+        checks.screenshot(page, "home-mobile.png")
     finally:
         context.close()
 
@@ -388,6 +407,8 @@ def main() -> int:
         launch_options = {"headless": True, "args": ["--no-sandbox"]}
         if executable:
             launch_options["executable_path"] = executable
+        elif Path("/usr/bin/chromium").exists():
+            launch_options["executable_path"] = "/usr/bin/chromium"
         browser = playwright.chromium.launch(**launch_options)
         try:
             public_tests(browser, base, api_handler, checks, root)

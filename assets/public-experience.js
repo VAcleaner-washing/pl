@@ -350,6 +350,80 @@
     }).catch(()=>{});
   }
 
+  const mobileBookingMedia=window.matchMedia('(max-width:620px)');
+  const mobileBookingStepIds=['booking-products','booking-dates','booking-extras','booking-contact'];
+  let mobileBookingMediaBound=false;
+
+  function mobileBookingParts(){
+    const form=document.querySelector('.booking-form');
+    if(!form)return null;
+    const steps=mobileBookingStepIds.map(id=>form.querySelector(`#${id}`)).filter(Boolean);
+    const progress=form.querySelector('.booking-progress');
+    const buttons=progress?[...progress.querySelectorAll('button')]:[];
+    return steps.length===mobileBookingStepIds.length?{form,steps,progress,buttons}:null;
+  }
+  function setMobileBookingStep(index,{scroll=false}={}){
+    const parts=mobileBookingParts();
+    if(!parts||!mobileBookingMedia.matches)return;
+    const next=Math.max(0,Math.min(parts.steps.length-1,Number(index)||0));
+    parts.form.dataset.vxActiveStep=String(next);
+    parts.steps.forEach((step,stepIndex)=>{
+      const active=stepIndex===next;
+      step.classList.toggle('is-vx-active',active);
+      step.setAttribute('aria-hidden',active?'false':'true');
+    });
+    parts.buttons.forEach((button,buttonIndex)=>{
+      button.classList.toggle('is-vx-active',buttonIndex===next);
+      if(buttonIndex===next)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');
+    });
+    if(scroll){
+      requestAnimationFrame(()=>{
+        const top=parts.progress?.getBoundingClientRect().top||0;
+        if(Math.abs(top-68)>4)window.scrollBy({top:top-68,behavior:'smooth'});
+      });
+    }
+  }
+  function mobileStepFromCta(button){
+    const label=(button?.textContent||'').trim();
+    if(label.includes('Обрати техніку'))return 0;
+    if(label.includes('Обрати дату'))return 1;
+    if(label.includes('Вказати адресу'))return 2;
+    if(label.includes('До контактів'))return 3;
+    return -1;
+  }
+  function enhanceMobileBookingFlow(){
+    const parts=mobileBookingParts();
+    if(!parts)return;
+    const mobile=mobileBookingMedia.matches;
+    parts.form.classList.toggle('vx-mobile-stepper',mobile);
+    if(!mobile){
+      parts.steps.forEach(step=>{step.classList.remove('is-vx-active');step.removeAttribute('aria-hidden')});
+      parts.buttons.forEach(button=>{button.classList.remove('is-vx-active');button.removeAttribute('aria-current')});
+      return;
+    }
+    if(!parts.form.dataset.vxMobileStepperBound){
+      parts.form.dataset.vxMobileStepperBound='1';
+      parts.form.addEventListener('click',event=>{
+        const progressButton=event.target.closest('.booking-progress button');
+        if(progressButton){
+          const liveButtons=[...parts.form.querySelectorAll('.booking-progress button')];
+          const index=liveButtons.indexOf(progressButton);
+          if(index>=0)setMobileBookingStep(index);
+          return;
+        }
+        const button=event.target.closest('.booking-mobile-summary button');
+        if(!button||button.type==='submit')return;
+        const target=mobileStepFromCta(button);
+        if(target>=0)setMobileBookingStep(target);
+      },true);
+    }
+    setMobileBookingStep(Number(parts.form.dataset.vxActiveStep||0));
+    if(!mobileBookingMediaBound){
+      mobileBookingMediaBound=true;
+      mobileBookingMedia.addEventListener?.('change',()=>enhanceMobileBookingFlow());
+    }
+  }
+
   function enhance(){
     if(location.pathname.startsWith('/admin/'))return;
     replacePublicLabels();
@@ -360,6 +434,7 @@
     injectProof();
     injectTerms();
     enhanceDepositSummary();
+    enhanceMobileBookingFlow();
   }
 
   let queued=false;

@@ -311,3 +311,64 @@ html{scrollbar-gutter:stable;}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:2px solid #d9a85d;outline-offset:3px}
 .vx-calendar-day:focus-visible{outline:2px solid #17130d;outline-offset:-4px;box-shadow:0 0 0 3px #e5b66f}
 @media(max-width:760px){.footer-links a,.footer-contact a{width:max-content;padding-block:10px}.vx-summary-finance-row{padding:14px 0;gap:14px}.vx-summary-finance-row b{font-size:14px}.vx-summary-finance-row strong{font-size:16px}}
+
+
+/* v3.0.13 — mobile conversion pass: compact heroes, one CTA layer and real booking steps */
+@media(max-width:620px){
+  .site-header{grid-template-columns:minmax(0,1fr) 44px!important;gap:12px!important;height:68px!important;padding:0 16px!important}
+  .site-header .brand{min-width:0}
+  .site-header .brand-copy strong{font-size:10px}
+  .site-header .brand-copy small{font-size:7px}
+  .header-cta{display:none!important}
+  .menu-button{justify-self:end!important;width:44px!important;height:44px!important;min-width:44px!important;margin:0!important}
+
+  .v21-hero-copy{min-height:520px!important;padding:58px 18px 36px!important}
+  .v21-hero h1{font-size:clamp(43px,11.8vw,52px)!important;line-height:.95!important}
+  .v21-lead{margin-top:22px!important}
+  .v21-actions{margin-top:26px!important}
+  .v21-actions .v21-secondary{display:none!important}
+  .v21-included{margin-top:28px!important}
+  .v21-hero-media,.v21-hero-media>img{height:440px!important;min-height:440px!important}
+  .v21-trust-strip p{min-height:62px!important}
+
+  .inner-hero{min-height:auto!important;padding:108px 18px 48px!important;gap:22px!important}
+  .contact-hero{min-height:auto!important;padding:108px 18px 52px!important}
+  .booking-hero{padding:104px 18px 38px!important;gap:22px!important}
+  .inner-hero h1,.contact-hero h1,.booking-hero h1{font-size:clamp(42px,11.8vw,52px)!important;line-height:.95!important}
+  .inner-hero>p,.contact-hero>p:last-child,.booking-hero>p{font-size:14px!important;line-height:1.65!important}
+  .contact-hero>p:last-child{margin-top:24px!important}
+
+  .editorial-footer a,.package-link,.contact-card a,.faq-list-large summary,.v21-choice-help>a{min-height:44px;display:flex;align-items:center}
+  .editorial-footer a,.package-link{padding-block:10px}
+  .faq-list-large summary{padding-block:20px!important}
+  .booking-consent{grid-template-columns:24px 1fr!important;gap:12px!important}
+  .booking-consent input{width:22px!important;height:22px!important;margin-top:1px}
+
+  .booking-form.vx-mobile-stepper{padding-top:30px!important;padding-bottom:118px!important}
+  .booking-form.vx-mobile-stepper .booking-progress{top:68px!important;margin:-10px -6px 18px!important;padding:6px!important;grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .booking-form.vx-mobile-stepper .booking-progress button{min-height:52px!important;display:grid!important;place-items:center!important;align-content:center!important;gap:4px!important;padding:4px 2px!important}
+  .booking-form.vx-mobile-stepper .booking-progress button b{display:block!important;font-size:9px!important;line-height:1!important;white-space:nowrap}
+  .booking-form.vx-mobile-stepper .booking-progress button span{width:25px!important;height:25px!important}
+  .booking-form.vx-mobile-stepper .booking-progress button.is-vx-active{color:#17191b}
+  .booking-form.vx-mobile-stepper .booking-progress button.is-vx-active span{color:#fff;background:#8c6a3f;border-color:#8c6a3f}
+  .booking-form.vx-mobile-stepper .booking-step{display:none!important;border-bottom:0!important;padding:28px 0 18px!important;min-height:calc(100dvh - 250px)}
+  .booking-form.vx-mobile-stepper .booking-step.is-vx-active{display:block!important;animation:vx-step-enter .22s ease both}
+  .booking-form.vx-mobile-stepper .booking-step-heading{grid-template-columns:38px 1fr!important;gap:12px!important;margin-bottom:22px!important}
+  .booking-form.vx-mobile-stepper .booking-step-heading>span{width:34px!important;height:34px!important}
+  .booking-form.vx-mobile-stepper .booking-step-heading h2{font-size:30px!important}
+  .booking-form.vx-mobile-stepper .booking-summary{display:none!important}
+  .booking-mobile-summary{z-index:60!important;bottom:calc(8px + env(safe-area-inset-bottom))!important;min-height:66px!important}
+  .booking-mobile-summary .button{min-height:48px!important}
+  .booking-page-active .vx-proof{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+}
+
+@media(min-width:621px) and (max-width:900px){
+  .inner-hero{min-height:520px;padding:138px 32px 72px}
+  .contact-hero{min-height:540px;padding:145px 32px 72px}
+  .booking-hero{padding:132px 32px 54px}
+  .inner-hero h1,.contact-hero h1,.booking-hero h1{font-size:clamp(50px,7.2vw,64px)}
+  .booking-form{padding-inline:32px}
+  .booking-progress button{min-height:48px}
+}
+
+@keyframes vx-step-enter{from{opacity:.25;transform:translateY(8px)}to{opacity:1;transform:none}}

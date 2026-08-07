@@ -3,28 +3,24 @@
 .booking-contact-grid input{height:54px;min-height:54px;max-height:54px}
 .booking-contact-grid .public-loyalty-status{margin-top:12px}
 
-/* Keep the original responsive homepage layout. Only stabilize the mobile CTA. */
+/* v3.0.13 — one mobile CTA layer, safe areas and stable public viewport */
 @media(max-width:620px){
   html,body{overflow-x:hidden}
-  .home-v21{padding-bottom:86px}
+  main{padding-bottom:calc(86px + env(safe-area-inset-bottom))!important}
+  main:has(.booking-form){padding-bottom:calc(96px + env(safe-area-inset-bottom))!important}
+  h1,h2,h3,[id]{scroll-margin-top:84px}
+  input[type=text],input[type=tel],input[type=email],input[type=number],input[type=date],input[type=time],select,textarea{font-size:16px!important}
   .mobile-booking{
+    display:grid!important;
     grid-template-columns:minmax(0,1.2fr) minmax(108px,.8fr)!important;
     left:10px!important;right:10px!important;
     bottom:calc(8px + env(safe-area-inset-bottom))!important;
-    padding:0!important;
-    overflow:hidden!important;
+    padding:0!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:17px!important;
+    overflow:hidden!important;box-shadow:0 18px 52px rgba(0,0,0,.38)
   }
   .mobile-booking a{min-width:0;height:56px!important;padding:0 12px!important;font-size:12px!important;text-align:center}
+  main:has(.booking-form) .mobile-booking{display:none!important}
 }
-
-/* === v2.9.5.1 merged audit fixes: public booking === */
-@media (max-width:620px){
-  input[type=text],input[type=tel],input[type=email],input[type=number],
-  input[type=date],input[type=time],select,textarea{font-size:16px!important}
-  main{padding-bottom:calc(120px + env(safe-area-inset-bottom))!important}
-  h1,h2,h3,[id]{scroll-margin-top:84px}
-}
-
 
 /* v2.9.12.0 — public accessibility and focus targets */
 .site-header a,.site-header button,.site-footer a,.breadcrumb,.button,.vx-proof a{min-height:44px;display:inline-flex;align-items:center}.site-footer a{padding-block:10px}.breadcrumb{padding:8px 4px;margin-left:-4px}.site-header button:focus-visible,.site-header a:focus-visible,.button:focus-visible,.breadcrumb:focus-visible,.vx-proof a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #d6a45f;outline-offset:3px}
