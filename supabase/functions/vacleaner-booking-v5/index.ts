@@ -27,22 +27,30 @@ function base(product: any, sd: string, n: number) {
   }
   return t;
 }
-function fullWeekend(sd: string, rd: string) {
-  let d = new Date(sd + "T12:00:00Z"), end = new Date(rd + "T12:00:00Z"), sat = false, sun = false;
+function fullWeekend(sd: string, rd: string, pickupWindow = "morning", returnWindow = "evening") {
+  if (!sd || !rd) return false;
+  const dayIndex = (value: string) => Math.floor(Date.parse(value + "T12:00:00Z") / 86400000);
+  const startSlot = dayIndex(sd) * 2 + (pickupWindow === "evening" ? 1 : 0);
+  const endSlot = dayIndex(rd) * 2 + (returnWindow === "evening" ? 1 : 0);
+  let d = new Date(sd + "T12:00:00Z"), end = new Date(rd + "T12:00:00Z");
   for (let guard = 0; d <= end && guard < 32; guard += 1) {
-    if (d.getUTCDay() === 6) sat = true;
-    if (d.getUTCDay() === 0) sun = true;
+    if (d.getUTCDay() === 6) {
+      const saturday = d.toISOString().slice(0, 10);
+      const saturdayMorning = dayIndex(saturday) * 2;
+      const sundayEvening = (dayIndex(saturday) + 1) * 2 + 1;
+      if (startSlot <= saturdayMorning && endSlot >= sundayEvening) return true;
+    }
     d = new Date(d.getTime() + 86400000);
   }
-  return sat && sun;
+  return false;
 }
 function depositGroup(code: string, catalog: any) {
   return catalog?.products?.[code]?.depositGroup || defaults.products[code as keyof typeof defaults.products]?.depositGroup || "oneUnit";
 }
-function depositAmount(code: string, sd: string, rd: string, rules: any, catalog: any) {
+function depositAmount(code: string, sd: string, rd: string, pickupWindow: string, returnWindow: string, rules: any, catalog: any) {
   const group = depositGroup(code, catalog);
   const source = rules?.[group] || defaultDepositRules[group as keyof typeof defaultDepositRules];
-  return Math.max(0, Number(fullWeekend(sd, rd) ? source.weekend : source.day) || 0);
+  return Math.max(0, Number(fullWeekend(sd, rd, pickupWindow, returnWindow) ? source.weekend : source.day) || 0);
 }
 function selectedExtras(value: unknown, catalog: any) {
   const rows = Array.isArray(value) ? value : [];
@@ -94,7 +102,7 @@ Deno.serve(async req => {
     const discount = Math.round(rawBase * percent / 100);
     const baseAmount = rawBase - discount;
     const totalAmount = baseAmount + extrasAmount + deliveryAmount;
-    const securityDeposit = depositAmount(String(body.productCode || ""), body.startDate, body.returnDate, rules, cat);
+    const securityDeposit = depositAmount(String(body.productCode || ""), body.startDate, body.returnDate, String(body.pickupWindow || "morning"), String(body.returnWindow || "evening"), rules, cat);
     payload.estimate = {
       ...(payload.estimate || {}),
       rentalDays: n,

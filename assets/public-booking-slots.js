@@ -30,17 +30,27 @@ function selectedProductCode(){
   const text=selected?.textContent||'';
   return productCodes.find(([re])=>re.test(text))?.[1]||'';
 }
-function fullWeekend(start,finish){
+function fullWeekend(start,finish,pickupWindow='morning',returnWindow='evening'){
   if(!start||!finish)return false;
-  let d=new Date(start+'T12:00:00Z'),end=new Date(finish+'T12:00:00Z'),sat=false,sun=false;
-  for(let guard=0;d<=end&&guard<32;guard+=1){if(d.getUTCDay()===6)sat=true;if(d.getUTCDay()===0)sun=true;d=new Date(d.getTime()+86400000)}
-  return sat&&sun;
+  const dayIndex=value=>Math.floor(Date.parse(value+'T12:00:00Z')/86400000);
+  const startSlot=dayIndex(start)*2+(pickupWindow==='evening'?1:0);
+  const endSlot=dayIndex(finish)*2+(returnWindow==='evening'?1:0);
+  let d=new Date(start+'T12:00:00Z'),end=new Date(finish+'T12:00:00Z');
+  for(let guard=0;d<=end&&guard<32;guard+=1){
+    if(d.getUTCDay()===6){
+      const saturday=d.toISOString().slice(0,10),satMorning=dayIndex(saturday)*2,sunEvening=(dayIndex(saturday)+1)*2+1;
+      if(startSlot<=satMorning&&endSlot>=sunEvening)return true;
+    }
+    d=new Date(d.getTime()+86400000);
+  }
+  return false;
 }
 function depositGroup(code){if(code==='elite')return'elite';if(code==='general')return'general';if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';return'oneUnit'}
 function depositAmount(){
-  const code=selectedProductCode(),dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')];
+  const code=selectedProductCode(),dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];
   if(!code||!dates[0]?.value||!dates[1]?.value)return 0;
-  const row=depositRules[depositGroup(code)];return Number(fullWeekend(dates[0].value,dates[1].value)?row.weekend:row.day)||0;
+  const row=depositRules[depositGroup(code)],pickupWindow=windows[0]?.value||'morning',returnWindow=windows[1]?.value||'evening';
+  return Number(fullWeekend(dates[0].value,dates[1].value,pickupWindow,returnWindow)?row.weekend:row.day)||0;
 }
 function formatMoney(v){return new Intl.NumberFormat('uk-UA').format(Number(v)||0)+' грн'}
 function renderDeposit(){

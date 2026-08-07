@@ -100,5 +100,8 @@ for(const file of files.filter(f=>f.endsWith('.html'))){
   if(!fs.existsSync(local))errors.push(`missing local reference ${match[1]} in ${rel}`);
  }
 }
+if(!e2eSmoke.includes('Selecting equipment does not auto-select dates')||!e2eSmoke.includes('Deposit stays unknown until dates are selected'))errors.push('date/deposit preselection regression test missing');
+if(publicReactBundle.includes('b(c(t)),f(c(d(t,1)))'))errors.push('booking page silently preselects dates');
+if(!publicExperience.includes('if(!dates.start||!dates.finish)return 0'))errors.push('public deposit must stay unknown until both dates are selected');
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
 console.log(`Build ${release.version} passed ${files.length} file checks. Shared config ${expected}.`);

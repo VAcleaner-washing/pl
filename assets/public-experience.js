@@ -62,7 +62,8 @@
   }
 
   function enhanceDate(input){
-    if(dateState.has(input)||!input.closest('.booking-date-grid'))return;
+    if(!input.closest('.booking-date-grid'))return;
+    if(dateState.has(input)){updateDateTrigger(input);return;}
     input.classList.add('vx-native-control');
     input.tabIndex=-1;
     const trigger=document.createElement('button');
@@ -248,16 +249,17 @@
     if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';
     return'oneUnit';
   }
-  function fullWeekend(start,finish){
+  function fullWeekend(start,finish,pickupWindow='morning',returnWindow='evening'){
     const a=parseDate(start),b=parseDate(finish);if(!a||!b)return false;
-    let sat=false,sun=false,d=new Date(a);for(let i=0;d<=b&&i<32;i++,d=new Date(d.getTime()+86400000)){if(d.getDay()===6)sat=true;if(d.getDay()===0)sun=true}return sat&&sun;
+    const dayIndex=value=>Math.floor(Date.parse(value+'T12:00:00Z')/86400000),startSlot=dayIndex(start)*2+(pickupWindow==='evening'?1:0),endSlot=dayIndex(finish)*2+(returnWindow==='evening'?1:0);
+    let d=new Date(a);for(let i=0;d<=b&&i<32;i++,d=new Date(d.getTime()+86400000)){if(d.getDay()===6){const saturday=d.toISOString().slice(0,10),satMorning=dayIndex(saturday)*2,sunEvening=(dayIndex(saturday)+1)*2+1;if(startSlot<=satMorning&&endSlot>=sunEvening)return true}}return false;
   }
   function selectedProductCode(){
     const btn=document.querySelector('.booking-products button[aria-pressed="true"],.booking-products button.is-selected,.booking-products button.selected');
     const title=btn?.querySelector('strong')?.textContent?.trim()||'';return PRODUCT_ALIASES[title]||'';
   }
-  function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')];return{start:dates[0]?.value||'',finish:dates[1]?.value||''}}
-  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates(),group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish)?rule.weekend:rule.day)||0}
+  function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];return{start:dates[0]?.value||'',finish:dates[1]?.value||'',pickupWindow:windows[0]?.value||'morning',returnWindow:windows[1]?.value||'evening'}}
+  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}
   function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
   function enhanceDepositSummary(){
     const summary=document.querySelector('.booking-summary');if(!summary)return;

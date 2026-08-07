@@ -297,6 +297,10 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.locator(".vx-calendar-close").click()
         page.locator(".booking-products button").first.click()
         dates = page.locator('.booking-date-grid input[type="date"]')
+        page.wait_for_timeout(120)
+        checks.check(dates.nth(0).input_value() == "" and dates.nth(1).input_value() == "", "Selecting equipment does not auto-select dates")
+        checks.check(normalized_text(page.locator(".vx-summary-deposit strong").inner_text()) in {"—", "-"}, "Deposit stays unknown until dates are selected")
+        checks.check("Оберіть дату" in page.locator(".vx-date-trigger").first.inner_text(), "Custom calendar shows no hidden preselected date")
         saturday, sunday = next_weekend()
         dates.nth(0).fill(saturday)
         dates.nth(1).fill(sunday)
@@ -304,6 +308,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.wait_for_timeout(200)
         deposit_text = normalized_text(page.locator(".vx-summary-deposit strong").inner_text())
         checks.check("2 000" in deposit_text, "Weekend deposit updates to 2000 UAH")
+        checks.check("Оберіть дату" not in page.locator(".vx-date-trigger").first.inner_text(), "Custom calendar stays synchronized with selected dates")
         checks.check(no_horizontal_overflow(page), "Public desktop has no horizontal overflow")
         checks.screenshot(page, "public-desktop.png")
     finally:

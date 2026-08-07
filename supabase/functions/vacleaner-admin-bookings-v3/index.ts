@@ -45,18 +45,23 @@ function calculateBase(product: any, startDate: string, days: number) {
   }
   return total;
 }
-function includesFullWeekend(startDate: string, returnDate: string) {
+function includesFullWeekend(startDate: string, returnDate: string, pickupWindow = "morning", returnWindow = "evening") {
   if (!startDate || !returnDate) return false;
+  const dayIndex = (value: string) => Math.floor(Date.parse(`${value}T12:00:00Z`) / 86400000);
+  const startSlot = dayIndex(startDate) * 2 + (pickupWindow === "evening" ? 1 : 0);
+  const endSlot = dayIndex(returnDate) * 2 + (returnWindow === "evening" ? 1 : 0);
   let cursor = new Date(`${startDate}T12:00:00Z`);
   const end = new Date(`${returnDate}T12:00:00Z`);
-  let saturday = false, sunday = false;
   for (let guard = 0; cursor <= end && guard < 32; guard += 1) {
-    const d = cursor.getUTCDay();
-    if (d === 6) saturday = true;
-    if (d === 0) sunday = true;
+    if (cursor.getUTCDay() === 6) {
+      const saturday = cursor.toISOString().slice(0, 10);
+      const saturdayMorning = dayIndex(saturday) * 2;
+      const sundayEvening = (dayIndex(saturday) + 1) * 2 + 1;
+      if (startSlot <= saturdayMorning && endSlot >= sundayEvening) return true;
+    }
     cursor = new Date(cursor.getTime() + 86400000);
   }
-  return saturday && sunday;
+  return false;
 }
 function normalizeDepositRules(value: any) {
   const out = structuredClone(defaultDepositRules);
@@ -69,9 +74,9 @@ function normalizeDepositRules(value: any) {
   }
   return out;
 }
-function calculateDeposit(productCode: string, startDate: string, returnDate: string, rules: DepositRules, catalog: any = defaultCatalog) {
+function calculateDeposit(productCode: string, startDate: string, returnDate: string, pickupWindow: string, returnWindow: string, rules: DepositRules, catalog: any = defaultCatalog) {
   const group = depositGroup(productCode, catalog) as keyof typeof rules;
-  return rules[group][includesFullWeekend(startDate, returnDate) ? "weekend" : "day"];
+  return rules[group][includesFullWeekend(startDate, returnDate, pickupWindow, returnWindow) ? "weekend" : "day"];
 }
 
 function normalizeSelectedExtras(value: unknown, productCode: string, catalog: any) {
@@ -124,7 +129,7 @@ Deno.serve(async (request: Request) => {
       const productCode = String(body.productCode ?? "");
       const startDate = dateValue(body.startDate);
       const returnDate = dateValue(body.returnDate);
-      if (productCode && startDate && returnDate) body.depositAmount = calculateDeposit(productCode, startDate, returnDate, depositRules, catalog);
+      if (productCode && startDate && returnDate) body.depositAmount = calculateDeposit(productCode, startDate, returnDate, String(body.pickupWindow ?? "morning"), String(body.returnWindow ?? "evening"), depositRules, catalog);
     }
 
     if (action === "audit_log") {
@@ -300,7 +305,7 @@ Deno.serve(async (request: Request) => {
       const startDate = dateValue(body.startDate ?? booking.start_date);
       const returnDate = dateValue(body.returnDate ?? booking.return_date);
       const depositAmount = productCode && startDate && returnDate
-        ? calculateDeposit(productCode, startDate, returnDate, depositRules, catalog)
+        ? calculateDeposit(productCode, startDate, returnDate, String(body.pickupWindow ?? booking.pickup_window ?? "morning"), String(body.returnWindow ?? booking.return_window ?? "evening"), depositRules, catalog)
         : Number(booking.deposit_amount || 0);
       if (validBookingId(bookingId)) {
         const prepaymentPaid = body.prepaymentPaid === true;
