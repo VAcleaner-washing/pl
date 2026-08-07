@@ -720,9 +720,9 @@ input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-ou
 .status-panel-head p{margin: 0; color: var(--muted); font-size: 12px;}
 .status-panel-head>strong{min-width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid rgba(214,164,95,.24); border-radius: 14px; background: rgba(214,164,95,.09); color: var(--gold-2); font-size: 20px;}
 .status-dashboard{display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px;}
-.analytics-status-item{--status-color:#aeb4b7; padding: 13px 14px; border: 1px solid rgba(255,255,255,.08); border-radius: 13px; background: rgba(5,10,13,.32);}
-.status-row-top{display: flex; align-items: center; justify-content: space-between; gap: 12px;}
-.status-row-top span{display: inline-flex; align-items: center; gap: 9px; color: #dce0e1; font-size: 13px; font-weight: 620;}
+.analytics-status-item{--status-color:#aeb4b7; min-width:0; padding: 13px 14px; border: 1px solid rgba(255,255,255,.08); border-radius: 13px; background: rgba(5,10,13,.32);}
+.status-row-top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;}
+.status-row-top span{display:inline-flex;align-items:center;gap:9px;min-width:0;color:#dce0e1;font-size:13px;font-weight:620;overflow-wrap:anywhere;}
 .status-row-top span i{width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; background: var(--status-color); box-shadow: 0 0 0 5px color-mix(in srgb,var(--status-color) 13%,transparent);}
 .status-row-top strong{min-width: 32px; color: var(--status-color); text-align: right; font-size: 17px;}
 .status-progress{height: 5px; margin-top: 11px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.055);}
@@ -1312,8 +1312,11 @@ body{touch-action:manipulation}
 }
 @media (max-width:360px){
   .page-head h1{font-size:24px}.booking-row-head{padding:12px}.booking-identity h2{font-size:18px}.modal-form>header h2{font-size:25px!important}.window-choice span{padding:9px}.time-chip-list{grid-template-columns:repeat(2,minmax(0,1fr))}.mobile-booking-progress{grid-template-columns:repeat(4,28px) minmax(0,1fr);gap:5px}.mobile-booking-progress span{width:28px;height:28px}
+  .status-dashboard{grid-template-columns:minmax(0,1fr)}
 }
 @media (display-mode:standalone) and (max-width:900px){
   .sidebar{background:#070b0e}.main{background:#070b0e}.modal{background:#070b0e}
 }
+
+.historical-extra-note{display:inline-block;max-width:150px;color:var(--muted);font-size:10px;font-weight:600;line-height:1.25;text-align:right;white-space:normal;}
 

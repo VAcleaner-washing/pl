@@ -86,6 +86,15 @@ lacks(adminDataEdge,'base_amount','admin data endpoint never recalculates rental
 lacks(adminDataEdge,'deposit_amount','admin data endpoint never touches deposits');
 has(css,'.catalog-toolbar,.analytics-toolbar{display:grid!important','320px equipment and analytics toolbars share mobile containment');
 
+has(css,'.status-dashboard{grid-template-columns:minmax(0,1fr)}','320px analytics statuses collapse to one column');
+has(pwaQa,'analytics status dashboard contains its own content','analytics status dashboard has direct geometry coverage');
+has(pwaQa,'returned historical booking shows mapped premium nozzles','returned historical extras have runtime coverage');
+has(admin,'function isHistoricalBooking(b)','historical booking presentation is explicit');
+has(admin,'у складі історичної суми','historical extras never invent a current price');
+has(bookingEdge,'db.from("vacleaner_customers").select("phone")','public booking syncs the customer registry');
+has(bookingEdge,'db.from("vacleaner_customers").insert','new public clients are persisted');
+has(bookingEdge,'db.from("vacleaner_customers").update(profilePatch)','repeat public clients update only safe profile fields');
+
 has(pwaQa,'settings cards use full mobile width','mobile settings full-width is gated');
 has(e2e,'Selecting equipment does not auto-select dates','hidden auto-dates are forbidden');
 has(e2e,'base = \"http://127.0.0.1:4173\"','browser E2E uses a local origin instead of blocked synthetic DNS');

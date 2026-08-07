@@ -210,6 +210,27 @@ Deno.serve(async (req: Request) => {
     const resources = Object.entries(product.resources || {}).map(([resource_code, quantity]) => ({ booking_id: booking.id, resource_code, quantity: Number(quantity || 0) })).filter(row => row.quantity > 0);
     const { error: resourceError } = await db.from("vacleaner_booking_resources").insert(resources);
     if (resourceError) { await db.from("vacleaner_bookings").delete().eq("id", booking.id); throw resourceError; }
+
+    // Keep the clients registry complete for public bookings without overwriting verified documents
+    // or a previously saved delivery address with null values.
+    const now = new Date().toISOString();
+    const telegram = cleanText(body.customerTelegram, 80);
+    const profilePatch: Record<string, unknown> = { name: customerName, updated_at: now };
+    if (telegram) profilePatch.telegram = telegram;
+    if (fulfillment === "delivery" && address) profilePatch.address = address;
+    const { data: existingCustomer, error: customerReadError } = await db.from("vacleaner_customers").select("phone").eq("phone", phone).maybeSingle();
+    if (customerReadError) {
+      await db.from("vacleaner_bookings").delete().eq("id", booking.id);
+      throw customerReadError;
+    }
+    const customerWrite = existingCustomer
+      ? db.from("vacleaner_customers").update(profilePatch).eq("phone", phone)
+      : db.from("vacleaner_customers").insert({ phone, ...profilePatch, telegram: telegram || null, address: fulfillment === "delivery" ? (address || null) : null, created_at: now });
+    const { error: customerError } = await customerWrite;
+    if (customerError) {
+      await db.from("vacleaner_bookings").delete().eq("id", booking.id);
+      throw customerError;
+    }
     await Promise.allSettled([notifyTelegram(booking), notifyWebPush(db, booking)]);
     return json({ success: true, bookingCode, status: "pending", estimate, loyalty: { ...loyalty, completedOrders: completed }, telegramText: `Вітаю! Створив(ла) заявку ${bookingCode} на ${product.label}. Прошу підтвердити дату.` }, 201);
   } catch (error) {

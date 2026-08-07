@@ -65,12 +65,31 @@ def booking(idx: int, status: str, product: str = "puzzi", label: str = "Kärche
     }
 
 
+HISTORICAL_COMPLETED = booking(6, "completed", "sc2", "Kärcher SC 2 Deluxe")
+HISTORICAL_COMPLETED.update({
+    "booking_code": "HIST-PWA-001",
+    "source": "historical_import",
+    "extras": {
+        "selected_items": [{
+            "code": "premium_nozzles",
+            "label": "Насадки «Преміум» до SC 2",
+            "price": 0,
+            "historical": True,
+            "included_in_total": True,
+        }],
+        "selected_items_amount": 0,
+        "chemistry": {"used_packets": 0, "story_mention": False},
+        "historical_import": {"source": "Бронювання.txt", "raw_rental": "пароочисник преміум"},
+    },
+})
+
 BOOKINGS = [
     booking(1, "pending"),
     booking(2, "waiting_payment", "puzzi_jimmy", "Puzzi + Jimmy"),
     booking(3, "confirmed", "sc2", "Kärcher SC 2 Deluxe"),
     booking(4, "issued"),
     booking(5, "completed"),
+    HISTORICAL_COMPLETED,
 ]
 
 
@@ -238,8 +257,26 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             if view=='analytics':
                 qa.check(page.locator('.analytics-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics toolbar stays inside its own width")
                 qa.check(page.locator('.analytics-periods').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics period controls never widen 320px viewport")
+                qa.check(page.locator('.status-dashboard').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics status dashboard contains its own content")
+                status_geometry=page.locator('.status-dashboard').evaluate("""el=>{const d=el.getBoundingClientRect(),items=[...el.querySelectorAll('.analytics-status-item')].map(x=>x.getBoundingClientRect());return{dashboard:{left:d.left,right:d.right},items:items.map(r=>({left:r.left,right:r.right,width:r.width}))}}""")
+                qa.check(bool(status_geometry['items']) and all(r['left']>=status_geometry['dashboard']['left']-1 and r['right']<=status_geometry['dashboard']['right']+1 for r in status_geometry['items']), f"{label}: analytics status cards stay inside dashboard")
+                if width<=360:
+                    lefts=[round(r['left'],1) for r in status_geometry['items']]
+                    qa.check(len(set(lefts))==1, f"{label}: analytics statuses collapse to one stable column")
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
+
+        # Returned historical bookings keep mapped extras visible without inventing a current price.
+        open_mobile_view(page,'bookings')
+        page.locator('[data-filter="completed"]').click()
+        historical_card=page.locator('.booking-card', has_text='HIST-PWA-001')
+        qa.check(historical_card.count()==1 and 'Насадки «Преміум» до SC 2' in historical_card.locator('.booking-extra').inner_text(), f"{label}: returned historical booking shows mapped premium nozzles")
+        qa.check('0 грн' not in historical_card.locator('.booking-extra').inner_text(), f"{label}: historical extra never displays a fake zero price")
+        historical_card.click();page.wait_for_selector('.detail')
+        qa.check(page.locator('.extras-panel', has_text='Насадки «Преміум» до SC 2').count()==1, f"{label}: historical extra remains visible in booking detail")
+        qa.check(page.locator('.historical-extra-note', has_text='у складі історичної суми').count()==1, f"{label}: historical detail explains extra is included in original total")
+        page.locator('.detail .back').click();page.wait_for_timeout(40)
+        if page.locator('[data-filter="all"]').count(): page.locator('[data-filter="all"]').click()
 
         # Client search is contextual and the card can be edited.
         open_mobile_view(page,'clients')
