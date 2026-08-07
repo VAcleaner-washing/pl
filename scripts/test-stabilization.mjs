@@ -114,6 +114,8 @@ has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevid
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
 has(css,'.nav button[data-view="equipment"]','mobile primary navigation can move equipment into More');
 has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
+has(admin,"['equipment','clients','campaigns','chemistry','settings'].includes(v)",'More active state excludes analytics and includes equipment');
+has(pwaQa,'analytics is the only active bottom-nav item on analytics view','analytics cannot highlight More at the same time');
 
 has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');
 has(admin,"state.filter=b.dataset.filter;renderBookings();resetViewScroll()",'booking filter changes reset the main scroll owner');
@@ -124,7 +126,7 @@ has(pwaQa,'scrollbar starts below the fixed topbar instead of hiding underneath 
 has(pwaQa,'single-equipment photography is vertically centered on the machine','single equipment crop is runtime-gated');
 has(css,'.flow-compact{display:grid;grid-template-columns:minmax(0,1fr)','mobile booking progress becomes one clean stacked section');
 has(pwaQa,'all booking-progress stages fit without smashed labels','booking progress has direct mobile geometry coverage');
-has(pwaQa,'detail header scrolls naturally and never covers finance/history content','mobile detail header cannot cover scrolled content');
+has(pwaQa,'detail back row stays sticky during long booking scroll','mobile detail keeps the back-to-bookings control visible while scrolling');
 has(pwaQa,'booking-detail photography never overlaps rental dates','detail hero media/date separation is runtime-gated');
 has(pwaQa,'search clears when manager changes tabs','global search leakage across tabs is runtime-gated');
 has(pwaQa,'tapping the date field reaches the native calendar input','admin mobile calendar tap target is runtime-gated');
