@@ -63,6 +63,11 @@ def view_suite(page:Page,qa:QA,width:int):
                 qa.check(' ' not in cols.strip(),f'{width}: settings use one-column tablet-desktop layout')
         if view=='clients':
             qa.check(page.locator('.clients-table').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: clients stay readable without horizontal table scrolling')
+        if view=='campaigns':
+            campaign_layout=page.locator('.campaign-panel').evaluate("""el=>{const head=el.querySelector('.campaign-panel-head'),summary=el.querySelector('.campaign-summary'),row=el.querySelector('.campaign-row');return{head:getComputedStyle(head).display,summary:getComputedStyle(summary).display,summaryCols:getComputedStyle(summary).gridTemplateColumns.split(' ').filter(Boolean).length,row:row?getComputedStyle(row).display:'none'}}""")
+            qa.check(campaign_layout['head']=='flex',f'{width}: campaigns desktop header uses styled flex layout')
+            qa.check(campaign_layout['summary']=='grid' and campaign_layout['summaryCols']==4,f'{width}: campaigns desktop KPI summary uses four-column grid')
+            qa.check(campaign_layout['row']=='grid',f'{width}: campaigns desktop row uses styled grid layout')
         qa.shot(page,f'{width}-{view}.png')
     qa.check(not runtime_errors,f'{width}: all 8 desktop views render without JavaScript errors' + (f' ({runtime_errors[0]})' if runtime_errors else ''))
 
