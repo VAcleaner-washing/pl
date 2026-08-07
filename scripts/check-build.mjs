@@ -31,6 +31,10 @@ for(const fn of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bo
 }
 const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes(`vacleaner-manager-${build}`))errors.push('service worker cache version mismatch');
 const adminRuntime=fs.readFileSync(path.join(root,'assets','admin-v250.js'),'utf8');
+
+const e2eSmoke=fs.readFileSync(path.join(root,'scripts','e2e_smoke.py'),'utf8');
+for(const token of ['def normalized_text(', 'def select_uses_dark_theme(', 'hero_limit = min(700', '#bookingForm header [data-close]'])if(!e2eSmoke.includes(token))errors.push(`E2E CI hardening missing: ${token}`);
+if(e2eSmoke.includes('page.locator("[data-close]").click()'))errors.push('E2E uses ambiguous generic data-close click');
 const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)/g)].map(match=>match[1]);
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
 
