@@ -42,6 +42,8 @@ def inside_viewport(page:Page, selector:str, margin=10):
     return b['x']>=margin-1 and b['x']+b['width']<=w-margin+1 and b['y']>=margin-1 and b['y']+b['height']<=h-margin+1
 
 def view_suite(page:Page,qa:QA,width:int):
+    runtime_errors=[]
+    page.on('pageerror',lambda exc: runtime_errors.append(str(exc)))
     for view in VIEWS:
         page.locator(f'.nav button[data-view="{view}"]').click();page.wait_for_timeout(70)
         qa.check(pwa.no_overflow(page),f'{width}: {view} has no page/main horizontal overflow')
@@ -62,6 +64,7 @@ def view_suite(page:Page,qa:QA,width:int):
         if view=='clients':
             qa.check(page.locator('.clients-table').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: clients stay readable without horizontal table scrolling')
         qa.shot(page,f'{width}-{view}.png')
+    qa.check(not runtime_errors,f'{width}: all 8 desktop views render without JavaScript errors' + (f' ({runtime_errors[0]})' if runtime_errors else ''))
 
 def search_state(page:Page,qa:QA,width:int):
     page.locator('.nav button[data-view="bookings"]').click();page.locator('#globalSearch').fill('НЕІСНУЮЧИЙ-КЛІЄНТ-999');page.wait_for_timeout(50)

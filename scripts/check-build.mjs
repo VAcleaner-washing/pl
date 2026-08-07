@@ -5,6 +5,11 @@ import {execFileSync} from 'node:child_process';
 const root=process.cwd(),release=JSON.parse(fs.readFileSync('release.json','utf8')),build=String(release.build);
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 const files=walk(root),errors=[];
+// Never ship one-off historical import payloads or customer PII in the GitHub release.
+for(const rel of ['scripts/historical-bookings.parsed.json','scripts/historical-import-db.json','scripts/historical-import-plan.json']){
+  if(fs.existsSync(path.join(root,rel)))errors.push(`Private historical import payload must not ship: ${rel}`);
+}
+
 if(fs.existsSync(path.join(root,'sw.js')))errors.push('legacy public sw.js still exists');
 if(fs.existsSync(path.join(root,'manifest.webmanifest')))errors.push('legacy public manifest still exists');
 for(const file of files.filter(f=>f.endsWith('.html')||f.endsWith('.txt'))){
@@ -37,7 +42,8 @@ const e2eSmoke=fs.readFileSync(path.join(root,'scripts','e2e_smoke.py'),'utf8');
 for(const token of ['def normalized_text(', 'def select_uses_dark_theme(', 'hero_limit = min(700', '#bookingForm header [data-close]', 'Saturday morning to Sunday morning keeps 1000 UAH deposit', 'Saturday evening to Sunday evening keeps 1000 UAH deposit', 'Friday evening to Sunday morning uses 2000 UAH weekend deposit', 'Friday evening to Sunday evening uses 2000 UAH weekend deposit', 'Saturday morning to Monday morning uses 2000 UAH weekend deposit'])if(!e2eSmoke.includes(token))errors.push(`E2E CI hardening missing: ${token}`);
 if(e2eSmoke.includes('page.locator("[data-close]").click()'))errors.push('E2E uses ambiguous generic data-close click');
 if(/visualViewport\?\.addEventListener\('scroll'/.test(adminRuntime))errors.push('iPhone viewport must not resync on visualViewport scroll');
-for(const token of ["--pwa-viewport-top","classList.toggle('keyboard-open'","keepFocusedControlVisible(target)"])if(!adminRuntime.includes(token))errors.push(`iPhone viewport runtime hardening missing: ${token}`);
+for(const token of ["classList.toggle('keyboard-open'","keepFocusedControlVisible(target)","--keyboard-viewport-height","--keyboard-viewport-top"])if(!adminRuntime.includes(token))errors.push(`iPhone keyboard runtime hardening missing: ${token}`);
+if(adminRuntime.includes("visualViewport?.addEventListener('scroll'"))errors.push('visualViewport scroll listener must not move the app shell');
 const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)/g)].map(match=>match[1]);
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
 
@@ -51,6 +57,7 @@ const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks'
 const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');
 execFileSync(process.execPath,[path.join(root,'scripts','test-finance.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-deposit-policy.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-stabilization.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-session.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-ux.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-density.mjs')],{stdio:'pipe'});
@@ -69,7 +76,8 @@ if(!/^playwright==\d+\.\d+\.\d+$/m.test(ciRequirements))errors.push('Playwright 
 const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
 const publicExperienceCss=fs.readFileSync(path.join(root,'assets','public-experience.css'),'utf8');
 const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8');
-for(const token of ['.auth-card .field input{font-size:16px!important}','html.keyboard-open .auth','overflow:hidden;\n    overscroll-behavior:none;'])if(!adminCss.includes(token))errors.push(`iPhone login CSS hardening missing: ${token}`);
+for(const token of ['.auth-card .field input{font-size:16px!important}','html.keyboard-open .auth','.app{position:fixed;inset:0;width:100%;height:100dvh'])if(!adminCss.includes(token))errors.push(`iPhone/mobile CSS hardening missing: ${token}`);
+if(adminCss.includes('--pwa-viewport-height')||adminCss.includes('--pwa-viewport-top'))errors.push('legacy app-shell visualViewport CSS variables remain');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
@@ -98,7 +106,7 @@ for(const token of ['settlementConfirmation(body, finance)','status: "completed"
 for(const token of ['export function settlementFromBooking','export function selectedExtrasAmount','export function settlementConfirmation','Math.min(2, usedPackets)','legacyRefund !== finance.refundAmount','settlement_mismatch'])if(!settlementModule.includes(token))errors.push(`settlement module guard missing: ${token}`);
 
 if(!publicReactBundle.includes('code:"carp_deta"')||!publicReactBundle.includes('Плямовивідник Carp-Deta 30 мл'))errors.push('Carp-Deta is missing from the hydrated public booking bundle');
-if(!bookingEdgeV5.includes('selected_items: selected.items.map')||!bookingEdgeV5.includes('systemItems'))errors.push('booking v5 does not persist selected extras independently of booking v4');
+if(!bookingEdgeV5.includes('selected_items: selected.items.map')||!bookingEdgeV5.includes('db.from("vacleaner_booking_resources").insert(resources)'))errors.push('booking v5 does not persist extras/resources directly');
 if(!adminEdge.includes('normalizeSelectedExtras(body.selectedExtras')||!adminEdge.includes('extras_amount: selected.amount'))errors.push('admin v3 does not persist selected extras independently of admin v2');
 for(const file of files.filter(f=>f.endsWith('.html'))){
  const rel=path.relative(root,file).replaceAll('\\','/'),html=fs.readFileSync(file,'utf8');
@@ -114,8 +122,8 @@ for(const fn of ['vacleaner-booking-v5','vacleaner-admin-bookings-v3']){
  const cfg=fs.readFileSync(path.join(root,'supabase','functions',fn,'config.ts'),'utf8');
  if(!cfg.includes('export function rentalDays')||!cfg.includes('export function isWeekendDeposit'))errors.push(`${fn} does not share paid-day weekend deposit policy`);
 }
-if(!bookingEdgeV5.includes('isWeekendDeposit(sd, rd, pickupWindow, returnWindow)'))errors.push('booking v5 deposit does not include pickup/return windows');
-if(!adminEdge.includes('isWeekendDeposit(startDate, returnDate, pickupWindow, returnWindow)'))errors.push('admin v3 deposit does not include pickup/return windows');
+if(!bookingEdgeV5.includes('depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow'))errors.push('booking v5 deposit does not include pickup/return windows');
+if(!adminEdge.includes('calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow'))errors.push('admin v3 deposit does not include pickup/return windows');
 if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale Saturday→Sunday 2000 UAH E2E rule still present');
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
 console.log(`Build ${release.version} passed ${files.length} file checks. Shared config ${expected}.`);

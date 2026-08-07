@@ -139,3 +139,59 @@ fetch(API,{cache:'no-store'})
 const depositObserver=new MutationObserver(()=>requestAnimationFrame(renderDeposit));
 document.addEventListener('DOMContentLoaded',()=>{depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',renderDeposit,true);document.addEventListener('click',()=>setTimeout(renderDeposit,0),true)});
 })();
+
+// v3.0.23 — public nearest-availability UX.
+// This layer observes booking API responses and enriches the existing availability card
+// without changing the Next.js bundle.
+(()=>{
+  const BOOKING_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5';
+  const originalFetch=window.fetch.bind(window);
+  const dateFmt=new Intl.DateTimeFormat('uk-UA',{day:'numeric',month:'long'});
+  const windowLabel=value=>value==='evening'?'вечір':'ранок';
+  const setNativeValue=(el,value)=>{
+    if(!el)return;
+    const proto=el instanceof HTMLSelectElement?HTMLSelectElement.prototype:HTMLInputElement.prototype;
+    const setter=Object.getOwnPropertyDescriptor(proto,'value')?.set;
+    if(setter)setter.call(el,value);else el.value=value;
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+  };
+  function applySuggestedPeriod(next){
+    const grid=document.querySelector('.booking-date-grid');
+    if(!grid)return;
+    const dates=[...grid.querySelectorAll('input[type="date"]')],windows=[...grid.querySelectorAll('select')];
+    setNativeValue(dates[0],next.startDate);
+    setNativeValue(windows[0],next.pickupWindow);
+    setNativeValue(dates[1],next.returnDate);
+    setNativeValue(windows[1],next.returnWindow);
+    grid.scrollIntoView({block:'center',behavior:'smooth'});
+  }
+  function renderNearest(next){
+    if(!next?.startDate)return;
+    const paint=()=>{
+      const card=document.querySelector('.availability-card');
+      if(!card)return;
+      const start=dateFmt.format(new Date(next.startDate+'T12:00:00'));
+      card.classList.remove('idle','available');
+      card.classList.add('unavailable','vx-nearest-availability');
+      card.innerHTML=`<strong>На цей час техніка зайнята</strong><span>Найближче вільне вікно для цього комплекту й тієї самої тривалості — <b>${start}, ${windowLabel(next.pickupWindow)}</b>.</span><div class="vx-nearest-actions"><button type="button" class="vx-use-nearest">Обрати ${start} · ${windowLabel(next.pickupWindow)}</button><small>Або виберіть іншу дату вручну.</small></div>`;
+      card.querySelector('.vx-use-nearest')?.addEventListener('click',()=>applySuggestedPeriod(next),{once:true});
+    };
+    requestAnimationFrame(paint);setTimeout(paint,60);setTimeout(paint,180);
+  }
+  window.fetch=async(input,init)=>{
+    const response=await originalFetch(input,init);
+    try{
+      const url=typeof input==='string'?input:input?.url||'';
+      if(String(url).startsWith(BOOKING_API)){
+        let action='';
+        if(typeof init?.body==='string')action=JSON.parse(init.body)?.action||'';
+        if(action==='availability'||action==='create'){
+          const data=await response.clone().json();
+          if(data?.nextAvailable&&data?.available!==true)renderNearest(data.nextAvailable);
+        }
+      }
+    }catch{}
+    return response;
+  };
+})();

@@ -31,6 +31,8 @@ jobs:
         run: npm run check
       - name: Verify rental day and deposit policy
         run: npm run test:deposit-policy
+      - name: Verify stabilization architecture
+        run: npm run test:stabilization
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test source

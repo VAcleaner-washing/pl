@@ -8,8 +8,11 @@ const sandbox={window:{},structuredClone:globalThis.structuredClone};
 vm.runInNewContext(code,sandbox,{filename:'vacleaner-core.js'});
 const core=sandbox.window.VACLEANER_CORE;
 if(!core)throw new Error('VACLEANER_CORE missing');
+let passed=0;
+const eq=(actual,expected,label)=>{if(actual!==expected)throw new Error(`${label}: expected ${expected}, got ${actual}`);passed++};
 
-const cases=[
+// Deposit is based on paid days, not simply whether Saturday/Sunday appears between dates.
+const depositCases=[
   ['Saturday morning → Sunday morning','2026-08-08','2026-08-09','morning','morning',1,false],
   ['Saturday evening → Sunday evening','2026-08-08','2026-08-09','evening','evening',1,false],
   ['Friday evening → Sunday morning','2026-08-07','2026-08-09','evening','morning',2,true],
@@ -17,22 +20,48 @@ const cases=[
   ['Saturday morning → Monday morning','2026-08-08','2026-08-10','morning','morning',2,true],
   ['Monday morning → Wednesday morning','2026-08-10','2026-08-12','morning','morning',2,false],
 ];
-let passed=0;
-for(const [label,start,finish,pickup,returned,expectedDays,expectedWeekend] of cases){
-  const days=core.rentalDays(start,finish,pickup,returned);
-  const weekend=core.isWeekendDeposit(start,finish,pickup,returned);
-  if(days!==expectedDays)throw new Error(`${label}: expected ${expectedDays} paid day(s), got ${days}`);
-  if(weekend!==expectedWeekend)throw new Error(`${label}: weekend deposit expected ${expectedWeekend}, got ${weekend}`);
-  passed+=2;
+for(const [label,start,finish,pickup,returned,expectedDays,expectedWeekend] of depositCases){
+  eq(core.rentalDays(start,finish,pickup,returned),expectedDays,`${label} paid days`);
+  eq(core.isWeekendDeposit(start,finish,pickup,returned),expectedWeekend,`${label} deposit class`);
 }
+
+// Rental tariff boundary: Friday evening starts weekend pricing; Sunday evening starts weekday pricing.
+const tariffMoments=[
+  ['Friday morning','2026-08-07','morning',false],
+  ['Friday evening','2026-08-07','evening',true],
+  ['Saturday morning','2026-08-08','morning',true],
+  ['Saturday evening','2026-08-08','evening',true],
+  ['Sunday morning','2026-08-09','morning',true],
+  ['Sunday evening','2026-08-09','evening',false],
+  ['Monday morning','2026-08-10','morning',false],
+];
+for(const [label,date,window,weekend] of tariffMoments)eq(core.isWeekendTariffMoment(date,window),weekend,`${label} tariff class`);
+
+const sc2=core.products.sc2;
+eq(core.rentalBase(sc2,'2026-08-07','2026-08-08','morning','morning'),500,'Friday morning one-day SC2 uses weekday price');
+eq(core.rentalBase(sc2,'2026-08-07','2026-08-08','evening','evening'),600,'Friday evening one-day SC2 uses weekend price');
+eq(core.rentalBase(sc2,'2026-08-08','2026-08-09','morning','morning'),600,'Saturday morning one-day SC2 uses weekend price');
+eq(core.rentalBase(sc2,'2026-08-09','2026-08-10','morning','morning'),600,'Sunday morning one-day SC2 uses weekend price');
+eq(core.rentalBase(sc2,'2026-08-09','2026-08-10','evening','evening'),500,'Sunday evening one-day SC2 uses weekday price');
+
+// Half-open slot overlap: same-slot return releases inventory for same-slot pickup.
+eq(core.periodsOverlap('2026-08-07','2026-08-08','morning','morning','2026-08-08','2026-08-09','morning','morning'),false,'Morning return releases morning pickup');
+eq(core.periodsOverlap('2026-08-07','2026-08-08','evening','evening','2026-08-08','2026-08-09','evening','evening'),false,'Evening return releases evening pickup');
+eq(core.periodsOverlap('2026-08-07','2026-08-08','morning','evening','2026-08-08','2026-08-09','morning','morning'),true,'Evening return still occupies same-day morning');
+
 const groups={oneUnit:[1000,2000],twoUnits:[1500,3000],general:[2000,3000],elite:[3000,4000]};
 for(const [group,[dayAmount,weekendAmount]] of Object.entries(groups)){
   const rule=core.depositRules[group];
-  if(Number(rule.day)!==dayAmount||Number(rule.weekend)!==weekendAmount)throw new Error(`${group}: deposit rule mismatch`);
-  const oneDay=core.isWeekendDeposit('2026-08-08','2026-08-09','morning','morning')?rule.weekend:rule.day;
-  const weekend=core.isWeekendDeposit('2026-08-07','2026-08-09','evening','morning')?rule.weekend:rule.day;
-  if(Number(oneDay)!==dayAmount)throw new Error(`${group}: one-day weekend must use ${dayAmount}`);
-  if(Number(weekend)!==weekendAmount)throw new Error(`${group}: two-day weekend must use ${weekendAmount}`);
-  passed+=3;
+  eq(Number(rule.day),dayAmount,`${group} day deposit`);
+  eq(Number(rule.weekend),weekendAmount,`${group} weekend deposit`);
+  eq(Number(core.isWeekendDeposit('2026-08-08','2026-08-09','morning','morning')?rule.weekend:rule.day),dayAmount,`${group} one-day weekend deposit`);
+  eq(Number(core.isWeekendDeposit('2026-08-07','2026-08-09','evening','morning')?rule.weekend:rule.day),weekendAmount,`${group} paid weekend deposit`);
 }
-console.log(`Deposit policy passed ${passed} assertions.`);
+
+// Full-weekend bundle tariffs remain special only for two paid weekend-classified days.
+const combo=core.products.combo;
+eq(core.rentalBase(combo,'2026-08-08','2026-08-10','morning','morning'),1800,'Combo Saturday morning → Monday morning uses full-weekend bundle');
+eq(core.rentalBase(combo,'2026-08-07','2026-08-09','evening','morning'),1800,'Combo Friday evening → Sunday morning uses full-weekend bundle');
+eq(core.rentalBase(combo,'2026-08-09','2026-08-11','evening','evening'),2000,'Combo Sunday evening → Tuesday evening uses two weekday days');
+
+console.log(`Rental/deposit/slot policy passed ${passed} assertions.`);

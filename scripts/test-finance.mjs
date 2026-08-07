@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {settlementConfirmation, settlementFromBooking, selectedExtrasAmount} from '../supabase/functions/vacleaner-admin-bookings-v3/settlement.mjs';
+import {discountInfo} from '../supabase/functions/vacleaner-admin-bookings-v3/pricing.mjs';
 
 const catalog={puzziPacketPrice:50,products:{
   puzzi:{resources:{puzzi:1}},
@@ -63,4 +64,11 @@ assert.equal(legacyMismatch.ok,false); assert.equal(legacyMismatch.error,'settle
 const incompleteLegacy=settlementConfirmation({returned:true,refundAmount:200},example);
 assert.equal(incompleteLegacy.ok,false); assert.equal(incompleteLegacy.error,'settlement_not_confirmed');
 
-console.log('Finance tests passed: 15 scenarios.');
+
+const existingManual={discount:{source:'manual',percent:10,amount:60},loyalty:{percent:0}};
+assert.deepEqual(discountInfo({},600,existingManual),{percent:10,amount:60,baseAmount:540,source:'manual',loyaltyPercent:0});
+assert.deepEqual(discountInfo({discount10:false},600,existingManual),{percent:0,amount:0,baseAmount:600,source:'none',loyaltyPercent:0});
+assert.deepEqual(discountInfo({loyaltyPercent:5},600,{}),{percent:5,amount:30,baseAmount:570,source:'loyalty',loyaltyPercent:5});
+assert.deepEqual(discountInfo({discount10:true,loyaltyPercent:5},600,{}),{percent:10,amount:60,baseAmount:540,source:'manual',loyaltyPercent:5});
+
+console.log('Finance tests passed: 19 scenarios.');

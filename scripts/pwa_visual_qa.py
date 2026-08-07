@@ -180,79 +180,144 @@ def dismiss_update(page: Page, qa: QA, shot_name: str | None = None) -> None:
     qa.check(page.locator(".pwa-update-prompt").count() == 0, "Update prompt can be postponed without reload")
 
 
+def open_mobile_view(page: Page, view: str) -> None:
+    direct = page.locator(f'.nav button[data-view="{view}"]:visible')
+    if direct.count():
+        direct.click()
+    else:
+        page.locator('.more-nav:visible').click()
+        page.locator(f'[data-more-view="{view}"]').click()
+    page.wait_for_timeout(70)
+
+
 def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
-    page = render_page(browser, width, 844)
+    height=844
+    safe_top=47
+    safe_bottom=34
+    page = render_page(browser, width, height)
     try:
-        page.evaluate("document.documentElement.style.setProperty('--pwa-safe-top','47px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px')")
+        page.evaluate(f"document.documentElement.style.setProperty('--pwa-safe-top','{safe_top}px');document.documentElement.style.setProperty('--pwa-safe-bottom','{safe_bottom}px')")
         page.wait_for_timeout(80)
         dismiss_update(page, qa, f"{label}-update-prompt.png" if label=='mobile-390' else None)
         qa.check(no_overflow(page), f"{label}: shell has no horizontal overflow")
         topbar = page.locator(".topbar").bounding_box()
         main_head = page.locator(".page-head").bounding_box()
         sidebar = page.locator(".sidebar").bounding_box()
-        qa.check(topbar is not None and topbar["height"] >= 108, f"{label}: topbar includes simulated iPhone safe area")
-        qa.check(main_head is not None and topbar is not None and main_head["y"] >= topbar["y"] + topbar["height"] + 8, f"{label}: content starts below the status bar and topbar")
-        qa.check(sidebar is not None and abs(sidebar["y"] + sidebar["height"] - 844) <= 1 and sidebar["height"] >= 106, f"{label}: bottom navigation includes home-indicator safe area")
+        qa.check(topbar is not None and abs(topbar["height"]-(64+safe_top))<=1.5, f"{label}: topbar has one stable safe-area height")
+        qa.check(main_head is not None and topbar is not None and main_head["y"] >= topbar["y"] + topbar["height"] + 8, f"{label}: content starts below status bar and topbar")
+        qa.check(sidebar is not None and abs(sidebar["y"] + sidebar["height"] - height) <= 1 and abs(sidebar["height"]-(62+safe_bottom))<=1.5, f"{label}: bottom navigation is pinned to the physical viewport bottom")
         heights = page.locator(".nav button:visible").evaluate_all("els=>els.map(el=>el.getBoundingClientRect().height)")
         qa.check(all(value >= 44 for value in heights), f"{label}: bottom navigation tap targets are at least 44px")
-        qa.check(page.locator(".operations-bar").evaluate("el=>el.scrollWidth>=el.clientWidth"), f"{label}: attention cards use intentional horizontal scrolling")
+        qa.check(page.locator('.connection-state:visible').count()==0, f"{label}: mobile topbar keeps only search and primary action")
+        qa.check(page.locator('.operations-bar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: attention cards never hide in a horizontal carousel")
+        qa.check(page.locator('.booking-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: booking filters wrap instead of being clipped")
 
-        for view in ["calendar", "upcoming", "equipment"]:
-            page.locator(f'.nav button[data-view="{view}"]:visible').click()
-            page.wait_for_timeout(60)
+        # Bottom nav must not move when only the app content scrolls.
+        nav_before=page.locator('.sidebar').bounding_box()
+        page.locator('.main').evaluate("el=>el.scrollTop=Math.min(420,el.scrollHeight-el.clientHeight)")
+        page.wait_for_timeout(50)
+        nav_after=page.locator('.sidebar').bounding_box()
+        qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs(nav_after['y']+nav_after['height']-height)<=1, f"{label}: bottom navigation does not walk during content scroll")
+        page.locator('.main').evaluate('el=>el.scrollTop=0')
+
+        # Walk every admin view, not only the primary four.
+        for view in ["bookings","calendar", "upcoming", "equipment", "clients", "analytics", "chemistry", "settings"]:
+            open_mobile_view(page,view)
             qa.check(no_overflow(page), f"{label}: {view} view stays inside viewport")
-            qa.check(page.evaluate("document.querySelector('.main').scrollTop") == 0, f"{label}: {view} opens at top")
-        page.evaluate("navigator.onLine=false;dispatchEvent(new Event('offline'))")
-        page.wait_for_timeout(40)
-        qa.check(page.locator('.app').count()==1 and page.locator('.auth').count()==0, f"{label}: offline transition keeps the authenticated shell")
-        toast_box=page.locator('.toast').bounding_box()
-        qa.check(toast_box is not None and toast_box['y']+toast_box['height']<=810.5, f"{label}: offline message clears bottom navigation")
-        page.evaluate("navigator.onLine=true;dispatchEvent(new Event('online'))")
-        page.wait_for_timeout(100)
-        page.locator('.toast').evaluate_all("els=>els.forEach(el=>el.remove())")
+            qa.check(page.locator('.main').evaluate('el=>el.scrollLeft')==0, f"{label}: {view} cannot drift horizontally")
+            qa.check(page.locator('.main').evaluate('el=>el.scrollTop')==0, f"{label}: {view} opens at top")
+            if view=='settings':
+                cards=page.locator('.settings-grid>*:visible').evaluate_all('els=>els.map(el=>el.getBoundingClientRect())')
+                qa.check(bool(cards) and all(r['left']>=11 and r['right']<=width-11 for r in cards), f"{label}: settings cards use full mobile width")
+                slot_rows=page.locator('.slot-editor-row:visible').evaluate_all('els=>els.map(el=>({r:el.getBoundingClientRect(),children:[...el.querySelectorAll(".premium-control")].map(x=>x.getBoundingClientRect())}))')
+                qa.check(all(all(c['left']>=row['r']['left']-1 and c['right']<=row['r']['right']+1 for c in row['children']) for row in slot_rows), f"{label}: time-slot controls stay inside settings cards")
+            if view=='chemistry':
+                qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
+
+        # More sheet remains usable and contained.
         page.locator(".more-nav:visible").click()
-        qa.check(rect_inside(page, ".mobile-more-card", top=47, bottom=810), f"{label}: More sheet stays between status bar and home indicator")
+        qa.check(rect_inside(page, ".mobile-more-card", top=safe_top, bottom=height-safe_bottom), f"{label}: More sheet stays between status bar and home indicator")
         page.keyboard.press("Escape")
 
-        page.locator('.nav button[data-view="bookings"]:visible').click()
+        # Booking form: true mobile stepper, one section only, stable custom dates.
+        open_mobile_view(page,'bookings')
         page.locator("#newBooking").click()
         page.wait_for_selector("#bookingForm")
         qa.check(no_overflow(page), f"{label}: new booking modal has no horizontal overflow")
-        header_title=page.locator('#bookingForm>header h2').bounding_box();qa.check(header_title is not None and header_title['y']>=58, f"{label}: modal header clears Dynamic Island safe area")
-        footer = page.locator("#bookingForm>footer").bounding_box()
-        footer_button=page.locator('#bookingForm>footer .btn').last.bounding_box()
-        qa.check(footer is not None and footer_button is not None and footer_button['y']+footer_button['height']<=811, f"{label}: modal footer clears home indicator")
-        qa.check(page.locator("#bookingForm .booking-form-scroll").evaluate("el=>el.scrollHeight>el.clientHeight"), f"{label}: long booking form has one dedicated scroll region")
-        page.locator('#bookingForm input[name="customerName"]').focus()
-        page.set_viewport_size({"width": width, "height": 560})
-        page.wait_for_timeout(320)
-        css_height = page.evaluate("parseInt(getComputedStyle(document.documentElement).getPropertyValue('--pwa-viewport-height'))")
-        qa.check(abs(css_height - 560) <= 2, f"{label}: visual viewport height follows simulated keyboard")
-        compact_footer = page.locator("#bookingForm>footer").bounding_box()
-        qa.check(compact_footer is not None and compact_footer["y"] + compact_footer["height"] <= 560.5, f"{label}: modal actions remain visible above keyboard")
-        page.set_viewport_size({"width": width, "height": 844})
-        page.wait_for_timeout(180)
+        header_title=page.locator('#bookingForm>header h2').bounding_box()
+        progress=page.locator('#bookingForm .mobile-booking-progress').bounding_box()
+        first_section=page.locator('#bookingForm [data-mobile-step="1"]:visible').bounding_box()
+        qa.check(header_title is not None and header_title['y']>=safe_top+8, f"{label}: booking header clears Dynamic Island safe area")
+        qa.check(progress is not None and first_section is not None and progress['y']+progress['height']<=first_section['y']+1, f"{label}: booking progress has its own row and never overlaps form content")
+        qa.check(page.locator('#bookingForm [data-mobile-step]:visible').count()==1, f"{label}: booking form shows exactly one mobile step")
+        qa.check(page.locator('#bookingForm input[name="startDate"]').input_value()=='' and page.locator('#bookingForm input[name="returnDate"]').input_value()=='', f"{label}: new booking never preselects hidden dates")
+        footer=page.locator('#bookingForm>footer').bounding_box(); footer_button=page.locator('#bookingForm>footer .btn:visible').last.bounding_box()
+        qa.check(footer is not None and abs(footer['y']+footer['height']-height)<=1 and footer_button is not None and footer_button['y']+footer_button['height']<=height-safe_bottom+1, f"{label}: booking footer is pinned and clears Home Indicator")
+        date_before=page.locator('#bookingForm .date-control').first.bounding_box()
+        page.locator('#bookingForm input[name="startDate"]').evaluate("el=>{el.value='2026-08-08';el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}")
+        page.wait_for_timeout(80)
+        date_after=page.locator('#bookingForm .date-control').first.bounding_box()
+        qa.check(date_before is not None and date_after is not None and abs(date_before['y']-date_after['y'])<=0.5 and abs(date_before['height']-date_after['height'])<=0.5, f"{label}: admin date control geometry is invariant after date selection")
+        qa.check(page.locator('#bookingForm input[name="returnDate"]').input_value()=='2026-08-09', f"{label}: return date follows first date only until manager edits it")
+        page.locator('.mobile-booking-next').click(); page.wait_for_timeout(60)
+        qa.check(page.locator('#bookingForm').get_attribute('data-mobile-step')=='2' and page.locator('#bookingForm [data-mobile-step]:visible').count()==1, f"{label}: Next advances to one clean client step")
+        page.locator('.mobile-booking-back').click(); page.wait_for_timeout(60)
+        date_back=page.locator('#bookingForm .date-control').first.bounding_box()
+        qa.check(date_after is not None and date_back is not None and abs(date_after['y']-date_back['y'])<=0.5 and abs(date_after['height']-date_back['height'])<=0.5, f"{label}: admin date returns to identical geometry after step navigation")
+
+        # Keyboard mode is explicit and must hide bottom navigation instead of moving it.
+        page.locator('.mobile-booking-next').click(); page.locator('#bookingForm input[name="customerPhone"]').focus()
+        page.wait_for_timeout(160)
+        page.evaluate("document.documentElement.classList.add('keyboard-open');document.documentElement.style.setProperty('--keyboard-viewport-height','560px');document.documentElement.style.setProperty('--keyboard-viewport-top','0px')")
+        page.wait_for_timeout(40)
+        qa.check(page.locator('.sidebar:visible').count()==0, f"{label}: keyboard hides bottom nav instead of pushing it upward")
+        qa.check(page.locator('#bookingForm').bounding_box()['height']<=560.5, f"{label}: booking modal follows keyboard visual height only while keyboard is open")
+        keyboard_footer=page.locator('#bookingForm>footer').bounding_box()
+        qa.check(keyboard_footer is not None and keyboard_footer['y']+keyboard_footer['height']<=560.5, f"{label}: booking actions remain reachable above keyboard")
+        page.evaluate("document.documentElement.classList.remove('keyboard-open');document.documentElement.style.removeProperty('--keyboard-viewport-height');document.documentElement.style.removeProperty('--keyboard-viewport-top')")
+        page.wait_for_timeout(80)
+        qa.check(page.locator('.sidebar:visible').count()==1 and abs(page.locator('.sidebar').bounding_box()['y']+page.locator('.sidebar').bounding_box()['height']-height)<=1, f"{label}: bottom nav returns to exact bottom after keyboard closes")
+        if label=='mobile-390': qa.shot(page,'mobile-390-booking-step2.png')
         page.locator("#bookingForm .close").click()
+
+        # Existing booking edit must have one real internal scroll owner; footer stays fixed.
+        edit_target=BOOKINGS[2]
+        page.locator(f'.booking-card[data-id="{edit_target["id"]}"] [data-action="edit"]').click()
+        page.wait_for_selector('#bookingForm')
+        qa.check(page.locator('#bookingForm h2').inner_text().strip()=='Редагувати бронювання', f"{label}: edit opens the booking editor, not a separate legacy form")
+        metrics=page.locator('#bookingForm .booking-form-scroll').evaluate("el=>({sh:el.scrollHeight,ch:el.clientHeight,oy:getComputedStyle(el).overflowY})")
+        qa.check(metrics['oy'] in ('auto','scroll') and metrics['sh']>metrics['ch']+20, f"{label}: edit booking has a real internal vertical scroll region")
+        page.locator('#bookingForm .booking-form-scroll').evaluate("el=>el.scrollTop=Math.min(220,el.scrollHeight-el.clientHeight)")
+        page.wait_for_timeout(40)
+        qa.check(page.locator('#bookingForm .booking-form-scroll').evaluate('el=>el.scrollTop')>0, f"{label}: edit booking content actually scrolls")
+        edit_footer=page.locator('#bookingForm>footer').bounding_box()
+        qa.check(edit_footer is not None and abs(edit_footer['y']+edit_footer['height']-height)<=1, f"{label}: edit booking footer remains pinned while form scrolls")
+        page.locator('#bookingForm .close').click()
+
+        # Offline must not throw user out of the authenticated shell.
+        page.evaluate("navigator.onLine=false;dispatchEvent(new Event('offline'))")
+        page.wait_for_timeout(40)
+        qa.check(page.locator('.app').count()==1 and page.locator('.auth').count()==0, f"{label}: offline transition keeps authenticated shell")
+        page.evaluate("navigator.onLine=true;dispatchEvent(new Event('online'))")
+        page.wait_for_timeout(100)
+        page.locator('.toast').evaluate_all("els=>els.forEach(el=>el.remove())")
 
         # Deep-link from a push while PWA is already open.
         target = BOOKINGS[2]
         page.evaluate("data=>window.__emitSwMessage(data)", {"type": "VACLEANER_OPEN_BOOKING", "bookingId": target["id"], "url": f"https://vacleaner.test/admin/bronuvannia/?booking={target['id']}"})
         page.wait_for_selector(".detail")
-        detail_text=page.locator('.detail').inner_text();qa.check(target["booking_code"] in detail_text, f"{label}: push deep-link opens the exact booking")
+        detail_text=page.locator('.detail').inner_text();qa.check(target["booking_code"] in detail_text, f"{label}: push deep-link opens exact booking")
         qa.check(no_overflow(page), f"{label}: booking detail has no horizontal overflow")
         qa.check(page.locator(".detail-actions").evaluate("el=>getComputedStyle(el).position") != "sticky", f"{label}: detail actions do not cover client content")
-        qa.shot(page, f"{label}-detail-top.png")
+        if label=='mobile-390': qa.shot(page, f"{label}-detail-top.png")
         page.locator(".detail").evaluate("el=>el.scrollTop=el.scrollHeight")
         page.wait_for_timeout(80)
         actions = page.locator(".detail-actions").bounding_box()
-        qa.check(actions is not None and actions["y"] + actions["height"] <= 810.5, f"{label}: detail actions clear bottom navigation after scroll")
-        qa.shot(page, f"{label}-detail-bottom.png")
+        qa.check(actions is not None and actions["y"] + actions["height"] <= height-safe_bottom+1, f"{label}: detail actions clear Home Indicator after scroll")
         page.locator(".back").click()
-        expected_scroll = page.locator('.main').evaluate("el=>{el.scrollTop=420;return el.scrollTop}")
+        expected_scroll = page.locator('.main').evaluate("el=>{el.scrollTop=Math.min(420,el.scrollHeight-el.clientHeight);return el.scrollTop}")
         page.evaluate("bookingId=>document.querySelector(`.booking-card[data-id=\"${bookingId}\"]`)?.click()", BOOKINGS[0]["id"])
-        page.wait_for_selector('.detail')
-        page.locator('.back').click()
-        page.wait_for_timeout(80)
+        page.wait_for_selector('.detail');page.locator('.back').click();page.wait_for_timeout(80)
         restored_scroll = page.locator('.main').evaluate("el=>el.scrollTop")
         qa.check(abs(restored_scroll-expected_scroll)<=2, f"{label}: returning from details restores list position")
 
@@ -268,15 +333,15 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             page.wait_for_selector(selector)
             qa.check(no_overflow(page), f"{label}: {action} modal has no horizontal overflow")
             header_box = page.locator(f"{selector}>header h2").bounding_box()
-            footer_box = page.locator(f"{selector}>footer .btn").last.bounding_box()
-            qa.check(header_box is not None and header_box["y"] >= 58, f"{label}: {action} header respects top safe area")
-            qa.check(footer_box is not None and footer_box["y"] + footer_box["height"] <= 811, f"{label}: {action} footer respects bottom safe area")
+            footer_box = page.locator(f"{selector}>footer").bounding_box()
+            footer_action=page.locator(f"{selector}>footer .btn:visible").last.bounding_box()
+            qa.check(header_box is not None and header_box["y"] >= safe_top+8, f"{label}: {action} header respects top safe area")
+            qa.check(footer_box is not None and abs(footer_box['y']+footer_box['height']-height)<=1 and footer_action is not None and footer_action['y']+footer_action['height']<=height-safe_bottom+1, f"{label}: {action} footer is pinned above Home Indicator")
             if label=='mobile-390': qa.shot(page, f"mobile-390-{action}-modal.png")
             page.locator(f"{selector} .close").click()
-        qa.shot(page, f"{label}-bookings.png")
+        if label=='mobile-390': qa.shot(page, f"{label}-bookings.png")
     finally:
         page.close()
-
 
 def tablet_suite(browser: Browser, qa: QA) -> None:
     page = render_page(browser, 768, 1024)
@@ -348,6 +413,56 @@ def auth_suite(browser: Browser, qa: QA) -> None:
         page.close()
 
 
+
+def public_date_suite(browser: Browser, qa: QA) -> None:
+    page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
+    try:
+        html = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\"></head><body><main style=\"padding:24px\"><div class=\"booking-date-grid\" style=\"display:grid;gap:16px\"><label>Отримання<input type=\"date\" value=\"\"></label><label>Повернення<input type=\"date\" value=\"\"></label></div></main></body></html>"
+        page.set_content(html)
+        page.evaluate("window.fetch=async()=>({ok:true,json:async()=>({})})")
+        page.add_style_tag(content=(ROOT/'assets/public-experience.css').read_text(encoding='utf-8'))
+        page.add_script_tag(content=(ROOT/'assets/vacleaner-core.js').read_text(encoding='utf-8'))
+        page.add_script_tag(content=(ROOT/'assets/public-experience.js').read_text(encoding='utf-8'))
+        page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
+        page.wait_for_selector('.vx-date-trigger')
+        qa.check(page.locator('.vx-date-trigger').count()==2,'Public: both dates use stable custom controls')
+        first=page.locator('.vx-date-trigger').first
+        before=first.bounding_box()
+        page.locator('.booking-date-grid input[type=\"date\"]').first.evaluate("el=>{el.value='2026-08-08';el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}")
+        page.wait_for_timeout(60)
+        after=first.bounding_box()
+        qa.check(before is not None and after is not None and abs(before['y']-after['y'])<=0.5 and abs(before['height']-after['height'])<=0.5,'Public: date geometry does not move after value selection')
+        first.click();page.wait_for_selector('.vx-calendar-layer.is-open');page.wait_for_timeout(40)
+        open_box=first.bounding_box();qa.check(after is not None and open_box is not None and abs(after['y']-open_box['y'])<=0.5 and abs(after['height']-open_box['height'])<=0.5,'Public: opening calendar does not move date field')
+        page.locator('.vx-calendar-close').click();page.wait_for_timeout(40)
+        closed=first.bounding_box();qa.check(after is not None and closed is not None and abs(after['y']-closed['y'])<=0.5,'Public: closing calendar restores identical date position')
+        qa.check(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'Public: enhanced date controls never create horizontal overflow')
+    finally:
+        page.close()
+
+def public_nearest_availability_suite(browser: Browser, qa: QA) -> None:
+    page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
+    try:
+        html='<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><div class="booking-date-grid"><label>Отримання<input type="date"></label><select><option value="morning">Ранок</option><option value="evening">Вечір</option></select><label>Повернення<input type="date"></label><select><option value="morning">Ранок</option><option value="evening">Вечір</option></select></div><div class="availability-card idle">Оберіть дату</div></body></html>'
+        page.set_content(html)
+        cfg=json.loads((ROOT/'config/vacleaner.json').read_text(encoding='utf-8'))
+        page.evaluate("cfg=>{window.__cfg=cfg;window.fetch=async(url,init={})=>{let p={};try{p=JSON.parse(init.body||'{}')}catch{};const data=String(url).includes('vacleaner-settings')?{slots:cfg.slots,depositRules:cfg.depositRules,catalog:cfg.catalog}:p.action==='availability'?{available:false,nextAvailable:{startDate:'2026-08-09',pickupWindow:'morning',returnDate:'2026-08-10',returnWindow:'morning'}}:{};return {ok:true,status:200,json:async()=>data,clone(){return this}}};}",cfg)
+        page.add_style_tag(content=(ROOT/'assets/public-fixes.css').read_text(encoding='utf-8'))
+        page.add_script_tag(content=(ROOT/'assets/vacleaner-core.js').read_text(encoding='utf-8'))
+        page.add_script_tag(content=(ROOT/'assets/public-booking-slots.js').read_text(encoding='utf-8'))
+        page.evaluate("()=>fetch('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5',{method:'POST',body:JSON.stringify({action:'availability'})})")
+        page.wait_for_selector('.vx-nearest-availability')
+        text=page.locator('.availability-card').inner_text()
+        qa.check('Найближче вільне вікно' in text and '9 серпня' in text, 'Public: unavailable equipment shows the nearest compatible free window')
+        qa.check(page.locator('.vx-use-nearest').count()==1, 'Public: nearest availability offers one explicit apply action')
+        page.locator('.vx-use-nearest').click();page.wait_for_timeout(60)
+        dates=page.locator('.booking-date-grid input[type="date"]').evaluate_all('els=>els.map(x=>x.value)')
+        windows=page.locator('.booking-date-grid select').evaluate_all('els=>els.map(x=>x.value)')
+        qa.check(dates==['2026-08-09','2026-08-10'] and windows==['morning','morning'], 'Public: nearest-window action applies the complete compatible rental period')
+        qa.check(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'), 'Public: nearest-availability message does not introduce horizontal overflow')
+    finally:
+        page.close()
+
 def landscape_suite(browser: Browser, qa: QA) -> None:
     page = render_page(browser, 844, 390)
     try:
@@ -359,8 +474,8 @@ def landscape_suite(browser: Browser, qa: QA) -> None:
         qa.check(top is not None and bottom is not None and top['y']+top['height']<bottom['y'], "Landscape: header and navigation leave a usable content viewport")
         page.locator('#newBooking').click();page.wait_for_selector('#bookingForm')
         qa.check(no_overflow(page), "Landscape: booking modal has no horizontal overflow")
-        footer=page.locator('#bookingForm>footer .btn').last.bounding_box()
-        qa.check(footer is not None and footer['y']+footer['height']<=369.5, "Landscape: modal actions clear the home indicator")
+        footer=page.locator('#bookingForm>footer .btn:visible').last.bounding_box()
+        footer_shell=page.locator('#bookingForm>footer').bounding_box();qa.check(footer is not None and footer_shell is not None and abs(footer_shell['y']+footer_shell['height']-390)<=1 and footer['y']+footer['height']<=369.5, "Landscape: modal footer is pinned and actions clear home indicator")
         qa.shot(page,'landscape-booking-modal.png')
     finally:
         page.close()
@@ -387,6 +502,8 @@ def main() -> int:
             tablet_suite(browser, qa)
             landscape_suite(browser, qa)
             auth_suite(browser, qa)
+            public_date_suite(browser, qa)
+            public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
         except Exception as exc:
             qa.failed.append(f"Unhandled PWA visual error: {exc}")

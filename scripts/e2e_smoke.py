@@ -321,6 +321,18 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check("2 000" in set_period(friday, sunday, "evening", "morning"), "Friday evening to Sunday morning uses 2000 UAH weekend deposit")
         checks.check("2 000" in set_period(friday, sunday, "evening", "evening"), "Friday evening to Sunday evening uses 2000 UAH weekend deposit")
         checks.check("2 000" in set_period(saturday, monday, "morning", "morning"), "Saturday morning to Monday morning uses 2000 UAH weekend deposit")
+        browser_policy = page.evaluate("""([friday,saturday,sunday])=>({
+          friMorning: window.VACLEANER_CORE.rentalBase(window.VACLEANER_CORE.products.sc2,friday,saturday,'morning','morning'),
+          friEvening: window.VACLEANER_CORE.rentalBase(window.VACLEANER_CORE.products.sc2,friday,saturday,'evening','evening'),
+          sunMorning: window.VACLEANER_CORE.rentalBase(window.VACLEANER_CORE.products.sc2,sunday,new Date(Date.parse(sunday+'T12:00:00Z')+86400000).toISOString().slice(0,10),'morning','morning'),
+          sunEvening: window.VACLEANER_CORE.rentalBase(window.VACLEANER_CORE.products.sc2,sunday,new Date(Date.parse(sunday+'T12:00:00Z')+86400000).toISOString().slice(0,10),'evening','evening'),
+          handoff: window.VACLEANER_CORE.periodsOverlap(friday,saturday,'morning','morning',saturday,sunday,'morning','morning')
+        })""", [friday, saturday, sunday])
+        checks.check(browser_policy["friMorning"] == 500, "Friday morning uses weekday rental tariff")
+        checks.check(browser_policy["friEvening"] == 600, "Friday evening uses weekend rental tariff")
+        checks.check(browser_policy["sunMorning"] == 600, "Sunday morning uses weekend rental tariff")
+        checks.check(browser_policy["sunEvening"] == 500, "Sunday evening uses weekday rental tariff")
+        checks.check(browser_policy["handoff"] is False, "Morning return releases equipment for morning pickup")
         checks.check("Оберіть дату" not in page.locator(".vx-date-trigger").first.inner_text(), "Custom calendar stays synchronized with selected dates")
         checks.check(no_horizontal_overflow(page), "Public desktop has no horizontal overflow")
         checks.screenshot(page, "public-desktop.png")
