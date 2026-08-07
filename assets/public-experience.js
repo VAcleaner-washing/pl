@@ -55,10 +55,10 @@
 
   function updateDateTrigger(input){
     const state=dateState.get(input);if(!state)return;
-    const has=!!input.value;
-    state.value.textContent=formatDate(input.value);
-    state.hint.textContent=has?`Дата ${dateRole(input)} обрана`:'Відкриється календар українською';
-    state.trigger.setAttribute('aria-label',`${dateRole(input)}: ${state.value.textContent}`);
+    const has=!!input.value,value=formatDate(input.value),hint=has?`Дата ${dateRole(input)} обрана`:'Відкриється календар українською',aria=`${dateRole(input)}: ${value}`;
+    if(state.value.textContent!==value)state.value.textContent=value;
+    if(state.hint.textContent!==hint)state.hint.textContent=hint;
+    if(state.trigger.getAttribute('aria-label')!==aria)state.trigger.setAttribute('aria-label',aria);
   }
 
   function enhanceDate(input){
@@ -206,8 +206,9 @@
   }
   function updateSlots(select){
     const state=slotState.get(select);if(!state)return;
-    const options=[...select.options].filter(o=>o.value);
-    state.wrap.innerHTML='';
+    const options=[...select.options].filter(o=>o.value),signature=JSON.stringify([select.value,...options.map(o=>[o.value,o.textContent])]);
+    if(state.signature===signature)return;
+    state.signature=signature;state.wrap.replaceChildren();
     options.forEach(option=>{
       const data=slotParts(option.textContent);
       const btn=document.createElement('button');
@@ -224,7 +225,7 @@
     select.classList.add('vx-native-control');select.tabIndex=-1;
     const label=select.closest('label');label?.classList.add('vx-slot-field');
     const wrap=document.createElement('div');wrap.className='vx-slot-options';select.insertAdjacentElement('afterend',wrap);
-    slotState.set(select,{wrap});
+    slotState.set(select,{wrap,signature:''});
     select.addEventListener('change',()=>updateSlots(select));
     updateSlots(select);
   }
@@ -259,27 +260,24 @@
   function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];return{start:dates[0]?.value||'',finish:dates[1]?.value||'',pickupWindow:windows[0]?.value||'morning',returnWindow:windows[1]?.value||'evening'}}
   function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}
   function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
+  function setTextIfChanged(el,text){if(el&&el.textContent!==text)el.textContent=text}
+  function ensureDepositSummaryRow(summary,total,className,title,subtitle){
+    let row=summary.querySelector('.'+className);
+    if(!row){row=document.createElement('div');row.className=`${className} vx-summary-finance-row`;row.innerHTML='<span><b></b><small></small></span><strong></strong>';total.insertAdjacentElement('beforebegin',row)}
+    setTextIfChanged(row.querySelector('b'),title);setTextIfChanged(row.querySelector('small'),subtitle);return row;
+  }
   function enhanceDepositSummary(){
     const summary=document.querySelector('.booking-summary');if(!summary)return;
-    const value=currentDeposit();
-    const total=summary.querySelector('.booking-summary-total');
-    if(!total)return;
-    summary.querySelectorAll('.vx-summary-prepayment,.vx-summary-deposit').forEach(el=>el.remove());
-    const prepayment=document.createElement('div');
-    prepayment.className='vx-summary-prepayment vx-summary-finance-row';
-    prepayment.innerHTML='<span><b>Бронювання дати</b><small>Сплачується після підтвердження заявки.</small></span><strong>200 грн</strong>';
-    total.insertAdjacentElement('beforebegin',prepayment);
-    const deposit=document.createElement('div');
-    deposit.className='vx-summary-deposit vx-summary-finance-row';
-    deposit.innerHTML=`<span><b>Залоговий платіж</b><small>Сплачується під час отримання техніки.</small></span><strong>${value?formatMoney(value):'—'}</strong>`;
-    total.insertAdjacentElement('beforebegin',deposit);
-    const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
-    let note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
-    if(note){
-      note.className='vx-summary-deposit-note';
-      note.textContent='Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
-    }
+    const value=currentDeposit(),total=summary.querySelector('.booking-summary-total');if(!total)return;
+    const prepayment=ensureDepositSummaryRow(summary,total,'vx-summary-prepayment','Бронювання дати','Сплачується після підтвердження заявки.');
+    setTextIfChanged(prepayment.querySelector('strong'),'200 грн');
+    const deposit=ensureDepositSummaryRow(summary,total,'vx-summary-deposit','Залоговий платіж','Сплачується під час отримання техніки.');
+    setTextIfChanged(deposit.querySelector('strong'),value?formatMoney(value):'—');
+    setTextIfChanged(summary.querySelector('.booking-summary-total span'),'Вартість оренди');
+    const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
+    if(note){if(note.className!=='vx-summary-deposit-note')note.className='vx-summary-deposit-note';setTextIfChanged(note,'Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');}
   }
+
   async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.depositRules){mergeDepositRules(d.depositRules);enhanceDepositSummary()}}catch{}}
   function termsMarkup(){
     return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактично отриманий залоговий платіж формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залоговий платіж</h3><p>Сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>2+ доби у вікенд · 4 000 грн</small></span></div></div></article></div><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;

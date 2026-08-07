@@ -372,3 +372,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 @keyframes vx-step-enter{from{opacity:.25;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* v3.0.30 — promo / retention */
+.booking-promo-field{position:relative}.booking-promo-field>small:first-of-type{color:inherit}.booking-promo-hint{display:block;margin-top:6px;color:#8f979a;font-size:11px;line-height:1.35}.booking-summary-discount{border-color:rgba(214,164,95,.2);background:rgba(214,164,95,.055)}.booking-summary-discount strong{color:#d6a45f}

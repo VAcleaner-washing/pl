@@ -133,6 +133,7 @@ def init_script(authenticated: bool = True) -> str:
           else if(payload.action==='calendar')body={{days:Array.from({{length:14}},(_,i)=>({{date:new Date(Date.now()+i*86400000).toISOString().slice(0,10),resources:{{puzzi:{{label:'Puzzi',capacity:2,morning:2,evening:1}},sc2:{{label:'SC 2',capacity:2,morning:2,evening:2}},jimmy:{{label:'Jimmy',capacity:2,morning:1,evening:2}},abir:{{label:'ABIR',capacity:2,morning:2,evening:2}}}}}}))}};
           else if(payload.action==='clients')body={{customers:[{{phone:'+380951111111',name:'Анна Коваленко',telegram:'@anna',address:'Полтава, вул. Соборності, 10',document_type:'ID-картка',document_number:'000123456',document_verified_at:new Date().toISOString()}}]}};
           else if(payload.action==='health')body={{checkedAt:new Date().toISOString(),reservation:{{healthy:true,transactionLock:true,halfOpenSlots:true,capacityHardBlock:true,pendingDoesNotReserve:true}},push:{{healthy:true,configReady:true,activeSubscriptions:3,lastSuccessAt:new Date().toISOString(),lastFailureAt:null}}}};
+          else if(payload.action==='campaigns')body={{campaigns:[{{id:'10000000-0000-4000-8000-000000000001',name:'RETURN · 180+ днів',campaign_type:'return',status:'active',discount_type:'percent',discount_value:10,dormant_days:180,assignedCodes:12,audienceSize:12,usedCount:3,completedUses:2,conversion:25,revenue:1600,discountGiven:240,codes:[{{code:'VA-ABC1234',customer_phone:'+380951111111'}}]}}]}};
           else if(payload.action==='save_customer')body={{customer:{{phone:payload.customerPhone,name:payload.customerName,telegram:payload.customerTelegram,address:payload.customerAddress}}}};
           else if(payload.action==='lookup_customer')body={{customer:{{phone:'+380951111111',name:'Анна Коваленко',address:'Полтава, вул. Соборності, 10',documentType:'ID-картка',documentNumber:'000123456',documentVerifiedAt:new Date().toISOString(),hasDocument:true,isRepeatCustomer:true,completedOrders:4,totalOrders:5,totalSpent:4200,lastDate:'{iso(-20)}',lastProduct:'Kärcher Puzzi 8/1',loyalty:{{level:'Regular',percent:5}}}}}};
           else if(payload.action==='audit_log')body={{entries:[{{id:1,booking_id:window.__bookings[0].id,booking_code:window.__bookings[0].booking_code,event_type:'updated',changed_fields:['status'],old_values:{{status:'pending'}},new_values:{{status:'confirmed'}},actor_id:'a',source:'edge:update',created_at:new Date().toISOString()}}]}};
@@ -278,6 +279,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.utilization-panel').count()==1 and page.locator('.utilization-row').count()>=4, f"{label}: analytics exposes utilization by physical equipment")
                 qa.check(page.locator('.customer-health-panel').count()==1 and page.locator('.customer-health-panel').inner_text().find('Repeat-rate')==-1, f"{label}: repeat customer decision panel renders without duplicating KPI copy")
                 qa.check(page.locator('#showSleepingClients').count()==1, f"{label}: sleeping-client segment has a direct action")
+                qa.check('Сплячі 180+ днів' in page.locator('.customer-health-panel').inner_text(), f"{label}: analytics uses the six-month sleeping-customer threshold")
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
 
@@ -314,6 +316,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.wait_for_timeout(40)
         qa.check(page.locator('#pageTitle').inner_text().strip()=='Клієнти', f"{label}: searching clients never jumps to bookings")
         qa.check(page.locator('.client-row').count()>=1, f"{label}: client search filters inside clients view")
+        qa.check(page.locator('.campaign-panel').count()==1, f"{label}: retention campaign panel renders in clients")
+        qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible")
+        qa.check('Сплячі 180+ днів' in page.locator('#clientSegment').inner_text(), f"{label}: sleeping segment uses 180 days")
         last_text=page.locator('.client-last-date').first.inner_text().strip() if page.locator('.client-last-date').count() else ''
         qa.check(bool(__import__('re').fullmatch(r'\d{2}\.\d{2}\.\d{4}|—',last_text)), f"{label}: client last-rental date includes full year")
         if page.locator('.client-edit-btn').count():

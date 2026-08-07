@@ -6,6 +6,20 @@ const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,
 const cleanText=(value:unknown,max:number)=>typeof value==="string"?value.trim().replace(/[<>]/g,"").slice(0,max):"";
 const normalizePhone=(value:unknown)=>{const digits=String(value??"").replace(/\D/g,"");if(digits.length===10&&digits.startsWith("0"))return `+38${digits}`;if(digits.length===12&&digits.startsWith("380"))return `+${digits}`;return ""};
 const safeBooking=(row:Record<string,unknown>)=>{const copy={...row};delete copy.ip_hash;return copy};
+const normalizePromoCode=(value:unknown)=>cleanText(value,32).toUpperCase().replace(/[^A-Z0-9_-]/g,"");
+const validUuid=(value:unknown)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value??""));
+async function personalPromoCode(campaignId:string,phone:string){const bytes=new TextEncoder().encode(`${campaignId}:${phone}`),hash=await crypto.subtle.digest("SHA-256",bytes),hex=[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase();return `VA-${hex.slice(0,7)}`}
+async function returnEligibleCustomers(db:any,dormantDays:number,minCompletedOrders:number){
+  const cutoff=new Date(Date.now()-Math.max(1,dormantDays)*86400000).toISOString().slice(0,10);
+  const [{data:completed,error:completedError},{data:active,error:activeError}]=await Promise.all([
+    db.from("vacleaner_bookings").select("customer_phone,customer_name,return_date").eq("status","completed").order("return_date",{ascending:false}).limit(5000),
+    db.from("vacleaner_bookings").select("customer_phone").in("status",["waiting_payment","confirmed","issued"]).limit(5000),
+  ]);
+  if(completedError||activeError)throw completedError||activeError;
+  const activePhones=new Set((active||[]).map((r:any)=>normalizePhone(r.customer_phone)).filter(Boolean)),stats=new Map<string,{phone:string,name:string,count:number,last:string}>();
+  for(const row of completed||[]){const phone=normalizePhone((row as any).customer_phone);if(!phone)continue;const rentalDate=String((row as any).return_date||"");const cur=stats.get(phone)||{phone,name:cleanText((row as any).customer_name,120),count:0,last:rentalDate};cur.count+=1;if(rentalDate>cur.last){cur.last=rentalDate;cur.name=cleanText((row as any).customer_name,120)||cur.name}stats.set(phone,cur)}
+  return [...stats.values()].filter(row=>!activePhones.has(row.phone)&&row.count>=Math.max(1,minCompletedOrders)&&row.last&&row.last<=cutoff);
+}
 
 Deno.serve(async request=>{
   if(request.method==="OPTIONS")return new Response("ok",{headers:cors});
@@ -49,6 +63,46 @@ Deno.serve(async request=>{
           healthy:Boolean(pushConfigResult.data&&subscriptions.length>0&&lastSuccess>0&&lastSuccess>=lastFailure),
         },
       });
+    }
+    if(action==="campaigns"){
+      const [{data:campaigns,error:campaignError},{data:codes,error:codesError},{data:redemptions,error:redemptionError}]=await Promise.all([
+        db.from("vacleaner_campaigns").select("*").order("created_at",{ascending:false}).limit(100),
+        db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,created_at").order("created_at",{ascending:false}).limit(1500),
+        db.from("vacleaner_promo_redemptions").select("id,campaign_id,promo_code_id,booking_id,customer_phone,discount_amount,base_before_discount,created_at").order("created_at",{ascending:false}).limit(3000),
+      ]);
+      if(campaignError||codesError||redemptionError)throw campaignError||codesError||redemptionError;
+      const bookingIds=[...new Set((redemptions||[]).map((r:any)=>r.booking_id).filter(Boolean))];let bookingMap=new Map<string,any>();
+      if(bookingIds.length){const {data:rows,error}=await db.from("vacleaner_bookings").select("id,total_amount,status").in("id",bookingIds);if(error)throw error;bookingMap=new Map((rows||[]).map((r:any)=>[r.id,r]))}
+      const enriched=(campaigns||[]).map((campaign:any)=>{const assigned=(codes||[]).filter((c:any)=>c.campaign_id===campaign.id),personalAssigned=assigned.filter((c:any)=>normalizePhone(c.customer_phone)).length,used=(redemptions||[]).filter((r:any)=>r.campaign_id===campaign.id),completedUses=used.filter((r:any)=>bookingMap.get(r.booking_id)?.status==='completed'),revenue=completedUses.reduce((sum:number,r:any)=>sum+Number(bookingMap.get(r.booking_id)?.total_amount||0),0),discountGiven=used.reduce((sum:number,r:any)=>sum+Number(r.discount_amount||0),0);return{...campaign,assignedCodes:assigned.length,audienceSize:personalAssigned,usedCount:used.length,completedUses:completedUses.length,conversion:personalAssigned?Math.round(used.length/personalAssigned*100):null,revenue,discountGiven,codes:assigned.slice(0,500)}});
+      return json({campaigns:enriched});
+    }
+    if(action==="create_campaign"){
+      const campaignType=String(body.campaignType||"").toLowerCase(),discountType=body.discountType==="fixed"?"fixed":"percent",discountValue=Math.max(1,Math.min(discountType==="percent"?100:10000,Math.round(Number(body.discountValue)||0))),days=Math.max(1,Math.min(90,Math.round(Number(body.durationDays)||14))),dormantDays=Math.max(1,Math.min(730,Math.round(Number(body.dormantDays)||180))),minCompletedOrders=Math.max(0,Math.min(100,Math.round(Number(body.minCompletedOrders)||0)));
+      if(!["return","weekday","product","personal"].includes(campaignType)||!discountValue)return json({error:"invalid_campaign"},400);
+      const allowedProducts:string[]=campaignType==="product"?[cleanText(body.productCode,40)].filter(Boolean):[],allowedWeekdays:number[]=campaignType==="weekday"?[1,2,3,4]:[],customerPhone=campaignType==="personal"?normalizePhone(body.customerPhone):"";
+      if(campaignType==="product"&&!allowedProducts.length)return json({error:"invalid_campaign"},400);if(campaignType==="personal"&&!customerPhone)return json({error:"invalid_campaign"},400);
+      const startsAt=new Date().toISOString(),endsAt=new Date(Date.now()+days*86400000).toISOString(),name=cleanText(body.name,120)||({return:`RETURN · ${dormantDays}+ днів`,weekday:"WEEKDAY",product:`PRODUCT · ${allowedProducts[0]||""}`,personal:"PERSONAL"} as Record<string,string>)[campaignType];
+      const {data:campaign,error}=await db.from("vacleaner_campaigns").insert({name,campaign_type:campaignType,status:"active",discount_type:discountType,discount_value:discountValue,dormant_days:dormantDays,allowed_product_codes:allowedProducts,allowed_weekdays:allowedWeekdays,min_completed_orders:campaignType==="return"?Math.max(1,minCompletedOrders):minCompletedOrders,starts_at:startsAt,ends_at:endsAt,usage_limit_per_customer:1,created_by:userData.user.id}).select("*").single();if(error||!campaign)throw error||new Error("campaign_insert_failed");
+      let codeRows:any[]=[];
+      const rollback=async()=>{await db.from("vacleaner_campaigns").delete().eq("id",campaign.id)};
+      try{
+        if(campaignType==="return"){
+          const eligible=await returnEligibleCustomers(db,dormantDays,Math.max(1,minCompletedOrders));
+          if(!eligible.length){await rollback();return json({error:"no_eligible_customers"},409)}
+          codeRows=await Promise.all(eligible.map(async customer=>({campaign_id:campaign.id,code:await personalPromoCode(campaign.id,customer.phone),customer_phone:customer.phone,active:true,expires_at:endsAt,usage_limit:1})));
+          const {error:codeError}=await db.from("vacleaner_promo_codes").insert(codeRows);if(codeError)throw codeError;
+          const {error:limitError}=await db.from("vacleaner_campaigns").update({usage_limit_total:codeRows.length,updated_at:new Date().toISOString()}).eq("id",campaign.id);if(limitError)throw limitError;
+        }else if(campaignType==="personal"){
+          const code=normalizePromoCode(body.code)||await personalPromoCode(campaign.id,customerPhone);if(code.length<4){await rollback();return json({error:"invalid_promo_code"},400)}
+          codeRows=[{campaign_id:campaign.id,code,customer_phone:customerPhone,active:true,expires_at:endsAt,usage_limit:1}];const {error:codeError}=await db.from("vacleaner_promo_codes").insert(codeRows);if(codeError)throw codeError;
+        }else{
+          const code=normalizePromoCode(body.code);if(code.length<4){await rollback();return json({error:"invalid_promo_code"},400)}const totalLimit=Math.max(1,Math.min(10000,Math.round(Number(body.usageLimitTotal)||500)));codeRows=[{campaign_id:campaign.id,code,customer_phone:null,active:true,expires_at:endsAt,usage_limit:totalLimit}];const {error:codeError}=await db.from("vacleaner_promo_codes").insert(codeRows);if(codeError)throw codeError;const {error:limitError}=await db.from("vacleaner_campaigns").update({usage_limit_total:totalLimit,updated_at:new Date().toISOString()}).eq("id",campaign.id);if(limitError)throw limitError;
+        }
+      }catch(codeError){await rollback();if(String((codeError as any)?.code||"")==="23505")return json({error:"promo_code_exists"},409);throw codeError}
+      return json({campaign:{...campaign,assignedCodes:codeRows.length},codes:codeRows});
+    }
+    if(action==="set_campaign_status"){
+      const campaignId=String(body.campaignId||""),status=String(body.status||"");if(!validUuid(campaignId)||!["active","paused","ended"].includes(status))return json({error:"invalid_campaign"},400);const {error}=await db.from("vacleaner_campaigns").update({status,updated_at:new Date().toISOString()}).eq("id",campaignId);if(error)throw error;return json({ok:true,status});
     }
     if(action==="save_customer"){
       const originalPhone=normalizePhone(body.originalPhone),customerPhone=normalizePhone(body.customerPhone),customerName=cleanText(body.customerName,120);

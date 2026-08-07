@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-07T12:50:00Z",
+  "capturedAt": "2026-08-07T13:49:33Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -9,9 +9,7 @@
     "adminData": "vacleaner-admin-data-v1"
   },
   "dependencyGraph": {
-    "vacleaner-booking-v5": [
-      "vacleaner-booking-v4"
-    ],
+    "vacleaner-booking-v5": [],
     "vacleaner-admin-bookings-v3": [],
     "vacleaner-admin-bookings-v2": [
       "vacleaner-admin-bookings"
@@ -48,7 +46,7 @@
       "verifyJwt": true,
       "status": "ACTIVE",
       "sha256": "c8a7c7e1ebeb95c092e62a2856cd5ed5829050b657a7cb057f0496a90b3b871a",
-      "role": "active dependency of admin v3"
+      "role": "legacy admin dependency retained pending production-usage proof"
     },
     {
       "slug": "vacleaner-settings",
@@ -80,7 +78,7 @@
       "verifyJwt": false,
       "status": "ACTIVE",
       "sha256": "455cb4a2d311f04cad965d88c6e62d58bba62b82b42321fa92aca79ba24d9621",
-      "role": "active dependency of booking v5"
+      "role": "legacy public function; retained pending production-usage proof"
     },
     {
       "slug": "vacleaner-admin-bookings-v3",
@@ -92,19 +90,19 @@
     },
     {
       "slug": "vacleaner-booking-v5",
-      "version": 6,
+      "version": 7,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "d0dd336f449db672bb07e7a332244859720aac8b7ed4dcbcb5989b90236631ee",
-      "role": "active public entrypoint; client sync + web push"
+      "sha256": "fd198547f4d62a322ddc828dab01fabe39eea2d0294de4825df33f6a28535342",
+      "role": "active public entrypoint; direct availability/create + loyalty/promo + client sync + web push"
     },
     {
       "slug": "vacleaner-admin-data-v1",
-      "version": 3,
+      "version": 4,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "8d811bc7a60a2a1994329ce02b5a83b0797acc7a6a22af20289eb3867cce5903",
-      "role": "active non-financial admin list/customer profile + operational health endpoint"
+      "sha256": "1c325f439c20bfbaa30312cb272e09a38b74739ddf6aeee0119748004d767856",
+      "role": "active non-financial admin clients + production health + retention campaign management"
     }
   ]
 }

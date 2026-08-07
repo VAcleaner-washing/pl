@@ -117,8 +117,9 @@ has(pwaQa,'booking-detail photography never overlaps rental dates','detail hero 
 has(admin,'function utilizationFor(bounds)','analytics calculates utilization from occupied half-day slots');
 has(admin,'function repeatMetrics(bounds)','analytics distinguishes new and repeat completed rentals');
 has(admin,"const rentalDate=String(b.return_date||b.start_date||'')",'analytics period uses rental return date, not historical import timestamp');
-has(admin,'Сплячі 60+ днів','sleeping client segment is visible');
+has(admin,'Сплячі 180+ днів','sleeping client segment is visible');
 has(admin,'id="clientSegment"','clients can be filtered by repeat/sleeping segment');
+has(admin,'SLEEPING_CUSTOMER_DAYS=180','sleeping customer threshold is six months / 180 days');
 has(admin,'Стан production','settings exposes live production health');
 has(adminDataEdge,'if(action==="health")','admin data endpoint exposes operational health');
 

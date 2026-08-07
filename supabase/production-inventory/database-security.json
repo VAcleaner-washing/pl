@@ -1,13 +1,16 @@
 {
-  "capturedAt": "2026-08-06T19:41:47Z",
+  "capturedAt": "2026-08-07T13:49:33Z",
   "postgresVersion": "17.6",
   "tables": [
     "vacleaner_admin_users",
     "vacleaner_booking_audit",
     "vacleaner_booking_resources",
     "vacleaner_bookings",
+    "vacleaner_campaigns",
     "vacleaner_customers",
     "vacleaner_inventory",
+    "vacleaner_promo_codes",
+    "vacleaner_promo_redemptions",
     "vacleaner_push_config",
     "vacleaner_push_subscriptions",
     "vacleaner_settings"
@@ -22,23 +25,54 @@
     "activeTable": "admin_users",
     "legacyMirror": "vacleaner_admin_users",
     "sameUserIdsAtCapture": true,
-    "decision": "Keep both in v3.0.11; do not destructively drop production access tables."
+    "decision": "Keep both; do not destructively drop production access tables in the shared Supabase project."
   },
   "productionFunctions": [
+    "vacleaner_apply_reservation(uuid,date,date,text,text,timestamptz,timestamptz,integer,jsonb,text,timestamptz)",
     "vacleaner_confirm_booking(uuid)",
-    "vacleaner_log_booking_change()"
+    "vacleaner_log_booking_change()",
+    "vacleaner_operational_health()",
+    "vacleaner_preserve_best_promo_discount()",
+    "vacleaner_redeem_promo(uuid,uuid,uuid,text,integer,integer)",
+    "vacleaner_slot_index(date,text)"
+  ],
+  "securityDefinerFunctions": [
+    "vacleaner_apply_reservation",
+    "vacleaner_confirm_booking",
+    "vacleaner_log_booking_change",
+    "vacleaner_operational_health",
+    "vacleaner_preserve_best_promo_discount",
+    "vacleaner_redeem_promo"
+  ],
+  "securityInvokerFunctions": [
+    "vacleaner_slot_index"
+  ],
+  "bookingTriggers": [
+    "vacleaner_booking_audit_trigger",
+    "vacleaner_preserve_best_promo_discount_trg"
   ],
   "unrelatedSharedProjectWarningsNotChanged": [
     "public.is_admin() is SECURITY DEFINER and executable by authenticated",
     "public.claim_customer_orders() is SECURITY DEFINER and executable by authenticated",
     "pg_net extension is installed in public schema"
   ],
-  "explicitRestrictivePolicies": 9,
-  "policyName": "VAcleaner deny direct client access",
+  "explicitRestrictivePolicies": 12,
+  "policyModel": "One explicit ALL deny policy for anon/authenticated on every vacleaner_* table; service_role access only.",
   "catalogVerification": {
     "carpDetaLabel": "Плямовивідник Carp-Deta 30 мл",
     "carpDetaPrice": 100,
     "verifiedAt": "2026-08-06T19:41:47Z"
+  },
+  "retentionVerification": {
+    "sleepingDays": 180,
+    "campaignTables": [
+      "vacleaner_campaigns",
+      "vacleaner_promo_codes",
+      "vacleaner_promo_redemptions"
+    ],
+    "redemptionAuthority": "vacleaner_redeem_promo",
+    "editGuard": "vacleaner_preserve_best_promo_discount_trg",
+    "loyaltyPromoRule": "Apply only the larger rental-base discount; if equal, loyalty wins and promo is not consumed."
   },
   "performanceAdvisor": {
     "vacleanerWarnings": 0,
@@ -46,6 +80,6 @@
       "vacleaner_push_subscriptions_user_idx",
       "vacleaner_customers_updated_idx"
     ],
-    "decision": "Keep both indexes in v3.0.11; the dataset is small/new and both support expected operational queries."
+    "decision": "Keep both indexes; they support expected operational queries and dataset growth."
   }
 }

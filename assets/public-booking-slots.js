@@ -41,36 +41,34 @@ function depositAmount(){
   return Number(fullWeekend(dates[0].value,dates[1].value,pickupWindow,returnWindow)?row.weekend:row.day)||0;
 }
 function formatMoney(v){return new Intl.NumberFormat('uk-UA').format(Number(v)||0)+' грн'}
+function setTextIfChanged(el,text){if(el&&el.textContent!==text)el.textContent=text}
+function ensureSummaryFinanceRow(summary,total,className,title,subtitle){
+  let row=summary.querySelector('.'+className);
+  if(!row){row=document.createElement('div');row.className=`${className} vx-summary-finance-row${className==='vx-summary-deposit'?' vx-booking-deposit':''}`;row.innerHTML='<span><b></b><small></small></span><strong></strong>';total.insertAdjacentElement('beforebegin',row)}
+  setTextIfChanged(row.querySelector('b'),title);setTextIfChanged(row.querySelector('small'),subtitle);return row;
+}
 function renderDeposit(){
   const amount=depositAmount(),summary=document.querySelector('.booking-summary'),mobile=document.querySelector('.booking-mobile-summary');
   if(summary){
     const total=summary.querySelector('.booking-summary-total');
     if(total){
-      summary.querySelectorAll('.vx-summary-prepayment,.vx-summary-deposit').forEach(el=>el.remove());
-      const prepayment=document.createElement('div');
-      prepayment.className='vx-summary-prepayment vx-summary-finance-row';
-      prepayment.innerHTML='<span><b>Бронювання дати</b><small>Сплачується після підтвердження заявки.</small></span><strong>200 грн</strong>';
-      total.insertAdjacentElement('beforebegin',prepayment);
-      const row=document.createElement('div');
-      row.className='vx-summary-deposit vx-summary-finance-row vx-booking-deposit';
-      row.innerHTML=`<span><b>Залоговий платіж</b><small>Сплачується під час отримання техніки.</small></span><strong>${amount?formatMoney(amount):'—'}</strong>`;
-      total.insertAdjacentElement('beforebegin',row);
-      const totalLabel=summary.querySelector('.booking-summary-total span');if(totalLabel)totalLabel.textContent='Вартість оренди';
+      const prepayment=ensureSummaryFinanceRow(summary,total,'vx-summary-prepayment','Бронювання дати','Сплачується після підтвердження заявки.');
+      setTextIfChanged(prepayment.querySelector('strong'),'200 грн');
+      const row=ensureSummaryFinanceRow(summary,total,'vx-summary-deposit','Залоговий платіж','Сплачується під час отримання техніки.');
+      setTextIfChanged(row.querySelector('strong'),amount?formatMoney(amount):'—');
+      const totalLabel=summary.querySelector('.booking-summary-total span');setTextIfChanged(totalLabel,'Вартість оренди');
       const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
-      if(note){
-        note.className='vx-summary-deposit-note';
-        note.textContent='Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.';
-      }
+      if(note){if(note.className!=='vx-summary-deposit-note')note.className='vx-summary-deposit-note';setTextIfChanged(note,'Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');}
     }
   }
   if(mobile){
     let note=mobile.querySelector('.vx-mobile-deposit');if(!note){note=document.createElement('small');note.className='vx-mobile-deposit';mobile.querySelector('div')?.appendChild(note)}
-    note.textContent=amount?`Залоговий платіж при отриманні: ${formatMoney(amount)}`:'Сума залогового платежу з’явиться після вибору';
+    setTextIfChanged(note,amount?`Залоговий платіж при отриманні: ${formatMoney(amount)}`:'Сума залогового платежу з’явиться після вибору');
   }
   const conditions=document.querySelector('.booking-conditions ul');
-  if(conditions&&conditions.children[0])conditions.children[0].textContent='Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.';
-  if(conditions&&conditions.children[1])conditions.children[1].textContent='Новий клієнт надсилає документ менеджеру приватно. Повторному клієнту, чиї дані вже є в базі, повторно надсилати документ не потрібно.';
-  if(conditions&&conditions.children[2])conditions.children[2].textContent=amount?`Залоговий платіж ${formatMoney(amount)} сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`:`Залоговий платіж сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`;
+  if(conditions&&conditions.children[0])setTextIfChanged(conditions.children[0],'Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.');
+  if(conditions&&conditions.children[1])setTextIfChanged(conditions.children[1],'Новий клієнт надсилає документ менеджеру приватно. Повторному клієнту, чиї дані вже є в базі, повторно надсилати документ не потрібно.');
+  if(conditions&&conditions.children[2])setTextIfChanged(conditions.children[2],amount?`Залоговий платіж ${formatMoney(amount)} сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`:'Залоговий платіж сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');
 }
 
 

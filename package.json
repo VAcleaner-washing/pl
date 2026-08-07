@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "3.0.29",
+  "version": "3.0.30",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -15,6 +15,8 @@
     "test:deposit-policy": "node scripts/test-deposit-policy.mjs",
     "test:stabilization": "node scripts/test-stabilization.mjs",
     "test:css-architecture": "node scripts/test-css-architecture.mjs",
-    "test:operational-health": "node scripts/test-operational-health.mjs"
+    "test:operational-health": "node scripts/test-operational-health.mjs",
+    "test:retention": "node scripts/test-retention.mjs",
+    "test:public-booking": "python scripts/public_booking_resilience_qa.py"
   }
 }

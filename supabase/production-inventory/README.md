@@ -5,22 +5,21 @@ This folder records the production dependencies verified for the current VAclean
 ## Runtime graph
 
 - Public site calls `vacleaner-booking-v5`.
-- `vacleaner-booking-v5` delegates legacy creation/availability work to `vacleaner-booking-v4`.
-- Admin PWA calls `vacleaner-admin-bookings-v3`.
-- `vacleaner-admin-bookings-v3` delegates legacy actions to `vacleaner-admin-bookings-v2`.
-- `vacleaner-admin-bookings-v2` delegates base actions to `vacleaner-admin-bookings`.
-- Notifications use `vacleaner-push`.
+- `vacleaner-booking-v5` is the active direct public availability/create entrypoint. It applies current catalog, slots, deposit, loyalty and promo rules and persists booking resources itself.
+- Admin PWA calls `vacleaner-admin-bookings-v3` for authoritative booking/finance actions.
+- `vacleaner-admin-data-v1` handles non-financial client data, production health and retention-campaign management.
+- Notifications use `vacleaner-push`; public booking also sends new-booking Web Push after a successful create.
 - Public/admin shared configuration uses `vacleaner-settings`.
-- Non-financial client/profile and operational-health reads use `vacleaner-admin-data-v1`.
+- Legacy VAcleaner Edge Functions remain deployed until production-usage evidence proves they are safe to remove.
 
-The manifest stores the exact active production versions and deployment hashes. Release 3.0.29 verifies `vacleaner-booking-v5` v6 and `vacleaner-admin-data-v1` v3. The latter exposes authenticated runtime health for Web Push and the authoritative slot-reservation hard-block. Release 3.0.11 deployed `vacleaner-booking-v5` version 4 and `vacleaner-admin-bookings-v3` version 11. Both entrypoints now normalize selected extras from the current shared catalog, so new catalog items are not silently discarded by legacy dependencies. A release must not delete or rename a dependency until its caller is changed and tested.
+The manifest stores the exact active production versions and deployment hashes. Release 3.0.30 verifies `vacleaner-booking-v5` v7 and `vacleaner-admin-data-v1` v4. `vacleaner-admin-bookings-v3` remains v13 because the retention edit rule is enforced centrally by the database trigger rather than by replacing the financial booking Edge Function.
 
 ## Database access model
 
-All nine `vacleaner_*` tables have RLS enabled. `anon` and `authenticated` have no direct table grants. Edge Functions validate the request and use `service_role` for database access.
+All twelve `vacleaner_*` tables have RLS enabled. `anon` and `authenticated` have no direct table grants. Every VAcleaner table has an explicit client-deny policy; Edge Functions validate their own request contract and use `service_role` for database work.
 
-Migration `20260806193000_vacleaner_explicit_client_deny_policies.sql` added nine restrictive deny policies as defense in depth. It does not change service-role access. Migration `20260806194500_vacleaner_carp_deta_catalog.sql` synchronized Carp-Deta into the production catalog.
+Release 3.0.30 adds isolated VAcleaner retention tables: `vacleaner_campaigns`, `vacleaner_promo_codes`, and `vacleaner_promo_redemptions`. Promo redemption is serialized by `vacleaner_redeem_promo`; ordinary booking edits are protected by `vacleaner_preserve_best_promo_discount_trg` so a better already-applied promo cannot disappear silently. Explicit manual manager discount remains an intentional override.
 
 ## Admin allowlist
 
-The active Edge Functions read `public.admin_users`. `public.vacleaner_admin_users` contains the same current user but is treated as a legacy mirror. It is intentionally not dropped in this release because the Supabase project is shared with VA HOME.
+The active Edge Functions read `public.admin_users`. `public.vacleaner_admin_users` is retained as a legacy mirror. It is intentionally not dropped because this Supabase project is shared; VA HOME objects are outside this VAcleaner release and are not modified.
