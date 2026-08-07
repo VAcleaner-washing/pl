@@ -105,6 +105,15 @@ has(admin,'https://t.me/+${phone}?text=${draft}','Telegram opens the customer ch
 lacks(admin,'https://t.me/share/url?url=&text=','Telegram share fallback never sends an empty required URL');
 has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');
 has(admin,"state.filter=b.dataset.filter;renderBookings();resetViewScroll()",'booking filter changes reset the main scroll owner');
+has(css,'html,body,.app{height:100dvh;min-height:0;overflow:hidden}','desktop shell locks body scrolling');
+has(css,'.main{position:fixed;top:var(--topbar);right:0;bottom:0;left:var(--sidebar)','desktop main starts below the fixed topbar');
+has(css,'overflow-anchor:none','scroll anchoring cannot resurrect a previous view position');
+has(pwaQa,'scrollbar starts below the fixed topbar instead of hiding underneath it','desktop scrollbar/topbar geometry is runtime-gated');
+has(pwaQa,'single-equipment photography is vertically centered on the machine','single equipment crop is runtime-gated');
+has(css,'.flow-compact{display:grid!important;grid-template-columns:minmax(0,1fr)!important','mobile booking progress becomes one clean stacked section');
+has(pwaQa,'all booking-progress stages fit without smashed labels','booking progress has direct mobile geometry coverage');
+has(pwaQa,'detail header scrolls naturally and never covers finance/history content','mobile detail header cannot cover scrolled content');
+has(pwaQa,'booking-detail photography never overlaps rental dates','detail hero media/date separation is runtime-gated');
 
 
 // Public site must actively retire legacy root-scoped PWA workers. Only /admin/ remains a PWA.
