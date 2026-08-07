@@ -1371,9 +1371,21 @@ body{touch-action:manipulation}
   .nav button[data-view="campaigns"]{display:none}
   .campaign-actions .campaign-archive,.campaign-actions .danger-soft{min-height:44px}
   html.pwa-standalone{--pwa-nav-bottom-pad:clamp(8px,calc(var(--pwa-safe-bottom) - 22px),12px);--mobile-nav-shell:calc(var(--mobile-nav) + var(--pwa-nav-bottom-pad))}
-  html.pwa-standalone .sidebar{height:var(--mobile-nav-shell);padding-bottom:var(--pwa-nav-bottom-pad)}
-  html.pwa-standalone .main{bottom:var(--mobile-nav-shell)}
+  /* v3.0.41 — installed iOS PWA uses one intrinsic three-row shell.
+     Bottom navigation is a grid row, not a bottom-positioned overlay, so transient
+     standalone viewport updates cannot move it independently from the content. */
+  html.pwa-standalone .app{
+    position:fixed;top:0;right:0;bottom:auto;left:0;inset:auto 0 auto 0;
+    width:100%;height:100lvh;min-height:100lvh;max-height:100lvh;
+    display:grid;grid-template-columns:minmax(0,1fr);
+    grid-template-rows:calc(var(--mobile-topbar) + var(--pwa-safe-top)) minmax(0,1fr) var(--mobile-nav-shell);
+    overflow:hidden
+  }
+  html.pwa-standalone .topbar{position:relative;inset:auto;grid-column:1;grid-row:1;width:100%;height:100%}
+  html.pwa-standalone .main{position:relative;inset:auto;grid-column:1;grid-row:2;width:100%;height:100%;min-height:0}
+  html.pwa-standalone .sidebar{position:relative;inset:auto;grid-column:1;grid-row:3;width:100%;height:100%;padding-bottom:var(--pwa-nav-bottom-pad)}
   html.pwa-standalone .mobile-more-card{bottom:calc(var(--mobile-nav-shell) + 10px)}
+  html.pwa-standalone.keyboard-open .app{grid-template-rows:calc(var(--mobile-topbar) + var(--pwa-safe-top)) minmax(0,1fr)}
 }
 @media (max-width:360px){
   .page-head h1{font-size:24px}.booking-row-head{padding:12px}.booking-identity h2{font-size:18px}.modal-form>header h2{font-size:25px}.window-choice span{padding:9px}.time-chip-list{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-form>header .mobile-booking-progress{grid-template-columns:repeat(4,28px);gap:5px}.mobile-booking-progress span{width:28px;height:28px}
