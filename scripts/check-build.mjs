@@ -101,7 +101,7 @@ const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8')
 for(const token of ['.auth-card .field input{font-size:16px}','html.keyboard-open .auth','.app{position:fixed;inset:0;width:auto;height:auto'])if(!adminCss.includes(token))errors.push(`iPhone/mobile CSS hardening missing: ${token}`);
 if(adminCss.includes('--pwa-viewport-height')||adminCss.includes('--pwa-viewport-top'))errors.push('legacy app-shell visualViewport CSS variables remain');
 if(adminCss.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'))errors.push('mobile app shell is over-constrained by 100dvh');
-if(!adminCss.includes('.app{position:fixed}')||!adminCss.includes('height:100lvh')||!adminCss.includes('html.pwa-standalone .sidebar{position:relative'))errors.push('installed PWA must use the stable intrinsic three-row large-viewport shell');
+if(!adminCss.includes('.app{position:fixed}')||!adminCss.includes('.topbar,.sidebar,.main{position:absolute}'))errors.push('PWA bottom navigation must be anchored inside a fixed physical-viewport shell');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
