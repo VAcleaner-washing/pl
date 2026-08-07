@@ -53,7 +53,8 @@ has(adminEdge,'if (![\"pending\", \"waiting_payment\", \"confirmed\"].includes(S
 ok((css.match(/@media \(max-width:900px\)\{/g)||[]).length===1,'exactly one primary <=900 mobile layout contract');
 has(css,'.app{position:fixed;inset:0;width:auto;height:auto','mobile app shell fills the fixed viewport by physical insets');
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
-has(css,'.sidebar{\n    position:absolute;right:0;bottom:0;left:0;top:auto','bottom navigation is pinned inside the fixed app shell');
+has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom navigation is pinned directly to the viewport');
+lacks(css,'html.pwa-standalone .sidebar{position:relative','standalone grid override is absent');
 has(css,'.main{\n    position:absolute;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region inside the fixed app shell');
 has(css,'.booking-form{grid-template-rows:auto minmax(0,1fr) auto}','mobile booking has header-with-progress/scroll/footer rows');
 has(css,'.booking-form>header .mobile-booking-progress{display:grid','mobile booking progress is integrated into the header');

@@ -43,7 +43,8 @@ ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail capture
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');
 
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
-ok(css.includes('html.pwa-standalone')&&css.includes('--pwa-nav-bottom-pad'),'standalone PWA has its own lower bottom-nav geometry');
+ok(css.includes('.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto'),'mobile navigation uses the same proven fixed bottom contract as VA HOME');
+ok(!css.includes('grid-template-rows:calc(var(--mobile-topbar) + var(--pwa-safe-top)) minmax(0,1fr) var(--mobile-nav-shell)'),'standalone PWA does not override the proven fixed mobile nav contract');
 ok(runtime.includes('client-mobile-stats')&&css.includes('.client-mobile-stats'),'mobile client cards expose rental count and spend');
 
 for(const token of [
@@ -64,5 +65,5 @@ ok(publicResilience.includes('reg.scope===ROOT_SCOPE'),'public runtime targets o
 ok(publicResilience.includes('reg.unregister()'),'public runtime removes stale root workers');
 
 
-ok(css.includes('.app{position:fixed}')&&css.includes('.topbar,.sidebar,.main{position:absolute}'),'PWA shell fills the physical viewport while chrome is anchored inside it');
+ok(!css.includes('html.pwa-standalone .sidebar{position:relative'),'installed PWA has no standalone grid override for bottom navigation');
 console.log(`PWA static tests passed ${passed} assertions.`);

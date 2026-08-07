@@ -1222,7 +1222,7 @@ body{touch-action:manipulation}
   .new-btn:after{content:"+";font-size:29px;font-weight:500;line-height:1}
 
   .sidebar{
-    position:absolute;right:0;bottom:0;left:0;top:auto;z-index:100;
+    position:fixed;right:0;bottom:0;left:0;top:auto;z-index:100;
     width:100%;height:var(--mobile-nav-shell);
     padding:0 max(4px,var(--pwa-safe-right)) var(--pwa-safe-bottom) max(4px,var(--pwa-safe-left));
     border:0;border-top:1px solid var(--line);background:rgba(7,11,14,.99);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden
@@ -1367,14 +1367,11 @@ body{touch-action:manipulation}
   .campaign-panel{padding:14px}.campaign-panel-head{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}.campaign-panel-head .btn{width:100%;min-height:44px}.campaign-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.campaign-row{grid-template-columns:minmax(0,1fr);gap:10px}.campaign-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.campaign-metrics>span{text-align:left}.campaign-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.campaign-actions .btn{width:100%}.campaign-form-body{padding:12px}.campaign-code-list{max-height:none}.campaign-code-list>div{grid-template-columns:minmax(0,1fr)}
   /* v3.0.36 — the shell itself owns the physical viewport; chrome is anchored inside it. */
   .app{position:fixed}
-  .topbar,.sidebar,.main{position:absolute}
+  .topbar,.main{position:absolute}
   .nav button[data-view="campaigns"]{display:none}
   .campaign-actions .campaign-archive,.campaign-actions .danger-soft{min-height:44px}
-  html.pwa-standalone{--pwa-nav-bottom-pad:clamp(8px,calc(var(--pwa-safe-bottom) - 22px),12px);--mobile-nav-shell:calc(var(--mobile-nav) + var(--pwa-nav-bottom-pad))}
-  html.pwa-standalone .sidebar{height:var(--mobile-nav-shell);padding-bottom:var(--pwa-nav-bottom-pad)}
-  html.pwa-standalone .main{bottom:var(--mobile-nav-shell)}
-  html.pwa-standalone .mobile-more-card{bottom:calc(var(--mobile-nav-shell) + 10px)}
-}
+  /* v3.0.42 — match the proven VA HOME mobile-nav contract: fixed to the layout viewport.
+     No standalone-specific shell/grid geometry; Safari and installed PWA use the same stable fixed nav. */
 @media (max-width:360px){
   .page-head h1{font-size:24px}.booking-row-head{padding:12px}.booking-identity h2{font-size:18px}.modal-form>header h2{font-size:25px}.window-choice span{padding:9px}.time-chip-list{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-form>header .mobile-booking-progress{grid-template-columns:repeat(4,28px);gap:5px}.mobile-booking-progress span{width:28px;height:28px}
   .status-dashboard{grid-template-columns:minmax(0,1fr)}
