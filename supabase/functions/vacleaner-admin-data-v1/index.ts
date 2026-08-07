@@ -25,6 +25,31 @@ Deno.serve(async request=>{
       const {data,error}=await db.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_updated_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000);
       if(error)throw error;return json({customers:data??[]});
     }
+    if(action==="health"){
+      const [reservationResult,pushConfigResult,pushSubscriptionsResult]=await Promise.all([
+        db.rpc("vacleaner_operational_health"),
+        db.from("vacleaner_push_config").select("singleton,updated_at").eq("singleton",true).maybeSingle(),
+        db.from("vacleaner_push_subscriptions").select("active,last_success_at,last_failure_at,updated_at").eq("active",true),
+      ]);
+      if(reservationResult.error)throw reservationResult.error;
+      if(pushConfigResult.error)throw pushConfigResult.error;
+      if(pushSubscriptionsResult.error)throw pushSubscriptionsResult.error;
+      const subscriptions=pushSubscriptionsResult.data??[];
+      const successTimes=subscriptions.map((row:any)=>row.last_success_at).filter(Boolean).map((value:string)=>new Date(value).getTime()).filter(Number.isFinite);
+      const failureTimes=subscriptions.map((row:any)=>row.last_failure_at).filter(Boolean).map((value:string)=>new Date(value).getTime()).filter(Number.isFinite);
+      const lastSuccess=successTimes.length?Math.max(...successTimes):0,lastFailure=failureTimes.length?Math.max(...failureTimes):0;
+      return json({
+        checkedAt:new Date().toISOString(),
+        reservation:reservationResult.data??{healthy:false},
+        push:{
+          configReady:Boolean(pushConfigResult.data),
+          activeSubscriptions:subscriptions.length,
+          lastSuccessAt:lastSuccess?new Date(lastSuccess).toISOString():null,
+          lastFailureAt:lastFailure?new Date(lastFailure).toISOString():null,
+          healthy:Boolean(pushConfigResult.data&&subscriptions.length>0&&lastSuccess>0&&lastSuccess>=lastFailure),
+        },
+      });
+    }
     if(action==="save_customer"){
       const originalPhone=normalizePhone(body.originalPhone),customerPhone=normalizePhone(body.customerPhone),customerName=cleanText(body.customerName,120);
       if(!originalPhone||!customerPhone||customerName.length<2)return json({error:"invalid_customer_data"},400);

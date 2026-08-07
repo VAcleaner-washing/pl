@@ -54,9 +54,9 @@ ok((css.match(/@media \(max-width:900px\)\{/g)||[]).length===1,'exactly one prim
 has(css,'.app{position:fixed;inset:0;width:auto;height:auto','mobile app shell fills the fixed viewport by physical insets');
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
 has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom navigation is physically pinned');
-has(css,'.main{\n    position:fixed!important;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region');
-has(css,'.booking-form{grid-template-rows:auto auto minmax(0,1fr) auto!important}','mobile booking has header/progress/scroll/footer rows');
-has(css,'.date-control{position:relative;display:block!important;width:100%;height:50px','admin dates use fixed geometry');
+has(css,'.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region');
+has(css,'.booking-form{grid-template-rows:auto auto minmax(0,1fr) auto}','mobile booking has header/progress/scroll/footer rows');
+has(css,'.date-control{position:relative;display:block;width:100%;height:50px','admin dates use fixed geometry');
 has(admin,"classList.toggle('keyboard-open',keyboard)",'keyboard state is explicit');
 lacks(admin,"visualViewport?.addEventListener('scroll'",'visual viewport scroll cannot move app shell');
 lacks(admin,"scrollIntoView({block:'center'",'focus never forcibly centers the page');
@@ -87,7 +87,7 @@ has(adminDataEdge,'.limit(1000)','admin data endpoint cannot truncate current bo
 has(adminDataEdge,'if(action==="save_customer")','admin data endpoint persists customer card edits');
 lacks(adminDataEdge,'base_amount','admin data endpoint never recalculates rental finance');
 lacks(adminDataEdge,'deposit_amount','admin data endpoint never touches deposits');
-has(css,'.catalog-toolbar,.analytics-toolbar{display:grid!important','320px equipment and analytics toolbars share mobile containment');
+has(css,'.catalog-toolbar,.analytics-toolbar{display:grid','320px equipment and analytics toolbars share mobile containment');
 
 has(css,'.status-dashboard{grid-template-columns:minmax(0,1fr)}','320px analytics statuses collapse to one column');
 has(pwaQa,'analytics status dashboard contains its own content','analytics status dashboard has direct geometry coverage');
@@ -110,10 +110,17 @@ has(css,'.main{position:fixed;top:var(--topbar);right:0;bottom:0;left:var(--side
 has(css,'overflow-anchor:none','scroll anchoring cannot resurrect a previous view position');
 has(pwaQa,'scrollbar starts below the fixed topbar instead of hiding underneath it','desktop scrollbar/topbar geometry is runtime-gated');
 has(pwaQa,'single-equipment photography is vertically centered on the machine','single equipment crop is runtime-gated');
-has(css,'.flow-compact{display:grid!important;grid-template-columns:minmax(0,1fr)!important','mobile booking progress becomes one clean stacked section');
+has(css,'.flow-compact{display:grid;grid-template-columns:minmax(0,1fr)','mobile booking progress becomes one clean stacked section');
 has(pwaQa,'all booking-progress stages fit without smashed labels','booking progress has direct mobile geometry coverage');
 has(pwaQa,'detail header scrolls naturally and never covers finance/history content','mobile detail header cannot cover scrolled content');
 has(pwaQa,'booking-detail photography never overlaps rental dates','detail hero media/date separation is runtime-gated');
+has(admin,'function utilizationFor(bounds)','analytics calculates utilization from occupied half-day slots');
+has(admin,'function repeatMetrics(bounds)','analytics distinguishes new and repeat completed rentals');
+has(admin,"const rentalDate=String(b.return_date||b.start_date||'')",'analytics period uses rental return date, not historical import timestamp');
+has(admin,'Сплячі 60+ днів','sleeping client segment is visible');
+has(admin,'id="clientSegment"','clients can be filtered by repeat/sleeping segment');
+has(admin,'Стан production','settings exposes live production health');
+has(adminDataEdge,'if(action==="health")','admin data endpoint exposes operational health');
 
 
 // Public site must actively retire legacy root-scoped PWA workers. Only /admin/ remains a PWA.

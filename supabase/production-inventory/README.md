@@ -1,6 +1,6 @@
 # VAcleaner production inventory
 
-This folder records the production dependencies that were verified before release 3.0.11.
+This folder records the production dependencies verified for the current VAcleaner release line.
 
 ## Runtime graph
 
@@ -11,8 +11,9 @@ This folder records the production dependencies that were verified before releas
 - `vacleaner-admin-bookings-v2` delegates base actions to `vacleaner-admin-bookings`.
 - Notifications use `vacleaner-push`.
 - Public/admin shared configuration uses `vacleaner-settings`.
+- Non-financial client/profile and operational-health reads use `vacleaner-admin-data-v1`.
 
-The manifest stores the exact active production versions and deployment hashes. Release 3.0.11 deployed `vacleaner-booking-v5` version 4 and `vacleaner-admin-bookings-v3` version 11. Both entrypoints now normalize selected extras from the current shared catalog, so new catalog items are not silently discarded by legacy dependencies. A release must not delete or rename a dependency until its caller is changed and tested.
+The manifest stores the exact active production versions and deployment hashes. Release 3.0.29 verifies `vacleaner-booking-v5` v6 and `vacleaner-admin-data-v1` v3. The latter exposes authenticated runtime health for Web Push and the authoritative slot-reservation hard-block. Release 3.0.11 deployed `vacleaner-booking-v5` version 4 and `vacleaner-admin-bookings-v3` version 11. Both entrypoints now normalize selected extras from the current shared catalog, so new catalog items are not silently discarded by legacy dependencies. A release must not delete or rename a dependency until its caller is changed and tested.
 
 ## Database access model
 

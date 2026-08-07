@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "3.0.28",
+  "version": "3.0.29",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -13,6 +13,8 @@
     "test:desktop-density": "python scripts/desktop_density_qa.py --artifacts density-test-results",
     "test:desktop-final": "python scripts/final_desktop_visual_qa.py --artifacts final-desktop-test-results",
     "test:deposit-policy": "node scripts/test-deposit-policy.mjs",
-    "test:stabilization": "node scripts/test-stabilization.mjs"
+    "test:stabilization": "node scripts/test-stabilization.mjs",
+    "test:css-architecture": "node scripts/test-css-architecture.mjs",
+    "test:operational-health": "node scripts/test-operational-health.mjs"
   }
 }

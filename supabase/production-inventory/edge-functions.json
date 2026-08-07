@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-07T10:56:50Z",
+  "capturedAt": "2026-08-07T12:50:00Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -92,19 +92,19 @@
     },
     {
       "slug": "vacleaner-booking-v5",
-      "version": 5,
+      "version": 6,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "21778c8564037fb1ca0cb5af8a921a568977d825a3da27f07599f87b3323b41a",
-      "role": "active public entrypoint"
+      "sha256": "d0dd336f449db672bb07e7a332244859720aac8b7ed4dcbcb5989b90236631ee",
+      "role": "active public entrypoint; client sync + web push"
     },
     {
       "slug": "vacleaner-admin-data-v1",
-      "version": 1,
+      "version": 3,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "51c614cde66d05a990b52284d32da578787119be1342fb9d4fab98aadd5e5fee",
-      "role": "active non-financial admin list/customer profile endpoint"
+      "sha256": "8d811bc7a60a2a1994329ce02b5a83b0797acc7a6a22af20289eb3867cce5903",
+      "role": "active non-financial admin list/customer profile + operational health endpoint"
     }
   ]
 }

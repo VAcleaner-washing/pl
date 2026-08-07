@@ -132,6 +132,7 @@ def init_script(authenticated: bool = True) -> str:
           if(payload.action==='list')body={{bookings:window.__bookings}};
           else if(payload.action==='calendar')body={{days:Array.from({{length:14}},(_,i)=>({{date:new Date(Date.now()+i*86400000).toISOString().slice(0,10),resources:{{puzzi:{{label:'Puzzi',capacity:2,morning:2,evening:1}},sc2:{{label:'SC 2',capacity:2,morning:2,evening:2}},jimmy:{{label:'Jimmy',capacity:2,morning:1,evening:2}},abir:{{label:'ABIR',capacity:2,morning:2,evening:2}}}}}}))}};
           else if(payload.action==='clients')body={{customers:[{{phone:'+380951111111',name:'Анна Коваленко',telegram:'@anna',address:'Полтава, вул. Соборності, 10',document_type:'ID-картка',document_number:'000123456',document_verified_at:new Date().toISOString()}}]}};
+          else if(payload.action==='health')body={{checkedAt:new Date().toISOString(),reservation:{{healthy:true,transactionLock:true,halfOpenSlots:true,capacityHardBlock:true,pendingDoesNotReserve:true}},push:{{healthy:true,configReady:true,activeSubscriptions:3,lastSuccessAt:new Date().toISOString(),lastFailureAt:null}}}};
           else if(payload.action==='save_customer')body={{customer:{{phone:payload.customerPhone,name:payload.customerName,telegram:payload.customerTelegram,address:payload.customerAddress}}}};
           else if(payload.action==='lookup_customer')body={{customer:{{phone:'+380951111111',name:'Анна Коваленко',address:'Полтава, вул. Соборності, 10',documentType:'ID-картка',documentNumber:'000123456',documentVerifiedAt:new Date().toISOString(),hasDocument:true,isRepeatCustomer:true,completedOrders:4,totalOrders:5,totalSpent:4200,lastDate:'{iso(-20)}',lastProduct:'Kärcher Puzzi 8/1',loyalty:{{level:'Regular',percent:5}}}}}};
           else if(payload.action==='audit_log')body={{entries:[{{id:1,booking_id:window.__bookings[0].id,booking_code:window.__bookings[0].booking_code,event_type:'updated',changed_fields:['status'],old_values:{{status:'pending'}},new_values:{{status:'confirmed'}},actor_id:'a',source:'edge:update',created_at:new Date().toISOString()}}]}};
@@ -256,6 +257,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(bool(cards) and all(r['left']>=11 and r['right']<=width-11 for r in cards), f"{label}: settings cards use full mobile width")
                 slot_rows=page.locator('.slot-editor-row:visible').evaluate_all('els=>els.map(el=>({r:el.getBoundingClientRect(),children:[...el.querySelectorAll(".premium-control")].map(x=>x.getBoundingClientRect())}))')
                 qa.check(all(all(c['left']>=row['r']['left']-1 and c['right']<=row['r']['right']+1 for c in row['children']) for row in slot_rows), f"{label}: time-slot controls stay inside settings cards")
+                page.wait_for_timeout(30)
+                qa.check(page.locator('.operational-health-card').count()==1, f"{label}: settings exposes production health")
+                qa.check(page.locator('.health-state.ok').count()>=2, f"{label}: push and double-booking health are verified at runtime")
             if view=='equipment':
                 qa.check(page.locator('.catalog-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: equipment toolbar stays inside its own width")
                 single=page.locator('.equipment-image-1 img').first
@@ -271,6 +275,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 if width<=360:
                     lefts=[round(r['left'],1) for r in status_geometry['items']]
                     qa.check(len(set(lefts))==1, f"{label}: analytics statuses collapse to one stable column")
+                qa.check(page.locator('.utilization-panel').count()==1 and page.locator('.utilization-row').count()>=4, f"{label}: analytics exposes utilization by physical equipment")
+                qa.check(page.locator('.customer-health-panel').count()==1 and page.locator('.customer-health-panel').inner_text().find('Repeat-rate')==-1, f"{label}: repeat customer decision panel renders without duplicating KPI copy")
+                qa.check(page.locator('#showSleepingClients').count()==1, f"{label}: sleeping-client segment has a direct action")
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
 
