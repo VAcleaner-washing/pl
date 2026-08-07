@@ -91,6 +91,8 @@ BOOKINGS = [
     booking(5, "completed"),
     HISTORICAL_COMPLETED,
 ]
+# The process-flow regression must exercise Telegram's phone deep-link fallback.
+BOOKINGS[0]["customer_telegram"] = ""
 
 
 def init_script(authenticated: bool = True) -> str:
@@ -221,6 +223,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.wait_for_timeout(80)
         dismiss_update(page, qa, f"{label}-update-prompt.png" if label=='mobile-390' else None)
         qa.check(no_overflow(page), f"{label}: shell has no horizontal overflow")
+        app_box = page.locator('.app').bounding_box()
+        qa.check(app_box is not None and abs(app_box['y'])<=0.5 and abs(app_box['y']+app_box['height']-height)<=1, f"{label}: app shell fills the physical viewport to the bottom")
         topbar = page.locator(".topbar").bounding_box()
         main_head = page.locator(".page-head").bounding_box()
         sidebar = page.locator(".sidebar").bounding_box()
@@ -266,9 +270,15 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
 
-        # Returned historical bookings keep mapped extras visible without inventing a current price.
+        # Returned bookings always start at the top and are sorted by return/end date, newest first.
         open_mobile_view(page,'bookings')
-        page.locator('[data-filter="completed"]').click()
+        page.locator('.main').evaluate("el=>el.scrollTop=Math.min(360,el.scrollHeight-el.clientHeight)")
+        page.locator('[data-filter="completed"]').click();page.wait_for_timeout(40)
+        qa.check(page.locator('.main').evaluate('el=>el.scrollTop')==0, f"{label}: returned filter resets list scroll to top")
+        first_returned=page.locator('.booking-card').first.get_attribute('data-id')
+        qa.check(first_returned==HISTORICAL_COMPLETED['id'], f"{label}: returned bookings are sorted newest return date first")
+
+        # Returned historical bookings keep mapped extras visible without inventing a current price.
         historical_card=page.locator('.booking-card', has_text='HIST-PWA-001')
         qa.check(historical_card.count()==1 and 'Насадки «Преміум» до SC 2' in historical_card.locator('.booking-extra').inner_text(), f"{label}: returned historical booking shows mapped premium nozzles")
         qa.check('0 грн' not in historical_card.locator('.booking-extra').inner_text(), f"{label}: historical extra never displays a fake zero price")
@@ -277,6 +287,15 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.historical-extra-note', has_text='у складі історичної суми').count()==1, f"{label}: historical detail explains extra is included in original total")
         page.locator('.detail .back').click();page.wait_for_timeout(40)
         if page.locator('[data-filter="all"]').count(): page.locator('[data-filter="all"]').click()
+
+        # Finance badges must remain rectangular, aligned and contained on narrow cards.
+        page.locator('[data-filter="confirmed"]').click();page.wait_for_timeout(30)
+        finance_card=page.locator(f'.booking-card[data-id="{BOOKINGS[2]["id"]}"]')
+        finance_geometry=finance_card.locator('.booking-finance').evaluate("""el=>{const p=el.getBoundingClientRect(),due=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},due:due?{l:due.left,r:due.right,t:due.top,b:due.bottom,h:due.height}:null,dep:dep?{l:dep.left,r:dep.right,t:dep.top,b:dep.bottom,h:dep.height}:null}}""")
+        fg=finance_geometry
+        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['l']>=fg['p']['l']-1 and fg['dep']['r']<=fg['p']['r']+1, f"{label}: due and deposit controls stay inside finance card")
+        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['h']>=48 and fg['dep']['h']>=48 and not (fg['due']['r']>fg['dep']['l'] and fg['dep']['r']>fg['due']['l'] and fg['due']['b']>fg['dep']['t'] and fg['dep']['b']>fg['due']['t']), f"{label}: due and deposit controls never overlap")
+        page.locator('[data-filter="all"]').click();page.wait_for_timeout(30)
 
         # Client search is contextual and the card can be edited.
         open_mobile_view(page,'clients')
@@ -305,6 +324,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         open_mobile_view(page,'bookings')
         page.locator("#newBooking").click()
         page.wait_for_selector("#bookingForm")
+        qa.check(page.locator('#bookingForm .booking-form-scroll').evaluate('el=>el.scrollTop')==0, f"{label}: new booking modal always opens at its own top")
         qa.check(no_overflow(page), f"{label}: new booking modal has no horizontal overflow")
         header_title=page.locator('#bookingForm>header h2').bounding_box()
         progress=page.locator('#bookingForm .mobile-booking-progress').bounding_box()
@@ -399,6 +419,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             footer_action=page.locator(f"{selector}>footer .btn:visible").last.bounding_box()
             qa.check(header_box is not None and header_box["y"] >= safe_top+8, f"{label}: {action} header respects top safe area")
             qa.check(footer_box is not None and abs(footer_box['y']+footer_box['height']-height)<=1 and footer_action is not None and footer_action['y']+footer_action['height']<=height-safe_bottom+1, f"{label}: {action} footer is pinned above Home Indicator")
+            if action=='process':
+                qa.check(page.locator('#processForm .process-grid').evaluate('el=>el.scrollTop')==0, f"{label}: process modal opens at its own top")
+                telegram_href=page.locator('#sendTelegram').get_attribute('href') or ''
+                qa.check(telegram_href.startswith('https://t.me/+380') and '?text=' in telegram_href, f"{label}: Telegram action opens the customer phone deep-link with draft")
+                qa.check('share/url?url=&' not in telegram_href, f"{label}: Telegram action never generates the broken empty share URL")
+                switch_gap=page.locator('#processForm').evaluate("""form=>{const a=form.elements.prepaymentPaid.closest('.switch').getBoundingClientRect(),b=form.elements.confirmationSent.closest('.switch').getBoundingClientRect();return b.top-a.bottom}""")
+                qa.check(switch_gap>=8, f"{label}: prepayment and conditions blocks keep a visible gap")
             if label=='mobile-390': qa.shot(page, f"mobile-390-{action}-modal.png")
             page.locator(f"{selector} .close").click()
         if label=='mobile-390': qa.shot(page, f"{label}-bookings.png")

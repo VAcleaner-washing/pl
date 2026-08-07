@@ -41,10 +41,11 @@ ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail 
 
 for(const token of [
   '--pwa-safe-top','--pwa-safe-bottom','--mobile-topbar:64px','--mobile-nav:62px',
-  '.app{position:fixed;inset:0;width:100%;height:100dvh',
+  '.app{position:fixed;inset:0;width:auto;height:auto',
   'bottom:calc(var(--mobile-nav) + var(--pwa-safe-bottom))',
   '.pwa-update-prompt','--keyboard-viewport-height','--keyboard-viewport-top',
 ]) ok(css.includes(token),`PWA visual token: ${token}`);
+ok(!css.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'),'app shell avoids iOS standalone 100dvh bottom gaps');
 ok(!css.includes('--pwa-viewport-height'),'legacy app-shell viewport variable is gone');
 ok(!css.includes('--pwa-viewport-top'),'legacy app-shell viewport top variable is gone');
 

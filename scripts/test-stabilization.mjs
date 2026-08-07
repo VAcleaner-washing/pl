@@ -49,7 +49,8 @@ has(adminEdge,'if (![\"pending\", \"waiting_payment\", \"confirmed\"].includes(S
 
 // Mobile/PWA layout has one normal <=900 shell contract; standalone only specializes it.
 ok((css.match(/@media \(max-width:900px\)\{/g)||[]).length===1,'exactly one primary <=900 mobile layout contract');
-has(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell uses stable dynamic viewport');
+has(css,'.app{position:fixed;inset:0;width:auto;height:auto','mobile app shell fills the fixed viewport by physical insets');
+lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
 has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom navigation is physically pinned');
 has(css,'.main{\n    position:fixed!important;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region');
 has(css,'.booking-form{grid-template-rows:auto auto minmax(0,1fr) auto!important}','mobile booking has header/progress/scroll/footer rows');
@@ -98,8 +99,10 @@ has(bookingEdge,'db.from("vacleaner_customers").update(profilePatch)','repeat pu
 has(pwaQa,'settings cards use full mobile width','mobile settings full-width is gated');
 has(e2e,'Selecting equipment does not auto-select dates','hidden auto-dates are forbidden');
 has(e2e,'base = \"http://127.0.0.1:4173\"','browser E2E uses a local origin instead of blocked synthetic DNS');
-lacks(admin,"t.me/+",'invalid direct Telegram phone URL is forbidden');
-has(admin,'https://t.me/share/url?url=&text=','Telegram fallback uses supported share URL');
+has(admin,'https://t.me/+${phone}?text=${draft}','Telegram opens the customer chat by phone when username is absent');
+lacks(admin,'https://t.me/share/url?url=&text=','Telegram share fallback never sends an empty required URL');
+has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');
+has(admin,"state.filter=b.dataset.filter;renderBookings();resetViewScroll()",'booking filter changes reset the main scroll owner');
 
 // Public UI must consume the same deposit classification.
 for(const text of [publicExperience,publicSlots])has(text,'isWeekendDeposit?.','public deposit reads shared policy');

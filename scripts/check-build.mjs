@@ -77,8 +77,9 @@ if(!/^playwright==\d+\.\d+\.\d+$/m.test(ciRequirements))errors.push('Playwright 
 const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
 const publicExperienceCss=fs.readFileSync(path.join(root,'assets','public-experience.css'),'utf8');
 const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8');
-for(const token of ['.auth-card .field input{font-size:16px!important}','html.keyboard-open .auth','.app{position:fixed;inset:0;width:100%;height:100dvh'])if(!adminCss.includes(token))errors.push(`iPhone/mobile CSS hardening missing: ${token}`);
+for(const token of ['.auth-card .field input{font-size:16px!important}','html.keyboard-open .auth','.app{position:fixed;inset:0;width:auto;height:auto'])if(!adminCss.includes(token))errors.push(`iPhone/mobile CSS hardening missing: ${token}`);
 if(adminCss.includes('--pwa-viewport-height')||adminCss.includes('--pwa-viewport-top'))errors.push('legacy app-shell visualViewport CSS variables remain');
+if(adminCss.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'))errors.push('mobile app shell is over-constrained by 100dvh');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
