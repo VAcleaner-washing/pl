@@ -1,12 +1,13 @@
 {
-  "capturedAt": "2026-08-07T13:49:33Z",
+  "capturedAt": "2026-08-07T15:06:30Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
     "adminBookings": "vacleaner-admin-bookings-v3",
     "settings": "vacleaner-settings",
     "push": "vacleaner-push",
-    "adminData": "vacleaner-admin-data-v1"
+    "adminData": "vacleaner-admin-data-v1",
+    "campaignLifecycle": "vacleaner-campaigns-v1"
   },
   "dependencyGraph": {
     "vacleaner-booking-v5": [],
@@ -103,6 +104,14 @@
       "status": "ACTIVE",
       "sha256": "1c325f439c20bfbaa30312cb272e09a38b74739ddf6aeee0119748004d767856",
       "role": "active non-financial admin clients + production health + retention campaign management"
+    },
+    {
+      "slug": "vacleaner-campaigns-v1",
+      "version": 1,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "d27c1145f030c55e380b08ca8a64ed70c75520712c8ae3d631cb68d27878f88c",
+      "role": "active authenticated campaign archive/delete lifecycle service"
     }
   ]
 }

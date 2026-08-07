@@ -57,9 +57,14 @@ has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom
 has(css,'.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region');
 has(css,'.booking-form{grid-template-rows:auto minmax(0,1fr) auto}','mobile booking has header-with-progress/scroll/footer rows');
 has(css,'.booking-form>header .mobile-booking-progress{display:grid','mobile booking progress is integrated into the header');
-has(css,'.date-control{position:relative;display:block;width:100%;height:50px','admin dates use fixed geometry');
+has(css,'.date-control{position:relative;display:block;width:100%;height:52px','admin dates use one base geometry on desktop and PWA');
+has(css,'.date-control .date-native{position:absolute;inset:0;z-index:3','native date input owns the whole date field hit area');
+has(css,'.date-control .date-display{position:absolute;inset:0;z-index:2','date display is a noninteractive visual layer');
+has(css,'.date-control .date-native::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%','calendar indicator covers the entire date field');
+lacks(admin,'picker-trigger date-display','date field has no second interactive button layer');
 has(admin,"classList.toggle('keyboard-open',keyboard)",'keyboard state is explicit');
 lacks(admin,"visualViewport?.addEventListener('scroll'",'visual viewport scroll cannot move app shell');
+has(admin,'focused=document.activeElement instanceof HTMLElement','keyboard mode is focus-gated during refresh');
 lacks(admin,"scrollIntoView({block:'center'",'focus never forcibly centers the page');
 
 // User-reported regressions are permanent gates.

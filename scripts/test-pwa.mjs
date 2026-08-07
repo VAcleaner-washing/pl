@@ -34,6 +34,7 @@ for(const token of [
   'showPwaUpdatePrompt','SKIP_WAITING','controllerchange','bookingIdFromUrl','queueBookingDeepLink','openPendingBooking','VACLEANER_OPEN_BOOKING','visualViewport',"classList.toggle('keyboard-open',keyboard)",
 ]) ok(runtime.includes(token),`PWA runtime token: ${token}`);
 ok(!runtime.includes("visualViewport?.addEventListener('scroll'"),'visual viewport scroll cannot move shell');
+ok(runtime.includes('focused=document.activeElement instanceof HTMLElement'),'keyboard viewport mode requires an actually focused editable control');
 ok(runtime.includes(`navigator.serviceWorker.register('/admin/sw.js?v=${build}'`),'service-worker registration matches build');
 ok(runtime.includes("requestAnimationFrame(()=>openDetail(b))"),'deep-link opens booking after render');
 ok(runtime.includes('function modal(html){'),'modal shell helper exists');
@@ -58,4 +59,6 @@ ok(!rootRetireSw.includes('caches.open'),'root worker never adds a public cache'
 ok(publicResilience.includes('reg.scope===ROOT_SCOPE'),'public runtime targets only root-scope legacy workers');
 ok(publicResilience.includes('reg.unregister()'),'public runtime removes stale root workers');
 
+
+ok(css.includes('.app,.topbar,.sidebar,.main{position:absolute}'),'mobile PWA chrome is layout-viewport anchored during refresh');
 console.log(`PWA static tests passed ${passed} assertions.`);

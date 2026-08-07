@@ -246,6 +246,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.wait_for_timeout(50)
         nav_after=page.locator('.sidebar').bounding_box()
         qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs(nav_after['y']+nav_after['height']-height)<=1, f"{label}: bottom navigation does not walk during content scroll")
+        page.locator('#globalSearch').evaluate('el=>el.blur()')
+        page.evaluate("()=>window.dispatchEvent(new Event('resize'))");page.wait_for_timeout(50)
+        nav_refresh=page.locator('.sidebar').bounding_box()
+        qa.check(nav_refresh is not None and abs(nav_refresh['y']+nav_refresh['height']-height)<=1 and not page.locator('html').evaluate("el=>el.classList.contains('keyboard-open')"), f"{label}: data/viewport refresh cannot lift bottom navigation without a keyboard")
         page.locator('.main').evaluate('el=>el.scrollTop=0')
 
         # Status filters become the sticky control row after the KPI/hero block scrolls away.
@@ -264,7 +268,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         open_mobile_view(page,'bookings')
 
         # Walk every admin view, not only the primary four.
-        for view in ["bookings","calendar", "upcoming", "equipment", "clients", "analytics", "chemistry", "settings"]:
+        for view in ["bookings","calendar", "upcoming", "equipment", "clients", "campaigns", "analytics", "chemistry", "settings"]:
             open_mobile_view(page,view)
             qa.check(no_overflow(page), f"{label}: {view} view stays inside viewport")
             qa.check(page.locator('.main').evaluate('el=>el.scrollLeft')==0, f"{label}: {view} cannot drift horizontally")
@@ -332,8 +336,11 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.wait_for_timeout(40)
         qa.check(page.locator('#pageTitle').inner_text().strip()=='Клієнти', f"{label}: searching clients never jumps to bookings")
         qa.check(page.locator('.client-row').count()>=1, f"{label}: client search filters inside clients view")
-        qa.check(page.locator('.campaign-panel').count()==1, f"{label}: retention campaign panel renders in clients")
-        qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible")
+        qa.check(page.locator('.campaign-panel').count()==0, f"{label}: clients view is free of campaign management")
+        page.evaluate("()=>document.querySelector('[data-view=campaigns]')?.click()");page.wait_for_timeout(60)
+        qa.check(page.locator('.campaign-panel').count()==1, f"{label}: campaigns render in their dedicated view")
+        qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible in campaigns view")
+        open_mobile_view(page,'clients')
         qa.check('Сплячі 180+ днів' in page.locator('#clientSegment').inner_text(), f"{label}: sleeping segment uses 180 days")
         last_text=page.locator('.client-last-date').first.inner_text().strip() if page.locator('.client-last-date').count() else ''
         qa.check(bool(__import__('re').fullmatch(r'\d{2}\.\d{2}\.\d{4}|—',last_text)), f"{label}: client last-rental date includes full year")
@@ -345,7 +352,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             qa.check(client_footer is not None and abs(client_footer['y']+client_footer['height']-height)<=1 and client_save is not None and client_save['y']+client_save['height']<=height-safe_bottom+1, f"{label}: client editor footer clears Home Indicator")
             qa.check(page.locator('#clientEditor input[name=customerName]').count()==1 and page.locator('#clientEditor input[name=customerPhone]').count()==1, f"{label}: client editor exposes core contact fields")
             page.locator('#clientEditor [data-close]').first.click()
-        page.locator('#clearSearch').click();page.wait_for_timeout(30)
+        if page.locator('#clearSearch').is_visible(): page.locator('#clearSearch').click();page.wait_for_timeout(30)
 
         # More sheet remains usable and contained.
         page.locator(".more-nav:visible").click()
@@ -507,7 +514,7 @@ def desktop_suite(browser: Browser, qa: QA) -> None:
         desktop_shell=page.evaluate("()=>{const main=document.querySelector('.main'),top=document.querySelector('.topbar'),mr=main.getBoundingClientRect(),tr=top.getBoundingClientRect();return{bodyOverflow:getComputedStyle(document.body).overflow,mainOverflow:getComputedStyle(main).overflowY,mainTop:mr.top,topBottom:tr.bottom}}")
         qa.check(desktop_shell['bodyOverflow']=='hidden' and desktop_shell['mainOverflow'] in ('auto','scroll'), "Desktop: main is the single vertical scroll owner")
         qa.check(abs(desktop_shell['mainTop']-desktop_shell['topBottom'])<=1, "Desktop: scrollbar starts below the fixed topbar instead of hiding underneath it")
-        for view in ["bookings", "calendar", "upcoming", "equipment", "clients", "analytics", "chemistry", "settings"]:
+        for view in ["bookings", "calendar", "upcoming", "equipment", "clients", "campaigns", "analytics", "chemistry", "settings"]:
             page.locator('.main').evaluate("el=>el.scrollTop=Math.min(360,Math.max(0,el.scrollHeight-el.clientHeight))")
             page.locator(f'.nav button[data-view="{view}"]').click()
             page.wait_for_timeout(90)
@@ -598,9 +605,9 @@ def public_nearest_availability_suite(browser: Browser, qa: QA) -> None:
         page.add_script_tag(content=(ROOT/'assets/public-booking-slots.js').read_text(encoding='utf-8'))
         before_url=page.url
         page.evaluate("()=>fetch('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5',{method:'POST',body:JSON.stringify({action:'availability'})})")
-        page.wait_for_selector('.vx-nearest-availability')
+        page.wait_for_selector('.vx-nearest-availability-panel')
         qa.check(page.url==before_url, 'Public: unavailable slot is rendered in-place without page navigation')
-        text=page.locator('.availability-card').inner_text()
+        text=page.locator('.vx-nearest-availability-panel').inner_text()
         qa.check('Найближче вільне вікно' in text and '9 серпня' in text, 'Public: unavailable equipment shows the nearest compatible free window')
         qa.check(page.locator('.vx-use-nearest').count()==1, 'Public: nearest availability offers one explicit apply action')
         page.locator('.vx-use-nearest').click();page.wait_for_timeout(60)

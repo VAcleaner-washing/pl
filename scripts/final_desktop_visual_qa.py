@@ -16,7 +16,7 @@ pwa.BOOKINGS[0]['fulfillment']='delivery'
 pwa.BOOKINGS[0]['fulfillment_address']='Полтава, вулиця Героїв України, будинок 123-А, під’їзд 4, квартира 158, домофон 3478'
 pwa.BOOKINGS[0]['customer_comment']='Дуже довгий коментар клієнта: потрібно почистити великий кутовий диван, два матраци, кілька крісел та килим у вітальні; доступ до квартири через другий під’їзд.'
 
-VIEWS=['bookings','calendar','upcoming','equipment','clients','analytics','chemistry','settings']
+VIEWS=['bookings','calendar','upcoming','equipment','clients','campaigns','analytics','chemistry','settings']
 
 class QA:
     def __init__(self, artifacts: Path): self.artifacts=artifacts; self.passed=0; self.failed=[]
@@ -100,7 +100,12 @@ def modal_check(page:Page,qa:QA,width:int,name:str,selector:str):
 
 def modal_suite(page:Page,qa:QA,width:int):
     page.locator('.nav button[data-view="bookings"]').click();page.wait_for_timeout(30)
-    page.locator('#newBooking').click();modal_check(page,qa,width,'new-booking','#bookingForm')
+    page.locator('#newBooking').click();page.wait_for_selector('#bookingForm');page.wait_for_timeout(50)
+    date_state=page.locator('#bookingForm .date-control').first.evaluate("""el=>{const input=el.querySelector('input[type=date]'),display=el.querySelector('.date-display'),r=el.getBoundingClientRect(),ir=input.getBoundingClientRect(),hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return{display:getComputedStyle(el).display,opacity:parseFloat(getComputedStyle(input).opacity),pointer:getComputedStyle(input).pointerEvents,hit:hit===input||input.contains(hit),sameBox:Math.abs(r.x-ir.x)<1&&Math.abs(r.y-ir.y)<1&&Math.abs(r.width-ir.width)<1&&Math.abs(r.height-ir.height)<1,displayText:display?.innerText?.trim()||'',interactiveDisplay:display?.tagName==='BUTTON'}}""")
+    qa.check(date_state['display']=='block' and date_state['sameBox'],f'{width}: desktop date input fills exactly one visual date field')
+    qa.check(date_state['opacity']<=0.01 and date_state['pointer']=='auto' and date_state['hit'],f'{width}: desktop date field click reaches only the native input')
+    qa.check(date_state['displayText'] and not date_state['interactiveDisplay'],f'{width}: desktop date has one noninteractive display layer without duplicate native text')
+    modal_check(page,qa,width,'new-booking','#bookingForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[0]["id"]}"] [data-action="process"]').click();modal_check(page,qa,width,'process','#processForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[2]["id"]}"] [data-action="issue"]').click();modal_check(page,qa,width,'issue','#issueForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="complete"]').click();modal_check(page,qa,width,'complete','#financeForm')

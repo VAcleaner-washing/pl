@@ -47,6 +47,7 @@ if(e2eSmoke.includes('page.locator("[data-close]").click()'))errors.push('E2E us
 if(/visualViewport\?\.addEventListener\('scroll'/.test(adminRuntime))errors.push('iPhone viewport must not resync on visualViewport scroll');
 for(const token of ["classList.toggle('keyboard-open'","keepFocusedControlVisible(target)","--keyboard-viewport-height","--keyboard-viewport-top"])if(!adminRuntime.includes(token))errors.push(`iPhone keyboard runtime hardening missing: ${token}`);
 if(adminRuntime.includes("visualViewport?.addEventListener('scroll'"))errors.push('visualViewport scroll listener must not move the app shell');
+if(!adminRuntime.includes('focused=document.activeElement instanceof HTMLElement'))errors.push('keyboard viewport mode must require a focused editable control');
 const swRegistrationVersions=[...adminRuntime.matchAll(/\/admin\/sw\.js\?v=(\d+)/g)].map(match=>match[1]);
 if(swRegistrationVersions.length!==1||swRegistrationVersions[0]!==build)errors.push(`service worker registration version mismatch: ${swRegistrationVersions.join(',')||'missing'}`);
 
