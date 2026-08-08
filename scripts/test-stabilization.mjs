@@ -10,6 +10,7 @@ const publicSlots=read('assets/public-booking-slots.js');
 const publicResilience=read('assets/public-resilience.js');
 const rootRetireSw=read('sw.js');
 const adminEdge=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts');
+const statusEdge=read('supabase/functions/vacleaner-status-correction-v1/index.ts');
 const adminDataEdge=read('supabase/functions/vacleaner-admin-data-v1/index.ts');
 const bookingEdge=read('supabase/functions/vacleaner-booking-v5/index.ts');
 const settingsEdge=read('supabase/functions/vacleaner-settings/index.ts');
@@ -30,6 +31,11 @@ for(const [name,text] of [['admin',adminEdge],['public booking',bookingEdge]]){
   has(text,'slotIndex',`${name} uses shared half-day slots`);
 }
 lacks(adminEdge,'/functions/v1/vacleaner-admin-bookings-v2','admin v3 never delegates to v2');
+lacks(adminEdge,'action === "correct_status"','status correction lives only in the dedicated Edge');
+has(statusEdge,'vacleaner_apply_reservation','status correction rechecks inventory through reservation authority');
+has(statusEdge,'admin_users','status correction verifies the admin whitelist');
+has(statusEdge,'edge:correct_status:','status correction writes an audit source');
+
 lacks(adminEdge,'/functions/v1/vacleaner-admin-bookings"','admin v3 never delegates to legacy admin');
 lacks(bookingEdge,'/functions/v1/vacleaner-booking-v4','booking v5 never delegates to v4');
 lacks(bookingEdge,'/functions/v1/vacleaner-booking"','booking v5 never delegates to legacy booking');
@@ -170,4 +176,9 @@ lacks(publicResilience,"'/admin/'",'public cleanup never unregisters the admin P
 // Public UI must consume the same deposit classification.
 for(const text of [publicExperience,publicSlots])has(text,'isWeekendDeposit?.','public deposit reads shared policy');
 
+
+lacks(css,'html{width:100%;height:100%;overflow:hidden;scrollbar-gutter:auto;overscroll-behavior:none}','mobile dashboard html root is not overflow-locked');
+has(css,'html{width:100%;height:100%;min-height:100%;overflow-x:clip;overflow-y:visible','mobile dashboard html root stays available to WebKit');
+has(css,'body{position:static;inset:auto;width:100%;height:100%;min-height:100%;overflow:visible','mobile dashboard body root stays available to WebKit');
+has(css,'.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0','mobile nav keeps a root fixed bottom anchor');
 console.log(`Stabilization contract passed ${passed} assertions.`);

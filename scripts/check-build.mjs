@@ -65,6 +65,7 @@ const publicExperience=fs.readFileSync(path.join(root,'assets','public-experienc
 const bookingHtml=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'utf8');
 const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
 const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','index.ts'),'utf8');
+const statusEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-status-correction-v1','index.ts'),'utf8');
 const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','settlement.mjs'),'utf8');
 const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w.js'),'utf8');
 const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');
@@ -106,13 +107,17 @@ if(!adminCss.includes('.sidebar{display:none}')||!adminCss.includes('.mobile-nav
 if(adminCss.includes('html.keyboard-open .mobile-nav{')||adminCss.includes('html.keyboard-open .main{'))errors.push('keyboard state must not mutate dedicated bottom nav or main shell; use the proven VA HOME fixed-nav contract');
 if(!adminCss.includes('.mobile-nav svg{width:19px;height:19px')||!adminCss.includes('fill:none;stroke:currentColor'))errors.push('mobile bottom-nav icons must inherit currentColor and never render as black fills');
 if(!adminCss.includes('.mobile-more-menu{position:fixed')||adminRuntime.includes('mobile-more-backdrop'))errors.push('mobile More menu must use the compact VA HOME-style popover, not a fullscreen backdrop sheet');
+if(adminCss.includes('html{width:100%;height:100%;overflow:hidden;scrollbar-gutter:auto;overscroll-behavior:none}'))errors.push('mobile dashboard html root must not be overflow-locked');
+if(!adminCss.includes('html{width:100%;height:100%;min-height:100%;overflow-x:clip;overflow-y:visible')||!adminCss.includes('body{position:static;inset:auto;width:100%;height:100%;min-height:100%;overflow:visible'))errors.push('mobile root viewport contract is missing');
+if(!adminHtml.includes('apple-mobile-web-app-capable')||!adminHtml.includes('black-translucent'))errors.push('admin standalone iOS metadata is missing');
 if(!publicExperienceCss.includes('.final-cta-orbit{pointer-events:none}'))errors.push('decorative public CTA orbits must not intercept clicks');
 if(!publicExperienceCss.includes('body:has(.mobile-menu.is-open) .mobile-booking{display:none}'))errors.push('public sticky CTA must hide while mobile navigation is open');
 if(!businessCopy.includes('У подарунок — будь-який аромадифузор VA HOME з колекції Entry'))errors.push('HOME RESET Entry diffuser gift copy is missing');
 if(!publicExperience.includes('HOME_RESET_GIFT_URL')||!publicExperience.includes('enhanceHomeResetGift'))errors.push('HOME RESET gift is not hydration-safe');
 if(!adminRuntime.includes('vacleaner-status-correction-v1')||!adminRuntime.includes('Виправити статус')||!adminRuntime.includes('invokeStatus({bookingId:b.id,status:target,reason})'))errors.push('admin status correction UI/endpoint binding is missing');
-if(!adminEdge.includes('action === "correct_status"')||!adminEdge.includes('edge:correct_status:'))errors.push('server-side controlled status correction is missing');
-if(/\["pending", "waiting_payment", "confirmed", "issued", "completed"\]\.includes\(nextStatus\)/.test(adminEdge))errors.push('manual status correction must never target completed; use settlement flow');
+if(!statusEdge.includes('edge:correct_status:')||!statusEdge.includes('vacleaner_apply_reservation')||!statusEdge.includes('admin_users'))errors.push('dedicated server-side controlled status correction is missing');
+if(adminEdge.includes('action === "correct_status"'))errors.push('status correction logic is duplicated inside vacleaner-admin-bookings-v3');
+if(/\["pending", "waiting_payment", "confirmed", "issued", "completed"\]\.includes\(nextStatus\)/.test(statusEdge))errors.push('manual status correction must never target completed; use settlement flow');
 if(!adminRuntime.includes('</main></div><nav class="mobile-nav"'))errors.push('mobile navigation is not a root sibling of the app');
 if(adminCss.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'))errors.push('stale fixed-app mobile override remains');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
