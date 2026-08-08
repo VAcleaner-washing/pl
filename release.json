@@ -1,6 +1,6 @@
 {
-  "version": "3.0.71",
-  "build": 3071,
+  "version": "3.0.73",
+  "build": 3073,
   "releasedAt": "2026-08-08",
-  "label": "VAcleaner v3.0.71 — CLIENT DOCUMENTS & MODAL VIEWPORT FIX"
+  "label": "VAcleaner v3.0.73 — PWA CLIENT NAV & FOCUS UX"
 }

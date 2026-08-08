@@ -19,6 +19,7 @@ assert.equal(manifest.id,'/admin/'); passed++;
 assert.equal(manifest.display,'standalone'); passed++;
 ok(manifest.display_override?.includes('standalone'),'manifest keeps standalone override');
 ok(html.includes('viewport-fit=cover'),'admin viewport includes safe areas');
+ok(html.includes('maximum-scale=1,user-scalable=no'),'admin viewport blocks accidental page zoom');
 ok(html.includes('apple-mobile-web-app-status-bar-style\" content=\"black\"')&&!html.includes('black-translucent'),'Apple PWA uses opaque black status-bar mode; black-translucent is rejected');
 ok(html.includes('apple-mobile-web-app-title'),'Apple PWA title exists');
 
@@ -43,6 +44,9 @@ ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail capture
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');
 
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
+ok(runtime.includes('function lockStandaloneZoom()')&&runtime.includes("e.touches?.length>1"),'standalone PWA blocks pinch zoom without changing public pages');
+ok(runtime.includes('data-client-card')&&runtime.includes('openBookingClient'),'booking and upcoming client blocks open the client card');
+ok(runtime.includes('mobile-booking-search-collapsed')&&css.includes('.app.mobile-booking-search-collapsed .topbar'),'booking search collapses while mobile list scrolls');
 ok(html.includes('<div id="adminMount"></div><nav class="mobile-nav"'),'mobile navigation exists in initial HTML before JS paint, matching VA HOME');
 ok(!runtime.includes('<nav class="mobile-nav"'),'runtime never recreates the static mobile navigation');
 ok(css.includes('.sidebar{display:none}'),'desktop sidebar is hidden rather than transformed on mobile');

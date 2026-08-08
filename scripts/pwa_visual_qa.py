@@ -267,11 +267,18 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.operations-bar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: attention cards never hide in a horizontal carousel")
         toolbar_contract=page.locator('.booking-toolbar').evaluate("el=>({position:getComputedStyle(el).position,overflowX:getComputedStyle(el).overflowX,wrap:getComputedStyle(el).flexWrap})")
         qa.check(toolbar_contract['position']=='sticky' and toolbar_contract['overflowX'] in ('auto','scroll') and toolbar_contract['wrap']=='nowrap', f"{label}: booking filters stay in one compact sticky row")
+        qa.check(page.locator('.booking-card [data-client-card]').count()>=1, f"{label}: booking client block exposes direct client-card navigation")
+        page.locator('.booking-card [data-client-card]').first.evaluate('el=>el.click()');page.wait_for_selector('#clientEditor');page.wait_for_timeout(20)
+        qa.check(page.locator('#clientEditor .client-rental-history').count()==1, f"{label}: booking client tap opens the full client card")
+        page.locator('#clientEditor [data-close]').first.click();page.wait_for_timeout(30)
+        page.wait_for_timeout(80)
 
         # Bottom nav must not move when only the app content scrolls.
         nav_before=page.locator('.mobile-nav').bounding_box()
         page.locator('.main').evaluate("el=>el.scrollTop=Math.min(420,el.scrollHeight-el.clientHeight)")
         page.wait_for_timeout(50)
+        qa.check(page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: booking search hides after list scroll")
+        qa.check(page.locator('.booking-toolbar').bounding_box()['y'] <= page.locator('.main').bounding_box()['y'] + 2, f"{label}: booking filters remain the sticky control when search hides")
         nav_after=page.locator('.mobile-nav').bounding_box()
         qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs(nav_after['y']+nav_after['height']-height)<=1, f"{label}: bottom navigation does not walk during content scroll")
         page.locator('#globalSearch').evaluate('el=>el.blur()')
@@ -309,6 +316,11 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 page.wait_for_timeout(30)
                 qa.check(page.locator('.operational-health-card').count()==1, f"{label}: settings exposes production health")
                 qa.check(page.locator('.health-state.ok').count()>=2, f"{label}: push and double-booking health are verified at runtime")
+            if view=='upcoming':
+                qa.check(page.locator('.upcoming-row [data-client-card]').count()>=1, f"{label}: upcoming client block exposes direct client-card navigation")
+                page.locator('.upcoming-row [data-client-card]').first.evaluate('el=>el.click()');page.wait_for_selector('#clientEditor');page.wait_for_timeout(20)
+                qa.check(page.locator('#clientEditor .client-rental-history').count()==1, f"{label}: upcoming client tap opens the full client card")
+                page.locator('#clientEditor [data-close]').first.click();page.wait_for_timeout(30)
             if view=='equipment':
                 qa.check(page.locator('.catalog-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: equipment toolbar stays inside its own width")
                 single=page.locator('.equipment-image-1 img').first
@@ -327,7 +339,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.utilization-panel').count()==1 and page.locator('.utilization-row').count()>=4, f"{label}: analytics exposes utilization by physical equipment")
                 qa.check(page.locator('.customer-health-panel').count()==1 and page.locator('.customer-health-panel').inner_text().find('Repeat-rate')==-1, f"{label}: repeat customer decision panel renders without duplicating KPI copy")
                 qa.check(page.locator('#showSleepingClients').count()==1, f"{label}: sleeping-client segment has a direct action")
-                qa.check('Сплячі 180+ днів' in page.locator('.customer-health-panel').inner_text(), f"{label}: analytics uses the six-month sleeping-customer threshold")
+                qa.check('180–365 днів' in page.locator('.customer-health-panel').inner_text() and '365+ днів' in page.locator('.customer-health-panel').inner_text(), f"{label}: analytics splits sleeping clients into warm and long-dormant segments")
+                qa.check(page.locator('.analytics-metric-switch [data-product-metric]').count()==3, f"{label}: popularity can switch between rentals, revenue and average check")
+                qa.check(page.locator('.topbar:visible').count()==0, f"{label}: analytics removes the unused mobile search bar")
+                qa.check(page.locator('.analytics-kpis .kpi').count()==4, f"{label}: analytics uses a compact four-KPI decision strip")
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
 

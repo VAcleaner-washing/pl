@@ -80,7 +80,7 @@ def search_state(page:Page,qa:QA,width:int):
 
 def detail_suite(page:Page,qa:QA,width:int):
     page.locator('.nav button[data-view="bookings"]').click();page.wait_for_timeout(30)
-    target=pwa.BOOKINGS[0]['id'];page.locator(f'.booking-card[data-id="{target}"]').click();page.wait_for_selector('.detail');page.wait_for_timeout(70)
+    target=pwa.BOOKINGS[0]['id'];page.locator(f'.booking-card[data-id="{target}"] .booking-row-head').click();page.wait_for_selector('.detail');page.wait_for_timeout(70)
     qa.check(pwa.no_overflow(page),f'{width}: stressed booking detail has no horizontal overflow')
     qa.check(not no_visible_overflow(page,'.detail'),f'{width}: stressed booking detail stays inside viewport')
     name=page.locator('.detail').get_by_text('Олександра-Вікторія Коваленко-Петренко',exact=True).first
