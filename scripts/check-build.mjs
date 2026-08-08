@@ -102,7 +102,7 @@ for(const token of ['.auth-card .field input{font-size:16px}','html.keyboard-ope
 if(adminCss.includes('--pwa-viewport-height')||adminCss.includes('--pwa-viewport-top'))errors.push('legacy app-shell visualViewport CSS variables remain');
 if(adminCss.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'))errors.push('mobile app shell is over-constrained by 100dvh');
 if(!adminCss.includes('.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto')||adminCss.includes('html.pwa-standalone .sidebar{position:relative'))errors.push('mobile bottom navigation must use one fixed bottom:0 viewport contract without standalone grid overrides');
-if(!adminCss.includes('html.keyboard-open .sidebar{opacity:0;visibility:hidden;pointer-events:none}')||adminCss.includes('html.keyboard-open .sidebar{display:none}'))errors.push('iPhone keyboard must hide bottom nav without destroying its fixed compositor layer');
+if(adminCss.includes('html.keyboard-open .sidebar{')||adminCss.includes('html.keyboard-open .main{'))errors.push('keyboard state must not mutate bottom nav or main shell; use the proven VA HOME fixed-nav contract');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');

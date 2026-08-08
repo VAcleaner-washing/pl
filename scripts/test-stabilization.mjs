@@ -54,8 +54,8 @@ ok((css.match(/@media \(max-width:900px\)\{/g)||[]).length===1,'exactly one prim
 has(css,'.app{position:fixed;inset:0;width:auto;height:auto','mobile app shell fills the fixed viewport by physical insets');
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
 has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom navigation is pinned directly to the viewport');
-has(css,'html.keyboard-open .sidebar{opacity:0;visibility:hidden;pointer-events:none}','keyboard hides bottom nav without destroying its fixed compositor layer');
-lacks(css,'html.keyboard-open .sidebar{display:none}','keyboard never removes the fixed bottom nav from layout/compositor');
+lacks(css,'html.keyboard-open .sidebar{','keyboard state never mutates bottom nav; matches proven VA HOME contract');
+lacks(css,'html.keyboard-open .main{','keyboard state never reflows the main shell around bottom nav');
 lacks(css,'html.pwa-standalone .sidebar{position:relative','standalone grid override is absent');
 has(css,'.main{\n    position:absolute;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region inside the fixed app shell');
 has(css,'.booking-form{grid-template-rows:auto minmax(0,1fr) auto}','mobile booking has header-with-progress/scroll/footer rows');

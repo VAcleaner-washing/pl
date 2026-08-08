@@ -1369,7 +1369,7 @@ body{touch-action:manipulation}
   .detail-actions{position:static;display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding:9px}.detail-actions .btn{width:100%;min-height:44px}.detail-actions .primary,.detail-actions .green,.detail-actions .danger{grid-column:1/-1}
 
   .auth{position:fixed;inset:0;width:auto;height:auto;min-height:0;padding:calc(14px + var(--pwa-safe-top)) max(14px,var(--pwa-safe-right)) calc(14px + var(--pwa-safe-bottom)) max(14px,var(--pwa-safe-left));display:grid;place-items:center;overflow:hidden;overscroll-behavior:none}.auth-card{width:min(440px,100%);max-height:100%;padding:22px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none}.auth-card::-webkit-scrollbar{display:none}.auth-card .field input{font-size:16px}.auth-card .field input[type=password]{font-size:16px}
-  html.keyboard-open .sidebar{opacity:0;visibility:hidden;pointer-events:none}html.keyboard-open .main{bottom:0}html.keyboard-open .auth{height:var(--keyboard-viewport-height,100dvh);top:var(--keyboard-viewport-top,0px);bottom:auto;place-items:start center;padding-top:8px;padding-bottom:8px}html.keyboard-open .modal-card{height:var(--keyboard-viewport-height,100dvh);top:var(--keyboard-viewport-top,0px);bottom:auto}html.keyboard-open .modal-form>header{padding-top:10px}html.keyboard-open .modal-form>footer{padding-bottom:8px}
+  html.keyboard-open .auth{height:var(--keyboard-viewport-height,100dvh);top:var(--keyboard-viewport-top,0px);bottom:auto;place-items:start center;padding-top:8px;padding-bottom:8px}html.keyboard-open .modal-card{height:var(--keyboard-viewport-height,100dvh);top:var(--keyboard-viewport-top,0px);bottom:auto}html.keyboard-open .modal-form>header{padding-top:10px}html.keyboard-open .modal-form>footer{padding-bottom:8px}
 
   .toast{right:max(10px,var(--pwa-safe-right));bottom:calc(var(--mobile-nav) + var(--pwa-safe-bottom) + 10px);left:max(10px,var(--pwa-safe-left));text-align:center}
   html.keyboard-open .toast{bottom:10px}
@@ -1385,8 +1385,8 @@ body{touch-action:manipulation}
   .app{position:fixed}
   .topbar,.main{position:absolute}
   .campaign-actions .campaign-archive,.campaign-actions .danger-soft{min-height:44px}
-  /* v3.0.42 — match the proven VA HOME mobile-nav contract: fixed to the layout viewport.
-     No standalone-specific shell/grid geometry; Safari and installed PWA use the same stable fixed nav. */
+  /* v3.0.48 — exact VA HOME keyboard contract: bottom navigation is never hidden, resized or re-positioned by keyboard state.
+     iOS may overlay it while the keyboard is open; when the keyboard closes there is no sidebar compositor layer to recreate. */
 }
 @media (max-width:360px){
   .page-head h1{font-size:24px}.booking-row-head{padding:12px}.booking-identity h2{font-size:18px}.modal-form>header h2{font-size:25px}.window-choice span{padding:9px}.time-chip-list{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-form>header .mobile-booking-progress{grid-template-columns:repeat(4,28px);gap:5px}.mobile-booking-progress span{width:28px;height:28px}
