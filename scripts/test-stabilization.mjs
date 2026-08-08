@@ -51,13 +51,16 @@ has(adminEdge,'if (![\"pending\", \"waiting_payment\", \"confirmed\"].includes(S
 
 // Mobile/PWA layout has one normal <=900 shell contract; standalone only specializes it.
 ok((css.match(/@media \(max-width:900px\)\{/g)||[]).length===1,'exactly one primary <=900 mobile layout contract');
-has(css,'.app{position:fixed;inset:0;width:auto;height:auto','mobile app shell fills the fixed viewport by physical insets');
+has(css,'.app{position:static;inset:auto;width:100%','mobile app wrapper stays out of the fixed viewport stack');
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
-has(css,'.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto','bottom navigation is pinned directly to the viewport');
-lacks(css,'html.keyboard-open .sidebar{','keyboard state never mutates bottom nav; matches proven VA HOME contract');
+has(css,'.sidebar{display:none}','desktop sidebar is hidden on mobile');
+has(css,'.mobile-nav{\n    position:fixed;right:0;bottom:0;left:0;z-index:100','dedicated mobile navigation is pinned directly to the viewport');
+has(admin,'</main></div><nav class="mobile-nav"','mobile nav is a body-level sibling of the app, like VA HOME');
+lacks(css,'html.keyboard-open .mobile-nav{','keyboard state never mutates dedicated bottom nav; matches proven VA HOME contract');
 lacks(css,'html.keyboard-open .main{','keyboard state never reflows the main shell around bottom nav');
-lacks(css,'html.pwa-standalone .sidebar{position:relative','standalone grid override is absent');
-has(css,'.main{\n    position:absolute;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is the sole scroll region inside the fixed app shell');
+lacks(css,'html.pwa-standalone .mobile-nav{position:relative','standalone grid override is absent');
+lacks(css,'.app{position:fixed}\n  .topbar,.main{position:absolute}','stale v3.0.36 fixed-ancestor override is absent');
+has(css,'.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is an independent root-fixed scroll region like VA HOME');
 has(css,'.booking-form{grid-template-rows:auto minmax(0,1fr) auto}','mobile booking has header-with-progress/scroll/footer rows');
 has(css,'.booking-form>header .mobile-booking-progress{display:grid','mobile booking progress is integrated into the header');
 has(css,'.date-control{position:relative;display:block;width:100%;height:52px','admin dates use one base geometry on desktop and PWA');
@@ -118,7 +121,7 @@ lacks(admin,'t.me/share/url','Telegram no longer uses the share endpoint for cli
 has(admin,"const ADMIN_ALIAS_KEY='vac_admin_alias'",'second admin login alias is explicitly tracked');
 has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevidoma share the requested credential');
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
-has(css,'.nav button[data-view="equipment"]','mobile primary navigation can move equipment into More');
+has(admin,'data-mobile-view="bookings"','dedicated mobile nav has its own primary-view buttons');
 has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
 has(admin,"['equipment','clients','campaigns','analytics','chemistry','settings'].includes(v)",'More active state includes analytics after moving it out of the primary nav');
 has(admin,'id="mobileNewBooking"','mobile navigation has a dedicated centered New action');

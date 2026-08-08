@@ -43,13 +43,17 @@ ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail capture
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');
 
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
-ok(css.includes('.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto'),'mobile navigation uses the same proven fixed bottom contract as VA HOME');
+ok(runtime.includes('</main></div><nav class="mobile-nav"'),'mobile navigation is a separate root sibling, matching VA HOME');
+ok(css.includes('.sidebar{display:none}'),'desktop sidebar is hidden rather than transformed on mobile');
+ok(css.includes('.mobile-nav{\n    position:fixed;right:0;bottom:0;left:0;z-index:100'),'dedicated mobile navigation is fixed directly to the viewport');
+ok(css.includes('.app{position:static;inset:auto;width:100%'),'mobile app wrapper is not a fixed ancestor of bottom navigation');
+ok(css.includes('.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))'),'mobile main is independently fixed like VA HOME');
 ok(!css.includes('grid-template-rows:calc(var(--mobile-topbar) + var(--pwa-safe-top)) minmax(0,1fr) var(--mobile-nav-shell)'),'standalone PWA does not override the proven fixed mobile nav contract');
 ok(runtime.includes('client-mobile-stats')&&css.includes('.client-mobile-stats'),'mobile client cards expose rental count and spend');
 
 for(const token of [
   '--pwa-safe-top','--pwa-safe-bottom','--mobile-topbar:64px','--mobile-nav:66px',
-  '.app{position:fixed;inset:0;width:auto;height:auto',
+  '.app{position:static;inset:auto;width:100%',
   '--mobile-nav-shell:calc(var(--mobile-nav) + var(--pwa-safe-bottom))',
   '.pwa-update-prompt','--keyboard-viewport-height','--keyboard-viewport-top',
 ]) ok(css.includes(token),`PWA visual token: ${token}`);
@@ -65,5 +69,7 @@ ok(publicResilience.includes('reg.scope===ROOT_SCOPE'),'public runtime targets o
 ok(publicResilience.includes('reg.unregister()'),'public runtime removes stale root workers');
 
 
-ok(!css.includes('html.pwa-standalone .sidebar{position:relative'),'installed PWA has no standalone grid override for bottom navigation');
+ok(!css.includes('html.pwa-standalone .mobile-nav{position:relative'),'installed PWA has no standalone grid override for bottom navigation');
+ok(!css.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'),'stale v3.0.36 fixed-ancestor override is gone');
+ok(runtime.includes("document.documentElement.classList.add('pwa-update-transition')"),'PWA update hides the outgoing mobile chrome before controller reload');
 console.log(`PWA static tests passed ${passed} assertions.`);

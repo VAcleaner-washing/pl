@@ -423,22 +423,22 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
         page.goto(f"{base}/admin/bronuvannia/", wait_until="networkidle")
         page.wait_for_selector(".booking-list")
         mobile_selectors = [
-            '.nav button[data-view="bookings"]:visible',
-            '.nav button[data-view="calendar"]:visible',
+            '.mobile-nav button[data-mobile-view="bookings"]:visible',
+            '.mobile-nav button[data-mobile-view="calendar"]:visible',
             '#mobileNewBooking:visible',
-            '.nav button[data-view="upcoming"]:visible',
-            '.more-nav:visible',
+            '.mobile-nav button[data-mobile-view="upcoming"]:visible',
+            '.mobile-nav .more-nav:visible',
         ]
         checks.check(all(page.locator(selector).count() == 1 for selector in mobile_selectors), "Mobile bottom navigation has five primary items")
-        page.locator(".more-nav:visible").click()
+        page.locator(".mobile-nav .more-nav:visible").click()
         more = page.locator(".mobile-more-card")
         checks.check(more.get_by_text("Техніка", exact=True).count() == 1 and more.get_by_text("Аналітика", exact=True).count() == 1 and more.get_by_text("Налаштування", exact=True).count() == 1, "Mobile More contains equipment, analytics and remaining sections")
         page.keyboard.press("Escape")
         page.evaluate("document.querySelector('.main').scrollTop=600")
-        page.locator('.nav button[data-view="calendar"]:visible').click()
+        page.locator('.mobile-nav button[data-mobile-view="calendar"]:visible').click()
         page.wait_for_timeout(100)
         checks.check(page.evaluate("document.querySelector('.main').scrollTop") == 0, "Mobile tab switch returns content to top")
-        tap_heights = page.locator(".nav button:visible").evaluate_all("els => els.map(el => el.getBoundingClientRect().height)")
+        tap_heights = page.locator(".mobile-nav button:visible").evaluate_all("els => els.map(el => el.getBoundingClientRect().height)")
         checks.check(all(height >= 44 for height in tap_heights), "Mobile navigation tap targets are at least 44px")
         page.locator("#mobileNewBooking:visible").click()
         page.wait_for_selector("#bookingForm")

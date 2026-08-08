@@ -12,9 +12,9 @@ with sync_playwright() as p:
     try:
         for width,height in [(320,720),(390,844),(430,932)]:
             page=m.render_page(browser,width,height,standalone=True)
-            page.wait_for_selector('.sidebar')
+            page.wait_for_selector('.mobile-nav')
             def snap(label):
-                return page.locator('.sidebar').evaluate("(el,label)=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {label,top:r.top,bottom:r.bottom,height:r.height,position:s.position,cssBottom:s.bottom,display:s.display,visibility:s.visibility,opacity:s.opacity}}",label)
+                return page.locator('.mobile-nav').evaluate("(el,label)=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return {label,top:r.top,bottom:r.bottom,height:r.height,position:s.position,cssBottom:s.bottom,display:s.display,visibility:s.visibility,opacity:s.opacity}}",label)
             before=snap('before')
             page.locator('.search input').focus(); page.wait_for_timeout(100)
             page.evaluate("document.documentElement.classList.add('keyboard-open');document.documentElement.style.setProperty('--keyboard-viewport-height','500px');document.documentElement.style.setProperty('--keyboard-viewport-top','0px')")

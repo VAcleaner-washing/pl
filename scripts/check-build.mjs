@@ -98,11 +98,13 @@ if(!bookingHtml.includes(`/assets/public-resilience.js?v=${build}`))errors.push(
 const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
 const publicExperienceCss=fs.readFileSync(path.join(root,'assets','public-experience.css'),'utf8');
 const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8');
-for(const token of ['.auth-card .field input{font-size:16px}','html.keyboard-open .auth','.app{position:fixed;inset:0;width:auto;height:auto'])if(!adminCss.includes(token))errors.push(`iPhone/mobile CSS hardening missing: ${token}`);
+for(const token of ['.auth-card .field input{font-size:16px}','html.keyboard-open .auth','.app{position:static;inset:auto;width:100%','.mobile-nav{\n    position:fixed;right:0;bottom:0;left:0;z-index:100'])if(!adminCss.includes(token))errors.push(`iPhone/mobile CSS hardening missing: ${token}`);
 if(adminCss.includes('--pwa-viewport-height')||adminCss.includes('--pwa-viewport-top'))errors.push('legacy app-shell visualViewport CSS variables remain');
 if(adminCss.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'))errors.push('mobile app shell is over-constrained by 100dvh');
-if(!adminCss.includes('.sidebar{\n    position:fixed;right:0;bottom:0;left:0;top:auto')||adminCss.includes('html.pwa-standalone .sidebar{position:relative'))errors.push('mobile bottom navigation must use one fixed bottom:0 viewport contract without standalone grid overrides');
-if(adminCss.includes('html.keyboard-open .sidebar{')||adminCss.includes('html.keyboard-open .main{'))errors.push('keyboard state must not mutate bottom nav or main shell; use the proven VA HOME fixed-nav contract');
+if(!adminCss.includes('.sidebar{display:none}')||!adminCss.includes('.mobile-nav{\n    position:fixed;right:0;bottom:0;left:0;z-index:100')||adminCss.includes('html.pwa-standalone .mobile-nav{position:relative'))errors.push('mobile bottom navigation must be a dedicated root-fixed element, separate from the desktop sidebar');
+if(adminCss.includes('html.keyboard-open .mobile-nav{')||adminCss.includes('html.keyboard-open .main{'))errors.push('keyboard state must not mutate dedicated bottom nav or main shell; use the proven VA HOME fixed-nav contract');
+if(!adminRuntime.includes('</main></div><nav class="mobile-nav"'))errors.push('mobile navigation is not a root sibling of the app');
+if(adminCss.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'))errors.push('stale fixed-app mobile override remains');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
