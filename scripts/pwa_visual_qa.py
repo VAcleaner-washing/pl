@@ -275,10 +275,22 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
 
         # Bottom nav must not move when only the app content scrolls.
         nav_before=page.locator('.mobile-nav').bounding_box()
+        main_top_before=page.locator('.main').bounding_box()['y']
         page.locator('.main').evaluate("el=>el.scrollTop=Math.min(420,el.scrollHeight-el.clientHeight)")
-        page.wait_for_timeout(50)
+        page.wait_for_timeout(70)
+        main_top_mid=page.locator('.main').bounding_box()['y']
+        qa.check(main_top_mid < main_top_before-2, f"{label}: booking search collapse starts as a real animated shell transition")
+        page.wait_for_timeout(230)
         qa.check(page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: booking search hides after list scroll")
         qa.check(page.locator('.booking-toolbar').bounding_box()['y'] <= page.locator('.main').bounding_box()['y'] + 2, f"{label}: booking filters remain the sticky control when search hides")
+        page.locator('.main').evaluate("el=>el.scrollTop=48")
+        page.wait_for_timeout(40)
+        qa.check(page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: booking search hysteresis prevents flicker during small reverse scrolls")
+        page.locator('.main').evaluate("el=>el.scrollTop=8")
+        page.wait_for_timeout(300)
+        qa.check(not page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: booking search returns only near the top")
+        page.locator('.main').evaluate("el=>el.scrollTop=Math.min(420,el.scrollHeight-el.clientHeight)")
+        page.wait_for_timeout(300)
         nav_after=page.locator('.mobile-nav').bounding_box()
         qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs(nav_after['y']+nav_after['height']-height)<=1, f"{label}: bottom navigation does not walk during content scroll")
         page.locator('#globalSearch').evaluate('el=>el.blur()')
@@ -291,7 +303,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         toolbar_before=page.locator('.booking-toolbar').bounding_box()
         main_box=page.locator('.main').bounding_box()
         page.locator('.main').evaluate("el=>el.scrollTop=Math.min(520,Math.max(0,el.scrollHeight-el.clientHeight))")
-        page.wait_for_timeout(60)
+        page.wait_for_timeout(300)
         toolbar_after=page.locator('.booking-toolbar').bounding_box()
         qa.check(toolbar_before is not None and toolbar_after is not None and main_box is not None and toolbar_after['y']<=main_box['y']+1.5, f"{label}: status filters pin directly below the hero/topbar after scroll")
         page.locator('.main').evaluate('el=>el.scrollTop=0')
