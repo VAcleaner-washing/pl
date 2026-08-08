@@ -70,7 +70,11 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+<<<<<<< HEAD
   deploy:
+=======
+    deploy:
+>>>>>>> 29c17c5afd968f71e4e8eed4dc8f71c0a2b7c340
     permissions:
       contents: read
       pages: write
