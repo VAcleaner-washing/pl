@@ -63,6 +63,8 @@ const publicResilience=fs.readFileSync(path.join(root,'assets','public-resilienc
 
 const publicExperience=fs.readFileSync(path.join(root,'assets','public-experience.js'),'utf8');
 const bookingHtml=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'utf8');
+if(!bookingHtml.includes('<script id="vac-gtm-bootstrap">')||!bookingHtml.includes('googletagmanager.com/gtm.js?id=')||!bookingHtml.includes("window,document,'script','dataLayer','GTM-KC8FF7FB'"))errors.push('direct /bronuvannia/ load must contain an executable GTM-KC8FF7FB bootstrap');
+if(!bookingHtml.includes('if(w.__VAC_GTM_LOADED__)return;w.__VAC_GTM_LOADED__=true'))errors.push('booking GTM bootstrap must guard against duplicate hydration load');
 const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
 const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','index.ts'),'utf8');
 const statusEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-status-correction-v1','index.ts'),'utf8');
