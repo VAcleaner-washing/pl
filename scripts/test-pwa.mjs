@@ -31,7 +31,7 @@ ok(sw.includes("VACLEANER_OPEN_BOOKING"),'push passes booking deep-link message'
 ok(sw.includes("target.searchParams.set('booking'"),'push URL carries booking id');
 
 for(const token of [
-  'showPwaUpdatePrompt','SKIP_WAITING','controllerchange','bookingIdFromUrl','queueBookingDeepLink','openPendingBooking','VACLEANER_OPEN_BOOKING','visualViewport',"classList.toggle('keyboard-open',keyboard)",
+  'showPwaUpdatePrompt','SKIP_WAITING','controllerchange','bookingIdFromUrl','queueBookingDeepLink','openPendingBooking','VACLEANER_OPEN_BOOKING','visualViewport',"classList.toggle('keyboard-open',keyboard)","let pwaKeyboardLatched=false","const keyboard=Boolean(reduced&&(focused||pwaKeyboardLatched))",
 ]) ok(runtime.includes(token),`PWA runtime token: ${token}`);
 ok(!runtime.includes("visualViewport?.addEventListener('scroll'"),'visual viewport scroll cannot move shell');
 ok(runtime.includes('focused=document.activeElement instanceof HTMLElement'),'keyboard viewport mode requires an actually focused editable control');

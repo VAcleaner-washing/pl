@@ -66,6 +66,9 @@ has(css,'.date-control .date-display{position:absolute;inset:0;z-index:2','date 
 has(css,'.date-control .date-native::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%','calendar indicator covers the entire date field');
 lacks(admin,'picker-trigger date-display','date field has no second interactive button layer');
 has(admin,"classList.toggle('keyboard-open',keyboard)",'keyboard state is explicit');
+has(admin,"let pwaKeyboardLatched=false",'keyboard close is latched until visual viewport actually restores');
+has(admin,"if(reduced&&focused)pwaKeyboardLatched=true;else if(!reduced)pwaKeyboardLatched=false",'keyboard latch survives blur while iOS visual viewport is still reduced');
+has(admin,"const keyboard=Boolean(reduced&&(focused||pwaKeyboardLatched))",'keyboard state cannot clear early on focusout');
 lacks(admin,"visualViewport?.addEventListener('scroll'",'visual viewport scroll cannot move app shell');
 has(admin,'focused=document.activeElement instanceof HTMLElement','keyboard mode is focus-gated during refresh');
 lacks(admin,"scrollIntoView({block:'center'",'focus never forcibly centers the page');
