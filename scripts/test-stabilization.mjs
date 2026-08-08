@@ -130,6 +130,10 @@ has(admin,"const ADMIN_ALIAS_KEY='vac_admin_alias'",'second admin login alias is
 has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevidoma share the requested credential');
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
 has(adminHtml,'data-mobile-view="bookings"','dedicated mobile nav has its own primary-view buttons in initial HTML');
+has(admin,"const initialAdminView=typeof window!=='undefined'&&window.matchMedia('(max-width: 900px)').matches?'upcoming':'bookings'",'mobile admin starts on Upcoming while desktop keeps Bookings');
+has(adminHtml,'data-mobile-view="upcoming" class="active"','initial mobile HTML highlights Upcoming');
+has(adminHtml,'<span>Найближчі</span></button><button data-mobile-view="bookings"','mobile nav order begins Upcoming then Bookings');
+has(admin,'comparisonLabel=previous?`проти ${analyticsRangeLabel(previous)}`','analytics comparison exposes the concrete previous date range');
 has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
 has(admin,"const MOBILE_MORE_VIEWS=['equipment','clients','campaigns','analytics','chemistry','settings']",'More active-state mapping includes analytics and all secondary views');
 has(admin,'MOBILE_MORE_VIEWS.includes(state.view)','More active state uses the shared secondary-view mapping');

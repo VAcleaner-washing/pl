@@ -462,15 +462,18 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
     page = context.new_page()
     try:
         page.goto(f"{base}/admin/bronuvannia/", wait_until="networkidle")
-        page.wait_for_selector(".booking-list")
+        page.wait_for_selector(".upcoming-scope")
         mobile_selectors = [
-            '.mobile-nav button[data-mobile-view="bookings"]:visible',
-            '.mobile-nav button[data-mobile-view="calendar"]:visible',
-            '#mobileNewBooking:visible',
             '.mobile-nav button[data-mobile-view="upcoming"]:visible',
+            '.mobile-nav button[data-mobile-view="bookings"]:visible',
+            '#mobileNewBooking:visible',
+            '.mobile-nav button[data-mobile-view="calendar"]:visible',
             '.mobile-nav .more-nav:visible',
         ]
         checks.check(all(page.locator(selector).count() == 1 for selector in mobile_selectors), "Mobile bottom navigation has five primary items")
+        order = page.locator('.mobile-nav > button:visible').evaluate_all("els=>els.map(el=>el.dataset.mobileView||el.id||el.dataset.mobileMore)")
+        checks.check(order == ['upcoming','bookings','mobileNewBooking','calendar','1'], "Mobile bottom navigation order is Upcoming, Bookings, New, Calendar, More")
+        checks.check(page.locator('.mobile-nav button[data-mobile-view="upcoming"].active:visible').count() == 1, "Upcoming is the mobile start view")
         checks.check(page.locator('html').evaluate("el=>el.classList.contains('pwa-browser')&&!el.classList.contains('pwa-standalone')"), "Mobile browser admin uses the browser-only shell contract")
         page.evaluate("window.scrollTo(0,99999)")
         page.wait_for_timeout(50)
@@ -482,7 +485,7 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
         checks.check(more.count() == 1 and all(more.get_by_text(label, exact=True).count() == 1 for label in expected_more), "Mobile More contains all six secondary sections")
         page.keyboard.press("Escape")
         page.wait_for_timeout(30)
-        checks.check(page.locator('.mobile-nav button[data-mobile-view="bookings"].active:visible').count() == 1 and page.locator('.mobile-nav .more-nav.active:visible').count() == 0, "Closing More restores the active state of the current primary view")
+        checks.check(page.locator('.mobile-nav button[data-mobile-view="upcoming"].active:visible').count() == 1 and page.locator('.mobile-nav .more-nav.active:visible').count() == 0, "Closing More restores the active state of the current primary view")
         page.evaluate("document.querySelector('.main').scrollTop=600")
         page.locator('.mobile-nav button[data-mobile-view="calendar"]:visible').click()
         page.wait_for_timeout(100)
