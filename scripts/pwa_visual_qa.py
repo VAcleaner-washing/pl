@@ -178,7 +178,7 @@ def render_page(browser: Browser, width: int, height: int, authenticated: bool =
     page.add_script_tag(content=(ROOT / "assets/vacleaner-core.js").read_text(encoding="utf-8"))
     page.add_script_tag(content=(ROOT / "assets/admin-v250.js").read_text(encoding="utf-8"))
     page.wait_for_selector(".app" if authenticated else ".auth-card")
-    if authenticated: page.wait_for_selector(".booking-list")
+    if authenticated: page.wait_for_selector(".upcoming-scope" if width <= 900 else ".booking-list")
     page.wait_for_timeout(150)
     return page
 

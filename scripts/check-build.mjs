@@ -131,6 +131,7 @@ if(!adminHtml.includes('<div id="adminMount"></div><nav class="mobile-nav"'))err
 if(adminRuntime.includes('<nav class="mobile-nav"'))errors.push('runtime must not recreate the static mobile navigation');
 if(adminCss.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'))errors.push('stale fixed-app mobile override remains');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell','opening More temporarily makes More the only active bottom-nav item','Mobile Safari tab: root cannot scroll into blank space'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA/mobile regression test missing: ${token}`);
+if(!pwaVisualQa.includes('page.wait_for_selector(".upcoming-scope" if width <= 900 else ".booking-list")'))errors.push('PWA visual QA must wait for Upcoming on mobile and Bookings on desktop');
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
 for(const token of ['color-scheme:dark','appearance:none','input[type="checkbox"]:checked','.switch:has(input:checked)','.field select option'])if(!adminCss.includes(token))errors.push(`admin controls visual missing: ${token}`);
