@@ -117,6 +117,7 @@ if(!businessCopy.includes('У подарунок — будь-який аром�
 if(!publicExperience.includes('HOME_RESET_GIFT_URL')||!publicExperience.includes('enhanceHomeResetGift'))errors.push('HOME RESET gift is not hydration-safe');
 if(!publicExperience.includes("HOME_RESET_GIFT_URL='https://vahome.com.ua/catalog?collection=entry'"))errors.push('HOME RESET gift must preserve the VA HOME Entry collection deep-link');
 if(!publicExperienceCss.includes('.package-page-grid .package-price{justify-content:center;text-align:center}'))errors.push('Package page prices must be horizontally centered');
+if(!publicExperienceCss.includes('@media(min-width:1051px){')||!publicExperienceCss.includes('.package-page-grid .package-card-large h2{min-height:2em}'))errors.push('Desktop package cards must reserve a shared two-line title zone so all following sections align');
 if(!publicExperienceCss.includes('.package-card.featured .vx-home-reset-gift{position:absolute'))errors.push('HOME RESET gift must have a dedicated non-overlapping featured-card layout');
 
 if(!publicExperience.includes('Фінальний штрих — аромадифузор VA HOME · Entry у подарунок'))errors.push('HOME RESET real-plan finale must mention the VA HOME diffuser gift');
