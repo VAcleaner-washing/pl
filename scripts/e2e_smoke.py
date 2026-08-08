@@ -431,8 +431,12 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
         ]
         checks.check(all(page.locator(selector).count() == 1 for selector in mobile_selectors), "Mobile bottom navigation has five primary items")
         page.locator(".mobile-nav .more-nav:visible").click()
-        more = page.locator(".mobile-more-card")
-        checks.check(more.get_by_text("Техніка", exact=True).count() == 1 and more.get_by_text("Аналітика", exact=True).count() == 1 and more.get_by_text("Налаштування", exact=True).count() == 1, "Mobile More contains equipment, analytics and remaining sections")
+        more = page.locator(".mobile-more-menu:visible")
+        more_labels = ["Техніка", "Клієнти", "Кампанії", "Аналітика", "Хімія", "Налаштування"]
+        checks.check(
+            more.count() == 1 and all(more.get_by_text(label, exact=True).count() == 1 for label in more_labels),
+            "Mobile More contains equipment, analytics and remaining sections",
+        )
         page.keyboard.press("Escape")
         page.evaluate("document.querySelector('.main').scrollTop=600")
         page.locator('.mobile-nav button[data-mobile-view="calendar"]:visible').click()
