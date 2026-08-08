@@ -1,50 +1,77 @@
 /*
-  VAcleaner v3.0.74 — experimental iOS Liquid Glass study.
-  Activated ONLY by ?glass=1. The production/default visual contract is untouched.
+  VAcleaner v3.0.75 — experimental Liquid Glass design study.
+  Loaded ONLY by /admin/bronuvannia-glass/. Production /admin/bronuvannia/ is untouched.
+
+  Design rule: glass is the functional/navigation layer. Content cards stay mostly opaque.
 */
 html.glass-test{
-  --glass-line:rgba(255,255,255,.14);
-  --glass-line-soft:rgba(255,255,255,.08);
-  --glass-fill:rgba(20,27,31,.56);
-  --glass-fill-strong:rgba(18,25,29,.72);
-  --glass-shadow:0 18px 48px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.11),inset 0 -1px 0 rgba(255,255,255,.025);
-  --glass-blur:blur(28px) saturate(155%);
-  --glass-gold:rgba(226,173,91,.20);
+  --lg-line:rgba(255,255,255,.16);
+  --lg-line-soft:rgba(255,255,255,.085);
+  --lg-line-gold:rgba(239,195,125,.34);
+  --lg-fill:rgba(24,31,35,.54);
+  --lg-fill-strong:rgba(18,25,29,.72);
+  --lg-fill-dark:rgba(9,14,17,.76);
+  --lg-gold:rgba(224,169,84,.18);
+  --lg-gold-strong:rgba(232,181,99,.34);
+  --lg-green:rgba(51,166,111,.22);
+  --lg-blur:blur(30px) saturate(170%);
+  --lg-blur-soft:blur(18px) saturate(145%);
+  --lg-shadow:0 22px 60px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(255,255,255,.025);
+  --lg-shadow-soft:0 12px 30px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.07);
+  --lg-ease:cubic-bezier(.22,1,.36,1);
 }
 
 @media (max-width:900px){
+  html.glass-test,
   html.glass-test body,
   html.glass-test .app{background:#070b0e}
 
-  /* Content stays content: deep, mostly opaque, with a little depth behind the glass layer. */
+  /* Edge-to-edge content field: color can subtly infuse the functional glass above it. */
   html.glass-test .main{
     bottom:0;
-    padding-bottom:calc(104px + var(--pwa-safe-bottom));
+    padding-bottom:calc(108px + var(--pwa-safe-bottom));
     background:
-      radial-gradient(circle at 10% -8%,rgba(226,173,91,.09),transparent 28%),
-      radial-gradient(circle at 92% 26%,rgba(71,139,111,.055),transparent 25%),
-      #070b0e;
+      radial-gradient(85% 42% at 8% -5%,rgba(224,169,84,.105),transparent 62%),
+      radial-gradient(75% 42% at 102% 28%,rgba(64,145,113,.07),transparent 62%),
+      linear-gradient(180deg,#080d10 0%,#070b0e 42%,#060a0d 100%);
+  }
+  html.glass-test .main::before{
+    content:"";
+    position:fixed;
+    inset:calc(var(--mobile-topbar) + var(--pwa-safe-top)) 0 auto 0;
+    height:64px;
+    pointer-events:none;
+    z-index:21;
+    background:linear-gradient(180deg,rgba(7,11,14,.44),rgba(7,11,14,0));
   }
 
-  html.glass-test .page-head{border-bottom-color:rgba(255,255,255,.065)}
+  /* Content layer: richer standard material, intentionally NOT Liquid Glass. */
   html.glass-test .booking-card,
   html.glass-test .upcoming-row,
   html.glass-test .day-card,
   html.glass-test .operation-card,
   html.glass-test .analytics-panel,
   html.glass-test .settings-card,
-  html.glass-test .client-row{
-    border-color:rgba(255,255,255,.105);
-    background:linear-gradient(145deg,rgba(18,27,32,.96),rgba(10,16,20,.965));
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.018),0 10px 30px rgba(0,0,0,.14);
+  html.glass-test .client-row,
+  html.glass-test .client-card,
+  html.glass-test .equipment-card,
+  html.glass-test .campaign-card,
+  html.glass-test .catalog-toolbar,
+  html.glass-test .analytics-toolbar{
+    border-color:rgba(255,255,255,.095);
+    background:linear-gradient(150deg,rgba(18,27,32,.975),rgba(9,15,19,.975));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.022),0 10px 28px rgba(0,0,0,.15);
   }
+  html.glass-test .booking-card,
+  html.glass-test .upcoming-row,
+  html.glass-test .day-card{border-radius:20px}
+  html.glass-test .page-head{border-bottom-color:rgba(255,255,255,.06)}
+  html.glass-test .page-head h1{letter-spacing:-.045em}
 
-  /* Search floats as a functional glass control, not a solid top sheet. */
+  /* Search is a floating functional control. Keep v3.0.75 shell geometry fully stable. */
   html.glass-test .topbar{
-    height:calc(var(--mobile-topbar) + var(--pwa-safe-top));
-    padding:var(--pwa-safe-top) max(14px,var(--pwa-safe-right)) 5px max(14px,var(--pwa-safe-left));
     border:0;
-    background:linear-gradient(180deg,rgba(7,11,14,.74) 0%,rgba(7,11,14,.28) 68%,transparent 100%);
+    background:linear-gradient(180deg,rgba(7,11,14,.80) 0%,rgba(7,11,14,.43) 72%,rgba(7,11,14,0) 100%);
     box-shadow:none;
     backdrop-filter:none;
     -webkit-backdrop-filter:none;
@@ -53,174 +80,311 @@ html.glass-test{
     position:relative;
     height:48px;
     padding:0 14px;
-    border:1px solid var(--glass-line);
-    border-radius:24px;
-    background:linear-gradient(145deg,rgba(37,44,48,.66),rgba(13,20,24,.43));
-    box-shadow:var(--glass-shadow);
-    backdrop-filter:var(--glass-blur);
-    -webkit-backdrop-filter:var(--glass-blur);
     overflow:hidden;
+    border:1px solid var(--lg-line);
+    border-radius:24px;
+    background:
+      linear-gradient(145deg,rgba(44,51,55,.63),rgba(13,20,24,.46));
+    box-shadow:var(--lg-shadow-soft);
+    backdrop-filter:var(--lg-blur);
+    -webkit-backdrop-filter:var(--lg-blur);
+    transition:border-color .24s ease,box-shadow .24s ease,transform .24s var(--lg-ease);
   }
   html.glass-test .search::before{
     content:"";
-    position:absolute;inset:0 0 auto 0;height:46%;pointer-events:none;
-    background:linear-gradient(180deg,rgba(255,255,255,.105),rgba(255,255,255,0));
+    position:absolute;
+    inset:0;
     border-radius:inherit;
+    pointer-events:none;
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.025) 38%,rgba(255,255,255,0) 70%),
+      radial-gradient(60% 80% at 18% 0%,rgba(255,255,255,.09),transparent 72%),
+      radial-gradient(58% 100% at 86% 120%,rgba(226,173,91,.11),transparent 70%);
   }
   html.glass-test .search::after{
     content:"";
-    position:absolute;left:14%;right:14%;bottom:-16px;height:22px;pointer-events:none;
-    background:radial-gradient(ellipse at center,rgba(226,173,91,.12),transparent 70%);
-    filter:blur(7px);
+    position:absolute;
+    left:18%;right:18%;bottom:-12px;height:18px;
+    pointer-events:none;
+    border-radius:50%;
+    background:rgba(226,173,91,.12);
+    filter:blur(9px);
   }
-  html.glass-test .search input,
-  html.glass-test .search>svg,
   html.glass-test .search>*{position:relative;z-index:1}
   html.glass-test .search:focus-within{
-    border-color:rgba(244,203,133,.33);
-    box-shadow:0 18px 52px rgba(0,0,0,.46),0 0 0 3px rgba(226,173,91,.07),inset 0 1px 0 rgba(255,255,255,.14);
+    border-color:rgba(244,207,147,.39);
+    box-shadow:0 18px 48px rgba(0,0,0,.40),0 0 0 3px rgba(226,173,91,.065),inset 0 1px 0 rgba(255,255,255,.15);
+  }
+  html.glass-test .search-clear{
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:50%;
+    background:rgba(255,255,255,.07);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
   }
 
-  /* Scroll-edge segmented filter: content can visually pass underneath it. */
+  /* Segmented/filter controls hover above content. */
   html.glass-test .booking-toolbar{
-    top:-10px;
-    gap:6px;
-    margin-bottom:13px;
-    padding:9px 4px 10px;
+    top:-18px;
+    gap:7px;
+    margin-bottom:12px;
+    padding:9px 0 10px;
     border:0;
-    background:linear-gradient(180deg,rgba(7,11,14,.88) 0%,rgba(7,11,14,.58) 70%,rgba(7,11,14,0) 100%);
+    background:linear-gradient(180deg,rgba(7,11,14,.88) 0%,rgba(7,11,14,.62) 58%,rgba(7,11,14,0) 100%);
     box-shadow:none;
-    backdrop-filter:blur(13px) saturate(130%);
-    -webkit-backdrop-filter:blur(13px) saturate(130%);
+    backdrop-filter:blur(13px) saturate(125%);
+    -webkit-backdrop-filter:blur(13px) saturate(125%);
   }
-  html.glass-test .app.mobile-booking-search-collapsed .booking-toolbar{top:-1px}
   html.glass-test .booking-toolbar .chip,
-  html.glass-test .upcoming-scope .chip{
+  html.glass-test .upcoming-scope .chip,
+  html.glass-test .analytics-periods .chip,
+  html.glass-test .client-sort button{
     position:relative;
     min-height:42px;
-    border:1px solid rgba(255,255,255,.10);
+    border:1px solid rgba(255,255,255,.11);
     border-radius:21px;
-    background:rgba(25,33,37,.48);
-    color:#b9c0c3;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 8px 18px rgba(0,0,0,.12);
-    backdrop-filter:blur(18px) saturate(145%);
-    -webkit-backdrop-filter:blur(18px) saturate(145%);
+    background:linear-gradient(145deg,rgba(38,46,50,.48),rgba(14,21,25,.38));
+    color:#bbc2c5;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.065),0 7px 18px rgba(0,0,0,.12);
+    backdrop-filter:blur(20px) saturate(150%);
+    -webkit-backdrop-filter:blur(20px) saturate(150%);
+    transition:transform .18s var(--lg-ease),background .22s ease,border-color .22s ease,color .22s ease,box-shadow .22s ease;
   }
+  html.glass-test .booking-toolbar .chip:active,
+  html.glass-test .upcoming-scope .chip:active,
+  html.glass-test .analytics-periods .chip:active,
+  html.glass-test .client-sort button:active{transform:scale(.965)}
   html.glass-test .booking-toolbar .chip.active,
-  html.glass-test .upcoming-scope .chip.active{
-    border-color:rgba(244,203,133,.34);
-    background:linear-gradient(145deg,rgba(232,178,92,.32),rgba(140,91,34,.16));
-    color:#fff1d6;
-    box-shadow:0 8px 24px rgba(151,95,26,.18),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.035);
+  html.glass-test .upcoming-scope .chip.active,
+  html.glass-test .analytics-periods .chip.active,
+  html.glass-test .client-sort button.active{
+    border-color:rgba(244,203,133,.35);
+    background:linear-gradient(145deg,rgba(235,183,101,.30),rgba(137,90,34,.15));
+    color:#fff0d2;
+    box-shadow:0 9px 24px rgba(152,95,29,.17),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.03);
   }
+  html.glass-test .booking-toolbar .chip b,
+  html.glass-test .upcoming-scope .chip b{background:rgba(255,255,255,.075)}
 
-  /* Floating Liquid Glass tab bar. Content scrolls behind it. */
+  /* Floating Liquid Glass tab bar. Main content deliberately scrolls behind it. */
   html.glass-test .mobile-nav{
     right:max(10px,var(--pwa-safe-right));
     bottom:calc(8px + var(--pwa-safe-bottom));
     left:max(10px,var(--pwa-safe-left));
     width:auto;
-    height:64px;
+    height:66px;
     padding:5px 7px;
-    border:1px solid var(--glass-line);
-    border-radius:28px;
-    background:linear-gradient(145deg,rgba(34,41,45,.60),rgba(10,16,20,.48));
-    box-shadow:0 22px 52px rgba(0,0,0,.52),0 1px 0 rgba(255,255,255,.06),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -1px 0 rgba(255,255,255,.025);
-    backdrop-filter:blur(34px) saturate(165%);
-    -webkit-backdrop-filter:blur(34px) saturate(165%);
+    gap:1px;
     overflow:visible;
+    border:1px solid var(--lg-line);
+    border-radius:29px;
+    background:linear-gradient(145deg,rgba(42,49,53,.61),rgba(11,17,21,.48));
+    box-shadow:0 24px 62px rgba(0,0,0,.54),0 1px 0 rgba(255,255,255,.06),inset 0 1px 0 rgba(255,255,255,.13),inset 0 -1px 0 rgba(255,255,255,.022);
+    backdrop-filter:blur(34px) saturate(180%);
+    -webkit-backdrop-filter:blur(34px) saturate(180%);
   }
   html.glass-test .mobile-nav::before{
-    content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
-    background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 44%);
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    border-radius:inherit;
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.105),rgba(255,255,255,0) 48%),
+      radial-gradient(42% 90% at 45% 110%,rgba(226,173,91,.10),transparent 72%);
+  }
+  html.glass-test .mobile-nav::after{
+    content:"";
+    position:absolute;
+    left:18%;right:18%;bottom:-8px;height:18px;
+    z-index:-1;
+    pointer-events:none;
+    border-radius:50%;
+    background:rgba(0,0,0,.50);
+    filter:blur(13px);
   }
   html.glass-test .mobile-nav button{
     z-index:1;
-    min-height:52px;
+    min-height:54px;
     border:1px solid transparent;
-    border-radius:22px;
-    transition:background .24s cubic-bezier(.22,1,.36,1),border-color .24s ease,color .2s ease,transform .2s cubic-bezier(.22,1,.36,1),box-shadow .24s ease;
+    border-radius:23px;
+    transition:transform .19s var(--lg-ease),background .24s ease,border-color .24s ease,color .2s ease,box-shadow .24s ease;
   }
-  html.glass-test .mobile-nav button:active{transform:scale(.95)}
+  html.glass-test .mobile-nav button:active{transform:scale(.94)}
   html.glass-test .mobile-nav button.active{
-    border-color:rgba(255,255,255,.105);
-    background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(226,173,91,.075));
-    color:#f2c77c;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 7px 18px rgba(0,0,0,.17);
+    border-color:rgba(255,255,255,.115);
+    background:
+      linear-gradient(145deg,rgba(255,255,255,.11),rgba(226,173,91,.075));
+    color:#f3ca83;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.115),0 7px 18px rgba(0,0,0,.16);
   }
   html.glass-test .mobile-nav .mobile-new-nav{
-    min-height:52px;border-color:transparent;background:transparent;box-shadow:none;
+    border-color:transparent;
+    background:transparent;
+    box-shadow:none;
   }
   html.glass-test .mobile-nav .mobile-new-nav i{
-    width:50px;height:50px;min-width:50px;margin-top:-22px;
-    border:1px solid rgba(244,203,133,.42);
-    background:linear-gradient(145deg,rgba(233,178,90,.29),rgba(58,43,27,.50));
-    box-shadow:0 15px 34px rgba(0,0,0,.45),0 0 0 5px rgba(15,20,23,.50),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(255,255,255,.04);
-    backdrop-filter:blur(26px) saturate(165%);
-    -webkit-backdrop-filter:blur(26px) saturate(165%);
-    color:#ffd992;
+    width:50px;height:50px;min-width:50px;
+    margin-top:-22px;
+    border:1px solid rgba(247,210,149,.43);
+    background:
+      linear-gradient(150deg,rgba(244,195,112,.32),rgba(49,37,24,.50));
+    box-shadow:0 16px 36px rgba(0,0,0,.46),0 0 0 5px rgba(14,20,23,.46),inset 0 1px 0 rgba(255,255,255,.20),inset 0 -1px 0 rgba(255,255,255,.035);
+    backdrop-filter:blur(26px) saturate(175%);
+    -webkit-backdrop-filter:blur(26px) saturate(175%);
+    color:#ffdc99;
+    transition:transform .18s var(--lg-ease),box-shadow .18s ease;
   }
-  html.glass-test .mobile-nav .mobile-new-nav span{color:#e6c88f}
+  html.glass-test .mobile-nav .mobile-new-nav:active i{transform:scale(.92);box-shadow:0 9px 24px rgba(0,0,0,.38),0 0 0 4px rgba(14,20,23,.42),inset 0 1px 0 rgba(255,255,255,.16)}
+  html.glass-test .mobile-nav .mobile-new-nav span{color:#e2c28b}
 
-  /* Controls get the glass language, while destructive/status semantics remain distinct. */
-  html.glass-test .btn{
-    border-radius:16px;
-    transition:transform .18s cubic-bezier(.22,1,.36,1),filter .18s ease,box-shadow .2s ease,border-color .2s ease;
+  /* "More" becomes a true floating glass popover. */
+  html.glass-test .mobile-more-menu{
+    right:max(12px,var(--pwa-safe-right));
+    bottom:calc(84px + var(--pwa-safe-bottom));
+    left:max(12px,var(--pwa-safe-left));
+    padding:10px;
+    border:1px solid var(--lg-line);
+    border-radius:25px;
+    background:linear-gradient(145deg,rgba(39,46,50,.72),rgba(9,15,19,.64));
+    box-shadow:0 30px 72px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.12);
+    backdrop-filter:blur(34px) saturate(175%);
+    -webkit-backdrop-filter:blur(34px) saturate(175%);
   }
-  html.glass-test .btn:active{transform:scale(.975)}
-  html.glass-test .btn:not(.primary):not(.green):not(.danger){
+  html.glass-test .mobile-more-grid{gap:8px}
+  html.glass-test .mobile-more-grid button{
+    min-height:58px;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:17px;
+    background:rgba(12,18,22,.42);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+    transition:transform .18s var(--lg-ease),background .2s ease,border-color .2s ease;
+  }
+  html.glass-test .mobile-more-grid button:active{transform:scale(.97)}
+  html.glass-test .mobile-more-grid button.active{
+    border-color:rgba(239,195,125,.28);
+    background:linear-gradient(145deg,rgba(225,172,89,.18),rgba(225,172,89,.06));
+    color:#f2c982;
+  }
+
+  /* Interactive controls get glass; semantic action colors remain semantic. */
+  html.glass-test .btn,
+  html.glass-test .icon-btn,
+  html.glass-test .close{
+    border-radius:16px;
+    transition:transform .18s var(--lg-ease),filter .18s ease,box-shadow .2s ease,border-color .2s ease,background .2s ease;
+  }
+  html.glass-test .btn:active,
+  html.glass-test .icon-btn:active,
+  html.glass-test .close:active{transform:scale(.965)}
+  html.glass-test .btn:not(.primary):not(.green):not(.danger),
+  html.glass-test .icon-btn,
+  html.glass-test .close{
     border-color:rgba(255,255,255,.115);
-    background:rgba(22,30,34,.54);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.055);
-    backdrop-filter:blur(16px) saturate(140%);
-    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    background:linear-gradient(145deg,rgba(38,46,50,.48),rgba(13,20,24,.42));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 8px 20px rgba(0,0,0,.10);
+    backdrop-filter:blur(18px) saturate(145%);
+    -webkit-backdrop-filter:blur(18px) saturate(145%);
   }
   html.glass-test .btn.primary,
   html.glass-test .upcoming-row.issue .upcoming-actions .btn:last-child{
-    border-color:rgba(255,216,145,.28);
-    background:linear-gradient(145deg,rgba(226,173,91,.92),rgba(188,126,49,.78));
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.27),0 10px 24px rgba(157,95,24,.20);
+    border-color:rgba(255,218,151,.30);
+    background:linear-gradient(150deg,rgba(231,180,96,.96),rgba(181,119,44,.80));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 11px 26px rgba(151,91,22,.20);
   }
   html.glass-test .btn.green,
   html.glass-test .upcoming-row.return .upcoming-actions .btn:last-child{
-    border-color:rgba(118,235,178,.24);
-    background:linear-gradient(145deg,rgba(36,160,105,.90),rgba(19,125,80,.78));
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.17),0 10px 24px rgba(11,107,65,.17);
+    border-color:rgba(128,239,187,.24);
+    background:linear-gradient(150deg,rgba(40,166,111,.92),rgba(18,120,76,.80));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 11px 26px rgba(10,102,61,.17);
   }
 
-  /* Full-screen sheets keep a solid content layer; only header/footer controls pick up glass. */
-  html.glass-test .modal{background:rgba(4,7,9,.82)}
+  /* Small input/select controls in sheets use a thicker standard material for legibility. */
+  html.glass-test .premium-control,
+  html.glass-test .field input,
+  html.glass-test .field select,
+  html.glass-test .field textarea{
+    border-color:rgba(255,255,255,.105);
+    background:rgba(18,26,30,.78);
+  }
+  html.glass-test .premium-control:focus-within,
+  html.glass-test .field input:focus,
+  html.glass-test .field select:focus,
+  html.glass-test .field textarea:focus{
+    border-color:rgba(239,195,125,.42);
+    box-shadow:0 0 0 3px rgba(226,173,91,.065),inset 0 1px 0 rgba(255,255,255,.045);
+  }
+
+  /* Sheets: content remains solid; functional chrome floats as glass. */
+  html.glass-test .modal{background:rgba(3,6,8,.76);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
   html.glass-test .modal-card,
   html.glass-test .modal-card:has(.issue-form),
   html.glass-test .modal-card:has(.finance-form),
-  html.glass-test .modal-card:has(.catalog-form){background:#0b1216}
+  html.glass-test .modal-card:has(.catalog-form){
+    border-color:rgba(255,255,255,.10);
+    background:#0a1115;
+    box-shadow:0 34px 90px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.035);
+  }
   html.glass-test .modal-form>header{
     border-bottom-color:rgba(255,255,255,.075);
-    background:rgba(14,21,25,.76);
-    backdrop-filter:blur(24px) saturate(145%);
-    -webkit-backdrop-filter:blur(24px) saturate(145%);
+    background:rgba(16,23,27,.75);
+    backdrop-filter:blur(26px) saturate(150%);
+    -webkit-backdrop-filter:blur(26px) saturate(150%);
   }
   html.glass-test .modal-form>footer{
     border-top-color:rgba(255,255,255,.075);
     background:rgba(12,19,23,.80);
-    backdrop-filter:blur(24px) saturate(145%);
-    -webkit-backdrop-filter:blur(24px) saturate(145%);
+    backdrop-filter:blur(26px) saturate(150%);
+    -webkit-backdrop-filter:blur(26px) saturate(150%);
   }
+
+  /* Calendar remains content, but slot controls gain a restrained interactive sheen. */
+  html.glass-test .calendar-grid .slot{
+    border:1px solid rgba(255,255,255,.08);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+  }
+  html.glass-test .calendar-grid .slot:not(.busy):active{transform:scale(.97)}
+
+  /* Focus should look intentional on a touch-first app when a hardware keyboard is used. */
+  html.glass-test :focus-visible{outline:2px solid rgba(244,203,133,.62);outline-offset:2px}
 }
 
 @media (max-width:900px) and (prefers-reduced-motion:reduce){
   html.glass-test .mobile-nav button,
-  html.glass-test .btn{transition:none}
+  html.glass-test .mobile-nav .mobile-new-nav i,
+  html.glass-test .booking-toolbar .chip,
+  html.glass-test .upcoming-scope .chip,
+  html.glass-test .analytics-periods .chip,
+  html.glass-test .client-sort button,
+  html.glass-test .btn,
+  html.glass-test .icon-btn,
+  html.glass-test .close{transition:none}
 }
 
 @media (max-width:900px) and (prefers-reduced-transparency:reduce){
   html.glass-test .search,
   html.glass-test .booking-toolbar .chip,
   html.glass-test .upcoming-scope .chip,
+  html.glass-test .analytics-periods .chip,
+  html.glass-test .client-sort button,
   html.glass-test .mobile-nav,
-  html.glass-test .btn:not(.primary):not(.green):not(.danger){
+  html.glass-test .mobile-more-menu,
+  html.glass-test .btn:not(.primary):not(.green):not(.danger),
+  html.glass-test .icon-btn,
+  html.glass-test .close{
     background:#11191d;
     backdrop-filter:none;
     -webkit-backdrop-filter:none;
+  }
+}
+
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  @media (max-width:900px){
+    html.glass-test .search,
+    html.glass-test .mobile-nav,
+    html.glass-test .mobile-more-menu,
+    html.glass-test .booking-toolbar .chip,
+    html.glass-test .upcoming-scope .chip{background:#151d21}
   }
 }

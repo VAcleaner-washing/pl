@@ -273,24 +273,18 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.locator('#clientEditor [data-close]').first.click();page.wait_for_timeout(30)
         page.wait_for_timeout(80)
 
-        # Bottom nav must not move when only the app content scrolls.
+        # iPhone shell must stay geometrically stable while only app content scrolls.
         nav_before=page.locator('.mobile-nav').bounding_box()
         main_top_before=page.locator('.main').bounding_box()['y']
-        page.locator('.main').evaluate("el=>el.scrollTop=Math.min(420,el.scrollHeight-el.clientHeight)")
-        page.wait_for_timeout(70)
-        main_top_mid=page.locator('.main').bounding_box()['y']
-        qa.check(main_top_mid < main_top_before-2, f"{label}: booking search collapse starts as a real animated shell transition")
-        page.wait_for_timeout(230)
-        qa.check(page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: booking search hides after list scroll")
-        qa.check(page.locator('.booking-toolbar').bounding_box()['y'] <= page.locator('.main').bounding_box()['y'] + 2, f"{label}: booking filters remain the sticky control when search hides")
-        page.locator('.main').evaluate("el=>el.scrollTop=48")
-        page.wait_for_timeout(40)
-        qa.check(page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: booking search hysteresis prevents flicker during small reverse scrolls")
-        page.locator('.main').evaluate("el=>el.scrollTop=8")
-        page.wait_for_timeout(300)
-        qa.check(not page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: booking search returns only near the top")
+        topbar_before=page.locator('.topbar').bounding_box()
         page.locator('.main').evaluate("el=>el.scrollTop=Math.min(420,el.scrollHeight-el.clientHeight)")
         page.wait_for_timeout(300)
+        main_top_after=page.locator('.main').bounding_box()['y']
+        topbar_after=page.locator('.topbar').bounding_box()
+        qa.check(abs(main_top_after-main_top_before)<=0.5, f"{label}: booking scroll never shifts the main shell")
+        qa.check(topbar_before is not None and topbar_after is not None and abs(topbar_after['y']-topbar_before['y'])<=0.5 and topbar_after['height']>=44, f"{label}: booking search stays fixed and visible during list scroll")
+        qa.check(not page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: no legacy booking-search collapse state is created")
+        qa.check(page.locator('.booking-toolbar').bounding_box()['y'] <= page.locator('.main').bounding_box()['y'] + 2, f"{label}: booking filters remain sticky below the stable search shell")
         nav_after=page.locator('.mobile-nav').bounding_box()
         qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs(nav_after['y']+nav_after['height']-height)<=1, f"{label}: bottom navigation does not walk during content scroll")
         page.locator('#globalSearch').evaluate('el=>el.blur()')

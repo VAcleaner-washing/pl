@@ -46,9 +46,9 @@ ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail 
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
 ok(runtime.includes('function lockStandaloneZoom()')&&runtime.includes("e.touches?.length>1"),'standalone PWA blocks pinch zoom without changing public pages');
 ok(runtime.includes('data-client-card')&&runtime.includes('openBookingClient'),'booking and upcoming client blocks open the client card');
-ok(runtime.includes('mobile-booking-search-collapsed')&&css.includes('.app.mobile-booking-search-collapsed .topbar'),'booking search collapses while mobile list scrolls');
-ok(runtime.includes('scrollTop>72')&&runtime.includes('scrollTop>18'),'booking search uses hysteresis instead of toggling on one scroll threshold');
-ok(css.includes('transition:top .24s cubic-bezier(.22,1,.36,1)')&&css.includes('transition:transform .24s cubic-bezier(.22,1,.36,1)'),'booking search collapse animates shell geometry instead of jumping');
+ok(!runtime.includes('mobile-booking-search-collapsed')&&!css.includes('.app.mobile-booking-search-collapsed'),'booking search never changes shell geometry while mobile list scrolls');
+ok(!runtime.includes('syncMobileBookingSearch')&&!runtime.includes('scrollTop>72'),'booking search has no scroll-driven hide threshold on iPhone');
+ok(css.includes('v3.0.75 — keep booking search geometry stable on iOS'),'mobile contract documents the stable booking-search shell');
 ok(html.includes('<div id="adminMount"></div><nav class="mobile-nav"'),'mobile navigation exists in initial HTML before JS paint, matching VA HOME');
 ok(!runtime.includes('<nav class="mobile-nav"'),'runtime never recreates the static mobile navigation');
 ok(css.includes('.sidebar{display:none}'),'desktop sidebar is hidden rather than transformed on mobile');
