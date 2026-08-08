@@ -126,6 +126,24 @@ if(!publicExperienceCss.includes('.package-card.featured .vx-home-reset-gift{pos
 
 if(!publicExperience.includes('Фінальний штрих — аромадифузор VA HOME · Entry у подарунок'))errors.push('HOME RESET real-plan finale must mention the VA HOME diffuser gift');
 if(!publicExperienceCss.includes('.vx-proof__actions .vx-proof__cta{-webkit-appearance:none;appearance:none')||!publicExperienceCss.includes('-webkit-text-fill-color:#15110c'))errors.push('Instagram review collection CTA must not fall back to Safari browser-blue styling');
+if(!publicReactBundle.includes('event:"generate_lead"')||!publicReactBundle.includes('currency:"UAH"')||!publicReactBundle.includes('value:Number(K?.totalAmount||0)'))errors.push('successful public booking must push GA4 generate_lead with UAH value after backend success');
+if(publicReactBundle.includes('booking_request_created'))errors.push('legacy booking_request_created event remains instead of recommended generate_lead');
+if(!publicReactBundle.includes('contact_click')||!publicReactBundle.includes('contact_method:i||void 0'))errors.push('public Instagram/Telegram/phone clicks must push normalized contact_click events');
+if(!publicExperience.includes("event:'booking_started'")||!publicExperience.includes('bindBookingAnalytics'))errors.push('public booking_started instrumentation is missing');
+if(!publicExperience.includes('setMobileBookingStep(index,{scroll:true})')||!publicExperience.includes('setMobileBookingStep(target,{scroll:true})'))errors.push('mobile booking step changes must restore the form to the fixed-header-safe position');
+if(!publicExperienceCss.includes('.booking-form .booking-step{scroll-margin-top:112px}'))errors.push('public booking anchors need fixed-header scroll margin');
+const faqHtml=fs.readFileSync(path.join(root,'faq','index.html'),'utf8');
+const packagesHtml=fs.readFileSync(path.join(root,'komplekty','index.html'),'utf8');
+for(const rel of ['index.html','bronuvannia/index.html','faq/index.html','komplekty/index.html','kontakty/index.html','umovy/index.html','vidhuky/index.html','yak-tse-pratsiuie/index.html','rishennia/index.html','rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html']){
+ const html=fs.readFileSync(path.join(root,...rel.split('/')),'utf8');
+ for(const token of ['"@type":"PostalAddress"','"streetAddress":"вул. Європейська, 146Е"','"@type":"GeoCoordinates"','"latitude":49.559015','"longitude":34.522031','"openingHoursSpecification"','"logo":"https://vacleaner.pp.ua/apple-touch-icon.png"','"image":"https://vacleaner.pp.ua/assets/og-home.png"'])if(!html.includes(token))errors.push(`LocalBusiness SEO field missing in ${rel}: ${token}`);
+}
+if(!faqHtml.includes('"@type":"FAQPage"')||((faqHtml.match(/"@type":"Question"/g)||[]).length<15))errors.push('FAQ page must expose FAQPage JSON-LD for all visible questions');
+for(const rel of ['rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html']){
+ const html=fs.readFileSync(path.join(root,...rel.split('/')),'utf8');
+ if(!html.includes('"@type":"Service"')||!html.includes('"@type":"Offer"')||!html.includes('"priceCurrency":"UAH"'))errors.push(`Service/Offer JSON-LD missing in ${rel}`);
+}
+if(!packagesHtml.includes('"@type":"Service"')||!packagesHtml.includes('"@type":"OfferCatalog"')||((packagesHtml.match(/"@type":"Offer"/g)||[]).length<5))errors.push('package page must expose Service + OfferCatalog JSON-LD');
 if(!adminRuntime.includes('vacleaner-status-correction-v1')||!adminRuntime.includes('Виправити статус')||!adminRuntime.includes('invokeStatus({bookingId:b.id,status:target,reason})'))errors.push('admin status correction UI/endpoint binding is missing');
 if(!statusEdge.includes('edge:correct_status:')||!statusEdge.includes('vacleaner_apply_reservation')||!statusEdge.includes('admin_users'))errors.push('dedicated server-side controlled status correction is missing');
 if(adminEdge.includes('action === "correct_status"'))errors.push('status correction logic is duplicated inside vacleaner-admin-bookings-v3');

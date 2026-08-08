@@ -450,13 +450,13 @@
         if(progressButton){
           const liveButtons=[...parts.form.querySelectorAll('.booking-progress button')];
           const index=liveButtons.indexOf(progressButton);
-          if(index>=0)setMobileBookingStep(index);
+          if(index>=0)setMobileBookingStep(index,{scroll:true});
           return;
         }
         const button=event.target.closest('.booking-mobile-summary button');
         if(!button||button.type==='submit')return;
         const target=mobileStepFromCta(button);
-        if(target>=0)setMobileBookingStep(target);
+        if(target>=0)setMobileBookingStep(target,{scroll:true});
       },true);
     }
     setMobileBookingStep(Number(parts.form.dataset.vxActiveStep||0));
@@ -485,6 +485,20 @@
     if(finishCopy)finishCopy.textContent='Фінальний штрих — аромадифузор VA HOME · Entry у подарунок';
   }
 
+  function bindBookingAnalytics(){
+    const form=document.querySelector('.booking-form');
+    if(!form||form.dataset.vxAnalyticsBound)return;
+    form.dataset.vxAnalyticsBound='1';
+    let started=false;
+    const fireStarted=()=>{
+      if(started)return;started=true;
+      window.dataLayer=window.dataLayer||[];
+      window.dataLayer.push({event:'booking_started',page_path:location.pathname});
+    };
+    form.addEventListener('click',event=>{if(event.target.closest('button,input,select,textarea'))fireStarted()},true);
+    form.addEventListener('change',fireStarted,true);
+  }
+
   function enhance(){
     if(location.pathname.startsWith('/admin/'))return;
     replacePublicLabels();
@@ -498,6 +512,7 @@
     enhanceDepositSummary();
     enhanceHomeResetGift();
     enhanceMobileBookingFlow();
+    bindBookingAnalytics();
   }
 
   let queued=false;

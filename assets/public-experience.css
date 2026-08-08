@@ -461,3 +461,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     min-height:2em;
   }
 }
+
+/* v3.0.66 — booking anchor alignment under fixed public header */
+.booking-form .booking-step{scroll-margin-top:112px}
+@media(min-width:621px) and (max-width:900px){.booking-form .booking-step{scroll-margin-top:136px}}
