@@ -397,6 +397,18 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
                 break
         checks.check(mobile_cta_ok, "Mobile booking and Instagram CTA never overlap on public pages")
 
+        page.goto(f"{base}/vidhuky/", wait_until="networkidle")
+        page.wait_for_selector(".vx-proof__cta")
+        review_cta = page.locator(".vx-proof__cta")
+        review_style = review_cta.evaluate("el=>({background:getComputedStyle(el).backgroundImage,color:getComputedStyle(el).color,fill:getComputedStyle(el).webkitTextFillColor,appearance:getComputedStyle(el).appearance})")
+        checks.check("linear-gradient" in review_style["background"] and review_style["appearance"] == "none" and review_style["fill"] not in ("", "auto"), "Review first-collection CTA keeps VAcleaner styling instead of Safari browser blue")
+
+        page.goto(f"{base}/", wait_until="networkidle")
+        page.wait_for_selector(".vx-home-reset-gift")
+        checks.check(page.locator('.vx-home-reset-gift').first.get_attribute('href') == 'https://vahome.com.ua/catalog?collection=entry', "HOME RESET diffuser gift opens the VA HOME Entry collection filter")
+        finish = page.locator('.v21-day-grid article').filter(has_text='Дім знову свіжий').first
+        checks.check(finish.count() == 1 and 'Фінальний штрих — аромадифузор VA HOME · Entry у подарунок' in finish.locator('p').inner_text(), "HOME RESET real plan ends with the VA HOME atmosphere step")
+
         page.goto(f"{base}/", wait_until="networkidle")
         hero_box = page.locator(".v21-hero-copy").bounding_box()
         viewport_height = page.viewport_size["height"] if page.viewport_size else 844
@@ -459,11 +471,18 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
             '.mobile-nav .more-nav:visible',
         ]
         checks.check(all(page.locator(selector).count() == 1 for selector in mobile_selectors), "Mobile bottom navigation has five primary items")
+        checks.check(page.locator('html').evaluate("el=>el.classList.contains('pwa-browser')&&!el.classList.contains('pwa-standalone')"), "Mobile browser admin uses the browser-only shell contract")
+        page.evaluate("window.scrollTo(0,99999)")
+        page.wait_for_timeout(50)
+        checks.check(page.evaluate("window.scrollY") == 0 and page.locator('.main').evaluate("el=>['auto','scroll'].includes(getComputedStyle(el).overflowY)"), "Mobile browser cannot scroll the root into blank space while main remains scrollable")
         page.locator(".mobile-nav .more-nav:visible").click()
+        checks.check(page.locator('.mobile-nav .more-nav.active:visible').count() == 1 and page.locator('.mobile-nav button[data-mobile-view].active:visible').count() == 0, "Opening More makes More the only active bottom-nav item")
         more = page.locator(".mobile-more-menu:visible")
         expected_more = ["Техніка", "Клієнти", "Кампанії", "Аналітика", "Хімія", "Налаштування"]
         checks.check(more.count() == 1 and all(more.get_by_text(label, exact=True).count() == 1 for label in expected_more), "Mobile More contains all six secondary sections")
         page.keyboard.press("Escape")
+        page.wait_for_timeout(30)
+        checks.check(page.locator('.mobile-nav button[data-mobile-view="bookings"].active:visible').count() == 1 and page.locator('.mobile-nav .more-nav.active:visible').count() == 0, "Closing More restores the active state of the current primary view")
         page.evaluate("document.querySelector('.main').scrollTop=600")
         page.locator('.mobile-nav button[data-mobile-view="calendar"]:visible').click()
         page.wait_for_timeout(100)

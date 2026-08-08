@@ -131,7 +131,8 @@ has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevid
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
 has(adminHtml,'data-mobile-view="bookings"','dedicated mobile nav has its own primary-view buttons in initial HTML');
 has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
-has(admin,"['equipment','clients','campaigns','analytics','chemistry','settings'].includes(v)",'More active state includes analytics after moving it out of the primary nav');
+has(admin,"const MOBILE_MORE_VIEWS=['equipment','clients','campaigns','analytics','chemistry','settings']",'More active-state mapping includes analytics and all secondary views');
+has(admin,'MOBILE_MORE_VIEWS.includes(state.view)','More active state uses the shared secondary-view mapping');
 has(adminHtml,'id="mobileNewBooking"','mobile navigation has a dedicated centered New action in initial HTML');
 has(pwaQa,'analytics activates More without a second visible active item','analytics correctly maps to More without double highlighting');
 

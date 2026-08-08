@@ -434,6 +434,10 @@
       if(!/HOME RESET/i.test(button.textContent||'')||button.querySelector('.vx-home-reset-gift-inline'))return;
       const gift=document.createElement('span');gift.className='vx-home-reset-gift-inline';gift.textContent='✦ Аромадифузор VA HOME · Entry у подарунок';button.append(gift);
     });
+    const dayCards=[...document.querySelectorAll('.v21-day-grid article')];
+    const finish=dayCards.find(card=>/Дім знову свіжий/i.test(card.textContent||''));
+    const finishCopy=finish?.querySelector('p');
+    if(finishCopy)finishCopy.textContent='Фінальний штрих — аромадифузор VA HOME · Entry у подарунок';
   }
 
   function enhance(){

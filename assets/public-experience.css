@@ -207,7 +207,7 @@ html{scrollbar-gutter:stable;}
   min-height:54px;display:inline-flex;align-items:center;justify-content:center;gap:10px;
   padding:0 20px;border-radius:14px;text-decoration:none;font-size:14px;font-weight:760;
 }
-.vx-proof__cta{background:linear-gradient(145deg,#e8bb74,#c58d40);color:#15110c;box-shadow:0 14px 28px rgba(197,141,64,.2)}
+.vx-proof__actions .vx-proof__cta{-webkit-appearance:none;appearance:none;border:1px solid rgba(232,187,116,.55);background:linear-gradient(145deg,#e8bb74,#c58d40);color:#15110c;-webkit-text-fill-color:#15110c;text-decoration:none;box-shadow:0 14px 28px rgba(197,141,64,.2)}
 .vx-proof__secondary{border:1px solid rgba(255,255,255,.14);color:#f4eee4;background:rgba(255,255,255,.035)}
 .vx-proof__panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .vx-proof__count{

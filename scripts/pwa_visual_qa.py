@@ -258,6 +258,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         new_box=page.locator('#mobileNewBooking:visible i').bounding_box(); regular_box=page.locator('.mobile-nav button[data-mobile-view="calendar"]:visible svg').bounding_box()
         qa.check(new_box is not None and regular_box is not None and new_box['y'] < regular_box['y'], f"{label}: center New action rises above the VA HOME-style nav row")
         page.locator('.mobile-nav .more-nav:visible').click();page.wait_for_timeout(20)
+        qa.check(page.locator('.mobile-nav .more-nav.active:visible').count()==1 and page.locator('.mobile-nav button[data-mobile-view].active:visible').count()==0, f"{label}: opening More temporarily makes More the only active bottom-nav item")
         qa.check(page.locator('.mobile-more-menu [data-more-view="equipment"]:visible').count()==1 and page.locator('.mobile-more-menu [data-more-view="analytics"]:visible').count()==1, f"{label}: equipment and analytics both live in More")
         page.locator('.mobile-more-menu [data-more-view="analytics"]:visible').click();page.wait_for_timeout(30)
         qa.check(page.locator('.mobile-nav .more-nav.active:visible').count()==1 and page.locator('.mobile-nav button[data-mobile-view="analytics"]:visible').count()==0, f"{label}: analytics activates More without a second visible active item")
@@ -652,6 +653,39 @@ def public_nearest_availability_suite(browser: Browser, qa: QA) -> None:
     finally:
         page.close()
 
+def mobile_browser_suite(browser: Browser, qa: QA, width: int = 390) -> None:
+    height=844
+    page=render_page(browser,width,height,standalone=False)
+    try:
+        page.evaluate("document.documentElement.style.setProperty('--pwa-safe-top','0px');document.documentElement.style.setProperty('--pwa-safe-bottom','0px')")
+        page.wait_for_timeout(80)
+        dismiss_update(page,qa)
+        qa.check(page.locator('html').evaluate("el=>el.classList.contains('pwa-browser')&&!el.classList.contains('pwa-standalone')"), 'Mobile Safari tab: browser mode is detected explicitly')
+        shell=page.evaluate("""()=>({
+          htmlOverflow:getComputedStyle(document.documentElement).overflowY,
+          bodyOverflow:getComputedStyle(document.body).overflowY,
+          appOverflow:getComputedStyle(document.querySelector('.app')).overflowY,
+          mainOverflow:getComputedStyle(document.querySelector('.main')).overflowY,
+          htmlScroll:document.documentElement.scrollHeight,
+          htmlClient:document.documentElement.clientHeight
+        })""")
+        qa.check(shell['htmlOverflow']=='hidden' and shell['bodyOverflow']=='hidden' and shell['appOverflow']=='hidden', 'Mobile Safari tab: document shell is locked because .main is the single scroll owner')
+        qa.check(shell['mainOverflow'] in ('auto','scroll'), 'Mobile Safari tab: admin content remains independently scrollable')
+        page.evaluate("window.scrollTo(0,99999)");page.wait_for_timeout(40)
+        root_scroll=page.evaluate("()=>({y:window.scrollY,html:document.documentElement.scrollTop,body:document.body.scrollTop})")
+        qa.check(root_scroll['y']==0 and root_scroll['html']==0 and root_scroll['body']==0, 'Mobile Safari tab: root cannot scroll into blank space')
+        nav=page.locator('.mobile-nav').bounding_box()
+        qa.check(nav is not None and abs(nav['y']+nav['height']-height)<=1, 'Mobile Safari tab: bottom navigation stays at the visible viewport bottom')
+        main=page.locator('.main')
+        main.evaluate("el=>el.scrollTop=Math.min(420,Math.max(0,el.scrollHeight-el.clientHeight))");page.wait_for_timeout(40)
+        qa.check(page.evaluate('window.scrollY')==0, 'Mobile Safari tab: scrolling admin content never transfers to the page root')
+        nav_after=page.locator('.mobile-nav').bounding_box()
+        qa.check(nav_after is not None and abs(nav_after['y']+nav_after['height']-height)<=1, 'Mobile Safari tab: bottom navigation remains pinned after content scroll')
+        qa.shot(page,'mobile-browser-shell.png')
+    finally:
+        page.close()
+
+
 def landscape_suite(browser: Browser, qa: QA) -> None:
     page = render_page(browser, 844, 390)
     try:
@@ -688,6 +722,7 @@ def main() -> int:
             mobile_suite(browser, qa, 320, "mobile-320")
             mobile_suite(browser, qa, 390, "mobile-390")
             mobile_suite(browser, qa, 430, "mobile-430")
+            mobile_browser_suite(browser, qa, 390)
             tablet_suite(browser, qa)
             landscape_suite(browser, qa)
             auth_suite(browser, qa)

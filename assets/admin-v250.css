@@ -1384,6 +1384,13 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .client-no-phone{align-self:center;color:var(--muted)}
   .campaign-panel{padding:14px}.campaign-panel-head{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}.campaign-panel-head .btn{width:100%;min-height:44px}.campaign-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.campaign-row{grid-template-columns:minmax(0,1fr);gap:10px}.campaign-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}.campaign-metrics>span{text-align:left}.campaign-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.campaign-actions .btn{width:100%}.campaign-form-body{padding:12px}.campaign-code-list{max-height:none}.campaign-code-list>div{grid-template-columns:minmax(0,1fr)}
   .campaign-actions .campaign-archive,.campaign-actions .danger-soft{min-height:44px}
+
+  /* v3.0.56 — Safari tab mode must not scroll the document shell into empty space.
+     .main is the one mobile scroll owner. The explicit pwa-browser class comes from
+     navigator.standalone/display-mode detection, so the installed PWA contract stays untouched. */
+  html.pwa-browser,html.pwa-browser body{height:100dvh;min-height:0;max-height:100dvh;overflow:hidden}
+  html.pwa-browser #adminMount,html.pwa-browser .app{height:100%;min-height:0;max-height:100%;overflow:hidden}
+
   /* v3.0.48 — exact VA HOME keyboard contract: bottom navigation is never hidden, resized or re-positioned by keyboard state.
      iOS may overlay it while the keyboard is open; when the keyboard closes there is no sidebar compositor layer to recreate. */
 }
