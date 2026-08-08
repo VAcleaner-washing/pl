@@ -39,6 +39,7 @@ for(const fn of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bo
 if(!fs.existsSync(path.join(root,'supabase','functions','vacleaner-admin-data-v1','index.ts')))errors.push('admin data Edge source is missing');
 if(!fs.existsSync(path.join(root,'supabase','functions','vacleaner-reminders-v1','index.ts')))errors.push('server reminder Edge source is missing');
 if(!fs.existsSync(path.join(root,'supabase','functions','vacleaner-status-correction-v1','index.ts')))errors.push('status correction Edge source is missing');
+if(!fs.existsSync(path.join(root,'supabase','functions','vacleaner-customer-documents-v1','index.ts')))errors.push('customer documents Edge source is missing');
 const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes(`vacleaner-manager-${build}`))errors.push('service worker cache version mismatch');
 const adminSw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');
 
@@ -104,6 +105,7 @@ if(!bookingHtml.includes(`/assets/public-resilience.js?v=${build}`))errors.push(
 const businessCopy=[publicBooking,publicExperience,bookingHtml,adminRuntime].join('\n');
 const publicExperienceCss=fs.readFileSync(path.join(root,'assets','public-experience.css'),'utf8');
 const adminCss=fs.readFileSync(path.join(root,'assets','admin-v250.css'),'utf8');
+if(/html\.keyboard-open \.modal-card\{[^}]*height:var\(--keyboard-viewport-height/.test(adminCss))errors.push('mobile modal geometry must not be resized by visualViewport keyboard state');
 for(const token of ['.auth-card .field input{font-size:16px}','html.keyboard-open .auth','.app{position:static;inset:auto;width:100%','.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0'])if(!adminCss.includes(token))errors.push(`iPhone/mobile CSS hardening missing: ${token}`);
 if(adminCss.includes('--pwa-viewport-height')||adminCss.includes('--pwa-viewport-top'))errors.push('legacy app-shell visualViewport CSS variables remain');
 if(adminCss.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'))errors.push('mobile app shell is over-constrained by 100dvh');
@@ -188,6 +190,11 @@ if(!adminRuntime.includes('primary=state.rememberSession?localStorage:sessionSto
 if(!adminRuntime.includes('name=\"remember\"')||!adminRuntime.includes('Запам’ятати цей пристрій'))errors.push('trusted-device login option is missing');
 if(!adminRuntime.includes('saveSession(d,sessionPersistent())'))errors.push('refreshed token does not preserve session mode');
 if(!adminRuntime.includes('safeMarkup(markup)')||!adminRuntime.includes('const escapeHtml='))errors.push('admin output hardening is missing');
+for(const token of ['DOCUMENT_API','documentUploadHtml','openClientCard','clientRentalHistory',"documentRequest('upload'",'data-client-open'])if(!adminRuntime.includes(token))errors.push(`customer document/client card UX missing: ${token}`);
+const documentEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-customer-documents-v1','index.ts'),'utf8');
+for(const token of ['vacleaner-client-documents','admin_users','createSignedUrl','createBucket','public: false','MAX_FILE_SIZE'])if(!documentEdge.includes(token))errors.push(`private customer document security missing: ${token}`);
+const customerDocumentMigration=fs.readFileSync(path.join(root,'supabase','migrations','20260808221500_vacleaner_customer_document_photos.sql'),'utf8');
+for(const token of ['document_photo_path','document_photo_name','document_photo_mime','document_photo_uploaded_at'])if(!customerDocumentMigration.includes(token))errors.push(`customer document migration missing: ${token}`);
 if(!adminRuntime.includes('Math.min(8,packetValue()')||!adminRuntime.includes('const value=Math.min(8,digits(form.used))'))errors.push('chemistry packet UI is not limited to 8');
 if(adminRuntime.includes('refundAmount:result.refund')||adminRuntime.includes('dueAmount:result.due'))errors.push('client still submits calculated refund or due');
 if(!adminRuntime.includes('settlementConfirmed:true')||!adminRuntime.includes('refundPaid:Number(finalFinance.refundAmount||0)>0')||!adminRuntime.includes('duePaid:Number(finalFinance.dueAmount||0)>0'))errors.push('settlement confirmations are incomplete');

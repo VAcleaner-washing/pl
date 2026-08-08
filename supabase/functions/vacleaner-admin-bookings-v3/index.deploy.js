@@ -278,7 +278,7 @@ Deno.serve(async (request) => {
             if (!phone)
                 return json({ customer: null });
             const [{ data: profile }, { data: orders, error }] = await Promise.all([
-                supabase.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,updated_at").eq("phone", phone).maybeSingle(),
+                supabase.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
                 supabase.from("vacleaner_bookings").select("customer_name,customer_telegram,fulfillment,fulfillment_address,product_label,start_date,status,total_amount,created_at").eq("customer_phone", phone).order("created_at", { ascending: false }).limit(100),
             ]);
             if (error)
@@ -291,6 +291,7 @@ Deno.serve(async (request) => {
             return json({ customer: {
                     phone, name: profile?.name || latest?.customer_name || "", telegram: profile?.telegram || latest?.customer_telegram || "", address: profile?.address || latestDelivery?.fulfillment_address || "",
                     documentType: profile?.document_type || "", documentNumber: profile?.document_number || "", documentVerifiedAt: profile?.document_verified_at || null,
+                    documentPhotoName: profile?.document_photo_name || "", documentPhotoMime: profile?.document_photo_mime || "", documentPhotoUploadedAt: profile?.document_photo_uploaded_at || null, hasDocumentPhoto: Boolean(profile?.document_photo_path),
                     hasDocument, isRepeatCustomer, documentsRequired: !hasDocument && !isRepeatCustomer, completedOrders, totalOrders: (orders || []).filter((row) => !["cancelled", "declined"].includes(row.status)).length,
                     totalSpent: completed.reduce((sum, row) => sum + Number(row.total_amount || 0), 0), lastDate: latest?.start_date || "", lastProduct: latest?.product_label || "", loyalty,
                 } });

@@ -104,7 +104,9 @@ has(publicSlots,'vx-nearest-availability','public UI renders nearest-compatible 
 has(admin,'function isHistoricalPhone(value)','historical clients without real phones cannot crash the clients view');
 has(admin,"!['bookings','clients'].includes(state.view)",'client search stays in the clients view');
 has(admin,'const dateFullNumeric=v=>','client list has a full numeric date formatter');
-has(admin,'function openClientEditor(client)','client cards have an editor');
+has(admin,'function openClientCard(client)','client rows open a full customer card');
+has(admin,'data-client-open','every client row is clickable');
+has(admin,'documentUploadHtml','new booking and customer card expose private document photo upload');
 has(adminEdge,'if (action === "clients")','admin API exposes customer profiles');
 has(adminEdge,'.order(\"start_at\", { ascending: false }).limit(1000)','historical import cannot push current bookings out of the admin list');
 has(adminEdge,'if (action === "save_customer")','admin API persists customer-card edits');

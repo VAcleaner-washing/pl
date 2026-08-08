@@ -26,6 +26,6 @@ check('ordinary admin edits cannot silently erase a better applied promo',()=>{a
 check('public form ships promo input runtime',()=>{assert.ok((bundle.match(/promoCode/g)||[]).length>=6);assert.ok(bundle.includes('Промокод'))});
 check('campaign data never directly exposes client tables',()=>{assert.ok(migration.includes('enable row level security'));assert.ok(migration.includes('to anon,authenticated using (false)'))});
 
-check('campaign management has a dedicated admin view',()=>{assert.ok(admin.includes("nav('campaigns','Кампанії'"));assert.ok(admin.includes("v==='campaigns'"));const clients=admin.slice(admin.indexOf('function renderClients()'),admin.indexOf('function openClientEditor'));assert.ok(!clients.includes('campaignPanel()'))});
+check('campaign management has a dedicated admin view',()=>{assert.ok(admin.includes("nav('campaigns','Кампанії'"));assert.ok(admin.includes("v==='campaigns'"));const clients=admin.slice(admin.indexOf('function renderClients()'),admin.indexOf('function openClientCard'));assert.ok(!clients.includes('campaignPanel()'))});
 check('campaign lifecycle supports archive and guarded deletion',()=>{assert.ok(campaignApi.includes('action==="archive_campaign"'));assert.ok(campaignApi.includes('action==="delete_campaign"'));assert.ok(campaignApi.includes('campaign_has_history'));assert.ok(admin.includes('data-campaign-archive'));assert.ok(admin.includes('data-campaign-delete'))});
 console.log(`Retention/campaign rules PASS: ${passed} checks.`);

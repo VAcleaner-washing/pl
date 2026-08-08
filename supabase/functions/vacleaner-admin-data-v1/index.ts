@@ -36,7 +36,7 @@ Deno.serve(async request=>{
       if(error)throw error;return json({bookings:(data??[]).map((row:any)=>safeBooking(row))});
     }
     if(action==="clients"){
-      const {data,error}=await db.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_updated_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000);
+      const {data,error}=await db.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000);
       if(error)throw error;return json({customers:data??[]});
     }
     if(action==="health"){
