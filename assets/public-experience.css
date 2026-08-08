@@ -452,3 +452,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .package-card.featured{padding-bottom:158px}
   .package-card.featured .vx-home-reset-gift{left:25px;right:25px;bottom:82px;padding:10px 11px;font-size:11px}
 }
+
+/* v3.0.63 — home package cards: shared desktop title rhythm only */
+@media(min-width:901px){
+  .home-v21 .v21-package-grid h3{
+    min-height:2em;
+  }
+}
