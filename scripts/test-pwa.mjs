@@ -71,6 +71,8 @@ ok(publicResilience.includes('reg.unregister()'),'public runtime removes stale r
 
 
 ok(!css.includes('html.pwa-standalone .mobile-nav{position:relative'),'installed PWA has no standalone grid override for bottom navigation');
+ok(css.includes('--pwa-safe-bottom-raw:env(safe-area-inset-bottom,0px)'),'raw iOS safe-area value is preserved separately');
+ok(css.includes('html.pwa-standalone{--pwa-safe-bottom:min(var(--pwa-safe-bottom-raw),34px)}'),'standalone PWA caps inflated WebKit bottom safe-area without moving the fixed nav');
 ok(!css.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'),'stale v3.0.36 fixed-ancestor override is gone');
 ok(runtime.includes("document.documentElement.classList.add('pwa-update-transition')"),'PWA update hides the outgoing mobile chrome before controller reload');
 console.log(`PWA static tests passed ${passed} assertions.`);

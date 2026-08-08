@@ -118,6 +118,7 @@ if(!adminRuntime.includes('vacleaner-status-correction-v1')||!adminRuntime.inclu
 if(!statusEdge.includes('edge:correct_status:')||!statusEdge.includes('vacleaner_apply_reservation')||!statusEdge.includes('admin_users'))errors.push('dedicated server-side controlled status correction is missing');
 if(adminEdge.includes('action === "correct_status"'))errors.push('status correction logic is duplicated inside vacleaner-admin-bookings-v3');
 if(/\["pending", "waiting_payment", "confirmed", "issued", "completed"\]\.includes\(nextStatus\)/.test(statusEdge))errors.push('manual status correction must never target completed; use settlement flow');
+if(!adminCss.includes('--pwa-safe-bottom-raw:env(safe-area-inset-bottom,0px)')||!adminCss.includes('html.pwa-standalone{--pwa-safe-bottom:min(var(--pwa-safe-bottom-raw),34px)}'))errors.push('standalone PWA must cap inflated iOS bottom safe-area while preserving the raw inset');
 if(!adminHtml.includes('<div id="adminMount"></div><nav class="mobile-nav"'))errors.push('mobile navigation must exist in initial admin HTML before JS paint');
 if(adminRuntime.includes('<nav class="mobile-nav"'))errors.push('runtime must not recreate the static mobile navigation');
 if(adminCss.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'))errors.push('stale fixed-app mobile override remains');

@@ -245,6 +245,16 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         expected_pwa_pad=max(8,min(12,safe_bottom-22))
         qa.check(page.locator('html').evaluate("el=>el.classList.contains('pwa-standalone')"), f"{label}: installed mode is detected independently from Safari")
         qa.check(sidebar is not None and abs(sidebar["y"] + sidebar["height"] - height) <= 1, f"{label}: bottom navigation is physically pinned to viewport bottom")
+        # iOS/WebKit standalone regression: safe-area-inset-bottom may include browser chrome
+        # that does not exist in the installed PWA. Simulate an inflated raw inset and
+        # verify that the standalone contract still uses only 34px.
+        page.evaluate("document.documentElement.style.removeProperty('--pwa-safe-bottom');document.documentElement.style.setProperty('--pwa-safe-bottom-raw','92px')")
+        page.wait_for_timeout(20)
+        inflated_safe = page.locator('.mobile-nav').evaluate("el=>({height:el.getBoundingClientRect().height,paddingBottom:parseFloat(getComputedStyle(el).paddingBottom),bottom:getComputedStyle(el).bottom})")
+        qa.check(abs(inflated_safe['height']-(66+34))<=1.5 and abs(inflated_safe['paddingBottom']-34)<=1 and inflated_safe['bottom']=='0px', f"{label}: inflated standalone safe-area is capped at 34px without lifting the fixed nav")
+        page.evaluate(f"document.documentElement.style.setProperty('--pwa-safe-bottom','{safe_bottom}px');document.documentElement.style.setProperty('--pwa-safe-bottom-raw','{safe_bottom}px')")
+        page.wait_for_timeout(20)
+        sidebar = page.locator('.mobile-nav').bounding_box()
         qa.check(page.evaluate("document.querySelector('.mobile-nav')?.parentElement===document.body"), f"{label}: mobile nav is a body-level root sibling, not nested in app")
         heights = page.locator(".mobile-nav button:visible").evaluate_all("els=>els.map(el=>el.getBoundingClientRect().height)")
         qa.check(all(value >= 44 for value in heights), f"{label}: bottom navigation tap targets are at least 44px")
