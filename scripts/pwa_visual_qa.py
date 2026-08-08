@@ -246,11 +246,11 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         heights = page.locator(".mobile-nav button:visible").evaluate_all("els=>els.map(el=>el.getBoundingClientRect().height)")
         qa.check(all(value >= 44 for value in heights), f"{label}: bottom navigation tap targets are at least 44px")
         qa.check(page.locator('.mobile-nav button[data-mobile-view="analytics"]:visible').count()==0 and page.locator('#mobileNewBooking:visible').count()==1, f"{label}: center New replaces analytics in the five primary bottom-nav actions")
-        new_box=page.locator('#mobileNewBooking:visible').bounding_box(); regular_box=page.locator('.mobile-nav button[data-mobile-view="calendar"]:visible').bounding_box()
+        new_box=page.locator('#mobileNewBooking:visible i').bounding_box(); regular_box=page.locator('.mobile-nav button[data-mobile-view="calendar"]:visible svg').bounding_box()
         qa.check(new_box is not None and regular_box is not None and new_box['y'] < regular_box['y'], f"{label}: center New action rises above the VA HOME-style nav row")
         page.locator('.mobile-nav .more-nav:visible').click();page.wait_for_timeout(20)
-        qa.check(page.locator('.mobile-more-card [data-more-view="equipment"]:visible').count()==1 and page.locator('.mobile-more-card [data-more-view="analytics"]:visible').count()==1, f"{label}: equipment and analytics both live in More")
-        page.locator('.mobile-more-card [data-more-view="analytics"]:visible').click();page.wait_for_timeout(30)
+        qa.check(page.locator('.mobile-more-menu [data-more-view="equipment"]:visible').count()==1 and page.locator('.mobile-more-menu [data-more-view="analytics"]:visible').count()==1, f"{label}: equipment and analytics both live in More")
+        page.locator('.mobile-more-menu [data-more-view="analytics"]:visible').click();page.wait_for_timeout(30)
         qa.check(page.locator('.mobile-nav .more-nav.active:visible').count()==1 and page.locator('.mobile-nav button[data-mobile-view="analytics"]:visible').count()==0, f"{label}: analytics activates More without a second visible active item")
         page.locator('.mobile-nav button[data-mobile-view="bookings"]:visible').click();page.wait_for_timeout(30)
         qa.check(page.locator('.connection-state:visible').count()==0, f"{label}: mobile topbar keeps only search and primary action")
@@ -376,7 +376,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
 
         # More sheet remains usable and contained.
         page.locator(".mobile-nav .more-nav:visible").click()
-        qa.check(rect_inside(page, ".mobile-more-card", top=safe_top, bottom=height-safe_bottom), f"{label}: More sheet stays between status bar and home indicator")
+        qa.check(rect_inside(page, ".mobile-more-menu", top=safe_top, bottom=height-safe_bottom), f"{label}: More popover stays between status bar and home indicator")
         page.keyboard.press("Escape")
 
         # Booking form: true mobile stepper, one section only, stable custom dates.

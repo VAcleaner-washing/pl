@@ -370,6 +370,51 @@ Deno.serve(async (request: Request) => {
       return json({ booking: safeBooking(saved) }, action === "create" ? 201 : 200);
     }
 
+    if (action === "correct_status") {
+      const bookingId = String(body.bookingId || ""), nextStatus = String(body.status || ""), reason = cleanText(body.reason, 240);
+      if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
+      if (!["pending", "waiting_payment", "confirmed", "issued"].includes(nextStatus)) return json({ error: "invalid_target_status" }, 400);
+      const { data: current, error } = await supabase.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").eq("id", bookingId).single();
+      if (error || !current) return json({ error: "invalid_booking" }, 404);
+      const currentStatus = String(current.status || "");
+      const allowed: Record<string, string[]> = {
+        waiting_payment: ["pending", "confirmed"],
+        confirmed: ["pending", "waiting_payment", "issued"],
+        issued: ["confirmed"],
+        completed: ["issued"],
+        cancelled: ["pending", "waiting_payment", "confirmed"],
+      };
+      if (!allowed[currentStatus]?.includes(nextStatus)) return json({ error: "invalid_transition" }, 409);
+      if (nextStatus === "confirmed" && current.prepayment_paid !== true) return json({ error: "prepayment_required" }, 409);
+      if (nextStatus === "issued" && (current.prepayment_paid !== true || current.deposit_paid !== true)) return json({ error: "issue_payment_required" }, 409);
+      if (["pending", "waiting_payment"].includes(nextStatus) && current.deposit_paid === true) return json({ error: "deposit_already_received" }, 409);
+      const product = catalog.products?.[current.product_code]; if (!product) return json({ error: "invalid_product" }, 400);
+      const pickupTime = current.extras?.pickup_time || (current.pickup_window === "evening" ? slots.evening.pickup : slots.morning.pickup);
+      const returnTime = current.extras?.return_time || (current.return_window === "evening" ? slots.evening.return : slots.morning.return);
+      const period = periodFromBody({ startDate: current.start_date, returnDate: current.return_date, pickupWindow: current.pickup_window, returnWindow: current.return_window, pickupTime, returnTime }, slots);
+      const hold = nextStatus === "waiting_payment" ? new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() : null;
+      let saved = await applyReservation(supabase, bookingId, period, product, nextStatus, hold);
+      const now = new Date().toISOString(), currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+      const patch: Record<string, any> = { updated_at: now };
+      if (["pending", "waiting_payment"].includes(nextStatus)) { patch.confirmed_at = null; patch.issued_at = null; patch.completed_at = null; }
+      if (currentStatus === "confirmed" && ["pending", "waiting_payment"].includes(nextStatus)) { patch.prepayment_paid = false; patch.prepayment_paid_at = null; }
+      if (nextStatus === "confirmed") { patch.confirmed_at = current.confirmed_at || now; patch.issued_at = null; patch.completed_at = null; }
+      if (nextStatus === "issued") { patch.issued_at = current.issued_at || now; patch.completed_at = null; }
+      if (currentStatus === "issued" && nextStatus === "confirmed") {
+        patch.deposit_paid = false; patch.deposit_paid_at = null; patch.deposit_returned = false; patch.deposit_returned_at = null;
+      }
+      if (currentStatus === "completed" && nextStatus === "issued") {
+        const settlement = currentExtras.settlement && typeof currentExtras.settlement === "object" ? currentExtras.settlement : {};
+        patch.extras = { ...currentExtras, settlement: { ...settlement, completed: false, completed_at: null, refund_paid: false, due_paid: false, corrected_from_completed: true } };
+        patch.deposit_returned = false; patch.deposit_returned_at = null; patch.return_payment_paid = false; patch.return_payment_paid_at = null;
+      }
+      if (reason) patch.admin_note = [String(current.admin_note || "").trim(), `Корекція статусу: ${reason}`].filter(Boolean).join("\n").slice(0, 800);
+      const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single();
+      if (updateError || !data) throw updateError || new Error("update_failed"); saved = data;
+      await tagAudit(supabase, bookingId, userData.user.id, `edge:correct_status:${currentStatus}_to_${nextStatus}`, actionStartedAt);
+      return json({ booking: safeBooking(saved) });
+    }
+
     if (action === "update") {
       const bookingId = String(body.bookingId || ""), nextStatus = String(body.status || ""); if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const { data: current, error } = await supabase.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").eq("id", bookingId).single(); if (error || !current) return json({ error: "invalid_booking" }, 404);

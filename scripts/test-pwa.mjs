@@ -45,7 +45,7 @@ ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail 
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
 ok(runtime.includes('</main></div><nav class="mobile-nav"'),'mobile navigation is a separate root sibling, matching VA HOME');
 ok(css.includes('.sidebar{display:none}'),'desktop sidebar is hidden rather than transformed on mobile');
-ok(css.includes('.mobile-nav{\n    position:fixed;right:0;bottom:0;left:0;z-index:100'),'dedicated mobile navigation is fixed directly to the viewport');
+ok(css.includes('.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0'),'dedicated mobile navigation is fixed directly to the viewport');
 ok(css.includes('.app{position:static;inset:auto;width:100%'),'mobile app wrapper is not a fixed ancestor of bottom navigation');
 ok(css.includes('.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))'),'mobile main is independently fixed like VA HOME');
 ok(!css.includes('grid-template-rows:calc(var(--mobile-topbar) + var(--pwa-safe-top)) minmax(0,1fr) var(--mobile-nav-shell)'),'standalone PWA does not override the proven fixed mobile nav contract');

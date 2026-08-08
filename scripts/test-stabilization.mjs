@@ -54,7 +54,7 @@ ok((css.match(/@media \(max-width:900px\)\{/g)||[]).length===1,'exactly one prim
 has(css,'.app{position:static;inset:auto;width:100%','mobile app wrapper stays out of the fixed viewport stack');
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
 has(css,'.sidebar{display:none}','desktop sidebar is hidden on mobile');
-has(css,'.mobile-nav{\n    position:fixed;right:0;bottom:0;left:0;z-index:100','dedicated mobile navigation is pinned directly to the viewport');
+has(css,'.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0','dedicated mobile navigation is pinned directly to the viewport');
 has(admin,'</main></div><nav class="mobile-nav"','mobile nav is a body-level sibling of the app, like VA HOME');
 lacks(css,'html.keyboard-open .mobile-nav{','keyboard state never mutates dedicated bottom nav; matches proven VA HOME contract');
 lacks(css,'html.keyboard-open .main{','keyboard state never reflows the main shell around bottom nav');
