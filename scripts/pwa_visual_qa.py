@@ -12,6 +12,8 @@ from typing import Any
 from playwright.sync_api import Browser, Page, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
+ADMIN_HTML = (ROOT / "admin/bronuvannia/index.html").read_text(encoding="utf-8")
+INITIAL_ADMIN_ROOTS = ADMIN_HTML.split("<body>", 1)[1].split("<noscript>", 1)[0]
 
 
 def iso(offset: int = 0) -> str:
@@ -170,6 +172,7 @@ class QA:
 def render_page(browser: Browser, width: int, height: int, authenticated: bool = True, standalone: bool = False) -> Page:
     page = browser.new_page(viewport={"width": width, "height": height}, is_mobile=width <= 900)
     page.evaluate("document.head.innerHTML='<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">'")
+    page.evaluate("html => { document.body.innerHTML = html; }", INITIAL_ADMIN_ROOTS)
     page.evaluate(init_script(authenticated, standalone))
     page.add_style_tag(content=(ROOT / "assets/admin-v250.css").read_text(encoding="utf-8"))
     page.add_script_tag(content=(ROOT / "assets/vacleaner-core.js").read_text(encoding="utf-8"))

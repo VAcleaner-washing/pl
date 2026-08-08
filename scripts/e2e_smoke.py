@@ -369,6 +369,35 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(same_row, "Mobile header logo and menu stay on one row")
         checks.check(page.locator(".header-cta:visible").count() == 0, "Mobile header does not duplicate booking CTA")
         checks.check(page.locator(".mobile-booking:visible").count() == 1, "Regular pages keep one bottom CTA")
+
+        regular_paths = ["/", "/rishennia/", "/komplekty/", "/yak-tse-pratsiuie/", "/vidhuky/", "/faq/", "/kontakty/", "/umovy/"]
+        mobile_cta_ok = True
+        for path in regular_paths:
+            page.goto(f"{base}{path}", wait_until="networkidle")
+            cta = page.locator(".mobile-booking:visible")
+            if cta.count() != 1:
+                mobile_cta_ok = False
+                break
+            links = cta.locator("a:visible")
+            if links.count() != 2:
+                mobile_cta_ok = False
+                break
+            box = cta.bounding_box()
+            first = links.nth(0).bounding_box()
+            second = links.nth(1).bounding_box()
+            display = cta.evaluate("el => getComputedStyle(el).display")
+            if not box or not first or not second or display != "grid":
+                mobile_cta_ok = False
+                break
+            first_right = first["x"] + first["width"]
+            second_right = second["x"] + second["width"]
+            container_right = box["x"] + box["width"]
+            if first_right > second["x"] + 1 or first["x"] < box["x"] - 1 or second_right > container_right + 1 or not no_horizontal_overflow(page):
+                mobile_cta_ok = False
+                break
+        checks.check(mobile_cta_ok, "Mobile booking and Instagram CTA never overlap on public pages")
+
+        page.goto(f"{base}/", wait_until="networkidle")
         hero_box = page.locator(".v21-hero-copy").bounding_box()
         viewport_height = page.viewport_size["height"] if page.viewport_size else 844
         hero_limit = min(700, viewport_height * 0.85)

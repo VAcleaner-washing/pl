@@ -43,7 +43,8 @@ ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail capture
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');
 
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
-ok(runtime.includes('</main></div><nav class="mobile-nav"'),'mobile navigation is a separate root sibling, matching VA HOME');
+ok(html.includes('<div id="adminMount"></div><nav class="mobile-nav"'),'mobile navigation exists in initial HTML before JS paint, matching VA HOME');
+ok(!runtime.includes('<nav class="mobile-nav"'),'runtime never recreates the static mobile navigation');
 ok(css.includes('.sidebar{display:none}'),'desktop sidebar is hidden rather than transformed on mobile');
 ok(css.includes('.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0'),'dedicated mobile navigation is fixed directly to the viewport');
 ok(css.includes('.app{position:static;inset:auto;width:100%'),'mobile app wrapper is not a fixed ancestor of bottom navigation');

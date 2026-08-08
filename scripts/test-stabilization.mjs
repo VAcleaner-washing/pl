@@ -3,6 +3,7 @@ import fs from 'node:fs';
 
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 const admin=read('assets/admin-v250.js');
+const adminHtml=read('admin/bronuvannia/index.html');
 const css=read('assets/admin-v250.css');
 const core=read('assets/vacleaner-core.js');
 const publicExperience=read('assets/public-experience.js');
@@ -61,7 +62,8 @@ has(css,'.app{position:static;inset:auto;width:100%','mobile app wrapper stays o
 lacks(css,'.app{position:fixed;inset:0;width:100%;height:100dvh','mobile app shell is not over-constrained by 100dvh');
 has(css,'.sidebar{display:none}','desktop sidebar is hidden on mobile');
 has(css,'.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0','dedicated mobile navigation is pinned directly to the viewport');
-has(admin,'</main></div><nav class="mobile-nav"','mobile nav is a body-level sibling of the app, like VA HOME');
+has(adminHtml,'<div id="adminMount"></div><nav class="mobile-nav"','mobile nav exists in initial HTML as a body-level sibling, like VA HOME');
+lacks(admin,'<nav class="mobile-nav"','runtime never recreates the static mobile nav');
 lacks(css,'html.keyboard-open .mobile-nav{','keyboard state never mutates dedicated bottom nav; matches proven VA HOME contract');
 lacks(css,'html.keyboard-open .main{','keyboard state never reflows the main shell around bottom nav');
 lacks(css,'html.pwa-standalone .mobile-nav{position:relative','standalone grid override is absent');
@@ -127,10 +129,10 @@ lacks(admin,'t.me/share/url','Telegram no longer uses the share endpoint for cli
 has(admin,"const ADMIN_ALIAS_KEY='vac_admin_alias'",'second admin login alias is explicitly tracked');
 has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevidoma share the requested credential');
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
-has(admin,'data-mobile-view="bookings"','dedicated mobile nav has its own primary-view buttons');
+has(adminHtml,'data-mobile-view="bookings"','dedicated mobile nav has its own primary-view buttons in initial HTML');
 has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
 has(admin,"['equipment','clients','campaigns','analytics','chemistry','settings'].includes(v)",'More active state includes analytics after moving it out of the primary nav');
-has(admin,'id="mobileNewBooking"','mobile navigation has a dedicated centered New action');
+has(adminHtml,'id="mobileNewBooking"','mobile navigation has a dedicated centered New action in initial HTML');
 has(pwaQa,'analytics activates More without a second visible active item','analytics correctly maps to More without double highlighting');
 
 has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');

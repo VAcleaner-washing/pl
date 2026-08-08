@@ -1229,6 +1229,7 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .new-btn{display:none}
 
   .sidebar{display:none}
+  body:not(.admin-shell-ready) .mobile-nav{opacity:0;pointer-events:none;transition:none}
   .mobile-nav{
     position:fixed;z-index:100;right:0;bottom:0;left:0;
     width:100%;height:calc(66px + var(--pwa-safe-bottom));

@@ -118,7 +118,8 @@ if(!adminRuntime.includes('vacleaner-status-correction-v1')||!adminRuntime.inclu
 if(!statusEdge.includes('edge:correct_status:')||!statusEdge.includes('vacleaner_apply_reservation')||!statusEdge.includes('admin_users'))errors.push('dedicated server-side controlled status correction is missing');
 if(adminEdge.includes('action === "correct_status"'))errors.push('status correction logic is duplicated inside vacleaner-admin-bookings-v3');
 if(/\["pending", "waiting_payment", "confirmed", "issued", "completed"\]\.includes\(nextStatus\)/.test(statusEdge))errors.push('manual status correction must never target completed; use settlement flow');
-if(!adminRuntime.includes('</main></div><nav class="mobile-nav"'))errors.push('mobile navigation is not a root sibling of the app');
+if(!adminHtml.includes('<div id="adminMount"></div><nav class="mobile-nav"'))errors.push('mobile navigation must exist in initial admin HTML before JS paint');
+if(adminRuntime.includes('<nav class="mobile-nav"'))errors.push('runtime must not recreate the static mobile navigation');
 if(adminCss.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'))errors.push('stale fixed-app mobile override remains');
 for(const token of ['iPhone inputs are at least 16px and cannot trigger Safari auto-zoom','outer viewport is locked instead of rubber-band scrolling','keyboard focus does not pan the page shell'])if(!pwaVisualQa.includes(token))errors.push(`iPhone PWA regression test missing: ${token}`);
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
