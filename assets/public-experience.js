@@ -17,6 +17,25 @@
   let calendarScrollLock=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
   const weekdays=['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  const LEGACY_CONTACT_EVENTS={contact_instagram:'instagram',contact_telegram:'telegram',contact_phone:'phone'};
+
+  // v3.0.68 — normalize cached legacy click events before GTM receives them.
+  // Public Next chunks are fingerprinted and may remain in a browser/CDN cache after a release,
+  // so this cache-busted runtime keeps analytics semantics stable during the transition.
+  function normalizeLegacyContactEvents(){
+    const layer=window.dataLayer=window.dataLayer||[];
+    if(layer.push?.__vacleanerContactNormalizer)return;
+    const previousPush=layer.push.bind(layer);
+    const normalizedPush=(...items)=>previousPush(...items.map(item=>{
+      if(!item||typeof item!=='object'||Array.isArray(item))return item;
+      const method=LEGACY_CONTACT_EVENTS[item.event];
+      if(!method)return item;
+      return {...item,event:'contact_click',contact_method:item.contact_method||method};
+    }));
+    Object.defineProperty(normalizedPush,'__vacleanerContactNormalizer',{value:true});
+    layer.push=normalizedPush;
+  }
+  normalizeLegacyContactEvents();
   const dateState=new WeakMap();
   const slotState=new WeakMap();
   let activeDateInput=null;
@@ -521,6 +540,7 @@
     requestAnimationFrame(()=>{queued=false;enhance()});
   });
   document.addEventListener('DOMContentLoaded',()=>{
+    normalizeLegacyContactEvents();
     retireLegacyPublicPwa();
     loadDepositRules();
     enhance();observer.observe(document.body,{childList:true,subtree:true});

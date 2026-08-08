@@ -68,6 +68,8 @@ const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner
 const statusEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-status-correction-v1','index.ts'),'utf8');
 const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','settlement.mjs'),'utf8');
 const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w.js'),'utf8');
+const publicChunkDir=path.join(root,'_next','static','chunks');
+const publicChunkCorpus=fs.readdirSync(publicChunkDir).filter(name=>name.endsWith('.js')).map(name=>fs.readFileSync(path.join(publicChunkDir,name),'utf8')).join('\n');
 const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');
 execFileSync(process.execPath,[path.join(root,'scripts','test-finance.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-deposit-policy.mjs')],{stdio:'pipe'});
@@ -128,7 +130,10 @@ if(!publicExperience.includes('Фінальний штрих — аромади�
 if(!publicExperienceCss.includes('.vx-proof__actions .vx-proof__cta{-webkit-appearance:none;appearance:none')||!publicExperienceCss.includes('-webkit-text-fill-color:#15110c'))errors.push('Instagram review collection CTA must not fall back to Safari browser-blue styling');
 if(!publicReactBundle.includes('event:"generate_lead"')||!publicReactBundle.includes('currency:"UAH"')||!publicReactBundle.includes('value:Number(K?.totalAmount||0)'))errors.push('successful public booking must push GA4 generate_lead with UAH value after backend success');
 if(publicReactBundle.includes('booking_request_created'))errors.push('legacy booking_request_created event remains instead of recommended generate_lead');
-if(!publicReactBundle.includes('contact_click')||!publicReactBundle.includes('contact_method:i||void 0'))errors.push('public Instagram/Telegram/phone clicks must push normalized contact_click events');
+if(!publicReactBundle.includes('contact_click')||!publicReactBundle.includes('contact_method:i||void 0'))errors.push('booking bundle Instagram/Telegram/phone clicks must push normalized contact_click events');
+if(/contact_(?:instagram|telegram|phone)/.test(publicChunkCorpus))errors.push('legacy per-channel contact events remain in public Next chunks; use contact_click + contact_method');
+if((publicChunkCorpus.match(/contact_click/g)||[]).length<3)errors.push('contact_click normalization is missing from one or more public Next click-tracking bundles');
+if(!publicExperience.includes('normalizeLegacyContactEvents')||!publicExperience.includes("LEGACY_CONTACT_EVENTS={contact_instagram:'instagram',contact_telegram:'telegram',contact_phone:'phone'}")||!publicExperience.includes("event:'contact_click',contact_method:item.contact_method||method"))errors.push('cache-safe legacy contact event normalizer is missing from public runtime');
 if(!publicExperience.includes("event:'booking_started'")||!publicExperience.includes('bindBookingAnalytics'))errors.push('public booking_started instrumentation is missing');
 if(!publicExperience.includes('setMobileBookingStep(index,{scroll:true})')||!publicExperience.includes('setMobileBookingStep(target,{scroll:true})'))errors.push('mobile booking step changes must restore the form to the fixed-header-safe position');
 if(!publicExperienceCss.includes('.booking-form .booking-step{scroll-margin-top:112px}'))errors.push('public booking anchors need fixed-header scroll margin');
