@@ -65,10 +65,24 @@ const incompleteLegacy=settlementConfirmation({returned:true,refundAmount:200},e
 assert.equal(incompleteLegacy.ok,false); assert.equal(incompleteLegacy.error,'settlement_not_confirmed');
 
 
-const existingManual={discount:{source:'manual',percent:10,amount:60},loyalty:{percent:0}};
-assert.deepEqual(discountInfo({},600,existingManual),{percent:10,amount:60,baseAmount:540,source:'manual',loyaltyPercent:0});
-assert.deepEqual(discountInfo({discount10:false},600,existingManual),{percent:0,amount:0,baseAmount:600,source:'none',loyaltyPercent:0});
-assert.deepEqual(discountInfo({loyaltyPercent:5},600,{}),{percent:5,amount:30,baseAmount:570,source:'loyalty',loyaltyPercent:5});
-assert.deepEqual(discountInfo({discount10:true,loyaltyPercent:5},600,{}),{percent:10,amount:60,baseAmount:540,source:'manual',loyaltyPercent:5});
+const existingManual={manual_discount:{type:'percent',value:10,amount:60,reason:'Домовленість'},discount:{source:'manual',type:'percent',percent:10,amount:60,reason:'Домовленість'},loyalty:{percent:0}};
+const preserved=discountInfo({},600,existingManual);
+assert.equal(preserved.source,'manual'); assert.equal(preserved.amount,60); assert.equal(preserved.baseAmount,540); assert.equal(preserved.manualType,'percent'); assert.equal(preserved.manualValue,10);
+const cleared=discountInfo({manualDiscountType:'none',manualDiscountValue:0,manualDiscountReason:''},600,existingManual);
+assert.equal(cleared.source,'none'); assert.equal(cleared.amount,0); assert.equal(cleared.baseAmount,600); assert.equal(cleared.manualType,'none');
+const regular=discountInfo({loyaltyPercent:5},600,{});
+assert.equal(regular.source,'loyalty'); assert.equal(regular.amount,30); assert.equal(regular.baseAmount,570);
+const manualFive=discountInfo({manualDiscountType:'percent',manualDiscountValue:5,manualDiscountReason:'Лояльність',loyaltyPercent:0},600,{});
+assert.equal(manualFive.source,'manual'); assert.equal(manualFive.amount,30); assert.equal(manualFive.baseAmount,570); assert.equal(manualFive.manualReason,'Лояльність');
+const manualFixed=discountInfo({manualDiscountType:'fixed',manualDiscountValue:100,manualDiscountReason:'Компенсація',loyaltyPercent:10},600,{});
+assert.equal(manualFixed.source,'manual'); assert.equal(manualFixed.amount,100); assert.equal(manualFixed.baseAmount,500); assert.equal(manualFixed.manualType,'fixed');
+const smallerManual=discountInfo({manualDiscountType:'fixed',manualDiscountValue:50,manualDiscountReason:'Компенсація',loyaltyPercent:10},600,{});
+assert.equal(smallerManual.source,'loyalty'); assert.equal(smallerManual.amount,60); assert.equal(smallerManual.manualAmount,50);
 
-console.log('Finance tests passed: 19 scenarios.');
+const returnDiscount=discountInfo({manualDiscountType:'fixed',manualDiscountValue:100,manualDiscountReason:'Компенсація'},700,{});
+const discountedReturn=settlementFromBooking(base({base_amount:returnDiscount.baseAmount,delivery_amount:250,extras:{selected_items:[{code:'carp_deta',price:100}],chemistry:{used_packets:1,story_mention:false}}}),catalog,catalog);
+assert.equal(discountedReturn.totalAmount,1000); assert.equal(discountedReturn.refundAmount,200); assert.equal(discountedReturn.dueAmount,0);
+const cappedFixed=discountInfo({manualDiscountType:'fixed',manualDiscountValue:5000,manualDiscountReason:'Компенсація'},700,{});
+assert.equal(cappedFixed.amount,700); assert.equal(cappedFixed.baseAmount,0);
+
+console.log('Finance tests passed: 23 scenarios.');

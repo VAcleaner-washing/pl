@@ -42,8 +42,12 @@ lacks(bookingEdge,'/functions/v1/vacleaner-booking-v4','booking v5 never delegat
 lacks(bookingEdge,'/functions/v1/vacleaner-booking"','booking v5 never delegates to legacy booking');
 has(adminEdge,'vacleaner_apply_reservation','admin reservations go through one SQL authority');
 has(adminEdge,'import { discountInfo } from "./pricing.mjs"','admin pricing is isolated in a tested module');
-has(pricing,"existingExtras?.discount?.source === 'manual'",'manual discount survives unrelated edits');
-has(pricing,"Object.prototype.hasOwnProperty.call(body || {}, 'discount10')",'manual discount is changed only by explicit input');
+has(pricing,"if(applied?.source==='manual')",'legacy applied manual discount survives unrelated edits');
+has(pricing,"own(body,'manualDiscountType')||own(body,'manualDiscountValue')||own(body,'manualDiscountReason')",'manual discount is changed only by explicit structured input');
+has(pricing,"existingExtras?.manual_discount",'manual 5/10/fixed request survives unrelated edits even when another discount wins');
+has(adminEdge,'action === "save_finance"','return settlement has a dedicated finance mutation');
+has(adminEdge,'manual_discount: discount.manualType === "none" ? null','return settlement persists manager manual discount request');
+has(adminEdge,'base_amount: discount.baseAmount','return settlement persists the discounted rental base');
 
 // Reservation authority is half-open and checks capacity per slot under one lock.
 has(migration,"pg_advisory_xact_lock(pg_catalog.hashtext('vacleaner-slot-reservation-v1'))",'reservation uses transaction lock');

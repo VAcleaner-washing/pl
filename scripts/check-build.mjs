@@ -136,6 +136,14 @@ if(!pwaVisualQa.includes('page.wait_for_selector(".upcoming-scope" if width <= 9
 for(const token of ['lockCalendarScroll','unlockCalendarScroll','root.style.paddingRight'])if(!publicExperience.includes(token))errors.push(`calendar layout lock missing: ${token}`);
 if(!publicExperienceCss.includes('html{scrollbar-gutter:stable;}'))errors.push('public stable scrollbar gutter missing');
 for(const token of ['color-scheme:dark','appearance:none','input[type="checkbox"]:checked','.switch:has(input:checked)','.field select option'])if(!adminCss.includes(token))errors.push(`admin controls visual missing: ${token}`);
+for(const token of ['data-discount-choice="p5"','data-discount-choice="p10"','data-discount-choice="fixed"','manualDiscountType','manualDiscountValue','manualDiscountReason',"discountEditorHtml(manualInitial,'return')"])if(!adminRuntime.includes(token))errors.push(`manual discount UX missing: ${token}`);
+if(adminRuntime.includes('name="discount10"'))errors.push('legacy browser/switch-only 10% discount control remains in admin UI');
+if(adminRuntime.includes('name="applyLoyalty"')||!adminRuntime.includes('class="loyalty-auto-card"'))errors.push('loyalty must be automatic in admin; manager toggle must not disable the earned tier');
+if(!adminCss.includes('.discount-choice button,.discount-reason-chips button{-webkit-appearance:none;appearance:none')||!adminCss.includes('.discount-fixed-row input{-webkit-appearance:none;appearance:none')||!adminCss.includes('.discount-reason>input{-webkit-appearance:none;appearance:none'))errors.push('manual discount controls must use custom non-browser visuals');
+if(!adminCss.includes('.finance-form .modal-layout{scrollbar-color:')||!adminCss.includes('.finance-form .modal-layout::-webkit-scrollbar-thumb'))errors.push('desktop finance modal custom scrollbar styling is missing');
+if(!adminCss.includes('/* v3.0.64 — discount editor stays inside the one mobile shell contract. */'))errors.push('manual discount mobile UX must remain inside the single primary <=900px shell contract');
+if(!publicExperience.includes('Програма лояльності')||!publicExperience.includes('0–2 завершені оренди')||!publicExperience.includes('після 3 завершених оренд')||!publicExperience.includes('після 6 завершених оренд'))errors.push('public loyalty program copy is missing or ambiguous');
+if(!adminEdge.includes('action === "save_finance"')||!adminEdge.includes('manual_discount: discount.manualType === "none" ? null')||!adminEdge.includes('base_amount: discount.baseAmount'))errors.push('return settlement must support and persist manual discount changes');
 const requiredCopy=[
  'Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.',
  'Новий клієнт надсилає документ менеджеру приватно.',

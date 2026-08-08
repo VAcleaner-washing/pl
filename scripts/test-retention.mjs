@@ -9,7 +9,10 @@ check('fixed promo beats Regular loyalty',()=>{const r=discountInfo({loyaltyPerc
 check('VIP loyalty beats smaller fixed promo',()=>{const r=discountInfo({loyaltyPercent:10},700,promo('fixed',50));assert.equal(r.source,'loyalty');assert.equal(r.amount,70);assert.equal(r.baseAmount,630)});
 check('15 percent promo beats VIP',()=>{const r=discountInfo({loyaltyPercent:10},700,promo('percent',15));assert.equal(r.source,'promo');assert.equal(r.amount,105);assert.equal(r.baseAmount,595)});
 check('equal promo and loyalty keeps loyalty',()=>{const r=discountInfo({loyaltyPercent:10},700,promo('percent',10));assert.equal(r.source,'loyalty');assert.equal(r.amount,70)});
-check('explicit manual 10 percent remains manager override',()=>{const r=discountInfo({discount10:true,loyaltyPercent:10},700,promo('percent',20));assert.equal(r.source,'manual');assert.equal(r.amount,70)});
+check('better promo still beats manual 10 percent',()=>{const r=discountInfo({manualDiscountType:'percent',manualDiscountValue:10,manualDiscountReason:'Домовленість',loyaltyPercent:10},700,promo('percent',20));assert.equal(r.source,'promo');assert.equal(r.amount,140);assert.equal(r.manualAmount,70)});
+check('manual fixed amount beats VIP when larger',()=>{const r=discountInfo({manualDiscountType:'fixed',manualDiscountValue:100,manualDiscountReason:'Компенсація',loyaltyPercent:10},700,{});assert.equal(r.source,'manual');assert.equal(r.amount,100);assert.equal(r.baseAmount,600)});
+check('manual 5 percent ties Regular and keeps automatic loyalty',()=>{const r=discountInfo({manualDiscountType:'percent',manualDiscountValue:5,manualDiscountReason:'Лояльність',loyaltyPercent:5},700,{});assert.equal(r.source,'loyalty');assert.equal(r.amount,35);assert.equal(r.manualAmount,35)});
+check('unsupported manual percent is rejected',()=>{const r=discountInfo({manualDiscountType:'percent',manualDiscountValue:7,manualDiscountReason:'Інше'},700,{});assert.equal(r.source,'none');assert.equal(r.manualType,'none');assert.equal(r.amount,0)});
 
 const root=new URL('..',import.meta.url).pathname;
 const read=rel=>fs.readFileSync(new URL('../'+rel,import.meta.url),'utf8');
