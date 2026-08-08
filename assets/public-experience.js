@@ -280,7 +280,7 @@
 
   async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.depositRules){mergeDepositRules(d.depositRules);enhanceDepositSummary()}}catch{}}
   function termsMarkup(){
-    return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактично отриманий залоговий платіж формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залоговий платіж</h3><p>Сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>2+ доби у вікенд · 4 000 грн</small></span></div></div></article></div><section class="vx-loyalty-policy" aria-label="Програма лояльності"><div><p>Програма лояльності</p><h3>Чим більше оренд — тим вигідніше.</h3><span>Знижка застосовується автоматично за номером телефону та діє тільки на оренду техніки.</span></div><div class="vx-loyalty-levels"><article><small>Start</small><strong>0%</strong><span>0–2 завершені оренди</span></article><article><small>Regular</small><strong>−5%</strong><span>після 3 завершених оренд</span></article><article><small>VIP</small><strong>−10%</strong><span>після 6 завершених оренд</span></article></div><p class="vx-loyalty-rule">Promo та loyalty не сумуються — система автоматично застосовує вигіднішу знижку. Доставка, додаткові позиції та хімія оплачуються без знижки.</p></section><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
+    return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактично отриманий залоговий платіж формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залоговий платіж</h3><p>Сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>2+ доби у вікенд · 4 000 грн</small></span></div></div></article></div><section class="vx-loyalty-policy" aria-label="Програма лояльності"><div><p>Програма лояльності</p><h3>Чим більше оренд — тим вигідніше.</h3><span>Знижка застосовується автоматично за номером телефону та діє тільки на оренду техніки.</span></div><div class="vx-loyalty-levels"><article><small>Start</small><strong>0%</strong><span>0–2 завершені оренди</span></article><article><small>Regular</small><strong>−5%</strong><span>після 3 завершених оренд</span></article><article><small>VIP</small><strong>−10%</strong><span>після 6 завершених оренд</span></article></div><p class="vx-loyalty-rule">Promo та loyalty не сумуються — система автоматично застосовує вигіднішу знижку. Доставка, додаткові позиції та хімія оплачуються без знижки.</p></section><section class="vx-care-policy" aria-label="Дбайливе користування технікою"><div class="vx-care-policy__head"><p>Дбайливе користування</p><h3>Без страшилок і дрібного шрифту.</h3><span>Техніка видається перевіреною та справною. Якщо щось працює не так — зупиніть роботу й напишіть нам.</span></div><div class="vx-care-policy__grid"><article><small>01</small><strong>Несправність</strong><span>Природний знос або технічна несправність не з вини клієнта — не його відповідальність. Самостійно розбирати чи ремонтувати техніку не потрібно.</span></article><article><small>02</small><strong>Фізичні пошкодження</strong><span>Відповідальність виникає за очевидні пошкодження через неправильне користування: падіння, удари, тріщини, залиття або самостійне розбирання.</span></article><article><small>03</small><strong>Повернення</strong><span>Злийте брудну воду, приберіть велике сміття й волосся, сполосніть робочі ємності та насадки. Звичайні сліди використання — нормально.</span></article></div><p class="vx-care-policy__proof">300 оренд — і нам ще не доводилося штрафувати клієнтів за техніку.</p></section><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
   }
   function injectTerms(){
     const path=location.pathname.replace(/\/+$/,'')||'/';
@@ -288,6 +288,50 @@
     const box=document.createElement('div');box.innerHTML=termsMarkup();
     const section=box.firstElementChild,footer=document.querySelector('footer'),cta=document.querySelector('.final-cta');
     if(cta)cta.insertAdjacentElement('beforebegin',section);else footer?.insertAdjacentElement('beforebegin',section);
+  }
+
+  function enhanceCarePolicy(){
+    const path=location.pathname.replace(/\/+$/,'')||'/';
+    if(path==='/faq'){
+      const list=document.querySelector('.faq-list.faq-list-large');
+      if(list&&!list.querySelector('[data-vx-care-faq]')){
+        const items=[
+          ['13','Що робити, якщо техніка перестала працювати?','Зупиніть роботу й напишіть нам — підкажемо, що перевірити. Природний знос або технічна несправність, яка виникла не через неправильне користування, не є відповідальністю клієнта. Самостійно розбирати чи ремонтувати техніку не потрібно.'],
+          ['14','Хто відповідає за фізичні пошкодження техніки?','Клієнт відповідає за очевидні фізичні пошкодження, що виникли під час оренди через неправильне користування: падіння, удари, тріщини, залиття частин, які не мають контактувати з водою, або самостійне розбирання. Якщо таке трапилося, спокійно фіксуємо ситуацію й узгоджуємо фактичну вартість відновлення. За 300 оренд нам ще не доводилося штрафувати клієнтів за техніку.'],
+          ['15','У якому стані потрібно повернути техніку?','Після роботи достатньо злити брудну воду, прибрати велике сміття та волосся, сполоснути робочі ємності й насадки за інструкцією. Ідеально відмивати техніку «як нову» не потрібно — сервісну підготовку між орендами робимо ми. Звичайні сліди використання — нормально.']
+        ];
+        items.forEach(([num,title,copy])=>{
+          const details=document.createElement('details');
+          details.dataset.vxCareFaq='1';
+          const summary=document.createElement('summary');
+          const number=document.createElement('span');number.textContent=num;
+          const icon=document.createElement('b');icon.setAttribute('aria-hidden','true');icon.textContent='+';
+          summary.append(number,document.createTextNode(title),icon);
+          const paragraph=document.createElement('p');paragraph.textContent=copy;
+          details.append(summary,paragraph);list.append(details);
+        });
+      }
+    }
+    if(path==='/umovy'){
+      const grid=document.querySelector('.terms-grid');
+      if(grid&&!grid.querySelector('[data-vx-care-term]')){
+        const support=[...grid.querySelectorAll('article')].find(article=>/Підтримка/i.test(article.querySelector('h2')?.textContent||''));
+        const entries=[
+          ['09','Несправність під час роботи','Якщо техніка працює не так, як очікується, припиніть використання та зв’яжіться з нами. Природний знос або несправність не з вини клієнта не є його відповідальністю; самостійно розбирати чи ремонтувати техніку не потрібно.'],
+          ['10','Фізичні пошкодження','Клієнт відповідає лише за фізичні пошкодження, спричинені неправильним користуванням під час оренди. У такій ситуації фіксуємо пошкодження та узгоджуємо фактичні витрати на відновлення. За 300 оренд нам ще не доводилося штрафувати клієнтів за техніку.'],
+          ['11','Чистота після використання','Перед поверненням потрібно злити брудну воду, прибрати велике сміття й волосся, сполоснути робочі ємності та насадки відповідно до інструкції. Звичайні сліди використання — нормально; повну сервісну підготовку між орендами робить VAcleaner.']
+        ];
+        entries.forEach(([num,title,copy])=>{
+          const article=document.createElement('article');article.dataset.vxCareTerm='1';
+          const number=document.createElement('span');number.textContent=num;
+          const heading=document.createElement('h2');heading.textContent=title;
+          const paragraph=document.createElement('p');paragraph.textContent=copy;
+          article.append(number,heading,paragraph);
+          if(support)grid.insertBefore(article,support);else grid.append(article);
+        });
+        const supportNumber=support?.querySelector(':scope > span');if(supportNumber)supportNumber.textContent='12';
+      }
+    }
   }
 
   function replacePublicLabels(root=document){
@@ -450,6 +494,7 @@
     document.querySelectorAll('.booking-date-grid select').forEach(enhanceSelect);
     injectProof();
     injectTerms();
+    enhanceCarePolicy();
     enhanceDepositSummary();
     enhanceHomeResetGift();
     enhanceMobileBookingFlow();

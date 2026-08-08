@@ -116,6 +116,9 @@ if(!publicExperienceCss.includes('body:has(.mobile-menu.is-open) .mobile-booking
 if(!businessCopy.includes('У подарунок — будь-який аромадифузор VA HOME з колекції Entry'))errors.push('HOME RESET Entry diffuser gift copy is missing');
 if(!publicExperience.includes('HOME_RESET_GIFT_URL')||!publicExperience.includes('enhanceHomeResetGift'))errors.push('HOME RESET gift is not hydration-safe');
 if(!publicExperience.includes("HOME_RESET_GIFT_URL='https://vahome.com.ua/catalog?collection=entry'"))errors.push('HOME RESET gift must preserve the VA HOME Entry collection deep-link');
+if(!publicExperience.includes('enhanceCarePolicy')||!publicExperience.includes('За 300 оренд нам ще не доводилося штрафувати клієнтів за техніку.'))errors.push('Public equipment care / responsibility FAQ policy is missing');
+if(!publicExperience.includes('Чистота після використання')||!publicExperience.includes('Природний знос або технічна несправність'))errors.push('Public return cleanliness and non-fault malfunction guidance is missing');
+if(!publicExperienceCss.includes('.vx-care-policy{')||!publicExperienceCss.includes('.vx-care-policy__grid{display:grid'))errors.push('Public care policy visual is missing');
 if(!publicExperienceCss.includes('.home-v21 .v21-package-grid h3{')||!publicExperienceCss.includes('min-height:2em'))errors.push('Home package cards must reserve a shared two-line desktop title zone');
 if(!publicExperienceCss.includes('.package-page-grid .package-price{justify-content:center;text-align:center}'))errors.push('Package page prices must be horizontally centered');
 if(!publicExperienceCss.includes('@media(min-width:1051px){')||!publicExperienceCss.includes('.package-page-grid .package-card-large h2{min-height:2em}'))errors.push('Desktop package cards must reserve a shared two-line title zone so all following sections align');
