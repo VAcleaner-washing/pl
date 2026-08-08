@@ -19,7 +19,7 @@ assert.equal(manifest.id,'/admin/'); passed++;
 assert.equal(manifest.display,'standalone'); passed++;
 ok(manifest.display_override?.includes('standalone'),'manifest keeps standalone override');
 ok(html.includes('viewport-fit=cover'),'admin viewport includes safe areas');
-ok(html.includes('apple-mobile-web-app-status-bar-style'),'Apple status-bar metadata exists');
+ok(html.includes('apple-mobile-web-app-status-bar-style\" content=\"black\"')&&!html.includes('black-translucent'),'Apple PWA uses opaque black status-bar mode; black-translucent is rejected');
 ok(html.includes('apple-mobile-web-app-title'),'Apple PWA title exists');
 
 ok(sw.includes(`const CACHE='vacleaner-manager-${build}'`),'service-worker cache matches build');
@@ -71,8 +71,7 @@ ok(publicResilience.includes('reg.unregister()'),'public runtime removes stale r
 
 
 ok(!css.includes('html.pwa-standalone .mobile-nav{position:relative'),'installed PWA has no standalone grid override for bottom navigation');
-ok(css.includes('--pwa-safe-bottom-raw:env(safe-area-inset-bottom,0px)'),'raw iOS safe-area value is preserved separately');
-ok(css.includes('html.pwa-standalone{--pwa-safe-bottom:min(var(--pwa-safe-bottom-raw),34px)}'),'standalone PWA caps inflated WebKit bottom safe-area without moving the fixed nav');
+ok(css.includes('--pwa-safe-bottom:env(safe-area-inset-bottom,0px)')&&!css.includes('--pwa-safe-bottom-raw'),'native iOS safe-area is used without the failed v3.0.54 clamp');
 ok(!css.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'),'stale v3.0.36 fixed-ancestor override is gone');
 ok(runtime.includes("document.documentElement.classList.add('pwa-update-transition')"),'PWA update hides the outgoing mobile chrome before controller reload');
 console.log(`PWA static tests passed ${passed} assertions.`);

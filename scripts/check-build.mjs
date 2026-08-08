@@ -109,7 +109,7 @@ if(!adminCss.includes('.mobile-nav svg{width:19px;height:19px')||!adminCss.inclu
 if(!adminCss.includes('.mobile-more-menu{position:fixed')||adminRuntime.includes('mobile-more-backdrop'))errors.push('mobile More menu must use the compact VA HOME-style popover, not a fullscreen backdrop sheet');
 if(adminCss.includes('html{width:100%;height:100%;overflow:hidden;scrollbar-gutter:auto;overscroll-behavior:none}'))errors.push('mobile dashboard html root must not be overflow-locked');
 if(!adminCss.includes('html{width:100%;height:100%;min-height:100%;overflow-x:clip;overflow-y:visible')||!adminCss.includes('body{position:static;inset:auto;width:100%;height:100%;min-height:100%;overflow:visible'))errors.push('mobile root viewport contract is missing');
-if(!adminHtml.includes('apple-mobile-web-app-capable')||!adminHtml.includes('black-translucent'))errors.push('admin standalone iOS metadata is missing');
+if(!adminHtml.includes('apple-mobile-web-app-capable')||!adminHtml.includes('apple-mobile-web-app-status-bar-style\" content=\"black\"')||adminHtml.includes('black-translucent'))errors.push('admin standalone iOS metadata must use opaque black status-bar mode, not black-translucent');
 if(!publicExperienceCss.includes('.final-cta-orbit{pointer-events:none}'))errors.push('decorative public CTA orbits must not intercept clicks');
 if(!publicExperienceCss.includes('body:has(.mobile-menu.is-open) .mobile-booking{display:none}'))errors.push('public sticky CTA must hide while mobile navigation is open');
 if(!businessCopy.includes('У подарунок — будь-який аромадифузор VA HOME з колекції Entry'))errors.push('HOME RESET Entry diffuser gift copy is missing');
@@ -118,7 +118,7 @@ if(!adminRuntime.includes('vacleaner-status-correction-v1')||!adminRuntime.inclu
 if(!statusEdge.includes('edge:correct_status:')||!statusEdge.includes('vacleaner_apply_reservation')||!statusEdge.includes('admin_users'))errors.push('dedicated server-side controlled status correction is missing');
 if(adminEdge.includes('action === "correct_status"'))errors.push('status correction logic is duplicated inside vacleaner-admin-bookings-v3');
 if(/\["pending", "waiting_payment", "confirmed", "issued", "completed"\]\.includes\(nextStatus\)/.test(statusEdge))errors.push('manual status correction must never target completed; use settlement flow');
-if(!adminCss.includes('--pwa-safe-bottom-raw:env(safe-area-inset-bottom,0px)')||!adminCss.includes('html.pwa-standalone{--pwa-safe-bottom:min(var(--pwa-safe-bottom-raw),34px)}'))errors.push('standalone PWA must cap inflated iOS bottom safe-area while preserving the raw inset');
+if(!adminCss.includes('--pwa-safe-bottom:env(safe-area-inset-bottom,0px)')||adminCss.includes('--pwa-safe-bottom-raw')||adminCss.includes('min(var(--pwa-safe-bottom-raw),34px)'))errors.push('admin PWA must use the native safe-area contract without the failed v3.0.54 clamp');
 if(!adminHtml.includes('<div id="adminMount"></div><nav class="mobile-nav"'))errors.push('mobile navigation must exist in initial admin HTML before JS paint');
 if(adminRuntime.includes('<nav class="mobile-nav"'))errors.push('runtime must not recreate the static mobile navigation');
 if(adminCss.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'))errors.push('stale fixed-app mobile override remains');

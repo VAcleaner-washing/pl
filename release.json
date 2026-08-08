@@ -1,6 +1,6 @@
 {
-  "version": "3.0.54",
-  "build": 3054,
+  "version": "3.0.55",
+  "build": 3055,
   "releasedAt": "2026-08-08",
-  "label": "VAcleaner v3.0.54 — IOS STANDALONE SAFE-AREA FIX"
+  "label": "VAcleaner v3.0.55 — IOS PWA STATUS BAR VIEWPORT FIX"
 }
