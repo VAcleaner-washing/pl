@@ -426,9 +426,10 @@
   function enhanceHomeResetGift(){
     const cards=[...document.querySelectorAll('.v21-package-grid article,.package-card')].filter(el=>/HOME RESET/i.test(el.textContent||''));
     cards.forEach(card=>{
-      if(card.querySelector('.vx-home-reset-gift'))return;
-      const gift=document.createElement('a');gift.className='vx-home-reset-gift';gift.href=HOME_RESET_GIFT_URL;gift.target='_blank';gift.rel='noreferrer';gift.textContent='У подарунок — будь-який аромадифузор VA HOME з колекції Entry ↗';
-      const action=card.querySelector('a[href*="bronuvannia"]');if(action)action.insertAdjacentElement('beforebegin',gift);else card.append(gift);
+      let gift=card.querySelector('.vx-home-reset-gift');
+      if(!gift){gift=document.createElement('a');gift.className='vx-home-reset-gift';gift.target='_blank';gift.rel='noreferrer';gift.textContent='У подарунок — будь-який аромадифузор VA HOME з колекції Entry ↗';}
+      gift.href=HOME_RESET_GIFT_URL;
+      const action=card.querySelector('a[href*="bronuvannia"]');if(action&&gift.nextElementSibling!==action)action.insertAdjacentElement('beforebegin',gift);else if(!gift.parentElement)card.append(gift);
     });
     document.querySelectorAll('.booking-products button').forEach(button=>{
       if(!/HOME RESET/i.test(button.textContent||'')||button.querySelector('.vx-home-reset-gift-inline'))return;

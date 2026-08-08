@@ -116,6 +116,9 @@ if(!publicExperienceCss.includes('body:has(.mobile-menu.is-open) .mobile-booking
 if(!businessCopy.includes('У подарунок — будь-який аромадифузор VA HOME з колекції Entry'))errors.push('HOME RESET Entry diffuser gift copy is missing');
 if(!publicExperience.includes('HOME_RESET_GIFT_URL')||!publicExperience.includes('enhanceHomeResetGift'))errors.push('HOME RESET gift is not hydration-safe');
 if(!publicExperience.includes("HOME_RESET_GIFT_URL='https://vahome.com.ua/catalog?collection=entry'"))errors.push('HOME RESET gift must preserve the VA HOME Entry collection deep-link');
+if(!publicExperienceCss.includes('.package-page-grid .package-price{justify-content:center;text-align:center}'))errors.push('Package page prices must be horizontally centered');
+if(!publicExperienceCss.includes('.package-card.featured .vx-home-reset-gift{position:absolute'))errors.push('HOME RESET gift must have a dedicated non-overlapping featured-card layout');
+
 if(!publicExperience.includes('Фінальний штрих — аромадифузор VA HOME · Entry у подарунок'))errors.push('HOME RESET real-plan finale must mention the VA HOME diffuser gift');
 if(!publicExperienceCss.includes('.vx-proof__actions .vx-proof__cta{-webkit-appearance:none;appearance:none')||!publicExperienceCss.includes('-webkit-text-fill-color:#15110c'))errors.push('Instagram review collection CTA must not fall back to Safari browser-blue styling');
 if(!adminRuntime.includes('vacleaner-status-correction-v1')||!adminRuntime.includes('Виправити статус')||!adminRuntime.includes('invokeStatus({bookingId:b.id,status:target,reason})'))errors.push('admin status correction UI/endpoint binding is missing');
