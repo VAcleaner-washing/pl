@@ -5,6 +5,7 @@
   const PRODUCT_INFO={
     puzzi:{label:'Kärcher Puzzi',price:700,desc:'Глибоке промивання диванів, крісел, матраців, килимів і текстилю.'},
     puzzi_jimmy:{label:'Puzzi + Jimmy',price:1050,desc:'Сухе очищення шерсті, волосся й пилу перед глибоким промиванням текстилю.'},
+    puzzi_abir:{label:'Puzzi + робот ABIR',price:1500,desc:'Глибоке очищення текстилю та миття скла одним комплектом.'},
     sc2:{label:'Kärcher SC 2 Deluxe',price:500,desc:'Кухня, ванна, плитка, шви, стики та тверді поверхні.'},
     abir:{label:'Робот для вікон',price:800,desc:'Скло, дзеркала та гладкі поверхні без роботи на висоті.'},
     combo:{label:'Комбо · Puzzi + SC 2',price:1000,desc:'Текстиль + кухня або ванна одним готовим комплектом.'},
@@ -27,6 +28,7 @@
   const PRODUCT_TITLES={
     puzzi:['Kärcher Puzzi','Kärcher Puzzi 8/1'],
     puzzi_jimmy:['Puzzi + Jimmy'],
+    puzzi_abir:['Puzzi + робот ABIR'],
     sc2:['Kärcher SC 2','Kärcher SC 2 Deluxe'],
     abir:['Робот для вікон','Робот ABIR'],
     combo:['Тариф «Комбо»','Комбо · Puzzi + SC 2'],
@@ -48,7 +50,7 @@
   };
 
   const blankState=()=>({
-    primary:'',zones:[],textileProblems:[],textileOdor:'',kitchenProblems:[],kitchenGrillSurface:'',kitchenScaleSurface:'',bathProblems:[],bathSurface:'',windowsMode:''
+    zones:[],textileProblems:[],textileOdor:'',kitchenProblems:[],kitchenGrillSurface:'',kitchenScaleSurface:'',bathProblems:[],bathSurface:'',windowsMode:''
   });
   let state=blankState();
   let stepIndex=0;
@@ -58,7 +60,7 @@
     window.dataLayer=window.dataLayer||[];
     window.dataLayer.push({event,...data,page_path:location.pathname});
   }
-  const selectedZones=()=>state.primary==='multi'?state.zones:[state.primary].filter(Boolean);
+  const selectedZones=()=>Array.isArray(state.zones)?state.zones:[];
   const hasTextile=()=>selectedZones().some(z=>['textile','mattress','carpet'].includes(z));
   const hasKitchen=()=>selectedZones().includes('kitchen');
   const hasBath=()=>selectedZones().includes('bathroom');
@@ -66,13 +68,10 @@
 
   function questions(){
     const list=[{
-      id:'primary',title:'Що хочете почистити?',note:'Оберіть головну задачу. Якщо зон кілька — ми зберемо один готовий план.',type:'single',options:[
-        ['textile','Диван / крісла','М’які меблі та оббивка'],['mattress','Матрац','Глибоке очищення місця для сну'],['carpet','Килим','Плями, пил, запахи'],['kitchen','Кухня','Жир, нагар, фасади, мийка'],['bathroom','Ванна кімната','Наліт, іржа, шви, сантехніка'],['windows','Вікна / дзеркала','Скло, рами та стики'],['multi','Кілька зон / вся квартира','Зберемо комплект під усе прибирання']
+      id:'zones',title:'Що хочете почистити?',note:'Позначте одну або кілька зон — ми зберемо рішення під усе за один раз.',type:'multi',options:[
+        ['textile','Диван / крісла','М’які меблі'],['mattress','Матрац','Місце для сну'],['carpet','Килим','Плями й запахи'],['kitchen','Кухня','Жир і нагар'],['bathroom','Ванна кімната','Наліт та сантехніка'],['windows','Вікна / дзеркала','Скло й рами']
       ]
     }];
-    if(state.primary==='multi')list.push({id:'zones',title:'Які зони входять у прибирання?',note:'Можна вибрати кілька. Комплект підбереться автоматично.',type:'multi',options:[
-      ['textile','Диван / крісла',''],['mattress','Матрац',''],['carpet','Килими',''],['kitchen','Кухня',''],['bathroom','Ванна',''],['windows','Вікна / дзеркала','']
-    ]});
     if(hasTextile())list.push({id:'textileProblems',title:'Що саме турбує в текстилі?',note:'Виберіть усе, що актуально — кожна відповідь впливає на засіб або техніку.',type:'multi',options:[
       ['refresh','Просто освіжити','Звичайний побутовий бруд'],['stain','Є видимі плями','Кава, чай, напої, жир, бруд та інші локальні плями'],['urine','Є запах сечі','Дитина або тварина'],['other_odor','Інший неприємний запах','Тютюн, затхлість, тварини, піт тощо'],['hair','Шерсть / волосся / крихти','Потрібен сухий етап перед миттям'],['heavy_dust','Багато пилу в тканині','Особливо актуально для матраців']
     ]});
@@ -106,8 +105,7 @@
     return q.type==='multi'?Array.isArray(value)&&value.length>0:Boolean(value);
   }
   function setAnswer(qId,value,type){
-    if(qId==='primary'&&state.primary!==value){state=blankState();state.primary=value;}
-    else if(type==='multi'){
+    if(type==='multi'){
       const arr=Array.isArray(state[qId])?[...state[qId]]:[];
       const i=arr.indexOf(value);if(i>=0)arr.splice(i,1);else arr.push(value);state[qId]=arr;
     }else state[qId]=value;
@@ -116,13 +114,13 @@
   function extra(code,reason){return{code,...EXTRA_INFO[code],reason}}
   function result(){
     const zones=selectedZones(),text=hasTextile(),hard=hasKitchen()||hasBath(),windows=hasWindows();
-    const needJimmy=zones.includes('mattress')||state.textileProblems.some(x=>['hair','heavy_dust'].includes(x));
+    const needJimmy=state.textileProblems.some(x=>['hair','heavy_dust'].includes(x));
     let product='puzzi';
     const warnings=[];
     if(text&&hard&&windows)product='elite';
     else if(text&&hard)product=needJimmy?'general':'combo';
     else if(hard&&windows)product='ideal_windows';
-    else if(text&&windows){product='elite';warnings.push('Для поєднання лише текстилю та вікон готового двопозиційного тарифу у формі немає. HOME RESET закриває обидві задачі; якщо потрібні тільки Puzzi + робот, менеджер зможе уточнити індивідуальний варіант.');}
+    else if(text&&windows)product='puzzi_abir';
     else if(text)product=needJimmy?'puzzi_jimmy':'puzzi';
     else if(hard)product='sc2';
     else if(windows)product=state.windowsMode==='glass'?'abir':'ideal_windows';
@@ -167,7 +165,7 @@
 
     if((state.bathSurface==='stone'||state.kitchenScaleSurface==='stone')&&!extras.some(x=>x.code==='eco_clean'))add('eco_clean','Натуральний камінь не дружить із кислотними засобами; Eco Clean підходить для регулярного догляду за каменем і мармуром.');
 
-    return {product,productInfo:PRODUCT_INFO[product],extras,warnings,includesPuzzi:['puzzi','puzzi_jimmy','combo','general','elite'].includes(product)};
+    return {product,productInfo:PRODUCT_INFO[product],extras,warnings,includesPuzzi:['puzzi','puzzi_jimmy','puzzi_abir','combo','general','elite'].includes(product)};
   }
 
   function escapeHtml(value){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
@@ -196,7 +194,7 @@
     back.hidden=stepIndex===0;
     next.hidden=q.type==='single';
     next.disabled=!canContinue(q);
-    body.innerHTML=`<div class="vq-question"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?current.includes(value):current===value;return `<button type="button" class="vq-option ${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}"><span class="vq-option__check">${q.type==='multi'?'✓':'→'}</span><span><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>`;
+    body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;return `<button type="button" class="vq-option ${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}"><span class="vq-option__check">${q.type==='multi'?'✓':'→'}</span><span><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>`;
     body.querySelectorAll('.vq-option').forEach(button=>button.addEventListener('click',()=>{
       setAnswer(q.id,button.dataset.value,q.type);
       if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else render();
@@ -225,11 +223,35 @@
   function injectTeaser(){
     if(path!=='/'||document.querySelector('[data-vq-guide]'))return;
     const target=document.querySelector('.v21-choose');if(!target)return;
-    const section=document.createElement('section');section.className='vq-guide';section.dataset.vqGuide='1';section.innerHTML=`<div class="vq-guide__media"><img src="/assets/quiz-cleaning-guide.webp" alt="Домашнє прибирання з технікою VAcleaner" loading="lazy"><span>Підбір за 30 секунд</span></div><div class="vq-guide__copy"><p>VAcleaner · smart guide</p><h2>Не знаєте, що саме потрібно для прибирання?</h2><p>Опишіть задачу простими словами. Ми підберемо техніку, конкретні засоби й відсіємо хімію, яка не підходить вашій поверхні.</p><div class="vq-guide__chips"><span>Плями → Carp-Deta</span><span>Запах сечі → Neutralix</span><span>Наліт → правильний засіб за матеріалом</span></div><button type="button" class="vq-guide__button">Підібрати рішення →</button><small>2–7 коротких запитань · без реєстрації</small></div>`;
+    const section=document.createElement('section');section.className='vq-guide';section.dataset.vqGuide='1';section.innerHTML=`<div class="vq-guide__media"><img src="/assets/quiz-cleaning-guide.webp" alt="Домашнє прибирання з технікою VAcleaner" loading="lazy"><span>Підбір за 30 секунд</span></div><div class="vq-guide__copy"><p>VAcleaner · smart guide</p><h2>Не знаєте, що саме потрібно для прибирання?</h2><p>Опишіть задачу простими словами. Ми підберемо техніку, конкретні засоби й відсіємо хімію, яка не підходить вашій поверхні.</p><div class="vq-guide__chips"><span>Плями → Carp-Deta</span><span>Запах сечі → Neutralix</span><span>Наліт → правильний засіб за матеріалом</span></div><button type="button" class="vq-guide__button">Підібрати рішення →</button><small>Зазвичай 3–4 короткі кроки · без реєстрації</small></div>`;
     target.insertAdjacentElement('beforebegin',section);
     section.querySelector('.vq-guide__button').addEventListener('click',openQuiz);
-    document.querySelectorAll('a[href="#choose"]').forEach(a=>{a.addEventListener('click',e=>{e.preventDefault();openQuiz()})});
+    document.querySelectorAll('a[href="#choose"]').forEach(a=>{a.href='/pidbir/'});
     const note=document.querySelector('.v21-action-note');if(note)note.textContent='Не знаєте, що обрати? Пройдіть короткий підбір — сайт сам запропонує техніку й засоби під вашу задачу.';
+  }
+
+  function injectSolutionsEntry(){
+    if(path!=='/rishennia')return;
+    const strip=document.querySelector('.choice-strip');if(!strip)return;
+    const p=strip.querySelector('p');const h=strip.querySelector('h2');const a=strip.querySelector('a');
+    if(p)p.textContent='Не впевнені, що саме підійде?';
+    if(h)h.textContent='Позначте, що хочете почистити — підберемо техніку й засоби приблизно за 30 секунд.';
+    if(a){a.href='/pidbir/';a.innerHTML='Підібрати рішення <span aria-hidden="true">↗</span>';}
+  }
+
+  function injectBookingEscape(){
+    if(path!=='/bronuvannia'||document.querySelector('[data-vq-booking-help]'))return;
+    const heading=document.querySelector('.booking-step .booking-step-heading');if(!heading)return;
+    const box=document.createElement('div');box.className='vq-booking-help';box.dataset.vqBookingHelp='1';
+    box.innerHTML='<span>Не знаєте, що обрати?</span><a href="/pidbir/">Підібрати рішення за 30 секунд →</a>';
+    heading.insertAdjacentElement('afterend',box);
+  }
+
+  let standaloneOpened=false;
+  function openStandalone(){
+    if(path!=='/pidbir'||standaloneOpened)return;
+    standaloneOpened=true;
+    setTimeout(openQuiz,80);
   }
 
   function applyBookingPreset(){
@@ -268,7 +290,10 @@
 
   function bootPublicQuiz(){
     injectTeaser();
+    injectSolutionsEntry();
+    injectBookingEscape();
     applyBookingPreset();
+    openStandalone();
   }
 
   // Next/static hydration may reconcile the home tree after DOMContentLoaded and
