@@ -248,10 +248,11 @@
         ]
       },
       "neutralix": {
-        "label": "Neutralix · концентрат",
-        "price": 250,
+        "label": "Neutralix · 250 мл",
+        "price": 200,
         "aliases": [
-          "Neutralix · концентрат"
+          "Neutralix · концентрат",
+          "Neutralix"
         ]
       },
       "shower_care": {
