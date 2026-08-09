@@ -59,7 +59,7 @@ with sync_playwright() as p:
   page.close()
  # Desktop client-card regression: the quick actions used to inherit no desktop styles
  # because their V4 rules lived only inside max-width:900px.
- for w,h in ((1440,900),(1280,800),(1024,768)):
+ for w,h in ((1648,927),(1440,900),(1280,800),(1024,768)):
   page=mod.render_page(browser,w,h,authenticated=True,standalone=False)
   page.evaluate("document.documentElement.classList.add('glass-test')")
   page.add_style_tag(content=CSS);page.add_script_tag(content=JS);page.wait_for_timeout(120)
@@ -74,6 +74,17 @@ with sync_playwright() as p:
   check(header_box is not None and header_box['height']<190,f'{w}: desktop client header cannot balloon from unstyled quick actions')
   card_box=page.locator('.modal-card:has(.client-card-form)').bounding_box()
   check(card_box is not None and card_box['x']>=12 and card_box['x']+card_box['width']<=w-12,f'{w}: desktop client card uses the viewport without clipping')
+  # Force the same no-preview state seen with HEIC/browser decode failures and verify
+  # that the fallback remains a deliberate desktop card instead of overlapping controls.
+  preview=page.locator('#clientDocumentPreview')
+  preview.evaluate("""el=>{el.className='client-document-preview preview-unavailable';el.innerHTML='<div class=\"document-private-badge\">Приватний документ</div><img hidden alt=\"Фото документа клієнта\"><div class=\"document-preview-meta\"><div><b>MG_5195.jpeg</b><span>Формат фото не підтримує попередній перегляд у цьому браузері — відкрийте файл кнопкою.</span></div><a class=\"btn subtle\" href=\"#\">Відкрити фото</a></div>'}""")
+  badge_box=preview.locator('.document-private-badge').bounding_box()
+  meta_box=preview.locator('.document-preview-meta').bounding_box()
+  open_box=preview.locator('.document-preview-meta .btn').bounding_box()
+  decoration=preview.locator('.document-preview-meta .btn').evaluate("el=>getComputedStyle(el).textDecorationLine")
+  check(badge_box is not None and meta_box is not None and badge_box['y']+badge_box['height']<=meta_box['y']+1,f'{w}: desktop private-document badge stays above fallback content without overlap')
+  check(open_box is not None and open_box['height']>=42 and open_box['width']>=130,f'{w}: desktop open-document action has a deliberate button geometry')
+  check(decoration=='none',f'{w}: desktop open-document action does not fall back to browser underline styling')
   if w>=1280:
    columns=page.locator('.client-card-grid').evaluate("el=>getComputedStyle(el).gridTemplateColumns.split(' ').length")
    check(columns==3,f'{w}: wide desktop client card uses contacts, document and rental history side by side')
