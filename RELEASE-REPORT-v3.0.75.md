@@ -2,7 +2,7 @@
 
 ## Base
 - Source base: VAcleaner v3.0.74 — BOOKING SEARCH MOTION FIX.
-- The separate Liquid Glass experiment was not used and is not included in this release.
+- Production core remains the stable v3.0.75 implementation. This TEST archive additionally includes an isolated `/admin/bronuvannia-glass/` Liquid Glass V4 overlay; `/admin/bronuvannia/` is unchanged.
 
 ## Fixed
 - Removed the scroll-driven mobile booking-search collapse entirely.
@@ -35,3 +35,20 @@ On a real iPhone/PWA, animating the fixed topbar together with `.main` changed s
 - VA HOME was not touched.
 - GitHub Pages production is not considered updated until `https://vacleaner.pp.ua/release.json` reports `3.0.75`.
 - Real iPhone/PWA behavior still requires confirmation after deployment; the user-provided real-device result has priority over local emulation.
+
+
+## Liquid Glass V4 test overlay
+- `Найближчі`: strong amber issue / green return rails, halo, semantic badges and action hierarchy.
+- `Бронювання`: semantic status rail (new / waiting / confirmed / issued / completed / cancelled), stronger client affordance and premium status treatment.
+- `Календар`: distinct full / one-left / occupied slot controls while keeping day cards as solid content.
+- `Нове бронювання`: unified four-step progress, premium selected states, glass header/footer and stable solid form content.
+- `Картка клієнта`: quick Call / Telegram / New rental actions, stronger summary, private-document hierarchy and rental history.
+- Glass assets load only on `/admin/bronuvannia-glass/`.
+- Main production admin files (`admin/bronuvannia/index.html`, `assets/admin-v250.css`, `assets/admin-v250.js`, `assets/vacleaner-core.js`, `release.json`) SHA-match the clean v3.0.75 stable build.
+
+## Glass V4 QA
+- Existing Glass shell QA: PASS on 320 / 390 / 430.
+- V4 targeted UX QA: PASS on 320 / 390 / 430 for booking status rails, client quick actions, client-card overflow, four-step booking form, modal viewport fit and calendar overflow.
+- Build/static check after V4: PASS — 270 file checks.
+- Pages artifact build: PASS — 200 files / ~5.9 MiB.
+- No Supabase changes.

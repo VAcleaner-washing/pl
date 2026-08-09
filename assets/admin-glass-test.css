@@ -483,3 +483,359 @@ html.glass-test{
     html.glass-test .upcoming-scope .chip{background:#151d21}
   }
 }
+
+/* --------------------------------------------------------------------------
+   Glass V4 — unified decision UX pass
+   Loaded only by /admin/bronuvannia-glass/.
+   -------------------------------------------------------------------------- */
+@media (max-width:900px){
+  /* BOOKING LIST — status is readable before the text. */
+  html.glass-test .booking-row{
+    position:relative;
+    overflow:hidden;
+    border-radius:20px;
+    transition:border-color .2s ease,box-shadow .2s ease,transform .18s var(--lg-ease);
+  }
+  html.glass-test .booking-row::before{
+    content:"";
+    position:absolute;
+    z-index:3;
+    left:0;
+    top:15px;
+    bottom:15px;
+    width:4px;
+    border-radius:0 999px 999px 0;
+    background:var(--booking-accent,rgba(255,255,255,.18));
+    box-shadow:0 0 20px color-mix(in srgb,var(--booking-accent,transparent) 42%,transparent);
+    pointer-events:none;
+  }
+  html.glass-test .booking-row::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:radial-gradient(100% 62% at 0 30%,var(--booking-wash,rgba(255,255,255,.025)),transparent 54%);
+  }
+  html.glass-test .booking-row:has(.status.pending){--booking-accent:#e7b76e;--booking-wash:rgba(214,164,95,.085)}
+  html.glass-test .booking-row:has(.status.waiting_payment){--booking-accent:#77b9ec;--booking-wash:rgba(72,145,205,.075)}
+  html.glass-test .booking-row:has(.status.confirmed){--booking-accent:#efbd70;--booking-wash:rgba(214,164,95,.095)}
+  html.glass-test .booking-row:has(.status.issued){--booking-accent:#58ce94;--booking-wash:rgba(43,173,116,.09)}
+  html.glass-test .booking-row:has(.status.completed){--booking-accent:#879399;--booking-wash:rgba(135,147,153,.045)}
+  html.glass-test .booking-row:has(.status.cancelled),
+  html.glass-test .booking-row:has(.status.declined){--booking-accent:#e67f78;--booking-wash:rgba(214,100,100,.075)}
+  html.glass-test .booking-row-head,
+  html.glass-test .booking-row-body,
+  html.glass-test .booking-extra,
+  html.glass-test .booking-note,
+  html.glass-test .booking-actions{position:relative;z-index:1}
+  html.glass-test .booking-row-head{
+    background:linear-gradient(180deg,rgba(255,255,255,.026),rgba(255,255,255,.006));
+    border-bottom-color:rgba(255,255,255,.075);
+  }
+  html.glass-test .booking-row .status{
+    border:1px solid color-mix(in srgb,var(--booking-accent,#aaa) 30%,transparent);
+    background:color-mix(in srgb,var(--booking-accent,#aaa) 13%,rgba(10,16,20,.78));
+    color:color-mix(in srgb,var(--booking-accent,#ddd) 78%,white);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  html.glass-test .booking-row-body>div{border-bottom-color:rgba(255,255,255,.065)}
+  html.glass-test .booking-person.booking-client-link{
+    border-radius:13px;
+    margin:5px 8px;
+    padding:10px 12px;
+    border:1px solid rgba(255,255,255,.06);
+    background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012));
+  }
+  html.glass-test .booking-person.booking-client-link:active{background:rgba(255,255,255,.055)}
+  html.glass-test .results-meta{padding:0 2px 2px}
+
+  /* CALENDAR — availability is a control state, not just a background color. */
+  html.glass-test .calendar-summary{
+    position:relative;
+    overflow:hidden;
+    border-color:rgba(255,255,255,.10);
+    border-radius:18px;
+    background:linear-gradient(145deg,rgba(37,44,48,.48),rgba(12,19,23,.36));
+    box-shadow:var(--lg-shadow-soft);
+    backdrop-filter:blur(20px) saturate(145%);
+    -webkit-backdrop-filter:blur(20px) saturate(145%);
+  }
+  html.glass-test .calendar-summary::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(180deg,rgba(255,255,255,.065),transparent 45%);
+  }
+  html.glass-test .calendar-summary>*{position:relative;z-index:1}
+  html.glass-test .calendar-summary strong{color:#f0c77f;text-shadow:0 0 22px rgba(214,164,95,.16)}
+  html.glass-test .day-card{
+    border-radius:20px;
+    border-color:rgba(255,255,255,.09);
+    background:linear-gradient(150deg,rgba(18,27,32,.98),rgba(8,14,18,.98));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 12px 30px rgba(0,0,0,.15);
+  }
+  html.glass-test .day-card header{
+    padding-bottom:11px;
+    border-bottom-color:rgba(255,255,255,.065);
+  }
+  html.glass-test .day-card header strong{letter-spacing:-.025em}
+  html.glass-test .day-labels{color:#7f8a8f;font-weight:700;letter-spacing:.08em}
+  html.glass-test .day-row{border-bottom-color:rgba(255,255,255,.055)}
+  html.glass-test .day-row>b{color:#dbe0e2;font-weight:660}
+  html.glass-test .calendar-grid .slot{
+    position:relative;
+    min-height:40px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.085);
+    background:linear-gradient(145deg,rgba(34,42,46,.43),rgba(12,19,23,.34));
+    color:#a7b1b5;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+    backdrop-filter:blur(14px) saturate(125%);
+    -webkit-backdrop-filter:blur(14px) saturate(125%);
+    transition:transform .17s var(--lg-ease),border-color .2s ease,background .2s ease,box-shadow .2s ease,color .2s ease;
+  }
+  html.glass-test .calendar-grid .slot.full{
+    border-color:rgba(111,190,151,.105);
+    background:linear-gradient(145deg,rgba(41,88,65,.115),rgba(15,25,22,.30));
+    color:#9db5a9;
+  }
+  html.glass-test .calendar-grid .slot.low{
+    border-color:rgba(239,195,125,.29);
+    background:linear-gradient(145deg,rgba(214,164,95,.18),rgba(77,53,24,.15));
+    color:#ffd69a;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 7px 20px rgba(152,95,29,.10);
+  }
+  html.glass-test .calendar-grid .slot.zero{
+    border-color:rgba(231,126,119,.20);
+    background:linear-gradient(145deg,rgba(151,56,53,.13),rgba(52,23,24,.14));
+    color:#d9908b;
+    opacity:.76;
+  }
+  html.glass-test .calendar-grid .slot:not(:disabled):active{transform:scale(.965)}
+
+  /* NEW BOOKING — one coherent four-step iOS-style flow. */
+  html.glass-test .modal-card:has(.booking-form){
+    border-color:rgba(255,255,255,.105);
+    background:#081014;
+    box-shadow:0 34px 90px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  html.glass-test .booking-form>header{
+    background:linear-gradient(180deg,rgba(33,41,45,.78),rgba(11,18,22,.69));
+    border-bottom-color:rgba(255,255,255,.085);
+    box-shadow:0 12px 32px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.09);
+    backdrop-filter:blur(28px) saturate(160%);
+    -webkit-backdrop-filter:blur(28px) saturate(160%);
+  }
+  html.glass-test .booking-form>header small{color:#f1c980}
+  html.glass-test .booking-form>header h2{letter-spacing:-.04em}
+  html.glass-test .booking-form>header .mobile-booking-progress{
+    position:relative;
+    gap:9px;
+  }
+  html.glass-test .booking-form>header .mobile-booking-progress::before{
+    content:"";
+    position:absolute;
+    z-index:0;
+    left:15px;
+    right:15px;
+    top:15px;
+    height:1px;
+    background:linear-gradient(90deg,rgba(239,195,125,.18),rgba(255,255,255,.07));
+  }
+  html.glass-test .mobile-booking-progress span{
+    z-index:1;
+    border-color:rgba(255,255,255,.13);
+    background:rgba(16,23,27,.80);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 4px 12px rgba(0,0,0,.12);
+  }
+  html.glass-test .mobile-booking-progress span.active{
+    border-color:rgba(244,203,133,.42);
+    background:linear-gradient(145deg,rgba(236,187,105,.28),rgba(116,79,33,.20));
+    color:#ffe0a4;
+    box-shadow:0 0 0 3px rgba(214,164,95,.055),inset 0 1px 0 rgba(255,255,255,.15),0 7px 20px rgba(152,95,29,.12);
+  }
+  html.glass-test .booking-form-scroll{
+    background:
+      radial-gradient(75% 28% at 0 0,rgba(214,164,95,.045),transparent 65%),
+      #081014;
+  }
+  html.glass-test .booking-form .form-section{
+    border-color:rgba(255,255,255,.09);
+    border-radius:18px;
+    background:linear-gradient(150deg,rgba(17,26,31,.97),rgba(9,15,19,.98));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025),0 12px 28px rgba(0,0,0,.12);
+  }
+  html.glass-test .booking-form .section-title>span{
+    border:1px solid rgba(239,195,125,.22);
+    border-radius:10px;
+    background:linear-gradient(145deg,rgba(226,174,91,.18),rgba(90,60,25,.12));
+    color:#f4ca82;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+  }
+  html.glass-test .booking-form .section-title h3{letter-spacing:-.02em}
+  html.glass-test .booking-form .rental-moment{
+    border-color:rgba(255,255,255,.085);
+    background:linear-gradient(145deg,rgba(31,39,43,.34),rgba(10,17,21,.30));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  html.glass-test .booking-form .rental-moment .group-label{color:#f0c77f}
+  html.glass-test .booking-form .window-choice span,
+  html.glass-test .booking-form .time-chip,
+  html.glass-test .booking-form .time-chip-picker{
+    border-color:rgba(255,255,255,.10);
+    background:linear-gradient(145deg,rgba(36,44,48,.42),rgba(12,19,23,.36));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+  }
+  html.glass-test .booking-form .window-choice input:checked+span,
+  html.glass-test .booking-form .time-chip.active{
+    border-color:rgba(244,203,133,.36);
+    background:linear-gradient(145deg,rgba(233,181,99,.28),rgba(104,70,30,.18));
+    color:#ffe1aa;
+    box-shadow:0 0 0 3px rgba(214,164,95,.045),inset 0 1px 0 rgba(255,255,255,.14);
+  }
+  html.glass-test .booking-form .time-chip.active{font-weight:750}
+  html.glass-test .booking-form .passport-data-group,
+  html.glass-test .booking-form .manual-discount-editor,
+  html.glass-test .booking-form .deposit-preview{
+    border-color:rgba(239,195,125,.16);
+    background:linear-gradient(145deg,rgba(214,164,95,.065),rgba(11,18,22,.50));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  html.glass-test .booking-form .passport-data-head>span,
+  html.glass-test .booking-form .manual-discount-head>span.applied{
+    border:1px solid rgba(239,195,125,.20);
+    background:rgba(214,164,95,.10);
+    color:#f0c77f;
+  }
+  html.glass-test .booking-form .extra-check,
+  html.glass-test .booking-form .switch{
+    border-color:rgba(255,255,255,.09);
+    background:linear-gradient(145deg,rgba(31,39,43,.32),rgba(10,17,21,.31));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  html.glass-test .booking-form .extra-check:has(input:checked),
+  html.glass-test .booking-form .switch:has(input:checked){
+    border-color:rgba(239,195,125,.28);
+    background:linear-gradient(145deg,rgba(214,164,95,.13),rgba(74,50,24,.09));
+  }
+  html.glass-test .booking-form>footer{
+    background:linear-gradient(180deg,rgba(12,19,23,.68),rgba(20,27,31,.88));
+    border-top-color:rgba(255,255,255,.09);
+    box-shadow:0 -14px 36px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.07);
+  }
+  html.glass-test .booking-form>footer .btn.primary{
+    border-radius:16px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.24),0 10px 24px rgba(151,91,22,.20);
+  }
+
+  /* CLIENT CARD — detail screen with clear summary, secure document and quick actions. */
+  html.glass-test .modal-card:has(.client-card-form){
+    border-color:rgba(255,255,255,.10);
+    background:#081014;
+    box-shadow:0 34px 90px rgba(0,0,0,.62),inset 0 1px 0 rgba(255,255,255,.035);
+  }
+  html.glass-test .client-card-form>header{
+    background:
+      radial-gradient(75% 130% at 0 0,rgba(214,164,95,.105),transparent 68%),
+      linear-gradient(180deg,rgba(32,40,44,.78),rgba(11,18,22,.72));
+  }
+  html.glass-test .client-card-form>header h2{letter-spacing:-.04em}
+  html.glass-test .glass-client-actions{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:7px;
+    margin-top:12px;
+    max-width:440px;
+  }
+  html.glass-test .glass-client-actions a,
+  html.glass-test .glass-client-actions button{
+    min-width:0;
+    min-height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:0 9px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:14px;
+    background:linear-gradient(145deg,rgba(42,50,54,.48),rgba(13,20,24,.38));
+    color:#e3e8ea;
+    font:inherit;
+    font-size:11px;
+    font-weight:700;
+    text-decoration:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 7px 18px rgba(0,0,0,.10);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+  }
+  html.glass-test .glass-client-actions a:first-child{color:#a8efcb;border-color:rgba(98,211,157,.15)}
+  html.glass-test .glass-client-actions a:nth-child(2){color:#9fd2ff;border-color:rgba(104,178,237,.15)}
+  html.glass-test .glass-client-actions button{color:#f2c983;border-color:rgba(239,195,125,.18)}
+  html.glass-test .glass-client-actions a:active,
+  html.glass-test .glass-client-actions button:active{transform:scale(.965)}
+  html.glass-test .client-editor-summary>div{
+    border-color:rgba(255,255,255,.09);
+    border-radius:16px;
+    background:linear-gradient(145deg,rgba(37,45,49,.39),rgba(11,18,22,.34));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.045);
+  }
+  html.glass-test .client-editor-summary strong{color:#f1f4f5;letter-spacing:-.025em}
+  html.glass-test .client-editor-form .modal-section{
+    border-color:rgba(255,255,255,.085);
+    border-radius:18px;
+    background:linear-gradient(150deg,rgba(17,26,31,.97),rgba(9,15,19,.98));
+  }
+  html.glass-test .client-section-head small{
+    border-color:rgba(239,195,125,.22);
+    background:rgba(214,164,95,.08);
+    color:#f0c77f;
+  }
+  html.glass-test .client-section-head>span{
+    border:1px solid rgba(255,255,255,.075);
+    background:rgba(255,255,255,.035);
+  }
+  html.glass-test .client-document-preview{
+    border-color:rgba(239,195,125,.12);
+    background:linear-gradient(145deg,rgba(19,28,33,.98),rgba(6,11,14,.98));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+  }
+  html.glass-test .document-private-badge{
+    border-color:rgba(239,195,125,.20);
+    background:rgba(17,23,26,.78);
+    color:#f0c77f;
+    box-shadow:0 8px 20px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.07);
+    backdrop-filter:blur(18px) saturate(140%);
+    -webkit-backdrop-filter:blur(18px) saturate(140%);
+  }
+  html.glass-test .client-rental-history article{
+    border-color:rgba(255,255,255,.075);
+    border-radius:14px;
+    background:linear-gradient(145deg,rgba(32,40,44,.26),rgba(10,17,21,.28));
+  }
+  html.glass-test .document-photo-upload{
+    border-color:rgba(239,195,125,.15);
+    background:linear-gradient(145deg,rgba(214,164,95,.05),rgba(10,17,21,.36));
+  }
+  html.glass-test .document-photo-picker{
+    border-color:rgba(239,195,125,.24);
+    background:rgba(12,19,23,.52);
+  }
+
+  /* Keep all interactive glass inside the viewport on narrow iPhones. */
+  html.glass-test .booking-row,
+  html.glass-test .day-card,
+  html.glass-test .calendar-summary,
+  html.glass-test .client-card-form,
+  html.glass-test .booking-form{max-width:100%;min-width:0}
+}
+
+@media (max-width:360px){
+  html.glass-test .glass-client-actions{grid-template-columns:1fr 1fr}
+  html.glass-test .glass-client-actions button{grid-column:1/-1}
+}
+@media (max-width:900px){
+  html.glass-test .glass-client-actions svg{width:14px;height:14px;flex:0 0 14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  html.glass-test .glass-client-actions a:nth-child(2) svg path:first-child{fill:currentColor;stroke:none;opacity:.92}
+  html.glass-test .glass-client-actions a:nth-child(2) svg path:last-child{stroke:#0d171c;stroke-width:1.45;opacity:.68}
+}

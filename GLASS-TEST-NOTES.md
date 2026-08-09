@@ -14,3 +14,11 @@ This is an experimental visual branch inside the same ZIP.
 - Confirmed / issue cards use amber edge, badge and time-chip accents.
 - Issued / return cards use green edge, badge and time-chip accents.
 - Goal: faster visual scanning in “Найближчі” without losing the premium glass feel.
+
+
+## Glass V4 — unified UX pass
+- Bookings: semantic status rail + status-tinted badge hierarchy.
+- Calendar: clearer available / one-left / occupied control states.
+- New booking: stronger 4-step progress, stable glass header/footer, premium selected controls.
+- Client card: quick Call / Telegram / New rental actions, stronger private document hierarchy and rental history.
+- Core production /admin/bronuvannia/ remains unchanged; V4 assets load only in /admin/bronuvannia-glass/.
