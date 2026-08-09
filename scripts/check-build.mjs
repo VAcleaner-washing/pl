@@ -23,7 +23,7 @@ for(const file of files.filter(f=>f.endsWith('.html')||f.endsWith('.txt'))){
 for(const file of files.filter(f=>f.endsWith('.js')&&!f.includes(`${path.sep}_next${path.sep}`))){try{execFileSync(process.execPath,['--check',file],{stdio:'pipe'})}catch{errors.push(`JS syntax: ${path.relative(root,file)}`)}}
 for(const file of files.filter(f=>f.endsWith('.html'))){
  const s=fs.readFileSync(file,'utf8'),rel=path.relative(root,file).replaceAll('\\','/');
- for(const m of s.matchAll(/\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|admin-v250|public-fixes|mobile-home-fix)\.(?:js|css)\?v=([^"']+)/g))if(m[1]!==build)errors.push(`asset version ${m[1]} in ${rel}`);
+ for(const m of s.matchAll(/\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|admin-v250|public-fixes|mobile-home-fix|site-v400)\.(?:js|css)\?v=([^"']+)/g))if(m[1]!==build)errors.push(`asset version ${m[1]} in ${rel}`);
  const hasCore=/vacleaner-core\.js/.test(s), needsCore=rel==='bronuvannia/index.html'||rel.startsWith('admin/');
  if(hasCore!==needsCore)errors.push(`shared core route mismatch: ${rel}`);
  if(rel!=='bronuvannia/index.html'&&/public-catalog\.js/.test(s))errors.push(`catalog runtime on ${rel}`);
@@ -154,7 +154,8 @@ const faqHtml=fs.readFileSync(path.join(root,'faq','index.html'),'utf8');
 const packagesHtml=fs.readFileSync(path.join(root,'komplekty','index.html'),'utf8');
 for(const rel of ['index.html','bronuvannia/index.html','faq/index.html','komplekty/index.html','kontakty/index.html','umovy/index.html','vidhuky/index.html','yak-tse-pratsiuie/index.html','rishennia/index.html','rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html']){
  const html=fs.readFileSync(path.join(root,...rel.split('/')),'utf8');
- for(const token of ['"@type":"PostalAddress"','"streetAddress":"вул. Європейська, 146Е"','"@type":"GeoCoordinates"','"latitude":49.559015','"longitude":34.522031','"openingHoursSpecification"','"logo":"https://vacleaner.pp.ua/apple-touch-icon.png"','"image":"https://vacleaner.pp.ua/assets/og-home.png"'])if(!html.includes(token))errors.push(`LocalBusiness SEO field missing in ${rel}: ${token}`);
+ for(const token of ['"@type":"PostalAddress"','"addressLocality":"Полтава"','"areaServed"','"openingHoursSpecification"','"logo":"https://vacleaner.pp.ua/apple-touch-icon.png"','"image":"https://vacleaner.pp.ua/assets/og-home.png"'])if(!html.includes(token))errors.push(`LocalBusiness SEO field missing in ${rel}: ${token}`);
+ if(html.includes('\"streetAddress\":\"вул. Європейська, 146Е\"')||html.includes('\"@type\":\"GeoCoordinates\"'))errors.push(`Variable pickup point must not be published as permanent LocalBusiness address/geo in ${rel}`);
 }
 if(!faqHtml.includes('"@type":"FAQPage"')||((faqHtml.match(/"@type":"Question"/g)||[]).length<15))errors.push('FAQ page must expose FAQPage JSON-LD for all visible questions');
 for(const rel of ['rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html']){
