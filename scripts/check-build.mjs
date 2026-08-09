@@ -67,6 +67,15 @@ const bookingHtml=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'ut
 if(!bookingHtml.includes('<script id="vac-gtm-bootstrap">')||!bookingHtml.includes('googletagmanager.com/gtm.js?id=')||!bookingHtml.includes("window,document,'script','dataLayer','GTM-KC8FF7FB'"))errors.push('direct /bronuvannia/ load must contain an executable GTM-KC8FF7FB bootstrap');
 if(!bookingHtml.includes('if(w.__VAC_GTM_LOADED__)return;w.__VAC_GTM_LOADED__=true'))errors.push('booking GTM bootstrap must guard against duplicate hydration load');
 const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
+const classicAdminPath=path.join(root,'admin','bronuvannia-classic','index.html');
+if(!adminHtml.includes('class="glass-test"')||!adminHtml.includes('/assets/admin-glass-test.css')||!adminHtml.includes('/assets/admin-glass-test.js'))errors.push('primary admin route must ship Liquid Glass UI');
+if(!fs.existsSync(classicAdminPath))errors.push('classic reserve admin route is missing');
+else{const classicAdminHtml=fs.readFileSync(classicAdminPath,'utf8');if(classicAdminHtml.includes('admin-glass-test.css')||classicAdminHtml.includes('class="glass-test"'))errors.push('classic reserve must remain isolated from Liquid Glass');}
+const adminManifest=JSON.parse(fs.readFileSync(path.join(root,'admin','manifest.webmanifest'),'utf8'));
+if(adminManifest.start_url!=='/admin/bronuvannia/'||adminManifest.id!=='/admin/')errors.push('primary PWA manifest must open Liquid Glass admin route');
+const classicManifestPath=path.join(root,'admin','manifest-classic.webmanifest');
+if(!fs.existsSync(classicManifestPath))errors.push('classic reserve manifest is missing');
+else if(JSON.parse(fs.readFileSync(classicManifestPath,'utf8')).start_url!=='/admin/bronuvannia-classic/')errors.push('classic reserve manifest start_url is invalid');
 const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','index.ts'),'utf8');
 const statusEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-status-correction-v1','index.ts'),'utf8');
 const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','settlement.mjs'),'utf8');

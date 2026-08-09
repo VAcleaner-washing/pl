@@ -56,8 +56,7 @@ html.glass-test{
   html.glass-test .client-card,
   html.glass-test .equipment-card,
   html.glass-test .campaign-card,
-  html.glass-test .catalog-toolbar,
-  html.glass-test .analytics-toolbar{
+  html.glass-test .catalog-toolbar{
     border-color:rgba(255,255,255,.095);
     background:linear-gradient(150deg,rgba(18,27,32,.975),rgba(9,15,19,.975));
     box-shadow:inset 0 1px 0 rgba(255,255,255,.022),0 10px 28px rgba(0,0,0,.15);
@@ -68,7 +67,14 @@ html.glass-test{
   html.glass-test .page-head{border-bottom-color:rgba(255,255,255,.06)}
   html.glass-test .page-head h1{letter-spacing:-.045em}
 
-  /* Search is a floating functional control. Keep v3.0.76 shell geometry fully stable. */
+  /* Analytics period controls float directly on the page; never inherit card material. */
+  html.glass-test .analytics-toolbar{
+    border:0;
+    background:transparent;
+    box-shadow:none;
+  }
+
+  /* Search is a floating functional control. Keep v3.0.77 shell geometry fully stable. */
   html.glass-test .topbar{
     border:0;
     background:linear-gradient(180deg,rgba(7,11,14,.80) 0%,rgba(7,11,14,.43) 72%,rgba(7,11,14,0) 100%);
@@ -223,10 +229,15 @@ html.glass-test{
     border-color:transparent;
     background:transparent;
     box-shadow:none;
+    overflow:visible;
+    align-content:center;
+    grid-template-rows:30px 14px;
+    gap:3px;
+    padding:0 2px 2px;
   }
   html.glass-test .mobile-nav .mobile-new-nav i{
-    width:50px;height:50px;min-width:50px;
-    margin-top:-22px;
+    width:48px;height:48px;min-width:48px;
+    margin-top:-20px;
     border:1px solid rgba(247,210,149,.43);
     background:
       linear-gradient(150deg,rgba(244,195,112,.32),rgba(49,37,24,.50));
@@ -237,7 +248,16 @@ html.glass-test{
     transition:transform .18s var(--lg-ease),box-shadow .18s ease;
   }
   html.glass-test .mobile-nav .mobile-new-nav:active i{transform:scale(.92);box-shadow:0 9px 24px rgba(0,0,0,.38),0 0 0 4px rgba(14,20,23,.42),inset 0 1px 0 rgba(255,255,255,.16)}
-  html.glass-test .mobile-nav .mobile-new-nav span{color:#e2c28b}
+  html.glass-test .mobile-nav .mobile-new-nav span{
+    align-self:end;
+    margin:0;
+    color:#e2c28b;
+    font-size:9.5px;
+    font-weight:700;
+    line-height:1.2;
+    overflow:visible;
+    transform:translateY(1px);
+  }
 
   /* "More" becomes a true floating glass popover. */
   html.glass-test .mobile-more-menu{
@@ -486,7 +506,7 @@ html.glass-test{
 
 /* --------------------------------------------------------------------------
    Glass V4 — unified decision UX pass
-   Loaded only by /admin/bronuvannia-glass/.
+   Primary production UI; classic reserve is intentionally isolated.
    -------------------------------------------------------------------------- */
 @media (max-width:900px){
   /* BOOKING LIST — status is readable before the text. */

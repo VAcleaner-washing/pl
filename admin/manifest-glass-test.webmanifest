@@ -1,7 +1,7 @@
 {
-  "name": "VAcleaner Liquid Glass Test",
-  "short_name": "VAglass",
-  "description": "Тестовий Liquid Glass дизайн VAcleaner на базі v3.0.76",
+  "name": "VAcleaner Manager",
+  "short_name": "VAcleaner",
+  "description": "Сумісність для попереднього Liquid Glass test URL",
   "start_url": "/admin/bronuvannia-glass/",
   "scope": "/admin/",
   "display": "standalone",

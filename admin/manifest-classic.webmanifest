@@ -1,8 +1,8 @@
 {
-  "name": "VAcleaner Manager",
-  "short_name": "VAcleaner",
-  "description": "Адмінка бронювань VAcleaner · Liquid Glass",
-  "start_url": "/admin/bronuvannia/",
+  "name": "VAcleaner Manager Classic",
+  "short_name": "VAclassic",
+  "description": "Резервний класичний інтерфейс адмінки VAcleaner",
+  "start_url": "/admin/bronuvannia-classic/",
   "scope": "/admin/",
   "display": "standalone",
   "background_color": "#070b0e",
@@ -19,7 +19,7 @@
       "type": "image/png"
     }
   ],
-  "id": "/admin/",
+  "id": "/admin/bronuvannia-classic/",
   "display_override": [
     "standalone",
     "minimal-ui"

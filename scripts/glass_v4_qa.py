@@ -44,6 +44,14 @@ with sync_playwright() as p:
   mod.open_mobile_view(page,'calendar');page.wait_for_timeout(80)
   check(page.locator('.calendar-grid .slot').count()>0,f'{w}: calendar slots rendered')
   check(mod.no_overflow(page),f'{w}: calendar V4 no overflow')
+  mod.open_mobile_view(page,'analytics');page.wait_for_timeout(80)
+  toolbar=page.locator('.analytics-toolbar').first
+  material=toolbar.evaluate("el=>{const s=getComputedStyle(el);return {bg:s.backgroundColor,img:s.backgroundImage,border:s.borderTopWidth,shadow:s.boxShadow}}")
+  check(material['bg']=='rgba(0, 0, 0, 0)' and material['img']=='none',f'{w}: analytics toolbar has no inherited opaque strip')
+  check(material['border']=='0px' and material['shadow']=='none',f'{w}: analytics toolbar has no inherited border or shadow')
+  check(page.locator('.analytics-periods .chip').count()==4,f'{w}: four analytics period glass chips remain visible')
+  check(mod.no_overflow(page),f'{w}: analytics toolbar fix keeps viewport stable')
+  if w==390: page.screenshot(path=str(ROOT/'glass-test-results/analytics-toolbar-fix-390.png'),full_page=True)
   page.close()
  browser.close()
 if fail:

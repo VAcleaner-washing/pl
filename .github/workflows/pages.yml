@@ -51,6 +51,8 @@ jobs:
         run: npm run test:public-booking
       - name: Run installed-PWA visual QA
         run: npm run test:pwa
+      - name: Run Liquid Glass primary UX QA
+        run: npm run test:glass-primary
       - name: Run desktop density visual QA
         run: npm run test:desktop-density
       - name: Run final desktop visual audit
