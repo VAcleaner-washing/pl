@@ -208,7 +208,7 @@
     back.hidden=stepIndex===0;
     next.hidden=q.type==='single';
     next.disabled=!canContinue(q);
-    body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;const icon=q.id==='zones'?zoneIcon(value):'';return `<button type="button" class="vq-option ${icon?'has-icon ':''}${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}">${icon?`<span class="vq-option__icon">${icon}</span>`:''}<span class="vq-option__copy"><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span><span class="vq-option__check" aria-hidden="true">${q.type==='multi'?(active?'✓':''):'→'}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>`;
+    body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><div class="vq-question__main"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;const icon=q.id==='zones'?zoneIcon(value):'';return `<button type="button" class="vq-option ${icon?'has-icon ':''}${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}">${icon?`<span class="vq-option__icon">${icon}</span>`:''}<span class="vq-option__copy"><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span><span class="vq-option__check" aria-hidden="true">${q.type==='multi'?(active?'✓':''):'→'}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>${q.id==='zones'?'<aside class="vq-zones-media"><img src="/assets/quiz-cleaning-guide.webp" alt="Чистий інтер’єр і техніка VAcleaner"><span>Професійна чистота у вас вдома</span></aside>':''}</div>`;
     body.querySelectorAll('.vq-option').forEach(button=>button.addEventListener('click',()=>{
       setAnswer(q.id,button.dataset.value,q.type);
       if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else render();
@@ -232,7 +232,7 @@
     state=blankState();stepIndex=0;completedKey='';modal.classList.add('is-open');document.documentElement.classList.add('vq-lock');render();fire('cleaning_quiz_started');
     setTimeout(()=>modal.querySelector('.vq-close')?.focus(),30);
   }
-  function closeQuiz(){if(!modal)return;modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');if(path==='/pidbir')document.documentElement.classList.remove('vq-standalone-page');}
+  function closeQuiz(){if(!modal)return;if(path==='/pidbir'){location.href='/';return;}modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');}
 
   function injectTeaser(){
     if(path!=='/'||document.querySelector('[data-vq-guide]'))return;
@@ -250,7 +250,7 @@
     const p=strip.querySelector('p');const h=strip.querySelector('h2');const a=strip.querySelector('a');
     if(p)p.textContent='Не впевнені, що саме підійде?';
     if(h)h.textContent='Позначте, що хочете почистити — підберемо техніку й засоби приблизно за 30 секунд.';
-    if(a){a.href='/pidbir/';a.innerHTML='Підібрати рішення <span aria-hidden="true">↗</span>';}
+    if(a){a.href='/pidbir/';a.textContent='Підібрати рішення';}
   }
 
   function injectBookingEscape(){
@@ -266,7 +266,7 @@
     if(path!=='/pidbir'||standaloneOpened)return;
     standaloneOpened=true;
     document.documentElement.classList.add('vq-standalone-page');
-    setTimeout(openQuiz,80);
+    openQuiz();
   }
 
   function setControlledInput(input,value){

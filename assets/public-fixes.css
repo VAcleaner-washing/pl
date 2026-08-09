@@ -12,7 +12,7 @@
 }
 
 /* v2.9.12.0 — public accessibility and focus targets */
-.site-header a,.site-header button,.site-footer a,.breadcrumb,.button,.vx-proof a{min-height:44px;display:inline-flex;align-items:center}.site-footer a{padding-block:10px}.breadcrumb{padding:8px 4px;margin-left:-4px}.site-header button:focus-visible,.site-header a:focus-visible,.button:focus-visible,.breadcrumb:focus-visible,.vx-proof a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #d6a45f;outline-offset:3px}
+.site-header a,.site-footer a,.breadcrumb,.button,.vx-proof a{min-height:44px;display:inline-flex;align-items:center}.site-header button{min-height:44px;align-items:center}.site-footer a{padding-block:10px}.breadcrumb{padding:8px 4px;margin-left:-4px}.site-header button:focus-visible,.site-header a:focus-visible,.button:focus-visible,.breadcrumb:focus-visible,.vx-proof a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid #d6a45f;outline-offset:3px}
 @media(max-width:620px){.site-header .menu-toggle{width:44px;height:44px}.mobile-menu a{min-height:48px;justify-content:space-between;padding:10px 2px}.mobile-menu a[href*="vidhuky"]::after{content:"→";font-size:20px;color:#d9aa67;transition:transform .2s ease}.mobile-menu a[href*="vidhuky"]:active::after{transform:translateX(3px)}}
 
 /* v3.0.33 — nearest availability lives outside the React-owned status card */

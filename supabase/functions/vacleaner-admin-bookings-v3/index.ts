@@ -336,7 +336,10 @@ Deno.serve(async (request: Request) => {
       const rawBase = rentalBase(product, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow), existing = action === "edit" ? (await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single()).data : null;
       if (action === "edit" && !existing) return json({ error: "invalid_booking" }, 404);
       const currentExtras = existing?.extras && typeof existing.extras === "object" ? existing.extras : {}, discount = discountInfo(body, rawBase, currentExtras), selected = normalizeSelectedExtras(body.selectedExtras, productCode, catalog);
-      const deliveryAmount = fulfillment === "delivery" ? 250 : 0, depositAmount = calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow, depositRules, catalog), prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
+      const depositSnapshotLocked = Boolean(existing && (currentExtras?.processing?.confirmation_sent === true || ["waiting_payment", "confirmed", "issued", "completed"].includes(String(existing.status || ""))));
+      const calculatedDeposit = calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow, depositRules, catalog);
+      const depositAmount = depositSnapshotLocked ? Math.max(0, Number(existing?.deposit_amount || calculatedDeposit) || 0) : calculatedDeposit;
+      const deliveryAmount = fulfillment === "delivery" ? 250 : 0, prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
       const extras = { ...currentExtras, pickup_time: period.pickupTime, return_time: period.returnTime, slot_config: slots,
         discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, reason: discount.source === "manual" ? discount.manualReason : "" },
         manual_discount: discount.manualType === "none" ? null : { type: discount.manualType, value: discount.manualValue, amount: discount.manualAmount, reason: discount.manualReason },

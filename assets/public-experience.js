@@ -403,7 +403,7 @@
   }
 
   function proofMarkup(){
-    return `<section class="vx-proof" data-vx-proof="${VERSION}" aria-labelledby="vx-proof-title"><div class="vx-proof__inner"><div><p class="vx-proof__eyebrow">Оригінальні відгуки · Instagram Highlights</p><h2 id="vx-proof-title">Не кілька цитат. <em>Близько сотні реальних відгуків.</em></h2><p class="vx-proof__lead">У профілі VAcleaner збережено дві великі добірки повідомлень клієнтів. Ми не переписуємо їх «красивими словами» — відкривайте оригінальні сторіс і дивіться досвід людей із Полтави.</p><div class="vx-proof__actions"><a class="vx-proof__cta" href="${REVIEW_HIGHLIGHT_1}" target="_blank" rel="noreferrer">Відкрити першу добірку ↗</a><a class="vx-proof__secondary" href="/bronuvannia">Перевірити вільну дату</a></div></div><div class="vx-proof__panel"><div class="vx-proof__count"><span class="vx-proof__number">02</span><span class="vx-proof__count-copy">повні добірки реальних відгуків у Instagram Highlights</span></div><a class="vx-highlight" href="${REVIEW_HIGHLIGHT_1}" target="_blank" rel="noreferrer" aria-label="Відкрити першу добірку відгуків в Instagram"><span class="vx-highlight__ring"><span>01</span></span><span><strong>Відгуки · частина I</strong><small>Відкрити перший Highlight з відгуками</small></span></a><a class="vx-highlight" href="${REVIEW_HIGHLIGHT_2}" target="_blank" rel="noreferrer" aria-label="Відкрити другу добірку відгуків в Instagram"><span class="vx-highlight__ring"><span>02</span></span><span><strong>Відгуки · частина II</strong><small>Відкрити другий Highlight з відгуками</small></span></a><p class="vx-proof__note">Кожна картка відкриває відповідну добірку відгуків без переходу через профіль.</p></div></div></section>`;
+    return `<section class="vx-proof" data-vx-proof="${VERSION}" aria-labelledby="vx-proof-title"><div class="vx-proof__inner"><div><p class="vx-proof__eyebrow">Оригінальні відгуки · Instagram Highlights</p><h2 id="vx-proof-title">Не кілька цитат. <em>Близько сотні реальних відгуків.</em></h2><p class="vx-proof__lead">У профілі VAcleaner збережено дві великі добірки повідомлень клієнтів. Ми не переписуємо їх «красивими словами» — відкривайте оригінальні сторіс і дивіться досвід людей із Полтави.</p><div class="vx-proof__actions"><a class="vx-proof__cta" href="${REVIEW_HIGHLIGHT_1}" target="_blank" rel="noreferrer">Відкрити першу добірку <svg class="vx-proof__external" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M4 12 12 4M6 4h6v6"></path></svg></a><a class="vx-proof__secondary" href="/bronuvannia">Перевірити вільну дату</a></div></div><div class="vx-proof__panel"><div class="vx-proof__count"><span class="vx-proof__number">02</span><span class="vx-proof__count-copy">повні добірки реальних відгуків у Instagram Highlights</span></div><a class="vx-highlight" href="${REVIEW_HIGHLIGHT_1}" target="_blank" rel="noreferrer" aria-label="Відкрити першу добірку відгуків в Instagram"><span class="vx-highlight__ring"><span>01</span></span><span><strong>Відгуки · частина I</strong><small>Відкрити перший Highlight з відгуками</small></span></a><a class="vx-highlight" href="${REVIEW_HIGHLIGHT_2}" target="_blank" rel="noreferrer" aria-label="Відкрити другу добірку відгуків в Instagram"><span class="vx-highlight__ring"><span>02</span></span><span><strong>Відгуки · частина II</strong><small>Відкрити другий Highlight з відгуками</small></span></a><p class="vx-proof__note">Кожна картка відкриває відповідну добірку відгуків без переходу через профіль.</p></div></div></section>`;
   }
   function injectProof(){
     if(document.querySelector('[data-vx-proof]'))return;
@@ -479,8 +479,9 @@
   }
   function enhanceMobileBookingFlow(){
     const parts=mobileBookingParts();
-    if(!parts)return;
+    if(!parts){document.documentElement.classList.remove('vx-booking-standalone-mobile');return}
     const mobile=mobileBookingMedia.matches;
+    document.documentElement.classList.toggle('vx-booking-standalone-mobile',mobile);
     parts.form.classList.toggle('vx-mobile-stepper',mobile);
     if(!mobile){
       parts.steps.forEach(step=>{step.classList.remove('is-vx-active');step.removeAttribute('aria-hidden')});
@@ -492,15 +493,22 @@
       parts.form.addEventListener('click',event=>{
         const progressButton=event.target.closest('.booking-progress button');
         if(progressButton){
+          event.preventDefault();
+          event.stopPropagation();
           const liveButtons=[...parts.form.querySelectorAll('.booking-progress button')];
           const index=liveButtons.indexOf(progressButton);
-          if(index>=0)setMobileBookingStep(index,{scroll:true});
+          const current=Number(parts.form.dataset.vxActiveStep||0);
+          if(index>=0&&index<=current)setMobileBookingStep(index,{scroll:true});
           return;
         }
         const button=event.target.closest('.booking-mobile-summary button');
         if(!button||button.type==='submit')return;
         const target=mobileStepFromCta(button);
-        if(target>=0)setMobileBookingStep(target,{scroll:true});
+        if(target>=0){
+          event.preventDefault();
+          event.stopPropagation();
+          setMobileBookingStep(target,{scroll:true});
+        }
       },true);
     }
     setMobileBookingStep(Number(parts.form.dataset.vxActiveStep||0));
@@ -515,7 +523,7 @@
     const cards=[...document.querySelectorAll('.v21-package-grid article,.package-card')].filter(el=>/HOME RESET/i.test(el.textContent||''));
     cards.forEach(card=>{
       let gift=card.querySelector('.vx-home-reset-gift');
-      if(!gift){gift=document.createElement('a');gift.className='vx-home-reset-gift';gift.target='_blank';gift.rel='noreferrer';gift.textContent='У подарунок — будь-який аромадифузор VA HOME з колекції Entry ↗';}
+      if(!gift){gift=document.createElement('a');gift.className='vx-home-reset-gift';gift.target='_blank';gift.rel='noreferrer';gift.textContent='У подарунок — будь-який аромадифузор VA HOME з колекції Entry';}
       gift.href=HOME_RESET_GIFT_URL;
       const action=card.querySelector('a[href*="bronuvannia"]');if(action&&gift.nextElementSibling!==action)action.insertAdjacentElement('beforebegin',gift);else if(!gift.parentElement)card.append(gift);
     });
