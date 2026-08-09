@@ -878,3 +878,110 @@ html.glass-test{
   html.glass-test .analytics-calendar-picker select{color:#f2e9db}
   html.glass-test .analytics-step{color:#f0c57e}
 }
+
+
+/* v3.0.83 — premium site-like canvas + restrained scrollbar.
+   Mirrors the public VAcleaner dark/gold visual language without adding visual noise. */
+html.glass-test{
+  background:#080a0c;
+  scrollbar-color:rgba(211,160,88,.72) transparent;
+  scrollbar-width:thin;
+}
+html.glass-test body,
+html.glass-test .app{
+  background:
+    radial-gradient(900px 560px at 88% -120px,rgba(201,147,72,.135),transparent 62%),
+    radial-gradient(780px 520px at -8% 82%,rgba(214,164,95,.035),transparent 68%),
+    linear-gradient(145deg,#121415 0%,#090b0c 52%,#07090a 100%);
+  background-attachment:fixed;
+}
+html.glass-test .main{
+  background:
+    radial-gradient(780px 480px at 88% -100px,rgba(201,147,72,.105),transparent 64%),
+    radial-gradient(620px 420px at 4% 88%,rgba(214,164,95,.028),transparent 70%),
+    linear-gradient(145deg,rgba(17,20,22,.985) 0%,rgba(9,11,12,.992) 54%,rgba(7,9,10,.996) 100%);
+}
+
+/* Desktop scrollbar: no heavy browser track, only a slim floating gold rail. */
+@media (min-width:901px){
+  html.glass-test .main,
+  html.glass-test .detail,
+  html.glass-test .booking-form-scroll,
+  html.glass-test .catalog-scroll,
+  html.glass-test .modal-card,
+  html.glass-test .modal-layout,
+  html.glass-test .campaign-code-list{
+    scrollbar-color:rgba(211,160,88,.68) transparent;
+    scrollbar-width:thin;
+  }
+  html.glass-test .main::-webkit-scrollbar,
+  html.glass-test .detail::-webkit-scrollbar,
+  html.glass-test .booking-form-scroll::-webkit-scrollbar,
+  html.glass-test .catalog-scroll::-webkit-scrollbar,
+  html.glass-test .modal-card::-webkit-scrollbar,
+  html.glass-test .modal-layout::-webkit-scrollbar,
+  html.glass-test .campaign-code-list::-webkit-scrollbar{
+    width:7px;
+    height:7px;
+  }
+  html.glass-test .main::-webkit-scrollbar-track,
+  html.glass-test .detail::-webkit-scrollbar-track,
+  html.glass-test .booking-form-scroll::-webkit-scrollbar-track,
+  html.glass-test .catalog-scroll::-webkit-scrollbar-track,
+  html.glass-test .modal-card::-webkit-scrollbar-track,
+  html.glass-test .modal-layout::-webkit-scrollbar-track,
+  html.glass-test .campaign-code-list::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  html.glass-test .main::-webkit-scrollbar-thumb,
+  html.glass-test .detail::-webkit-scrollbar-thumb,
+  html.glass-test .booking-form-scroll::-webkit-scrollbar-thumb,
+  html.glass-test .catalog-scroll::-webkit-scrollbar-thumb,
+  html.glass-test .modal-card::-webkit-scrollbar-thumb,
+  html.glass-test .modal-layout::-webkit-scrollbar-thumb,
+  html.glass-test .campaign-code-list::-webkit-scrollbar-thumb{
+    min-height:46px;
+    border:2px solid transparent;
+    border-radius:999px;
+    background:linear-gradient(180deg,rgba(236,194,126,.88),rgba(154,103,43,.76)) padding-box;
+    box-shadow:0 0 14px rgba(201,147,72,.12);
+  }
+  html.glass-test .main::-webkit-scrollbar-thumb:hover,
+  html.glass-test .detail::-webkit-scrollbar-thumb:hover,
+  html.glass-test .booking-form-scroll::-webkit-scrollbar-thumb:hover,
+  html.glass-test .catalog-scroll::-webkit-scrollbar-thumb:hover,
+  html.glass-test .modal-card::-webkit-scrollbar-thumb:hover,
+  html.glass-test .modal-layout::-webkit-scrollbar-thumb:hover,
+  html.glass-test .campaign-code-list::-webkit-scrollbar-thumb:hover{
+    background:linear-gradient(180deg,#efc77f,#b67834) padding-box;
+  }
+}
+
+@media (max-width:900px){
+  html.glass-test,
+  html.glass-test body,
+  html.glass-test .app{
+    background:#080a0c;
+  }
+  html.glass-test .main{
+    background:
+      radial-gradient(92% 44% at 92% -4%,rgba(201,147,72,.13),transparent 64%),
+      radial-gradient(88% 50% at -18% 78%,rgba(214,164,95,.025),transparent 70%),
+      linear-gradient(145deg,#111416 0%,#090b0c 50%,#07090a 100%);
+  }
+  /* Keep iOS scrolling native and clean; the content itself is the premium surface. */
+  html.glass-test .main,
+  html.glass-test .booking-form-scroll,
+  html.glass-test .catalog-scroll,
+  html.glass-test .client-editor-scroll,
+  html.glass-test .modal-layout{
+    scrollbar-width:none;
+  }
+  html.glass-test .main::-webkit-scrollbar,
+  html.glass-test .booking-form-scroll::-webkit-scrollbar,
+  html.glass-test .catalog-scroll::-webkit-scrollbar,
+  html.glass-test .client-editor-scroll::-webkit-scrollbar,
+  html.glass-test .modal-layout::-webkit-scrollbar{
+    display:none;
+  }
+}
