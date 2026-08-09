@@ -1,14 +1,14 @@
 {
-  "name": "VAcleaner",
-  "short_name": "VAcleaner",
+  "name": "VA HOME",
+  "short_name": "VA HOME",
   "icons": [
     {
-      "src": "/vacleaner-favicon/android-chrome-192x192.png",
+      "src": "/va-home-favicon/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/vacleaner-favicon/android-chrome-512x512.png",
+      "src": "/va-home-favicon/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
