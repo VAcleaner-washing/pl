@@ -4,6 +4,7 @@ const css=fs.readFileSync('assets/admin-v250.css','utf8');
 const publicJs=fs.readFileSync('assets/public-experience.js','utf8');
 const publicCss=fs.readFileSync('assets/public-experience.css','utf8');
 const publicFixes=fs.readFileSync('assets/public-fixes.css','utf8');
+const glassCss=fs.readFileSync('assets/admin-glass-test.css','utf8');
 const selectPositions=[...js.matchAll(/<select\b/g)].map(match=>match.index);
 const checkboxPositions=[...js.matchAll(/<input[^>]+type="checkbox"/g)].map(match=>match.index);
 const allSelectsCovered=selectPositions.length===11&&selectPositions.every(index=>{const prefix=js.slice(Math.max(0,index-220),index);const tail=js.slice(index,index+90);return prefix.includes('class="field"')||prefix.includes('clients-toolbar')||prefix.includes('campaign-product-field')||tail.includes('id="clientSegment"')||tail.includes('id="clientSort"')});
@@ -22,6 +23,10 @@ const checks=[
  ['all admin selects covered',allSelectsCovered],
  ['premium analytics picker',js.includes('analyticsMonthPopover')&&js.includes('data-analytics-month')&&css.includes('.analytics-picker-popover')&&css.includes('.analytics-month-grid')],
  ['all admin checkboxes covered',allCheckboxesCovered],
+ ['desktop client card keeps structured glass layout',js.includes('client-editor-summary')&&js.includes('client-card-grid')&&js.includes('client-contact-section')&&js.includes('client-document-section')&&js.includes('client-history-section')&&glassCss.includes('v4.0.5 — desktop client card restores Liquid Glass')&&glassCss.includes('@media (min-width:901px)')],
+ ['mobile client card is not overridden by desktop restoration',!glassCss.includes('@media (max-width:900px){\n  html.glass-test .modal-card:has(.client-card-form)')],
+ ['edited booking customer status waits for lookup instead of flashing new client',js.includes("b?'Перевіряємо клієнта…':'Перевіримо за телефоном'")&&js.includes("customer.isRepeatCustomer?'Повторний клієнт':'Новий клієнт'")],
+ ['processed booking edit preserves stored deposit snapshot',js.includes("depositAmount:Number(b.deposit_amount||depositFor(")],
  ['mobile booking uses real stepper',publicJs.includes('enhanceMobileBookingFlow()')&&publicJs.includes("mobileBookingStepIds=['booking-products','booking-dates','booking-extras','booking-contact']")&&publicCss.includes('.booking-form.vx-mobile-stepper .booking-step.is-vx-active')],
  ['booking has one mobile CTA layer',publicCss.includes('main:has(.booking-form) .mobile-booking{display:none}')&&publicCss.includes('.booking-mobile-summary{z-index:60!important')],
  ['public mobile CTA is a global non-overlapping grid',publicCss.includes('grid-template-columns:minmax(0,1.75fr) minmax(0,1fr)')&&publicCss.includes('.mobile-booking a:last-child{border-left:1px solid rgba(255,255,255,.12)}')&&!publicFixes.includes('  .mobile-booking{')],

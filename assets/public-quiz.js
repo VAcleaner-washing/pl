@@ -267,6 +267,9 @@
     standaloneOpened=true;
     document.documentElement.classList.add('vq-standalone-page');
     openQuiz();
+    // Only hide the fallback page after the interactive quiz is mounted.
+    // If JS is delayed or fails, /pidbir/ remains a usable page instead of a blank screen.
+    document.documentElement.classList.add('vq-ready');
   }
 
   function setControlledInput(input,value){

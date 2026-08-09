@@ -79,7 +79,7 @@ function renderDeposit(){
   }
   if(mobile){
     let note=mobile.querySelector('.vx-mobile-deposit');if(!note){note=document.createElement('small');note.className='vx-mobile-deposit';mobile.querySelector('div')?.appendChild(note)}
-    setTextIfChanged(note,amount?`Залоговий платіж при отриманні: ${formatMoney(amount)}`:'Сума залогового платежу з’явиться після вибору');
+    setTextIfChanged(note,amount?`Залоговий платіж: ${formatMoney(amount)}`:'Залоговий платіж — після вибору дат');
   }
   const conditions=document.querySelector('.booking-conditions ul');
   if(conditions&&conditions.children[0])setTextIfChanged(conditions.children[0],'Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.');

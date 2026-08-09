@@ -6,7 +6,7 @@
 .v4-story h2,.v4-bridge h2{font-size:clamp(34px,4vw,58px);line-height:1.02;letter-spacing:-.045em;margin:10px 0 24px}.v4-story p{font-size:17px;line-height:1.75;color:#625d57}
 .v4-kicker{font-size:12px!important;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#9a6e31!important}
 .v4-principles{display:grid;gap:14px}.v4-principles article,.v4-service-grid article,.v4-blog-grid a{border:1px solid rgba(62,54,44,.14);border-radius:24px;background:#fbf8f3;padding:28px;box-shadow:0 16px 44px rgba(29,22,15,.06)}.v4-principles span,.v4-service-grid span{color:#b27b33;font-weight:800;font-size:13px}.v4-principles strong{display:block;font-size:22px;margin:8px 0}.v4-principles p{font-size:15px;margin:0}
-.v4-service-grid{padding:72px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;background:#f4efe8}.v4-service-grid h2{font-size:28px;margin:10px 0}.v4-service-grid p{line-height:1.65;color:#69625b}
+.v4-service-grid{padding:72px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;background:#f4efe8;color:#111315}.v4-service-grid h2{font-size:28px;margin:10px 0}.v4-service-grid p{line-height:1.65;color:#69625b}
 .v4-note{margin-top:18px;margin-bottom:72px;padding:28px clamp(24px,5vw,48px);border:1px solid rgba(200,150,76,.28);border-radius:24px;background:#111315;color:#f4efe8}.v4-note strong{color:#e7bd7a}.v4-note p{color:#c7c0b8;line-height:1.65}.v4-note a{color:#e7bd7a;font-weight:750}
 .v4-legal{padding:64px clamp(24px,5vw,72px) 88px;background:#f4efe8;color:#111315;display:grid;gap:0}.v4-legal article{padding:30px 0;border-bottom:1px solid rgba(62,54,44,.14)}.v4-legal article:last-child{border-bottom:0}.v4-legal h2{font-size:24px;margin:0 0 12px}.v4-legal p{max-width:880px;line-height:1.75;color:#655f58;margin:0}
 .v4-blog-grid{padding:72px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;background:#f4efe8}.v4-blog-grid a{color:#111315;text-decoration:none;min-height:310px;display:flex;flex-direction:column}.v4-blog-grid span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#9a6e31;font-weight:800}.v4-blog-grid h2{font-size:28px;line-height:1.08;margin:20px 0 14px}.v4-blog-grid p{color:#6b645d;line-height:1.6}.v4-blog-grid b{margin-top:auto;color:#9a6e31}
@@ -21,3 +21,21 @@
 
 /* v4.0.5 — suppress legacy footer during React hydration; site-v400 replaces it with v4 footer. */
 main>footer:not(.v4-footer){visibility:hidden}
+
+/* v4.0.8 — small-desktop editorial hero safety.
+   The original 1.15fr/.55fr grid left long right-column headings too narrow
+   around 901–1180px (notably /dostavka/ at 1024px). */
+@media (min-width:901px) and (max-width:1180px){
+  .inner-hero.v4-inner-hero{
+    grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
+    gap:4vw;
+    padding-left:5vw;
+    padding-right:5vw;
+  }
+  .inner-hero.v4-inner-hero h1{
+    min-width:0;
+    max-width:100%;
+    font-size:clamp(54px,5.7vw,64px);
+  }
+  .inner-hero.v4-inner-hero h1 em{max-width:100%}
+}

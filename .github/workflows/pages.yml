@@ -33,6 +33,8 @@ jobs:
         run: npm run test:deposit-policy
       - name: Verify stabilization architecture
         run: npm run test:stabilization
+      - name: Verify full public visual contract
+        run: npm run test:public-visual-contract
       - name: Verify retention and promo rules
         run: npm run test:retention
       - name: Build clean Pages artifact

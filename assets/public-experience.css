@@ -576,10 +576,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 
 /* v4.0.2 — dedicated Smart Guide page integrity */
-html.vq-standalone-page .inner-hero,
-html.vq-standalone-page .v4-bridge,
-html.vq-standalone-page .v4-footer,
-html.vq-standalone-page .mobile-booking{display:none}
+html.vq-standalone-page.vq-ready .inner-hero,
+html.vq-standalone-page.vq-ready .v4-bridge,
+html.vq-standalone-page.vq-ready .v4-footer,
+html.vq-standalone-page.vq-ready .mobile-booking{display:none}
 /* v4.0.7 — /pidbir uses the exact same global header as every public page.
    The quiz lives below it instead of replacing/hiding it. */
 html.vq-standalone-page .site-header{display:grid}
@@ -596,8 +596,8 @@ html.vq-standalone-page .vq-dialog{pointer-events:auto}
 /* v4.0.5 — standalone Smart Guide first-paint + desktop composition */
 html.vq-standalone-page,
 html.vq-standalone-page body{min-height:100dvh;background:#080a0c}
-html.vq-standalone-page body{overflow:hidden}
-html.vq-standalone-page .vq-layer{opacity:1;visibility:visible}
+html.vq-standalone-page.vq-ready body{overflow:hidden}
+html.vq-standalone-page.vq-ready .vq-layer{opacity:1;visibility:visible}
 html.vq-standalone-page .vq-dialog{width:min(1240px,calc(100vw - 48px));max-height:calc(100dvh - 40px)}
 .vq-question__main{min-width:0}
 .vq-zones-media{display:none}
@@ -651,7 +651,7 @@ html.vq-standalone-page .vq-dialog{width:min(1240px,calc(100vw - 48px));max-heig
 }
 @media(max-width:1099px){html.vq-standalone-page .vq-dialog{width:min(920px,calc(100vw - 32px))}}
 @media(max-width:620px){
-  html.vq-standalone-page body{overflow:hidden}
+  html.vq-standalone-page.vq-ready body{overflow:hidden}
   html.vq-standalone-page .vq-dialog{width:100%;height:100dvh;max-height:100dvh;border-radius:0}
 }
 

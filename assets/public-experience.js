@@ -497,8 +497,7 @@
           event.stopPropagation();
           const liveButtons=[...parts.form.querySelectorAll('.booking-progress button')];
           const index=liveButtons.indexOf(progressButton);
-          const current=Number(parts.form.dataset.vxActiveStep||0);
-          if(index>=0&&index<=current)setMobileBookingStep(index,{scroll:true});
+          if(index>=0)setMobileBookingStep(index,{scroll:true});
           return;
         }
         const button=event.target.closest('.booking-mobile-summary button');

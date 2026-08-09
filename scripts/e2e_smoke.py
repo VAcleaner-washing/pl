@@ -343,6 +343,43 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
     finally:
         context.close()
 
+    # Full public small-desktop sweep: this is where long editorial headings and
+    # breakpoint gaps tend to surface (for example /dostavka/ around 1024px).
+    context = browser.new_context(viewport={"width": 1024, "height": 900}, service_workers="block")
+    install_routes(context, base, api_handler, static_root)
+    page = context.new_page()
+    try:
+        visual_paths = ["/", "/rishennia/", "/komplekty/", "/yak-tse-pratsiuie/", "/vidhuky/", "/faq/", "/kontakty/", "/umovy/", "/dostavka/", "/pro-nas/", "/blog/", "/polityka-konfidenciynosti/"]
+        small_desktop_ok = True
+        hero_titles_ok = True
+        for path in visual_paths:
+            page.goto(f"{base}{path}", wait_until="networkidle")
+            page.wait_for_selector(".site-header")
+            if not no_horizontal_overflow(page):
+                small_desktop_ok = False
+                break
+            hero = page.locator(".inner-hero h1").first
+            if hero.count():
+                fits = hero.evaluate("el => el.scrollWidth <= el.clientWidth + 1 && el.getBoundingClientRect().right <= innerWidth + 1")
+                if not fits:
+                    hero_titles_ok = False
+                    break
+        checks.check(small_desktop_ok, "All public pages avoid horizontal overflow at 1024px")
+        checks.check(hero_titles_ok, "Editorial hero titles fit their grid columns at 1024px")
+    finally:
+        context.close()
+
+    # /pidbir/ must have a usable first paint even if JS is slow or unavailable.
+    context = browser.new_context(viewport={"width": 1024, "height": 900}, java_script_enabled=False, service_workers="block")
+    install_routes(context, base, api_handler, static_root)
+    page = context.new_page()
+    try:
+        page.goto(f"{base}/pidbir/", wait_until="domcontentloaded")
+        fallback = page.locator(".inner-hero")
+        checks.check(fallback.count() == 1 and fallback.is_visible(), "Smart Guide keeps a visible no-JS fallback instead of a blank page")
+    finally:
+        context.close()
+
     context = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, service_workers="block")
     install_routes(context, base, api_handler, static_root)
     page = context.new_page()
@@ -360,6 +397,9 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.locator(".booking-progress button").nth(1).click()
         page.wait_for_timeout(100)
         checks.check(page.locator("#booking-dates.is-vx-active").count() == 1 and page.locator("#booking-products:visible").count() == 0, "Progress navigation switches mobile booking step")
+        checks.check(page.locator("main > footer.v4-footer:visible").count() == 0, "Mobile booking keeps reviews/footer outside the four-step wizard")
+        deposit_note = page.locator(".vx-mobile-deposit")
+        checks.check(deposit_note.count() == 1 and "…" not in deposit_note.inner_text() and "після вибору дат" in deposit_note.inner_text(), "Mobile booking deposit hint stays readable without ellipsis")
         checks.screenshot(page, "public-mobile.png")
         page.goto(f"{base}/", wait_until="networkidle")
         page.wait_for_selector(".site-header")

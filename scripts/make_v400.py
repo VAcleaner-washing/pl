@@ -24,7 +24,7 @@ def mobile_menu_html():
     return f'''<div class="mobile-menu"><nav aria-label="Мобільна навігація"><a href="/rishennia/">Що почистити</a><a href="/komplekty/">Комплекти</a><a href="/yak-tse-pratsiuie/">Як це працює</a><a href="/vidhuky/">Відгуки</a><a href="/pidbir/">Підбір</a><a href="/kontakty/">Контакти</a></nav><div class="mobile-menu-actions"><a class="button button-gold" href="/bronuvannia/">Забронювати онлайн {arrow}</a><a class="button button-outline" href="https://www.instagram.com/vacleaner_washing.pl/" rel="noreferrer" target="_blank">Instagram {arrow}</a></div></div>'''
 
 def footer_html():
-    return '''<footer class="v4-footer"><div class="footer-main v4-footer-grid"><div class="v4-footer-brand"><a class="brand footer-brand" href="/"><span class="brand-mark">VA</span><span class="brand-copy"><strong>CLEANER</strong><small>POLTAVA</small></span></a><p>Сервіс самостійного глибокого прибирання в Полтаві.</p></div><div><strong>Підібрати</strong><a href="/pidbir/">Підбір рішення</a><a href="/rishennia/">Що почистити</a><a href="/komplekty/">Комплекти</a><a href="/bronuvannia/">Бронювання</a></div><div><strong>Довіра</strong><a href="/yak-tse-pratsiuie/">Як це працює</a><a href="/vidhuky/">Відгуки</a><a href="/pro-nas/">Про VAcleaner</a><a href="/blog/">Поради</a></div><div><strong>Сервіс</strong><a href="/dostavka/">Доставка й оплата</a><a href="/faq/">FAQ</a><a href="/umovy/">Умови оренди</a><a href="/kontakty/">Контакти</a><a href="/polityka-konfidenciynosti/">Конфіденційність</a></div><div class="v4-footer-ecosystem"><strong>VA ecosystem</strong><a href="https://vahome.com.ua/" rel="noreferrer" target="_blank">VA HOME ↗</a><small>Простір чистий — тепер атмосфера.</small></div></div><div class="footer-bottom"><span>© 2026 VAcleaner</span><span>Полтава · +38 (095) 391 95 69</span></div></footer>'''
+    return '''<footer class="v4-footer"><div class="footer-main v4-footer-grid"><div class="v4-footer-brand"><a class="brand footer-brand" href="/"><span class="brand-mark">VA</span><span class="brand-copy"><strong>CLEANER</strong><small>POLTAVA</small></span></a><p>Сервіс самостійного глибокого прибирання в Полтаві.</p></div><div><strong>Підібрати</strong><a href="/pidbir/">Підбір рішення</a><a href="/rishennia/">Що почистити</a><a href="/komplekty/">Комплекти</a><a href="/bronuvannia/">Бронювання</a></div><div><strong>Довіра</strong><a href="/yak-tse-pratsiuie/">Як це працює</a><a href="/vidhuky/">Відгуки</a><a href="/pro-nas/">Про VAcleaner</a><a href="/blog/">Поради</a></div><div><strong>Сервіс</strong><a href="/dostavka/">Доставка й оплата</a><a href="/faq/">FAQ</a><a href="/umovy/">Умови оренди</a><a href="/kontakty/">Контакти</a><a href="/polityka-konfidenciynosti/">Конфіденційність</a></div><div class="v4-footer-ecosystem"><strong>VA ecosystem</strong><a href="https://vahome.com.ua/" rel="noreferrer" target="_blank">VA HOME</a><small>Простір чистий — тепер атмосфера.</small></div></div><div class="footer-bottom"><span>© 2026 VAcleaner</span><span>Полтава · +38 (095) 391 95 69</span></div></footer>'''
 
 def mobile_booking_html():
     return f'''<div class="mobile-booking"><a href="/bronuvannia/">Забронювати онлайн {arrow}</a><a aria-label="Відкрити Instagram VAcleaner" href="https://www.instagram.com/vacleaner_washing.pl/" rel="noreferrer" target="_blank">Instagram {arrow}</a></div>'''
@@ -93,6 +93,7 @@ for slug,title,desc,content in articles:
 
 # ---------- V4 CSS ----------
 css=r'''
+
 /* VAcleaner 4.0 — structural layer only; visual language intentionally inherits the existing site. */
 .v4-inner-hero{max-width:1180px;margin:0 auto;padding-left:clamp(24px,5vw,72px);padding-right:clamp(24px,5vw,72px)}
 .v4-story,.v4-service-grid,.v4-legal,.v4-blog-grid,.v4-article,.v4-note,.v4-bridge{max-width:1180px;margin:0 auto}
@@ -100,7 +101,7 @@ css=r'''
 .v4-story h2,.v4-bridge h2{font-size:clamp(34px,4vw,58px);line-height:1.02;letter-spacing:-.045em;margin:10px 0 24px}.v4-story p{font-size:17px;line-height:1.75;color:#625d57}
 .v4-kicker{font-size:12px!important;letter-spacing:.18em;text-transform:uppercase;font-weight:800;color:#9a6e31!important}
 .v4-principles{display:grid;gap:14px}.v4-principles article,.v4-service-grid article,.v4-blog-grid a{border:1px solid rgba(62,54,44,.14);border-radius:24px;background:#fbf8f3;padding:28px;box-shadow:0 16px 44px rgba(29,22,15,.06)}.v4-principles span,.v4-service-grid span{color:#b27b33;font-weight:800;font-size:13px}.v4-principles strong{display:block;font-size:22px;margin:8px 0}.v4-principles p{font-size:15px;margin:0}
-.v4-service-grid{padding:72px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;background:#f4efe8}.v4-service-grid h2{font-size:28px;margin:10px 0}.v4-service-grid p{line-height:1.65;color:#69625b}
+.v4-service-grid{padding:72px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;background:#f4efe8;color:#111315}.v4-service-grid h2{font-size:28px;margin:10px 0}.v4-service-grid p{line-height:1.65;color:#69625b}
 .v4-note{margin-top:18px;margin-bottom:72px;padding:28px clamp(24px,5vw,48px);border:1px solid rgba(200,150,76,.28);border-radius:24px;background:#111315;color:#f4efe8}.v4-note strong{color:#e7bd7a}.v4-note p{color:#c7c0b8;line-height:1.65}.v4-note a{color:#e7bd7a;font-weight:750}
 .v4-legal{padding:64px clamp(24px,5vw,72px) 88px;background:#f4efe8;color:#111315;display:grid;gap:0}.v4-legal article{padding:30px 0;border-bottom:1px solid rgba(62,54,44,.14)}.v4-legal article:last-child{border-bottom:0}.v4-legal h2{font-size:24px;margin:0 0 12px}.v4-legal p{max-width:880px;line-height:1.75;color:#655f58;margin:0}
 .v4-blog-grid{padding:72px clamp(24px,5vw,72px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;background:#f4efe8}.v4-blog-grid a{color:#111315;text-decoration:none;min-height:310px;display:flex;flex-direction:column}.v4-blog-grid span{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#9a6e31;font-weight:800}.v4-blog-grid h2{font-size:28px;line-height:1.08;margin:20px 0 14px}.v4-blog-grid p{color:#6b645d;line-height:1.6}.v4-blog-grid b{margin-top:auto;color:#9a6e31}
@@ -109,37 +110,55 @@ css=r'''
 .v4-article{padding:64px clamp(24px,10vw,150px) 96px;background:#f4efe8;color:#111315}.v4-article h2{font-size:30px;margin:42px 0 14px}.v4-article p{max-width:820px;font-size:18px;line-height:1.78;color:#5f5953}.v4-lead{font-size:23px!important;color:#2a2724!important}.v4-article-cta{margin-top:60px;padding:32px;border-radius:24px;background:#111315;color:#f4efe8}.v4-article-cta strong{font-size:26px}.v4-article-cta p{color:#bbb4ab;font-size:16px}.v4-article-cta .button{display:inline-flex;margin-top:12px}
 .v4-footer-grid{display:grid!important;grid-template-columns:1.4fr repeat(4,minmax(140px,1fr));gap:30px!important;align-items:start}.v4-footer-grid>div{display:grid;gap:10px}.v4-footer-grid>div>strong{color:#e7bd7a;font-size:12px;text-transform:uppercase;letter-spacing:.14em}.v4-footer-grid>div>a{color:inherit;text-decoration:none;font-size:14px;opacity:.82}.v4-footer-grid>div>a:hover{opacity:1;color:#e7bd7a}.v4-footer-ecosystem small{opacity:.55;line-height:1.45}
 .v4-review-proof{max-width:1180px;margin:0 auto 10px;padding:0 clamp(24px,5vw,72px)}.v4-review-proof>div{padding:26px 30px;border:1px solid rgba(200,150,76,.25);border-radius:22px;background:#17191b;color:#eee7dd}.v4-review-proof strong{color:#e7bd7a}.v4-review-proof p{color:#aaa39a;line-height:1.6;margin:8px 0 0}
-.v4-booking-help{margin:16px 0 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px}.v4-booking-help a{font-weight:800;color:#97662d}
 .v4-vahome-success{margin-top:22px;padding:22px;border-radius:20px;border:1px solid rgba(200,150,76,.28);background:#151515}.v4-vahome-success strong{color:#e7bd7a}.v4-vahome-success p{margin:7px 0 13px!important;color:#bbb!important}.v4-vahome-success a{color:#f2c87d;font-weight:800}
 @media(max-width:900px){.v4-story{grid-template-columns:1fr;padding-top:48px}.v4-service-grid{grid-template-columns:1fr}.v4-blog-grid{grid-template-columns:1fr}.v4-bridge{margin-left:18px;margin-right:18px;padding:28px;align-items:flex-start;flex-direction:column}.v4-footer-grid{grid-template-columns:1fr 1fr!important}.v4-footer-brand,.v4-footer-ecosystem{grid-column:1/-1}.v4-article{padding-left:24px;padding-right:24px}}
 @media(max-width:560px){.v4-footer-grid{grid-template-columns:1fr!important}.v4-footer-grid>div{grid-column:auto}.v4-blog-grid{padding-left:18px;padding-right:18px}.v4-service-grid{padding-left:18px;padding-right:18px}.v4-legal{padding-left:20px;padding-right:20px}}
+
+/* v4.0.5 — suppress legacy footer during React hydration; site-v400 replaces it with v4 footer. */
+main>footer:not(.v4-footer){visibility:hidden}
+
+/* v4.0.8 — small-desktop editorial hero safety.
+   The original 1.15fr/.55fr grid left long right-column headings too narrow
+   around 901–1180px (notably /dostavka/ at 1024px). */
+@media (min-width:901px) and (max-width:1180px){
+  .inner-hero.v4-inner-hero{
+    grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
+    gap:4vw;
+    padding-left:5vw;
+    padding-right:5vw;
+  }
+  .inner-hero.v4-inner-hero h1{
+    min-width:0;
+    max-width:100%;
+    font-size:clamp(54px,5.7vw,64px);
+  }
+  .inner-hero.v4-inner-hero h1 em{max-width:100%}
+}
+
 '''
 (ROOT/'assets'/'site-v400.css').write_text(css,encoding='utf-8')
 
 # ---------- V4 JS ----------
 js=r'''
+
 (()=>{
 'use strict';
 const path=location.pathname.replace(/\/+$/,'')||'/';
 const ARROW='<svg aria-hidden="true" class="icon-arrow" focusable="false" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6"></path></svg>';
-function patchNav(){
- document.querySelectorAll('.desktop-nav').forEach(nav=>nav.innerHTML='<a href="/rishennia/">Що почистити</a><a href="/komplekty/">Комплекти</a><a href="/yak-tse-pratsiuie/">Як це працює</a><a href="/vidhuky/">Відгуки</a><a href="/pidbir/">Підбір</a>');
- document.querySelectorAll('.mobile-menu nav').forEach(nav=>nav.innerHTML='<a href="/rishennia/">Що почистити</a><a href="/komplekty/">Комплекти</a><a href="/yak-tse-pratsiuie/">Як це працює</a><a href="/vidhuky/">Відгуки</a><a href="/pidbir/">Підбір</a><a href="/kontakty/">Контакти</a>');
- document.querySelectorAll('.header-cta').forEach(a=>a.href='/bronuvannia/');
-}
 function patchFooter(){
- document.querySelectorAll('footer').forEach(footer=>{if(footer.classList.contains('v4-footer'))return;footer.className='v4-footer';footer.innerHTML='<div class="footer-main v4-footer-grid"><div class="v4-footer-brand"><a class="brand footer-brand" href="/"><span class="brand-mark">VA</span><span class="brand-copy"><strong>CLEANER</strong><small>POLTAVA</small></span></a><p>Сервіс самостійного глибокого прибирання в Полтаві.</p></div><div><strong>Підібрати</strong><a href="/pidbir/">Підбір рішення</a><a href="/rishennia/">Що почистити</a><a href="/komplekty/">Комплекти</a><a href="/bronuvannia/">Бронювання</a></div><div><strong>Довіра</strong><a href="/yak-tse-pratsiuie/">Як це працює</a><a href="/vidhuky/">Відгуки</a><a href="/pro-nas/">Про VAcleaner</a><a href="/blog/">Поради</a></div><div><strong>Сервіс</strong><a href="/dostavka/">Доставка й оплата</a><a href="/faq/">FAQ</a><a href="/umovy/">Умови оренди</a><a href="/kontakty/">Контакти</a><a href="/polityka-konfidenciynosti/">Конфіденційність</a></div><div class="v4-footer-ecosystem"><strong>VA ecosystem</strong><a href="https://vahome.com.ua/" rel="noreferrer" target="_blank">VA HOME ↗</a><small>Простір чистий — тепер атмосфера.</small></div></div><div class="footer-bottom"><span>© 2026 VAcleaner</span><span>Полтава · +38 (095) 391 95 69</span></div>';});
+ document.querySelectorAll('footer').forEach(footer=>{if(footer.classList.contains('v4-footer')||footer.closest('.vq-dialog'))return;footer.className='v4-footer';footer.innerHTML='<div class="footer-main v4-footer-grid"><div class="v4-footer-brand"><a class="brand footer-brand" href="/"><span class="brand-mark">VA</span><span class="brand-copy"><strong>CLEANER</strong><small>POLTAVA</small></span></a><p>Сервіс самостійного глибокого прибирання в Полтаві.</p></div><div><strong>Підібрати</strong><a href="/pidbir/">Підбір рішення</a><a href="/rishennia/">Що почистити</a><a href="/komplekty/">Комплекти</a><a href="/bronuvannia/">Бронювання</a></div><div><strong>Довіра</strong><a href="/yak-tse-pratsiuie/">Як це працює</a><a href="/vidhuky/">Відгуки</a><a href="/pro-nas/">Про VAcleaner</a><a href="/blog/">Поради</a></div><div><strong>Сервіс</strong><a href="/dostavka/">Доставка й оплата</a><a href="/faq/">FAQ</a><a href="/umovy/">Умови оренди</a><a href="/kontakty/">Контакти</a><a href="/polityka-konfidenciynosti/">Конфіденційність</a></div><div class="v4-footer-ecosystem"><strong>VA ecosystem</strong><a href="https://vahome.com.ua/" rel="noreferrer" target="_blank">VA HOME</a><small>Простір чистий — тепер атмосфера.</small></div></div><div class="footer-bottom"><span>© 2026 VAcleaner</span><span>Полтава · +38 (095) 391 95 69</span></div>';});
 }
-function mobileMenu(){document.querySelectorAll('.menu-button').forEach(btn=>{if(btn.dataset.v4Bound)return;btn.dataset.v4Bound='1';btn.addEventListener('click',()=>{const menu=document.querySelector('.mobile-menu');const open=btn.getAttribute('aria-expanded')==='true';btn.setAttribute('aria-expanded',String(!open));menu?.classList.toggle('is-open',!open);document.body.classList.toggle('menu-open',!open)})});document.querySelectorAll('.mobile-menu a').forEach(a=>a.addEventListener('click',()=>{document.querySelector('.menu-button')?.setAttribute('aria-expanded','false');document.querySelector('.mobile-menu')?.classList.remove('is-open');document.body.classList.remove('menu-open')}));}
+function mobileMenu(){if(document.getElementById('_R_'))return;document.querySelectorAll('.menu-button').forEach(btn=>{if(btn.dataset.v4Bound)return;btn.dataset.v4Bound='1';btn.addEventListener('click',()=>{const menu=document.querySelector('.mobile-menu');const open=btn.getAttribute('aria-expanded')==='true';btn.setAttribute('aria-expanded',String(!open));menu?.classList.toggle('is-open',!open);document.body.classList.toggle('menu-open',!open)})});document.querySelectorAll('.mobile-menu a').forEach(a=>a.addEventListener('click',()=>{document.querySelector('.menu-button')?.setAttribute('aria-expanded','false');document.querySelector('.mobile-menu')?.classList.remove('is-open');document.body.classList.remove('menu-open')}));}
 function reviewsProof(){if(path!=='/vidhuky'||document.querySelector('.v4-review-proof'))return;const hero=document.querySelector('.inner-hero');if(!hero)return;const box=document.createElement('section');box.className='v4-review-proof';box.innerHTML='<div><strong>Підтверджена оренда</strong><p>Позначку даємо лише відгукам, які можна пов’язати з фактичним бронюванням. Ім’я публікуємо тільки з дозволу клієнта — без вигаданих рейтингів і підписів.</p></div>';hero.insertAdjacentElement('afterend',box);}
 function termsDelivery(){if(path!=='/umovy')return;document.querySelectorAll('.terms-grid article,.terms-grid>div').forEach(card=>{const t=card.textContent||'';if(t.includes('Самовивіз або доставка')){const p=card.querySelector('p');if(p)p.innerHTML='Умови отримання та оплати винесені окремо: самовивіз у Полтаві, доставка по місту та передплата. <a href="/dostavka/"><strong>Доставка й оплата →</strong></a>';}})}
+function privacyConsent(){if(path!=='/bronuvannia')return;const span=document.querySelector('.booking-consent span');if(!span||span.querySelector('a[href="/polityka-konfidenciynosti/"]'))return;const terms=span.querySelector('a[href^="/umovy"]');if(!terms)return;const a=document.createElement('a');a.href='/polityka-konfidenciynosti/';a.target='_blank';a.rel='noopener';a.textContent='політику конфіденційності';terms.insertAdjacentText('afterend',' та ');terms.insertAdjacentElement('afterend',a);}
 function vahomeBridge(){if(path!=='/bronuvannia')return;const success=document.querySelector('.booking-success');if(!success||success.querySelector('.v4-vahome-success'))return;const box=document.createElement('div');box.className='v4-vahome-success';box.innerHTML='<strong>Простір чистий — тепер атмосфера.</strong><p>Після прибирання можна продовжити VA ecosystem у VA HOME.</p><a href="https://vahome.com.ua/" rel="noreferrer" target="_blank">Перейти до VA HOME →</a>';success.appendChild(box);}
-function boot(){patchNav();patchFooter();mobileMenu();reviewsProof();termsDelivery();vahomeBridge()}
+function boot(){patchFooter();mobileMenu();reviewsProof();termsDelivery();privacyConsent();vahomeBridge()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 window.addEventListener('load',boot,{once:true});
-[120,500,1200,2400].forEach(t=>setTimeout(boot,t));
-new MutationObserver(()=>vahomeBridge()).observe(document.body,{childList:true,subtree:true});
+new MutationObserver(()=>{vahomeBridge();if(document.querySelector('main>footer:not(.v4-footer)'))patchFooter();}).observe(document.body,{childList:true,subtree:true});
 })();
+
 '''
 (ROOT/'assets'/'site-v400.js').write_text(js,encoding='utf-8')
 
