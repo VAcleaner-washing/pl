@@ -1,6 +1,6 @@
 {
-  "version": "4.0.14",
-  "build": 4014,
+  "version": "4.0.15",
+  "build": 4015,
   "releasedAt": "2026-08-09",
-  "label": "VAcleaner v4.0.14 — MOBILE BOOKING LIST DENSITY FIX"
+  "label": "VAcleaner v4.0.15 — 320PX BOOKING DENSITY CI PARITY FIX"
 }

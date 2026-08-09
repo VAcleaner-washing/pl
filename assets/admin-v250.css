@@ -1727,7 +1727,8 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .booking-card .booking-actions .secondary-danger{grid-column:auto}
 }
 @media(max-width:359px){
-  .booking-card .booking-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .booking-card .booking-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .booking-card .booking-actions .btn{min-height:44px}
   .booking-card .booking-actions .primary-action{grid-column:1/-1}
   .booking-card .booking-finance>.booking-deposit-state{max-width:136px}
 }
