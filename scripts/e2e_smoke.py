@@ -396,7 +396,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(progress_labels.count() == 4, "Mobile progress keeps all four step labels")
         page.locator(".booking-progress button").nth(1).click()
         page.wait_for_timeout(100)
-        checks.check(page.locator("#booking-dates.is-vx-active").count() == 1 and page.locator("#booking-products:visible").count() == 0, "Progress navigation switches mobile booking step")
+        checks.check(page.locator("#booking-products.is-vx-active").count() == 1 and page.locator("#booking-dates:visible").count() == 0, "Locked progress navigation does not skip mobile booking prerequisites")
         checks.check(page.locator("main > footer.v4-footer:visible").count() == 0, "Mobile booking keeps reviews/footer outside the four-step wizard")
         deposit_note = page.locator(".vx-mobile-deposit")
         checks.check(deposit_note.count() == 1 and "…" not in deposit_note.inner_text() and "після вибору дат" in deposit_note.inner_text(), "Mobile booking deposit hint stays readable without ellipsis")
