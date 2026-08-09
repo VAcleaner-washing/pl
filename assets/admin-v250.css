@@ -1532,3 +1532,26 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .analytics-picker-scroll{max-height:calc(min(58dvh,520px) - 66px);padding:13px 14px 16px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.analytics-picker-scroll::-webkit-scrollbar{display:none}
   .analytics-month-grid{gap:8px}.analytics-month-grid button{height:46px;font-size:12px;border-radius:14px}.analytics-year-grid button{height:50px;font-size:14px}
 }
+
+
+/* v3.0.87 — issued rental extension */
+.extend-rental-action{border-color:rgba(225,174,92,.38);background:linear-gradient(180deg,rgba(213,157,72,.12),rgba(142,101,43,.07));color:#f0c87f}
+.extend-rental-scroll{min-height:0;overflow-y:auto;overflow-x:hidden;padding:18px 28px 24px;overscroll-behavior:contain}
+.extend-current{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.extend-current>div{padding:16px 18px;border:1px solid var(--line);border-radius:16px;background:#10171b}
+.extend-current small{display:block;margin-bottom:7px;color:var(--muted);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.extend-current strong{display:block;color:#f3f1eb;font-size:19px;line-height:1.3}
+.extend-current span{display:block;margin-top:5px;color:#73d6a5;font-size:12px}
+.extend-rental-section{padding:18px}
+.extend-rental-section>h3{margin:0 0 16px;font-size:21px}
+.extend-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;margin-top:16px;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--line)}
+.extend-preview>div{min-width:0;padding:14px 16px;background:#0e161a}
+.extend-preview span,.extend-preview small{display:block;color:var(--muted);font-size:12px;line-height:1.35}
+.extend-preview strong{display:block;margin-top:5px;color:#f1eee7;font-size:19px}
+.extend-preview>div:nth-child(3) strong{color:#77d9aa}
+.extend-preview-balance.refund strong{color:#76d7a7}.extend-preview-balance.due strong{color:#ef9b98}.extend-preview-balance.neutral strong{color:#efc578}
+.extend-preview-error{grid-column:1/-1!important;color:#ef9b98!important;background:rgba(112,42,42,.17)!important;font-weight:700}
+.extend-availability-note{margin-top:14px}
+.modal-card:has(.extend-form){width:min(760px,calc(100vw - 32px));height:auto;max-height:min(760px,calc(100dvh - 32px))}
+.extend-form{grid-template-rows:auto minmax(0,1fr) auto}
+@media(max-width:900px){.modal-card:has(.extend-form){position:absolute;inset:0;width:auto;height:auto;max-height:none;border:0;border-radius:0}.extend-rental-scroll{padding:12px 12px 18px;-webkit-overflow-scrolling:touch;scrollbar-width:none}.extend-rental-scroll::-webkit-scrollbar{display:none}.extend-current{grid-template-columns:1fr;gap:8px}.extend-current>div{padding:13px 14px;border-radius:14px}.extend-rental-section{padding:14px}.extend-preview{grid-template-columns:1fr}.extend-preview>div{padding:12px 14px}.extend-preview strong{font-size:18px}}
