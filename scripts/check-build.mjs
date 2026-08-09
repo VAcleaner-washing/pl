@@ -79,7 +79,7 @@ else if(JSON.parse(fs.readFileSync(classicManifestPath,'utf8')).start_url!=='/ad
 const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','index.ts'),'utf8');
 const statusEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-status-correction-v1','index.ts'),'utf8');
 const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','settlement.mjs'),'utf8');
-const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w-v4010.js'),'utf8');
+const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w-v4016.js'),'utf8');
 const publicChunkDir=path.join(root,'_next','static','chunks');
 const publicChunkCorpus=fs.readdirSync(publicChunkDir).filter(name=>name.endsWith('.js')).map(name=>fs.readFileSync(path.join(publicChunkDir,name),'utf8')).join('\n');
 const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');
@@ -223,10 +223,13 @@ for(const file of files.filter(f=>f.endsWith('.html'))){
  }
 }
 if(!e2eSmoke.includes('Selecting equipment does not auto-select dates')||!e2eSmoke.includes('Deposit stays unknown until dates are selected'))errors.push('date/deposit preselection regression test missing');
+for(const token of ['Mobile CTA advances equipment → date','Delivery choice never regresses CTA to date during estimate refresh','Stories checkbox never regresses CTA to date','Extra-item checkbox never regresses CTA to date','Phone entry never regresses CTA to date','Promo entry never regresses CTA to date','Completed contacts expose final submit CTA'])if(!e2eSmoke.includes(token))errors.push(`public booking CTA browser regression missing: ${token}`);
 if(publicReactBundle.includes('b(c(t)),f(c(d(t,1)))'))errors.push('booking page silently preselects dates');
 if(publicReactBundle.includes('[_,C]=(0,n.useState)("pickup")'))errors.push('public booking must not preselect pickup before step 3');
 if(!publicReactBundle.includes('[_,C]=(0,n.useState)("")'))errors.push('public booking fulfillment must start unselected');
 if(!publicReactBundle.includes('{label:"До отримання",target:"booking-extras"}'))errors.push('mobile booking CTA must route date → fulfillment before contacts');
+for(const token of ['eb=(0,n.useRef)("")','ef=`${e}|${j}|${g}|${v}|${k}`','r=eb.current!==ef','r&&(q("checking"),V(null))','eb.current=ef'])if(!publicReactBundle.includes(token))errors.push(`public booking CTA stability guard missing: ${token}`);
+if(publicReactBundle.includes('window.setTimeout(async()=>{q("checking"),W("")'))errors.push('public booking still resets availability to checking on every estimate-only change');
 if(!publicReactBundle.includes('className:el&&eo?"is-complete":el&&ei?"is-current":"",onClick:()=>ed("booking-contact")'))errors.push('step 4 progress state must depend on completed fulfillment');
 for(const token of ["label.includes('До отримання')","index===3&&liveButtons[2]?.classList.contains('is-complete')","target===3&&liveButtons[2]?.classList.contains('is-complete')"])if(!publicExperience.includes(token))errors.push(`mobile booking step-order guard missing: ${token}`);
 if(!publicReactBundle.includes('if(!ei)return void W("Оберіть спосіб отримання.")'))errors.push('public booking submit must reject missing fulfillment');

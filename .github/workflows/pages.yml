@@ -37,6 +37,8 @@ jobs:
         run: npm run test:public-visual-contract
       - name: Verify retention and promo rules
         run: npm run test:retention
+      - name: Verify public booking CTA stability
+        run: npm run test:booking-cta
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources

@@ -3,7 +3,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
-BUNDLE=(ROOT/'_next/static/chunks/146ntlcv_t6~w-v4010.js').read_text()
+BUNDLE=(ROOT/'_next/static/chunks/146ntlcv_t6~w-v4016.js').read_text()
 EXPERIENCE=ROOT/'assets/public-experience.js'
 
 assert '[_,C]=(0,n.useState)("")' in BUNDLE, 'fulfillment must start unselected'

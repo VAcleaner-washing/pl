@@ -61,7 +61,7 @@ check(!generator.includes('[120,500,1200,2400]'),'historical v4 generator cannot
 check(!generator.includes('VA HOME ↗'),'historical v4 generator cannot reintroduce emoji arrow glyphs');
 check(generator.includes('color:#111315') && generator.includes('small-desktop editorial hero safety'),'historical v4 generator preserves current public visual hardening');
 
-const hydratedChunks=['_next/static/chunks/01pb0x0z72e50.js','_next/static/chunks/146ntlcv_t6~w-v4010.js','_next/static/chunks/0x2bx8kerxrmz.js'];
+const hydratedChunks=['_next/static/chunks/01pb0x0z72e50.js','_next/static/chunks/146ntlcv_t6~w-v4016.js','_next/static/chunks/0x2bx8kerxrmz.js'];
 for(const chunk of hydratedChunks){
   const text=read(chunk);
   check(!text.includes('children:"Процес"') && !text.includes('children:"Рішення"') && !text.includes('children:"Умови сервісу"'),`${chunk} contains no stale hydrated footer labels`);
