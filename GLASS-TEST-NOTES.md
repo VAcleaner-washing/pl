@@ -1,4 +1,4 @@
-# VAcleaner Liquid Glass Test — base v3.0.75
+# VAcleaner Liquid Glass Test — base v3.0.76
 
 This is an experimental visual branch inside the same ZIP.
 
@@ -22,3 +22,9 @@ This is an experimental visual branch inside the same ZIP.
 - New booking: stronger 4-step progress, stable glass header/footer, premium selected controls.
 - Client card: quick Call / Telegram / New rental actions, stronger private document hierarchy and rental history.
 - Core production /admin/bronuvannia/ remains unchanged; V4 assets load only in /admin/bronuvannia-glass/.
+
+
+## Upcoming client interaction
+- “Найближчі”: customer name is informational only in both stable and Glass.
+- Phone remains a direct tel: action.
+- Only “Відкрити” opens booking details; CRM client card remains accessible from booking/client views.

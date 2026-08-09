@@ -323,10 +323,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.operational-health-card').count()==1, f"{label}: settings exposes production health")
                 qa.check(page.locator('.health-state.ok').count()>=2, f"{label}: push and double-booking health are verified at runtime")
             if view=='upcoming':
-                qa.check(page.locator('.upcoming-row [data-client-card]').count()>=1, f"{label}: upcoming client block exposes direct client-card navigation")
-                page.locator('.upcoming-row [data-client-card]').first.evaluate('el=>el.click()');page.wait_for_selector('#clientEditor');page.wait_for_timeout(20)
-                qa.check(page.locator('#clientEditor .client-rental-history').count()==1, f"{label}: upcoming client tap opens the full client card")
-                page.locator('#clientEditor [data-close]').first.click();page.wait_for_timeout(30)
+                qa.check(page.locator('.upcoming-row [data-client-card]').count()==0, f"{label}: upcoming customer identity is not a CRM navigation target")
+                qa.check(page.locator('.upcoming-row .upcoming-client-info a[href^="tel:"]').count()>=1, f"{label}: upcoming phone remains a direct call action")
+                page.locator('.upcoming-row .upcoming-client-info strong').first.click();page.wait_for_timeout(20)
+                qa.check(page.locator('#clientEditor').count()==0 and page.locator('.detail').count()==0, f"{label}: tapping upcoming customer name does not navigate")
+                page.locator('.upcoming-row [data-up="open"]').first.click();page.wait_for_timeout(20)
+                qa.check(page.locator('.detail').count()==1, f"{label}: explicit Open action opens booking details")
+                page.locator('.detail .back').first.click();page.wait_for_timeout(30)
             if view=='equipment':
                 qa.check(page.locator('.catalog-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: equipment toolbar stays inside its own width")
                 single=page.locator('.equipment-image-1 img').first
