@@ -8,7 +8,7 @@ const version=String(release.version), build=String(release.build||version.repla
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 for(const file of walk(root).filter(f=>f.endsWith('.html'))){
   let s=fs.readFileSync(file,'utf8');
-  s=s.replace(/(\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|admin-v250|admin-glass-test|public-fixes|mobile-home-fix)\.(?:js|css))\?v=[^"']+/g,`$1?v=${build}`);
+  s=s.replace(/(\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|public-quiz|admin-v250|admin-glass-test|public-fixes|mobile-home-fix)\.(?:js|css))\?v=[^"']+/g,`$1?v=${build}`);
   fs.writeFileSync(file,s);
 }
 const adminSw=path.join(root,'admin','sw.js');

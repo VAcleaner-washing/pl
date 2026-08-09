@@ -266,5 +266,26 @@
     return banner;
   }
 
-  document.addEventListener('DOMContentLoaded',()=>{injectTeaser();applyBookingPreset()});
+  function bootPublicQuiz(){
+    injectTeaser();
+    applyBookingPreset();
+  }
+
+  // Next/static hydration may reconcile the home tree after DOMContentLoaded and
+  // remove nodes injected too early. Re-run idempotently after hydration/load
+  // and keep a lightweight observer on the home tree so the guide always stays visible.
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootPublicQuiz,{once:true});
+  else bootPublicQuiz();
+  window.addEventListener('load',bootPublicQuiz,{once:true});
+  [80,280,900,1800].forEach(ms=>setTimeout(bootPublicQuiz,ms));
+  if(path==='/'){
+    const root=document.querySelector('.home-v21')||document.body;
+    let repairTimer=0;
+    const observer=new MutationObserver(()=>{
+      if(document.querySelector('[data-vq-guide]'))return;
+      clearTimeout(repairTimer);
+      repairTimer=setTimeout(injectTeaser,40);
+    });
+    observer.observe(root,{childList:true,subtree:true});
+  }
 })();
