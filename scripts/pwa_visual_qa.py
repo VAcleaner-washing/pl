@@ -268,6 +268,11 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         toolbar_contract=page.locator('.booking-toolbar').evaluate("el=>({position:getComputedStyle(el).position,overflowX:getComputedStyle(el).overflowX,wrap:getComputedStyle(el).flexWrap})")
         qa.check(toolbar_contract['position']=='sticky' and toolbar_contract['overflowX'] in ('auto','scroll') and toolbar_contract['wrap']=='nowrap', f"{label}: booking filters stay in one compact sticky row")
         qa.check(page.locator('.booking-card [data-client-card]').count()>=1, f"{label}: booking client block exposes direct client-card navigation")
+        booking_card_heights=page.locator('.booking-card').evaluate_all('els=>els.map(el=>el.getBoundingClientRect().height)')
+        density_limit=640 if width<=340 else 590
+        qa.check(bool(booking_card_heights) and max(booking_card_heights)<=density_limit, f"{label}: booking cards stay compact instead of consuming a full phone screen")
+        qa.check(page.locator('.main').evaluate('el=>el.scrollHeight')<3000, f"{label}: active booking list no longer creates multi-screen card inflation")
+        qa.check(page.locator('.booking-card .booking-extra:visible').count()==0 and page.locator('.booking-card .booking-note:visible').count()==0 and page.locator('.booking-mobile-flags:visible').count()>=1, f"{label}: verbose extras and comments collapse to compact mobile indicators")
         page.locator('.booking-card [data-client-card]').first.evaluate('el=>el.click()');page.wait_for_selector('#clientEditor');page.wait_for_timeout(20)
         qa.check(page.locator('#clientEditor .client-rental-history').count()==1, f"{label}: booking client tap opens the full client card")
         page.locator('#clientEditor [data-close]').first.click();page.wait_for_timeout(30)

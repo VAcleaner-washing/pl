@@ -1692,3 +1692,42 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
     font-weight:700;
   }
 }
+
+/* v4.0.14 — mobile booking list density: cards stay scannable instead of becoming full-screen documents. */
+.booking-mobile-flags{display:none}
+@media(max-width:900px){
+  .booking-card .booking-row-head{padding:11px 12px 10px;gap:9px}
+  .booking-card .booking-identity h2{margin:4px 0 0;font-size:18px;line-height:1.12}
+  .booking-card .booking-identity>span{font-size:10px}
+  .booking-card .status{height:26px;max-width:46%;padding:0 8px;font-size:9.5px}
+  .booking-card .booking-row-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .booking-card .booking-row-body>div{min-width:0;padding:10px 12px}
+  .booking-card .booking-time,.booking-card .booking-finance{grid-column:1/-1}
+  .booking-card .booking-time{border-right:0;border-bottom:1px solid var(--line)}
+  .booking-card .booking-time strong{font-size:13.5px;line-height:1.3}
+  .booking-card .booking-time-meta{margin-top:6px;gap:7px}
+  .booking-card .booking-time-meta span,.booking-card .schedule-badge{font-size:9.5px}
+  .booking-card .booking-person{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .booking-card .booking-delivery{border-right:0;border-bottom:1px solid var(--line)}
+  .booking-card .booking-person strong,.booking-card .booking-delivery strong{font-size:13.5px;line-height:1.25}
+  .booking-card .booking-person a{margin-top:3px;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .booking-card .booking-delivery span{display:none}
+  .booking-card .booking-finance{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 8px;border-bottom:0}
+  .booking-card .booking-finance>small{grid-column:1;grid-row:1;margin:0}
+  .booking-card .booking-finance>strong{grid-column:2;grid-row:1;justify-self:end;font-size:18px}
+  .booking-card .booking-finance>span:not(.booking-deposit-state){display:none}
+  .booking-card .booking-finance>em{grid-column:1;grid-row:2;min-height:48px;margin:0;padding:7px 9px;border-radius:10px;font-size:10px;line-height:1.15;white-space:normal}
+  .booking-card .booking-finance>.booking-deposit-state{grid-column:2;grid-row:2;min-height:48px;max-width:160px;margin:0;padding:7px 9px;border-radius:10px;font-size:9.5px;line-height:1.15;white-space:normal;text-align:left}
+  .booking-card .booking-extra,.booking-card .booking-note{display:none}
+  .booking-mobile-flags{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px;border-top:0;background:transparent}
+  .booking-mobile-flags span{display:inline-flex;align-items:center;min-height:25px;padding:0 8px;border:1px solid rgba(214,164,95,.2);border-radius:999px;background:rgba(214,164,95,.055);color:#c9ab77;font-size:9.5px;font-weight:700}
+  .booking-card .booking-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;padding:8px 12px 11px}
+  .booking-card .booking-actions .btn{grid-column:auto;width:100%;min-width:0;min-height:40px;margin:0;padding:0 6px;font-size:10.5px;line-height:1.12;white-space:normal}
+  .booking-card .booking-actions .primary-action{grid-column:1/-1;min-height:43px;font-size:11.5px}
+  .booking-card .booking-actions .secondary-danger{grid-column:auto}
+}
+@media(max-width:359px){
+  .booking-card .booking-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .booking-card .booking-actions .primary-action{grid-column:1/-1}
+  .booking-card .booking-finance>.booking-deposit-state{max-width:136px}
+}
