@@ -47,6 +47,22 @@ function ensureSummaryFinanceRow(summary,total,className,title,subtitle){
   if(!row){row=document.createElement('div');row.className=`${className} vx-summary-finance-row${className==='vx-summary-deposit'?' vx-booking-deposit':''}`;row.innerHTML='<span><b></b><small></small></span><strong></strong>';total.insertAdjacentElement('beforebegin',row)}
   setTextIfChanged(row.querySelector('b'),title);setTextIfChanged(row.querySelector('small'),subtitle);return row;
 }
+
+function renderPickupLocationNote(){
+  const row=document.querySelector('.booking-choice-row');
+  if(!row)return;
+  const pickup=[...row.querySelectorAll('button')].find(btn=>/Самовивіз/.test(btn.textContent||''));
+  if(pickup){const span=pickup.querySelector('span');if(span&&span.textContent!=='Полтава · 0 грн')span.textContent='Полтава · 0 грн'}
+  const selected=row.querySelector('button.is-selected');
+  const isPickup=Boolean(selected&&/Самовивіз/.test(selected.textContent||''));
+  let note=document.querySelector('.vx-pickup-location-note');
+  if(isPickup){
+    if(!note){note=document.createElement('p');note.className='vx-pickup-location-note';row.insertAdjacentElement('afterend',note)}
+    note.textContent='Точне місце отримання менеджер повідомить під час опрацювання заявки.';
+    note.hidden=false;
+  }else if(note)note.hidden=true;
+}
+
 function renderDeposit(){
   const amount=depositAmount(),summary=document.querySelector('.booking-summary'),mobile=document.querySelector('.booking-mobile-summary');
   if(summary){
@@ -125,6 +141,7 @@ function refreshBindings(){
   apply();
   bindLoyalty();
   renderDeposit();
+  renderPickupLocationNote();
   if(refreshAttempts<12){
     refreshAttempts+=1;
     setTimeout(refreshBindings,500);
@@ -135,7 +152,7 @@ fetch(API,{cache:'no-store'})
   .then(d=>{if(d?.slots)slots={...slots,...d.slots};if(d?.depositRules)depositRules={...depositRules,...d.depositRules};refreshBindings()})
   .catch(()=>refreshBindings());
 const depositObserver=new MutationObserver(()=>requestAnimationFrame(renderDeposit));
-document.addEventListener('DOMContentLoaded',()=>{depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',renderDeposit,true);document.addEventListener('click',()=>setTimeout(renderDeposit,0),true)});
+document.addEventListener('DOMContentLoaded',()=>{depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote()},true);document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote()},0),true)});
 })();
 
 // v3.0.23 — public nearest-availability UX.

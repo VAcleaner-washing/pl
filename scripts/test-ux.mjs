@@ -6,7 +6,7 @@ const publicCss=fs.readFileSync('assets/public-experience.css','utf8');
 const publicFixes=fs.readFileSync('assets/public-fixes.css','utf8');
 const selectPositions=[...js.matchAll(/<select\b/g)].map(match=>match.index);
 const checkboxPositions=[...js.matchAll(/<input[^>]+type="checkbox"/g)].map(match=>match.index);
-const allSelectsCovered=selectPositions.length===13&&selectPositions.every(index=>{const prefix=js.slice(Math.max(0,index-220),index);const tail=js.slice(index,index+90);return prefix.includes('class="field"')||prefix.includes('clients-toolbar')||prefix.includes('campaign-product-field')||tail.includes('id="clientSegment"')||tail.includes('id="clientSort"')||tail.includes('id="analyticsMonth"')||tail.includes('id="analyticsYear"')});
+const allSelectsCovered=selectPositions.length===11&&selectPositions.every(index=>{const prefix=js.slice(Math.max(0,index-220),index);const tail=js.slice(index,index+90);return prefix.includes('class="field"')||prefix.includes('clients-toolbar')||prefix.includes('campaign-product-field')||tail.includes('id="clientSegment"')||tail.includes('id="clientSort"')});
 const allCheckboxesCovered=checkboxPositions.length===13&&checkboxPositions.every(index=>{const prefix=js.slice(Math.max(0,index-180),index);return prefix.includes('class="switch')||prefix.includes('class="extra-check')});
 const checks=[
  ['operations dashboard',js.includes('operationsBar()')&&css.includes('.operations-bar')],
@@ -20,6 +20,7 @@ const checks=[
  ['premium native selects',css.includes('color-scheme:dark')&&css.includes('appearance:none')&&css.includes('.field select option')],
  ['unified checkbox visual',css.includes('input[type="checkbox"]:checked')&&css.includes('.switch:has(input:checked)')],
  ['all admin selects covered',allSelectsCovered],
+ ['premium analytics picker',js.includes('analyticsMonthPopover')&&js.includes('data-analytics-month')&&css.includes('.analytics-picker-popover')&&css.includes('.analytics-month-grid')],
  ['all admin checkboxes covered',allCheckboxesCovered],
  ['mobile booking uses real stepper',publicJs.includes('enhanceMobileBookingFlow()')&&publicJs.includes("mobileBookingStepIds=['booking-products','booking-dates','booking-extras','booking-contact']")&&publicCss.includes('.booking-form.vx-mobile-stepper .booking-step.is-vx-active')],
  ['booking has one mobile CTA layer',publicCss.includes('main:has(.booking-form) .mobile-booking{display:none}')&&publicCss.includes('.booking-mobile-summary{z-index:60!important')],

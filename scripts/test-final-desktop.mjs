@@ -11,7 +11,7 @@ for(const token of [
   '.analytics-toolbar h2{font-size:24px',
 ]) if(!css.includes(token))errors.push(`missing final desktop visual rule: ${token}`);
 if(!js.includes('<h2>Показники</h2><p>Виручка, середній чек, завантаження й повторні клієнти'))errors.push('analytics hierarchy/copy is missing');
-if(!js.includes('id="analyticsMonth"')||!js.includes('id="analyticsYear"')||!js.includes("['month','Місяць']")||!js.includes("['year','Рік']"))errors.push('calendar analytics period selector is missing');
+if(!js.includes('id="analyticsMonthPicker"')||!js.includes('id="analyticsYearPicker"')||!js.includes('id="analyticsMonthPopover"')||!js.includes("['month','Місяць']")||!js.includes("['year','Рік']"))errors.push('calendar analytics period selector is missing');
 if(js.includes('<div class="analytics-toolbar"><div><h2>Аналітика</h2>'))errors.push('duplicate analytics heading returned');
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
 console.log('Final desktop visual guard passed.');

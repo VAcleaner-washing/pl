@@ -24,3 +24,7 @@
 .vx-nearest-actions button:hover{background:rgba(176,128,66,.18)}
 .vx-nearest-actions small{opacity:.72}
 @media(max-width:620px){.vx-nearest-availability-panel{margin-top:10px;padding:14px;border-radius:16px}.vx-nearest-actions{display:grid;grid-template-columns:1fr;gap:7px}.vx-nearest-actions button{width:100%;min-height:46px}.vx-nearest-actions small{text-align:center}}
+
+/* v3.0.85 — pickup location is confirmed by manager after request processing. */
+.vx-pickup-location-note{margin:10px 0 0;padding:11px 13px;border:1px solid rgba(202,162,97,.18);border-radius:12px;background:rgba(202,162,97,.055);color:#b8b0a5;font-size:12px;line-height:1.45}
+.vx-pickup-location-note::before{content:"✦";margin-right:7px;color:#d8ae6b}
