@@ -11,11 +11,12 @@ if(!errors.length){
   const bySlug=new Map(inventory.functions.map(item=>[item.slug,item]));
   const required=['vacleaner-booking-v5','vacleaner-booking-v4','vacleaner-admin-bookings-v3','vacleaner-admin-bookings-v2','vacleaner-admin-bookings','vacleaner-settings','vacleaner-push','vacleaner-admin-data-v1','vacleaner-campaigns-v1','vacleaner-reminders-v1'];
   for(const slug of required){const row=bySlug.get(slug);if(!row||row.status!=='ACTIVE'||!/^[a-f0-9]{64}$/.test(row.sha256||''))errors.push(`invalid production function inventory: ${slug}`)}
-  const bookingV5=bySlug.get('vacleaner-booking-v5'),adminData=bySlug.get('vacleaner-admin-data-v1'),campaignApi=bySlug.get('vacleaner-campaigns-v1'),reminders=bySlug.get('vacleaner-reminders-v1');
+  const bookingV5=bySlug.get('vacleaner-booking-v5'),adminData=bySlug.get('vacleaner-admin-data-v1'),campaignApi=bySlug.get('vacleaner-campaigns-v1'),reminders=bySlug.get('vacleaner-reminders-v1'),pushApi=bySlug.get('vacleaner-push');
   if(bookingV5?.version!==9)errors.push('production vacleaner-booking-v5 must be v9 after safe production restore');
-  if(adminData?.version!==4)errors.push('production vacleaner-admin-data-v1 must be v4 for campaign management');
+  if(adminData?.version!==5)errors.push('production vacleaner-admin-data-v1 must be v5 for current client/document data');
   if(campaignApi?.version!==1||campaignApi?.verifyJwt!==true)errors.push('production vacleaner-campaigns-v1 must be authenticated v1');
   if(reminders?.version!==3||reminders?.verifyJwt!==false)errors.push('production vacleaner-reminders-v1 must be custom-auth v3');
+  if(pushApi?.version!==2||pushApi?.verifyJwt!==true)errors.push('production vacleaner-push must be authenticated v2 with two-device control');
   for(const [caller,deps] of Object.entries(inventory.dependencyGraph||{}))for(const dep of deps)if(!bySlug.has(dep))errors.push(`untracked dependency ${caller} -> ${dep}`);
 
   const db=JSON.parse(fs.readFileSync(dbFile,'utf8'));

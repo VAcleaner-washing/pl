@@ -12,5 +12,5 @@ for(const token of ['pg_advisory_xact_lock','v_reserved + v_resource.quantity > 
 for(const token of ['vacleaner_operational_health','pg_get_functiondef','capacityHardBlock','halfOpenSlots','transactionLock'])assert.ok(migration.includes(token),`runtime health proof missing: ${token}`);
 for(const token of ['if(action==="health")','db.rpc("vacleaner_operational_health")','vacleaner_push_subscriptions','lastSuccessAt','lastSuccess>=lastFailure'])assert.ok(adminData.includes(token),`admin health endpoint missing: ${token}`);
 for(const token of ['notifyWebPush','vacleaner_push_subscriptions','if (!av.available) return json({ error: "not_available"'])assert.ok(publicBooking.includes(token),`public booking operational guard missing: ${token}`);
-for(const token of ['Стан production','Hard-block дабл-букінгу','Push нових заявок','refreshOperationalHealth'])assert.ok(admin.includes(token),`production health UI missing: ${token}`);
+for(const token of ['Стан production','Hard-block дабл-букінгу','Push VAcleaner','refreshOperationalHealth'])assert.ok(admin.includes(token),`production health UI missing: ${token}`);
 console.log('Operational health contract passed.');

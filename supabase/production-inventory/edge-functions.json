@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-07T16:05:00Z",
+  "capturedAt": "2026-08-09T06:55:00Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -36,11 +36,11 @@
     },
     {
       "slug": "vacleaner-push",
-      "version": 1,
+      "version": 2,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "b24d1d93bf5d6355a7fc1607b1dfa92e2ded72dc3db6e7851d9318a4dd15b6e6",
-      "role": "active push service"
+      "sha256": "f443cf416fdd797ff06f7ee8cfdc4e46f8be5008a3354a81a6d37c53fc6bd57b",
+      "role": "active push service; stable device identity + max two manager phones"
     },
     {
       "slug": "vacleaner-admin-bookings-v2",
@@ -100,11 +100,11 @@
     },
     {
       "slug": "vacleaner-admin-data-v1",
-      "version": 4,
+      "version": 5,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "1c325f439c20bfbaa30312cb272e09a38b74739ddf6aeee0119748004d767856",
-      "role": "active non-financial admin clients + production health + retention campaign management"
+      "sha256": "35eeb6f90557eea742f91fb75ae063657ad3f61107c361d36e00120d2bb9f3fb",
+      "role": "active non-financial admin clients + production health + retention campaign management + customer document metadata"
     },
     {
       "slug": "vacleaner-campaigns-v1",
