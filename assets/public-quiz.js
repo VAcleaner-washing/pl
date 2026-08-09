@@ -2,6 +2,7 @@
   'use strict';
 
   const path=location.pathname.replace(/\/+$/,'')||'/';
+  const QUIZ_PROMO='PIDBIR5';
   const PRODUCT_INFO={
     puzzi:{label:'Kärcher Puzzi',price:700,desc:'Глибоке промивання диванів, крісел, матраців, килимів і текстилю.'},
     puzzi_jimmy:{label:'Puzzi + Jimmy',price:1050,desc:'Сухе очищення шерсті, волосся й пилу перед глибоким промиванням текстилю.'},
@@ -181,8 +182,8 @@
     if(isResult){
       const r=result();
       progress.style.width='100%';meta.textContent='Ваше рішення';back.hidden=false;next.hidden=true;
-      body.innerHTML=`<div class="vq-result"><p class="vq-eyebrow">Персональний підбір VAcleaner</p><h2>Ваше рішення готове.</h2><article class="vq-result__product"><span>Техніка</span><h3>${escapeHtml(r.productInfo.label)}</h3><p>${escapeHtml(r.productInfo.desc)}</p><strong>від ${new Intl.NumberFormat('uk-UA').format(r.productInfo.price)} грн / доба</strong>${r.includesPuzzi?'<small>Для Puzzi базові 8 порцій миючої хімії вже видаються в комплекті.</small>':''}</article>${r.extras.length?`<div class="vq-result__extras"><h3>Під ваші задачі рекомендуємо</h3>${r.extras.map(x=>`<article><div><strong>${escapeHtml(x.label)}</strong><p>${escapeHtml(x.reason)}</p></div><b>+${new Intl.NumberFormat('uk-UA').format(x.price)} грн</b></article>`).join('')}</div>`:'<div class="vq-result__clean"><strong>Додаткова хімія не обов’язкова</strong><span>За вашими відповідями базового рішення достатньо.</span></div>'}${r.warnings.length?`<div class="vq-result__warnings"><strong>Важливо для поверхні</strong>${r.warnings.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`:''}<div class="vq-result__actions"><a class="vq-book" href="${bookingUrl(r)}">Забронювати це рішення →</a><a class="vq-manager" href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" rel="noreferrer">Запитати менеджера</a><button type="button" class="vq-restart">Пройти заново</button></div></div>`;
-      body.querySelector('.vq-book')?.addEventListener('click',()=>fire('cleaning_quiz_booking_click',{quiz_product:r.product,quiz_extras:r.extras.map(x=>x.code).join(',')}));
+      body.innerHTML=`<div class="vq-result"><p class="vq-eyebrow">Персональний підбір VAcleaner</p><h2>Ваше рішення готове.</h2><article class="vq-result__product"><span>Техніка</span><h3>${escapeHtml(r.productInfo.label)}</h3><p>${escapeHtml(r.productInfo.desc)}</p><strong>від ${new Intl.NumberFormat('uk-UA').format(r.productInfo.price)} грн / доба</strong>${r.includesPuzzi?'<small>Для Puzzi базові 8 порцій миючої хімії вже видаються в комплекті.</small>':''}</article>${r.extras.length?`<div class="vq-result__extras"><h3>Під ваші задачі рекомендуємо</h3>${r.extras.map(x=>`<article><div><strong>${escapeHtml(x.label)}</strong><p>${escapeHtml(x.reason)}</p></div><b>+${new Intl.NumberFormat('uk-UA').format(x.price)} грн</b></article>`).join('')}</div>`:'<div class="vq-result__clean"><strong>Додаткова хімія не обов’язкова</strong><span>За вашими відповідями базового рішення достатньо.</span></div>'}${r.warnings.length?`<div class="vq-result__warnings"><strong>Важливо для поверхні</strong>${r.warnings.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`:''}<div class="vq-result__bonus"><span>Бонус за підбір</span><strong>−5% на оренду</strong><p>Застосуємо автоматично при бронюванні. Якщо у вас уже є більша знижка лояльності — система залишить вигіднішу.</p></div><div class="vq-result__actions"><a class="vq-book" href="${bookingUrl(r)}">Забронювати зі знижкою →</a><a class="vq-manager" href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" rel="noreferrer">Запитати менеджера →</a><button type="button" class="vq-restart">Пройти заново</button></div></div>`;
+      body.querySelector('.vq-book')?.addEventListener('click',()=>fire('cleaning_quiz_booking_click',{quiz_product:r.product,quiz_extras:r.extras.map(x=>x.code).join(','),promo_code:QUIZ_PROMO}));
       body.querySelector('.vq-restart')?.addEventListener('click',()=>{state=blankState();stepIndex=0;render()});
       fireOnceCompleted(r);
       return;
@@ -203,7 +204,7 @@
   let completedKey='';
   function fireOnceCompleted(r){const key=[r.product,...r.extras.map(x=>x.code)].join('|');if(completedKey===key)return;completedKey=key;fire('cleaning_quiz_completed',{quiz_product:r.product,quiz_extras:r.extras.map(x=>x.code).join(',')});}
   function bookingUrl(r){
-    const p=new URLSearchParams();p.set('from','quiz');p.set('product',r.product);if(r.extras.length)p.set('extras',r.extras.map(x=>x.code).join(','));
+    const p=new URLSearchParams();p.set('from','quiz');p.set('product',r.product);p.set('promo',QUIZ_PROMO);if(r.extras.length)p.set('extras',r.extras.map(x=>x.code).join(','));
     return `/bronuvannia?${p.toString()}`;
   }
   function openQuiz(){
@@ -218,7 +219,7 @@
     state=blankState();stepIndex=0;completedKey='';modal.classList.add('is-open');document.documentElement.classList.add('vq-lock');render();fire('cleaning_quiz_started');
     setTimeout(()=>modal.querySelector('.vq-close')?.focus(),30);
   }
-  function closeQuiz(){if(!modal)return;modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');}
+  function closeQuiz(){if(!modal)return;modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');if(path==='/pidbir')document.documentElement.classList.remove('vq-standalone-page');}
 
   function injectTeaser(){
     if(path!=='/'||document.querySelector('[data-vq-guide]'))return;
@@ -251,13 +252,30 @@
   function openStandalone(){
     if(path!=='/pidbir'||standaloneOpened)return;
     standaloneOpened=true;
+    document.documentElement.classList.add('vq-standalone-page');
     setTimeout(openQuiz,80);
+  }
+
+  function setControlledInput(input,value){
+    if(!input)return false;
+    const descriptor=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
+    descriptor?.set?.call(input,value);
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+    return true;
+  }
+  function applyPromoPreset(code){
+    if(!code)return false;
+    const input=document.querySelector('.booking-promo-field input');
+    if(!input)return false;
+    if(String(input.value||'').toUpperCase()!==code)setControlledInput(input,code);
+    return true;
   }
 
   function applyBookingPreset(){
     if(path!=='/bronuvannia')return;
     const params=new URLSearchParams(location.search);if(params.get('from')!=='quiz')return;
-    const product=params.get('product')||'';const extras=(params.get('extras')||'').split(',').filter(Boolean);
+    const product=params.get('product')||'';const extras=(params.get('extras')||'').split(',').filter(Boolean);const promo=(params.get('promo')||'').toUpperCase()===QUIZ_PROMO?QUIZ_PROMO:'';
     let attempts=0;
     const run=()=>{
       attempts+=1;
@@ -271,20 +289,21 @@
           const label=[...document.querySelectorAll('.booking-extras label')].find(l=>names.includes(l.querySelector('b')?.textContent.trim()));
           const input=label?.querySelector('input[type="checkbox"]');if(input&&!input.checked)input.click();
         });
-        const banner=ensurePresetBanner(product,extras);
+        applyPromoPreset(promo);
+        const banner=ensurePresetBanner(product,extras,promo);
         if(banner)banner.scrollIntoView({block:'nearest'});
       },180);
-      if((!productButton||extras.some(code=>!findExtra(code)))&&attempts<10)setTimeout(run,300);
+      if((!productButton||extras.some(code=>!findExtra(code))||(promo&&!document.querySelector('.booking-promo-field input')))&&attempts<10)setTimeout(run,300);
     };
     setTimeout(run,180);
   }
   function findExtra(code){const names=EXTRA_TITLES[code]||[];return [...document.querySelectorAll('.booking-extras label')].find(l=>names.includes(l.querySelector('b')?.textContent.trim()))}
-  function ensurePresetBanner(product,extras){
+  function ensurePresetBanner(product,extras,promo){
     const form=document.querySelector('.booking-form');if(!form)return null;
     let banner=form.querySelector('.vq-preset-banner');if(!banner){banner=document.createElement('div');banner.className='vq-preset-banner';const products=form.querySelector('#booking-products');products?.insertAdjacentElement('beforebegin',banner)}
     const p=PRODUCT_INFO[product];if(!p)return banner;
     const extraNames=extras.map(x=>EXTRA_INFO[x]?.label).filter(Boolean);
-    banner.innerHTML=`<span>Підібрано у Smart Guide</span><strong>${escapeHtml(p.label)}</strong><small>${extraNames.length?'Додатково: '+escapeHtml(extraNames.join(' · ')):'Без обов’язкових додаткових засобів'}</small>`;
+    banner.innerHTML=`<span>Підібрано у Smart Guide</span><strong>${escapeHtml(p.label)}</strong><small>${extraNames.length?'Додатково: '+escapeHtml(extraNames.join(' · ')):'Без обов’язкових додаткових засобів'}</small>${promo===QUIZ_PROMO?'<em>Бонус за підбір · −5% на оренду · застосовується автоматично</em>':''}`;
     return banner;
   }
 
