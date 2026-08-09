@@ -58,6 +58,31 @@
     return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   }
   function sameDay(a,b){return !!a&&!!b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+  function addCalendarDays(value,days){
+    const date=parseDate(value);
+    if(!date)return '';
+    date.setDate(date.getDate()+Number(days||0));
+    return isoDate(date);
+  }
+  function defaultReturnAfterStart(startInput){
+    if(dateRole(startInput)!=='отримання'||!startInput.value)return;
+    const grid=startInput.closest('.booking-date-grid');
+    if(!grid)return;
+    const returnInput=[...grid.querySelectorAll('input[type="date"]')].find(input=>input!==startInput&&dateRole(input)==='повернення');
+    if(!returnInput)return;
+    let next=addCalendarDays(startInput.value,1);
+    if(!next)return;
+    if(returnInput.max&&next>returnInput.max)next=returnInput.max;
+    if(returnInput.min&&next<returnInput.min)next=returnInput.min;
+    if(returnInput.value===next)return;
+    setNativeValue(returnInput,next);
+    updateDateTrigger(returnInput);
+  }
+  function scheduleDefaultReturnAfterStart(startInput){
+    cancelAnimationFrame(Number(startInput.dataset.vxReturnDefaultRaf||0));
+    const raf=requestAnimationFrame(()=>{delete startInput.dataset.vxReturnDefaultRaf;defaultReturnAfterStart(startInput)});
+    startInput.dataset.vxReturnDefaultRaf=String(raf);
+  }
   function formatDate(value){
     const d=parseDate(value);
     if(!d)return 'Оберіть дату';
@@ -94,7 +119,7 @@
     trigger.addEventListener('click',()=>openCalendar(input));
     input.closest('label')?.addEventListener('click',e=>{if(e.target===input.closest('label')){e.preventDefault();trigger.click()}});
     input.addEventListener('invalid',e=>{e.preventDefault();openCalendar(input)});
-    input.addEventListener('change',()=>updateDateTrigger(input));
+    input.addEventListener('change',()=>{updateDateTrigger(input);if(dateRole(input)==='отримання')scheduleDefaultReturnAfterStart(input)});
     input.addEventListener('input',()=>updateDateTrigger(input));
     updateDateTrigger(input);
   }
