@@ -170,6 +170,19 @@
   }
 
   function escapeHtml(value){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+  function zoneIcon(value){
+    const common='viewBox="0 0 32 32" aria-hidden="true" focusable="false"';
+    const icons={
+      textile:`<svg ${common}><path d="M6 15v-3.2A3.8 3.8 0 0 1 9.8 8h12.4a3.8 3.8 0 0 1 3.8 3.8V15"/><path d="M5 15h22a2 2 0 0 1 2 2v6H3v-6a2 2 0 0 1 2-2Z"/><path d="M7 23v3M25 23v3M9 15V11M23 15V11"/></svg>`,
+      mattress:`<svg ${common}><path d="M5 13h22a2 2 0 0 1 2 2v8H3v-8a2 2 0 0 1 2-2Z"/><path d="M7 13V9.5A2.5 2.5 0 0 1 9.5 7h13A2.5 2.5 0 0 1 25 9.5V13M3 19h26M6 23v3M26 23v3"/></svg>`,
+      carpet:`<svg ${common}><path d="M8 7h16l3 18H5L8 7Z"/><path d="m12 12 4-2 4 2-2 4 2 4-4 2-4-2 2-4-2-4ZM8 25l-1 3M24 25l1 3"/></svg>`,
+      kitchen:`<svg ${common}><path d="M6 6h20v20H6zM6 13h20M16 13v13"/><circle cx="11" cy="9.5" r="1"/><circle cx="16" cy="9.5" r="1"/><circle cx="21" cy="9.5" r="1"/><path d="M9 18h4M19 18h4"/></svg>`,
+      bathroom:`<svg ${common}><path d="M4 15h24v3a7 7 0 0 1-7 7H11a7 7 0 0 1-7-7v-3Z"/><path d="M8 15V9a4 4 0 0 1 8 0v1M8 25l-1 3M24 25l1 3"/><path d="M14 10h4"/></svg>`,
+      windows:`<svg ${common}><path d="M6 4h20v24H6zM16 4v24M6 16h20"/><path d="m20 20 2 2 4-5"/></svg>`
+    };
+    return icons[value]||'';
+  }
+
   function render(){
     if(!modal)return;
     const qs=questions();
@@ -195,7 +208,7 @@
     back.hidden=stepIndex===0;
     next.hidden=q.type==='single';
     next.disabled=!canContinue(q);
-    body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;return `<button type="button" class="vq-option ${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}"><span class="vq-option__check">${q.type==='multi'?'✓':'→'}</span><span><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>`;
+    body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;const icon=q.id==='zones'?zoneIcon(value):'';return `<button type="button" class="vq-option ${icon?'has-icon ':''}${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}">${icon?`<span class="vq-option__icon">${icon}</span>`:''}<span class="vq-option__copy"><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span><span class="vq-option__check" aria-hidden="true">${q.type==='multi'?(active?'✓':''):'→'}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>`;
     body.querySelectorAll('.vq-option').forEach(button=>button.addEventListener('click',()=>{
       setAnswer(q.id,button.dataset.value,q.type);
       if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else render();
@@ -209,7 +222,7 @@
   }
   function openQuiz(){
     if(!modal){
-      modal=document.createElement('div');modal.className='vq-layer';modal.innerHTML=`<section class="vq-dialog" role="dialog" aria-modal="true" aria-labelledby="vq-title"><header class="vq-dialog__header"><button type="button" class="vq-back" aria-label="Назад">‹</button><div class="vq-progress"><span class="vq-progress__meta">Крок 1</span><div><i class="vq-progress__bar"></i></div></div><button type="button" class="vq-close" aria-label="Закрити">×</button></header><div class="vq-dialog__body" id="vq-title"></div><footer class="vq-dialog__footer"><button type="button" class="vq-next">Далі →</button></footer></section>`;document.body.appendChild(modal);
+      modal=document.createElement('div');modal.className='vq-layer';modal.innerHTML=`<section class="vq-dialog" role="dialog" aria-modal="true" aria-labelledby="vq-title"><header class="vq-dialog__header"><button type="button" class="vq-back" aria-label="Назад">‹</button><div class="vq-progress"><span class="vq-progress__meta">Крок 1</span><div><i class="vq-progress__bar"></i></div></div><button type="button" class="vq-close" aria-label="Закрити">×</button></header><div class="vq-dialog__body" id="vq-title"></div><div class="vq-dialog__footer"><button type="button" class="vq-next">Далі →</button></div></section>`;document.body.appendChild(modal);
       modal.addEventListener('click',e=>{if(e.target===modal)closeQuiz()});
       modal.querySelector('.vq-close').addEventListener('click',closeQuiz);
       modal.querySelector('.vq-back').addEventListener('click',()=>{if(stepIndex>0){stepIndex-=1;render()}});

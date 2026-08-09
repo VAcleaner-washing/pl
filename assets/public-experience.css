@@ -500,10 +500,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .vq-question h2,.vq-result>h2{margin:0;font-size:clamp(32px,4vw,52px);line-height:1.02;letter-spacing:-.045em}
 .vq-question__note{max-width:680px;margin:15px 0 0;color:#9fa2a2;font-size:14px;line-height:1.55}
 .vq-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:30px}
-.vq-option{min-height:84px;display:grid;grid-template-columns:34px 1fr;align-items:center;gap:12px;padding:16px;border:1px solid rgba(255,255,255,.085);border-radius:18px;background:rgba(255,255,255,.027);color:#f2eee6;text-align:left;font:inherit;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.vq-option{min-height:84px;display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:center;gap:14px;padding:16px 16px 16px 18px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.018));color:#f2eee6;text-align:left;font:inherit;cursor:pointer;position:relative;isolation:isolate;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
 .vq-option:hover{transform:translateY(-2px);border-color:rgba(220,173,101,.3);background:rgba(255,255,255,.045)}
 .vq-option.is-selected{border-color:rgba(229,181,108,.58);background:linear-gradient(145deg,rgba(222,169,91,.15),rgba(255,255,255,.035));box-shadow:0 12px 28px rgba(0,0,0,.16),0 0 0 1px rgba(229,181,108,.08) inset}
-.vq-option__check{width:32px;height:32px;border-radius:11px;display:grid;place-items:center;background:rgba(255,255,255,.045);color:#8f9293;font-weight:900}.vq-option.is-selected .vq-option__check{background:linear-gradient(145deg,#e7ba72,#bd8136);color:#19130d}
+.vq-option.has-icon{grid-template-columns:46px minmax(0,1fr) 34px}.vq-option__icon{width:42px;height:42px;display:grid;place-items:center;color:#e8e1d6}.vq-option__icon svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}.vq-option__copy{min-width:0}.vq-option__check{width:30px;height:30px;border-radius:9px;border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;background:rgba(255,255,255,.025);color:transparent;font-size:17px;font-weight:950;transition:background .18s ease,border-color .18s ease,color .18s ease}.vq-option.is-selected .vq-option__icon{color:#efc478}.vq-option.is-selected .vq-option__check{border-color:#e5b66b;background:linear-gradient(145deg,#efc47c,#c48737);color:#17120d}
 .vq-option strong{display:block;font-size:15px;line-height:1.3}.vq-option small{display:block;margin-top:4px;color:#898d8e;font-size:12px;line-height:1.4}.vq-option.is-selected small{color:#b9b4aa}
 .vq-multi-hint{margin:15px 0 0;color:#777b7c;font-size:11px}
 
@@ -542,16 +542,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 /* v3.0.90 — compact multi-zone Smart Guide */
-.vq-question--zones .vq-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px}
-.vq-question--zones .vq-option{min-height:70px;padding:12px 14px;border-radius:16px}
-.vq-question--zones .vq-option__check{width:30px;height:30px;border-radius:10px}
+.vq-question--zones .vq-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:20px}
+.vq-question--zones .vq-option{min-height:82px;padding:12px 14px;border-radius:17px}
+.vq-question--zones .vq-option__check{width:28px;height:28px;border-radius:8px}
 .vq-question--zones .vq-question__note{margin-top:10px}
 .vq-question--zones .vq-multi-hint{margin-top:10px}
 .vq-booking-help{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:12px 0 18px;padding:13px 15px;border:1px solid rgba(190,136,58,.22);border-radius:15px;background:linear-gradient(145deg,rgba(215,160,77,.07),rgba(255,255,255,.018));font-size:12px}
 .vq-booking-help span{color:#8a8177}.vq-booking-help a{color:#9a672a;font-weight:800;text-decoration:none;white-space:nowrap}
 @media(max-width:760px){
   .vq-question--zones .vq-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:16px}
-  .vq-question--zones .vq-option{min-height:68px;padding:10px 11px;grid-template-columns:30px minmax(0,1fr);gap:9px}
+  .vq-question--zones .vq-option{min-height:74px;padding:10px 10px;gap:8px}.vq-question--zones .vq-option.has-icon{grid-template-columns:32px minmax(0,1fr) 24px}.vq-question--zones .vq-option__icon{width:30px;height:30px}.vq-question--zones .vq-option__icon svg{width:27px;height:27px}.vq-question--zones .vq-option__check{width:24px;height:24px;border-radius:7px;font-size:14px}
   .vq-question--zones .vq-option strong{font-size:13px}
   .vq-question--zones .vq-option small{font-size:10px;line-height:1.25;margin-top:2px}
   .vq-question--zones .vq-eyebrow{margin-bottom:9px}
@@ -585,3 +585,9 @@ html.vq-standalone-page .mobile-booking{display:none}
 html.vq-standalone-page .vq-layer{z-index:2147483000;background:radial-gradient(circle at 82% 4%,rgba(207,174,123,.12),transparent 24rem),#080a0c;backdrop-filter:none;-webkit-backdrop-filter:none}
 html.vq-standalone-page .vq-dialog{width:min(1060px,calc(100vw - 40px));max-height:calc(100dvh - 40px)}
 @media(max-width:620px){html.vq-standalone-page .vq-dialog{width:100%;max-height:100dvh;height:100dvh;border-radius:0;padding-top:env(safe-area-inset-top)}}
+
+/* v4.0.3 — Smart Guide premium options + click hit-area hardening */
+.vq-layer.is-open,.vq-dialog,.vq-dialog__body,.vq-question,.vq-options{pointer-events:auto}
+.vq-option,.vq-option *{pointer-events:auto}
+.vq-option:focus-visible{outline:2px solid #e5b66b;outline-offset:3px}
+html.vq-standalone-page .vq-dialog{pointer-events:auto}
