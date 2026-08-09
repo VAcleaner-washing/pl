@@ -473,7 +473,7 @@
     const label=(button?.textContent||'').trim();
     if(label.includes('Обрати техніку'))return 0;
     if(label.includes('Обрати дату'))return 1;
-    if(label.includes('Вказати адресу'))return 2;
+    if(label.includes('До отримання')||label.includes('Вказати адресу'))return 2;
     if(label.includes('До контактів'))return 3;
     return -1;
   }
@@ -497,13 +497,18 @@
           event.stopPropagation();
           const liveButtons=[...parts.form.querySelectorAll('.booking-progress button')];
           const index=liveButtons.indexOf(progressButton);
-          if(index>=0)setMobileBookingStep(index,{scroll:true});
+          const active=Number(parts.form.dataset.vxActiveStep||0);
+          const prerequisite=index<=0||index<=active||(index===1&&liveButtons[0]?.classList.contains('is-complete'))||(index===2&&liveButtons[1]?.classList.contains('is-complete'))||(index===3&&liveButtons[2]?.classList.contains('is-complete'));
+          if(index>=0&&prerequisite)setMobileBookingStep(index,{scroll:true});
           return;
         }
         const button=event.target.closest('.booking-mobile-summary button');
         if(!button||button.type==='submit')return;
         const target=mobileStepFromCta(button);
-        if(target>=0){
+        const liveButtons=[...parts.form.querySelectorAll('.booking-progress button')];
+        const active=Number(parts.form.dataset.vxActiveStep||0);
+        const prerequisite=target<=0||target<=active||(target===1&&liveButtons[0]?.classList.contains('is-complete'))||(target===2&&liveButtons[1]?.classList.contains('is-complete'))||(target===3&&liveButtons[2]?.classList.contains('is-complete'));
+        if(target>=0&&prerequisite){
           event.preventDefault();
           event.stopPropagation();
           setMobileBookingStep(target,{scroll:true});

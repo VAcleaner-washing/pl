@@ -242,8 +242,8 @@ Deno.serve(async (req: Request) => {
     if (body.promoCode && !promo?.valid) return json({ error: "invalid_promo", promo: promo || { valid: false, reason: "invalid_code" }, estimate }, 400);
     if (!av.available) return json({ error: "not_available", ...av, estimate }, 409);
 
-    const customerName = cleanText(body.customerName, 80), fulfillment = body.fulfillment === "delivery" ? "delivery" : "pickup", address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 180) : "Полтава, вул. Європейська, 146Е";
-    if (customerName.length < 2 || !phone || body.privacyAccepted !== true || (fulfillment === "delivery" && address.length < 8)) return json({ error: "invalid_customer_data" }, 400);
+    const customerName = cleanText(body.customerName, 80), fulfillment = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "", address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 180) : fulfillment === "pickup" ? "Полтава, вул. Європейська, 146Е" : "";
+    if (customerName.length < 2 || !phone || !fulfillment || body.privacyAccepted !== true || (fulfillment === "delivery" && address.length < 8)) return json({ error: "invalid_customer_data" }, 400);
     const chemistry = product.resources?.puzzi ? [
       { code: "carpet_chemistry_kit", label: "Хімія для Puzzi · видано 8 порцій, оплата після повернення за використані", quantity: 8, unitPrice: 0, amount: 0 },
       ...(body.storyMention === true ? [{ code: "story_mention_bonus", label: "Відмітка у сторіс · 2 використані порції безкоштовно", quantity: 1, unitPrice: 0, amount: 0 }] : []),

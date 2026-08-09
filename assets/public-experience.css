@@ -705,3 +705,90 @@ html.vq-standalone-page .vq-dialog{max-height:calc(100dvh - 116px)}
 }
 @media (min-width:1181px){.home-v21 .desktop-nav a{font-size:13px}}
 @media (min-width:961px) and (max-width:1180px){.home-v21 .desktop-nav a{font-size:11px}}
+
+
+/* v4.0.9 — Smart Guide desktop fit: question steps use the available viewport without an inner scrollbar. */
+@media (min-width:901px){
+  html.vq-standalone-page .vq-dialog.is-question{
+    height:min(720px,calc(100dvh - 116px));
+    max-height:calc(100dvh - 116px);
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-dialog__header{
+    min-height:64px;
+    padding:12px 18px;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-dialog__body{
+    min-height:0;
+    overflow:hidden;
+    padding:clamp(18px,2.25vh,28px) clamp(28px,3vw,42px);
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-dialog__footer{
+    min-height:64px;
+    padding:10px 18px 14px;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-next{min-height:46px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-eyebrow{margin-bottom:9px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-question h2{
+    font-size:clamp(31px,3.15vw,46px);
+    line-height:1;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-question__note{
+    margin-top:10px;
+    font-size:13px;
+    line-height:1.42;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-options{
+    gap:9px;
+    margin-top:20px;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-option{
+    min-height:68px;
+    padding:11px 13px 11px 15px;
+    border-radius:15px;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-option.has-icon{
+    grid-template-columns:40px minmax(0,1fr) 30px;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-option__icon{width:36px;height:36px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option__icon svg{width:30px;height:30px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option__check{width:28px;height:28px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option strong{font-size:14px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option small{margin-top:2px;font-size:11px;line-height:1.28}
+  html.vq-standalone-page .vq-dialog.is-question .vq-multi-hint{margin-top:10px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-question{height:100%;min-height:0}
+}
+@media (min-width:1100px){
+  html.vq-standalone-page .vq-dialog.is-question .vq-question--zones{
+    height:100%;
+    min-height:0;
+    gap:22px;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-question--zones .vq-question__main{align-self:center}
+  html.vq-standalone-page .vq-dialog.is-question .vq-zones-media{
+    height:100%;
+    min-height:0;
+  }
+}
+@media (min-width:901px) and (max-height:760px){
+  html.vq-standalone-page .vq-dialog.is-question .vq-dialog__body{padding-top:16px;padding-bottom:16px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-options{margin-top:15px;gap:8px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option{min-height:62px;padding-top:9px;padding-bottom:9px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-question h2{font-size:clamp(29px,3vw,40px)}
+  html.vq-standalone-page .vq-dialog.is-question .vq-question__note{margin-top:8px}
+}
+
+/* v4.0.9 — tablet Smart Guide keeps question steps on one screen too. */
+@media (min-width:621px) and (max-width:900px){
+  html.vq-standalone-page .vq-dialog.is-question .vq-dialog__body{
+    overflow:hidden;
+    padding:16px 24px;
+  }
+  html.vq-standalone-page .vq-dialog.is-question .vq-eyebrow{margin-bottom:8px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-question h2{font-size:34px;line-height:1}
+  html.vq-standalone-page .vq-dialog.is-question .vq-question__note{margin-top:8px;font-size:12.5px;line-height:1.4}
+  html.vq-standalone-page .vq-dialog.is-question .vq-options{gap:8px;margin-top:15px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option{min-height:62px;padding:9px 12px;border-radius:14px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option strong{font-size:13.5px}
+  html.vq-standalone-page .vq-dialog.is-question .vq-option small{font-size:10.5px;line-height:1.25}
+  html.vq-standalone-page .vq-dialog.is-question .vq-multi-hint{margin-top:8px}
+}

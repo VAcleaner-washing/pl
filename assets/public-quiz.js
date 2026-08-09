@@ -192,9 +192,13 @@
     const meta=modal.querySelector('.vq-progress__meta');
     const back=modal.querySelector('.vq-back');
     const next=modal.querySelector('.vq-next');
+    const dialog=modal.querySelector('.vq-dialog');
+    dialog?.classList.toggle('is-result',isResult);
+    dialog?.classList.toggle('is-question',!isResult);
     if(isResult){
       const r=result();
       progress.style.width='100%';meta.textContent='Ваше рішення';back.hidden=false;next.hidden=true;
+      body.scrollTop=0;
       body.innerHTML=`<div class="vq-result"><p class="vq-eyebrow">Персональний підбір VAcleaner</p><h2>Ваше рішення готове.</h2><article class="vq-result__product"><span>Техніка</span><h3>${escapeHtml(r.productInfo.label)}</h3><p>${escapeHtml(r.productInfo.desc)}</p><strong>від ${new Intl.NumberFormat('uk-UA').format(r.productInfo.price)} грн / доба</strong>${r.includesPuzzi?'<small>Для Puzzi базові 8 порцій миючої хімії вже видаються в комплекті.</small>':''}</article>${r.extras.length?`<div class="vq-result__extras"><h3>Під ваші задачі рекомендуємо</h3>${r.extras.map(x=>`<article><div><strong>${escapeHtml(x.label)}</strong><p>${escapeHtml(x.reason)}</p></div><b>+${new Intl.NumberFormat('uk-UA').format(x.price)} грн</b></article>`).join('')}</div>`:'<div class="vq-result__clean"><strong>Додаткова хімія не обов’язкова</strong><span>За вашими відповідями базового рішення достатньо.</span></div>'}${r.warnings.length?`<div class="vq-result__warnings"><strong>Важливо для поверхні</strong>${r.warnings.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`:''}<div class="vq-result__bonus"><span>Бонус за підбір</span><strong>−5% на оренду</strong><p>Застосуємо автоматично при бронюванні. Якщо у вас уже є більша знижка лояльності — система залишить вигіднішу.</p></div><div class="vq-result__actions"><a class="vq-book" href="${bookingUrl(r)}">Забронювати зі знижкою →</a><a class="vq-manager" href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" rel="noreferrer">Запитати менеджера →</a><button type="button" class="vq-restart">Пройти заново</button></div></div>`;
       body.querySelector('.vq-book')?.addEventListener('click',()=>fire('cleaning_quiz_booking_click',{quiz_product:r.product,quiz_extras:r.extras.map(x=>x.code).join(','),promo_code:QUIZ_PROMO}));
       body.querySelector('.vq-restart')?.addEventListener('click',()=>{state=blankState();stepIndex=0;render()});
@@ -208,10 +212,17 @@
     back.hidden=stepIndex===0;
     next.hidden=q.type==='single';
     next.disabled=!canContinue(q);
+    body.scrollTop=0;
     body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><div class="vq-question__main"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;const icon=q.id==='zones'?zoneIcon(value):'';return `<button type="button" class="vq-option ${icon?'has-icon ':''}${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}">${icon?`<span class="vq-option__icon">${icon}</span>`:''}<span class="vq-option__copy"><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span><span class="vq-option__check" aria-hidden="true">${q.type==='multi'?(active?'✓':''):'→'}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>${q.id==='zones'?'<aside class="vq-zones-media"><img src="/assets/quiz-cleaning-guide.webp" alt="Чистий інтер’єр і техніка VAcleaner"><span>Професійна чистота у вас вдома</span></aside>':''}</div>`;
     body.querySelectorAll('.vq-option').forEach(button=>button.addEventListener('click',()=>{
       setAnswer(q.id,button.dataset.value,q.type);
-      if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else render();
+      if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else{
+        const selected=Array.isArray(valueFor(q.id))&&valueFor(q.id).includes(button.dataset.value);
+        button.classList.toggle('is-selected',selected);
+        button.setAttribute('aria-pressed',selected?'true':'false');
+        const check=button.querySelector('.vq-option__check');if(check)check.textContent=selected?'✓':'';
+        next.disabled=!canContinue(q);
+      }
     }));
   }
   let completedKey='';

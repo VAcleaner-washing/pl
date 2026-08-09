@@ -50,7 +50,7 @@ check(experienceCss.includes('html.vq-standalone-page.vq-ready .inner-hero'),'/p
 check(experienceCss.includes('html.vq-standalone-page.vq-ready body{overflow:hidden}'),'/pidbir/ locks page scroll only after quiz readiness');
 check(quizJs.includes("document.documentElement.classList.add('vq-ready')"),'/pidbir/ marks quiz ready only after openQuiz');
 check(experienceCss.includes('html.vx-booking-standalone-mobile main>.booking-form~*:not(.booking-mobile-summary){display:none}'),'mobile booking isolates the four-step wizard from footer/reviews');
-check(/if\(index>=0\)setMobileBookingStep\(index,\{scroll:true\}\)/.test(experienceJs),'mobile booking progress buttons switch steps');
+check(/if\(index>=0&&prerequisite\)setMobileBookingStep\(index,\{scroll:true\}\)/.test(experienceJs) && experienceJs.includes("index===3&&liveButtons[2]?.classList.contains('is-complete')"),'mobile booking progress buttons switch only to unlocked steps');
 check(bookingSlots.includes("'Залоговий платіж — після вибору дат'"),'mobile booking uses a short non-truncated deposit hint');
 check(siteCss.includes('@media (min-width:901px) and (max-width:1180px)') && siteCss.includes('.inner-hero.v4-inner-hero'),'small-desktop editorial heroes have a dedicated safe grid');
 check(/\.v4-service-grid\{[^}]*background:#f4efe8;[^}]*color:#111315/.test(siteCss),'light service cards explicitly restore dark text contrast');
@@ -61,7 +61,7 @@ check(!generator.includes('[120,500,1200,2400]'),'historical v4 generator cannot
 check(!generator.includes('VA HOME ↗'),'historical v4 generator cannot reintroduce emoji arrow glyphs');
 check(generator.includes('color:#111315') && generator.includes('small-desktop editorial hero safety'),'historical v4 generator preserves current public visual hardening');
 
-const hydratedChunks=['_next/static/chunks/01pb0x0z72e50.js','_next/static/chunks/146ntlcv_t6~w.js','_next/static/chunks/0x2bx8kerxrmz.js'];
+const hydratedChunks=['_next/static/chunks/01pb0x0z72e50.js','_next/static/chunks/146ntlcv_t6~w-v4010.js','_next/static/chunks/0x2bx8kerxrmz.js'];
 for(const chunk of hydratedChunks){
   const text=read(chunk);
   check(!text.includes('children:"Процес"') && !text.includes('children:"Рішення"') && !text.includes('children:"Умови сервісу"'),`${chunk} contains no stale hydrated footer labels`);

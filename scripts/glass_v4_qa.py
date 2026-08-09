@@ -57,6 +57,31 @@ with sync_playwright() as p:
   check(mod.no_overflow(page),f'{w}: analytics toolbar fix keeps viewport stable')
   if w==390: page.screenshot(path=str(ROOT/'glass-test-results/analytics-toolbar-fix-390.png'),full_page=True)
   page.close()
+ # Desktop client-card regression: the quick actions used to inherit no desktop styles
+ # because their V4 rules lived only inside max-width:900px.
+ for w,h in ((1440,900),(1280,800),(1024,768)):
+  page=mod.render_page(browser,w,h,authenticated=True,standalone=False)
+  page.evaluate("document.documentElement.classList.add('glass-test')")
+  page.add_style_tag(content=CSS);page.add_script_tag(content=JS);page.wait_for_timeout(120)
+  if page.locator('.pwa-update-prompt').count():page.locator('.pwa-update-later').click()
+  page.locator('.nav button[data-view="clients"]').click();page.wait_for_timeout(90)
+  page.locator('.client-row .client-open-indicator').first.click();page.wait_for_selector('#clientEditor');page.wait_for_timeout(100)
+  actions=page.locator('.glass-client-actions')
+  action_box=actions.bounding_box()
+  display=actions.evaluate("el=>getComputedStyle(el).display")
+  check(display=='grid' and action_box is not None and action_box['height']<=44,f'{w}: desktop client quick actions are a compact grid, not a raw stacked block')
+  header_box=page.locator('#clientEditor>header').bounding_box()
+  check(header_box is not None and header_box['height']<190,f'{w}: desktop client header cannot balloon from unstyled quick actions')
+  card_box=page.locator('.modal-card:has(.client-card-form)').bounding_box()
+  check(card_box is not None and card_box['x']>=12 and card_box['x']+card_box['width']<=w-12,f'{w}: desktop client card uses the viewport without clipping')
+  if w>=1280:
+   columns=page.locator('.client-card-grid').evaluate("el=>getComputedStyle(el).gridTemplateColumns.split(' ').length")
+   check(columns==3,f'{w}: wide desktop client card uses contacts, document and rental history side by side')
+  else:
+   check(page.locator('.client-card-grid').evaluate("el=>getComputedStyle(el).gridTemplateColumns.split(' ').length")==2,f'{w}: compact desktop client card falls back to two columns')
+  check(mod.no_overflow(page),f'{w}: desktop client card creates no horizontal overflow')
+  if w==1440: page.screenshot(path=str(ROOT/'glass-test-results/client-card-glass-v4-desktop-1440.png'),full_page=True)
+  page.close()
  browser.close()
 if fail:
  print('Glass V4 QA failed:',len(fail));raise SystemExit(1)
