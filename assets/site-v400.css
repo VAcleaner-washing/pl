@@ -39,3 +39,7 @@ main>footer:not(.v4-footer){visibility:hidden}
   }
   .inner-hero.v4-inner-hero h1 em{max-width:100%}
 }
+
+/* v4.0.19 — contextual internal link between solution intent and Puzzi device intent. */
+.v4-inline-tech-link{margin-left:auto;color:#d6b77f;font-size:11px;font-weight:750;white-space:nowrap}
+@media(max-width:620px){.v4-inline-tech-link{display:block;width:100%;margin:8px 0 0 44px;white-space:normal}}

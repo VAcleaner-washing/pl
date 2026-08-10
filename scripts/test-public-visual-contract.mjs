@@ -4,7 +4,7 @@ import path from 'node:path';
 const ROOT=process.cwd();
 const read=(p)=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const routes=[
-  '', 'rishennia','rishennia/textile','rishennia/steam','rishennia/mattress','rishennia/windows',
+  '', 'tekhnika/karcher-puzzi-8-1','rishennia','rishennia/textile','rishennia/steam','rishennia/mattress','rishennia/windows',
   'komplekty','yak-tse-pratsiuie','vidhuky','pidbir','bronuvannia','faq','kontakty','umovy',
   'dostavka','pro-nas','blog','blog/yak-pochystyty-matrats-pislia-dytyny',
   'blog/yak-vyvesty-plyamu-z-dyvana','blog/skilky-sokhne-dyvan-pislia-chyshchennia',

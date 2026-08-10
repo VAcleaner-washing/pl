@@ -28,6 +28,21 @@ for(const file of files.filter(f=>f.endsWith('.html'))){
  if(hasCore!==needsCore)errors.push(`shared core route mismatch: ${rel}`);
  if(rel!=='bronuvannia/index.html'&&/public-catalog\.js/.test(s))errors.push(`catalog runtime on ${rel}`);
 }
+// Puzzi SEO landing / Search Console / favicon contract (v4.0.19).
+const puzziSeoPath=path.join(root,'tekhnika','karcher-puzzi-8-1','index.html');
+if(!fs.existsSync(puzziSeoPath))errors.push('Puzzi SEO landing is missing');
+else{
+ const seo=fs.readFileSync(puzziSeoPath,'utf8');
+ for(const token of ['<title>Оренда миючого пилососа Kärcher Puzzi 8/1 у Полтаві | VAcleaner</title>','rel="canonical" href="https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/"','"@type":"Service"','"@type":"FAQPage"','"@type":"BreadcrumbList"','"streetAddress":"вул. Європейська, 146Е"','700 грн','800 грн','8 порцій','Залоговий платіж','/bronuvannia/?product=puzzi','/rishennia/textile/'])if(!seo.includes(token))errors.push(`Puzzi SEO landing contract missing: ${token}`);
+}
+const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+if(!sitemap.includes('https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/'))errors.push('Puzzi SEO landing missing from sitemap');
+const googleVerify=path.join(root,'google23d85db681a5b7ee.html');
+if(!fs.existsSync(googleVerify)||fs.readFileSync(googleVerify,'utf8').trim()!=='google-site-verification: google23d85db681a5b7ee.html')errors.push('Google site verification file missing or invalid');
+for(const file of files.filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(file,'utf8');if(/favicon\.(?:ico|svg)\?v=3081|apple-touch-icon\.png\?v=3081/.test(html))errors.push(`stale favicon cache URL: ${path.relative(root,file)}`)}
+const siteRuntime=fs.readFileSync(path.join(root,'assets','site-v400.js'),'utf8');
+if(!siteRuntime.includes("'/tekhnika/karcher-puzzi-8-1/'")||!siteRuntime.includes('v4-inline-tech-link'))errors.push('textile → Puzzi contextual internal link is missing');
+
 const raw=fs.readFileSync(path.join(root,'config','vacleaner.json'),'utf8');
 const expected=crypto.createHash('sha256').update(raw).digest('hex').slice(0,16);
 const core=fs.readFileSync(path.join(root,'assets','vacleaner-core.js'),'utf8');
