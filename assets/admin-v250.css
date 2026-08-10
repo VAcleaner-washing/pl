@@ -1151,7 +1151,10 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
     overflow:hidden;
     align-items:stretch;
   }
-  .issue-form .modal-section,.issue-form .modal-summary{padding:13px;}
+  .issue-form .modal-section,.issue-form .modal-summary{padding:13px;min-width:0;}
+  .issue-form .modal-summary .live{min-width:0;width:100%;}
+  .issue-form .live>div{min-width:0;}
+  .issue-form .live>div>span{min-width:0;overflow-wrap:anywhere;}
   .issue-form .modal-summary h3,.issue-form .modal-section h3{margin:0 0 9px;font-size:17px;line-height:1.15;}
   .issue-form .issue-confirm{gap:10px;}
   .issue-payment-block{padding:11px;gap:8px;border-radius:14px;}
