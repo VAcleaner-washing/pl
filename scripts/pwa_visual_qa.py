@@ -95,6 +95,8 @@ BOOKINGS = [
 ]
 # The process-flow regression must exercise Telegram's phone deep-link fallback.
 BOOKINGS[0]["customer_telegram"] = ""
+# Regression fixture: historical releases polluted admin_note with workflow flags.
+BOOKINGS[2]["admin_note"] = "Перевірити комплект перед видачею.\nЗ клієнтом зв’язались\nУмови оренди та сума залогового платежу надіслані\nПередплата 200 грн отримана"
 
 
 def init_script(authenticated: bool = True, standalone: bool = False) -> str:
@@ -501,6 +503,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.evaluate("data=>window.__emitSwMessage(data)", {"type": "VACLEANER_OPEN_BOOKING", "bookingId": target["id"], "url": f"https://vacleaner.test/admin/bronuvannia/?booking={target['id']}"})
         page.wait_for_selector(".detail")
         detail_text=page.locator('.detail').inner_text();qa.check(target["booking_code"] in detail_text, f"{label}: push deep-link opens exact booking")
+        qa.check('З клієнтом зв’язались' not in detail_text and 'Умови оренди та сума залогового платежу надіслані' not in detail_text and 'Передплата 200 грн отримана' not in detail_text, f"{label}: legacy workflow metadata never leaks into the visible comment")
+        comment_labels=page.locator('.detail .comment h3').evaluate_all("els=>els.map(el=>(el.textContent||'').trim())")
+        qa.check('Коментар клієнта' in comment_labels and 'Примітка менеджера' in comment_labels and 'Перевірити комплект перед видачею.' in detail_text, f"{label}: client comment and manager note stay separate in booking detail")
         qa.check(no_overflow(page), f"{label}: booking detail has no horizontal overflow")
         qa.check(page.locator(".detail-actions").evaluate("el=>getComputedStyle(el).position") != "sticky", f"{label}: detail actions do not cover client content")
         qa.check(page.locator(".detail-top").evaluate("el=>getComputedStyle(el).position") == "sticky", f"{label}: detail back row stays sticky during long booking scroll")
