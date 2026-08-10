@@ -1219,8 +1219,8 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .analytics-kpis .kpi strong{margin-top:6px;font-size:23px;line-height:1.05}
 .analytics-kpis .kpi-revenue{background:linear-gradient(145deg,rgba(214,164,95,.085),rgba(255,255,255,.018))}
 .analytics-kpis .kpi-revenue strong{color:#f2c77c;font-size:27px}
-.reactivation-summary{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,.8fr) minmax(130px,.8fr);gap:8px;margin-top:12px;padding:10px;border:1px solid rgba(214,164,95,.2);border-radius:14px;background:linear-gradient(145deg,rgba(214,164,95,.055),rgba(255,255,255,.012))}
-.reactivation-summary>div{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 5px 4px 3px}.reactivation-summary>div span{color:#d7dbdc;font-size:12px}.reactivation-summary>div strong{color:var(--gold-2);font-size:23px}
+.reactivation-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;padding:10px;border:1px solid rgba(214,164,95,.2);border-radius:14px;background:linear-gradient(145deg,rgba(214,164,95,.055),rgba(255,255,255,.012))}
+.reactivation-summary>div{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;padding:4px 5px 4px 3px}.reactivation-summary>div span{min-width:0;color:#d7dbdc;font-size:12px}.reactivation-summary>div strong{flex:0 0 auto;color:var(--gold-2);font-size:23px}
 .reactivation-summary>button:not(.btn){-webkit-appearance:none;appearance:none;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2px 8px;min-width:0;padding:9px 10px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:#0b1216;color:var(--text);font:inherit;text-align:left;cursor:pointer}
 .reactivation-summary>button:not(.btn):hover{border-color:rgba(214,164,95,.36);background:rgba(214,164,95,.07)}
 .reactivation-summary>button span{font-size:11px}.reactivation-summary>button b{color:var(--gold-2);font-size:16px}.reactivation-summary>button small{grid-column:1/-1;color:var(--muted);font-size:9.5px;line-height:1.3}

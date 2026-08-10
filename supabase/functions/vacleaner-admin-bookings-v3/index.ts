@@ -31,6 +31,10 @@ const defaultDepositRules: DepositRules = structuredClone(DEFAULT_DEPOSIT_RULES)
 const defaultSlots: SlotConfig = structuredClone(DEFAULT_SLOTS) as SlotConfig;
 const cleanInt = (value: unknown, max = 100000) => Math.max(0, Math.min(max, Math.floor(Number(value) || 0)));
 const cleanText = (value: unknown, max: number) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
+const cleanAdminAlias = (value: unknown) => {
+  const alias = cleanText(value, 40).toLowerCase();
+  return alias === "vacleaner" || alias === "annanevidoma" ? alias : "";
+};
 const legacyWorkflowNotes = new Set([
   "Документи нового клієнта перевірено й збережено",
   "Повторний клієнт — документи повторно не запитували",
@@ -188,6 +192,23 @@ async function tagAudit(supabase: ReturnType<typeof createClient>, bookingId: st
   const { error } = await supabase.from("vacleaner_booking_audit").update({ actor_id: actorId, source })
     .eq("booking_id", bookingId).is("actor_id", null).gte("created_at", since);
   if (error) console.warn("audit_tag_failed", error.message);
+}
+async function notifyPeerAdmin(request: Request, supabaseUrl: string, bookingId: string, eventType: "new" | "issued" | "completed", body: Record<string, any>) {
+  const adminAlias = cleanAdminAlias(body.adminAlias), actorDeviceId = cleanText(body.actorDeviceId, 128);
+  if (!validBookingId(bookingId) || (!adminAlias && actorDeviceId.length < 8)) return;
+  try {
+    const authorization = request.headers.get("Authorization") || "";
+    const apiKey = request.headers.get("apikey") || Deno.env.get("SUPABASE_ANON_KEY") || "";
+    const response = await fetch(`${supabaseUrl}/functions/v1/vacleaner-push`, {
+      method: "POST",
+      headers: { Authorization: authorization, apikey: apiKey, "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "notify_admin_event", bookingId, eventType, adminAlias, actorDeviceId }),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) console.warn("peer_push_failed", eventType, response.status);
+  } catch (error) {
+    console.warn("peer_push_failed", eventType, error instanceof Error ? error.message : "unknown_error");
+  }
 }
 async function upsertCustomer(supabase: ReturnType<typeof createClient>, body: Record<string, any>, fallback: Record<string, any> = {}) {
   const phone = normalizePhone(body.customerPhone ?? fallback.customer_phone);
@@ -383,6 +404,7 @@ Deno.serve(async (request: Request) => {
         const { data, error } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single(); if (error || !data) throw error || new Error("update_failed"); saved = data;
       }
       await upsertCustomer(supabase, body, saved); await tagAudit(supabase, saved.id, userData.user.id, `edge:${action}`, actionStartedAt);
+      if (action === "create") await notifyPeerAdmin(request, supabaseUrl, saved.id, "new", body);
       return json({ booking: safeBooking(saved) }, action === "create" ? 201 : 200);
     }
 
@@ -413,7 +435,9 @@ Deno.serve(async (request: Request) => {
       if (nextStatus === "issued") patch.issued_at = current.issued_at || now;
       if (nextStatus === "completed") patch.completed_at = current.completed_at || now;
       const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single(); if (updateError) throw updateError;
-      await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt); return json({ booking: safeBooking(data) });
+      await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt);
+      if (nextStatus === "issued" || nextStatus === "completed") await notifyPeerAdmin(request, supabaseUrl, bookingId, nextStatus, body);
+      return json({ booking: safeBooking(data) });
     }
 
     if (action === "save_finance") {
@@ -443,7 +467,9 @@ Deno.serve(async (request: Request) => {
       const now = new Date().toISOString(), currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
       const extras = { ...currentExtras, settlement: { ...(currentExtras.settlement || {}), model: "prepayment_plus_deposit", prepayment_amount: finance.prepaymentAmount, deposit_amount: finance.depositPaid ? finance.securityDeposit : 0, received_amount: finance.receivedAmount, expenses_amount: finance.totalAmount, refund_amount: finance.refundAmount, due_amount: finance.dueAmount, refund_paid: finance.refundAmount > 0 ? confirmation.refundPaid : false, due_paid: finance.dueAmount > 0 ? confirmation.duePaid : false, completed: true, completed_at: now, calculated_at: now } };
       const { data, error } = await supabase.from("vacleaner_bookings").update({ extras, extras_amount: finance.totalExtras, total_amount: finance.totalAmount, deposit_returned: true, deposit_returned_at: now, return_payment_amount: finance.dueAmount, return_payment_paid: finance.dueAmount > 0 ? confirmation.duePaid : false, return_payment_paid_at: finance.dueAmount > 0 && confirmation.duePaid ? now : null, status: "completed", completed_at: current.completed_at || now, hold_expires_at: null, updated_at: now }).eq("id", bookingId).select("*").single(); if (error) throw error;
-      await tagAudit(supabase, bookingId, userData.user.id, "edge:save_deposit_return", actionStartedAt); return json({ booking: data, finance });
+      await tagAudit(supabase, bookingId, userData.user.id, "edge:save_deposit_return", actionStartedAt);
+      if (current.status !== "completed") await notifyPeerAdmin(request, supabaseUrl, bookingId, "completed", body);
+      return json({ booking: data, finance });
     }
 
     return json({ error: "invalid_action" }, 400);

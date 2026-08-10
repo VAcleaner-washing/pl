@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-09T06:55:00Z",
+  "capturedAt": "2026-08-10T23:06:00Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -12,7 +12,9 @@
   },
   "dependencyGraph": {
     "vacleaner-booking-v5": [],
-    "vacleaner-admin-bookings-v3": [],
+    "vacleaner-admin-bookings-v3": [
+      "vacleaner-push"
+    ],
     "vacleaner-admin-bookings-v2": [
       "vacleaner-admin-bookings"
     ]
@@ -36,11 +38,11 @@
     },
     {
       "slug": "vacleaner-push",
-      "version": 2,
+      "version": 3,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "f443cf416fdd797ff06f7ee8cfdc4e46f8be5008a3354a81a6d37c53fc6bd57b",
-      "role": "active push service; stable device identity + max two manager phones"
+      "sha256": "e2ace4d7f36370ac97dc190f6d28adeb876ce7a3104becb01429a3a6235611f1",
+      "role": "active push service; stable device/admin identity + peer-only booking event delivery"
     },
     {
       "slug": "vacleaner-admin-bookings-v2",
@@ -84,11 +86,11 @@
     },
     {
       "slug": "vacleaner-admin-bookings-v3",
-      "version": 13,
+      "version": 16,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "b3013c45f4989571b024dad6d7cf9e87a84e8684190fa1b554a2de089c050825",
-      "role": "active authoritative admin business entrypoint; v3.0.23 discount fix"
+      "sha256": "b0dfde21c596b565daa81f50d628bdad2077575c62ef5a555f502531891f2d13",
+      "role": "active authoritative admin business entrypoint; peer-admin push on create, issue and return"
     },
     {
       "slug": "vacleaner-booking-v5",

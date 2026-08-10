@@ -41,6 +41,8 @@ jobs:
         run: npm run test:booking-cta
       - name: Verify processing metadata and push copy
         run: npm run test:process-metadata
+      - name: Verify peer-admin push and analytics layout
+        run: npm run test:peer-admin-push
       - name: Verify issue payment workflow
         run: npm run test:issue-workflow
       - name: Build clean Pages artifact

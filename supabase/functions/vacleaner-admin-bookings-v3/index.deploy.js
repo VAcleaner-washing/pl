@@ -17,6 +17,10 @@ const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultSlots = structuredClone(DEFAULT_SLOTS);
 const cleanInt = (value, max = 100000) => Math.max(0, Math.min(max, Math.floor(Number(value) || 0)));
 const cleanText = (value, max) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
+const cleanAdminAlias = (value) => {
+    const alias = cleanText(value, 40).toLowerCase();
+    return alias === "vacleaner" || alias === "annanevidoma" ? alias : "";
+};
 const legacyWorkflowNotes = new Set([
     "Документи нового клієнта перевірено й збережено",
     "Повторний клієнт — документи повторно не запитували",
@@ -200,6 +204,26 @@ async function tagAudit(supabase, bookingId, actorId, source, since) {
     if (error)
         console.warn("audit_tag_failed", error.message);
 }
+async function notifyPeerAdmin(request, supabaseUrl, bookingId, eventType, body) {
+    const adminAlias = cleanAdminAlias(body.adminAlias), actorDeviceId = cleanText(body.actorDeviceId, 128);
+    if (!validBookingId(bookingId) || (!adminAlias && actorDeviceId.length < 8))
+        return;
+    try {
+        const authorization = request.headers.get("Authorization") || "";
+        const apiKey = request.headers.get("apikey") || Deno.env.get("SUPABASE_ANON_KEY") || "";
+        const response = await fetch(`${supabaseUrl}/functions/v1/vacleaner-push`, {
+            method: "POST",
+            headers: { Authorization: authorization, apikey: apiKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "notify_admin_event", bookingId, eventType, adminAlias, actorDeviceId }),
+            signal: AbortSignal.timeout(5000),
+        });
+        if (!response.ok)
+            console.warn("peer_push_failed", eventType, response.status);
+    }
+    catch (error) {
+        console.warn("peer_push_failed", eventType, error instanceof Error ? error.message : "unknown_error");
+    }
+}
 async function upsertCustomer(supabase, body, fallback = {}) {
     const phone = normalizePhone(body.customerPhone ?? fallback.customer_phone);
     if (!phone)
@@ -377,6 +401,8 @@ Deno.serve(async (request) => {
             }
             await upsertCustomer(supabase, body, saved);
             await tagAudit(supabase, saved.id, userData.user.id, `edge:${action}`, actionStartedAt);
+            if (action === "create")
+                await notifyPeerAdmin(request, supabaseUrl, saved.id, "new", body);
             return json({ booking: safeBooking(saved) }, action === "create" ? 201 : 200);
         }
         if (action === "update") {
@@ -428,6 +454,8 @@ Deno.serve(async (request) => {
             if (updateError)
                 throw updateError;
             await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt);
+            if (nextStatus === "issued" || nextStatus === "completed")
+                await notifyPeerAdmin(request, supabaseUrl, bookingId, nextStatus, body);
             return json({ booking: safeBooking(data) });
         }
         if (action === "save_finance") {
@@ -474,6 +502,8 @@ Deno.serve(async (request) => {
             if (error)
                 throw error;
             await tagAudit(supabase, bookingId, userData.user.id, "edge:save_deposit_return", actionStartedAt);
+            if (current.status !== "completed")
+                await notifyPeerAdmin(request, supabaseUrl, bookingId, "completed", body);
             return json({ booking: data, finance });
         }
         return json({ error: "invalid_action" }, 400);

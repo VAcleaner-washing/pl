@@ -3,6 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 import webpush from "npm:web-push@3.6.7";
 
 const MAX_ACTIVE_DEVICES = 2;
+const ADMIN_ALIASES = new Set(["vacleaner", "annanevidoma"]);
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -17,6 +18,23 @@ const json = (body: unknown, status = 200) =>
 
 const cleanText = (value: unknown, max: number) =>
   typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
+const cleanAdminAlias = (value: unknown) => {
+  const alias = cleanText(value, 40).toLowerCase();
+  return ADMIN_ALIASES.has(alias) ? alias : "";
+};
+const validBookingId = (value: unknown) => /^[0-9a-f-]{36}$/i.test(String(value ?? ""));
+const adminName = (alias: string) => alias === "annanevidoma" ? "Анна" : alias === "vacleaner" ? "Вадим" : "Адміністратор";
+const shortDate = (value: unknown) => {
+  const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return match ? `${match[3]}.${match[2]}` : "дату не вказано";
+};
+const bookingTime = (booking: Record<string, any>, kind: "pickup" | "return") => {
+  const extras = booking.extras && typeof booking.extras === "object" ? booking.extras : {};
+  const direct = cleanText(extras[kind === "pickup" ? "pickup_time" : "return_time"], 5);
+  if (/^\d{2}:\d{2}$/.test(direct)) return direct;
+  const window = String(booking[kind === "pickup" ? "pickup_window" : "return_window"] || "");
+  return window === "morning" ? (kind === "pickup" ? "07:00" : "09:00") : (kind === "pickup" ? "18:00" : "20:00");
+};
 
 const ensureConfig = async (supabase: ReturnType<typeof createClient>) => {
   const { data: existing, error } = await supabase.from("vacleaner_push_config")
@@ -38,12 +56,13 @@ const ensureConfig = async (supabase: ReturnType<typeof createClient>) => {
 
 const deviceList = async (supabase: ReturnType<typeof createClient>, userId: string, currentEndpoint = "") => {
   const { data, error } = await supabase.from("vacleaner_push_subscriptions")
-    .select("id,endpoint,device_id,device_label,user_agent,last_success_at,last_failure_at,created_at,updated_at")
+    .select("id,endpoint,device_id,device_label,admin_alias,user_agent,last_success_at,last_failure_at,created_at,updated_at")
     .eq("user_id", userId).eq("active", true).order("updated_at", { ascending: false });
   if (error) throw error;
   return (data || []).map((row: any) => ({
     id: row.id,
     label: row.device_label || "iPhone",
+    adminAlias: cleanAdminAlias(row.admin_alias) || null,
     current: Boolean(currentEndpoint && row.endpoint === currentEndpoint),
     lastSuccessAt: row.last_success_at,
     lastFailureAt: row.last_failure_at,
@@ -115,6 +134,8 @@ Deno.serve(async (request: Request) => {
     const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
     const action = cleanText(body.action, 30);
     const currentEndpoint = cleanText(body.endpoint, 2048);
+    const actorAlias = cleanAdminAlias(body.adminAlias);
+    const actorDeviceId = cleanText(body.actorDeviceId, 128);
     const config = await ensureConfig(supabase);
 
     if (action === "config") {
@@ -141,7 +162,7 @@ Deno.serve(async (request: Request) => {
 
       const { error } = await supabase.from("vacleaner_push_subscriptions").upsert({
         user_id: userId, endpoint, p256dh, auth_key: authKey, device_id: deviceId,
-        device_label: deviceLabel, user_agent: cleanText(body.userAgent, 500) || null,
+        device_label: deviceLabel, admin_alias: actorAlias || null, user_agent: cleanText(body.userAgent, 500) || null,
         active: true, updated_at: new Date().toISOString(),
       }, { onConflict: "endpoint" });
       if (error) throw error;
@@ -175,6 +196,49 @@ Deno.serve(async (request: Request) => {
         data: { url: "/admin/bronuvannia/", event: "push_test" },
       });
       return json({ delivered });
+    }
+    if (action === "notify_admin_event") {
+      const bookingId = cleanText(body.bookingId, 40);
+      const eventType = cleanText(body.eventType, 20);
+      if (!validBookingId(bookingId) || !["new", "issued", "completed"].includes(eventType)) return json({ error: "invalid_event" }, 400);
+      if (!actorAlias && actorDeviceId.length < 8) return json({ error: "invalid_actor" }, 400);
+
+      const { data: booking, error: bookingError } = await supabase.from("vacleaner_bookings")
+        .select("id,status,product_label,customer_name,start_date,return_date,pickup_window,return_window,extras,created_at")
+        .eq("id", bookingId).single();
+      if (bookingError || !booking) return json({ error: "booking_not_found" }, 404);
+      const expectedStatus = eventType === "issued" ? "issued" : eventType === "completed" ? "completed" : "";
+      if (expectedStatus && booking.status !== expectedStatus) return json({ error: "event_state_mismatch" }, 409);
+      if (eventType === "new") {
+        const age = Date.now() - new Date(booking.created_at || 0).getTime();
+        if (!Number.isFinite(age) || age < -60000 || age > 10 * 60 * 1000) return json({ error: "event_expired" }, 409);
+      }
+
+      const { data: subscriptions, error: subscriptionsError } = await supabase.from("vacleaner_push_subscriptions")
+        .select("id,endpoint,p256dh,auth_key,device_id,admin_alias")
+        .eq("user_id", userId).eq("active", true);
+      if (subscriptionsError) throw subscriptionsError;
+      const recipients = (subscriptions || []).filter((row: any) => {
+        const recipientAlias = cleanAdminAlias(row.admin_alias);
+        if (actorAlias && recipientAlias) return recipientAlias !== actorAlias;
+        return !actorDeviceId || row.device_id !== actorDeviceId;
+      });
+      const product = cleanText(booking.product_label, 80) || "техніка";
+      const customer = cleanText(booking.customer_name, 100) || "Клієнт";
+      const actor = adminName(actorAlias);
+      const title = eventType === "new" ? `Нове бронювання · ${product}` : eventType === "issued" ? `Техніку видано · ${product}` : `Оренду повернено · ${product}`;
+      const details = eventType === "new"
+        ? `${customer}\n${shortDate(booking.start_date)} ${bookingTime(booking, "pickup")} → ${shortDate(booking.return_date)} ${bookingTime(booking, "return")}\nДодав: ${actor}`
+        : eventType === "issued"
+        ? `${customer}\nПовернення ${shortDate(booking.return_date)} о ${bookingTime(booking, "return")}\nЗмінив: ${actor}`
+        : `${customer}\nБронювання завершено\nЗмінив: ${actor}`;
+      const results = await Promise.all(recipients.map((subscription: any) => sendNotification(supabase, subscription, config, {
+        title,
+        body: details,
+        tag: `vacleaner-admin-${booking.id}-${eventType}`,
+        data: { url: "/admin/bronuvannia/", bookingId: booking.id, event: `admin_${eventType}` },
+      })));
+      return json({ delivered: results.filter(Boolean).length, recipients: recipients.length });
     }
     return json({ error: "invalid_action" }, 400);
   } catch (error) {

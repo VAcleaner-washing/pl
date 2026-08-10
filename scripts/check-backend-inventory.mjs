@@ -16,7 +16,7 @@ if(!errors.length){
   if(adminData?.version!==5)errors.push('production vacleaner-admin-data-v1 must be v5 for current client/document data');
   if(campaignApi?.version!==1||campaignApi?.verifyJwt!==true)errors.push('production vacleaner-campaigns-v1 must be authenticated v1');
   if(reminders?.version!==3||reminders?.verifyJwt!==false)errors.push('production vacleaner-reminders-v1 must be custom-auth v3');
-  if(pushApi?.version!==2||pushApi?.verifyJwt!==true)errors.push('production vacleaner-push must be authenticated v2 with two-device control');
+  if(pushApi?.version!==3||pushApi?.verifyJwt!==true)errors.push('production vacleaner-push must be authenticated v3 with peer-admin delivery');
   for(const [caller,deps] of Object.entries(inventory.dependencyGraph||{}))for(const dep of deps)if(!bySlug.has(dep))errors.push(`untracked dependency ${caller} -> ${dep}`);
 
   const db=JSON.parse(fs.readFileSync(dbFile,'utf8'));

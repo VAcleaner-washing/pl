@@ -8,11 +8,11 @@ This folder records the production dependencies verified for the current VAclean
 - `vacleaner-booking-v5` is the active direct public availability/create entrypoint. It applies current catalog, slots, deposit, loyalty and promo rules and persists booking resources itself.
 - Admin PWA calls `vacleaner-admin-bookings-v3` for authoritative booking/finance actions.
 - `vacleaner-admin-data-v1` handles non-financial client data, production health and retention-campaign management.
-- Notifications use `vacleaner-push`; public booking also sends new-booking Web Push after a successful create.
+- Notifications use `vacleaner-push`; admin create/issue/return actions notify only the other identified manager device.
 - Public/admin shared configuration uses `vacleaner-settings`.
 - Legacy VAcleaner Edge Functions remain deployed until production-usage evidence proves they are safe to remove.
 
-The manifest stores the exact active production versions and deployment hashes. Release 3.0.30 verifies `vacleaner-booking-v5` v7 and `vacleaner-admin-data-v1` v4. `vacleaner-admin-bookings-v3` remains v13 because the retention edit rule is enforced centrally by the database trigger rather than by replacing the financial booking Edge Function.
+The manifest stores the exact active production versions and deployment hashes. Release 4.0.26 deploys `vacleaner-push` v3 and `vacleaner-admin-bookings-v3` v16 for peer-only manager push notifications.
 
 ## Database access model
 
