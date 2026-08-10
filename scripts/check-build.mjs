@@ -35,6 +35,7 @@ if(!fs.existsSync(puzziSeoPath))errors.push('Puzzi SEO landing is missing');
 else{
  const seo=fs.readFileSync(puzziSeoPath,'utf8');
  for(const token of ['<title>Оренда миючого пилососа Kärcher Puzzi 8/1 у Полтаві | VAcleaner</title>','rel="canonical" href="https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/"','"@type":"Service"','"@type":"FAQPage"','"@type":"BreadcrumbList"','700 грн','800 грн','8 порцій','Залоговий платіж','/bronuvannia/?product=puzzi','/rishennia/textile/','width="1086" height="1448"'])if(!seo.includes(token))errors.push(`Puzzi SEO landing contract missing: ${token}`);
+ if((seo.match(/class="mobile-booking"/g)||[]).length!==1)errors.push('Puzzi landing must include exactly one mobile booking bar');
  if(seo.includes('"streetAddress"'))errors.push('Puzzi landing must not publish a fixed pickup address');
 }
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');

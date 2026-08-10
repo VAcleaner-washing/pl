@@ -78,7 +78,8 @@ const puzziHtml=read('tekhnika/karcher-puzzi-8-1/index.html');
 const puzziCss=read('assets/puzzi-seo.css');
 check(!puzziHtml.includes('"streetAddress"'),'Puzzi landing does not publish a fixed pickup address');
 check(puzziHtml.includes('width="1086" height="1448"'),'Puzzi hero image reserves its intrinsic aspect ratio');
-check(/\.puzzi-hero-visual img\{[^}]*inset:0;[^}]*width:100%;[^}]*height:100%;[^}]*object-fit:cover/.test(puzziCss),'Puzzi hero image fills the visual panel');
+check((puzziHtml.match(/class="mobile-booking"/g)||[]).length===1 && puzziHtml.includes('<div class="mobile-booking"><a href="/bronuvannia/?product=puzzi">'),'Puzzi landing includes one product-aware mobile booking bar');
+check(/\.puzzi-hero-visual img\{[^}]*inset:-1px;[^}]*width:calc\(100% \+ 2px\);[^}]*max-width:none;[^}]*height:calc\(100% \+ 2px\);[^}]*object-fit:cover/.test(puzziCss),'Puzzi hero image covers the complete bordered visual panel');
 
 console.log(JSON.stringify({passed,failed,status:failed.length?'failed':'passed'}));
 if(failed.length)process.exit(1);

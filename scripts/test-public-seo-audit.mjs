@@ -39,6 +39,7 @@ check(!puzzi.includes('"streetAddress"'),'Puzzi JSON-LD does not expose a fixed 
 check(puzzi.includes('href="/bronuvannia/?product=puzzi"'),'Puzzi landing preserves product context in booking CTAs');
 check(puzzi.includes('width="1086" height="1448"'),'Puzzi hero image has intrinsic dimensions');
 check(/\.puzzi-hero-visual img\{[^}]*object-fit:cover/.test(puzziCss),'Puzzi hero image fills its frame without distortion');
+check((puzzi.match(/class="mobile-booking"/g)||[]).length===1,'Puzzi landing exposes one mobile booking bar');
 
 console.log(JSON.stringify({passed,failed:failures.length,failures},null,2));
 if(failures.length)process.exit(1);
