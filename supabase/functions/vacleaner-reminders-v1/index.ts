@@ -67,7 +67,7 @@ Deno.serve(async (request: Request) => {
         const created = DateTime.fromISO(String((booking as any).created_at || ""), { zone: "utc" }).setZone(ZONE);
         if (created.isValid && now.diff(created, "minutes").minutes >= 0 && now.diff(created, "minutes").minutes <= 120) {
           const pickupTime = exactTime(booking, "pickup", slots), returnTime = exactTime(booking, "return", slots);
-          const result = await sendToManagers(db, { title: `Нова заявка · ${compactProductLabel(booking.product_label)}`, body: `${booking.customer_name || "Клієнт"} · ${shortDate(booking.start_date)} ${pickupTime} → ${shortDate(booking.return_date)} ${returnTime}\nСума ${money(booking.total_amount)} грн · потрібне підтвердження`, tag: `new-${booking.id}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "new_booking" } }, 7200);
+          const result = await sendToManagers(db, { title: `Нове бронювання · ${compactProductLabel(booking.product_label)}`, body: `${booking.customer_name || "Клієнт"}\n${shortDate(booking.start_date)} ${pickupTime} → ${shortDate(booking.return_date)} ${returnTime} · ${money(booking.total_amount)} грн\nПотрібне підтвердження`, tag: `new-${booking.id}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "new_booking" } }, 7200);
           if (result.delivered > 0) { entry.newBooking = (booking as any).created_at || now.toISO(); sent.push({ bookingId: booking.id, type: "new", delivered: result.delivered }); }
         }
       }

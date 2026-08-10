@@ -1,6 +1,6 @@
 {
-  "version": "4.0.16",
-  "build": 4016,
-  "releasedAt": "2026-08-09",
-  "label": "VAcleaner v4.0.16 — PUBLIC BOOKING CTA STATE STABILITY FIX"
+  "version": "4.0.17",
+  "build": 4017,
+  "releasedAt": "2026-08-10",
+  "label": "VAcleaner v4.0.17 — PROCESS METADATA & PUSH COPY FIX"
 }
