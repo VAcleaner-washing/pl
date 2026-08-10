@@ -334,6 +334,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             if view=='upcoming':
                 qa.check(page.locator('.upcoming-row [data-client-card]').count()==0, f"{label}: upcoming customer identity is not a CRM navigation target")
                 qa.check(page.locator('.upcoming-row .upcoming-client-info a[href^="tel:"]').count()>=1, f"{label}: upcoming phone remains a direct call action")
+                time_geometry=page.locator('.upcoming-row .upcoming-time').evaluate_all("""rails=>rails.map(rail=>{const rr=rail.getBoundingClientRect(),center=rr.left+rr.width/2,items=[...rail.querySelectorAll(':scope>i,:scope>strong,:scope>span,:scope>em')].map(el=>{const r=el.getBoundingClientRect();return{center:r.left+r.width/2,clientWidth:el.clientWidth,scrollWidth:el.scrollWidth}});return{items,center}})""")
+                qa.check(bool(time_geometry) and all(all(abs(item['center']-rail['center'])<=1.5 for item in rail['items']) for rail in time_geometry), f"{label}: upcoming arrow, time, event type and day badge share one centered axis")
+                qa.check(all(all(item['scrollWidth']<=item['clientWidth']+1 for item in rail['items']) for rail in time_geometry), f"{label}: upcoming time rail labels fit without clipping")
                 page.locator('.upcoming-row .upcoming-client-info strong').first.click();page.wait_for_timeout(20)
                 qa.check(page.locator('#clientEditor').count()==0 and page.locator('.detail').count()==0, f"{label}: tapping upcoming customer name does not navigate")
                 page.locator('.upcoming-row [data-up="open"]').first.click();page.wait_for_timeout(20)

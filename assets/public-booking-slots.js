@@ -1,9 +1,16 @@
 (()=>{
 'use strict';
 const API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
-let slots={morningStart:'07:00',morningEnd:'09:30',eveningStart:'17:30',eveningEnd:'20:00'};
+const CORE_SLOTS=window.VACLEANER_CORE?.slots||{morningStart:'07:00',morningEnd:'09:30',eveningStart:'17:30',eveningEnd:'20:00'};
+let slots={...CORE_SLOTS};
 let depositRules={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
 const label=(kind)=>kind==='morning'?`Ранок · ${slots.morningStart}–${slots.morningEnd}`:`Вечір · ${slots.eveningStart}–${slots.eveningEnd}`;
+function validSlots(value){
+  const keys=['morningStart','morningEnd','eveningStart','eveningEnd'];
+  if(!value||!keys.every(key=>/^\d{2}:\d{2}$/.test(String(value[key]||''))))return null;
+  const next=Object.fromEntries(keys.map(key=>[key,String(value[key])]));
+  return next.morningStart<next.morningEnd&&next.morningEnd<next.eveningStart&&next.eveningStart<next.eveningEnd?next:null;
+}
 function apply(){
   document.querySelectorAll('select').forEach(sel=>{
     const options=[...sel.options];
@@ -18,6 +25,7 @@ function apply(){
     const field=sel.closest('label')?.nextElementSibling?.querySelector?.('input[type="time"]');
     if(field){field.min=isMorning?slots.morningStart:slots.eveningStart;field.max=isMorning?slots.morningEnd:slots.eveningEnd}
   });
+  document.documentElement.dataset.bookingSlots=`${slots.morningStart}-${slots.morningEnd}|${slots.eveningStart}-${slots.eveningEnd}`;
   window.dispatchEvent(new CustomEvent('vacleaner:slots-updated'));
 }
 
@@ -87,6 +95,50 @@ function renderDeposit(){
   if(conditions&&conditions.children[2])setTextIfChanged(conditions.children[2],amount?`Залоговий платіж ${formatMoney(amount)} сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`:'Залоговий платіж сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');
 }
 
+function renderConsent(){
+  const span=document.querySelector('.booking-consent span');
+  if(!span||span.dataset.vxConsentFixed==='1')return;
+  const terms=document.createElement('a');
+  terms.href='/umovy/';terms.target='_blank';terms.rel='noopener';terms.textContent='умови бронювання';
+  const privacy=document.createElement('a');
+  privacy.href='/polityka-konfidenciynosti/';privacy.target='_blank';privacy.rel='noopener';privacy.textContent='політику конфіденційності';
+  span.replaceChildren(
+    document.createTextNode('Погоджуюсь на обробку контактних даних для цієї заявки та приймаю '),
+    terms,
+    document.createTextNode(' і '),
+    privacy,
+    document.createTextNode('.')
+  );
+  span.dataset.vxConsentFixed='1';
+}
+
+const requestedProduct=new URLSearchParams(location.search).get('product')||'';
+const validRequestedProduct=productCodes.some(([,code])=>code===requestedProduct);
+function renderPrefilledProduct(){
+  const section=document.querySelector('#booking-products'),list=section?.querySelector('.booking-products');
+  if(!section||!list||!validRequestedProduct)return;
+  const selected=list.querySelector('button.is-selected,button[aria-pressed="true"],button.selected');
+  if(!selected)return;
+  section.classList.add('vx-product-prefilled');
+  let bar=section.querySelector('.vx-product-prefill-bar');
+  if(!bar){
+    bar=document.createElement('div');bar.className='vx-product-prefill-bar';
+    bar.innerHTML='<span><small>Вже обрано</small><strong></strong></span><button type="button" aria-expanded="false">Змінити техніку</button>';
+    section.querySelector('.booking-step-heading')?.insertAdjacentElement('afterend',bar);
+    bar.querySelector('button').onclick=()=>{
+      const expanded=section.classList.toggle('vx-product-expanded');
+      bar.querySelector('button').setAttribute('aria-expanded',String(expanded));
+      bar.querySelector('button').textContent=expanded?'Згорнути список':'Змінити техніку';
+    };
+    list.addEventListener('click',event=>{
+      if(!event.target.closest('button')||!section.classList.contains('vx-product-expanded'))return;
+      setTimeout(()=>{section.classList.remove('vx-product-expanded');const button=bar.querySelector('button');button.setAttribute('aria-expanded','false');button.textContent='Змінити техніку';renderPrefilledProduct()},0);
+    });
+  }
+  const title=selected.querySelector('strong')?.textContent?.trim()||'Обрана техніка';
+  const barTitle=bar.querySelector('strong');if(barTitle&&barTitle.textContent!==title)barTitle.textContent=title;
+}
+
 
 const LOYALTY_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5';
 let loyaltyTimer=0;
@@ -142,6 +194,8 @@ function refreshBindings(){
   bindLoyalty();
   renderDeposit();
   renderPickupLocationNote();
+  renderConsent();
+  renderPrefilledProduct();
   if(refreshAttempts<12){
     refreshAttempts+=1;
     setTimeout(refreshBindings,500);
@@ -149,10 +203,10 @@ function refreshBindings(){
 }
 fetch(API,{cache:'no-store'})
   .then(r=>r.ok?r.json():Promise.reject(new Error('settings_failed')))
-  .then(d=>{if(d?.slots)slots={...slots,...d.slots};if(d?.depositRules)depositRules={...depositRules,...d.depositRules};refreshBindings()})
+  .then(d=>{const remoteSlots=validSlots(d?.slots);if(remoteSlots)slots=remoteSlots;if(d?.depositRules)depositRules={...depositRules,...d.depositRules};refreshBindings()})
   .catch(()=>refreshBindings());
 const depositObserver=new MutationObserver(()=>requestAnimationFrame(renderDeposit));
-document.addEventListener('DOMContentLoaded',()=>{depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote()},true);document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote()},0),true)});
+document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote();renderPrefilledProduct()},true);document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote();renderPrefilledProduct()},0),true)});
 })();
 
 // v3.0.23 — public nearest-availability UX.

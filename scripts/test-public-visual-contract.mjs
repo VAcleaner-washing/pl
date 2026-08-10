@@ -53,6 +53,10 @@ check(quizJs.includes("document.documentElement.classList.add('vq-ready')"),'/pi
 check(experienceCss.includes('html.vx-booking-standalone-mobile main>.booking-form~*:not(.booking-mobile-summary){display:none}'),'mobile booking isolates the four-step wizard from footer/reviews');
 check(/if\(index>=0&&prerequisite\)setMobileBookingStep\(index,\{scroll:true\}\)/.test(experienceJs) && experienceJs.includes("index===3&&liveButtons[2]?.classList.contains('is-complete')"),'mobile booking progress buttons switch only to unlocked steps');
 check(bookingSlots.includes("'Залоговий платіж — після вибору дат'"),'mobile booking uses a short non-truncated deposit hint');
+check(bookingSlots.includes('const CORE_SLOTS=window.VACLEANER_CORE?.slots') && bookingSlots.includes('const remoteSlots=validSlots(d?.slots)'),'public booking uses the shared slot configuration and validates remote overrides');
+check(bookingSlots.includes("section.classList.add('vx-product-prefilled')") && experienceCss.includes('#booking-products.vx-product-prefilled:not(.vx-product-expanded)'),'product-aware booking collapses the catalogue behind an explicit change action');
+check(bookingSlots.includes("terms.href='/umovy/'") && bookingSlots.includes("privacy.href='/polityka-konfidenciynosti/'") && bookingSlots.includes("document.createTextNode(' і ')"),'booking consent has complete legal links and punctuation');
+check(siteJs.includes("control.setAttribute('href','/pidbir/')") && siteJs.includes("'Підібрати рішення ↓'"),'home solution CTA opens the dedicated quiz route');
 check(siteCss.includes('@media (min-width:901px) and (max-width:1180px)') && siteCss.includes('.inner-hero.v4-inner-hero'),'small-desktop editorial heroes have a dedicated safe grid');
 check(/\.v4-service-grid\{[^}]*background:#f4efe8;[^}]*color:#111315/.test(siteCss),'light service cards explicitly restore dark text contrast');
 check(!siteJs.includes('function patchNav('),'runtime no longer rewrites the global navigation after first paint');

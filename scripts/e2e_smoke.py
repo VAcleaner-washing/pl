@@ -340,6 +340,21 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check("Оберіть дату" not in page.locator(".vx-date-trigger").first.inner_text(), "Custom calendar stays synchronized with selected dates")
         checks.check(no_horizontal_overflow(page), "Public desktop has no horizontal overflow")
         checks.screenshot(page, "public-desktop.png")
+
+        page.goto(f"{base}/bronuvannia/?product=puzzi", wait_until="networkidle")
+        page.wait_for_selector("#booking-products.vx-product-prefilled")
+        checks.check(page.locator("#booking-products .booking-products>button:visible").count() == 1, "Product-aware booking shows only the preselected equipment")
+        change_product = page.locator(".vx-product-prefill-bar button")
+        checks.check(change_product.count() == 1 and "Змінити техніку" in change_product.inner_text(), "Product-aware booking keeps an explicit equipment change action")
+        change_product.click()
+        checks.check(page.locator("#booking-products .booking-products>button:visible").count() >= 8, "Equipment change action restores the complete catalogue")
+        consent = page.locator(".booking-consent span")
+        checks.check("умови бронювання і політику конфіденційності." in normalized_text(consent.inner_text()), "Booking consent has complete legal punctuation")
+        checks.check(consent.locator('a[href="/umovy/"]').count() == 1 and consent.locator('a[href="/polityka-konfidenciynosti/"]').count() == 1, "Booking consent links to both legal pages")
+
+        page.goto(f"{base}/", wait_until="networkidle")
+        quiz_cta = page.locator("a", has_text="Підібрати рішення ↓").first
+        checks.check(quiz_cta.count() == 1 and quiz_cta.get_attribute("href") == "/pidbir/", "Home solution CTA opens the dedicated quiz")
     finally:
         context.close()
 
@@ -365,7 +380,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
                     hero_titles_ok = False
                     break
         checks.check(small_desktop_ok, "All public pages avoid horizontal overflow at 1024px")
-        checks.check(hero_titles_ok, "Editorial hero titles fit their grid columns at 1024px")
+        checks.check(hero_titles_ok, f"Editorial hero titles fit their grid columns at 1024px ({path})")
         page.goto(f"{base}/tekhnika/karcher-puzzi-8-1/", wait_until="networkidle")
         hero_image_fill = page.locator(".puzzi-hero-visual img").evaluate("""img=>{
           const frame=img.parentElement.getBoundingClientRect(),r=img.getBoundingClientRect(),style=getComputedStyle(img);

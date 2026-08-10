@@ -133,6 +133,14 @@ main>footer:not(.v4-footer){visibility:hidden}
     font-size:clamp(54px,5.7vw,64px);
   }
   .inner-hero.v4-inner-hero h1 em{max-width:100%}
+
+  /* /umovy/ still uses the legacy wrapper around its heading. Keep the
+     longest word inside that column at tablet/small-desktop widths. */
+  body:has(.terms-grid) .inner-hero h1{
+    min-width:0;
+    max-width:100%;
+    font-size:clamp(54px,5.7vw,64px);
+  }
 }
 
 '''
