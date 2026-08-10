@@ -57,6 +57,7 @@ check(bookingSlots.includes('const CORE_SLOTS=window.VACLEANER_CORE?.slots') && 
 check(bookingSlots.includes("section.classList.add('vx-product-prefilled')") && experienceCss.includes('#booking-products.vx-product-prefilled:not(.vx-product-expanded)'),'product-aware booking collapses the catalogue behind an explicit change action');
 check(bookingSlots.includes("terms.href='/umovy/'") && bookingSlots.includes("privacy.href='/polityka-konfidenciynosti/'") && bookingSlots.includes("document.createTextNode(' і ')"),'booking consent has complete legal links and punctuation');
 check(siteJs.includes("control.setAttribute('href','/pidbir/')") && siteJs.includes("'Підібрати рішення ↓'"),'home solution CTA opens the dedicated quiz route');
+check(siteJs.includes("first.classList.add('v4-has-tech-link')") && siteCss.includes('.feature-list li.v4-has-tech-link{grid-template-columns:48px minmax(0,1fr) auto') && siteCss.includes('.v4-inline-tech-link{grid-column:2;grid-row:2'),'mobile textile page keeps the Puzzi contextual link below the feature copy');
 check(siteCss.includes('@media (min-width:901px) and (max-width:1180px)') && siteCss.includes('.inner-hero.v4-inner-hero'),'small-desktop editorial heroes have a dedicated safe grid');
 check(/\.v4-service-grid\{[^}]*background:#f4efe8;[^}]*color:#111315/.test(siteCss),'light service cards explicitly restore dark text contrast');
 check(!siteJs.includes('function patchNav('),'runtime no longer rewrites the global navigation after first paint');

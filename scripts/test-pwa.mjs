@@ -47,6 +47,7 @@ ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standal
 ok(runtime.includes('function lockStandaloneZoom()')&&runtime.includes("e.touches?.length>1"),'standalone PWA blocks pinch zoom without changing public pages');
 ok(runtime.includes('booking-client-link')&&runtime.includes('openBookingClient'),'booking client block opens the client card');
 ok(runtime.includes('upcoming-client-info')&&!runtime.includes('upcoming-client-link\" data-client-card'),'upcoming keeps customer identity informational while phone remains actionable');
+ok(css.includes('.upcoming-client-info{display:flex;flex-direction:column;align-items:flex-start'),'upcoming phone is structurally placed below the customer name');
 ok(!runtime.includes('mobile-booking-search-collapsed')&&!css.includes('.app.mobile-booking-search-collapsed'),'booking search never changes shell geometry while mobile list scrolls');
 ok(!runtime.includes('syncMobileBookingSearch')&&!runtime.includes('scrollTop>72'),'booking search has no scroll-driven hide threshold on iPhone');
 ok(css.includes('v3.0.75 — keep booking search geometry stable on iOS'),'mobile contract documents the stable booking-search shell');
