@@ -349,7 +349,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
     install_routes(context, base, api_handler, static_root)
     page = context.new_page()
     try:
-        visual_paths = ["/", "/rishennia/", "/komplekty/", "/yak-tse-pratsiuie/", "/vidhuky/", "/faq/", "/kontakty/", "/umovy/", "/dostavka/", "/pro-nas/", "/blog/", "/polityka-konfidenciynosti/"]
+        visual_paths = ["/", "/tekhnika/karcher-puzzi-8-1/", "/rishennia/", "/komplekty/", "/yak-tse-pratsiuie/", "/vidhuky/", "/faq/", "/kontakty/", "/umovy/", "/dostavka/", "/pro-nas/", "/blog/", "/polityka-konfidenciynosti/"]
         small_desktop_ok = True
         hero_titles_ok = True
         for path in visual_paths:
@@ -366,6 +366,13 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
                     break
         checks.check(small_desktop_ok, "All public pages avoid horizontal overflow at 1024px")
         checks.check(hero_titles_ok, "Editorial hero titles fit their grid columns at 1024px")
+        page.goto(f"{base}/tekhnika/karcher-puzzi-8-1/", wait_until="networkidle")
+        hero_image_fill = page.locator(".puzzi-hero-visual img").evaluate("""img=>{
+          const frame=img.parentElement.getBoundingClientRect(),r=img.getBoundingClientRect(),style=getComputedStyle(img);
+          return style.objectFit==='cover' && Math.abs(r.left-frame.left)<=1 && Math.abs(r.top-frame.top)<=1 && Math.abs(r.right-frame.right)<=1 && Math.abs(r.bottom-frame.bottom)<=1;
+        }""")
+        checks.check(hero_image_fill, "Puzzi hero image fills its complete visual panel at 1024px")
+        checks.screenshot(page, "puzzi-1024.png")
     finally:
         context.close()
 
@@ -480,7 +487,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(page.locator(".header-cta:visible").count() == 0, "Mobile header does not duplicate booking CTA")
         checks.check(page.locator(".mobile-booking:visible").count() == 1, "Regular pages keep one bottom CTA")
 
-        regular_paths = ["/", "/rishennia/", "/komplekty/", "/yak-tse-pratsiuie/", "/vidhuky/", "/faq/", "/kontakty/", "/umovy/"]
+        regular_paths = ["/", "/tekhnika/karcher-puzzi-8-1/", "/rishennia/", "/komplekty/", "/yak-tse-pratsiuie/", "/vidhuky/", "/faq/", "/kontakty/", "/umovy/"]
         mobile_cta_ok = True
         for path in regular_paths:
             page.goto(f"{base}{path}", wait_until="networkidle")
@@ -506,6 +513,14 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
                 mobile_cta_ok = False
                 break
         checks.check(mobile_cta_ok, "Mobile booking and Instagram CTA never overlap on public pages")
+
+        page.goto(f"{base}/tekhnika/karcher-puzzi-8-1/", wait_until="networkidle")
+        puzzi_mobile_fill = page.locator(".puzzi-hero-visual img").evaluate("""img=>{
+          const frame=img.parentElement.getBoundingClientRect(),r=img.getBoundingClientRect(),style=getComputedStyle(img);
+          return style.objectFit==='cover' && Math.abs(r.width-frame.width)<=1 && Math.abs(r.height-frame.height)<=1;
+        }""")
+        checks.check(puzzi_mobile_fill and no_horizontal_overflow(page), "Puzzi hero fills the mobile panel without horizontal overflow")
+        checks.screenshot(page, "puzzi-mobile.png")
 
         page.goto(f"{base}/vidhuky/", wait_until="networkidle")
         page.wait_for_selector(".vx-proof__cta")

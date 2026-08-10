@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.0.20",
+  "version": "4.0.21",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -24,6 +24,7 @@
     "test:client-card-mobile": "python scripts/test-mobile-client-card.py",
     "test:booking-cta": "node scripts/test-public-booking-cta-stability.mjs",
     "test:process-metadata": "node scripts/test-process-metadata.mjs",
-    "test:issue-workflow": "node scripts/test-issue-workflow.mjs"
+    "test:issue-workflow": "node scripts/test-issue-workflow.mjs",
+    "test:public-seo": "node scripts/test-public-seo-audit.mjs"
   }
 }

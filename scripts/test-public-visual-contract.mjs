@@ -32,7 +32,8 @@ for(const route of routes){
   check((html.match(/class="site-header"/g)||[]).length===1,`${label} has exactly one global header`);
   check(JSON.stringify(navPairs(html))===JSON.stringify(expectedNav),`${label} uses the canonical desktop nav`);
   const headerCtaTag=(html.match(/<a[^>]*class="header-cta"[^>]*>/i)||html.match(/<a[^>]*href="\/bronuvannia\/"[^>]*class="header-cta"[^>]*>/i)||[''])[0];
-  check(/href="\/bronuvannia\/"/.test(headerCtaTag),`${label} header CTA points to booking`);
+  const expectedBookingHref=route==='tekhnika/karcher-puzzi-8-1'?'/bronuvannia/?product=puzzi':'/bronuvannia/';
+  check(headerCtaTag.includes(`href="${expectedBookingHref}"`),`${label} header CTA points to the correct booking context`);
   check(!/(>\s*Процес\s*<|>\s*FAQ\s*<)/.test((html.match(/<nav[^>]*class="desktop-nav"[\s\S]*?<\/nav>/)||[''])[0]||''),`${label} has no stale header labels`);
   check(!html.includes('↗'),`${label} contains no browser/emoji external-arrow glyph`);
   check((html.match(/<footer[^>]*class="v4-footer"/g)||[]).length===1,`${label} has exactly one canonical footer`);
@@ -70,6 +71,14 @@ for(const chunk of hydratedChunks){
 const publicFiles=routes.map(r=>r?`${r}/index.html`:'index.html');
 const stalePrice=publicFiles.filter(f=>read(f).includes('350–3500 UAH'));
 check(stalePrice.length===0,'public structured data no longer advertises the stale 350 UAH minimum');
+const versionedFavicons=publicFiles.filter(f=>/(?:favicon\.(?:ico|svg)|apple-touch-icon\.png)\?v=/.test(read(f)));
+check(versionedFavicons.length===0,'public favicon URLs are stable and unversioned');
+
+const puzziHtml=read('tekhnika/karcher-puzzi-8-1/index.html');
+const puzziCss=read('assets/puzzi-seo.css');
+check(!puzziHtml.includes('"streetAddress"'),'Puzzi landing does not publish a fixed pickup address');
+check(puzziHtml.includes('width="1086" height="1448"'),'Puzzi hero image reserves its intrinsic aspect ratio');
+check(/\.puzzi-hero-visual img\{[^}]*inset:0;[^}]*width:100%;[^}]*height:100%;[^}]*object-fit:cover/.test(puzziCss),'Puzzi hero image fills the visual panel');
 
 console.log(JSON.stringify({passed,failed,status:failed.length?'failed':'passed'}));
 if(failed.length)process.exit(1);

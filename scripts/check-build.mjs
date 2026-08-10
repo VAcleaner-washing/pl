@@ -3,7 +3,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=process.cwd(),release=JSON.parse(fs.readFileSync('release.json','utf8')),build=String(release.build);
-const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
+const ignoredDirs=new Set(['.git','.venv','.pw-browsers','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__']);
+const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>ignoredDirs.has(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 const files=walk(root),errors=[];
 // Never ship one-off historical import payloads or customer PII in the GitHub release.
 for(const rel of ['scripts/historical-bookings.parsed.json','scripts/historical-import-db.json','scripts/historical-import-plan.json']){
@@ -33,13 +34,14 @@ const puzziSeoPath=path.join(root,'tekhnika','karcher-puzzi-8-1','index.html');
 if(!fs.existsSync(puzziSeoPath))errors.push('Puzzi SEO landing is missing');
 else{
  const seo=fs.readFileSync(puzziSeoPath,'utf8');
- for(const token of ['<title>Оренда миючого пилососа Kärcher Puzzi 8/1 у Полтаві | VAcleaner</title>','rel="canonical" href="https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/"','"@type":"Service"','"@type":"FAQPage"','"@type":"BreadcrumbList"','"streetAddress":"вул. Європейська, 146Е"','700 грн','800 грн','8 порцій','Залоговий платіж','/bronuvannia/?product=puzzi','/rishennia/textile/'])if(!seo.includes(token))errors.push(`Puzzi SEO landing contract missing: ${token}`);
+ for(const token of ['<title>Оренда миючого пилососа Kärcher Puzzi 8/1 у Полтаві | VAcleaner</title>','rel="canonical" href="https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/"','"@type":"Service"','"@type":"FAQPage"','"@type":"BreadcrumbList"','700 грн','800 грн','8 порцій','Залоговий платіж','/bronuvannia/?product=puzzi','/rishennia/textile/','width="1086" height="1448"'])if(!seo.includes(token))errors.push(`Puzzi SEO landing contract missing: ${token}`);
+ if(seo.includes('"streetAddress"'))errors.push('Puzzi landing must not publish a fixed pickup address');
 }
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
 if(!sitemap.includes('https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/'))errors.push('Puzzi SEO landing missing from sitemap');
 const googleVerify=path.join(root,'google23d85db681a5b7ee.html');
 if(!fs.existsSync(googleVerify)||fs.readFileSync(googleVerify,'utf8').trim()!=='google-site-verification: google23d85db681a5b7ee.html')errors.push('Google site verification file missing or invalid');
-for(const file of files.filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(file,'utf8');if(/favicon\.(?:ico|svg)\?v=3081|apple-touch-icon\.png\?v=3081/.test(html))errors.push(`stale favicon cache URL: ${path.relative(root,file)}`)}
+for(const file of files.filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(file,'utf8');if(/(?:favicon\.(?:ico|svg)|apple-touch-icon\.png)\?v=/.test(html))errors.push(`versioned favicon URL: ${path.relative(root,file)}`)}
 const siteRuntime=fs.readFileSync(path.join(root,'assets','site-v400.js'),'utf8');
 if(!siteRuntime.includes("'/tekhnika/karcher-puzzi-8-1/'")||!siteRuntime.includes('v4-inline-tech-link'))errors.push('textile → Puzzi contextual internal link is missing');
 
@@ -167,7 +169,7 @@ if(!publicExperience.includes('setMobileBookingStep(index,{scroll:true})')||!pub
 if(!publicExperienceCss.includes('.booking-form .booking-step{scroll-margin-top:112px}'))errors.push('public booking anchors need fixed-header scroll margin');
 const faqHtml=fs.readFileSync(path.join(root,'faq','index.html'),'utf8');
 const packagesHtml=fs.readFileSync(path.join(root,'komplekty','index.html'),'utf8');
-for(const rel of ['index.html','bronuvannia/index.html','faq/index.html','komplekty/index.html','kontakty/index.html','umovy/index.html','vidhuky/index.html','yak-tse-pratsiuie/index.html','rishennia/index.html','rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html']){
+for(const rel of ['index.html','bronuvannia/index.html','faq/index.html','komplekty/index.html','kontakty/index.html','umovy/index.html','vidhuky/index.html','yak-tse-pratsiuie/index.html','rishennia/index.html','rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html','tekhnika/karcher-puzzi-8-1/index.html']){
  const html=fs.readFileSync(path.join(root,...rel.split('/')),'utf8');
  for(const token of ['"@type":"PostalAddress"','"addressLocality":"Полтава"','"areaServed"','"openingHoursSpecification"','"logo":"https://vacleaner.pp.ua/apple-touch-icon.png"','"image":"https://vacleaner.pp.ua/assets/og-home.png"'])if(!html.includes(token))errors.push(`LocalBusiness SEO field missing in ${rel}: ${token}`);
  if(html.includes('\"streetAddress\":\"вул. Європейська, 146Е\"')||html.includes('\"@type\":\"GeoCoordinates\"'))errors.push(`Variable pickup point must not be published as permanent LocalBusiness address/geo in ${rel}`);
