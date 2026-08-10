@@ -74,9 +74,10 @@ Deno.serve(async (request: Request) => {
       if (booking.status === "confirmed") {
         const pickupTime = exactTime(booking, "pickup", slots), pickup = DateTime.fromISO(`${booking.start_date}T${pickupTime}`, { zone: ZONE }), reminderAt = pickup.minus({ hours: 1 });
         if (pickup.isValid && now >= reminderAt && now < pickup && entry.issue !== booking.start_date) {
-          const prepaid = booking.prepayment_paid ? Math.max(0, Number(booking.prepayment_amount || 0)) : 0, due = Math.max(0, Number(booking.total_amount || 0) - prepaid), deposit = Math.max(0, Number(booking.deposit_amount || 0));
-          const delivery = booking.fulfillment === "delivery" ? "Доставка" : "Самовивіз", finance = [due > 0 ? `доплата ${money(due)} грн` : "оренда оплачена", deposit > 0 ? `залог ${money(deposit)} грн` : ""].filter(Boolean).join(" · ");
-          const result = await sendToManagers(db, { title: `Видача через 1 год · ${compactProductLabel(booking.product_label)}`, body: `${booking.customer_name || "Клієнт"} · ${shortDate(booking.start_date)} ${pickupTime}\n${delivery}${finance ? ` · ${finance}` : ""}`, tag: `issue-${booking.id}-${booking.start_date}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "pickup_reminder" } }, 5400);
+          const deposit = Math.max(0, Number(booking.deposit_amount || 0));
+          const delivery = booking.fulfillment === "delivery" ? "Доставка" : "Самовивіз";
+          const depositText = deposit > 0 ? `Залоговий платіж ${money(deposit)} грн` : "Перевірити залоговий платіж";
+          const result = await sendToManagers(db, { title: `Видача через 1 год · ${compactProductLabel(booking.product_label)}`, body: `${booking.customer_name || "Клієнт"} · ${shortDate(booking.start_date)} ${pickupTime}\n${delivery} · ${depositText}`, tag: `issue-${booking.id}-${booking.start_date}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "pickup_reminder" } }, 5400);
           if (result.delivered > 0) { entry.issue = booking.start_date; sent.push({ bookingId: booking.id, type: "issue", delivered: result.delivered }); }
         }
       }

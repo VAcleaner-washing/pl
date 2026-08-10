@@ -39,6 +39,10 @@ jobs:
         run: npm run test:retention
       - name: Verify public booking CTA stability
         run: npm run test:booking-cta
+      - name: Verify processing metadata and push copy
+        run: npm run test:process-metadata
+      - name: Verify issue payment workflow
+        run: npm run test:issue-workflow
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources
