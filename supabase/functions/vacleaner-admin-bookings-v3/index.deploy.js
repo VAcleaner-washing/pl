@@ -17,6 +17,14 @@ const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultSlots = structuredClone(DEFAULT_SLOTS);
 const cleanInt = (value, max = 100000) => Math.max(0, Math.min(max, Math.floor(Number(value) || 0)));
 const cleanText = (value, max) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
+const legacyWorkflowNotes = new Set([
+    "Документи нового клієнта перевірено й збережено",
+    "Повторний клієнт — документи повторно не запитували",
+    "З клієнтом зв’язались",
+    "Умови оренди та сума залогового платежу надіслані",
+    "Передплата 200 грн отримана",
+]);
+const cleanAdminNote = (value, max = 800) => cleanText(value, max).split(/\r?\n/).map(line => line.trim()).filter(line => line && !legacyWorkflowNotes.has(line) && !line.startsWith("[[VAC_PROCESS:")).join("\n").slice(0, max);
 const validBookingId = (value) => /^[0-9a-f-]{36}$/i.test(String(value ?? ""));
 const dateValue = (value) => typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
 const validTime = (value) => typeof value === "string" && /^\d{2}:\d{2}$/.test(value);
@@ -325,7 +333,9 @@ Deno.serve(async (request) => {
                 return json({ error: "invalid_booking" }, 404);
             const currentExtras = existing?.extras && typeof existing.extras === "object" ? existing.extras : {}, discount = discountInfo(body, rawBase, currentExtras), selected = normalizeSelectedExtras(body.selectedExtras, productCode, catalog);
             const deliveryAmount = fulfillment === "delivery" ? 250 : 0, depositAmount = calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow, depositRules, catalog), prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
-            const extras = { ...currentExtras, pickup_time: period.pickupTime, return_time: period.returnTime, slot_config: slots,
+            const requestedProcessing = body.processing && typeof body.processing === "object" ? body.processing : null;
+            const processing = requestedProcessing ? { contacted: requestedProcessing.contacted === true, confirmation_sent: requestedProcessing.confirmation_sent === true, documents_required: requestedProcessing.documents_required === true, identity_verified: requestedProcessing.identity_verified === true, customer_kind: ["new", "repeat", "known"].includes(String(requestedProcessing.customer_kind || "")) ? String(requestedProcessing.customer_kind) : "known", updated_at: new Date().toISOString() } : currentExtras?.processing;
+            const extras = { ...currentExtras, pickup_time: period.pickupTime, return_time: period.returnTime, slot_config: slots, ...(processing ? { processing } : {}),
                 discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, reason: discount.source === "manual" ? discount.manualReason : "" },
                 manual_discount: discount.manualType === "none" ? null : { type: discount.manualType, value: discount.manualValue, amount: discount.manualAmount, reason: discount.manualReason },
                 loyalty: { level: String(body.loyaltyLevel || currentExtras?.loyalty?.level || (discount.loyaltyPercent === 10 ? "VIP" : discount.loyaltyPercent === 5 ? "Regular" : "Start")), percent: discount.loyaltyPercent, completed_orders: cleanInt(body.completedOrders ?? currentExtras?.loyalty?.completed_orders, 10000) },
@@ -335,7 +345,7 @@ Deno.serve(async (request) => {
                 start_at: `${period.startDate}T${period.pickupTime}:00.000Z`, end_at: `${period.returnDate}T${period.returnTime}:00.000Z`, pickup_window: period.pickupWindow, return_window: period.returnWindow, rental_days: period.days,
                 fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: customerPhone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_comment: cleanText(body.customerComment, 800) || null,
                 source: cleanText(body.source, 30) || "instagram", extras, base_amount: discount.baseAmount, extras_amount: selected.amount, delivery_amount: deliveryAmount, total_amount: discount.baseAmount + selected.amount + deliveryAmount,
-                prepayment_amount: 200, prepayment_paid: prepaymentPaid, deposit_amount: depositAmount, admin_note: cleanText(body.adminNote, 800) || null, updated_at: new Date().toISOString(),
+                prepayment_amount: 200, prepayment_paid: prepaymentPaid, deposit_amount: depositAmount, admin_note: cleanAdminNote(body.adminNote, 800) || null, updated_at: new Date().toISOString(),
             };
             let saved;
             if (action === "create") {
@@ -399,7 +409,7 @@ Deno.serve(async (request) => {
             const allowed = nextStatus === "issued" ? ["confirmed"] : nextStatus === "completed" ? ["confirmed", "issued"] : ["pending", "waiting_payment", "confirmed", "issued"];
             if (!["issued", "completed", "declined", "cancelled"].includes(nextStatus) || !allowed.includes(current.status))
                 return json({ error: "invalid_transition" }, 409);
-            const now = new Date().toISOString(), patch = { status: nextStatus, admin_note: cleanText(body.adminNote, 800) || current.admin_note, updated_at: now };
+            const now = new Date().toISOString(), patch = { status: nextStatus, admin_note: cleanAdminNote(body.adminNote, 800) || cleanAdminNote(current.admin_note, 800) || null, updated_at: now };
             if (nextStatus === "waiting_payment")
                 patch.hold_expires_at = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
             else
