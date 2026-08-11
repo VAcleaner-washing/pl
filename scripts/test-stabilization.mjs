@@ -135,6 +135,11 @@ lacks(admin,'t.me/share/url','Telegram no longer uses the share endpoint for cli
 has(admin,"const ADMIN_ALIAS_KEY='vac_admin_alias'",'second admin login alias is explicitly tracked');
 has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevidoma share the requested credential');
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
+has(admin,'data-mobile-logout','mobile More exposes a dedicated account logout action');
+has(admin,"/auth/v1/logout?scope=local",'logout revokes only the current device session');
+has(admin,"finally{clearSession();location.reload()}",'logout always clears the local remembered session and returns to login');
+has(admin,'adminAlias:currentAdminAlias()','push subscription sync preserves the selected admin alias after re-login');
+has(css,'.mobile-more-logout{width:100%','mobile logout is a full-width secondary action inside More');
 has(adminHtml,'data-mobile-view="bookings"','dedicated mobile nav has its own primary-view buttons in initial HTML');
 has(admin,"const initialAdminView=typeof window!=='undefined'&&window.matchMedia('(max-width: 900px)').matches?'upcoming':'bookings'",'mobile admin starts on Upcoming while desktop keeps Bookings');
 has(css,'@media(max-width:767px){\n  .booking-card .booking-row-body{grid-template-columns:minmax(0,1fr)}','phone-only booking card override uses one full-width content column');

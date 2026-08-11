@@ -439,6 +439,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         # More sheet remains usable and contained.
         page.locator(".mobile-nav .more-nav:visible").click()
         qa.check(rect_inside(page, ".mobile-more-menu", top=safe_top, bottom=height-safe_bottom), f"{label}: More popover stays between status bar and home indicator")
+        logout_button=page.locator('.mobile-more-menu .mobile-more-logout:visible')
+        qa.check(logout_button.count()==1 and logout_button.inner_text().strip()=='Вийти з акаунта', f"{label}: More exposes one clear account logout action")
+        logout_contained=logout_button.evaluate("el=>{const p=el.closest('.mobile-more-menu'),a=el.getBoundingClientRect(),b=p?.getBoundingClientRect();return!!b&&a.left>=b.left-1&&a.right<=b.right+1&&a.top>=b.top-1&&a.bottom<=b.bottom+1}")
+        qa.check(logout_contained, f"{label}: account logout stays contained inside More")
         page.keyboard.press("Escape")
 
         # Booking form: true mobile stepper, one section only, stable custom dates.
