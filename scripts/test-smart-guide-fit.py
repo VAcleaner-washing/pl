@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import os
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -18,7 +19,7 @@ def check(ok,label):
         failed.append(label);print('FAIL:',label)
 
 with sync_playwright() as p:
-    browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+    browser=p.chromium.launch(headless=True,executable_path=os.environ.get('VAC_TEST_CHROMIUM','/usr/bin/chromium'),args=['--no-sandbox'])
     for w,h in SIZES:
         page=browser.new_page(viewport={'width':w,'height':h})
         page.set_content(HTML);page.add_style_tag(content=CSS);page.add_script_tag(content=JS)
@@ -33,6 +34,22 @@ with sync_playwright() as p:
                 check(page.locator('.vq-dialog__body').evaluate('el=>el.scrollTop')==0,f'{w}x{h}: multi-select does not jump the body scroll')
                 page.locator('.vq-next').click();page.wait_for_timeout(80)
         page.close()
+
+    page=browser.new_page(viewport={'width':1440,'height':720})
+    page.set_content(HTML);page.add_style_tag(content=CSS);page.add_script_tag(content=JS)
+    page.wait_for_selector('.vq-layer.is-open');page.wait_for_timeout(80)
+    page.get_by_role('button',name='Диван / крісла М’які меблі').click()
+    page.locator('.vq-next').click();page.wait_for_timeout(80)
+    page.get_by_role('button',name='Їжа, жир, косметика або невідома пляма Підберемо універсальний плямовивідник').click()
+    page.locator('.vq-next').click();page.wait_for_timeout(80)
+    add_button=page.locator('[data-result-extra="spot_lifter"]')
+    page.locator('.vq-dialog__body').evaluate('el=>el.scrollTop=420')
+    before=page.locator('.vq-dialog__body').evaluate('el=>el.scrollTop')
+    add_button.click();page.wait_for_timeout(80)
+    after=page.locator('.vq-dialog__body').evaluate('el=>el.scrollTop')
+    check(abs(after-before)<=2,'result add button preserves the current inner scroll position')
+    check(page.locator('[data-result-extra="spot_lifter"]').inner_text()=='Додано ✓','result add button confirms the selected extra')
+    page.close()
     browser.close()
 if failed:
     raise SystemExit(f'Smart Guide fit QA failed: {len(failed)}')

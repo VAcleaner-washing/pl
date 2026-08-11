@@ -285,9 +285,9 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
     try:
         page.goto(f"{base}/bronuvannia/", wait_until="networkidle")
         page.wait_for_selector(".booking-summary")
-        spot = page.locator(".booking-extras label", has_text="VA SPOT FIX")
+        spot = page.locator(".booking-extras label", has_text="Універсальний плямовивідник")
         stain = page.locator(".booking-extras label", has_text="VA STAIN OX")
-        checks.check(spot.count() == 1 and "100" in spot.locator("strong").inner_text(), "VA SPOT FIX is shown once at 100 UAH")
+        checks.check(spot.count() == 1 and "100" in spot.locator("strong").inner_text(), "universal stain remover is shown once at 100 UAH")
         checks.check(stain.count() == 1 and "100" in stain.locator("strong").inner_text(), "VA STAIN OX is shown once at 100 UAH")
         checks.check(page.locator(".booking-extras", has_text="Carp-Deta").count() == 0, "Legacy Carp-Deta is hidden publicly")
         checks.check(page.locator(".vx-summary-prepayment").count() == 1, "One prepayment summary row")
