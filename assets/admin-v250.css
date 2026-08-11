@@ -1494,6 +1494,15 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .upcoming-client-info a{display:block;width:max-content;max-width:100%;min-width:0;color:var(--gold-2);font-size:12px;text-decoration:none}
 @media(max-width:900px){.upcoming-client-info{margin:7px 0 5px}.upcoming-client-info strong{font-size:12.5px}.upcoming-client-info a{font-size:11.5px}}
 
+/* v4.0.27 — restore the richer phone treatment only on phones; desktop stays unchanged. */
+.upcoming-client-info .phone-mobile{display:none}
+@media(max-width:767px){
+  .upcoming-client-info{gap:5px}
+  .upcoming-client-info .phone-desktop{display:none}
+  .upcoming-client-info .phone-mobile{display:inline}
+  .upcoming-client-info a{margin-top:1px;padding:2px 0 1px;color:var(--gold-2);font-size:13px;font-weight:680;line-height:1.25;letter-spacing:.01em}
+}
+
 /* v3.0.79 — two-device push diagnostics */
 .push-device-name-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
 .push-device-name-row label{display:grid;gap:7px;min-width:0}.push-device-name-row label span{color:var(--muted);font-size:12px;font-weight:650}.push-device-name-row input{width:100%;min-width:0;height:44px;padding:0 13px;border:1px solid var(--line);border-radius:12px;background:#0b1115;color:var(--text);font:inherit;outline:none}.push-device-name-row input:focus{border-color:rgba(212,163,94,.52);box-shadow:0 0 0 3px rgba(212,163,94,.07)}

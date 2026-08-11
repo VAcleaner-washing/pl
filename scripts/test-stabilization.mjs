@@ -137,6 +137,12 @@ has(admin,"login==='vacleaner'||login==='annanevidoma'",'vacleaner and annanevid
 has(admin,"['equipment','Техніка',ico.tech]",'mobile More includes equipment');
 has(adminHtml,'data-mobile-view="bookings"','dedicated mobile nav has its own primary-view buttons in initial HTML');
 has(admin,"const initialAdminView=typeof window!=='undefined'&&window.matchMedia('(max-width: 900px)').matches?'upcoming':'bookings'",'mobile admin starts on Upcoming while desktop keeps Bookings');
+has(admin,'class="phone-desktop"','Upcoming keeps a dedicated desktop phone value');
+has(admin,'class="phone-mobile"','Upcoming keeps a dedicated formatted mobile phone value');
+has(admin,'function mobilePhone(value)','mobile phone formatting is explicit and isolated');
+has(css,'.upcoming-client-info .phone-mobile{display:none}','formatted mobile phone is hidden by default on desktop');
+has(css,'@media(max-width:767px){\n  .upcoming-client-info{gap:5px}','phone visual override is scoped to phone widths only');
+has(css,'.upcoming-client-info .phone-desktop{display:none}','desktop phone value is swapped only inside the mobile media query');
 has(adminHtml,'data-mobile-view="upcoming" class="active"','initial mobile HTML highlights Upcoming');
 has(adminHtml,'<span>Найближчі</span></button><button data-mobile-view="bookings"','mobile nav order begins Upcoming then Bookings');
 has(admin,'comparisonLabel=previous?`проти ${analyticsRangeLabel(previous)}`','analytics comparison exposes the concrete previous date range');
