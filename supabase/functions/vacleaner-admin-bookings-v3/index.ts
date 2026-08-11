@@ -111,7 +111,7 @@ function normalizeSelectedExtras(value: unknown, productCode: string, catalog: a
     if (!item) return [];
     const requires = Array.isArray(item.requires) ? item.requires.map(String) : [];
     if (requires.length && !requires.includes(productCode)) return [];
-    return [{ code, label: String(item.label || code), price: Math.max(0, Number(item.price || 0)) }];
+    return [{ code, label: String(item.label || code), price: Math.max(0, Number(item.price || 0)), payment_mode: "upfront" }];
   });
   return { items, amount: items.reduce((sum, item) => sum + item.price, 0) };
 }
@@ -371,16 +371,18 @@ Deno.serve(async (request: Request) => {
       const deliveryAmount = fulfillment === "delivery" ? 250 : 0, prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
       const requestedProcessing = body.processing && typeof body.processing === "object" ? body.processing : null;
       const processing = requestedProcessing ? { contacted: requestedProcessing.contacted === true, confirmation_sent: requestedProcessing.confirmation_sent === true, documents_required: requestedProcessing.documents_required === true, identity_verified: requestedProcessing.identity_verified === true, customer_kind: ["new", "repeat", "known"].includes(String(requestedProcessing.customer_kind || "")) ? String(requestedProcessing.customer_kind) : "known", updated_at: new Date().toISOString() } : currentExtras?.processing;
+      const selectedItems = selected.items;
+      const selectedAmount = selected.amount;
       const extras = { ...currentExtras, pickup_time: period.pickupTime, return_time: period.returnTime, slot_config: slots, ...(processing ? { processing } : {}),
         discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, reason: discount.source === "manual" ? discount.manualReason : "" },
         manual_discount: discount.manualType === "none" ? null : { type: discount.manualType, value: discount.manualValue, amount: discount.manualAmount, reason: discount.manualReason },
         loyalty: { level: String(body.loyaltyLevel || currentExtras?.loyalty?.level || (discount.loyaltyPercent === 10 ? "VIP" : discount.loyaltyPercent === 5 ? "Regular" : "Start")), percent: discount.loyaltyPercent, completed_orders: cleanInt(body.completedOrders ?? currentExtras?.loyalty?.completed_orders, 10000) },
-        base_before_discount: rawBase, selected_items: selected.items, selected_items_amount: selected.amount };
+        base_before_discount: rawBase, selected_items: selectedItems, selected_items_amount: selectedAmount };
       const common: Record<string, any> = {
         product_code: productCode, product_label: product.label || productCode, start_date: period.startDate, return_date: period.returnDate,
         start_at: `${period.startDate}T${period.pickupTime}:00.000Z`, end_at: `${period.returnDate}T${period.returnTime}:00.000Z`, pickup_window: period.pickupWindow, return_window: period.returnWindow, rental_days: period.days,
         fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: customerPhone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_comment: cleanText(body.customerComment, 800) || null,
-        source: cleanText(body.source, 30) || "instagram", extras, base_amount: discount.baseAmount, extras_amount: selected.amount, delivery_amount: deliveryAmount, total_amount: discount.baseAmount + selected.amount + deliveryAmount,
+        source: cleanText(body.source, 30) || "instagram", extras, base_amount: discount.baseAmount, extras_amount: selectedAmount, delivery_amount: deliveryAmount, total_amount: discount.baseAmount + selectedAmount + deliveryAmount,
         prepayment_amount: 200, prepayment_paid: prepaymentPaid, deposit_amount: depositAmount, admin_note: cleanAdminNote(body.adminNote, 800) || null, updated_at: new Date().toISOString(),
       };
       let saved: any;
@@ -447,7 +449,11 @@ Deno.serve(async (request: Request) => {
       const depositAmount = cleanInt(body.depositAmount ?? current.deposit_amount, 100000), depositPaid = body.depositPaid === true || current.deposit_paid === true;
       const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
       const rawBase = Math.max(0, Number(currentExtras.base_before_discount ?? (Number(current.base_amount || 0) + Number(currentExtras?.discount?.amount || 0))) || 0);
-      const discount = discountInfo(body, rawBase, currentExtras), discountedExtras = { ...currentExtras,
+      const selectedItems = Array.isArray(currentExtras.selected_items) ? currentExtras.selected_items.map((item: any) => {
+        const { opened: _opened, ...rest } = item || {};
+        return { ...rest, payment_mode: "upfront" };
+      }) : [];
+      const discount = discountInfo(body, rawBase, currentExtras), discountedExtras = { ...currentExtras, selected_items: selectedItems,
         discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, reason: discount.source === "manual" ? discount.manualReason : "" },
         manual_discount: discount.manualType === "none" ? null : { type: discount.manualType, value: discount.manualValue, amount: discount.manualAmount, reason: discount.manualReason },
         base_before_discount: rawBase };

@@ -42,7 +42,7 @@ def booking(idx: int, status: str, product: str = "puzzi", label: str = "Kärche
         "customer_telegram": "@vacleaner_test",
         "customer_comment": "Потрібно почистити диван, матрац і килим у вітальні.",
         "extras": {
-            "selected_items": [{"code": "carp_deta", "label": "Плямовивідник Carp-Deta 30 мл", "price": 100}],
+            "selected_items": [{"code": "spot_lifter", "label": "VA SPOT FIX · 50 мл", "price": 100, "payment_mode": "upfront"}],
             "chemistry": {"used_packets": 1, "story_mention": True},
             "discount": {"percent": 0},
         },
@@ -376,7 +376,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.topbar:visible').count()==0, f"{label}: analytics removes the unused mobile search bar")
                 qa.check(page.locator('.analytics-kpis .kpi').count()==4, f"{label}: analytics uses a compact four-KPI decision strip")
             if view=='chemistry':
-                qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==1, f"{label}: Carp-Deta is present in chemistry pricing")
+                qa.check(page.locator('.chem-product-row').filter(has_text='VA SPOT FIX').count()==1, f"{label}: VA SPOT FIX is present in chemistry pricing")
+                qa.check(page.locator('.chem-product-row').filter(has_text='VA STAIN OX').count()==1, f"{label}: VA STAIN OX is present in chemistry pricing")
+                qa.check(page.locator('.chem-product-row').filter(has_text='Carp-Deta').count()==0, f"{label}: legacy Carp-Deta is hidden from chemistry pricing")
 
         # Returned bookings always start at the top and are sorted by return/end date, newest first.
         open_mobile_view(page,'bookings')

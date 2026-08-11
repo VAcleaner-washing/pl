@@ -90,9 +90,11 @@ lacks(admin,"scrollIntoView({block:'center'",'focus never forcibly centers the p
 
 // User-reported regressions are permanent gates.
 has(admin,'function mergeCatalog(value)','catalog migration merges new defaults into old cache');
-has(core,'"carp_deta"','Carp-Deta is in shared catalog');
+has(core,'"spot_lifter"','VA SPOT FIX is in shared catalog');
+has(core,'"stain_exit"','VA STAIN OX is in shared catalog');
 has(settingsEdge,'DEFAULT_CATALOG','settings normalizes against current catalog');
-has(pwaQa,'Carp-Deta is present in chemistry pricing','Carp-Deta has visual regression coverage');
+has(pwaQa,'VA SPOT FIX is present in chemistry pricing','VA SPOT FIX has visual regression coverage');
+has(pwaQa,'VA STAIN OX is present in chemistry pricing','VA STAIN OX has visual regression coverage');
 has(pwaQa,'bottom navigation does not walk during content scroll','bottom nav has position-invariance coverage');
 has(pwaQa,'admin date control geometry is invariant after date selection','admin date has geometry-invariance coverage');
 has(pwaQa,'Public: date geometry does not move after value selection','public date has geometry-invariance coverage');

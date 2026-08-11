@@ -230,9 +230,12 @@ if(/refund_amount\s*:\s*cleanInt\(body\.refundAmount|due_amount\s*:\s*cleanInt\(
 for(const token of ['settlementConfirmation(body, finance)','status: "completed"','cleanInt(body.usedPackets, packetLimit)'])if(!adminEdge.includes(token))errors.push(`edge settlement guard missing: ${token}`);
 for(const token of ['export function settlementFromBooking','export function selectedExtrasAmount','export function settlementConfirmation','Math.min(2, usedPackets)','legacyRefund !== finance.refundAmount','settlement_mismatch'])if(!settlementModule.includes(token))errors.push(`settlement module guard missing: ${token}`);
 
-if(!publicReactBundle.includes('code:"carp_deta"')||!publicReactBundle.includes('Плямовивідник Carp-Deta 30 мл'))errors.push('Carp-Deta is missing from the hydrated public booking bundle');
+for(const token of ['code:"spot_lifter"','VA SPOT FIX · 50 мл','code:"stain_exit"','VA STAIN OX · 30 мл'])if(!publicReactBundle.includes(token))errors.push(`stain-care product is missing from the hydrated public booking bundle: ${token}`);
+if(publicReactBundle.includes('code:"carp_deta"')||bookingHtml.includes('Carp-Deta'))errors.push('legacy Carp-Deta remains in the public booking experience');
 if(!bookingEdgeV5.includes('selected_items: selected.items.map')||!bookingEdgeV5.includes('db.from("vacleaner_booking_resources").insert(resources)'))errors.push('booking v5 does not persist extras/resources directly');
-if(!adminEdge.includes('normalizeSelectedExtras(body.selectedExtras')||!adminEdge.includes('extras_amount: selected.amount'))errors.push('admin v3 does not persist selected extras independently of admin v2');
+if(!adminEdge.includes('normalizeSelectedExtras(body.selectedExtras')||!adminEdge.includes('extras_amount: selectedAmount'))errors.push('admin v3 does not persist selected extras independently of admin v2');
+for(const token of ['payment_mode: "upfront"','selected_items: selectedItems','const selectedAmount = selected.amount'])if(!adminEdge.includes(token))errors.push(`immediate extra-sale settlement guard missing: ${token}`);
+for(const token of ['on_open','openedExtraCodes','Пломбу відкрито','Оплата лише при відкритті пломби'])if(adminEdge.includes(token)||adminRuntime.includes(token)||publicExperience.includes(token)||publicReactBundle.includes(token)||bookingHtml.includes(token))errors.push(`obsolete sealed-extra logic remains: ${token}`);
 for(const file of files.filter(f=>f.endsWith('.html'))){
  const rel=path.relative(root,file).replaceAll('\\','/'),html=fs.readFileSync(file,'utf8');
  for(const match of html.matchAll(/(?:src|href)=["'](\/(?:assets|admin)\/[^"'?#]+)[^"']*["']/g)){

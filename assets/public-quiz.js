@@ -17,7 +17,8 @@
   const EXTRA_INFO={
     neutralix:{label:'Neutralix · 250 мл',price:200},
     odour_zero:{label:'Odour Zero Spring · 250 мл',price:250},
-    carp_deta:{label:'Carp-Deta · 30 мл',price:100},
+    spot_lifter:{label:'VA SPOT FIX · 50 мл',price:100},
+    stain_exit:{label:'VA STAIN OX · 30 мл',price:100},
     shower_care:{label:'Shower Care · 250 мл',price:250},
     scalex_pro:{label:'Scalex Pro · 250 мл',price:250},
     eco_clean:{label:'Eco Clean · 250 мл',price:250},
@@ -40,7 +41,8 @@
   const EXTRA_TITLES={
     neutralix:['Neutralix · 250 мл','Neutralix · концентрат','Neutralix'],
     odour_zero:['Odour Zero'],
-    carp_deta:['Плямовивідник Carp-Deta 30 мл','Carp-Deta 30 мл','Carp-Deta'],
+    spot_lifter:['VA SPOT FIX · 50 мл','VA SPOT FIX','Універсальний плямовивідник · 50 мл','Універсальний плямовивідник','Spot Lifter','Chemspec Professional Spot Lifter'],
+    stain_exit:['VA STAIN OX · 30 мл','VA STAIN OX','Для стійких кольорових плям · 30 мл','Засіб для стійких кольорових плям','Stain Exit','Chemspec Stain Exit'],
     shower_care:['Shower Care'],
     scalex_pro:['Scalex Pro'],
     eco_clean:['Eco Clean'],
@@ -56,6 +58,7 @@
   let state=blankState();
   let stepIndex=0;
   let modal=null;
+  let selectedResultExtras=new Set();
 
   function fire(event,data={}){
     window.dataLayer=window.dataLayer||[];
@@ -73,11 +76,11 @@
         ['textile','Диван / крісла','М’які меблі'],['mattress','Матрац','Місце для сну'],['carpet','Килим','Плями й запахи'],['kitchen','Кухня','Жир і нагар'],['bathroom','Ванна кімната','Наліт та сантехніка'],['windows','Вікна / дзеркала','Скло й рами']
       ]
     }];
-    if(hasTextile())list.push({id:'textileProblems',title:'Що саме турбує в текстилі?',note:'Виберіть усе, що актуально — кожна відповідь впливає на засіб або техніку.',type:'multi',options:[
-      ['refresh','Просто освіжити','Звичайний побутовий бруд'],['stain','Є видимі плями','Кава, чай, напої, жир, бруд та інші локальні плями'],['urine','Є запах сечі','Дитина або тварина'],['other_odor','Інший неприємний запах','Тютюн, затхлість, тварини, піт тощо'],['hair','Шерсть / волосся / крихти','Потрібен сухий етап перед миттям'],['heavy_dust','Багато пилу в тканині','Особливо актуально для матраців']
+    if(hasTextile())list.push({id:'textileProblems',title:'Є окремі плями або запахи?',note:'Можна обрати кілька варіантів — додамо лише те, що справді потрібне.',type:'multi',options:[
+      ['common_stain','Звичайні або невідомі плями','Їжа, жир, косметика, напої та побутові забруднення'],['color_stain','Старі кольорові плями','Кава, чай, вино, ягоди або соки'],['odor','Неприємний запах','Сеча, домашні тварини або інші стійкі запахи'],['none','Нічого з цього','Потрібне лише загальне очищення']
     ]});
-    if(hasTextile()&&state.textileProblems.includes('other_odor'))list.push({id:'textileOdor',title:'Який запах у текстилі?',note:'Це допоможе відрізнити локальну проблему від запаху всього приміщення.',type:'single',options:[
-      ['pet','Запах тварин',''],['musty','Затхлість / вогкість',''],['smoke','Тютюн / дим',''],['sweat','Піт',''],['food','Їжа / кухня',''],['unknown','Не можу визначити','']
+    if(hasTextile()&&state.textileProblems.includes('odor'))list.push({id:'textileOdor',title:'Який саме запах?',note:'Так збережемо чинний точний підбір Neutralix або Odour Zero.',type:'single',options:[
+      ['urine','Сеча','Дитина або тварина'],['pet','Домашні тварини','Запах у текстилі або оббивці'],['musty','Затхлість / вогкість',''],['smoke','Тютюн / дим',''],['food','Їжа / кухня',''],['unknown','Не можу визначити','']
     ]});
     if(hasKitchen())list.push({id:'kitchenProblems',title:'Що найбільше потрібно прибрати на кухні?',note:'Можна вибрати кілька типів забруднення.',type:'multi',options:[
       ['daily','Повсякденний бруд','Фасади, стільниця, легкі сліди'],['fresh_grease','Свіжий / регулярний жир','Без сильного нагару'],['carbon','Пригорілий жир / нагар','Духовка, гриль'],['light_scale','Легкий водний наліт','Мийка, змішувач, скло'],['heavy_scale_rust','Сильний наліт або іржа','Водний камінь, застарілі відкладення'],['odor','Запахи на кухні','Їжа, сміття, загальний запах'],['corners','Стики / важкодоступні місця','Потрібна точкова робота парою']
@@ -108,14 +111,17 @@
   function setAnswer(qId,value,type){
     if(type==='multi'){
       const arr=Array.isArray(state[qId])?[...state[qId]]:[];
-      const i=arr.indexOf(value);if(i>=0)arr.splice(i,1);else arr.push(value);state[qId]=arr;
+      if(qId==='textileProblems'&&value==='none'){state[qId]=arr.includes('none')?[]:['none'];state.textileOdor='';return;}
+      const withoutNone=qId==='textileProblems'?arr.filter(x=>x!=='none'):arr;
+      const i=withoutNone.indexOf(value);if(i>=0)withoutNone.splice(i,1);else withoutNone.push(value);state[qId]=withoutNone;
+      if(qId==='textileProblems'&&!withoutNone.includes('odor'))state.textileOdor='';
     }else state[qId]=value;
   }
 
   function extra(code,reason){return{code,...EXTRA_INFO[code],reason}}
   function result(){
     const zones=selectedZones(),text=hasTextile(),hard=hasKitchen()||hasBath(),windows=hasWindows();
-    const needJimmy=state.textileProblems.some(x=>['hair','heavy_dust'].includes(x));
+    const needJimmy=false;
     let product='puzzi';
     const warnings=[];
     if(text&&hard&&windows)product='elite';
@@ -127,9 +133,14 @@
     else if(windows)product=state.windowsMode==='glass'?'abir':'ideal_windows';
 
     const extras=[];const add=(code,reason)=>{if(!extras.some(x=>x.code===code))extras.push(extra(code,reason));};
-    if(state.textileProblems.includes('urine'))add('neutralix','Ви вказали запах сечі — Neutralix ставимо пріоритетно для нейтралізації причини запаху.');
-    if(state.textileProblems.includes('other_odor'))add('neutralix','Ви вказали локальний запах у текстилі — Neutralix працює по тканині, меблях і м’яких поверхнях.');
-    if(state.textileProblems.includes('stain')){add('carp_deta','Є видима пляма — Carp-Deta потрібен для локального опрацювання перед промиванням Puzzi.');warnings.push('Перед Carp-Deta перевірте стійкість барвника на невеликій непомітній ділянці.');}
+    if(state.textileProblems.includes('odor')){
+      if(['musty','smoke','food'].includes(state.textileOdor))add('odour_zero','Для загального стійкого запаху рекомендуємо Odour Zero.');
+      else add('neutralix',state.textileOdor==='urine'?'Для запаху сечі Neutralix ставимо пріоритетно — він працює по причині запаху в текстилі.':'Для локального запаху в текстилі рекомендуємо Neutralix.');
+    }
+    if(state.textileProblems.includes('common_stain'))add('spot_lifter','Для їжі, жиру, косметики та плям невідомого походження — універсальний плямовивідник 50 мл.');
+    if(state.textileProblems.includes('color_stain'))add('stain_exit','Для старих кольорових слідів від кави, чаю, вина, ягід і соків — VA STAIN OX 30 мл.');
+    if(state.textileProblems.includes('common_stain')&&state.textileProblems.includes('color_stain'))warnings.push('Використовуйте засоби окремо: спочатку VA SPOT FIX, потім ретельно промийте поверхню. VA STAIN OX наносьте лише на кольоровий слід, що залишився, і після нього знову промийте поверхню.');
+    if(state.textileProblems.some(x=>['common_stain','color_stain'].includes(x)))warnings.push('Перед обробкою протестуйте засіб на невеликій непомітній ділянці тканини.');
     if(state.kitchenProblems.includes('odor'))add('odour_zero','Є загальний кухонний запах — Odour Zero нейтралізує запахи в приміщенні та на стійких поверхнях.');
     if(state.kitchenProblems.includes('daily'))add('eco_clean','Для регулярного кухонного бруду достатньо м’якого універсального Eco Clean.');
     if(state.kitchenProblems.includes('fresh_grease'))add('soft_degreaser','Для свіжого й регулярного жиру потрібен Soft Degreaser, без зайвої агресії.');
@@ -199,9 +210,13 @@
       const r=result();
       progress.style.width='100%';meta.textContent='Ваше рішення';back.hidden=false;next.hidden=true;
       body.scrollTop=0;
-      body.innerHTML=`<div class="vq-result"><p class="vq-eyebrow">Персональний підбір VAcleaner</p><h2>Ваше рішення готове.</h2><article class="vq-result__product"><span>Техніка</span><h3>${escapeHtml(r.productInfo.label)}</h3><p>${escapeHtml(r.productInfo.desc)}</p><strong>від ${new Intl.NumberFormat('uk-UA').format(r.productInfo.price)} грн / доба</strong>${r.includesPuzzi?'<small>Для Puzzi базові 8 порцій миючої хімії вже видаються в комплекті.</small>':''}</article>${r.extras.length?`<div class="vq-result__extras"><h3>Під ваші задачі рекомендуємо</h3>${r.extras.map(x=>`<article><div><strong>${escapeHtml(x.label)}</strong><p>${escapeHtml(x.reason)}</p></div><b>+${new Intl.NumberFormat('uk-UA').format(x.price)} грн</b></article>`).join('')}</div>`:'<div class="vq-result__clean"><strong>Додаткова хімія не обов’язкова</strong><span>За вашими відповідями базового рішення достатньо.</span></div>'}${r.warnings.length?`<div class="vq-result__warnings"><strong>Важливо для поверхні</strong>${r.warnings.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`:''}<div class="vq-result__bonus"><span>Бонус за підбір</span><strong>−5% на оренду</strong><p>Застосуємо автоматично при бронюванні. Якщо у вас уже є більша знижка лояльності — система залишить вигіднішу.</p></div><div class="vq-result__actions"><a class="vq-book" href="${bookingUrl(r)}">Забронювати зі знижкою →</a><a class="vq-manager" href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" rel="noreferrer">Запитати менеджера →</a><button type="button" class="vq-restart">Пройти заново</button></div></div>`;
-      body.querySelector('.vq-book')?.addEventListener('click',()=>fire('cleaning_quiz_booking_click',{quiz_product:r.product,quiz_extras:r.extras.map(x=>x.code).join(','),promo_code:QUIZ_PROMO}));
-      body.querySelector('.vq-restart')?.addEventListener('click',()=>{state=blankState();stepIndex=0;render()});
+      const selectedExtras=r.extras.filter(x=>selectedResultExtras.has(x.code));
+      const discountedRental=Math.round(r.productInfo.price*.95);
+      const total=discountedRental+selectedExtras.reduce((sum,x)=>sum+x.price,0);
+      body.innerHTML=`<div class="vq-result"><p class="vq-eyebrow">Персональний підбір VAcleaner</p><h2>Ваше рішення готове.</h2><article class="vq-result__product"><span>Техніка</span><h3>${escapeHtml(r.productInfo.label)}</h3><p>${escapeHtml(r.productInfo.desc)}</p><strong>${new Intl.NumberFormat('uk-UA').format(r.productInfo.price)} грн / будня доба</strong>${r.includesPuzzi?'<small>Для Puzzi базові 8 порцій миючої хімії вже видаються в комплекті.</small>':''}</article>${r.extras.length?`<div class="vq-result__extras"><h3>Під ваші задачі рекомендуємо</h3>${r.extras.map(x=>{const selected=selectedResultExtras.has(x.code);return`<article class="${selected?'is-added':''}"><div><strong>${escapeHtml(x.label)}</strong><p>${escapeHtml(x.reason)}</p></div><div class="vq-result__extra-action"><b>+${new Intl.NumberFormat('uk-UA').format(x.price)} грн</b><button type="button" data-result-extra="${escapeHtml(x.code)}" aria-pressed="${selected?'true':'false'}">${selected?'Додано ✓':'Додати'}</button></div></article>`}).join('')}</div>`:'<div class="vq-result__clean"><strong>Додаткова хімія не обов’язкова</strong><span>За вашими відповідями базового рішення достатньо.</span></div>'}${r.warnings.length?`<div class="vq-result__warnings"><strong>Важливо</strong>${r.warnings.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`:''}<div class="vq-result__bonus"><span>Бонус за підбір</span><strong>−5% на оренду</strong><p>Застосуємо автоматично при бронюванні. Якщо у вас уже є більша знижка лояльності — система залишить вигіднішу.</p></div><div class="vq-result__total"><span>Орієнтовно за 1 будню добу</span><strong>${new Intl.NumberFormat('uk-UA').format(total)} грн</strong><small>Уже зі знижкою −5% на оренду${selectedExtras.length?' та обраними додатковими засобами':'. Додаткові засоби можна додати вище'}.</small></div><div class="vq-result__actions"><a class="vq-book" href="${bookingUrl(r,selectedExtras)}">Забронювати →</a><a class="vq-manager" href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" rel="noreferrer">Запитати менеджера →</a><button type="button" class="vq-restart">Пройти заново</button></div></div>`;
+      body.querySelectorAll('[data-result-extra]').forEach(button=>button.addEventListener('click',()=>{const code=button.dataset.resultExtra;if(selectedResultExtras.has(code))selectedResultExtras.delete(code);else selectedResultExtras.add(code);render()}));
+      body.querySelector('.vq-book')?.addEventListener('click',()=>fire('cleaning_quiz_booking_click',{quiz_product:r.product,quiz_extras:selectedExtras.map(x=>x.code).join(','),promo_code:QUIZ_PROMO}));
+      body.querySelector('.vq-restart')?.addEventListener('click',()=>{state=blankState();selectedResultExtras.clear();stepIndex=0;render()});
       fireOnceCompleted(r);
       return;
     }
@@ -217,6 +232,7 @@
     body.querySelectorAll('.vq-option').forEach(button=>button.addEventListener('click',()=>{
       setAnswer(q.id,button.dataset.value,q.type);
       if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else{
+        if(q.id==='textileProblems'){render();return;}
         const selected=Array.isArray(valueFor(q.id))&&valueFor(q.id).includes(button.dataset.value);
         button.classList.toggle('is-selected',selected);
         button.setAttribute('aria-pressed',selected?'true':'false');
@@ -227,8 +243,8 @@
   }
   let completedKey='';
   function fireOnceCompleted(r){const key=[r.product,...r.extras.map(x=>x.code)].join('|');if(completedKey===key)return;completedKey=key;fire('cleaning_quiz_completed',{quiz_product:r.product,quiz_extras:r.extras.map(x=>x.code).join(',')});}
-  function bookingUrl(r){
-    const p=new URLSearchParams();p.set('from','quiz');p.set('product',r.product);p.set('promo',QUIZ_PROMO);if(r.extras.length)p.set('extras',r.extras.map(x=>x.code).join(','));
+  function bookingUrl(r,selectedExtras=r.extras){
+    const p=new URLSearchParams();p.set('from','quiz');p.set('product',r.product);p.set('promo',QUIZ_PROMO);if(selectedExtras.length)p.set('extras',selectedExtras.map(x=>x.code).join(','));
     return `/bronuvannia?${p.toString()}`;
   }
   function openQuiz(){
@@ -240,7 +256,7 @@
       modal.querySelector('.vq-next').addEventListener('click',()=>{const q=questions()[stepIndex];if(q&&canContinue(q)){stepIndex+=1;render()}});
       document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('is-open'))closeQuiz()});
     }
-    state=blankState();stepIndex=0;completedKey='';modal.classList.add('is-open');document.documentElement.classList.add('vq-lock');render();fire('cleaning_quiz_started');
+    state=blankState();selectedResultExtras.clear();stepIndex=0;completedKey='';modal.classList.add('is-open');document.documentElement.classList.add('vq-lock');render();fire('cleaning_quiz_started');
     setTimeout(()=>modal.querySelector('.vq-close')?.focus(),30);
   }
   function closeQuiz(){if(!modal)return;if(path==='/pidbir'){location.href='/';return;}modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');}
@@ -248,7 +264,7 @@
   function injectTeaser(){
     if(path!=='/'||document.querySelector('[data-vq-guide]'))return;
     const target=document.querySelector('.v21-choose');if(!target)return;
-    const section=document.createElement('section');section.className='vq-guide';section.dataset.vqGuide='1';section.innerHTML=`<div class="vq-guide__media"><img src="/assets/quiz-cleaning-guide.webp" alt="Домашнє прибирання з технікою VAcleaner" loading="lazy"><span>Підбір за 30 секунд</span></div><div class="vq-guide__copy"><p>VAcleaner · smart guide</p><h2>Не знаєте, що саме потрібно для прибирання?</h2><p>Опишіть задачу простими словами. Ми підберемо техніку, конкретні засоби й відсіємо хімію, яка не підходить вашій поверхні.</p><div class="vq-guide__chips"><span>Плями → Carp-Deta</span><span>Запах сечі → Neutralix</span><span>Наліт → правильний засіб за матеріалом</span></div><button type="button" class="vq-guide__button">Підібрати рішення →</button><small>Зазвичай 3–4 короткі кроки · без реєстрації</small></div>`;
+    const section=document.createElement('section');section.className='vq-guide';section.dataset.vqGuide='1';section.innerHTML=`<div class="vq-guide__media"><img src="/assets/quiz-cleaning-guide.webp" alt="Домашнє прибирання з технікою VAcleaner" loading="lazy"><span>Підбір за 30 секунд</span></div><div class="vq-guide__copy"><p>VAcleaner · smart guide</p><h2>Не знаєте, що саме потрібно для прибирання?</h2><p>Опишіть задачу простими словами. Ми підберемо техніку, конкретні засоби й відсіємо хімію, яка не підходить вашій поверхні.</p><div class="vq-guide__chips"><span>Звичайні плями → VA SPOT FIX</span><span>Кольорові плями → VA STAIN OX</span><span>Запах сечі → Neutralix</span></div><button type="button" class="vq-guide__button">Підібрати рішення →</button><small>Зазвичай 3–4 короткі кроки · без реєстрації</small></div>`;
     target.insertAdjacentElement('beforebegin',section);
     section.querySelector('.vq-guide__button').addEventListener('click',openQuiz);
     document.querySelectorAll('a[href="#choose"]').forEach(a=>{a.href='/pidbir/'});
@@ -270,6 +286,23 @@
     const box=document.createElement('div');box.className='vq-booking-help';box.dataset.vqBookingHelp='1';
     box.innerHTML='<span>Не знаєте, що обрати?</span><a href="/pidbir/">Підібрати рішення за 30 секунд →</a>';
     heading.insertAdjacentElement('afterend',box);
+  }
+
+  function injectStainCareSection(){
+    if(!['/rishennia/textile','/rishennia/mattress','/tekhnika/karcher-puzzi-8-1'].includes(path)||document.querySelector('[data-vq-stain-care]'))return;
+    const target=document.querySelector('.final-cta,.puzzi-book,.mini-process');if(!target)return;
+    const section=document.createElement('section');section.className='vq-stain-care';section.dataset.vqStainCare='1';
+    section.innerHTML=`<div class="vq-stain-care__head"><div><p>Точкова допомога до Puzzi</p><h2>Потрібна додаткова хімія?</h2></div><span>Додайте потрібний засіб до бронювання — його вартість одразу ввійде в замовлення.</span></div><div class="vq-stain-care__grid"><article class="vq-stain-product is-blue"><div class="vq-stain-product__top"><span>Для більшості локальних плям</span><b>50 мл · 100 грн</b></div><h3>VA SPOT FIX</h3><p>Допомагає прибрати локальні плями від їжі, напоїв, жиру, косметики та побутових забруднень із диванів, матраців, килимів і текстильної оббивки.</p><details><summary>Як використати</summary><p>Протестуйте на непомітній ділянці. Зробіть 2–4 натискання на пляму, промокніть білою серветкою від країв до центру, після чого ретельно промийте та витягніть засіб миючим пилососом.</p><small>Не додавайте в бак і не змішуйте з іншими засобами. Результат залежить від походження, давності плями та типу тканини.</small></details><div class="vq-stain-product__bottom"><a href="/bronuvannia?from=extras&product=puzzi&extras=spot_lifter">Додати до бронювання →</a></div></article><article class="vq-stain-product is-berry"><div class="vq-stain-product__top"><span>Для старих кольорових слідів</span><b>30 мл · 100 грн</b></div><h3>VA STAIN OX</h3><p>Спеціальний точковий засіб для залишкового пігменту від кави, чаю, вина, ягід і соків, який може зберігатися після звичайного очищення текстилю.</p><details><summary>Як використати</summary><p>Протестуйте на непомітній ділянці. Нанесіть кілька крапель лише на пляму. Після її освітлення одразу ретельно промийте та витягніть засіб миючим пилососом.</p><small>Не змішуйте з VA SPOT FIX і не давайте засобу висихати на тканині.</small></details><div class="vq-stain-product__bottom"><a href="/bronuvannia?from=extras&product=puzzi&extras=stain_exit">Додати до бронювання →</a></div></article></div><div class="vq-stain-care__choice"><strong>Який обрати?</strong><span><b>Їжа, жир, косметика або невідома пляма</b> — VA SPOT FIX.</span><span><b>Кава, чай, вино, ягоди чи сік</b> — VA STAIN OX.</span><span><b>Є обидва типи</b> — використовуйте окремо з ретельним промиванням між етапами.</span></div>`;
+    target.insertAdjacentElement('beforebegin',section);
+    section.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>fire('stain_product_booking_click',{extra_code:new URL(link.href).searchParams.get('extras')})));
+  }
+
+  function decorateBookingExtras(){
+    if(path!=='/bronuvannia')return;
+    const root=document.querySelector('.booking-extras');if(!root)return;
+    const intro=root.querySelector(':scope > p');
+    if(intro)intro.textContent='Засоби купуються окремо. Якщо додали засіб до бронювання — його вартість одразу входить у замовлення.';
+    if(!root.querySelector('.vq-extra-choice'))root.insertAdjacentHTML('beforeend','<div class="vq-extra-choice"><strong>Швидкий вибір</strong><span>Їжа, жир, косметика або невідома пляма — VA SPOT FIX.</span><span>Стара пляма від кави, чаю, вина, ягід чи соку — VA STAIN OX.</span><small>Обидва можна додати разом, але використовувати окремо з промиванням між етапами.</small></div>');
   }
 
   let standaloneOpened=false;
@@ -301,7 +334,7 @@
 
   function applyBookingPreset(){
     if(path!=='/bronuvannia')return;
-    const params=new URLSearchParams(location.search);if(params.get('from')!=='quiz')return;
+    const params=new URLSearchParams(location.search),source=params.get('from')||'';if(!['quiz','extras'].includes(source))return;
     const product=params.get('product')||'';const extras=(params.get('extras')||'').split(',').filter(Boolean);const promo=(params.get('promo')||'').toUpperCase()===QUIZ_PROMO?QUIZ_PROMO:'';
     let attempts=0;
     const run=()=>{
@@ -317,7 +350,7 @@
           const input=label?.querySelector('input[type="checkbox"]');if(input&&!input.checked)input.click();
         });
         applyPromoPreset(promo);
-        const banner=ensurePresetBanner(product,extras,promo);
+        const banner=ensurePresetBanner(product,extras,promo,source);
         if(banner)banner.scrollIntoView({block:'nearest'});
       },180);
       if((!productButton||extras.some(code=>!findExtra(code))||(promo&&!document.querySelector('.booking-promo-field input')))&&attempts<10)setTimeout(run,300);
@@ -325,12 +358,12 @@
     setTimeout(run,180);
   }
   function findExtra(code){const names=EXTRA_TITLES[code]||[];return [...document.querySelectorAll('.booking-extras label')].find(l=>names.includes(l.querySelector('b')?.textContent.trim()))}
-  function ensurePresetBanner(product,extras,promo){
+  function ensurePresetBanner(product,extras,promo,source='quiz'){
     const form=document.querySelector('.booking-form');if(!form)return null;
     let banner=form.querySelector('.vq-preset-banner');if(!banner){banner=document.createElement('div');banner.className='vq-preset-banner';const products=form.querySelector('#booking-products');products?.insertAdjacentElement('beforebegin',banner)}
     const p=PRODUCT_INFO[product];if(!p)return banner;
     const extraNames=extras.map(x=>EXTRA_INFO[x]?.label).filter(Boolean);
-    banner.innerHTML=`<span>Підібрано у Smart Guide</span><strong>${escapeHtml(p.label)}</strong><small>${extraNames.length?'Додатково: '+escapeHtml(extraNames.join(' · ')):'Без обов’язкових додаткових засобів'}</small>${promo===QUIZ_PROMO?'<em>Бонус за підбір · −5% на оренду · застосовується автоматично</em>':''}`;
+    banner.innerHTML=`<span>${source==='quiz'?'Підібрано у Smart Guide':'Додано із картки засобу'}</span><strong>${escapeHtml(p.label)}</strong><small>${extraNames.length?'Додатково: '+escapeHtml(extraNames.join(' · ')):'Без обов’язкових додаткових засобів'}</small>${promo===QUIZ_PROMO?'<em>Бонус за підбір · −5% на оренду · застосовується автоматично</em>':''}`;
     return banner;
   }
 
@@ -338,6 +371,8 @@
     injectTeaser();
     injectSolutionsEntry();
     injectBookingEscape();
+    injectStainCareSection();
+    decorateBookingExtras();
     applyBookingPreset();
     openStandalone();
   }

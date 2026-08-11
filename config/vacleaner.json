@@ -293,10 +293,44 @@
       "carp_deta": {
         "label": "Плямовивідник Carp-Deta 30 мл",
         "price": 100,
+        "volumeMl": 30,
+        "active": false,
+        "legacy": true,
         "aliases": [
           "Плямовивідник Carp-Deta 30 мл",
           "Carp-Deta 30 мл",
           "Carp-Deta"
+        ]
+      },
+      "spot_lifter": {
+        "label": "VA SPOT FIX · 50 мл",
+        "price": 100,
+        "volumeMl": 50,
+        "shortDescription": "Для більшості локальних плям від їжі, напоїв, жиру, косметики та побутових забруднень.",
+        "aliases": [
+          "VA SPOT FIX · 50 мл",
+          "VA SPOT FIX",
+          "Універсальний плямовивідник · 50 мл",
+          "Універсальний плямовивідник",
+          "Chemspec Professional Spot Lifter",
+          "SPOT LIFTER",
+          "Spot Lifter"
+        ]
+      },
+      "stain_exit": {
+        "label": "VA STAIN OX · 30 мл",
+        "price": 100,
+        "volumeMl": 30,
+        "shortDescription": "Для старих слідів від кави, чаю, вина, ягід і соків.",
+        "aliases": [
+          "VA STAIN OX · 30 мл",
+          "VA STAIN OX",
+          "Для стійких кольорових плям · 30 мл",
+          "Засіб для стійких кольорових плям",
+          "Chemspec Stain Exit",
+          "Stain Exit",
+          "STAIN EXIT",
+          "Stain Ox"
         ]
       },
       "glass_perfect": {

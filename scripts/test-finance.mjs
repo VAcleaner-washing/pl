@@ -80,9 +80,11 @@ const smallerManual=discountInfo({manualDiscountType:'fixed',manualDiscountValue
 assert.equal(smallerManual.source,'loyalty'); assert.equal(smallerManual.amount,60); assert.equal(smallerManual.manualAmount,50);
 
 const returnDiscount=discountInfo({manualDiscountType:'fixed',manualDiscountValue:100,manualDiscountReason:'Компенсація'},700,{});
-const discountedReturn=settlementFromBooking(base({base_amount:returnDiscount.baseAmount,delivery_amount:250,extras:{selected_items:[{code:'carp_deta',price:100}],chemistry:{used_packets:1,story_mention:false}}}),catalog,catalog);
+const discountedReturn=settlementFromBooking(base({base_amount:returnDiscount.baseAmount,delivery_amount:250,extras:{selected_items:[{code:'spot_lifter',price:100,payment_mode:'upfront'}],chemistry:{used_packets:1,story_mention:false}}}),catalog,catalog);
 assert.equal(discountedReturn.totalAmount,1000); assert.equal(discountedReturn.refundAmount,200); assert.equal(discountedReturn.dueAmount,0);
+const legacyOnOpen=settlementFromBooking(base({base_amount:700,delivery_amount:0,extras:{selected_items:[{code:'spot_lifter',price:100,payment_mode:'on_open',opened:false}],chemistry:{used_packets:0,story_mention:false}}}),catalog,catalog);
+assert.equal(legacyOnOpen.selectedExtrasAmount,100); assert.equal(legacyOnOpen.totalAmount,800);
 const cappedFixed=discountInfo({manualDiscountType:'fixed',manualDiscountValue:5000,manualDiscountReason:'Компенсація'},700,{});
 assert.equal(cappedFixed.amount,700); assert.equal(cappedFixed.baseAmount,0);
 
-console.log('Finance tests passed: 23 scenarios.');
+console.log('Finance tests passed: selected extras are charged immediately.');
