@@ -11,7 +11,7 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
 
-from playwright.sync_api import Browser, BrowserContext, Page, Route, sync_playwright
+from playwright.sync_api import Browser, BrowserContext, Page, Route, expect, sync_playwright
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SUPABASE_HOST = "https://yweluzclearwrazdkahu.supabase.co"
@@ -310,21 +310,28 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         monday = (date.fromisoformat(sunday) + timedelta(days=1)).isoformat()
         windows = page.locator('.booking-date-grid select')
 
-        def set_period(start: str, finish: str, pickup: str, returned: str) -> str:
-            dates.nth(0).fill(start)
-            windows.nth(0).select_option(pickup)
-            dates.nth(1).fill(finish)
-            windows.nth(1).select_option(returned)
-            dates.nth(1).dispatch_event("change")
-            windows.nth(1).dispatch_event("change")
-            page.wait_for_timeout(220)
-            return normalized_text(page.locator(".vx-summary-deposit strong").inner_text())
+        def set_period(start: str, finish: str, pickup: str, returned: str, expected: str) -> str:
+            def settle_control(control, value: str, *, select: bool = False) -> None:
+                if select:
+                    control.select_option(value)
+                else:
+                    control.fill(value)
+                page.evaluate("()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
+                expect(control).to_have_value(value)
 
-        checks.check("1 000" in set_period(saturday, sunday, "morning", "morning"), "Saturday morning to Sunday morning keeps 1000 UAH deposit")
-        checks.check("1 000" in set_period(saturday, sunday, "evening", "evening"), "Saturday evening to Sunday evening keeps 1000 UAH deposit")
-        checks.check("2 000" in set_period(friday, sunday, "evening", "morning"), "Friday evening to Sunday morning uses 2000 UAH weekend deposit")
-        checks.check("2 000" in set_period(friday, sunday, "evening", "evening"), "Friday evening to Sunday evening uses 2000 UAH weekend deposit")
-        checks.check("2 000" in set_period(saturday, monday, "morning", "morning"), "Saturday morning to Monday morning uses 2000 UAH weekend deposit")
+            settle_control(dates.nth(0), start)
+            settle_control(windows.nth(0), pickup, select=True)
+            settle_control(dates.nth(1), finish)
+            settle_control(windows.nth(1), returned, select=True)
+            deposit = page.locator(".vx-summary-deposit strong")
+            expect(deposit).to_contain_text(expected, timeout=3000)
+            return normalized_text(deposit.inner_text())
+
+        checks.check("1 000" in set_period(saturday, sunday, "morning", "morning", "1 000"), "Saturday morning to Sunday morning keeps 1000 UAH deposit")
+        checks.check("1 000" in set_period(saturday, sunday, "evening", "evening", "1 000"), "Saturday evening to Sunday evening keeps 1000 UAH deposit")
+        checks.check("2 000" in set_period(friday, sunday, "evening", "morning", "2 000"), "Friday evening to Sunday morning uses 2000 UAH weekend deposit")
+        checks.check("2 000" in set_period(friday, sunday, "evening", "evening", "2 000"), "Friday evening to Sunday evening uses 2000 UAH weekend deposit")
+        checks.check("2 000" in set_period(saturday, monday, "morning", "morning", "2 000"), "Saturday morning to Monday morning uses 2000 UAH weekend deposit")
         browser_policy = page.evaluate("""([friday,saturday,sunday])=>({
           friMorning: window.VACLEANER_CORE.rentalBase(window.VACLEANER_CORE.products.sc2,friday,saturday,'morning','morning'),
           friEvening: window.VACLEANER_CORE.rentalBase(window.VACLEANER_CORE.products.sc2,friday,saturday,'evening','evening'),

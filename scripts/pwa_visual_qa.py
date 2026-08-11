@@ -275,11 +275,14 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(abs(booking_rows['person']['l']-booking_rows['body']['l'])<=1 and abs(booking_rows['person']['r']-booking_rows['body']['r'])<=1 and abs(booking_rows['delivery']['l']-booking_rows['body']['l'])<=1 and abs(booking_rows['delivery']['r']-booking_rows['body']['r'])<=1, f"{label}: Client and Handoff each use the full booking-card width")
         qa.check(booking_rows['deliveryMetaVisible'], f"{label}: Handoff details stay visible on phone")
         booking_card_heights=page.locator('.booking-card').evaluate_all('els=>els.map(el=>el.getBoundingClientRect().height)')
-        density_limit=640 if width<=340 else 590
+        # The requested full-width Client and Handoff rows add useful vertical detail,
+        # but a complete active card must still fit within one phone viewport.
+        density_limit=min(710, height*0.84)
         max_booking_card_height=max(booking_card_heights) if booking_card_heights else 0
         print(f"INFO: {label}: booking card heights={booking_card_heights}; max={max_booking_card_height:.1f}px; limit={density_limit}px")
-        qa.check(bool(booking_card_heights) and max_booking_card_height<=density_limit, f"{label}: booking cards stay compact instead of consuming a full phone screen")
-        qa.check(page.locator('.main').evaluate('el=>el.scrollHeight')<3000, f"{label}: active booking list no longer creates multi-screen card inflation")
+        qa.check(bool(booking_card_heights) and max_booking_card_height<=density_limit, f"{label}: stacked booking card fits within one usable phone viewport")
+        list_height_limit=len(booking_card_heights)*density_limit+420
+        qa.check(page.locator('.main').evaluate('el=>el.scrollHeight')<list_height_limit, f"{label}: active booking list height follows the number of visible cards")
         qa.check(page.locator('.booking-card .booking-extra:visible').count()==0 and page.locator('.booking-card .booking-note:visible').count()==0 and page.locator('.booking-mobile-flags:visible').count()>=1, f"{label}: verbose extras and comments collapse to compact mobile indicators")
         page.locator('.booking-card [data-client-card]').first.evaluate('el=>el.click()');page.wait_for_selector('#clientEditor');page.wait_for_timeout(20)
         qa.check(page.locator('#clientEditor .client-rental-history').count()==1, f"{label}: booking client tap opens the full client card")

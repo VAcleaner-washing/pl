@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 from playwright.sync_api import sync_playwright
-import importlib.util, sys
+import importlib.util, os, sys
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('pwaqa',ROOT/'scripts/pwa_visual_qa.py')
 mod=importlib.util.module_from_spec(spec);sys.modules['pwaqa']=mod;spec.loader.exec_module(mod)
@@ -12,7 +12,11 @@ def check(c,label):
  print(('PASS' if c else 'FAIL')+': '+label)
  if not c: fail.append(label)
 with sync_playwright() as p:
- browser=p.chromium.launch(headless=True, executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+ opts={'headless':True,'args':['--no-sandbox']}
+ executable=os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE')
+ if executable: opts['executable_path']=executable
+ elif Path('/usr/bin/chromium').exists(): opts['executable_path']='/usr/bin/chromium'
+ browser=p.chromium.launch(**opts)
  for w in (320,390,430):
   page=mod.render_page(browser,w,844,authenticated=True,standalone=True)
   page.evaluate("document.documentElement.classList.add('glass-test');document.documentElement.style.setProperty('--pwa-safe-top','47px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px')")

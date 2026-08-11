@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd(),dist=path.join(root,'dist');
 fs.rmSync(dist,{recursive:true,force:true});
-const excludedTop=new Set(['.git','.github','.venv','.pw-browsers','config','scripts','supabase','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__','QA-EVIDENCE-v2.9.11.0']);
+const excludedTop=new Set(['.git','.github','.venv','.pw-browsers','config','scripts','supabase','dist','test-results','pwa-test-results','glass-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__','QA-EVIDENCE-v2.9.11.0']);
 const excludedRoot=new Set(['package.json','manifest.webmanifest']);
 function copy(src,dst,depth=0){
  for(const entry of fs.readdirSync(src,{withFileTypes:true})){
