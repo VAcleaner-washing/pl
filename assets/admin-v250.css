@@ -1752,3 +1752,23 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .booking-card .booking-actions .primary-action{grid-column:1/-1}
   .booking-card .booking-finance>.booking-deposit-state{max-width:136px}
 }
+
+/* v4.0.34 — chemistry catalog uses space by content, not equal-height columns. */
+.chem-grid{
+  grid-template-columns:minmax(360px,.72fr) minmax(0,1.28fr);
+  align-items:start;
+}
+.chem-grid>.chem-card{align-self:start}
+.chem-product-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) max-content;
+  align-items:start;
+  gap:24px;
+}
+.chem-product-row>strong{
+  white-space:nowrap;
+  text-align:right;
+}
+@media(max-width:1100px){
+  .chem-grid{grid-template-columns:minmax(0,1fr)}
+}

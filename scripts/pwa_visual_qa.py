@@ -618,6 +618,12 @@ def desktop_suite(browser: Browser, qa: QA) -> None:
             page.wait_for_timeout(90)
             qa.check(no_overflow(page), f"Desktop: {view} view has no horizontal overflow")
             qa.check(page.locator('.main').evaluate('el=>el.scrollTop')==0, f"Desktop: {view} view always opens at the top")
+            if view == "chemistry":
+                chem_cards=page.locator('.chem-grid>.chem-card').evaluate_all("els=>els.map(el=>el.getBoundingClientRect())")
+                qa.check(len(chem_cards)==2 and chem_cards[0]['width']<chem_cards[1]['width'], "Desktop: chemistry gives the product catalogue the wider column")
+                qa.check(len(chem_cards)==2 and chem_cards[0]['height']<chem_cards[1]['height'], "Desktop: Puzzi chemistry card no longer stretches to catalogue height")
+                price_fit=page.locator('.chem-product-row>strong').evaluate_all("els=>els.map(el=>el.scrollWidth<=el.clientWidth+1)")
+                qa.check(bool(price_fit) and all(price_fit), "Desktop: chemistry prices stay on one line")
         page.locator('.nav button[data-view="bookings"]').click();page.wait_for_timeout(90)
         main_box=page.locator('.main').bounding_box();page.locator('.main').evaluate("el=>el.scrollTop=Math.min(520,Math.max(0,el.scrollHeight-el.clientHeight))");page.wait_for_timeout(50)
         desktop_toolbar=page.locator('.booking-toolbar').bounding_box()
