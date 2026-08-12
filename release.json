@@ -1,6 +1,6 @@
 {
-  "version": "4.0.40",
-  "build": 4040,
+  "version": "4.0.41",
+  "build": 4041,
   "releasedAt": "2026-08-12",
-  "label": "VAcleaner v4.0.40 — CLEAR PACKAGE NAMES"
+  "label": "VAcleaner v4.0.41 — PACKAGE CACHE BUST"
 }

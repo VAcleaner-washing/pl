@@ -2,7 +2,7 @@ import fs from 'node:fs';
 
 const config=JSON.parse(fs.readFileSync('config/vacleaner.json','utf8'));
 const bookingHtml=fs.readFileSync('bronuvannia/index.html','utf8');
-const bookingChunk=fs.readFileSync('_next/static/chunks/146ntlcv_t6~w-v4016.js','utf8');
+const bookingChunk=fs.readFileSync('_next/static/chunks/146ntlcv_t6~w-v4041.js','utf8');
 const packageHtml=fs.readFileSync('komplekty/index.html','utf8');
 const failures=[];
 

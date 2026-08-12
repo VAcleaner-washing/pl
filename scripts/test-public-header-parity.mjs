@@ -23,7 +23,7 @@ ok(/min-width:621px[^}]*max-width:860px/.test(exp),'621–860 three-column heade
 const site=fs.readFileSync(path.join(root,'assets/site-v400.js'),'utf8');
 ok(!/desktop-nav[^\n]*innerHTML|mobile-menu nav[^\n]*innerHTML/.test(site),'site-v400 does not rewrite nav after first paint');
 ok(/if\(document\.getElementById\('_R_'\)\)return/.test(site),'site-v400 does not double-bind React mobile menu');
-const home=fs.readFileSync(path.join(root,'_next/static/chunks/01pb0x0z72e50.js'),'utf8');
+const home=fs.readFileSync(path.join(root,'_next/static/chunks/01pb0x0z72e41.js'),'utf8');
 const hStart=home.indexOf('className:"site-header"'),hEnd=home.indexOf('className:`mobile-menu',hStart);
 const headerSlice=home.slice(hStart,hEnd>hStart?hEnd:hStart+5000);
 ok(headerSlice.includes('children:"Відгуки"')&&headerSlice.includes('children:"Підбір"'),'home React desktop header uses current labels');

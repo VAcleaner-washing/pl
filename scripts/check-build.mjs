@@ -6,6 +6,11 @@ const root=process.cwd(),release=JSON.parse(fs.readFileSync('release.json','utf8
 const ignoredDirs=new Set(['.git','.venv','.pw-browsers','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__']);
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>ignoredDirs.has(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 const files=walk(root),errors=[];
+const retiredChunkNames=['146ntlcv_t6~w-v4016.js','01pb0x0z72e50.js','09z99witl-xo-.js'];
+for(const file of files.filter(f=>/\.(?:html|txt|mjs|js|py)$/.test(f)&&!f.endsWith(`${path.sep}scripts${path.sep}check-build.mjs`))){
+ const source=fs.readFileSync(file,'utf8');
+ for(const stale of retiredChunkNames)if(source.includes(stale))errors.push(`stale cacheable chunk reference ${stale}: ${path.relative(root,file)}`);
+}
 // Never ship one-off historical import payloads or customer PII in the GitHub release.
 for(const rel of ['scripts/historical-bookings.parsed.json','scripts/historical-import-db.json','scripts/historical-import-plan.json']){
   if(fs.existsSync(path.join(root,rel)))errors.push(`Private historical import payload must not ship: ${rel}`);
@@ -97,7 +102,7 @@ else if(JSON.parse(fs.readFileSync(classicManifestPath,'utf8')).start_url!=='/ad
 const adminEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','index.ts'),'utf8');
 const statusEdge=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-status-correction-v1','index.ts'),'utf8');
 const settlementModule=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v3','settlement.mjs'),'utf8');
-const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w-v4016.js'),'utf8');
+const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w-v4041.js'),'utf8');
 const publicChunkDir=path.join(root,'_next','static','chunks');
 const publicChunkCorpus=fs.readdirSync(publicChunkDir).filter(name=>name.endsWith('.js')).map(name=>fs.readFileSync(path.join(publicChunkDir,name),'utf8')).join('\n');
 const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');

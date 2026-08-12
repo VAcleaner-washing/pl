@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root=process.cwd();
-const bundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w-v4016.js'),'utf8');
+const bundle=fs.readFileSync(path.join(root,'_next','static','chunks','146ntlcv_t6~w-v4041.js'),'utf8');
 const checks=[];
 const check=(ok,label)=>{if(!ok)throw new Error(label);checks.push(label)};
 
