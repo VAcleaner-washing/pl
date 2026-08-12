@@ -31,7 +31,7 @@ function apply(){
 
 
 const productCodes=[
-  [/HOME RESET/i,'elite'],[/Генеральне/i,'general'],[/Ідеальні вікна/i,'ideal_windows'],[/Тариф «Комбо»|Комбо/i,'combo'],[/Puzzi \+ Jimmy/i,'puzzi_jimmy'],[/Puzzi \+ робот/i,'puzzi_abir'],[/Kärcher SC 2/i,'sc2'],[/Робот для вікон/i,'abir'],[/Kärcher Puzzi/i,'puzzi']
+  [/HOME RESET|Весь дім/i,'elite'],[/Генеральне прибирання|Генеральне/i,'general'],[/Вікна та гладкі поверхні|Ідеальні вікна/i,'ideal_windows'],[/Текстиль \+ кухня та ванна|Тариф «Комбо»|Комбо/i,'combo'],[/Глибоке очищення текстилю|Puzzi \+ Jimmy/i,'puzzi_jimmy'],[/Текстиль \+ вікна|Puzzi \+ робот/i,'puzzi_abir'],[/Kärcher SC 2/i,'sc2'],[/Робот для вікон/i,'abir'],[/Kärcher Puzzi/i,'puzzi']
 ];
 function selectedProductCode(){
   const selected=document.querySelector('.booking-products button.is-selected');

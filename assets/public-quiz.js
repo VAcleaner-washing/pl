@@ -5,14 +5,14 @@
   const QUIZ_PROMO='PIDBIR5';
   const PRODUCT_INFO={
     puzzi:{label:'Kärcher Puzzi',price:700,desc:'Глибоке промивання диванів, крісел, матраців, килимів і текстилю.'},
-    puzzi_jimmy:{label:'Puzzi + Jimmy',price:1050,desc:'Сухе очищення шерсті, волосся й пилу перед глибоким промиванням текстилю.'},
-    puzzi_abir:{label:'Puzzi + робот ABIR',price:1500,desc:'Глибоке очищення текстилю та миття скла одним комплектом.'},
+    puzzi_jimmy:{label:'Глибоке очищення текстилю',price:1050,desc:'Puzzi + Jimmy · дивани, матраци, крісла, килими та інший домашній текстиль.'},
+    puzzi_abir:{label:'Текстиль + вікна',price:1500,desc:'Puzzi + робот для вікон · м’які меблі, матраци, скло та дзеркала.'},
     sc2:{label:'Kärcher SC 2 Deluxe',price:500,desc:'Кухня, ванна, плитка, шви, стики та тверді поверхні.'},
     abir:{label:'Робот для вікон',price:800,desc:'Скло, дзеркала та гладкі поверхні без роботи на висоті.'},
-    combo:{label:'Комбо · Puzzi + SC 2',price:1000,desc:'Текстиль + кухня або ванна одним готовим комплектом.'},
-    general:{label:'Генеральне прибирання',price:1300,desc:'Puzzi + SC 2 + Jimmy для текстилю, твердих поверхонь і сухого етапу.'},
-    ideal_windows:{label:'Ідеальні вікна',price:1200,desc:'SC 2 для рам, стиків і складних зон + робот для скла.'},
-    elite:{label:'HOME RESET',price:2300,desc:'Повний комплект для текстилю, кухні, ванної, сухого очищення та вікон.'}
+    combo:{label:'Текстиль + кухня та ванна',price:1000,desc:'Puzzi + SC 2 · дивани й матраци, кухня, ванна, плитка та шви.'},
+    general:{label:'Генеральне прибирання',price:1300,desc:'Puzzi + SC 2 + Jimmy · текстиль, матраци, кухня, ванна та тверді поверхні.'},
+    ideal_windows:{label:'Вікна та гладкі поверхні',price:1200,desc:'SC 2 + робот для вікон · рами, скло, дзеркала, плитка та шви.'},
+    elite:{label:'Весь дім · HOME RESET',price:2300,desc:'Повний комплект для текстилю, кухні, ванної, сухого очищення та вікон.'}
   };
   const EXTRA_INFO={
     neutralix:{label:'Neutralix · 250 мл',price:200},
@@ -29,14 +29,14 @@
   };
   const PRODUCT_TITLES={
     puzzi:['Kärcher Puzzi','Kärcher Puzzi 8/1'],
-    puzzi_jimmy:['Puzzi + Jimmy'],
-    puzzi_abir:['Puzzi + робот ABIR','Puzzi + робот для вікон'],
+    puzzi_jimmy:['Puzzi + Jimmy','Глибоке очищення','Глибоке очищення текстилю'],
+    puzzi_abir:['Puzzi + робот ABIR','Puzzi + робот для вікон','Текстиль + вікна'],
     sc2:['Kärcher SC 2','Kärcher SC 2 Deluxe'],
     abir:['Робот для вікон','Робот ABIR'],
-    combo:['Тариф «Комбо»','Комбо · Puzzi + SC 2'],
+    combo:['Тариф «Комбо»','Комбо · Puzzi + SC 2','Текстиль + кухня та ванна'],
     general:['Генеральне','Генеральне прибирання'],
-    ideal_windows:['Ідеальні вікна'],
-    elite:['HOME RESET']
+    ideal_windows:['Ідеальні вікна','Вікна та гладкі поверхні'],
+    elite:['HOME RESET','Весь дім за один вікенд','Весь дім · HOME RESET']
   };
   const EXTRA_TITLES={
     neutralix:['Neutralix · 250 мл','Neutralix · концентрат','Neutralix'],

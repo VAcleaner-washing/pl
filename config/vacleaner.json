@@ -52,10 +52,10 @@
         ]
       },
       "puzzi_jimmy": {
-        "label": "Puzzi + Jimmy",
-        "shortLabel": "Puzzi + Jimmy",
+        "label": "Глибоке очищення текстилю",
+        "shortLabel": "Глибоке очищення текстилю",
         "category": "Комплект",
-        "description": "Puzzi для глибокого миття + Jimmy для сухого очищення текстилю.",
+        "description": "Puzzi + Jimmy · дивани, матраци, крісла, килими та інший домашній текстиль.",
         "weekday": 1050,
         "weekend": 1150,
         "resources": {
@@ -68,14 +68,16 @@
           "jimmy"
         ],
         "aliases": [
-          "Puzzi + Jimmy"
+          "Puzzi + Jimmy",
+          "Глибоке очищення",
+          "Глибоке очищення текстилю"
         ]
       },
       "puzzi_abir": {
-        "label": "Puzzi + робот для вікон",
-        "shortLabel": "Puzzi + робот для вікон",
+        "label": "Текстиль + вікна",
+        "shortLabel": "Текстиль + вікна",
         "category": "Комплект",
-        "description": "Puzzi для меблів і текстилю + робот для вікон для скла та дзеркал.",
+        "description": "Puzzi + робот для вікон · м’які меблі, матраци, скло та дзеркала.",
         "weekday": 1500,
         "weekend": 1700,
         "resources": {
@@ -89,7 +91,8 @@
         ],
         "aliases": [
           "Puzzi + робот для вікон",
-          "Puzzi + робот ABIR"
+          "Puzzi + робот ABIR",
+          "Текстиль + вікна"
         ]
       },
       "sc2": {
@@ -132,10 +135,10 @@
         ]
       },
       "combo": {
-        "label": "Комбо · Puzzi + SC 2",
-        "shortLabel": "Комбо · Puzzi + SC 2",
+        "label": "Текстиль + кухня та ванна",
+        "shortLabel": "Текстиль + кухня та ванна",
         "category": "Комплект",
-        "description": "Puzzi для текстилю + SC 2 для кухні, ванної та твердих поверхонь.",
+        "description": "Puzzi + SC 2 · дивани й матраци, кухня, ванна, плитка та шви.",
         "weekday": 1000,
         "weekend": 1200,
         "saturdaySunday": 1800,
@@ -150,14 +153,15 @@
         ],
         "aliases": [
           "Тариф «Комбо»",
-          "Комбо · Puzzi + SC 2"
+          "Комбо · Puzzi + SC 2",
+          "Текстиль + кухня та ванна"
         ]
       },
       "general": {
         "label": "Генеральне прибирання",
-        "shortLabel": "Генеральне",
+        "shortLabel": "Генеральне прибирання",
         "category": "Комплект",
-        "description": "Puzzi, SC 2 і Jimmy для повного прибирання квартири.",
+        "description": "Puzzi + SC 2 + Jimmy · текстиль, матраци, кухня, ванна та тверді поверхні.",
         "weekday": 1300,
         "weekend": 1400,
         "saturdaySunday": 2200,
@@ -178,10 +182,10 @@
         ]
       },
       "ideal_windows": {
-        "label": "Ідеальні вікна",
-        "shortLabel": "Ідеальні вікна",
+        "label": "Вікна та гладкі поверхні",
+        "shortLabel": "Вікна та гладкі поверхні",
         "category": "Комплект",
-        "description": "SC 2 для рам і складних зон + робот для вікон для скла.",
+        "description": "SC 2 + робот для вікон · рами, скло, дзеркала, плитка та шви.",
         "weekday": 1200,
         "weekend": 1300,
         "saturdaySunday": 1900,
@@ -195,14 +199,15 @@
           "abir"
         ],
         "aliases": [
-          "Ідеальні вікна"
+          "Ідеальні вікна",
+          "Вікна та гладкі поверхні"
         ]
       },
       "elite": {
-        "label": "HOME RESET",
-        "shortLabel": "HOME RESET",
+        "label": "Весь дім · HOME RESET",
+        "shortLabel": "Весь дім · HOME RESET",
         "category": "Комплект",
-        "description": "Повний набір техніки для комплексного HOME RESET. У подарунок — будь-який аромадифузор VA HOME з колекції Entry.",
+        "description": "Puzzi + SC 2 + Jimmy + робот для вікон · повне прибирання всього дому. У подарунок — аромадифузор VA HOME Entry.",
         "weekday": 2300,
         "weekend": 2500,
         "saturdaySunday": 3500,
@@ -221,7 +226,9 @@
         ],
         "aliases": [
           "HOME RESET",
-          "HOME RESET · повний комплект"
+          "HOME RESET · повний комплект",
+          "Весь дім за один вікенд",
+          "Весь дім · HOME RESET"
         ]
       }
     },
