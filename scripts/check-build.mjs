@@ -111,7 +111,9 @@ execFileSync(process.execPath,[path.join(root,'scripts','test-final-desktop.mjs'
 execFileSync(process.execPath,[path.join(root,'scripts','test-pwa.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-css-architecture.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-operational-health.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-analytics-decision.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-retention.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-smart-guide-logic.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','check-backend-inventory.mjs')],{stdio:'pipe'});
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','e2e_smoke.py')],{stdio:'pipe'})}catch{errors.push('Playwright Python source does not compile')}
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','public_booking_resilience_qa.py')],{stdio:'pipe'})}catch{errors.push('public booking resilience source does not compile')}

@@ -30,7 +30,7 @@
   const PRODUCT_TITLES={
     puzzi:['Kärcher Puzzi','Kärcher Puzzi 8/1'],
     puzzi_jimmy:['Puzzi + Jimmy'],
-    puzzi_abir:['Puzzi + робот ABIR'],
+    puzzi_abir:['Puzzi + робот ABIR','Puzzi + робот для вікон'],
     sc2:['Kärcher SC 2','Kärcher SC 2 Deluxe'],
     abir:['Робот для вікон','Робот ABIR'],
     combo:['Тариф «Комбо»','Комбо · Puzzi + SC 2'],
@@ -76,8 +76,8 @@
         ['textile','Диван / крісла','М’які меблі'],['mattress','Матрац','Місце для сну'],['carpet','Килим','Плями й запахи'],['kitchen','Кухня','Жир і нагар'],['bathroom','Ванна кімната','Наліт та сантехніка'],['windows','Вікна / дзеркала','Скло й рами']
       ]
     }];
-    if(hasTextile())list.push({id:'textileProblems',title:'Є окремі плями або запахи?',note:'Можна обрати кілька варіантів — додамо лише те, що справді потрібне.',type:'multi',options:[
-      ['common_stain','Їжа, жир, косметика або невідома пляма','Підберемо універсальний плямовивідник'],['color_stain','Кава, чай, вино, ягоди або сік','Для старих кольорових слідів'],['odor','Неприємний запах','Сеча, домашні тварини або інші стійкі запахи'],['none','Нічого з цього','Потрібне лише загальне очищення']
+    if(hasTextile())list.push({id:'textileProblems',title:'Що є на текстилі?',note:'Позначте все, що бачите — так підберемо і техніку, і потрібні засоби.',type:'multi',options:[
+      ['common_stain','Їжа, жир, косметика або невідома пляма','Підберемо універсальний плямовивідник'],['color_stain','Кава, чай, вино, ягоди або сік','Для старих кольорових слідів'],['odor','Неприємний запах','Сеча, домашні тварини або інші стійкі запахи'],['dry_debris','Шерсть, волосся або багато пилу','Додамо сухе очищення перед промиванням'],['none','Нічого з цього','Потрібне лише загальне очищення']
     ]});
     if(hasTextile()&&state.textileProblems.includes('odor'))list.push({id:'textileOdor',title:'Який саме запах?',note:'Так збережемо чинний точний підбір Neutralix або Odour Zero.',type:'single',options:[
       ['urine','Сеча','Дитина або тварина'],['pet','Домашні тварини','Запах у текстилі або оббивці'],['musty','Затхлість / вогкість',''],['smoke','Тютюн / дим',''],['food','Їжа / кухня',''],['unknown','Не можу визначити','']
@@ -98,7 +98,7 @@
       ['acid_safe','Скло / кераміка / хром / нержавійка',''],['aluminum','Алюміній',''],['stone','Мармур / травертин / доломіт','Кислотні засоби не використовуємо'],['painted','Пофарбована поверхня',''],['unknown','Не знаю матеріал','Краще не ризикувати агресивною хімією']
     ]});
     if(hasWindows())list.push({id:'windowsMode',title:'Що саме з вікнами?',note:'Від цього залежить, чи достатньо робота, чи потрібна ще пара для рам і стиків.',type:'single',options:[
-      ['glass','Тільки скло / дзеркала',''],['frames','Скло + рами',''],['full','Скло + рами + кути / стики','']
+      ['glass','Тільки скло / дзеркала','Робот для вікон'],['frames','Скло + рами, кути / стики','Робот для скла + SC 2 для складних зон']
     ]});
     return list;
   }
@@ -108,26 +108,56 @@
     const value=valueFor(q.id);
     return q.type==='multi'?Array.isArray(value)&&value.length>0:Boolean(value);
   }
+  function sanitizeState(){
+    if(!hasTextile()){
+      state.textileProblems=[];
+      state.textileOdor='';
+    }else if(!state.textileProblems.includes('odor'))state.textileOdor='';
+
+    if(!hasKitchen()){
+      state.kitchenProblems=[];
+      state.kitchenGrillSurface='';
+      state.kitchenScaleSurface='';
+    }else{
+      if(!state.kitchenProblems.includes('carbon'))state.kitchenGrillSurface='';
+      if(!state.kitchenProblems.some(x=>['light_scale','heavy_scale_rust'].includes(x)))state.kitchenScaleSurface='';
+    }
+
+    if(!hasBath()){
+      state.bathProblems=[];
+      state.bathSurface='';
+    }else if(!state.bathProblems.some(x=>['light_scale','heavy_scale','rust'].includes(x)))state.bathSurface='';
+
+    if(!hasWindows())state.windowsMode='';
+    else if(state.windowsMode==='full')state.windowsMode='frames';
+  }
   function setAnswer(qId,value,type){
     if(type==='multi'){
       const arr=Array.isArray(state[qId])?[...state[qId]]:[];
-      if(qId==='textileProblems'&&value==='none'){state[qId]=arr.includes('none')?[]:['none'];state.textileOdor='';return;}
+      if(qId==='textileProblems'&&value==='none'){
+        state[qId]=arr.includes('none')?[]:['none'];
+        state.textileOdor='';
+        sanitizeState();
+        return;
+      }
       const withoutNone=qId==='textileProblems'?arr.filter(x=>x!=='none'):arr;
       const i=withoutNone.indexOf(value);if(i>=0)withoutNone.splice(i,1);else withoutNone.push(value);state[qId]=withoutNone;
       if(qId==='textileProblems'&&!withoutNone.includes('odor'))state.textileOdor='';
     }else state[qId]=value;
+    sanitizeState();
   }
 
   function extra(code,reason){return{code,...EXTRA_INFO[code],reason}}
   function result(){
     const zones=selectedZones(),text=hasTextile(),hard=hasKitchen()||hasBath(),windows=hasWindows();
-    const needJimmy=false;
+    const needJimmy=state.textileProblems.includes('dry_debris');
+    const needWindowSteam=windows&&state.windowsMode==='frames';
     let product='puzzi';
     const warnings=[];
     if(text&&hard&&windows)product='elite';
     else if(text&&hard)product=needJimmy?'general':'combo';
     else if(hard&&windows)product='ideal_windows';
-    else if(text&&windows)product='puzzi_abir';
+    else if(text&&windows)product=(needWindowSteam||needJimmy)?'elite':'puzzi_abir';
     else if(text)product=needJimmy?'puzzi_jimmy':'puzzi';
     else if(hard)product='sc2';
     else if(windows)product=state.windowsMode==='glass'?'abir':'ideal_windows';
@@ -181,6 +211,7 @@
   }
 
   function escapeHtml(value){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+  const formatMoney=value=>new Intl.NumberFormat('uk-UA').format(value);
   function zoneIcon(value){
     const common='viewBox="0 0 32 32" aria-hidden="true" focusable="false"';
     const icons={
@@ -203,6 +234,8 @@
     const meta=modal.querySelector('.vq-progress__meta');
     const back=modal.querySelector('.vq-back');
     const next=modal.querySelector('.vq-next');
+    const footer=modal.querySelector('.vq-dialog__footer');
+    const resultCta=modal.querySelector('.vq-result-cta');
     const dialog=modal.querySelector('.vq-dialog');
     const savedScrollTop=preserveScroll?body.scrollTop:0;
     dialog?.classList.toggle('is-result',isResult);
@@ -210,22 +243,28 @@
     if(isResult){
       const r=result();
       progress.style.width='100%';meta.textContent='Ваше рішення';back.hidden=false;next.hidden=true;
+      footer.classList.add('is-result');
       if(!preserveScroll)body.scrollTop=0;
       const selectedExtras=r.extras.filter(x=>selectedResultExtras.has(x.code));
-      const discountedRental=Math.round(r.productInfo.price*.95);
+      const discountedRental=r.productInfo.price-Math.round(r.productInfo.price*.05);
       const total=discountedRental+selectedExtras.reduce((sum,x)=>sum+x.price,0);
-      body.innerHTML=`<div class="vq-result"><p class="vq-eyebrow">Персональний підбір VAcleaner</p><h2>Ваше рішення готове.</h2><article class="vq-result__product"><span>Техніка</span><h3>${escapeHtml(r.productInfo.label)}</h3><p>${escapeHtml(r.productInfo.desc)}</p><strong>${new Intl.NumberFormat('uk-UA').format(r.productInfo.price)} грн / будня доба</strong>${r.includesPuzzi?'<small>Для Puzzi базові 8 порцій миючої хімії вже видаються в комплекті.</small>':''}</article>${r.extras.length?`<div class="vq-result__extras"><h3>Під ваші задачі рекомендуємо</h3>${r.extras.map(x=>{const selected=selectedResultExtras.has(x.code);return`<article class="${selected?'is-added':''}"><div><strong>${escapeHtml(x.label)}</strong><p>${escapeHtml(x.reason)}</p></div><div class="vq-result__extra-action"><b>+${new Intl.NumberFormat('uk-UA').format(x.price)} грн</b><button type="button" data-result-extra="${escapeHtml(x.code)}" aria-pressed="${selected?'true':'false'}">${selected?'Додано ✓':'Додати'}</button></div></article>`}).join('')}</div>`:'<div class="vq-result__clean"><strong>Додаткова хімія не обов’язкова</strong><span>За вашими відповідями базового рішення достатньо.</span></div>'}${r.warnings.length?`<div class="vq-result__warnings"><strong>Важливо</strong>${r.warnings.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`:''}<div class="vq-result__bonus"><span>Бонус за підбір</span><strong>−5% на оренду</strong><p>Застосуємо автоматично при бронюванні. Якщо у вас уже є більша знижка лояльності — система залишить вигіднішу.</p></div><div class="vq-result__total"><span>Орієнтовно за 1 будню добу</span><strong>${new Intl.NumberFormat('uk-UA').format(total)} грн</strong><small>Уже зі знижкою −5% на оренду${selectedExtras.length?' та обраними додатковими засобами':'. Додаткові засоби можна додати вище'}.</small></div><div class="vq-result__actions"><a class="vq-book" href="${bookingUrl(r,selectedExtras)}">Забронювати →</a><a class="vq-manager" href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" rel="noreferrer">Запитати менеджера →</a><button type="button" class="vq-restart">Пройти заново</button></div></div>`;
+      body.innerHTML=`<div class="vq-result"><p class="vq-eyebrow">Персональний підбір VAcleaner</p><h2>Ваше рішення готове.</h2><article class="vq-result__product"><span>Техніка</span><h3>${escapeHtml(r.productInfo.label)}</h3><p>${escapeHtml(r.productInfo.desc)}</p><div class="vq-result__rental-price"><s>${formatMoney(r.productInfo.price)} грн</s><strong>${formatMoney(discountedRental)} грн / будня доба</strong><small>Ціна з бонусом −5% за проходження підбору</small></div>${r.includesPuzzi?'<small>Для Puzzi базові 8 порцій миючої хімії вже видаються в комплекті.</small>':''}</article>${r.extras.length?`<div class="vq-result__extras"><h3>Під ваші задачі рекомендуємо</h3>${r.extras.map(x=>{const selected=selectedResultExtras.has(x.code);return`<article class="${selected?'is-added':''}"><div><strong>${escapeHtml(x.label)}</strong><p>${escapeHtml(x.reason)}</p></div><div class="vq-result__extra-action"><b>+${formatMoney(x.price)} грн</b><button type="button" data-result-extra="${escapeHtml(x.code)}" aria-pressed="${selected?'true':'false'}">${selected?'Додано ✓':'Додати'}</button></div></article>`}).join('')}</div>`:'<div class="vq-result__clean"><strong>Додаткова хімія не обов’язкова</strong><span>За вашими відповідями базового рішення достатньо.</span></div>'}${r.warnings.length?`<div class="vq-result__warnings"><strong>Важливо</strong>${r.warnings.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`:''}<div class="vq-result__actions"><a class="vq-manager" href="https://www.instagram.com/vacleaner_washing.pl/" target="_blank" rel="noreferrer">Запитати менеджера →</a><button type="button" class="vq-restart">Пройти заново</button></div></div>`;
+      resultCta.hidden=false;
+      resultCta.innerHTML=`<div><span>Разом за будню добу</span><strong>${formatMoney(total)} грн</strong><small>−5% уже враховано${selectedExtras.length?' · додаткові засоби включено':''}</small></div><a class="vq-book" href="${bookingUrl(r,selectedExtras)}">Забронювати →</a>`;
       if(preserveScroll)body.scrollTop=savedScrollTop;
       body.querySelectorAll('[data-result-extra]').forEach(button=>button.addEventListener('click',()=>{const code=button.dataset.resultExtra;if(selectedResultExtras.has(code))selectedResultExtras.delete(code);else selectedResultExtras.add(code);render({preserveScroll:true})}));
-      body.querySelector('.vq-book')?.addEventListener('click',()=>fire('cleaning_quiz_booking_click',{quiz_product:r.product,quiz_extras:selectedExtras.map(x=>x.code).join(','),promo_code:QUIZ_PROMO}));
+      resultCta.querySelector('.vq-book')?.addEventListener('click',()=>fire('cleaning_quiz_booking_click',{quiz_product:r.product,quiz_extras:selectedExtras.map(x=>x.code).join(','),promo_code:QUIZ_PROMO}));
       body.querySelector('.vq-restart')?.addEventListener('click',()=>{state=blankState();selectedResultExtras.clear();stepIndex=0;render()});
       fireOnceCompleted(r);
       return;
     }
     const q=qs[stepIndex];
     const current=valueFor(q.id);
-    progress.style.width=`${Math.max(8,Math.round((stepIndex/qs.length)*100))}%`;
-    meta.textContent=`Крок ${stepIndex+1} з ${qs.length}`;
+    footer.classList.remove('is-result');
+    resultCta.hidden=true;
+    resultCta.innerHTML='';
+    progress.style.width=`${Math.max(8,Math.round(((stepIndex+.35)/Math.max(qs.length,1))*100))}%`;
+    meta.textContent=q.id==='zones'?'Початок · оберіть зони':`Етап ${stepIndex+1} · уточнюємо деталі`;
     back.hidden=stepIndex===0;
     next.hidden=q.type==='single';
     next.disabled=!canContinue(q);
@@ -251,7 +290,7 @@
   }
   function openQuiz(){
     if(!modal){
-      modal=document.createElement('div');modal.className='vq-layer';modal.innerHTML=`<section class="vq-dialog" role="dialog" aria-modal="true" aria-labelledby="vq-title"><header class="vq-dialog__header"><button type="button" class="vq-back" aria-label="Назад">‹</button><div class="vq-progress"><span class="vq-progress__meta">Крок 1</span><div><i class="vq-progress__bar"></i></div></div><button type="button" class="vq-close" aria-label="Закрити">×</button></header><div class="vq-dialog__body" id="vq-title"></div><div class="vq-dialog__footer"><button type="button" class="vq-next">Далі →</button></div></section>`;document.body.appendChild(modal);
+      modal=document.createElement('div');modal.className='vq-layer';modal.innerHTML=`<section class="vq-dialog" role="dialog" aria-modal="true" aria-labelledby="vq-title"><header class="vq-dialog__header"><button type="button" class="vq-back" aria-label="Назад">‹</button><div class="vq-progress"><span class="vq-progress__meta">Початок · оберіть зони</span><div><i class="vq-progress__bar"></i></div></div><button type="button" class="vq-close" aria-label="Закрити">×</button></header><div class="vq-dialog__body" id="vq-title"></div><div class="vq-dialog__footer"><button type="button" class="vq-next">Далі →</button><div class="vq-result-cta" hidden></div></div></section>`;document.body.appendChild(modal);
       modal.addEventListener('click',e=>{if(e.target===modal)closeQuiz()});
       modal.querySelector('.vq-close').addEventListener('click',closeQuiz);
       modal.querySelector('.vq-back').addEventListener('click',()=>{if(stepIndex>0){stepIndex-=1;render()}});

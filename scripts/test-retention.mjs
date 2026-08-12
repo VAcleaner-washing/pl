@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import {discountInfo} from '../supabase/functions/vacleaner-admin-bookings-v3/pricing.mjs';
 
 let passed=0;
@@ -28,4 +29,13 @@ check('campaign data never directly exposes client tables',()=>{assert.ok(migrat
 
 check('campaign management has a dedicated admin view',()=>{assert.ok(admin.includes("nav('campaigns','Кампанії'"));assert.ok(admin.includes("v==='campaigns'"));const clients=admin.slice(admin.indexOf('function renderClients()'),admin.indexOf('function openClientCard'));assert.ok(!clients.includes('campaignPanel()'))});
 check('campaign lifecycle supports archive and guarded deletion',()=>{assert.ok(campaignApi.includes('action==="archive_campaign"'));assert.ok(campaignApi.includes('action==="delete_campaign"'));assert.ok(campaignApi.includes('campaign_has_history'));assert.ok(admin.includes('data-campaign-archive'));assert.ok(admin.includes('data-campaign-delete'))});
+
+const lifecycleSource=admin.slice(admin.indexOf('const COMPLETED_VISIBLE_DAYS'),admin.indexOf('function scheduleMeta'));
+const lifecycleContext={Date,result:null};
+vm.runInNewContext(`${lifecycleSource};result={isRecentCompleted,isFinishedCompleted,completionMoment,days:COMPLETED_VISIBLE_DAYS}`,lifecycleContext);
+const lifecycle=lifecycleContext.result,now=Date.parse('2026-08-12T12:00:00.000Z');
+check('returned rentals stay recent for exactly 14 days',()=>{assert.equal(lifecycle.days,14);assert.equal(lifecycle.isRecentCompleted({status:'completed',completed_at:'2026-07-30T12:00:01.000Z'},now),true);assert.equal(lifecycle.isFinishedCompleted({status:'completed',completed_at:'2026-07-29T12:00:00.000Z'},now),true)});
+check('active bookings never enter completed-rental groups',()=>{const booking={status:'issued',completed_at:'2026-07-01T12:00:00.000Z'};assert.equal(lifecycle.isRecentCompleted(booking,now),false);assert.equal(lifecycle.isFinishedCompleted(booking,now),false)});
+check('actual completed_at wins over planned return date',()=>{const booking={status:'completed',return_date:'2026-07-01',completed_at:'2026-08-11T12:00:00.000Z'};assert.equal(lifecycle.isRecentCompleted(booking,now),true);assert.equal(lifecycle.completionMoment(booking),Date.parse(booking.completed_at))});
+check('booking filters separate returned and finished rentals',()=>{assert.ok(admin.includes("state.filter==='completed')x=x.filter(b=>isRecentCompleted(b)"));assert.ok(admin.includes("state.filter==='finished')x=x.filter(b=>isFinishedCompleted(b)"));assert.ok(admin.includes("['finished','Завершені оренди']"));assert.ok(admin.includes("if(state.filter==='all')x=x.filter(b=>!['completed','cancelled'].includes(b.status))"))});
 console.log(`Retention/campaign rules PASS: ${passed} checks.`);

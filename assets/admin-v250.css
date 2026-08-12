@@ -1772,3 +1772,37 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 @media(max-width:1100px){
   .chem-grid{grid-template-columns:minmax(0,1fr)}
 }
+
+/* v4.0.37 — decision analytics 2.0: finance mix, acquisition, demand and period-cohort funnel. */
+.analytics-decision-grid{grid-auto-flow:row dense}
+.analytics-decision-grid .popularity-panel{grid-column:1}
+.analytics-decision-grid .customer-health-panel{grid-column:2}
+.kpi-context{display:block;margin-top:5px;color:var(--muted);font-size:9.5px;line-height:1.3}
+.analytics-kpis .kpi{min-height:112px}
+.revenue-breakdown{display:grid;gap:13px}
+.revenue-breakdown-row{display:grid;gap:6px}
+.revenue-breakdown-row>div:first-child{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;gap:10px}
+.revenue-breakdown-row span{font-size:12px}.revenue-breakdown-row b{color:var(--muted);font-size:10px}.revenue-breakdown-row strong{font-size:13px}
+.analytics-finance-note{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding:11px 12px;border:1px solid rgba(214,164,95,.18);border-radius:12px;background:rgba(214,164,95,.045)}
+.analytics-finance-note span{color:var(--muted);font-size:11px}.analytics-finance-note strong{color:#efb978;font-size:13px}
+.analytics-scope-note{margin:-3px 0 15px;padding:10px 11px;border:1px solid rgba(214,164,95,.18);border-radius:11px;background:rgba(214,164,95,.045);color:#b9b1a5;font-size:10.5px;line-height:1.45}
+.source-performance-list{display:grid;gap:13px}.source-performance-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,.9fr);gap:6px 14px;align-items:center}
+.source-performance-row>div:first-child{display:flex;align-items:center;justify-content:space-between;gap:10px}.source-performance-row>div:first-child span{font-size:12px}.source-performance-row>div:first-child strong{color:var(--gold-2);font-size:16px}
+.source-performance-row>small{grid-column:2;color:var(--muted);font-size:9.5px;line-height:1.35}
+.weekday-demand{display:grid;gap:9px}.weekday-demand-row{display:grid;grid-template-columns:24px minmax(60px,1fr) 22px minmax(70px,auto);align-items:center;gap:8px}
+.weekday-demand-row>span{color:var(--muted);font-size:10px;font-weight:750}.weekday-demand-row.weekend>span{color:var(--gold-2)}.weekday-demand-row>strong{font-size:12px;text-align:right}.weekday-demand-row>small{color:var(--muted);font-size:9px;text-align:right}
+.weekday-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:14px}.weekday-summary span{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.018);color:var(--muted);font-size:10px}.weekday-summary b{color:var(--text);font-size:14px}
+.booking-funnel-panel .status-panel-head>strong{font-size:16px}
+@media(max-width:1200px){
+  .analytics-decision-grid .popularity-panel,.analytics-decision-grid .customer-health-panel{grid-column:1}
+}
+@media(max-width:900px){
+  .analytics-kpis .kpi{min-height:101px}
+  .kpi-context{font-size:9px}
+  .source-performance-row{grid-template-columns:minmax(0,1fr)}
+  .source-performance-row>small{grid-column:1}
+}
+@media(max-width:360px){
+  .weekday-demand-row{grid-template-columns:22px minmax(50px,1fr) 18px 62px;gap:6px}
+  .revenue-breakdown-row>div:first-child{gap:7px}
+}

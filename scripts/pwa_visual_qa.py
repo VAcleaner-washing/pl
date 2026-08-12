@@ -70,6 +70,7 @@ def booking(idx: int, status: str, product: str = "puzzi", label: str = "Kärche
 HISTORICAL_COMPLETED = booking(6, "completed", "sc2", "Kärcher SC 2 Deluxe")
 HISTORICAL_COMPLETED.update({
     "booking_code": "HIST-PWA-001",
+    "completed_at": f"{iso(-1)}T18:00:00.000Z",
     "source": "historical_import",
     "extras": {
         "selected_items": [{
@@ -85,6 +86,17 @@ HISTORICAL_COMPLETED.update({
     },
 })
 
+ARCHIVED_COMPLETED = booking(7, "completed", "puzzi", "Kärcher Puzzi 8/1")
+ARCHIVED_COMPLETED.update({
+    "booking_code": "HIST-PWA-ARCHIVED",
+    "start_date": iso(-22),
+    "return_date": iso(-21),
+    "start_at": f"{iso(-22)}T07:00:00.000Z",
+    "end_at": f"{iso(-21)}T09:30:00.000Z",
+    "completed_at": f"{iso(-20)}T12:00:00.000Z",
+    "updated_at": f"{iso(-20)}T12:00:00.000Z",
+})
+
 BOOKINGS = [
     booking(1, "pending"),
     booking(2, "waiting_payment", "puzzi_jimmy", "Puzzi + Jimmy"),
@@ -92,6 +104,7 @@ BOOKINGS = [
     booking(4, "issued"),
     booking(5, "completed"),
     HISTORICAL_COMPLETED,
+    ARCHIVED_COMPLETED,
 ]
 # The process-flow regression must exercise Telegram's phone deep-link fallback.
 BOOKINGS[0]["customer_telegram"] = ""
@@ -373,6 +386,12 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 sleeping_geometry=page.locator('.reactivation-summary').evaluate("""el=>{const summary=el.querySelector(':scope>div')?.getBoundingClientRect(),segments=[...el.querySelectorAll(':scope>button:not(.btn)')].map(x=>x.getBoundingClientRect());return{summary:summary?{l:summary.left,r:summary.right,t:summary.top,b:summary.bottom}:null,segments:segments.map(r=>({l:r.left,r:r.right,t:r.top,b:r.bottom}))}}""")
                 qa.check(sleeping_geometry['summary'] is not None and len(sleeping_geometry['segments'])==2 and all(r['t']>=sleeping_geometry['summary']['b']-1 for r in sleeping_geometry['segments']), f"{label}: sleeping-client total stays on its own row without overlapping segment cards")
                 qa.check(page.locator('.analytics-metric-switch [data-product-metric]').count()==3, f"{label}: popularity can switch between rentals, revenue and average check")
+                qa.check(page.locator('.revenue-structure-panel').count()==1 and 'Хімія Puzzi' in page.locator('.revenue-structure-panel').inner_text(), f"{label}: revenue is reconciled into rental, delivery, chemistry and extras")
+                qa.check(page.locator('.source-performance-panel').count()==1 and 'Instagram' in page.locator('.source-performance-panel').inner_text(), f"{label}: acquisition source cohort is visible")
+                qa.check(page.locator('.weekday-demand-panel .weekday-demand-row').count()==7, f"{label}: demand is split across all seven issue weekdays")
+                qa.check(page.locator('.booking-funnel-panel').count()==1 and 'створених за вибраний період' in page.locator('.booking-funnel-panel').inner_text(), f"{label}: status funnel uses the selected-period creation cohort")
+                for panel in ['.revenue-structure-panel','.source-performance-panel','.weekday-demand-panel','.booking-funnel-panel']:
+                    qa.check(page.locator(panel).evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: {panel} stays inside the analytics viewport")
                 qa.check(page.locator('.topbar:visible').count()==0, f"{label}: analytics removes the unused mobile search bar")
                 qa.check(page.locator('.analytics-kpis .kpi').count()==4, f"{label}: analytics uses a compact four-KPI decision strip")
             if view=='chemistry':
@@ -396,6 +415,12 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.extras-panel', has_text='Насадки «Преміум» до SC 2').count()==1, f"{label}: historical extra remains visible in booking detail")
         qa.check(page.locator('.historical-extra-note', has_text='у складі історичної суми').count()==1, f"{label}: historical detail explains extra is included in original total")
         page.locator('.detail .back').click();page.wait_for_timeout(40)
+
+        # Older returned rentals automatically leave Returned and appear in Finished rentals.
+        qa.check(page.locator('.booking-card', has_text='HIST-PWA-ARCHIVED').count()==0, f"{label}: 20-day-old rental is absent from Returned")
+        page.locator('[data-filter="finished"]').click();page.wait_for_timeout(40)
+        qa.check(page.locator('.booking-card', has_text='HIST-PWA-ARCHIVED').count()==1, f"{label}: 20-day-old rental appears in Finished rentals")
+        qa.check(page.locator('.booking-card', has_text='HIST-PWA-001').count()==0, f"{label}: recent returned rental is absent from Finished rentals")
         if page.locator('[data-filter="all"]').count(): page.locator('[data-filter="all"]').click()
 
         # Finance badges must remain rectangular, aligned and contained on narrow cards.

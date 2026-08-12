@@ -157,7 +157,8 @@ has(admin,'MOBILE_MORE_VIEWS.includes(state.view)','More active state uses the s
 has(adminHtml,'id="mobileNewBooking"','mobile navigation has a dedicated centered New action in initial HTML');
 has(pwaQa,'analytics activates More without a second visible active item','analytics correctly maps to More without double highlighting');
 
-has(admin,"state.filter==='completed'",'returned bookings have an explicit date sort');
+has(admin,"['completed','finished'].includes(state.filter)",'returned and finished bookings have an explicit completion-time sort');
+has(admin,"['finished','Завершені оренди']",'finished rentals have a dedicated booking filter');
 has(admin,"state.filter=b.dataset.filter;renderBookings();resetViewScroll()",'booking filter changes reset the main scroll owner');
 has(css,'html,body,.app{height:100dvh;min-height:0;overflow:hidden}','desktop shell locks body scrolling');
 has(css,'.main{position:fixed;top:var(--topbar);right:0;bottom:0;left:var(--sidebar)','desktop main starts below the fixed topbar');

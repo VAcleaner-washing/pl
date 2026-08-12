@@ -923,3 +923,94 @@ html.vq-standalone-page .vq-dialog{max-height:calc(100dvh - 116px)}
   }
   .vq-result__extra-action b{text-align:left}
 }
+
+/* v4.0.35 — Smart Guide logic/result conversion pass. */
+.vq-result__rental-price{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:7px 12px;
+  margin-top:16px;
+}
+.vq-result__rental-price s{
+  color:#7f817f;
+  font-size:14px;
+  text-decoration-thickness:1px;
+}
+.vq-result__rental-price strong{
+  color:#efc681;
+  font-size:20px;
+}
+.vq-result__rental-price small{
+  flex-basis:100%;
+  color:#b69562;
+  font-size:11px;
+  line-height:1.4;
+}
+.vq-dialog__footer.is-result{
+  justify-content:stretch;
+  padding:12px 20px max(12px,env(safe-area-inset-bottom));
+  background:rgba(10,12,13,.96);
+  box-shadow:0 -16px 34px rgba(0,0,0,.22);
+}
+.vq-result-cta{
+  width:100%;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:18px;
+}
+.vq-result-cta[hidden]{display:none}
+.vq-result-cta>div{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:baseline;
+  gap:2px 10px;
+}
+.vq-result-cta span{
+  color:#979998;
+  font-size:11px;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.vq-result-cta strong{
+  color:#f2d296;
+  font-size:24px;
+  white-space:nowrap;
+}
+.vq-result-cta small{
+  grid-column:1/-1;
+  color:#777b7a;
+  font-size:10px;
+}
+.vq-result-cta .vq-book{
+  min-width:190px;
+  min-height:52px;
+}
+.vq-result__actions{
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  margin-top:22px;
+}
+.vq-result__actions .vq-manager,
+.vq-result__actions .vq-restart{min-height:46px}
+
+@media(max-width:620px){
+  .vq-dialog__footer.is-result{padding:10px 12px max(10px,env(safe-area-inset-bottom))}
+  .vq-result-cta{gap:10px}
+  .vq-result-cta>div{display:block}
+  .vq-result-cta span,.vq-result-cta small{display:block}
+  .vq-result-cta span{font-size:9px;line-height:1.2}
+  .vq-result-cta strong{display:block;margin-top:2px;font-size:22px;line-height:1.05}
+  .vq-result-cta small{margin-top:3px;font-size:9px;white-space:nowrap}
+  .vq-result-cta .vq-book{width:auto;min-width:148px;min-height:50px;padding:0 14px}
+  .vq-result__rental-price{gap:5px 9px}
+  .vq-result__rental-price strong{font-size:18px}
+  .vq-result__actions{grid-template-columns:1fr;gap:8px}
+}
+
+@media(max-width:380px){
+  .vq-result-cta .vq-book{min-width:132px;padding:0 10px;font-size:13px}
+  .vq-result-cta small{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+}
