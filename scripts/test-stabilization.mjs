@@ -152,7 +152,7 @@ has(adminHtml,'data-mobile-view="upcoming" class="active"','initial mobile HTML 
 has(adminHtml,'<span>Найближчі</span></button><button data-mobile-view="bookings"','mobile nav order begins Upcoming then Bookings');
 has(admin,'comparisonLabel=previous?`проти ${analyticsRangeLabel(previous)}`','analytics comparison exposes the concrete previous date range');
 has(admin,"nav('analytics','Аналітика',ico.chart)",'analytics remains an explicit navigation destination');
-has(admin,"const MOBILE_MORE_VIEWS=['equipment','clients','campaigns','analytics','chemistry','settings']",'More active-state mapping includes analytics and all secondary views');
+has(admin,"const MOBILE_MORE_VIEWS=['equipment','clients','campaigns','finances','analytics','chemistry','settings']",'More active-state mapping includes finances, analytics and all secondary views');
 has(admin,'MOBILE_MORE_VIEWS.includes(state.view)','More active state uses the shared secondary-view mapping');
 has(adminHtml,'id="mobileNewBooking"','mobile navigation has a dedicated centered New action in initial HTML');
 has(pwaQa,'analytics activates More without a second visible active item','analytics correctly maps to More without double highlighting');

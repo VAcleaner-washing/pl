@@ -8,6 +8,10 @@ const normalizePhone=(value:unknown)=>{const digits=String(value??"").replace(/\
 const safeBooking=(row:Record<string,unknown>)=>{const copy={...row};delete copy.ip_hash;return copy};
 const normalizePromoCode=(value:unknown)=>cleanText(value,32).toUpperCase().replace(/[^A-Z0-9_-]/g,"");
 const validUuid=(value:unknown)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value??""));
+const EXPENSE_CATEGORIES=new Set(["chemistry","consumables","repair","delivery","advertising","fees","utilities","other","equipment","improvement"]);
+const INVESTMENT_CATEGORIES=new Set(["equipment","improvement"]);
+const validIsoDate=(value:unknown)=>/^\d{4}-\d{2}-\d{2}$/.test(String(value??""))&&!Number.isNaN(Date.parse(`${value}T12:00:00Z`));
+const safeExpense=(row:Record<string,unknown>)=>({id:row.id,spent_on:row.spent_on,amount:row.amount,category:row.category,cost_type:row.cost_type,vendor:row.vendor,note:row.note,created_at:row.created_at,updated_at:row.updated_at});
 async function personalPromoCode(campaignId:string,phone:string){const bytes=new TextEncoder().encode(`${campaignId}:${phone}`),hash=await crypto.subtle.digest("SHA-256",bytes),hex=[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase();return `VA-${hex.slice(0,7)}`}
 async function returnEligibleCustomers(db:any,dormantDays:number,minCompletedOrders:number){
   const cutoff=new Date(Date.now()-Math.max(1,dormantDays)*86400000).toISOString().slice(0,10);
@@ -32,8 +36,23 @@ Deno.serve(async request=>{
     const {data:admin}=await db.from("admin_users").select("user_id").eq("user_id",userData.user.id).maybeSingle();if(!admin)return json({error:"forbidden"},403);
     const body=await request.json() as Record<string,unknown>,action=String(body.action??"");
     if(action==="list"){
-      const {data,error}=await db.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").order("start_at",{ascending:false}).limit(1000);
-      if(error)throw error;return json({bookings:(data??[]).map((row:any)=>safeBooking(row))});
+      const [{data:bookings,error:bookingError},{data:expenses,error:expenseError}]=await Promise.all([
+        db.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").order("start_at",{ascending:false}).limit(1000),
+        db.from("vacleaner_expenses").select("id,spent_on,amount,category,cost_type,vendor,note,created_at,updated_at").is("archived_at",null).order("spent_on",{ascending:false}).order("created_at",{ascending:false}).limit(5000),
+      ]);
+      if(bookingError||expenseError)throw bookingError||expenseError;
+      return json({bookings:(bookings??[]).map((row:any)=>safeBooking(row)),expenses:(expenses??[]).map((row:any)=>safeExpense(row))});
+    }
+    if(action==="save_expense"){
+      const expenseId=String(body.expenseId??""),spentOn=String(body.spentOn??""),category=String(body.category??""),amount=Math.round(Number(body.amount)||0);
+      if((expenseId&&!validUuid(expenseId))||!validIsoDate(spentOn)||spentOn>new Date().toISOString().slice(0,10)||!EXPENSE_CATEGORIES.has(category)||amount<1||amount>10000000)return json({error:"invalid_expense"},400);
+      const now=new Date().toISOString(),costType=INVESTMENT_CATEGORIES.has(category)?"investment":"operating",row={spent_on:spentOn,amount,category,cost_type:costType,vendor:cleanText(body.vendor,120)||null,note:cleanText(body.note,500)||null,updated_by:userData.user.id,updated_at:now};
+      if(expenseId){const {data,error}=await db.from("vacleaner_expenses").update(row).eq("id",expenseId).is("archived_at",null).select("id,spent_on,amount,category,cost_type,vendor,note,created_at,updated_at").maybeSingle();if(error)throw error;if(!data)return json({error:"expense_not_found"},404);return json({expense:safeExpense(data)})}
+      const {data,error}=await db.from("vacleaner_expenses").insert({...row,created_by:userData.user.id}).select("id,spent_on,amount,category,cost_type,vendor,note,created_at,updated_at").single();if(error||!data)throw error||new Error("expense_insert_failed");return json({expense:safeExpense(data)});
+    }
+    if(action==="archive_expense"){
+      const expenseId=String(body.expenseId??"");if(!validUuid(expenseId))return json({error:"invalid_expense"},400);const now=new Date().toISOString();
+      const {data,error}=await db.from("vacleaner_expenses").update({archived_at:now,archived_by:userData.user.id,updated_at:now,updated_by:userData.user.id}).eq("id",expenseId).is("archived_at",null).select("id").maybeSingle();if(error)throw error;if(!data)return json({error:"expense_not_found"},404);return json({ok:true});
     }
     if(action==="clients"){
       const {data,error}=await db.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000);

@@ -112,6 +112,7 @@ execFileSync(process.execPath,[path.join(root,'scripts','test-pwa.mjs')],{stdio:
 execFileSync(process.execPath,[path.join(root,'scripts','test-css-architecture.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-operational-health.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-analytics-decision.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-financial-control.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-retention.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-smart-guide-logic.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','check-backend-inventory.mjs')],{stdio:'pipe'});
