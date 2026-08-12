@@ -24,6 +24,9 @@ with sync_playwright() as p:
         page=browser.new_page(viewport={'width':w,'height':h})
         page.set_content(HTML);page.add_style_tag(content=CSS);page.add_script_tag(content=JS)
         page.wait_for_selector('.vq-layer.is-open');page.wait_for_timeout(80)
+        header=page.locator('.vq-dialog__header').evaluate("""el=>{const h=el.getBoundingClientRect(),back=el.querySelector('.vq-back').getBoundingClientRect(),progress=el.querySelector('.vq-progress').getBoundingClientRect(),close=el.querySelector('.vq-close').getBoundingClientRect(),meta=el.querySelector('.vq-progress__meta');return{h,back,progress,close,metaHeight:meta.getBoundingClientRect().height,metaScrollHeight:meta.scrollHeight}}""")
+        check(header['progress']['left']>=header['back']['right']+8 and header['close']['left']>=header['progress']['right']+8 and header['progress']['width']>=header['h']['width']*.7,f'{w}x{h}: progress owns the center header track without close-button overlap')
+        check(header['metaScrollHeight']<=header['metaHeight']+1 and header['metaHeight']<20,f'{w}x{h}: Початок · оберіть зони stays on one line')
         for step in range(3):
             body=page.locator('.vq-dialog__body').evaluate("el=>({h:el.clientHeight,sh:el.scrollHeight,st:el.scrollTop,ov:getComputedStyle(el).overflowY})")
             check(body['sh']<=body['h']+1 and body['st']==0,f'{w}x{h}: question step {step+1} fits without inner scroll')

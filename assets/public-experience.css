@@ -1014,3 +1014,26 @@ html.vq-standalone-page .vq-dialog{max-height:calc(100dvh - 116px)}
   .vq-result-cta .vq-book{min-width:132px;padding:0 10px;font-size:13px}
   .vq-result-cta small{max-width:150px;overflow:hidden;text-overflow:ellipsis}
 }
+
+/* v4.0.38 — Smart Guide progress owns the full header width. */
+html.vq-standalone-page .vq-dialog__header{
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+}
+html.vq-standalone-page .vq-dialog__header>.vq-back{grid-column:1;justify-self:start}
+html.vq-standalone-page .vq-dialog__header>.vq-progress{grid-column:2;width:100%;min-width:0}
+html.vq-standalone-page .vq-dialog__header>.vq-close{grid-column:3;justify-self:end}
+html.vq-standalone-page .vq-progress__meta{
+  display:block;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+@media(min-width:621px){
+  html.vq-standalone-page .vq-dialog__header{grid-template-columns:44px minmax(0,1fr) 44px}
+}
+@media(max-width:620px){
+  html.vq-standalone-page .vq-dialog__header{grid-template-columns:40px minmax(0,1fr) 40px}
+}

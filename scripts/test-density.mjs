@@ -14,6 +14,8 @@ for(const token of [
   '.pwa-update-prompt button{min-height:44px',
   '.modal-card:has(.issue-form){width:min(1040px',
   '.modal-card:has(.finance-form){height:min(700px',
+  '/* v4.0.38 — the full settlement document scrolls between its fixed header and footer. */',
+  '.finance-form .modal-layout::-webkit-scrollbar{display:block;width:8px}',
 ]) if(!css.includes(token))errors.push(`missing desktop density rule: ${token}`);
 const densityStart=css.indexOf('/* v3.0.15 — desktop density pass.');
 const nextReleaseMarker=css.indexOf('/* v3.',densityStart+'/* v3.0.15'.length);

@@ -1806,3 +1806,21 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .weekday-demand-row{grid-template-columns:22px minmax(50px,1fr) 18px 62px;gap:6px}
   .revenue-breakdown-row>div:first-child{gap:7px}
 }
+
+/* v4.0.38 — the full settlement document scrolls between its fixed header and footer. */
+@media(min-width:901px){
+  .finance-form .modal-layout{
+    min-height:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+    scrollbar-gutter:stable;
+  }
+  .finance-form .modal-section,
+  .finance-form .modal-summary{
+    height:max-content;
+    min-height:0;
+    overflow:visible;
+  }
+  .finance-form .modal-layout::-webkit-scrollbar{display:block;width:8px}
+}

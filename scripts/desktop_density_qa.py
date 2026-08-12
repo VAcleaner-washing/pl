@@ -58,6 +58,8 @@ def suite(browser,qa,width,height,label):
         finance=page.locator('.modal-card').bounding_box(); finance_btn=page.locator('#financeForm>footer .btn').last.bounding_box()
         qa.check(finance and finance['height']<=702, f'{label}: finance modal is compact')
         qa.check(finance_btn and finance_btn['height']>=44, f'{label}: finance action stays 44px+')
+        settlement_scroll=page.locator('#financeForm .modal-layout').evaluate("""el=>{const before=el.scrollTop,scrollable=el.scrollHeight>el.clientHeight+1;el.scrollTop=el.scrollHeight;const note=el.querySelector('.modal-section .note')?.getBoundingClientRect(),box=el.getBoundingClientRect();return{before,after:el.scrollTop,scrollable,noteBottom:note?.bottom||0,boxBottom:box.bottom}}""")
+        qa.check((not settlement_scroll['scrollable']) or (settlement_scroll['after']>0 and settlement_scroll['noteBottom']<=settlement_scroll['boxBottom']+1),f'{label}: full settlement content scrolls above the fixed footer')
         qa.check(pwa.no_overflow(page),f'{label}: finance modal has no horizontal overflow')
         qa.shot(page,f'{label}-finance.png')
     finally:
