@@ -1,0 +1,355 @@
+{
+  "slots": {
+    "morningStart": "07:00",
+    "morningEnd": "09:30",
+    "eveningStart": "17:30",
+    "eveningEnd": "20:00"
+  },
+  "deliveryFee": 250,
+  "depositRules": {
+    "oneUnit": {
+      "day": 1000,
+      "weekend": 2000
+    },
+    "twoUnits": {
+      "day": 1500,
+      "weekend": 3000
+    },
+    "general": {
+      "day": 2000,
+      "weekend": 3000
+    },
+    "elite": {
+      "day": 3000,
+      "weekend": 4000
+    }
+  },
+  "images": {
+    "puzzi": "/assets/puzzi.webp",
+    "sc2": "/assets/sc2.webp",
+    "jimmy": "/assets/jimmy.webp",
+    "abir": "/assets/abir.webp"
+  },
+  "catalog": {
+    "puzziPacketPrice": 50,
+    "products": {
+      "puzzi": {
+        "label": "Kärcher Puzzi 8/1",
+        "shortLabel": "Kärcher Puzzi",
+        "category": "Миючий пилосос",
+        "description": "Дивани, матраци, крісла, килими та текстиль.",
+        "weekday": 700,
+        "weekend": 800,
+        "resources": {
+          "puzzi": 1
+        },
+        "depositGroup": "oneUnit",
+        "imageKeys": [
+          "puzzi"
+        ],
+        "aliases": [
+          "Kärcher Puzzi",
+          "Kärcher Puzzi 8/1"
+        ]
+      },
+      "puzzi_jimmy": {
+        "label": "Глибоке очищення текстилю",
+        "shortLabel": "Глибоке очищення текстилю",
+        "category": "Комплект",
+        "description": "Puzzi + Jimmy · дивани, матраци, крісла, килими та інший домашній текстиль.",
+        "weekday": 1050,
+        "weekend": 1150,
+        "resources": {
+          "puzzi": 1,
+          "jimmy": 1
+        },
+        "depositGroup": "twoUnits",
+        "imageKeys": [
+          "puzzi",
+          "jimmy"
+        ],
+        "aliases": [
+          "Puzzi + Jimmy",
+          "Глибоке очищення",
+          "Глибоке очищення текстилю"
+        ]
+      },
+      "puzzi_abir": {
+        "label": "Текстиль + вікна",
+        "shortLabel": "Текстиль + вікна",
+        "category": "Комплект",
+        "description": "Puzzi + робот для вікон · м’які меблі, матраци, скло та дзеркала.",
+        "weekday": 1500,
+        "weekend": 1700,
+        "resources": {
+          "puzzi": 1,
+          "abir": 1
+        },
+        "depositGroup": "twoUnits",
+        "imageKeys": [
+          "puzzi",
+          "abir"
+        ],
+        "aliases": [
+          "Puzzi + робот для вікон",
+          "Puzzi + робот ABIR",
+          "Текстиль + вікна"
+        ]
+      },
+      "sc2": {
+        "label": "Kärcher SC 2 Deluxe",
+        "shortLabel": "Kärcher SC 2",
+        "category": "Пароочисник",
+        "description": "Кухня, плитка, ванна, шви та тверді поверхні.",
+        "weekday": 500,
+        "weekend": 600,
+        "resources": {
+          "sc2": 1
+        },
+        "depositGroup": "oneUnit",
+        "imageKeys": [
+          "sc2"
+        ],
+        "aliases": [
+          "Kärcher SC 2",
+          "Kärcher SC 2 Deluxe"
+        ]
+      },
+      "abir": {
+        "label": "Робот для вікон",
+        "shortLabel": "Робот для вікон",
+        "category": "Робот для вікон",
+        "description": "Вікна, плитка, дзеркала та скляні поверхні.",
+        "weekday": 800,
+        "weekend": 900,
+        "resources": {
+          "abir": 1
+        },
+        "depositGroup": "oneUnit",
+        "imageKeys": [
+          "abir"
+        ],
+        "aliases": [
+          "Робот для вікон",
+          "Робот ABIR",
+          "Робот для вікон ABIR"
+        ]
+      },
+      "combo": {
+        "label": "Комбо",
+        "shortLabel": "Комбо",
+        "category": "Комплект",
+        "description": "Puzzi + SC 2 · дивани й матраци, кухня, ванна, плитка та шви.",
+        "weekday": 1000,
+        "weekend": 1200,
+        "saturdaySunday": 1800,
+        "resources": {
+          "puzzi": 1,
+          "sc2": 1
+        },
+        "depositGroup": "twoUnits",
+        "imageKeys": [
+          "puzzi",
+          "sc2"
+        ],
+        "aliases": [
+          "Тариф «Комбо»",
+          "Комбо · Puzzi + SC 2",
+          "Текстиль + кухня та ванна"
+        ]
+      },
+      "general": {
+        "label": "Генеральне прибирання",
+        "shortLabel": "Генеральне прибирання",
+        "category": "Комплект",
+        "description": "Puzzi + SC 2 + Jimmy · текстиль, матраци, кухня, ванна та тверді поверхні.",
+        "weekday": 1300,
+        "weekend": 1400,
+        "saturdaySunday": 2200,
+        "resources": {
+          "puzzi": 1,
+          "sc2": 1,
+          "jimmy": 1
+        },
+        "depositGroup": "general",
+        "imageKeys": [
+          "puzzi",
+          "sc2",
+          "jimmy"
+        ],
+        "aliases": [
+          "Генеральне",
+          "Генеральне прибирання"
+        ]
+      },
+      "ideal_windows": {
+        "label": "Ідеальні вікна",
+        "shortLabel": "Ідеальні вікна",
+        "category": "Комплект",
+        "description": "SC 2 + робот для вікон · рами, скло, дзеркала, плитка та шви.",
+        "weekday": 1200,
+        "weekend": 1300,
+        "saturdaySunday": 1900,
+        "resources": {
+          "sc2": 1,
+          "abir": 1
+        },
+        "depositGroup": "twoUnits",
+        "imageKeys": [
+          "sc2",
+          "abir"
+        ],
+        "aliases": [
+          "Ідеальні вікна",
+          "Вікна та гладкі поверхні"
+        ]
+      },
+      "elite": {
+        "label": "HOME RESET",
+        "shortLabel": "HOME RESET",
+        "category": "Комплект",
+        "description": "Puzzi + SC 2 + Jimmy + робот для вікон · повне прибирання всього дому. У подарунок — аромадифузор VA HOME Entry.",
+        "weekday": 2300,
+        "weekend": 2500,
+        "saturdaySunday": 3500,
+        "resources": {
+          "puzzi": 1,
+          "sc2": 1,
+          "jimmy": 1,
+          "abir": 1
+        },
+        "depositGroup": "elite",
+        "imageKeys": [
+          "puzzi",
+          "sc2",
+          "jimmy",
+          "abir"
+        ],
+        "aliases": [
+          "HOME RESET",
+          "HOME RESET · повний комплект",
+          "Весь дім за один вікенд",
+          "Весь дім · HOME RESET",
+          "Елітний стандарт чистоти"
+        ]
+      }
+    },
+    "extras": {
+      "premium_nozzles": {
+        "label": "Насадки «Преміум» до SC 2",
+        "price": 200,
+        "requires": [
+          "sc2",
+          "combo",
+          "general",
+          "ideal_windows",
+          "elite"
+        ],
+        "aliases": [
+          "Насадки «Преміум» до SC 2"
+        ]
+      },
+      "odour_zero": {
+        "label": "Odour Zero",
+        "price": 250,
+        "aliases": [
+          "Odour Zero"
+        ]
+      },
+      "neutralix": {
+        "label": "Neutralix · 250 мл",
+        "price": 200,
+        "aliases": [
+          "Neutralix · концентрат",
+          "Neutralix"
+        ]
+      },
+      "shower_care": {
+        "label": "Shower Care",
+        "price": 250,
+        "aliases": [
+          "Shower Care"
+        ]
+      },
+      "soft_degreaser": {
+        "label": "Soft Degreaser",
+        "price": 250,
+        "aliases": [
+          "Soft Degreaser"
+        ]
+      },
+      "grill_force": {
+        "label": "Grill Force",
+        "price": 250,
+        "aliases": [
+          "Grill Force"
+        ]
+      },
+      "scalex_pro": {
+        "label": "Scalex Pro",
+        "price": 250,
+        "aliases": [
+          "Scalex Pro"
+        ]
+      },
+      "eco_clean": {
+        "label": "Eco Clean",
+        "price": 250,
+        "aliases": [
+          "Eco Clean"
+        ]
+      },
+      "carp_deta": {
+        "label": "Плямовивідник Carp-Deta 30 мл",
+        "price": 100,
+        "volumeMl": 30,
+        "active": false,
+        "legacy": true,
+        "aliases": [
+          "Плямовивідник Carp-Deta 30 мл",
+          "Carp-Deta 30 мл",
+          "Carp-Deta"
+        ]
+      },
+      "spot_lifter": {
+        "label": "VA SPOT FIX · 50 мл",
+        "price": 100,
+        "volumeMl": 50,
+        "shortDescription": "Для більшості локальних плям від їжі, напоїв, жиру, косметики та побутових забруднень.",
+        "aliases": [
+          "VA SPOT FIX · 50 мл",
+          "VA SPOT FIX",
+          "Універсальний плямовивідник · 50 мл",
+          "Універсальний плямовивідник",
+          "Chemspec Professional Spot Lifter",
+          "SPOT LIFTER",
+          "Spot Lifter"
+        ]
+      },
+      "stain_exit": {
+        "label": "VA STAIN OX · 30 мл",
+        "price": 100,
+        "volumeMl": 30,
+        "shortDescription": "Для старих слідів від кави, чаю, вина, ягід і соків.",
+        "aliases": [
+          "Плямовивідник від кави, вина та ягід · 30 мл",
+          "VA STAIN OX · 30 мл",
+          "VA STAIN OX",
+          "Для стійких кольорових плям · 30 мл",
+          "Засіб для стійких кольорових плям",
+          "Chemspec Stain Exit",
+          "Stain Exit",
+          "STAIN EXIT",
+          "Stain Ox"
+        ]
+      },
+      "glass_perfect": {
+        "label": "Glass Perfect Care",
+        "price": 150,
+        "aliases": [
+          "Glass Perfect Care"
+        ]
+      }
+    }
+  }
+}

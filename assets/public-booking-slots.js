@@ -4,6 +4,7 @@ const API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-setti
 const CORE_SLOTS=window.VACLEANER_CORE?.slots||{morningStart:'07:00',morningEnd:'09:30',eveningStart:'17:30',eveningEnd:'20:00'};
 let slots={...CORE_SLOTS};
 let depositRules={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
+let deliveryFee=Number(window.VACLEANER_CORE?.deliveryFee)||250;
 const label=(kind)=>kind==='morning'?`Ранок · ${slots.morningStart}–${slots.morningEnd}`:`Вечір · ${slots.eveningStart}–${slots.eveningEnd}`;
 function validSlots(value){
   const keys=['morningStart','morningEnd','eveningStart','eveningEnd'];
@@ -69,6 +70,14 @@ function renderPickupLocationNote(){
     note.textContent='Точне місце отримання менеджер повідомить під час опрацювання заявки.';
     note.hidden=false;
   }else if(note)note.hidden=true;
+}
+function renderDeliveryFee(){
+  const row=document.querySelector('.booking-choice-row');if(!row)return;
+  const delivery=[...row.querySelectorAll('button')].find(btn=>/Доставка/.test(btn.textContent||''));
+  const amount=formatMoney(deliveryFee);
+  if(delivery){const span=delivery.querySelector('span');setTextIfChanged(span,`до вас і назад · ${amount}`)}
+  const address=document.querySelector('.booking-delivery-address small');
+  if(address)setTextIfChanged(address,`${amount} включає доставку техніки до вас і її повернення назад.`);
 }
 
 function renderDeposit(){
@@ -194,6 +203,7 @@ function refreshBindings(){
   bindLoyalty();
   renderDeposit();
   renderPickupLocationNote();
+  renderDeliveryFee();
   renderConsent();
   renderPrefilledProduct();
   if(refreshAttempts<12){
@@ -203,10 +213,10 @@ function refreshBindings(){
 }
 fetch(API,{cache:'no-store'})
   .then(r=>r.ok?r.json():Promise.reject(new Error('settings_failed')))
-  .then(d=>{const remoteSlots=validSlots(d?.slots);if(remoteSlots)slots=remoteSlots;if(d?.depositRules)depositRules={...depositRules,...d.depositRules};refreshBindings()})
+  .then(d=>{const remoteSlots=validSlots(d?.slots);if(remoteSlots)slots=remoteSlots;if(d?.depositRules)depositRules={...depositRules,...d.depositRules};if(Number.isFinite(Number(d?.deliveryFee))&&Number(d.deliveryFee)>=0)deliveryFee=Math.round(Number(d.deliveryFee));refreshBindings()})
   .catch(()=>refreshBindings());
 const depositObserver=new MutationObserver(()=>requestAnimationFrame(renderDeposit));
-document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote();renderPrefilledProduct()},true);document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote();renderPrefilledProduct()},0),true)});
+document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},true);document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},0),true)});
 })();
 
 // v3.0.23 — public nearest-availability UX.

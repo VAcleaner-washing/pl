@@ -11,8 +11,10 @@
   const FALLBACK_ALIASES={'Kärcher Puzzi':'puzzi','Kärcher Puzzi 8/1':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Глибоке очищення':'puzzi_jimmy','Глибоке очищення текстилю':'puzzi_jimmy','Puzzi + робот для вікон':'puzzi_abir','Puzzi + робот ABIR':'puzzi_abir','Текстиль + вікна':'puzzi_abir','Kärcher SC 2':'sc2','Kärcher SC 2 Deluxe':'sc2','Робот для вікон':'abir','Робот ABIR':'abir','Тариф «Комбо»':'combo','Комбо · Puzzi + SC 2':'combo','Текстиль + кухня та ванна':'combo','Генеральне':'general','Генеральне прибирання':'general','Ідеальні вікна':'ideal_windows','Вікна та гладкі поверхні':'ideal_windows','HOME RESET':'elite','Весь дім за один вікенд':'elite','Весь дім · HOME RESET':'elite'};
   const clone=value=>CORE?.clone?CORE.clone(value):JSON.parse(JSON.stringify(value));
   const DEFAULT_DEPOSIT_RULES=clone(CORE?.depositRules||FALLBACK_DEPOSIT_RULES);
+  const DEFAULT_DELIVERY_FEE=Number(CORE?.deliveryFee)||250;
   const PRODUCT_ALIASES=CORE?.productAliases||FALLBACK_ALIASES;
   let depositRules=clone(DEFAULT_DEPOSIT_RULES);
+  let deliveryFee=DEFAULT_DELIVERY_FEE;
   let calendarReturnFocus=null;
   let calendarScrollLock=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
@@ -289,6 +291,42 @@
       depositRules[key]={day:Number(src.day)||DEFAULT_DEPOSIT_RULES[key].day,weekend:Number(src.weekend)||DEFAULT_DEPOSIT_RULES[key].weekend};
     }
   }
+  function setDeliveryFee(value){
+    const fee=Number(value);
+    if(Number.isFinite(fee)&&fee>=0&&fee<=100000)deliveryFee=Math.round(fee);
+  }
+  function deliveryContext(node){
+    let el=node.parentElement;
+    for(let depth=0;el&&depth<2;depth+=1,el=el.parentElement){
+      const text=String(el.textContent||'').toLowerCase();
+      if(/самовивіз/.test(text)&&!/достав/.test(text))return false;
+      if(/достав|до вас і назад|привезення/.test(text))return true;
+    }
+    return false;
+  }
+  function syncDeliveryFee(){
+    const fee=new Intl.NumberFormat('uk-UA').format(deliveryFee);
+    const replaceDeliveryAmount=text=>String(text).replace(/((?:достав(?:ка|ки|ку|ці|кою|ляємо|ити)?|до вас і назад|привезення)[^0-9]{0,100})\d[\d\s ]*\s*грн/gi,`$1${fee} грн`);
+    const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+    const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+    nodes.forEach(node=>{
+      if(!/\d[\d\s ]*\s*грн/i.test(node.nodeValue||'')||!deliveryContext(node))return;
+      const raw=String(node.nodeValue),next=replaceDeliveryAmount(raw);
+      node.nodeValue=next!==raw?next:/^\s*\d[\d\s ]*\s*грн\s*$/i.test(raw)?raw.replace(/\d[\d\s ]*\s*грн/i,`${fee} грн`):raw;
+    });
+    document.querySelectorAll('meta[content]').forEach(meta=>{
+      const content=meta.getAttribute('content')||'';
+      if(/достав/i.test(content))meta.setAttribute('content',replaceDeliveryAmount(content));
+    });
+    document.querySelectorAll('script[type="application/ld+json"]').forEach(script=>{
+      try{
+        const rewrite=value=>Array.isArray(value)?value.map(rewrite):value&&typeof value==='object'?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,rewrite(v)])):typeof value==='string'&&/достав/i.test(value)?replaceDeliveryAmount(value):value;
+        const next=JSON.stringify(rewrite(JSON.parse(script.textContent||'{}')));
+        if(script.textContent!==next)script.textContent=next;
+      }catch{}
+    });
+    window.VACLEANER_DELIVERY_FEE=deliveryFee;
+  }
   function depositGroup(code){
     if(code==='elite')return'elite';if(code==='general')return'general';
     if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';
@@ -322,7 +360,7 @@
     if(note){if(note.className!=='vx-summary-deposit-note')note.className='vx-summary-deposit-note';setTextIfChanged(note,'Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');}
   }
 
-  async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.depositRules){mergeDepositRules(d.depositRules);enhanceDepositSummary()}}catch{}}
+  async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok){if(d.depositRules)mergeDepositRules(d.depositRules);if(d.deliveryFee!==undefined)setDeliveryFee(d.deliveryFee);enhanceDepositSummary();syncDeliveryFee()}}catch{}}
   function termsMarkup(){
     return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактично отриманий залоговий платіж формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залоговий платіж</h3><p>Сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>2+ доби у вікенд · 4 000 грн</small></span></div></div></article></div><section class="vx-loyalty-policy" aria-label="Програма лояльності"><div><p>Програма лояльності</p><h3>Чим більше оренд — тим вигідніше.</h3><span>Знижка застосовується автоматично за номером телефону та діє тільки на оренду техніки.</span></div><div class="vx-loyalty-levels"><article><small>Start</small><strong>0%</strong><span>0–2 завершені оренди</span></article><article><small>Regular</small><strong>−5%</strong><span>після 3 завершених оренд</span></article><article><small>VIP</small><strong>−10%</strong><span>після 6 завершених оренд</span></article></div><p class="vx-loyalty-rule">Promo та loyalty не сумуються — система автоматично застосовує вигіднішу знижку. Доставка, додаткові позиції та хімія оплачуються без знижки.</p></section><section class="vx-care-policy" aria-label="Дбайливе користування технікою"><div class="vx-care-policy__head"><p>Дбайливе користування</p><h3>Без страшилок і дрібного шрифту.</h3><span>Техніка видається перевіреною та справною. Якщо щось працює не так — зупиніть роботу й напишіть нам.</span></div><div class="vx-care-policy__grid"><article><small>01</small><strong>Несправність</strong><span>Природний знос або технічна несправність не з вини клієнта — не його відповідальність. Самостійно розбирати чи ремонтувати техніку не потрібно.</span></article><article><small>02</small><strong>Фізичні пошкодження</strong><span>Відповідальність виникає за очевидні пошкодження через неправильне користування: падіння, удари, тріщини, залиття або самостійне розбирання.</span></article><article><small>03</small><strong>Повернення</strong><span>Злийте брудну воду, приберіть велике сміття й волосся, сполосніть робочі ємності та насадки. Звичайні сліди використання — нормально.</span></article></div><p class="vx-care-policy__proof">300 оренд — і нам ще не доводилося штрафувати клієнтів за техніку.</p></section><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
   }
@@ -566,6 +604,7 @@
     injectTerms();
     enhanceCarePolicy();
     enhanceDepositSummary();
+    syncDeliveryFee();
     enhanceHomeResetGift();
     enhanceMobileBookingFlow();
     bindBookingAnalytics();

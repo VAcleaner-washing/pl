@@ -1,0 +1,36 @@
+{
+  "name": "vacleaner-static",
+  "private": true,
+  "version": "4.0.42",
+  "scripts": {
+    "stamp": "node scripts/stamp-build.mjs",
+    "check": "node scripts/check-build.mjs",
+    "build": "node scripts/build-pages.mjs",
+    "test:e2e": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
+    "check:backend": "node scripts/check-backend-inventory.mjs",
+    "test:pwa": "python scripts/pwa_visual_qa.py --artifacts pwa-test-results",
+    "test:density": "node scripts/test-density.mjs",
+    "test:desktop-density": "python scripts/desktop_density_qa.py --artifacts density-test-results",
+    "test:desktop-final": "python scripts/final_desktop_visual_qa.py --artifacts final-desktop-test-results",
+    "test:deposit-policy": "node scripts/test-deposit-policy.mjs",
+    "test:stabilization": "node scripts/test-stabilization.mjs",
+    "test:css-architecture": "node scripts/test-css-architecture.mjs",
+    "test:operational-health": "node scripts/test-operational-health.mjs",
+    "test:analytics": "node scripts/test-analytics-decision.mjs",
+    "test:financial-control": "node scripts/test-financial-control.mjs",
+    "test:package-language": "node scripts/test-package-language.mjs",
+    "test:retention": "node scripts/test-retention.mjs",
+    "test:public-booking": "python scripts/public_booking_resilience_qa.py",
+    "test:glass-primary": "python scripts/glass_v4_qa.py",
+    "test:public-visual-contract": "node scripts/test-public-visual-contract.mjs",
+    "test:smart-guide-logic": "node scripts/test-smart-guide-logic.mjs",
+    "test:smart-guide-fit": "python scripts/test-smart-guide-fit.py",
+    "test:client-card-mobile": "python scripts/test-mobile-client-card.py",
+    "test:booking-cta": "node scripts/test-public-booking-cta-stability.mjs",
+    "test:process-metadata": "node scripts/test-process-metadata.mjs",
+    "test:issue-workflow": "node scripts/test-issue-workflow.mjs",
+    "test:public-seo": "node scripts/test-public-seo-audit.mjs",
+    "test:peer-admin-push": "node scripts/test-peer-admin-push.mjs"
+    ,"test:delivery-settings": "node scripts/test-delivery-settings.mjs"
+  }
+}
