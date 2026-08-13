@@ -391,7 +391,17 @@
       const trust=[...document.querySelectorAll('.v21-trust-strip p')].find(node=>/Засоби в комплекті/.test(node.textContent||''));
       if(trust)trust.innerHTML='<strong>02</strong> Засоби під задачу';
       document.querySelectorAll('.v21-solution').forEach(card=>{
-        if(/Jimmy JV35 \+ Puzzi/.test(card.textContent||''))setTextIfChanged(card.querySelector('strong'),'від 1 050 грн');
+        if(!/Jimmy JV35 \+ Puzzi/.test(card.textContent||''))return;
+        setTextIfChanged(card.querySelector('small'),'Пилові кліщі й алергени');
+        setTextIfChanged(card.querySelector('h3'),'Глибоке очищення матраца');
+        setTextIfChanged(card.querySelector('p'),'Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени, а Puzzi після цього глибоко промиває текстиль.');
+        setTextIfChanged(card.querySelector('strong'),'від 1 050 грн');
+      });
+      document.querySelectorAll('.v21-package-grid article').forEach(card=>{
+        const title=card.querySelector('h3')?.textContent.trim();
+        if(title==='Puzzi + Jimmy')setTextIfChanged(card.querySelector('p'),'Jimmy — сухий пил, пилові кліщі й пов’язані алергени; Puzzi — глибоке промивання текстилю.');
+        if(title==='Puzzi + SC 2 + Jimmy')setTextIfChanged(card.querySelector('p'),'Jimmy — пилові кліщі й пов’язані алергени, Puzzi — текстиль, SC 2 — кухня та ванна.');
+        if(title==='Увесь дім')setTextIfChanged(card.querySelector('p'),'Jimmy — пилові кліщі й пов’язані алергени, Puzzi — текстиль, SC 2 — кухня та ванна, робот — вікна.');
       });
     }
     if(path==='/komplekty'){
@@ -400,9 +410,10 @@
         const title=card.querySelector('h2');
         const eyebrow=card.querySelector('.package-eyebrow');
         if(title?.textContent.trim()==='Глибоке очищення текстилю'){
-          setTextIfChanged(title,'Глибоке очищення');
-          setTextIfChanged(eyebrow,'Текстиль · сухий + вологий етап');
-          setTextIfChanged(card.querySelector('.package-purpose'),'Сухе очищення Jimmy перед глибоким промиванням Puzzi — для диванів, матраців, крісел і домашнього текстилю.');
+          setTextIfChanged(eyebrow,'Матрац і текстиль · 2 етапи');
+          setTextIfChanged(card.querySelector('.package-purpose'),'Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi після цього глибоко промиває текстиль.');
+          const benefits=['Пилові кліщі й пов’язані алергени','Вібраційна щітка, UV-світло й нагрівання до 60 °C','Глибоке промивання Puzzi'];
+          card.querySelectorAll('li').forEach((node,index)=>{if(benefits[index])setTextIfChanged(node,benefits[index]);});
         }
         if(title?.textContent.trim()==='Комбо'){
           setTextIfChanged(title,'Текстиль + кухня та ванна');
@@ -410,15 +421,45 @@
         }
         if(title?.textContent.trim()==='Генеральне прибирання'){
           setTextIfChanged(eyebrow,'Текстиль + тверді поверхні');
-          setTextIfChanged(card.querySelector('.package-purpose'),'Jimmy прибирає сухий пил, Puzzi глибоко промиває текстиль, а SC 2 працює з кухнею, ванною та твердими поверхнями.');
+          setTextIfChanged(card.querySelector('.package-purpose'),'Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi промиває текстиль, а SC 2 працює з кухнею, ванною та твердими поверхнями.');
+          const benefits=['Jimmy: пилові кліщі й пов’язані алергени','Puzzi: текстиль і матраци','SC 2: кухня, ванна та поверхні'];
+          card.querySelectorAll('li').forEach((node,index)=>{if(benefits[index])setTextIfChanged(node,benefits[index]);});
         }
         if(title?.textContent.trim()==='Ідеальні вікна')setTextIfChanged(card.querySelector('.package-purpose'),'Скло, рами, кути й стики — одним комплектом техніки.');
-        if(title?.textContent.trim()==='HOME RESET')setTextIfChanged(card.querySelector('.package-purpose'),'Повний комплект для дому: текстиль, матраци, кухня, ванна та вікна.');
+        if(title?.textContent.trim()==='HOME RESET'){
+          setTextIfChanged(card.querySelector('.package-purpose'),'Повний цикл для дому: Jimmy — пилові кліщі й пов’язані алергени, Puzzi — текстиль, SC 2 — кухня та ванна, робот — вікна.');
+          const benefits=['Jimmy + Puzzi: матраци й текстиль','SC 2: кухня та ванна','Робот: вікна й дзеркала'];
+          card.querySelectorAll('li').forEach((node,index)=>{if(benefits[index])setTextIfChanged(node,benefits[index]);});
+        }
       });
       const route=document.querySelector('.day-heading h2');if(route)route.innerHTML='Орієнтовний маршрут<br>на один день.';
     }
     if(path==='/rishennia'){
       document.querySelectorAll('.editorial-body h2 a').forEach(link=>{if(link.textContent.trim()==='Скло без драбини')link.textContent='Менше ручної роботи зі склом';});
+      document.querySelectorAll('.editorial-card').forEach(card=>{
+        if(!/Jimmy JV35/.test(card.textContent||''))return;
+        setTextIfChanged(card.querySelector('.card-kicker'),'Пилові кліщі й алергени · Jimmy JV35');
+        setTextIfChanged(card.querySelector('h2 a'),'Глибоке очищення матраца');
+        setTextIfChanged(card.querySelector('.editorial-body>p:not(.card-kicker)'),'Jimmy допомагає прибрати сухий пил, шерсть, пилових кліщів і пов’язані з ними алергени; UV-світло та нагрівання до 60 °C додатково обробляють поверхню перед промиванням Puzzi.');
+        setTextIfChanged(card.querySelector('.editorial-footer strong'),'1 050 грн / комплект');
+      });
+    }
+    if(path==='/rishennia/mattress'){
+      const copy=document.querySelector('.product-copy');
+      if(copy){
+        setTextIfChanged(copy.querySelector('.eyebrow'),'Пилові кліщі й алергени · Jimmy JV35');
+        setTextIfChanged(copy.querySelector('h1'),'Глибоке очищення матраца');
+        setTextIfChanged(copy.querySelector('p:not(.eyebrow)'),'Jimmy JV35 допомагає прибрати сухий пил, шерсть, частинки шкіри, пилових кліщів і пов’язані з ними алергени. UV-світло та гаряче повітря до 60 °C додатково обробляють поверхню, а Puzzi після сухого етапу глибоко промиває текстиль.');
+      }
+      const results=[
+        'Вібраційна щітка піднімає сухий пил із волокон',
+        'Допомагає зменшити кількість пилових кліщів і пов’язаних алергенів',
+        'UV-світло й гаряче повітря до 60 °C',
+        'Глибоке промивання Puzzi після сухого етапу'
+      ];
+      document.querySelectorAll('.result-grid>div p').forEach((node,index)=>{if(results[index])setTextIfChanged(node,results[index]);});
+      setTextIfChanged(document.querySelector('.result-section h2'),'Чистіший матрац у два послідовні етапи');
+      document.querySelectorAll('.final-cta h2').forEach(node=>setTextIfChanged(node,'Потрібне глибоке очищення матраца?'));
     }
     if(path==='/rishennia/windows'){
       const title=document.querySelector('.product-copy h1');if(title?.textContent.trim()==='Скло без драбини')title.textContent='Менше ручної роботи зі склом';
