@@ -39,6 +39,8 @@ if(bookingHtml.includes('<strong>Генеральне</strong>'))failures.push('
 if(bookingHtml.includes('<strong>Тариф «Комбо»</strong>'))failures.push('booking still uses the opaque “Тариф «Комбо»” title');
 if(!bookingChunk.includes('code:"puzzi_abir"'))failures.push('hydrated booking is missing the quiz-recommended textile + windows package');
 if(!publicExperience.includes("setTextIfChanged(title,'Текстиль + кухня та ванна')"))failures.push('package-page runtime does not apply the plain-language combo title');
+if(!publicExperience.includes("setTextIfChanged(title,'Глибоке очищення')")||!publicExperience.includes('Текстиль · сухий + вологий етап'))failures.push('textile package page does not use the compact result-oriented title');
+if(!publicExperience.includes('Jimmy прибирає сухий пил, Puzzi глибоко промиває текстиль'))failures.push('general-cleaning package does not explain the role of each machine');
 if(!publicExperience.includes('syncBookingCatalog()'))failures.push('booking does not synchronize canonical catalog titles at runtime');
 if(!bookingChunk.includes('detail:"Puzzi + SC 2 + Jimmy · текстиль, кухня, ванна, поверхні"'))failures.push('general-cleaning booking card lacks a plain-language scope');
 

@@ -626,12 +626,17 @@ def tablet_suite(browser: Browser, qa: QA) -> None:
 
 
 def desktop_suite(browser: Browser, qa: QA) -> None:
+    update_page = render_page(browser, 1440, 1000)
+    try:
+        update_page.wait_for_selector('.pwa-update-prompt')
+        update_page.locator('.pwa-update-now').click()
+        qa.check(update_page.evaluate("window.__swMessages.some(x=>x.type==='SKIP_WAITING')"), "Desktop: Update now asks the waiting worker to activate")
+        qa.check(update_page.locator('.pwa-update-now').is_disabled(), "Desktop: Update action cannot be submitted twice while activation is pending")
+    finally:
+        update_page.close()
     page = render_page(browser, 1440, 1000)
     try:
-        page.wait_for_selector('.pwa-update-prompt')
-        page.locator('.pwa-update-now').click()
-        qa.check(page.evaluate("window.__swMessages.some(x=>x.type==='SKIP_WAITING')"), "Desktop: Update now asks the waiting worker to activate")
-        page.evaluate("document.querySelector('.pwa-update-prompt')?.remove()")
+        dismiss_update(page, qa)
         qa.check(no_overflow(page), "Desktop: shell has no horizontal overflow")
         qa.check(page.locator(".top-profile:visible").count() == 1, "Desktop: administrator profile is visible")
         desktop_shell=page.evaluate("()=>{const main=document.querySelector('.main'),top=document.querySelector('.topbar'),mr=main.getBoundingClientRect(),tr=top.getBoundingClientRect();return{bodyOverflow:getComputedStyle(document.body).overflow,mainOverflow:getComputedStyle(main).overflowY,mainTop:mr.top,topBottom:tr.bottom}}")

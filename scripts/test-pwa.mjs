@@ -85,4 +85,8 @@ ok(!css.includes('html.pwa-standalone .mobile-nav{position:relative'),'installed
 ok(css.includes('--pwa-safe-bottom:env(safe-area-inset-bottom,0px)')&&!css.includes('--pwa-safe-bottom-raw'),'native iOS safe-area is used without the failed v3.0.54 clamp');
 ok(!css.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'),'stale v3.0.36 fixed-ancestor override is gone');
 ok(runtime.includes("document.documentElement.classList.add('pwa-update-transition')"),'PWA update hides the outgoing mobile chrome before controller reload');
+ok(runtime.includes('PWA_UPDATE_FALLBACK_MS=8000'),'PWA update has a bounded iOS fallback instead of an endless loading state');
+ok(runtime.includes("worker.state==='activated'"),'PWA update reloads when the waiting worker activates even if controllerchange is missed');
+ok(runtime.includes('window.setTimeout(reloadPwaAfterUpdate,PWA_UPDATE_FALLBACK_MS)'),'PWA update forces a recovery reload after the activation timeout');
+ok(runtime.includes('later.disabled=true;now.disabled=true'),'PWA update prevents duplicate activation taps');
 console.log(`PWA static tests passed ${passed} assertions.`);

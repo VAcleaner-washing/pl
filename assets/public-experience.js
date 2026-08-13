@@ -399,12 +399,19 @@
       cards.forEach(card=>{
         const title=card.querySelector('h2');
         const eyebrow=card.querySelector('.package-eyebrow');
-        if(title?.textContent.trim()==='Глибоке очищення текстилю')setTextIfChanged(eyebrow,'Для глибокого очищення текстилю');
+        if(title?.textContent.trim()==='Глибоке очищення текстилю'){
+          setTextIfChanged(title,'Глибоке очищення');
+          setTextIfChanged(eyebrow,'Текстиль · сухий + вологий етап');
+          setTextIfChanged(card.querySelector('.package-purpose'),'Сухе очищення Jimmy перед глибоким промиванням Puzzi — для диванів, матраців, крісел і домашнього текстилю.');
+        }
         if(title?.textContent.trim()==='Комбо'){
           setTextIfChanged(title,'Текстиль + кухня та ванна');
           setTextIfChanged(eyebrow,'Найчастіше обирають');
         }
-        if(title?.textContent.trim()==='Генеральне прибирання')setTextIfChanged(card.querySelector('.package-purpose'),'Комплект техніки для текстилю, кухні, ванної та твердих поверхонь.');
+        if(title?.textContent.trim()==='Генеральне прибирання'){
+          setTextIfChanged(eyebrow,'Текстиль + тверді поверхні');
+          setTextIfChanged(card.querySelector('.package-purpose'),'Jimmy прибирає сухий пил, Puzzi глибоко промиває текстиль, а SC 2 працює з кухнею, ванною та твердими поверхнями.');
+        }
         if(title?.textContent.trim()==='Ідеальні вікна')setTextIfChanged(card.querySelector('.package-purpose'),'Скло, рами, кути й стики — одним комплектом техніки.');
         if(title?.textContent.trim()==='HOME RESET')setTextIfChanged(card.querySelector('.package-purpose'),'Повний комплект для дому: текстиль, матраци, кухня, ванна та вікна.');
       });
