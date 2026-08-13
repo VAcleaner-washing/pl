@@ -1,7 +1,7 @@
 {
   "slots": {
-    "morningStart": "07:00",
-    "morningEnd": "09:30",
+    "morningStart": "08:00",
+    "morningEnd": "10:00",
     "eveningStart": "17:30",
     "eveningEnd": "20:00"
   },
@@ -37,7 +37,7 @@
         "label": "Kärcher Puzzi 8/1",
         "shortLabel": "Kärcher Puzzi",
         "category": "Миючий пилосос",
-        "description": "Дивани, матраци, крісла, килими та текстиль.",
+        "description": "Дивани, матраци, крісла та текстиль; невеликі килими — після перевірки насадки й матеріалу.",
         "weekday": 700,
         "weekend": 800,
         "resources": {
@@ -56,7 +56,7 @@
         "label": "Глибоке очищення текстилю",
         "shortLabel": "Глибоке очищення текстилю",
         "category": "Комплект",
-        "description": "Puzzi + Jimmy · дивани, матраци, крісла, килими та інший домашній текстиль.",
+        "description": "Puzzi + Jimmy · сухий етап і глибоке промивання диванів, матраців, крісел та домашнього текстилю.",
         "weekday": 1050,
         "weekend": 1150,
         "resources": {
@@ -136,8 +136,8 @@
         ]
       },
       "combo": {
-        "label": "Комбо",
-        "shortLabel": "Комбо",
+        "label": "Текстиль + кухня та ванна",
+        "shortLabel": "Текстиль + кухня та ванна",
         "category": "Комплект",
         "description": "Puzzi + SC 2 · дивани й матраци, кухня, ванна, плитка та шви.",
         "weekday": 1000,
@@ -153,6 +153,7 @@
           "sc2"
         ],
         "aliases": [
+          "Комбо",
           "Тариф «Комбо»",
           "Комбо · Puzzi + SC 2",
           "Текстиль + кухня та ванна"
@@ -162,7 +163,7 @@
         "label": "Генеральне прибирання",
         "shortLabel": "Генеральне прибирання",
         "category": "Комплект",
-        "description": "Puzzi + SC 2 + Jimmy · текстиль, матраци, кухня, ванна та тверді поверхні.",
+        "description": "Комплект техніки Puzzi + SC 2 + Jimmy для текстилю, матраців, кухні, ванної та твердих поверхонь.",
         "weekday": 1300,
         "weekend": 1400,
         "saturdaySunday": 2200,
@@ -186,7 +187,7 @@
         "label": "Ідеальні вікна",
         "shortLabel": "Ідеальні вікна",
         "category": "Комплект",
-        "description": "SC 2 + робот для вікон · рами, скло, дзеркала, плитка та шви.",
+        "description": "SC 2 + робот для вікон · скло, рами, кути, стики та дзеркала.",
         "weekday": 1200,
         "weekend": 1300,
         "saturdaySunday": 1900,
@@ -208,7 +209,7 @@
         "label": "HOME RESET",
         "shortLabel": "HOME RESET",
         "category": "Комплект",
-        "description": "Puzzi + SC 2 + Jimmy + робот для вікон · повне прибирання всього дому. У подарунок — аромадифузор VA HOME Entry.",
+        "description": "Повний комплект для дому: Puzzi + SC 2 + Jimmy + робот для вікон. У подарунок — аромадифузор VA HOME Entry.",
         "weekday": 2300,
         "weekend": 2500,
         "saturdaySunday": 3500,
@@ -330,7 +331,7 @@
         "label": "VA STAIN OX · 30 мл",
         "price": 100,
         "volumeMl": 30,
-        "shortDescription": "Для старих слідів від кави, чаю, вина, ягід і соків.",
+        "shortDescription": "Для кольорових органічних слідів від кави, чаю, вина, ягід і соків.",
         "aliases": [
           "Плямовивідник від кави, вина та ягід · 30 мл",
           "VA STAIN OX · 30 мл",

@@ -11,6 +11,8 @@
       const code=CORE.productAliases[title];
       const product=catalog.products?.[code];
       if(!product)return;
+      const strong=btn.querySelector('strong');
+      if(strong&&product.shortLabel&&strong.textContent!==product.shortLabel){strong.textContent=product.shortLabel;changed+=1}
       const small=btn.querySelector('small');
       if(!small)return;
       const text=`Будні · ${fmt(product.weekday)} грн  |  1 вихідний · ${fmt(product.weekend)} грн${product.saturdaySunday?`  |  Сб + Нд · ${fmt(product.saturdaySunday)} грн`:''}`;

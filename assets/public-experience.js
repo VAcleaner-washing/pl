@@ -8,13 +8,14 @@
   const REVIEW_HIGHLIGHT_2='https://www.instagram.com/stories/highlights/18303073276178357/';
   const SETTINGS_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
   const FALLBACK_DEPOSIT_RULES={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
-  const FALLBACK_ALIASES={'Kärcher Puzzi':'puzzi','Kärcher Puzzi 8/1':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Глибоке очищення':'puzzi_jimmy','Глибоке очищення текстилю':'puzzi_jimmy','Puzzi + робот для вікон':'puzzi_abir','Puzzi + робот ABIR':'puzzi_abir','Текстиль + вікна':'puzzi_abir','Kärcher SC 2':'sc2','Kärcher SC 2 Deluxe':'sc2','Робот для вікон':'abir','Робот ABIR':'abir','Тариф «Комбо»':'combo','Комбо · Puzzi + SC 2':'combo','Текстиль + кухня та ванна':'combo','Генеральне':'general','Генеральне прибирання':'general','Ідеальні вікна':'ideal_windows','Вікна та гладкі поверхні':'ideal_windows','HOME RESET':'elite','Весь дім за один вікенд':'elite','Весь дім · HOME RESET':'elite'};
+  const FALLBACK_ALIASES={'Kärcher Puzzi':'puzzi','Kärcher Puzzi 8/1':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Глибоке очищення':'puzzi_jimmy','Глибоке очищення текстилю':'puzzi_jimmy','Puzzi + робот для вікон':'puzzi_abir','Puzzi + робот ABIR':'puzzi_abir','Текстиль + вікна':'puzzi_abir','Kärcher SC 2':'sc2','Kärcher SC 2 Deluxe':'sc2','Робот для вікон':'abir','Робот ABIR':'abir','Комбо':'combo','Тариф «Комбо»':'combo','Комбо · Puzzi + SC 2':'combo','Текстиль + кухня та ванна':'combo','Генеральне':'general','Генеральне прибирання':'general','Ідеальні вікна':'ideal_windows','Вікна та гладкі поверхні':'ideal_windows','HOME RESET':'elite','Весь дім за один вікенд':'elite','Весь дім · HOME RESET':'elite'};
   const clone=value=>CORE?.clone?CORE.clone(value):JSON.parse(JSON.stringify(value));
   const DEFAULT_DEPOSIT_RULES=clone(CORE?.depositRules||FALLBACK_DEPOSIT_RULES);
   const DEFAULT_DELIVERY_FEE=Number(CORE?.deliveryFee)||250;
   const PRODUCT_ALIASES=CORE?.productAliases||FALLBACK_ALIASES;
   let depositRules=clone(DEFAULT_DEPOSIT_RULES);
   let deliveryFee=DEFAULT_DELIVERY_FEE;
+  let liveCatalog=CORE?.catalog||null;
   let calendarReturnFocus=null;
   let calendarScrollLock=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
@@ -360,7 +361,75 @@
     if(note){if(note.className!=='vx-summary-deposit-note')note.className='vx-summary-deposit-note';setTextIfChanged(note,'Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');}
   }
 
-  async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok){if(d.depositRules)mergeDepositRules(d.depositRules);if(d.deliveryFee!==undefined)setDeliveryFee(d.deliveryFee);enhanceDepositSummary();syncDeliveryFee()}}catch{}}
+  function syncBookingCatalog(){
+    if(!liveCatalog?.products)return;
+    document.querySelectorAll('.booking-products button').forEach(button=>{
+      const strong=button.querySelector('strong');if(!strong)return;
+      const code=PRODUCT_ALIASES[strong.textContent.trim()]||CORE?.productAliases?.[strong.textContent.trim()];
+      const product=liveCatalog.products?.[code];if(!product)return;
+      if(product.shortLabel)setTextIfChanged(strong,product.shortLabel);
+    });
+    const buttons=[...document.querySelectorAll('.booking-products button')];
+    if(buttons.length&&!buttons.some(button=>/Текстиль \+ вікна/.test(button.textContent||''))){
+      const robot=buttons.find(button=>/^Робот для вікон/.test(button.querySelector('strong')?.textContent.trim()||''));
+      const product=liveCatalog.products.puzzi_abir;
+      if(robot&&product){
+        const button=robot.cloneNode(true);
+        button.className='';button.setAttribute('aria-pressed','false');button.type='button';
+        setTextIfChanged(button.querySelector('strong'),product.shortLabel||product.label);
+        setTextIfChanged(button.querySelector('span'),'Puzzi + робот для вікон · текстиль, скло, дзеркала');
+        const tariff=`Будні · ${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн  |  1 вихідний · ${new Intl.NumberFormat('uk-UA').format(product.weekend)} грн`;
+        setTextIfChanged(button.querySelector('small'),tariff);
+        button.addEventListener('click',()=>{const url=new URL(location.href);url.searchParams.set('product','puzzi_abir');location.assign(url.toString())});
+        robot.insertAdjacentElement('afterend',button);
+      }
+    }
+  }
+  function syncPublicCopy(){
+    const path=location.pathname.replace(/\/+$/,'')||'/';
+    if(path==='/'){
+      const trust=[...document.querySelectorAll('.v21-trust-strip p')].find(node=>/Засоби в комплекті/.test(node.textContent||''));
+      if(trust)trust.innerHTML='<strong>02</strong> Засоби під задачу';
+      document.querySelectorAll('.v21-solution').forEach(card=>{
+        if(/Jimmy JV35 \+ Puzzi/.test(card.textContent||''))setTextIfChanged(card.querySelector('strong'),'від 1 050 грн');
+      });
+    }
+    if(path==='/komplekty'){
+      const cards=[...document.querySelectorAll('.package-card')];
+      cards.forEach(card=>{
+        const title=card.querySelector('h2');
+        const eyebrow=card.querySelector('.package-eyebrow');
+        if(title?.textContent.trim()==='Глибоке очищення текстилю')setTextIfChanged(eyebrow,'Для глибокого очищення текстилю');
+        if(title?.textContent.trim()==='Комбо'){
+          setTextIfChanged(title,'Текстиль + кухня та ванна');
+          setTextIfChanged(eyebrow,'Найчастіше обирають');
+        }
+        if(title?.textContent.trim()==='Генеральне прибирання')setTextIfChanged(card.querySelector('.package-purpose'),'Комплект техніки для текстилю, кухні, ванної та твердих поверхонь.');
+        if(title?.textContent.trim()==='Ідеальні вікна')setTextIfChanged(card.querySelector('.package-purpose'),'Скло, рами, кути й стики — одним комплектом техніки.');
+        if(title?.textContent.trim()==='HOME RESET')setTextIfChanged(card.querySelector('.package-purpose'),'Повний комплект для дому: текстиль, матраци, кухня, ванна та вікна.');
+      });
+      const route=document.querySelector('.day-heading h2');if(route)route.innerHTML='Орієнтовний маршрут<br>на один день.';
+    }
+    if(path==='/rishennia'){
+      document.querySelectorAll('.editorial-body h2 a').forEach(link=>{if(link.textContent.trim()==='Скло без драбини')link.textContent='Менше ручної роботи зі склом';});
+    }
+    if(path==='/rishennia/windows'){
+      const title=document.querySelector('.product-copy h1');if(title?.textContent.trim()==='Скло без драбини')title.textContent='Менше ручної роботи зі склом';
+      document.querySelectorAll('.final-cta h2').forEach(node=>{if(/Скло без драбини/.test(node.textContent||''))node.textContent='Потрібне рішення для вікон і дзеркал?';});
+    }
+    if(path==='/tekhnika/karcher-puzzi-8-1'){
+      document.querySelectorAll('.puzzi-float strong').forEach(node=>{if(node.textContent.trim()==='8 порцій хімії')node.textContent='8 запечатаних порцій';});
+      document.querySelectorAll('.puzzi-facts article').forEach(card=>{if(/8 порцій/.test(card.textContent||''))setTextIfChanged(card.querySelector('p'),'оплата лише за використані');});
+      document.querySelectorAll('.puzzi-term-grid article').forEach(card=>{
+        const title=card.querySelector('small')?.textContent.trim();
+        if(title==='Оренда')setTextIfChanged(card.querySelector('p'),'700 грн — будній тариф. 800 грн — тариф за вихідний. Мінімальний тариф — 1 доба.');
+        if(title==='Слоти')setTextIfChanged(card.querySelector('p'),'Ранок 08:00–10:00 · вечір 17:30–20:00. Доступність техніки перевіряється онлайн перед бронюванням.');
+      });
+      document.querySelectorAll('.puzzi-steps article').forEach(card=>{if(/extras/.test(card.textContent||''))setTextIfChanged(card.querySelector('p'),'Рахуємо використану хімію й додаткові засоби та робимо фінальний взаєморозрахунок із залогом.');});
+      const finalCopy=document.querySelector('.puzzi-final>p:not(.eyebrow)');if(finalCopy)setTextIfChanged(finalCopy,'Перевірте доступність техніки онлайн. Система одразу покаже тариф, отримання та суму до оформлення.');
+    }
+  }
+  async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok){if(d.depositRules)mergeDepositRules(d.depositRules);if(d.deliveryFee!==undefined)setDeliveryFee(d.deliveryFee);syncBookingCatalog();enhanceDepositSummary();syncDeliveryFee()}}catch{}}
   function termsMarkup(){
     return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактично отриманий залоговий платіж формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залоговий платіж</h3><p>Сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>2+ доби у вікенд · 4 000 грн</small></span></div></div></article></div><section class="vx-loyalty-policy" aria-label="Програма лояльності"><div><p>Програма лояльності</p><h3>Чим більше оренд — тим вигідніше.</h3><span>Знижка застосовується автоматично за номером телефону та діє тільки на оренду техніки.</span></div><div class="vx-loyalty-levels"><article><small>Start</small><strong>0%</strong><span>0–2 завершені оренди</span></article><article><small>Regular</small><strong>−5%</strong><span>після 3 завершених оренд</span></article><article><small>VIP</small><strong>−10%</strong><span>після 6 завершених оренд</span></article></div><p class="vx-loyalty-rule">Promo та loyalty не сумуються — система автоматично застосовує вигіднішу знижку. Доставка, додаткові позиції та хімія оплачуються без знижки.</p></section><section class="vx-care-policy" aria-label="Дбайливе користування технікою"><div class="vx-care-policy__head"><p>Дбайливе користування</p><h3>Без страшилок і дрібного шрифту.</h3><span>Техніка видається перевіреною та справною. Якщо щось працює не так — зупиніть роботу й напишіть нам.</span></div><div class="vx-care-policy__grid"><article><small>01</small><strong>Несправність</strong><span>Природний знос або технічна несправність не з вини клієнта — не його відповідальність. Самостійно розбирати чи ремонтувати техніку не потрібно.</span></article><article><small>02</small><strong>Фізичні пошкодження</strong><span>Відповідальність виникає за очевидні пошкодження через неправильне користування: падіння, удари, тріщини, залиття або самостійне розбирання.</span></article><article><small>03</small><strong>Повернення</strong><span>Злийте брудну воду, приберіть велике сміття й волосся, сполосніть робочі ємності та насадки. Звичайні сліди використання — нормально.</span></article></div><p class="vx-care-policy__proof">300 оренд — і нам ще не доводилося штрафувати клієнтів за техніку.</p></section><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
   }
@@ -433,6 +502,7 @@
         .split('Puzzi + робот ABIR').join('Puzzi + робот для вікон')
         .split('SC 2 + ABIR').join('SC 2 + робот для вікон')
         .split('Робот ABIR').join('Робот для вікон');
+      value=value.split('Робот для вікон Робот для вікон').join('Робот для вікон');
       if(value.includes('ABIR WD8')&&!value.includes('Робот для вікон · ABIR WD8')){
         value=value.split('ABIR WD8').join('Робот для вікон · ABIR WD8');
       }
@@ -596,6 +666,8 @@
   function enhance(){
     if(location.pathname.startsWith('/admin/'))return;
     replacePublicLabels();
+    syncBookingCatalog();
+    syncPublicCopy();
     document.querySelectorAll('a[href="/vidhuky"]').forEach(a=>{if(a.textContent.trim()==='Процес')a.textContent='Відгуки'});
     enhanceReviewLinks();
     document.querySelectorAll('.booking-date-grid input[type="date"]').forEach(enhanceDate);
