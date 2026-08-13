@@ -132,16 +132,16 @@ function renderPrefilledProduct(){
   let bar=section.querySelector('.vx-product-prefill-bar');
   if(!bar){
     bar=document.createElement('div');bar.className='vx-product-prefill-bar';
-    bar.innerHTML='<span><small>Вже обрано</small><strong></strong></span><button type="button" aria-expanded="false">Змінити техніку</button>';
+    bar.innerHTML='<span><small>Ваш вибір</small><strong></strong></span><button type="button" aria-expanded="false"><span>Змінити техніку</span><i aria-hidden="true">↔</i></button>';
     section.querySelector('.booking-step-heading')?.insertAdjacentElement('afterend',bar);
     bar.querySelector('button').onclick=()=>{
       const expanded=section.classList.toggle('vx-product-expanded');
       bar.querySelector('button').setAttribute('aria-expanded',String(expanded));
-      bar.querySelector('button').textContent=expanded?'Згорнути список':'Змінити техніку';
+      bar.querySelector('button span').textContent=expanded?'Згорнути список':'Змінити техніку';
     };
     list.addEventListener('click',event=>{
       if(!event.target.closest('button')||!section.classList.contains('vx-product-expanded'))return;
-      setTimeout(()=>{section.classList.remove('vx-product-expanded');const button=bar.querySelector('button');button.setAttribute('aria-expanded','false');button.textContent='Змінити техніку';renderPrefilledProduct()},0);
+      setTimeout(()=>{section.classList.remove('vx-product-expanded');const button=bar.querySelector('button');button.setAttribute('aria-expanded','false');button.querySelector('span').textContent='Змінити техніку';renderPrefilledProduct()},0);
     });
   }
   const title=selected.querySelector('strong')?.textContent?.trim()||'Обрана техніка';

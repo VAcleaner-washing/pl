@@ -45,6 +45,13 @@ if(!bookingChunk.includes('detail:"Puzzi + SC 2 + Jimmy · текстиль, к�
 if(config.catalog.extras.neutralix.label!=='Neutralix · 250 мл'||config.catalog.extras.neutralix.price!==200)failures.push('Neutralix must remain 250 ml / 200 UAH');
 if(!publicExperience.includes('Залоговий платіж'))failures.push('approved “Залоговий платіж” wording is missing');
 if(!publicExperience.includes('8 запечатаних порцій')||!publicExperience.includes('оплата лише за використані'))failures.push('Puzzi chemistry payment is not explicit');
+const publicQuiz=fs.readFileSync('assets/public-quiz.js','utf8');
+if(!publicQuiz.includes("const SPOT_FIX_USE='Не розбавляйте."))failures.push('VA SPOT FIX instruction does not say to use it undiluted');
+if(!publicQuiz.includes('Потім промокніть — не тріть — чистою сухою білою тканиною'))failures.push('VA SPOT FIX instruction does not distinguish blotting from rubbing');
+if(!publicQuiz.includes('Завершіть промиванням водою або очищенням усієї поверхні миючим засобом'))failures.push('VA SPOT FIX instruction is missing the rinse/full-cleaning step');
+if(!publicQuiz.includes("const STAIN_OX_USE='Не розбавляйте."))failures.push('VA STAIN OX instruction does not say to use it undiluted');
+if(!publicQuiz.includes('Якщо на тканину перейшов колір матеріалу — засіб не використовуйте'))failures.push('VA STAIN OX instruction is missing the dye-transfer stop rule');
+if(!publicQuiz.includes('залиште діяти до 15 хвилин')||!publicQuiz.includes('Кислотний засіб, pH 3,5'))failures.push('VA STAIN OX dwell time or pH warning is missing');
 
 if(failures.length){
   console.error(failures.map(item=>`FAIL: ${item}`).join('\n'));

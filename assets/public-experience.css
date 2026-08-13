@@ -826,15 +826,18 @@ html.vq-standalone-page .vq-dialog{max-height:calc(100dvh - 116px)}
 }
 
 /* v4.0.23 — product-aware booking stays compact until the customer asks to change equipment. */
-.vx-product-prefill-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:-4px 0 16px;padding:14px 16px;border:1px solid rgba(202,162,97,.22);border-radius:16px;background:rgba(202,162,97,.07)}
+.vx-product-prefill-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:-4px 0 16px;padding:15px 16px;border:1px solid rgba(154,111,55,.26);border-radius:16px;background:#f8f4ed;box-shadow:0 8px 24px rgba(58,39,18,.05)}
 .vx-product-prefill-bar>span{display:grid;gap:3px;min-width:0}
-.vx-product-prefill-bar small{color:#9d9487;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
-.vx-product-prefill-bar strong{overflow:hidden;color:#eee8df;font-size:15px;text-overflow:ellipsis;white-space:nowrap}
-.vx-product-prefill-bar button{flex:0 0 auto;min-height:42px;padding:0 15px;border:1px solid rgba(202,162,97,.34);border-radius:999px;background:rgba(202,162,97,.1);color:#e6bf7e;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.vx-product-prefill-bar small{color:#8c7d69;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.vx-product-prefill-bar strong{overflow:hidden;color:#17191a;font-size:15px;text-overflow:ellipsis;white-space:nowrap}
+.vx-product-prefill-bar button{display:inline-flex;align-items:center;justify-content:center;gap:9px;flex:0 0 auto;min-height:44px;padding:0 16px;border:1px solid #a97738;border-radius:999px;background:#fffaf2;color:#8d5d22;font:inherit;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(92,61,25,.08);transition:background .18s ease,color .18s ease,transform .18s ease}
+.vx-product-prefill-bar button:hover{background:#a97738;color:#fff;transform:translateY(-1px)}
+.vx-product-prefill-bar button:focus-visible{outline:3px solid rgba(169,119,56,.25);outline-offset:3px}
+.vx-product-prefill-bar button i{font-size:16px;font-style:normal;line-height:1}
 #booking-products.vx-product-prefilled:not(.vx-product-expanded) .booking-products>button:not(.is-selected):not([aria-pressed="true"]):not(.selected){display:none}
 #booking-products.vx-product-prefilled:not(.vx-product-expanded) .booking-products{grid-template-columns:minmax(0,1fr)}
 #booking-products.vx-product-prefilled:not(.vx-product-expanded) .booking-products>button{max-width:680px}
-@media(max-width:620px){.vx-product-prefill-bar{align-items:stretch;gap:10px;margin-top:-2px;padding:12px;display:grid}.vx-product-prefill-bar button{width:100%;min-height:46px}.vx-product-prefill-bar strong{font-size:14px}}
+@media(max-width:620px){.vx-product-prefill-bar{align-items:stretch;gap:12px;margin-top:-2px;padding:13px;display:grid}.vx-product-prefill-bar button{width:100%;min-height:46px}.vx-product-prefill-bar strong{font-size:14px}}
 
 /* v4.0.34 — desktop polish for add-ons in booking and quiz results. */
 .booking-progress{
