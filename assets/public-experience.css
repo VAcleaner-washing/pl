@@ -900,6 +900,15 @@ html.vq-standalone-page .vq-dialog{max-height:calc(100dvh - 116px)}
   padding:9px 12px;
   border-radius:12px;
 }
+.vq-result__base-note{display:grid;gap:5px;margin-top:16px;padding:13px 14px;border:1px solid rgba(231,189,122,.15);border-radius:13px;background:rgba(231,189,122,.055)}
+.vq-result__base-note strong{color:#edc57f;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.vq-result__base-note span{color:#a8abab;font-size:12px;line-height:1.55}
+.vq-result__extras-intro{margin:-4px 0 14px;color:#8f9393;font-size:12px;line-height:1.5}
+.vq-result__extras .vq-result__extra-match{margin-top:7px;color:#d5d7d5;font-size:12px;line-height:1.5}
+.vq-result__extra-explain{display:grid;gap:8px;margin-top:13px}
+.vq-result__extras .vq-result__extra-explain p{display:grid;gap:3px;margin:0;padding-left:11px;border-left:2px solid rgba(213,164,88,.28)}
+.vq-result__extra-explain b{color:#c9a66e;font-size:10px;letter-spacing:.035em;text-transform:uppercase}
+.vq-result__extra-explain span{color:#8f9393;font-size:11.5px;line-height:1.5}
 
 @media(min-width:1200px){
   .booking-extras label>span b{

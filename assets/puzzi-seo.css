@@ -54,6 +54,17 @@
 .puzzi-kit-list>article>span{color:#caa66f;font:11px Georgia,serif}
 .puzzi-kit-list h3{margin:0 0 7px;font-size:23px;letter-spacing:-.03em}
 .puzzi-kit-list p{margin:0;max-width:650px;color:#8d8f8b;font-size:12px;line-height:1.7}
+.puzzi-cleaning-process{padding:110px 5.5vw 120px;background:#e8dfd2;color:var(--p-ink)}
+.puzzi-cleaning-process .eyebrow{color:#8d6536}
+.puzzi-cleaning-process .eyebrow>span{background:#a47743}
+.puzzi-cleaning-steps{max-width:1480px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);border:1px solid #17191b24;background:#f5f0e8}
+.puzzi-cleaning-steps article{min-height:310px;padding:29px 25px;display:flex;flex-direction:column;border-right:1px solid #17191b24}
+.puzzi-cleaning-steps article:last-child{border-right:0}
+.puzzi-cleaning-steps span{color:#9b7140;font:11px Georgia,serif}
+.puzzi-cleaning-steps h3{margin:54px 0 12px;font-size:22px;line-height:1.05;letter-spacing:-.035em}
+.puzzi-cleaning-steps p{margin:auto 0 0;color:#736e67;font-size:11px;line-height:1.7}
+.puzzi-cleaning-note{max-width:1480px;margin:16px auto 0;padding:20px 24px;display:flex;gap:12px;border:1px solid #17191b1f;color:#716b64;font-size:11px;line-height:1.55}
+.puzzi-cleaning-note strong{color:#151719;white-space:nowrap}
 .puzzi-term-grid{max-width:1480px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
 .puzzi-term-grid article{min-height:285px;padding:30px;border:1px solid #17191b24;background:#f9f6f1;display:flex;flex-direction:column}
 .puzzi-term-grid article.featured{background:#17191b;color:#f3eee6;border-color:#17191b}
@@ -106,6 +117,10 @@
 
 @media(max-width:1100px){.puzzi-hero{grid-template-columns:minmax(0,1fr) minmax(340px,.72fr);gap:45px}
 .puzzi-zone-grid,.puzzi-term-grid,.puzzi-steps{grid-template-columns:repeat(2,1fr)}
+.puzzi-cleaning-steps{grid-template-columns:repeat(2,1fr)}
+.puzzi-cleaning-steps article{border-bottom:1px solid #17191b24}
+.puzzi-cleaning-steps article:nth-child(2n){border-right:0}
+.puzzi-cleaning-steps article:last-child{grid-column:1/-1;min-height:230px;border-bottom:0}
 .puzzi-zone-grid article:nth-child(2){border-right:0}
 .puzzi-zone-grid article:nth-child(-n+2){border-bottom:1px solid #15171922}
 .puzzi-term-grid article{min-height:250px}
@@ -126,8 +141,9 @@
 .puzzi-proof-grid{grid-template-columns:1fr}
 .puzzi-proof-grid a{height:560px}
 .puzzi-weekend-note{display:grid}
+.puzzi-cleaning-note{display:grid}
 .puzzi-how{padding-top:92px}
-.puzzi-light,.puzzi-terms,.puzzi-proof{padding-top:92px;padding-bottom:95px}
+.puzzi-light,.puzzi-cleaning-process,.puzzi-terms,.puzzi-proof{padding-top:92px;padding-bottom:95px}
 }
 
 @media(max-width:620px){.puzzi-hero{padding:96px 18px 50px;min-height:auto}
@@ -146,7 +162,7 @@
 .puzzi-float.p3{display:none}
 .puzzi-facts{padding:0 18px}
 .puzzi-facts article{min-height:102px;padding:19px 15px}
-.puzzi-light,.puzzi-terms,.puzzi-proof,.puzzi-how{padding:78px 18px 84px}
+.puzzi-light,.puzzi-cleaning-process,.puzzi-terms,.puzzi-proof,.puzzi-how{padding:78px 18px 84px}
 .puzzi-heading{margin-bottom:34px}
 .puzzi-heading h2,.puzzi-kit h2,.puzzi-how h2,.puzzi-faq h2{font-size:clamp(40px,12.5vw,54px)}
 .puzzi-zone-grid,.puzzi-term-grid,.puzzi-steps{grid-template-columns:1fr}
@@ -155,6 +171,12 @@
 .puzzi-zone-grid h3{margin-top:36px}
 .puzzi-kit,.puzzi-faq{padding:80px 18px}
 .puzzi-kit-list article{grid-template-columns:36px 1fr;gap:10px}
+.puzzi-cleaning-steps{grid-template-columns:1fr}
+.puzzi-cleaning-steps article,.puzzi-cleaning-steps article:nth-child(2n),.puzzi-cleaning-steps article:last-child{grid-column:auto;min-height:225px;border-right:0;border-bottom:1px solid #17191b24}
+.puzzi-cleaning-steps article:last-child{border-bottom:0}
+.puzzi-cleaning-steps h3{margin-top:35px}
+.puzzi-cleaning-note{padding:18px}
+.puzzi-cleaning-note strong{white-space:normal}
 .puzzi-term-grid article{min-height:230px}
 .puzzi-weekend-note{padding:18px}
 .puzzi-steps article,.puzzi-steps article:nth-child(3){min-height:225px;border-left:1px solid #ffffff18;border-right:1px solid #ffffff18;border-bottom:1px solid #ffffff18}
