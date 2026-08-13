@@ -177,16 +177,31 @@ async function checkLoyalty(input){
     const loyalty=data?.loyalty;
     if(!response.ok||!loyalty)throw new Error('lookup_failed');
     if(loyalty.percent>0){
+      const completed=Math.max(0,Number(loyalty.completedOrders)||0);
+      const isVip=Number(loyalty.percent)>=10||String(loyalty.level||'').toLowerCase()==='vip';
+      const nextTarget=isVip?null:completed<3?3:6;
+      const remaining=nextTarget?Math.max(0,nextTarget-completed):0;
       box.className='public-loyalty-status active';
-      box.innerHTML=`<strong>${loyalty.level} · −${loyalty.percent}% на оренду техніки</strong><span>${loyalty.completedOrders} завершених оренд. Знижка застосована автоматично.</span>`;
+      box.innerHTML=`<small>Ваш рівень лояльності</small><strong>${loyalty.level} · −${loyalty.percent}% на оренду техніки</strong><span><b>${completed} завершених оренд</b> · знижка застосована автоматично.</span>${isVip?'<em>Максимальний рівень VAcleaner</em>':`<em>До VIP залишилось ${remaining} ${remaining===1?'оренда':'оренди'}</em>`}`;
     }else{
+      const completed=Math.max(0,Number(loyalty.completedOrders)||0);
+      const remaining=Math.max(0,3-completed);
       box.className='public-loyalty-status neutral';
-      box.innerHTML=`<strong>Рівень Start</strong><span>${loyalty.completedOrders||0} завершених оренд. Regular починається з 3 оренд.</span>`;
+      box.innerHTML=`<small>Ваш рівень лояльності</small><strong>Start · ${completed} завершених оренд</strong><span>До знижки −5% залишилось <b>${remaining} ${remaining===1?'оренда':'оренди'}</b>.</span><em>Далі: VIP · −10% після 6 оренд</em>`;
     }
   }catch{
     box.className='public-loyalty-status neutral';
     box.textContent='Не вдалося перевірити лояльність. Заявку можна оформити без цього.';
   }
+}
+
+function renderLoyaltyHint(){
+  const heading=document.querySelector('#booking-contact .booking-step-heading');
+  if(!heading||heading.parentElement.querySelector('.vx-loyalty-hint'))return;
+  const hint=document.createElement('p');
+  hint.className='vx-loyalty-hint';
+  hint.innerHTML='<b>Вже орендували у VAcleaner?</b> Введіть той самий номер — покажемо кількість завершених оренд, ваш рівень і застосуємо знижку автоматично.';
+  heading.insertAdjacentElement('afterend',hint);
 }
 function bindLoyalty(){
   document.querySelectorAll('input[type="tel"]').forEach(input=>{
@@ -200,6 +215,7 @@ function bindLoyalty(){
 let refreshAttempts=0;
 function refreshBindings(){
   apply();
+  renderLoyaltyHint();
   bindLoyalty();
   renderDeposit();
   renderPickupLocationNote();

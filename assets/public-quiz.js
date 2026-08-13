@@ -288,11 +288,13 @@
     body.querySelectorAll('.vq-option').forEach(button=>button.addEventListener('click',()=>{
       setAnswer(q.id,button.dataset.value,q.type);
       if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else{
-        if(q.id==='textileProblems'){render();return;}
-        const selected=Array.isArray(valueFor(q.id))&&valueFor(q.id).includes(button.dataset.value);
-        button.classList.toggle('is-selected',selected);
-        button.setAttribute('aria-pressed',selected?'true':'false');
-        const check=button.querySelector('.vq-option__check');if(check)check.textContent=selected?'✓':'';
+        const selectedValues=Array.isArray(valueFor(q.id))?valueFor(q.id):[];
+        body.querySelectorAll('.vq-option').forEach(option=>{
+          const selected=selectedValues.includes(option.dataset.value);
+          option.classList.toggle('is-selected',selected);
+          option.setAttribute('aria-pressed',selected?'true':'false');
+          const check=option.querySelector('.vq-option__check');if(check)check.textContent=selected?'✓':'';
+        });
         next.disabled=!canContinue(q);
       }
     }));

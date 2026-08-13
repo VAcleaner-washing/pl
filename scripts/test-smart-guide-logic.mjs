@@ -17,6 +17,8 @@ const harness=`${source.slice(0,cut)}
 const quiz=vm.runInNewContext(harness,{location:{pathname:'/pidbir/'},URLSearchParams,Intl,Math,JSON,Set});
 let passed=0;
 const check=(ok,label)=>{if(!ok)throw new Error(label);passed+=1};
+check(!source.includes("if(q.id==='textileProblems'){render();return;}"),'textile multi-select never rerenders and resets the scroll position');
+check(source.includes("body.querySelectorAll('.vq-option').forEach(option=>{"),'all multi-select questions synchronize option state in place');
 
 quiz.setState({zones:['textile'],textileProblems:['common_stain','odor'],textileOdor:'urine'});
 quiz.setAnswer('zones','textile','multi');
