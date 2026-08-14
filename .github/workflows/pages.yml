@@ -29,6 +29,16 @@ jobs:
         run: npm run stamp
       - name: Validate static and backend release
         run: npm run check
+      - name: Prevent stale copy and hydration mismatches
+        run: npm run test:copy-integrity
+      - name: Verify package naming and chemistry wording
+        run: npm run test:package-language
+      - name: Verify admin-controlled delivery settings
+        run: npm run test:delivery-settings
+      - name: Verify public SEO metadata and structured data
+        run: npm run test:public-seo
+      - name: Verify production backend inventory
+        run: npm run check:backend
       - name: Verify rental day and deposit policy
         run: npm run test:deposit-policy
       - name: Verify stabilization architecture

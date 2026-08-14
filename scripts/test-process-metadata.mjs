@@ -33,7 +33,7 @@ for(const [name,source] of [['edge source',edgeTs],['edge deploy',edgeDeploy]]){
   check(source.includes('const cleanAdminNote ='),`${name} strips legacy workflow lines from admin_note`);
   check(source.includes('!line.startsWith("[[VAC_PROCESS:")'),`${name} strips hidden compatibility marker before database storage`);
   check(source.includes('const requestedProcessing = body.processing'),`${name} accepts structured processing metadata`);
-  check(source.includes('...(processing ? { processing } : {})'),`${name} persists processing inside extras`);
+  check(/\.\.\.\s*\(\s*processing\s*\?\s*\{\s*processing\s*\}\s*:\s*\{\s*\}\s*\)/.test(source)||/\.\.\.\s*processing\s*\?\s*\{\s*processing\s*\}\s*:\s*\{\s*\}/.test(source),`${name} persists processing inside extras`);
   check(source.includes('admin_note: cleanAdminNote(body.adminNote, 800) || null'),`${name} refuses to re-store workflow text/marker during create/edit`);
 }
 

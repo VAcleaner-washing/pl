@@ -16,8 +16,8 @@ const exactTime = (booking: any, kind: "pickup" | "return", slots: any) => {
   const timestampTime = raw.match(/[T\s](\d{2}):(\d{2})/)?.slice(1, 3).join(":");
   if (timestampTime) return timestampTime;
   const windowName = kind === "pickup" ? booking?.pickup_window : booking?.return_window;
-  if (kind === "pickup") return windowName === "evening" ? String(slots?.eveningStart || "17:30") : String(slots?.morningStart || "07:00");
-  return windowName === "evening" ? String(slots?.eveningEnd || "20:00") : String(slots?.morningEnd || "09:30");
+  if (kind === "pickup") return windowName === "evening" ? String(slots?.eveningStart || "17:30") : String(slots?.morningStart || "08:00");
+  return windowName === "evening" ? String(slots?.eveningEnd || "20:00") : String(slots?.morningEnd || "10:00");
 };
 async function sendToManagers(db: any, payload: Record<string, unknown>, ttl = 3600) {
   const [{ data: config }, { data: subs }] = await Promise.all([

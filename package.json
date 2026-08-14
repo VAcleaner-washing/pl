@@ -30,7 +30,8 @@
     "test:process-metadata": "node scripts/test-process-metadata.mjs",
     "test:issue-workflow": "node scripts/test-issue-workflow.mjs",
     "test:public-seo": "node scripts/test-public-seo-audit.mjs",
-    "test:peer-admin-push": "node scripts/test-peer-admin-push.mjs"
-    ,"test:delivery-settings": "node scripts/test-delivery-settings.mjs"
+    "test:peer-admin-push": "node scripts/test-peer-admin-push.mjs",
+    "test:delivery-settings": "node scripts/test-delivery-settings.mjs",
+    "test:copy-integrity": "node scripts/test-static-copy-integrity.mjs"
   }
 }

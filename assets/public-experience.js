@@ -12,10 +12,12 @@
   const clone=value=>CORE?.clone?CORE.clone(value):JSON.parse(JSON.stringify(value));
   const DEFAULT_DEPOSIT_RULES=clone(CORE?.depositRules||FALLBACK_DEPOSIT_RULES);
   const DEFAULT_DELIVERY_FEE=Number(CORE?.deliveryFee)||250;
+  const DEFAULT_SLOTS=clone(CORE?.slots||{morningStart:'08:00',morningEnd:'10:00',eveningStart:'17:30',eveningEnd:'20:00'});
   const PRODUCT_ALIASES=CORE?.productAliases||FALLBACK_ALIASES;
   let depositRules=clone(DEFAULT_DEPOSIT_RULES);
   let deliveryFee=DEFAULT_DELIVERY_FEE;
   let liveCatalog=CORE?.catalog||null;
+  let liveSlots=clone(DEFAULT_SLOTS);
   let calendarReturnFocus=null;
   let calendarScrollLock=null;
   const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];
@@ -385,99 +387,20 @@
       }
     }
   }
-  function syncPublicCopy(){
-    const path=location.pathname.replace(/\/+$/,'')||'/';
-    if(path==='/'){
-      const trust=[...document.querySelectorAll('.v21-trust-strip p')].find(node=>/Засоби в комплекті/.test(node.textContent||''));
-      if(trust)trust.innerHTML='<strong>02</strong> Засоби під задачу';
-      document.querySelectorAll('.v21-solution').forEach(card=>{
-        if(!/Jimmy JV35 \+ Puzzi/.test(card.textContent||''))return;
-        setTextIfChanged(card.querySelector('small'),'Пилові кліщі й алергени');
-        setTextIfChanged(card.querySelector('h3'),'Глибоке очищення матраца');
-        setTextIfChanged(card.querySelector('p'),'Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени, а Puzzi після цього глибоко промиває текстиль.');
-        setTextIfChanged(card.querySelector('strong'),'від 1 050 грн');
-      });
-      document.querySelectorAll('.v21-package-grid article').forEach(card=>{
-        const title=card.querySelector('h3')?.textContent.trim();
-        if(title==='Puzzi + Jimmy')setTextIfChanged(card.querySelector('p'),'Jimmy — сухий пил, пилові кліщі й пов’язані алергени; Puzzi — глибоке промивання текстилю.');
-        if(title==='Puzzi + SC 2 + Jimmy')setTextIfChanged(card.querySelector('p'),'Jimmy — пилові кліщі й пов’язані алергени, Puzzi — текстиль, SC 2 — кухня та ванна.');
-        if(title==='Увесь дім')setTextIfChanged(card.querySelector('p'),'Jimmy — пилові кліщі й пов’язані алергени, Puzzi — текстиль, SC 2 — кухня та ванна, робот — вікна.');
-      });
-    }
-    if(path==='/komplekty'){
-      const cards=[...document.querySelectorAll('.package-card')];
-      cards.forEach(card=>{
-        const title=card.querySelector('h2');
-        const eyebrow=card.querySelector('.package-eyebrow');
-        if(title?.textContent.trim()==='Глибоке очищення текстилю'){
-          setTextIfChanged(eyebrow,'Матрац і текстиль · 2 етапи');
-          setTextIfChanged(card.querySelector('.package-purpose'),'Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi після цього глибоко промиває текстиль.');
-          const benefits=['Пилові кліщі й пов’язані алергени','Вібраційна щітка, UV-світло й нагрівання до 60 °C','Глибоке промивання Puzzi'];
-          card.querySelectorAll('li').forEach((node,index)=>{if(benefits[index])setTextIfChanged(node,benefits[index]);});
-        }
-        if(title?.textContent.trim()==='Комбо'){
-          setTextIfChanged(title,'Текстиль + кухня та ванна');
-          setTextIfChanged(eyebrow,'Найчастіше обирають');
-        }
-        if(title?.textContent.trim()==='Генеральне прибирання'){
-          setTextIfChanged(eyebrow,'Текстиль + тверді поверхні');
-          setTextIfChanged(card.querySelector('.package-purpose'),'Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi промиває текстиль, а SC 2 працює з кухнею, ванною та твердими поверхнями.');
-          const benefits=['Jimmy: пилові кліщі й пов’язані алергени','Puzzi: текстиль і матраци','SC 2: кухня, ванна та поверхні'];
-          card.querySelectorAll('li').forEach((node,index)=>{if(benefits[index])setTextIfChanged(node,benefits[index]);});
-        }
-        if(title?.textContent.trim()==='Ідеальні вікна')setTextIfChanged(card.querySelector('.package-purpose'),'Скло, рами, кути й стики — одним комплектом техніки.');
-        if(title?.textContent.trim()==='HOME RESET'){
-          setTextIfChanged(card.querySelector('.package-purpose'),'Повний цикл для дому: Jimmy — пилові кліщі й пов’язані алергени, Puzzi — текстиль, SC 2 — кухня та ванна, робот — вікна.');
-          const benefits=['Jimmy + Puzzi: матраци й текстиль','SC 2: кухня та ванна','Робот: вікна й дзеркала'];
-          card.querySelectorAll('li').forEach((node,index)=>{if(benefits[index])setTextIfChanged(node,benefits[index]);});
-        }
-      });
-      const route=document.querySelector('.day-heading h2');if(route)route.innerHTML='Орієнтовний маршрут<br>на один день.';
-    }
-    if(path==='/rishennia'){
-      document.querySelectorAll('.editorial-body h2 a').forEach(link=>{if(link.textContent.trim()==='Скло без драбини')link.textContent='Менше ручної роботи зі склом';});
-      document.querySelectorAll('.editorial-card').forEach(card=>{
-        if(!/Jimmy JV35/.test(card.textContent||''))return;
-        setTextIfChanged(card.querySelector('.card-kicker'),'Пилові кліщі й алергени · Jimmy JV35');
-        setTextIfChanged(card.querySelector('h2 a'),'Глибоке очищення матраца');
-        setTextIfChanged(card.querySelector('.editorial-body>p:not(.card-kicker)'),'Jimmy допомагає прибрати сухий пил, шерсть, пилових кліщів і пов’язані з ними алергени; UV-світло та нагрівання до 60 °C додатково обробляють поверхню перед промиванням Puzzi.');
-        setTextIfChanged(card.querySelector('.editorial-footer strong'),'1 050 грн / комплект');
-      });
-    }
-    if(path==='/rishennia/mattress'){
-      const copy=document.querySelector('.product-copy');
-      if(copy){
-        setTextIfChanged(copy.querySelector('.eyebrow'),'Пилові кліщі й алергени · Jimmy JV35');
-        setTextIfChanged(copy.querySelector('h1'),'Глибоке очищення матраца');
-        setTextIfChanged(copy.querySelector('p:not(.eyebrow)'),'Jimmy JV35 допомагає прибрати сухий пил, шерсть, частинки шкіри, пилових кліщів і пов’язані з ними алергени. UV-світло та гаряче повітря до 60 °C додатково обробляють поверхню, а Puzzi після сухого етапу глибоко промиває текстиль.');
-      }
-      const results=[
-        'Вібраційна щітка піднімає сухий пил із волокон',
-        'Допомагає зменшити кількість пилових кліщів і пов’язаних алергенів',
-        'UV-світло й гаряче повітря до 60 °C',
-        'Глибоке промивання Puzzi після сухого етапу'
-      ];
-      document.querySelectorAll('.result-grid>div p').forEach((node,index)=>{if(results[index])setTextIfChanged(node,results[index]);});
-      setTextIfChanged(document.querySelector('.result-section h2'),'Чистіший матрац у два послідовні етапи');
-      document.querySelectorAll('.final-cta h2').forEach(node=>setTextIfChanged(node,'Потрібне глибоке очищення матраца?'));
-    }
-    if(path==='/rishennia/windows'){
-      const title=document.querySelector('.product-copy h1');if(title?.textContent.trim()==='Скло без драбини')title.textContent='Менше ручної роботи зі склом';
-      document.querySelectorAll('.final-cta h2').forEach(node=>{if(/Скло без драбини/.test(node.textContent||''))node.textContent='Потрібне рішення для вікон і дзеркал?';});
-    }
-    if(path==='/tekhnika/karcher-puzzi-8-1'){
-      document.querySelectorAll('.puzzi-float strong').forEach(node=>{if(node.textContent.trim()==='8 порцій хімії')node.textContent='8 запечатаних порцій';});
-      document.querySelectorAll('.puzzi-facts article').forEach(card=>{if(/8 порцій/.test(card.textContent||''))setTextIfChanged(card.querySelector('p'),'оплата лише за використані');});
-      document.querySelectorAll('.puzzi-term-grid article').forEach(card=>{
-        const title=card.querySelector('small')?.textContent.trim();
-        if(title==='Оренда')setTextIfChanged(card.querySelector('p'),'700 грн — будній тариф. 800 грн — тариф за вихідний. Мінімальний тариф — 1 доба.');
-        if(title==='Слоти')setTextIfChanged(card.querySelector('p'),'Ранок 08:00–10:00 · вечір 17:30–20:00. Доступність техніки перевіряється онлайн перед бронюванням.');
-      });
-      document.querySelectorAll('.puzzi-steps article').forEach(card=>{if(/extras/.test(card.textContent||''))setTextIfChanged(card.querySelector('p'),'Рахуємо використану хімію й додаткові засоби та робимо фінальний взаєморозрахунок із залогом.');});
-      const finalCopy=document.querySelector('.puzzi-final>p:not(.eyebrow)');if(finalCopy)setTextIfChanged(finalCopy,'Перевірте доступність техніки онлайн. Система одразу покаже тариф, отримання та суму до оформлення.');
-    }
+  function validSlots(value){
+    const keys=['morningStart','morningEnd','eveningStart','eveningEnd'];
+    if(!value||!keys.every(key=>/^\d{2}:\d{2}$/.test(String(value[key]||''))))return null;
+    const next=Object.fromEntries(keys.map(key=>[key,String(value[key])]));
+    return next.morningStart<next.morningEnd&&next.morningEnd<next.eveningStart&&next.eveningStart<next.eveningEnd?next:null;
   }
-  async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok){if(d.depositRules)mergeDepositRules(d.depositRules);if(d.deliveryFee!==undefined)setDeliveryFee(d.deliveryFee);syncBookingCatalog();enhanceDepositSummary();syncDeliveryFee()}}catch{}}
+  function syncPublicSettings(){
+    if(location.pathname.replace(/\/+$/,'')!=='/tekhnika/karcher-puzzi-8-1')return;
+    document.querySelectorAll('.puzzi-term-grid article').forEach(card=>{
+      if(card.querySelector('small')?.textContent.trim()!=='Слоти')return;
+      setTextIfChanged(card.querySelector('p'),`Ранок ${liveSlots.morningStart}–${liveSlots.morningEnd} · вечір ${liveSlots.eveningStart}–${liveSlots.eveningEnd}. Доступність техніки перевіряється онлайн перед бронюванням.`);
+    });
+  }
+  async function loadDepositRules(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok){if(d.depositRules)mergeDepositRules(d.depositRules);if(d.deliveryFee!==undefined)setDeliveryFee(d.deliveryFee);if(d.catalog?.products)liveCatalog=d.catalog;const slots=validSlots(d.slots);if(slots)liveSlots=slots;syncBookingCatalog();syncPublicSettings();enhanceDepositSummary();syncDeliveryFee()}}catch{}}
   function termsMarkup(){
     return `<section class="vx-rental-terms" data-vx-rental-terms="${VERSION}" aria-labelledby="vx-rental-terms-title"><div class="vx-rental-terms__inner"><div class="vx-rental-terms__head"><p>Умови оренди · без прихованих платежів</p><h2 id="vx-rental-terms-title">Що потрібно для оформлення</h2><span>Передоплата та фактично отриманий залоговий платіж формують спільний фінальний розрахунок при поверненні.</span></div><div class="vx-rental-steps"><article><b>01</b><div><h3>Передплата 200 грн</h3><p>Вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.</p><dl><div><dt>ФОП</dt><dd>Невідома Анна Сергіївна</dd></div><div><dt>IBAN</dt><dd>UA523220010000026006370119233</dd></div><div><dt>ІПН</dt><dd>3314215243</dd></div><div><dt>Призначення</dt><dd>сплата за оренду техніки</dd></div></dl></div></article><article><b>02</b><div><h3>Документ для договору</h3><p>Новий клієнт надсилає фото паспорта, ID-картки або водійського посвідчення менеджеру приватно. Якщо ви вже орендували техніку й дані є в базі — повторно надсилати документ не потрібно.</p></div></article><article><b>03</b><div><h3>Залоговий платіж</h3><p>Сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.</p><div class="vx-deposit-table"><span><b>1 одиниця</b><em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small></span><span><b>2 одиниці / комплект</b><em>1 500 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>Генеральне</b><em>2 000 грн</em><small>2+ доби у вікенд · 3 000 грн</small></span><span><b>HOME RESET</b><em>3 000 грн</em><small>2+ доби у вікенд · 4 000 грн</small></span></div></div></article></div><section class="vx-loyalty-policy" aria-label="Програма лояльності"><div><p>Програма лояльності</p><h3>Чим більше оренд — тим вигідніше.</h3><span>Знижка застосовується автоматично за номером телефону та діє тільки на оренду техніки.</span></div><div class="vx-loyalty-levels"><article><small>Start</small><strong>0%</strong><span>0–2 завершені оренди</span></article><article><small>Regular</small><strong>−5%</strong><span>після 3 завершених оренд</span></article><article><small>VIP</small><strong>−10%</strong><span>після 6 завершених оренд</span></article></div><p class="vx-loyalty-rule">Promo та loyalty не сумуються — система автоматично застосовує вигіднішу знижку. Доставка, додаткові позиції та хімія оплачуються без знижки.</p></section><section class="vx-care-policy" aria-label="Дбайливе користування технікою"><div class="vx-care-policy__head"><p>Дбайливе користування</p><h3>Без страшилок і дрібного шрифту.</h3><span>Техніка видається перевіреною та справною. Якщо щось працює не так — зупиніть роботу й напишіть нам.</span></div><div class="vx-care-policy__grid"><article><small>01</small><strong>Несправність</strong><span>Природний знос або технічна несправність не з вини клієнта — не його відповідальність. Самостійно розбирати чи ремонтувати техніку не потрібно.</span></article><article><small>02</small><strong>Фізичні пошкодження</strong><span>Відповідальність виникає за очевидні пошкодження через неправильне користування: падіння, удари, тріщини, залиття або самостійне розбирання.</span></article><article><small>03</small><strong>Повернення</strong><span>Злийте брудну воду, приберіть велике сміття й волосся, сполосніть робочі ємності та насадки. Звичайні сліди використання — нормально.</span></article></div><p class="vx-care-policy__proof">300 оренд — і нам ще не доводилося штрафувати клієнтів за техніку.</p></section><p class="vx-rental-terms__privacy">Номери документів зберігаються у закритій базі VAcleaner лише для оформлення договорів і не показуються на публічному сайті.</p></div></section>`;
   }
@@ -715,7 +638,7 @@
     if(location.pathname.startsWith('/admin/'))return;
     replacePublicLabels();
     syncBookingCatalog();
-    syncPublicCopy();
+    syncPublicSettings();
     document.querySelectorAll('a[href="/vidhuky"]').forEach(a=>{if(a.textContent.trim()==='Процес')a.textContent='Відгуки'});
     enhanceReviewLinks();
     document.querySelectorAll('.booking-date-grid input[type="date"]').forEach(enhanceDate);

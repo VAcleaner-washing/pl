@@ -1,7 +1,7 @@
 (()=>{
 'use strict';
 const API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
-const CORE_SLOTS=window.VACLEANER_CORE?.slots||{morningStart:'07:00',morningEnd:'09:30',eveningStart:'17:30',eveningEnd:'20:00'};
+const CORE_SLOTS=window.VACLEANER_CORE?.slots||{morningStart:'08:00',morningEnd:'10:00',eveningStart:'17:30',eveningEnd:'20:00'};
 let slots={...CORE_SLOTS};
 let depositRules={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
 let deliveryFee=Number(window.VACLEANER_CORE?.deliveryFee)||250;

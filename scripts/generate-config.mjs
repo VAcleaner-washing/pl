@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { stripTypeScriptTypes } from 'node:module';
 
 const root=process.cwd();
 const release=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
@@ -33,6 +34,23 @@ const sharedWithDelivery=shared.replace(
   'export const DEFAULT_SLOTS=structuredClone(VACLEANER_CONFIG.slots);\nexport const DEFAULT_DELIVERY_FEE=Number(VACLEANER_CONFIG.deliveryFee);',
 );
 for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3']){
- const dir=path.join(root,'supabase','functions',name);fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(path.join(dir,'config.ts'),sharedWithDelivery);
+ const dir=path.join(root,'supabase','functions',name);fs.mkdirSync(dir,{recursive:true});
+ fs.writeFileSync(path.join(dir,'config.ts'),sharedWithDelivery);
+ // Some deployment workflows use the JavaScript fallback beside index.deploy.js.
+ // Generate it from the same source so an old fallback cannot restore stale
+ // product names, prices, slots or delivery settings during the next deploy.
+ fs.writeFileSync(path.join(dir,'config.deploy.js'),sharedWithDelivery
+   .replaceAll(' as const','')
+   .replaceAll(':string','')
+   .replaceAll(':any',''));
+}
+// Keep JavaScript deployment fallbacks aligned with the reviewed TypeScript
+// sources. Older hand-built fallbacks were a second, stale source of truth.
+for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3']){
+  const dir=path.join(root,'supabase','functions',name);
+  const source=fs.readFileSync(path.join(dir,'index.ts'),'utf8');
+  const deploy=stripTypeScriptTypes(source,{mode:'transform'})
+    .replace('from "./config.ts"','from "./config.deploy.js"');
+  fs.writeFileSync(path.join(dir,'index.deploy.js'),deploy);
 }
 console.log(`Generated shared VAcleaner config ${hash}`);

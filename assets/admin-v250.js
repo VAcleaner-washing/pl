@@ -51,7 +51,7 @@ function getCatalog(){try{return mergeCatalog(JSON.parse(localStorage.getItem('v
 function saveCatalogLocal(v){localStorage.setItem('vacleaner_catalog',JSON.stringify(mergeCatalog(v)))}
 async function saveGlobalCatalog(v){const s=getSession();if(!s?.access_token)throw new Error('Потрібен повторний вхід');const r=await fetch(SETTINGS_API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.access_token,'apikey':KEY},body:JSON.stringify({catalog:v})}),d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Не вдалося зберегти ціни');saveCatalogLocal(d.catalog||v);return d.catalog||v}
 
-const DEFAULT_SLOTS={morningStart:'07:00',morningEnd:'09:30',eveningStart:'17:30',eveningEnd:'20:00'};
+const DEFAULT_SLOTS=window.VACLEANER_CORE?.slots||{morningStart:'08:00',morningEnd:'10:00',eveningStart:'17:30',eveningEnd:'20:00'};
 function getSlots(){try{return {...DEFAULT_SLOTS,...JSON.parse(localStorage.getItem('vacleaner_slots')||'{}')}}catch{return {...DEFAULT_SLOTS}}}
 function saveSlots(v){localStorage.setItem('vacleaner_slots',JSON.stringify(v))}
 async function loadGlobalSlots(){try{const r=await fetch(SETTINGS_API,{cache:'no-store'}),d=await r.json();if(r.ok&&d.slots)saveSlots(d.slots);if(r.ok&&d.catalog)saveCatalogLocal(d.catalog);if(r.ok&&d.depositRules)saveDepositRulesLocal(d.depositRules);if(r.ok&&d.deliveryFee!==undefined)saveDeliveryFeeLocal(d.deliveryFee)}catch{}}

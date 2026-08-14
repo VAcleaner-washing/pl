@@ -20,9 +20,9 @@ const expected={
 for(const [code,label] of Object.entries(expected)){
   const product=config.catalog.products[code];
   if(product?.label!==label||product?.shortLabel!==label)failures.push(`${code}: canonical label mismatch`);
-  if(!['combo'].includes(code)&&!bookingChunk.includes(`label:"${label}"`))failures.push(`${code}: booking card label mismatch`);
-  if(!['puzzi_abir','combo'].includes(code)&&!bookingHtml.includes(`<strong>${label}</strong>`))failures.push(`${code}: server-rendered booking label mismatch`);
-  if(!['puzzi_abir','combo'].includes(code)&&!packageHtml.includes(`>${label}</h2>`))failures.push(`${code}: package page label mismatch`);
+  if(!bookingChunk.includes(`label:"${label}"`))failures.push(`${code}: booking card label mismatch`);
+  if(!['puzzi_abir'].includes(code)&&!bookingHtml.includes(`<strong>${label}</strong>`))failures.push(`${code}: server-rendered booking label mismatch`);
+  if(!['puzzi_abir'].includes(code)&&!packageHtml.includes(`>${label}</h2>`))failures.push(`${code}: package page label mismatch`);
 }
 
 for(const [code,alias] of [
@@ -39,11 +39,11 @@ for(const [code,alias] of [
 if(bookingHtml.includes('<strong>Генеральне</strong>'))failures.push('booking still uses the incomplete “Генеральне” title');
 if(bookingHtml.includes('<strong>Тариф «Комбо»</strong>'))failures.push('booking still uses the opaque “Тариф «Комбо»” title');
 if(!bookingChunk.includes('code:"puzzi_abir"'))failures.push('hydrated booking is missing the quiz-recommended textile + windows package');
-if(!publicExperience.includes("setTextIfChanged(title,'Текстиль + кухня та ванна')"))failures.push('package-page runtime does not apply the plain-language combo title');
-if(!packageHtml.includes('>Глибоке очищення текстилю</h2>')||!publicExperience.includes('Матрац і текстиль · 2 етапи'))failures.push('textile package page does not keep the clear canonical title and two-stage context');
-if(!publicExperience.includes('Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi промиває текстиль'))failures.push('general-cleaning package does not explain the role of each machine');
-if(!publicExperience.includes('Пилові кліщі й алергени')||!publicExperience.includes('UV-світло й гаряче повітря до 60 °C'))failures.push('Jimmy positioning does not explain the client problem and the treatment method');
-if(!publicExperience.includes('Пилові кліщі й пов’язані алергени')||!publicExperience.includes('Вібраційна щітка, UV-світло й нагрівання до 60 °C'))failures.push('package cards do not make Jimmy benefits visible');
+if(!packageHtml.includes('>Текстиль + кухня та ванна</h2>'))failures.push('package-page server HTML does not use the plain-language combo title');
+if(!packageHtml.includes('>Глибоке очищення текстилю</h2>')||!packageHtml.includes('Матрац і текстиль · 2 етапи'))failures.push('textile package page does not keep the clear canonical title and two-stage context');
+if(!packageHtml.includes('Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi промиває текстиль'))failures.push('general-cleaning package does not explain the role of each machine');
+if(!packageHtml.includes('Пилові кліщі й пов’язані алергени')||!packageHtml.includes('UV-світло й нагрівання до 60 °C'))failures.push('Jimmy positioning does not explain the client problem and the treatment method');
+if(!packageHtml.includes('Пилові кліщі й пов’язані алергени')||!packageHtml.includes('Вібраційна щітка, UV-світло й нагрівання до 60 °C'))failures.push('package cards do not make Jimmy benefits visible');
 if(!publicQuiz.includes('Пил, шерсть, пилові кліщі чи алергени')||!publicQuiz.includes('UV-світло й нагрівання до 60 °C'))failures.push('quiz does not trigger Jimmy for dust-mite and allergen concerns');
 for(const [file,content] of [
   ['home server HTML',fs.readFileSync('index.html','utf8')],
@@ -71,7 +71,9 @@ if(!bookingChunk.includes('detail:"Puzzi + SC 2 + Jimmy · пилові кліщ
 
 if(config.catalog.extras.neutralix.label!=='Neutralix · 250 мл'||config.catalog.extras.neutralix.price!==200)failures.push('Neutralix must remain 250 ml / 200 UAH');
 if(!publicExperience.includes('Залоговий платіж'))failures.push('approved “Залоговий платіж” wording is missing');
-if(!publicExperience.includes('8 запечатаних порцій')||!publicExperience.includes('оплата лише за використані'))failures.push('Puzzi chemistry payment is not explicit');
+const puzziLanding=fs.readFileSync('tekhnika/karcher-puzzi-8-1/index.html','utf8');
+if(!puzziLanding.includes('8 запечатаних порцій')||!puzziLanding.includes('не входять у вартість оренди'))failures.push('Puzzi chemistry payment is not explicit in initial HTML');
+if(publicExperience.includes('function syncPublicCopy'))failures.push('runtime static-copy patch must not return');
 if(!publicQuiz.includes("const SPOT_FIX_USE='Не розбавляйте."))failures.push('VA SPOT FIX instruction does not say to use it undiluted');
 if(!publicQuiz.includes('Потім промокніть — не тріть — чистою сухою білою тканиною'))failures.push('VA SPOT FIX instruction does not distinguish blotting from rubbing');
 if(!publicQuiz.includes('Завершіть промиванням водою або очищенням усієї поверхні миючим засобом'))failures.push('VA SPOT FIX instruction is missing the rinse/full-cleaning step');

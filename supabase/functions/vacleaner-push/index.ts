@@ -33,7 +33,7 @@ const bookingTime = (booking: Record<string, any>, kind: "pickup" | "return") =>
   const direct = cleanText(extras[kind === "pickup" ? "pickup_time" : "return_time"], 5);
   if (/^\d{2}:\d{2}$/.test(direct)) return direct;
   const window = String(booking[kind === "pickup" ? "pickup_window" : "return_window"] || "");
-  return window === "morning" ? (kind === "pickup" ? "07:00" : "09:00") : (kind === "pickup" ? "18:00" : "20:00");
+  return window === "morning" ? (kind === "pickup" ? "08:00" : "10:00") : (kind === "pickup" ? "17:30" : "20:00");
 };
 
 const ensureConfig = async (supabase: ReturnType<typeof createClient>) => {
