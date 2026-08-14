@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 const root=process.cwd(),release=JSON.parse(fs.readFileSync('release.json','utf8')),build=String(release.build);
 const ignoredDirs=new Set(['.git','.venv','.pw-browsers','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__']);
@@ -29,6 +30,14 @@ for(const file of files.filter(f=>f.endsWith('.html')||f.endsWith('.txt'))){
 for(const file of files.filter(f=>f.endsWith('.js')&&!f.includes(`${path.sep}_next${path.sep}`))){try{execFileSync(process.execPath,['--check',file],{stdio:'pipe'})}catch{errors.push(`JS syntax: ${path.relative(root,file)}`)}}
 for(const file of files.filter(f=>f.endsWith('.html'))){
  const s=fs.readFileSync(file,'utf8'),rel=path.relative(root,file).replaceAll('\\','/');
+ let inlineIndex=0;
+ for(const match of s.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)){
+  inlineIndex+=1;
+  const attrs=match[1]||'',code=(match[2]||'').trim();
+  if(!code||/\bsrc\s*=/.test(attrs)||/\btype\s*=\s*["']application\/(?:ld\+json|json)["']/i.test(attrs))continue;
+  try{new vm.Script(code,{filename:`${rel}#inline-${inlineIndex}`});}
+  catch(error){errors.push(`inline JS syntax: ${rel}#${inlineIndex}: ${error.message}`);}
+ }
  for(const m of s.matchAll(/\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|admin-v250|public-fixes|mobile-home-fix|site-v400)\.(?:js|css)\?v=([^"']+)/g))if(m[1]!==build)errors.push(`asset version ${m[1]} in ${rel}`);
  const hasCore=/vacleaner-core\.js/.test(s), needsCore=rel==='bronuvannia/index.html'||rel.startsWith('admin/');
  if(hasCore!==needsCore)errors.push(`shared core route mismatch: ${rel}`);

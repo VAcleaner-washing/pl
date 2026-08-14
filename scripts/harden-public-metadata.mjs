@@ -20,13 +20,98 @@ const setMeta=(html,key,value)=>{
   const attribute=key.startsWith('og:')?'property':'name';
   return next.replace('</head>',`<meta ${attribute}="${key}" content="${value}"></head>`);
 };
-const syncRscMetadata=(value,title,description,url)=>value
-  .replace(/(\\?"property\\?":\\?"og:title\\?",\\?"content\\?":\\?")[^"]*(\\?")/g,`$1${title}$2`)
-  .replace(/(\\?"property\\?":\\?"og:description\\?",\\?"content\\?":\\?")[^"]*(\\?")/g,`$1${description}$2`)
-  .replace(/(\\?"property\\?":\\?"og:url\\?",\\?"content\\?":\\?")[^"]*(\\?")/g,`$1${url}$2`)
-  .replace(/(\\?"name\\?":\\?"twitter:title\\?",\\?"content\\?":\\?")[^"]*(\\?")/g,`$1${title}$2`)
-  .replace(/(\\?"name\\?":\\?"twitter:description\\?",\\?"content\\?":\\?")[^"]*(\\?")/g,`$1${description}$2`)
-  .replace(/(\\?"name\\?":\\?"description\\?",\\?"content\\?":\\?")[^"]*(\\?")/g,`$1${description}$2`);
+const jsonStringValue=value=>JSON.stringify(String(value)).slice(1,-1);
+const inlineRscStringValue=value=>JSON.stringify(jsonStringValue(value)).slice(1,-1);
+
+const replaceRscObjectValue=(source,{attribute,key,property='content'},replacement)=>{
+  const escapedMarker=`\\"${attribute}\\":\\"${key}\\",\\"${property}\\":\\"`;
+  const plainMarker=`"${attribute}":"${key}","${property}":"`;
+  const replaceAfterMarker=(value,marker,escaped)=>{
+    let cursor=0;
+    while(true){
+      const markerAt=value.indexOf(marker,cursor);
+      if(markerAt<0)break;
+      const valueAt=markerAt+marker.length;
+      const escapedEnd=value.indexOf('\\"}',valueAt);
+      const plainEnd=value.indexOf('"}',valueAt);
+      let end=-1,closeLength=0;
+      if(escaped&&escapedEnd>=0&&(plainEnd<0||escapedEnd<plainEnd)){end=escapedEnd;closeLength=3;}
+      else if(plainEnd>=0){end=plainEnd;closeLength=2;}
+      else break;
+      const encoded=escaped?inlineRscStringValue(replacement):jsonStringValue(replacement);
+      const closing=escaped?'\\"}':'"}';
+      value=value.slice(0,valueAt)+encoded+closing+value.slice(end+closeLength);
+      cursor=valueAt+encoded.length+closing.length;
+    }
+    return value;
+  };
+  source=replaceAfterMarker(source,escapedMarker,true);
+  source=replaceAfterMarker(source,plainMarker,false);
+  return source;
+};
+
+const replaceRscTitleNode=(source,title)=>{
+  const variants=[
+    {marker:'[\\"$\\",\\"title\\",\\"0\\",{\\"children\\":\\"',closing:'\\"}]',escaped:true},
+    {marker:'["$","title","0",{"children":"',closing:'"}]',escaped:false},
+  ];
+  for(const variant of variants){
+    let cursor=0;
+    while(true){
+      const markerAt=source.indexOf(variant.marker,cursor);
+      if(markerAt<0)break;
+      const valueAt=markerAt+variant.marker.length;
+      const validEnd=source.indexOf(variant.closing,valueAt);
+      const brokenEnd=variant.escaped?source.indexOf('"}]',valueAt):-1;
+      let end=validEnd,closeLength=variant.closing.length;
+      if(variant.escaped&&brokenEnd>=0&&(validEnd<0||brokenEnd<validEnd)){end=brokenEnd;closeLength=3;}
+      if(end<0)break;
+      const encoded=variant.escaped?inlineRscStringValue(title):jsonStringValue(title);
+      source=source.slice(0,valueAt)+encoded+variant.closing+source.slice(end+closeLength);
+      cursor=valueAt+encoded.length+variant.closing.length;
+    }
+  }
+  return source;
+};
+
+const replaceRscCanonical=(source,url)=>{
+  const variants=[
+    {marker:'\\"rel\\":\\"canonical\\",\\"href\\":\\"',closing:'\\"}',escaped:true},
+    {marker:'"rel":"canonical","href":"',closing:'"}',escaped:false},
+  ];
+  for(const variant of variants){
+    let cursor=0;
+    while(true){
+      const markerAt=source.indexOf(variant.marker,cursor);
+      if(markerAt<0)break;
+      const valueAt=markerAt+variant.marker.length;
+      const validEnd=source.indexOf(variant.closing,valueAt);
+      const brokenEnd=variant.escaped?source.indexOf('"}',valueAt):-1;
+      let end=validEnd,closeLength=variant.closing.length;
+      if(variant.escaped&&brokenEnd>=0&&(validEnd<0||brokenEnd<validEnd)){end=brokenEnd;closeLength=2;}
+      if(end<0)break;
+      const encoded=variant.escaped?inlineRscStringValue(url):jsonStringValue(url);
+      source=source.slice(0,valueAt)+encoded+variant.closing+source.slice(end+closeLength);
+      cursor=valueAt+encoded.length+variant.closing.length;
+    }
+  }
+  return source;
+};
+
+const syncRscMetadata=(value,title,description,url)=>{
+  let next=value;
+  next=replaceRscTitleNode(next,title);
+  next=replaceRscCanonical(next,url);
+  for(const [attribute,key,replacement] of [
+    ['property','og:title',title],
+    ['property','og:description',description],
+    ['property','og:url',url],
+    ['name','twitter:title',title],
+    ['name','twitter:description',description],
+    ['name','description',description],
+  ])next=replaceRscObjectValue(next,{attribute,key},replacement);
+  return next;
+};
 
 for(const url of urls){
   const pathname=new URL(url).pathname;
