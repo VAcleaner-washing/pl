@@ -312,6 +312,19 @@ def no_horizontal_overflow(page: Page) -> bool:
 
 def public_tests(browser: Browser, base: str, api_handler, checks: Checks, static_root: Path) -> None:
     context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
+    context.add_init_script(r"""
+      window.__vacPackageTitleHistory=[];
+      const recordPackageTitles=()=>{
+        if(location.pathname.replace(/\/+$/,'')!=='/komplekty')return;
+        const titles=[...document.querySelectorAll('.package-page-grid .package-card h2')].map(el=>(el.textContent||'').trim());
+        if(!titles.length)return;
+        const signature=JSON.stringify(titles);
+        const last=window.__vacPackageTitleHistory.at(-1);
+        if(!last||last.signature!==signature)window.__vacPackageTitleHistory.push({signature,titles,time:performance.now()});
+      };
+      new MutationObserver(recordPackageTitles).observe(document,{subtree:true,childList:true,characterData:true});
+      document.addEventListener('DOMContentLoaded',recordPackageTitles);
+    """)
     install_routes(context, base, api_handler)
     page = context.new_page()
     runtime_events: list[dict[str, Any]] = []
@@ -402,6 +415,26 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.goto(f"{base}/", wait_until="networkidle")
         quiz_cta = page.locator("a", has_text="Підібрати рішення ↓").first
         checks.check(quiz_cta.count() == 1 and quiz_cta.get_attribute("href") == "/pidbir/", "Home solution CTA opens the dedicated quiz")
+
+        page.goto(f"{base}/komplekty/", wait_until="networkidle")
+        page.wait_for_selector(".package-page-grid .package-card h2")
+        canonical_package_titles = [
+            "Глибоке очищення текстилю", "Текстиль + вікна", "Текстиль + кухня та ванна",
+            "Генеральне прибирання", "Ідеальні вікна", "HOME RESET",
+        ]
+        live_titles = [title.strip() for title in page.locator(".package-page-grid .package-card h2").all_inner_texts()]
+        title_history = page.evaluate("window.__vacPackageTitleHistory || []")
+        checks.check(live_titles == canonical_package_titles, "Package page keeps all six canonical titles after hydration")
+        checks.check(all("Комбо" not in " ".join(entry.get("titles", [])) for entry in title_history), "Package titles never flash the legacy Kombo name during hydration")
+        price_geometry = page.locator(".package-page-grid .package-card").evaluate_all(r"""cards=>cards.map(card=>{
+          const cardBox=card.getBoundingClientRect(),price=card.querySelector('.package-price')?.getBoundingClientRect();
+          return price?{cardTop:cardBox.top,priceTop:price.top-cardBox.top}:null;
+        }).filter(Boolean)""")
+        row1=[entry["priceTop"] for entry in price_geometry[:3]]
+        row2=[entry["priceTop"] for entry in price_geometry[3:6]]
+        checks.check(len(row1)==3 and max(row1)-min(row1)<=1.5, "Package prices share one baseline across desktop row 1")
+        checks.check(len(row2)==3 and max(row2)-min(row2)<=1.5, "Package prices share one baseline across desktop row 2")
+        checks.screenshot(page, "packages-desktop.png")
     except Exception:
         checks.capture_failure(page, "public-desktop-failure", runtime_events)
         raise

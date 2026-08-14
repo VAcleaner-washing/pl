@@ -1049,3 +1049,16 @@ html.vq-standalone-page .vq-progress__meta{
 @media(max-width:620px){
   html.vq-standalone-page .vq-dialog__header{grid-template-columns:40px minmax(0,1fr) 40px}
 }
+
+
+/* v4.0.53 — package title hydration parity + shared desktop price baseline */
+@media(min-width:1200px){
+  .package-page-grid .package-card-large h2{min-height:3em}
+  .package-page-grid .package-card-large .package-items{min-height:36px}
+  .package-page-grid .package-card-large .package-purpose{min-height:104px}
+  .package-page-grid .package-card-large ul{min-height:123px}
+  .package-page-grid .package-card-large .package-price{min-height:44px;align-items:baseline}
+}
+@media(min-width:1051px) and (max-width:1199px){
+  .package-page-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

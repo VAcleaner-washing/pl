@@ -101,6 +101,10 @@ check(publicPackageLabels.every(label=>packageHtml.includes(`>${label}</h2>`)),'
 check(publicPackageLabels.every(label=>bookingHtml.includes(`<strong>${label}</strong>`)),'booking exposes the same six canonical client-facing package names');
 check(!bookingHtml.includes('<strong>Комбо</strong>')&&!packageHtml.includes('>Комбо</h2>'),'public catalogue never exposes the legacy “Комбо” name');
 check(experienceJs.includes('function syncPackageCatalog()')&&experienceJs.includes("path!=='/komplekty'"),'soft navigation restores the six-card package catalogue after RSC transitions');
+check(experienceJs.includes('const PUBLIC_PRODUCT_LABELS={')&&experienceJs.includes('PUBLIC_PRODUCT_LABELS.combo'),'public package titles are canonical before and after async catalog refreshes');
+check(!packageHtml.includes('\\\"article\\\",\\\"Комбо\\\"')&&!read('komplekty/__next._full.txt').includes('[\"$\",\"article\",\"Комбо\",'),'package hydration payload contains no legacy combo reconciliation key');
+check(/@media\(min-width:1200px\)\{[\s\S]*?\.package-page-grid \.package-card-large h2\{min-height:3em\}[\s\S]*?\.package-page-grid \.package-card-large \.package-items\{min-height:36px\}[\s\S]*?\.package-page-grid \.package-card-large \.package-purpose\{min-height:104px\}[\s\S]*?\.package-page-grid \.package-card-large ul\{min-height:123px\}[\s\S]*?\.package-page-grid \.package-card-large \.package-price\{min-height:44px/.test(experienceCss),'desktop package cards reserve shared title/items/purpose/list/price zones for aligned amounts');
+check(/@media\(min-width:1051px\) and \(max-width:1199px\)\{[\s\S]*?\.package-page-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}/.test(experienceCss),'package catalogue uses a two-column bridge before the three-column desktop layout becomes cramped');
 
 const puzziHtml=read('tekhnika/karcher-puzzi-8-1/index.html');
 const puzziCss=read('assets/puzzi-seo.css');

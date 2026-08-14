@@ -9,6 +9,7 @@
   const SETTINGS_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
   const FALLBACK_DEPOSIT_RULES={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
   const FALLBACK_ALIASES={'Kärcher Puzzi':'puzzi','Kärcher Puzzi 8/1':'puzzi','Puzzi + Jimmy':'puzzi_jimmy','Глибоке очищення':'puzzi_jimmy','Глибоке очищення текстилю':'puzzi_jimmy','Puzzi + робот для вікон':'puzzi_abir','Puzzi + робот ABIR':'puzzi_abir','Текстиль + вікна':'puzzi_abir','Kärcher SC 2':'sc2','Kärcher SC 2 Deluxe':'sc2','Робот для вікон':'abir','Робот ABIR':'abir','Комбо':'combo','Тариф «Комбо»':'combo','Комбо · Puzzi + SC 2':'combo','Текстиль + кухня та ванна':'combo','Генеральне':'general','Генеральне прибирання':'general','Ідеальні вікна':'ideal_windows','Вікна та гладкі поверхні':'ideal_windows','HOME RESET':'elite','Весь дім за один вікенд':'elite','Весь дім · HOME RESET':'elite'};
+  const PUBLIC_PRODUCT_LABELS={puzzi:'Kärcher Puzzi',puzzi_jimmy:'Глибоке очищення текстилю',puzzi_abir:'Текстиль + вікна',sc2:'Kärcher SC 2',abir:'Робот для вікон',combo:'Текстиль + кухня та ванна',general:'Генеральне прибирання',ideal_windows:'Ідеальні вікна',elite:'HOME RESET'};
   const clone=value=>CORE?.clone?CORE.clone(value):JSON.parse(JSON.stringify(value));
   const DEFAULT_DEPOSIT_RULES=clone(CORE?.depositRules||FALLBACK_DEPOSIT_RULES);
   const DEFAULT_DELIVERY_FEE=Number(CORE?.deliveryFee)||250;
@@ -369,7 +370,8 @@
       const strong=button.querySelector('strong');if(!strong)return;
       const code=PRODUCT_ALIASES[strong.textContent.trim()]||CORE?.productAliases?.[strong.textContent.trim()];
       const product=liveCatalog.products?.[code];if(!product)return;
-      if(product.shortLabel)setTextIfChanged(strong,product.shortLabel);
+      const publicLabel=PUBLIC_PRODUCT_LABELS[code]||product.shortLabel||product.label;
+      if(publicLabel)setTextIfChanged(strong,publicLabel);
     });
     const buttons=[...document.querySelectorAll('.booking-products button')];
     if(buttons.length&&!buttons.some(button=>/Текстиль \+ вікна/.test(button.textContent||''))){
@@ -378,7 +380,7 @@
       if(robot&&product){
         const button=robot.cloneNode(true);
         button.className='';button.setAttribute('aria-pressed','false');button.type='button';
-        setTextIfChanged(button.querySelector('strong'),product.shortLabel||product.label);
+        setTextIfChanged(button.querySelector('strong'),PUBLIC_PRODUCT_LABELS.puzzi_abir||product.shortLabel||product.label);
         setTextIfChanged(button.querySelector('span'),'Puzzi + робот для вікон · текстиль, скло, дзеркала');
         const tariff=`Будні · ${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн  |  1 вихідний · ${new Intl.NumberFormat('uk-UA').format(product.weekend)} грн`;
         setTextIfChanged(button.querySelector('small'),tariff);
@@ -393,11 +395,11 @@
     if(path!=='/komplekty'||!liveCatalog?.products)return;
     const grid=document.querySelector('.package-page-grid');if(!grid)return;
     const combo=[...grid.querySelectorAll('.package-card')].find(card=>/Текстиль \+ кухня та ванна|^Комбо$/m.test(card.querySelector('h2')?.textContent.trim()||''));
-    if(combo)setTextIfChanged(combo.querySelector('h2'),liveCatalog.products.combo?.shortLabel||liveCatalog.products.combo?.label||'Текстиль + кухня та ванна');
+    if(combo)setTextIfChanged(combo.querySelector('h2'),PUBLIC_PRODUCT_LABELS.combo);
     if([...grid.querySelectorAll('.package-card h2')].some(h=>h.textContent.trim()==='Текстиль + вікна'))return;
     const product=liveCatalog.products.puzzi_abir;if(!product)return;
     const article=document.createElement('article');article.className='package-card package-card-large';article.dataset.vxProduct='puzzi_abir';
-    article.innerHTML=`<p class="package-eyebrow">Текстиль + скло</p><h2>${product.shortLabel||product.label}</h2><p class="package-items">Puzzi + робот для вікон</p><p class="package-purpose">Puzzi глибоко промиває дивани й матраци, а робот працює зі склом і дзеркалами.</p><ul><li>Дивани, матраци й крісла</li><li>Вікна й дзеркала</li><li>Гладкі скляні поверхні</li></ul><div class="package-price"><strong>${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн</strong><span>будні / доба</span></div><p class="package-value">Будні — ${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн · вихідний — ${new Intl.NumberFormat('uk-UA').format(product.weekend)} грн</p><a class="package-link" href="/bronuvannia?product=puzzi_abir">Перевірити вільну дату <svg aria-hidden="true" class="icon-arrow" focusable="false" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6"></path></svg></a>`;
+    article.innerHTML=`<p class="package-eyebrow">Текстиль + скло</p><h2>${PUBLIC_PRODUCT_LABELS.puzzi_abir}</h2><p class="package-items">Puzzi + робот для вікон</p><p class="package-purpose">Puzzi глибоко промиває дивани й матраци, а робот працює зі склом і дзеркалами.</p><ul><li>Дивани, матраци й крісла</li><li>Вікна й дзеркала</li><li>Гладкі скляні поверхні</li></ul><div class="package-price"><strong>${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн</strong><span>будні / доба</span></div><p class="package-value">Будні — ${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн · вихідний — ${new Intl.NumberFormat('uk-UA').format(product.weekend)} грн</p><a class="package-link" href="/bronuvannia?product=puzzi_abir">Перевірити вільну дату <svg aria-hidden="true" class="icon-arrow" focusable="false" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6"></path></svg></a>`;
     if(combo)combo.insertAdjacentElement('beforebegin',article);else grid.append(article);
   }
 

@@ -31,6 +31,8 @@ for(const content of [bookingHtml,bookingChunk]){
 }
 for(const content of [packageHtml,packageRsc]){
   absent(content,'<h2>Комбо</h2>','packages');
+  absent(content,'[\"$\",\"article\",\"Комбо\",','packages RSC key');
+  absent(content,'[\\\"$\\\",\\\"article\\\",\\\"Комбо\\\",','packages embedded RSC key');
   must(content.includes('Текстиль + кухня та ванна'),'packages: canonical combo title is missing');
 }
 absent(packageChunk,'children\\\":\\\"Комбо\\\"','packages hydrated JS');
@@ -42,6 +44,8 @@ for(const content of [bookingHtml,bookingChunk]){
 must(packageHtml.includes('>Текстиль + вікна</h2>'),'packages: textile + windows card is missing');
 must(packageHtml.includes('href="/bronuvannia?product=puzzi_abir"'),'packages: textile + windows booking link is missing');
 must(experience.includes('syncPackageCatalog()'),'packages: runtime catalog parity guard is missing');
+must(experience.includes('const PUBLIC_PRODUCT_LABELS={'),'packages: public labels must be pinned independently from mutable catalog aliases');
+must(experience.includes('if(combo)setTextIfChanged(combo.querySelector(\'h2\'),PUBLIC_PRODUCT_LABELS.combo)'),'packages: runtime must never restore a legacy combo display name');
 absent(packageHtml,'"name":"Комбо · Puzzi + SC 2"','packages structured data');
 must(packageHtml.includes('"name":"Текстиль + кухня та ванна · Puzzi + SC 2"'),'packages structured data: canonical combo offer is missing');
 must(packageHtml.includes('"name":"Текстиль + вікна · Puzzi + робот для вікон"'),'packages structured data: textile + windows offer is missing');

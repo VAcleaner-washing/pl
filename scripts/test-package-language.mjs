@@ -63,6 +63,9 @@ if(packagePublicLabels.length!==publicPackageLabels.length)failures.push(`packag
 if(!packageHtml.includes('href="/bronuvannia?product=puzzi_abir"'))failures.push('package page is missing the textile + windows booking link');
 if(!publicExperience.includes('syncPackageCatalog()'))failures.push('package page does not restore catalog parity after client-side navigation');
 if(packageHtml.includes('>Комбо</h2>'))failures.push('package page still exposes the old “Комбо” title');
+const packageRsc=fs.readFileSync('komplekty/__next._full.txt','utf8');
+if(packageRsc.includes('[\"$\",\"article\",\"Комбо\",'))failures.push('package RSC still carries the legacy combo reconciliation key');
+if(!publicExperience.includes('const PUBLIC_PRODUCT_LABELS={'))failures.push('public package labels are not pinned against legacy runtime labels');
 
 if(bookingHtml.includes('<strong>Генеральне</strong>'))failures.push('booking still uses the incomplete “Генеральне” title');
 if(bookingHtml.includes('<strong>Тариф «Комбо»</strong>'))failures.push('booking still uses the opaque “Тариф «Комбо»” title');
