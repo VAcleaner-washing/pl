@@ -39,8 +39,8 @@ for(const [code,label] of Object.entries(expected)){
   const product=config.catalog.products[code];
   if(product?.label!==label||product?.shortLabel!==label)failures.push(`${code}: canonical label mismatch`);
   if(!bookingChunk.includes(`label:"${label}"`))failures.push(`${code}: booking card label mismatch`);
-  if(!['puzzi_abir'].includes(code)&&!bookingHtml.includes(`<strong>${label}</strong>`))failures.push(`${code}: server-rendered booking label mismatch`);
-  if(!['puzzi_abir'].includes(code)&&!packageHtml.includes(`>${label}</h2>`))failures.push(`${code}: package page label mismatch`);
+  if(!bookingHtml.includes(`<strong>${label}</strong>`))failures.push(`${code}: server-rendered booking label mismatch`);
+  if(!packageHtml.includes(`>${label}</h2>`))failures.push(`${code}: package page label mismatch`);
 }
 
 for(const [code,alias] of [
@@ -53,6 +53,16 @@ for(const [code,alias] of [
 ]){
   if(!config.catalog.products[code].aliases.includes(alias))failures.push(`${code}: legacy alias missing: ${alias}`);
 }
+
+
+const publicPackageLabels=Object.values(expected);
+const bookingPublicLabels=publicPackageLabels.filter(label=>bookingHtml.includes(`<strong>${label}</strong>`));
+const packagePublicLabels=publicPackageLabels.filter(label=>packageHtml.includes(`>${label}</h2>`));
+if(bookingPublicLabels.length!==publicPackageLabels.length)failures.push(`booking public package set mismatch: ${bookingPublicLabels.length}/${publicPackageLabels.length}`);
+if(packagePublicLabels.length!==publicPackageLabels.length)failures.push(`package page public package set mismatch: ${packagePublicLabels.length}/${publicPackageLabels.length}`);
+if(!packageHtml.includes('href="/bronuvannia?product=puzzi_abir"'))failures.push('package page is missing the textile + windows booking link');
+if(!publicExperience.includes('syncPackageCatalog()'))failures.push('package page does not restore catalog parity after client-side navigation');
+if(packageHtml.includes('>Комбо</h2>'))failures.push('package page still exposes the old “Комбо” title');
 
 if(bookingHtml.includes('<strong>Генеральне</strong>'))failures.push('booking still uses the incomplete “Генеральне” title');
 if(bookingHtml.includes('<strong>Тариф «Комбо»</strong>'))failures.push('booking still uses the opaque “Тариф «Комбо»” title');

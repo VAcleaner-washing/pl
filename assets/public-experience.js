@@ -387,6 +387,20 @@
       }
     }
   }
+
+  function syncPackageCatalog(){
+    const path=location.pathname.replace(/\/+$/,'');
+    if(path!=='/komplekty'||!liveCatalog?.products)return;
+    const grid=document.querySelector('.package-page-grid');if(!grid)return;
+    const combo=[...grid.querySelectorAll('.package-card')].find(card=>/Текстиль \+ кухня та ванна|^Комбо$/m.test(card.querySelector('h2')?.textContent.trim()||''));
+    if(combo)setTextIfChanged(combo.querySelector('h2'),liveCatalog.products.combo?.shortLabel||liveCatalog.products.combo?.label||'Текстиль + кухня та ванна');
+    if([...grid.querySelectorAll('.package-card h2')].some(h=>h.textContent.trim()==='Текстиль + вікна'))return;
+    const product=liveCatalog.products.puzzi_abir;if(!product)return;
+    const article=document.createElement('article');article.className='package-card package-card-large';article.dataset.vxProduct='puzzi_abir';
+    article.innerHTML=`<p class="package-eyebrow">Текстиль + скло</p><h2>${product.shortLabel||product.label}</h2><p class="package-items">Puzzi + робот для вікон</p><p class="package-purpose">Puzzi глибоко промиває дивани й матраци, а робот працює зі склом і дзеркалами.</p><ul><li>Дивани, матраци й крісла</li><li>Вікна й дзеркала</li><li>Гладкі скляні поверхні</li></ul><div class="package-price"><strong>${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн</strong><span>будні / доба</span></div><p class="package-value">Будні — ${new Intl.NumberFormat('uk-UA').format(product.weekday)} грн · вихідний — ${new Intl.NumberFormat('uk-UA').format(product.weekend)} грн</p><a class="package-link" href="/bronuvannia?product=puzzi_abir">Перевірити вільну дату <svg aria-hidden="true" class="icon-arrow" focusable="false" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6"></path></svg></a>`;
+    if(combo)combo.insertAdjacentElement('beforebegin',article);else grid.append(article);
+  }
+
   function validSlots(value){
     const keys=['morningStart','morningEnd','eveningStart','eveningEnd'];
     if(!value||!keys.every(key=>/^\d{2}:\d{2}$/.test(String(value[key]||''))))return null;
@@ -638,6 +652,7 @@
     if(location.pathname.startsWith('/admin/'))return;
     replacePublicLabels();
     syncBookingCatalog();
+    syncPackageCatalog();
     syncPublicSettings();
     document.querySelectorAll('a[href="/vidhuky"]').forEach(a=>{if(a.textContent.trim()==='Процес')a.textContent='Відгуки'});
     enhanceReviewLinks();

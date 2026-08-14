@@ -92,6 +92,16 @@ check(stalePrice.length===0,'public structured data no longer advertises the sta
 const versionedFavicons=publicFiles.filter(f=>/(?:favicon\.(?:ico|svg)|apple-touch-icon\.png)\?v=/.test(read(f)));
 check(versionedFavicons.length===0,'public favicon URLs are stable and unversioned');
 
+
+const packageHtml=htmlFor('komplekty');
+const bookingHtml=htmlFor('bronuvannia');
+const publicPackageLabels=['Глибоке очищення текстилю','Текстиль + вікна','Текстиль + кухня та ванна','Генеральне прибирання','Ідеальні вікна','HOME RESET'];
+check((packageHtml.match(/class="package-card package-card-large/g)||[]).length===6,'packages desktop catalogue has a complete 3×2 set with no empty third slot');
+check(publicPackageLabels.every(label=>packageHtml.includes(`>${label}</h2>`)),'packages page exposes all six canonical client-facing package names');
+check(publicPackageLabels.every(label=>bookingHtml.includes(`<strong>${label}</strong>`)),'booking exposes the same six canonical client-facing package names');
+check(!bookingHtml.includes('<strong>Комбо</strong>')&&!packageHtml.includes('>Комбо</h2>'),'public catalogue never exposes the legacy “Комбо” name');
+check(experienceJs.includes('function syncPackageCatalog()')&&experienceJs.includes("path!=='/komplekty'"),'soft navigation restores the six-card package catalogue after RSC transitions');
+
 const puzziHtml=read('tekhnika/karcher-puzzi-8-1/index.html');
 const puzziCss=read('assets/puzzi-seo.css');
 check(!puzziHtml.includes('"streetAddress"'),'Puzzi landing does not publish a fixed pickup address');

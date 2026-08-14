@@ -5,6 +5,8 @@ const root=process.cwd();
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const write=(file,value)=>fs.writeFileSync(path.join(root,file),value);
 const existing=files=>files.filter(file=>fs.existsSync(path.join(root,file)));
+const config=JSON.parse(read('config/vacleaner.json'));
+const money=value=>new Intl.NumberFormat('uk-UA').format(Number(value)||0);
 const textFiles=dir=>{
   const full=path.join(root,dir);
   if(!fs.existsSync(full))return[];
@@ -40,6 +42,65 @@ apply(packageFiles,[
   ['Вікна, дзеркала, плитка та гладкі поверхні без зайвої ручної роботи.','Скло, рами, кути й стики — одним комплектом техніки.'],
   ['Приклад маршруту','Орієнтовний маршрут'],
 ]);
+
+
+
+// Public package catalog parity: keep /komplekty/ and /bronuvannia/ on the same
+// client-facing package names/set, while admin keeps its own short operational labels.
+const publicPackageCodes=['puzzi_jimmy','puzzi_abir','combo','general','ideal_windows','elite'];
+const textileWindows=config.catalog.products.puzzi_abir;
+const textileWindowsCard=`<article class="package-card package-card-large"><p class="package-eyebrow">Текстиль + скло</p><h2>${textileWindows.label}</h2><p class="package-items">Puzzi + робот для вікон</p><p class="package-purpose">Puzzi глибоко промиває дивани й матраци, а робот працює зі склом і дзеркалами.</p><ul><li>Дивани, матраци й крісла</li><li>Вікна й дзеркала</li><li>Гладкі скляні поверхні</li></ul><div class="package-price"><strong>${money(textileWindows.weekday)} грн</strong><span>будні / доба</span></div><p class="package-value">Будні — ${money(textileWindows.weekday)} грн · вихідний — ${money(textileWindows.weekend)} грн</p><a class="package-link" href="/bronuvannia?product=puzzi_abir">Перевірити вільну дату <svg aria-hidden="true" class="icon-arrow" focusable="false" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6"></path></svg></a></article>`;
+const textileWindowsBooking=`<button aria-pressed="false" class="" type="button"><strong>${textileWindows.shortLabel||textileWindows.label}</strong><span>Puzzi + робот для вікон · текстиль, скло, дзеркала</span><small>Будні · ${money(textileWindows.weekday)} грн  |  1 вихідний · ${money(textileWindows.weekend)} грн</small></button>`;
+
+{
+  const file='komplekty/index.html';
+  let html=read(file);
+  if(!html.includes('href="/bronuvannia?product=puzzi_abir"')){
+    const anchor='<article class="package-card package-card-large"><p class="package-eyebrow">Найчастіше обирають</p><h2>Текстиль + кухня та ванна</h2>';
+    const at=html.indexOf(anchor);
+    if(at<0)throw new Error('Cannot locate combo card while adding public textile + windows package');
+    html=html.slice(0,at)+textileWindowsCard+html.slice(at);
+  }
+  html=html.replace(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,(full,jsonText)=>{
+    try{
+      const data=JSON.parse(jsonText);
+      const nodes=Array.isArray(data?.['@graph'])?data['@graph']:[data];
+      const service=nodes.find(node=>node?.hasOfferCatalog?.itemListElement);
+      if(!service)return full;
+      const offers=service.hasOfferCatalog.itemListElement;
+      const byUrl=new Map(offers.map(offer=>[offer.url,offer]));
+      const canonical=[
+        ['puzzi_jimmy','Глибоке очищення текстилю · Puzzi + Jimmy'],
+        ['puzzi_abir','Текстиль + вікна · Puzzi + робот для вікон'],
+        ['combo','Текстиль + кухня та ванна · Puzzi + SC 2'],
+        ['general','Генеральне прибирання · Puzzi + SC 2 + Jimmy'],
+        ['ideal_windows','Ідеальні вікна · SC 2 + робот для вікон'],
+        ['elite','HOME RESET · повний комплект'],
+      ];
+      service.hasOfferCatalog.itemListElement=canonical.map(([code,name])=>{
+        const product=config.catalog.products[code];
+        const url=`https://vacleaner.pp.ua/bronuvannia?product=${code}`;
+        return {...(byUrl.get(url)||{}),'@type':'Offer',name,price:String(product.weekday),priceCurrency:'UAH',url,seller:{'@id':'https://vacleaner.pp.ua/#business'}};
+      });
+      return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
+    }catch{return full;}
+  });
+  write(file,html);
+}
+
+{
+  const file='bronuvannia/index.html';
+  let html=read(file);
+  if(!html.includes('<strong>Текстиль + вікна</strong>')){
+    const strong='<strong>Робот для вікон</strong>';
+    const strongAt=html.indexOf(strong);
+    const end=strongAt<0?-1:html.indexOf('</button>',strongAt);
+    if(end<0)throw new Error('Cannot locate window robot booking card while adding textile + windows package');
+    const after=end+'</button>'.length;
+    html=html.slice(0,after)+textileWindowsBooking+html.slice(after);
+  }
+  write(file,html);
+}
 
 const solutionsFiles=['rishennia/index.html',...textFiles('rishennia')];
 apply(solutionsFiles,[['Скло без драбини','Менше ручної роботи зі склом']]);

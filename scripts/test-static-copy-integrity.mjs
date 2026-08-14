@@ -35,6 +35,17 @@ for(const content of [packageHtml,packageRsc]){
 }
 absent(packageChunk,'children\\\":\\\"Комбо\\\"','packages hydrated JS');
 must(packageChunk.includes('Текстиль + кухня та ванна'),'packages hydrated JS: canonical combo title is missing');
+
+for(const content of [bookingHtml,bookingChunk]){
+  must(content.includes('Текстиль + вікна'),'booking: textile + windows package is missing');
+}
+must(packageHtml.includes('>Текстиль + вікна</h2>'),'packages: textile + windows card is missing');
+must(packageHtml.includes('href="/bronuvannia?product=puzzi_abir"'),'packages: textile + windows booking link is missing');
+must(experience.includes('syncPackageCatalog()'),'packages: runtime catalog parity guard is missing');
+absent(packageHtml,'"name":"Комбо · Puzzi + SC 2"','packages structured data');
+must(packageHtml.includes('"name":"Текстиль + кухня та ванна · Puzzi + SC 2"'),'packages structured data: canonical combo offer is missing');
+must(packageHtml.includes('"name":"Текстиль + вікна · Puzzi + робот для вікон"'),'packages structured data: textile + windows offer is missing');
+
 for(const content of [homeHtml,homeChunk]){
   absent(content,'<small>Генеральне</small>','home');
   absent(content,'label:"Генеральне"','home');
