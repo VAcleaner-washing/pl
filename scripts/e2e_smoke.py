@@ -37,6 +37,17 @@ def normalized_text(value: str) -> str:
     return " ".join(str(value or "").split())
 
 
+def choose_booking_slot(page: Page, index: int, value: str, scope: str = ".booking-date-grid") -> None:
+    """Drive the customer-visible slot cards; the native select is state-only after enhancement."""
+    native = page.locator(f"{scope} select").nth(index)
+    custom = page.locator(f"{scope} .vx-slot-options").nth(index)
+    expect(custom).to_be_visible()
+    button = custom.locator(f'button[data-value="{value}"]')
+    expect(button).to_be_visible()
+    button.click()
+    expect(native).to_have_value(value)
+
+
 def select_uses_dark_theme(page: Page, selector: str) -> bool:
     """Native option popups are OS-rendered; assert the control + explicit CSS contract instead."""
     return bool(page.locator(selector).evaluate(r"""el => {
@@ -361,21 +372,16 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         saturday, sunday = next_weekend()
         friday = (date.fromisoformat(saturday) - timedelta(days=1)).isoformat()
         monday = (date.fromisoformat(sunday) + timedelta(days=1)).isoformat()
-        windows = page.locator('.booking-date-grid select')
-
         def set_period(start: str, finish: str, pickup: str, returned: str, expected: str) -> str:
-            def settle_control(control, value: str, *, select: bool = False) -> None:
-                if select:
-                    control.select_option(value)
-                else:
-                    control.fill(value)
+            def settle_date(control, value: str) -> None:
+                control.fill(value)
                 page.evaluate("()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))")
                 expect(control).to_have_value(value)
 
-            settle_control(dates.nth(0), start)
-            settle_control(windows.nth(0), pickup, select=True)
-            settle_control(dates.nth(1), finish)
-            settle_control(windows.nth(1), returned, select=True)
+            settle_date(dates.nth(0), start)
+            choose_booking_slot(page, 0, pickup)
+            settle_date(dates.nth(1), finish)
+            choose_booking_slot(page, 1, returned)
             deposit = page.locator(".vx-summary-deposit strong")
             expect(deposit).to_contain_text(expected, timeout=3000)
             return normalized_text(deposit.inner_text())
@@ -518,11 +524,10 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(page.locator("#booking-dates.is-vx-active").count() == 1, "Mobile CTA opens date step")
 
         mobile_dates = page.locator('#booking-dates input[type="date"]')
-        mobile_windows = page.locator('#booking-dates select')
         mobile_dates.nth(0).fill(iso(2))
-        mobile_windows.nth(0).select_option("morning")
+        choose_booking_slot(page, 0, "morning", "#booking-dates")
         mobile_dates.nth(1).fill(iso(3))
-        mobile_windows.nth(1).select_option("morning")
+        choose_booking_slot(page, 1, "morning", "#booking-dates")
         mobile_dates.nth(1).dispatch_event("change")
         page.wait_for_timeout(520)
         checks.check("До отримання" in cta.inner_text(), "Mobile CTA advances date → fulfillment after availability")
