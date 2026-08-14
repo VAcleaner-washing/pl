@@ -275,10 +275,10 @@ class Checks:
         self.artifacts.mkdir(parents=True, exist_ok=True)
         page.screenshot(path=str(self.artifacts / name), full_page=True)
 
-    def capture_failure(self, page: Page, stem: str) -> None:
+    def capture_failure(self, page: Page, stem: str, runtime_events: list[dict[str, Any]] | None = None) -> None:
         """Persist enough browser state to diagnose CI without reproducing it locally."""
         self.artifacts.mkdir(parents=True, exist_ok=True)
-        diagnostics: dict[str, Any] = {"url": page.url}
+        diagnostics: dict[str, Any] = {"url": page.url, "runtimeEvents": runtime_events or []}
         try:
             diagnostics.update(page.evaluate("""()=>({
               title:document.title,
@@ -314,6 +314,10 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
     context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
     install_routes(context, base, api_handler)
     page = context.new_page()
+    runtime_events: list[dict[str, Any]] = []
+    page.on("console", lambda message: runtime_events.append({"type": "console", "level": message.type, "text": message.text}))
+    page.on("pageerror", lambda error: runtime_events.append({"type": "pageerror", "text": str(error)}))
+    page.on("requestfailed", lambda request: runtime_events.append({"type": "requestfailed", "url": request.url, "error": request.failure or "unknown"}))
     try:
         response = page.goto(f"{base}/bronuvannia/", wait_until="networkidle")
         checks.check(response is not None and response.ok, "Booking page is served over HTTP")
@@ -399,7 +403,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         quiz_cta = page.locator("a", has_text="Підібрати рішення ↓").first
         checks.check(quiz_cta.count() == 1 and quiz_cta.get_attribute("href") == "/pidbir/", "Home solution CTA opens the dedicated quiz")
     except Exception:
-        checks.capture_failure(page, "public-desktop-failure")
+        checks.capture_failure(page, "public-desktop-failure", runtime_events)
         raise
     finally:
         context.close()

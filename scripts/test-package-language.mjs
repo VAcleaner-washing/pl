@@ -6,6 +6,7 @@ const bookingChunk=fs.readFileSync('_next/static/chunks/146ntlcv_t6~w-v4041.js',
 const packageHtml=fs.readFileSync('komplekty/index.html','utf8');
 const publicExperience=fs.readFileSync('assets/public-experience.js','utf8');
 const publicQuiz=fs.readFileSync('assets/public-quiz.js','utf8');
+const adminSource=fs.readFileSync('assets/admin-v250.js','utf8');
 const failures=[];
 
 const expected={
@@ -16,6 +17,23 @@ const expected={
   ideal_windows:'Ідеальні вікна',
   elite:'HOME RESET'
 };
+
+const expectedAdminLabels={
+  puzzi:'Kärcher Puzzi',
+  puzzi_jimmy:'Puzzi + Jimmy',
+  puzzi_abir:'Puzzi + робот',
+  sc2:'Kärcher SC 2',
+  abir:'Робот ABIR',
+  combo:'Puzzi + SC 2',
+  general:'Puzzi + SC 2 + Jimmy',
+  ideal_windows:'SC 2 + робот',
+  elite:'HOME RESET'
+};
+
+for(const [code,label] of Object.entries(expectedAdminLabels)){
+  if(!adminSource.includes(`${code}:'${label}'`))failures.push(`${code}: short admin label is missing`);
+}
+if(!adminSource.includes('adminProductLabel(code,item.shortLabel||item.label)'))failures.push('admin booking selector does not use the short admin-only labels');
 
 for(const [code,label] of Object.entries(expected)){
   const product=config.catalog.products[code];
