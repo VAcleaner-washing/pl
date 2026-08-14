@@ -122,7 +122,7 @@
     input.insertAdjacentElement('afterend',trigger);
     const state={trigger,value:trigger.querySelector('.vx-date-trigger__value'),hint:trigger.querySelector('.vx-date-trigger__hint')};
     dateState.set(input,state);
-    trigger.addEventListener('click',()=>openCalendar(input));
+    trigger.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCalendar(input)});
     input.closest('label')?.addEventListener('click',e=>{if(e.target===input.closest('label')){e.preventDefault();trigger.click()}});
     input.addEventListener('invalid',e=>{e.preventDefault();openCalendar(input)});
     input.addEventListener('change',()=>{updateDateTrigger(input);if(dateRole(input)==='отримання')scheduleDefaultReturnAfterStart(input)});
@@ -266,7 +266,7 @@
       btn.setAttribute('aria-pressed',String(select.value===option.value));
       if(select.value===option.value)btn.classList.add('is-selected');
       btn.innerHTML=`<span class="vx-slot-option__icon">${/вечір/i.test(data.name)?iconMoon():iconSun()}</span><span class="vx-slot-option__copy"><small>${data.name}</small><strong>${data.time}</strong></span>`;
-      btn.addEventListener('click',()=>{setNativeValue(select,option.value);updateSlots(select)});
+      btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setNativeValue(select,option.value);updateSlots(select)});
       state.wrap.appendChild(btn);
     });
   }

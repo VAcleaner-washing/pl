@@ -48,9 +48,10 @@ html{scrollbar-gutter:stable;}
 @media(max-width:760px){.vq-stain-care{width:calc(100% - 24px);margin:54px auto;padding:26px 18px;border-radius:22px}.vq-stain-care__head{grid-template-columns:1fr;gap:18px}.vq-stain-care__head>span{font-size:14px}.vq-stain-care__grid{grid-template-columns:1fr}.vq-stain-product{min-height:0;padding:22px}.vq-stain-product h3{margin-top:28px;font-size:30px}.vq-stain-product__bottom{align-items:stretch;flex-direction:column}.vq-stain-product__bottom em{max-width:none}.vq-stain-product__bottom a{text-align:center}.vq-stain-care__note{align-items:flex-start;flex-direction:column}.vq-result__extra-action{align-items:stretch}.vq-result__extras article{align-items:stretch}.vq-result__total{grid-template-columns:1fr}.vq-result__total strong{grid-row:auto;grid-column:auto}.vq-result__total small{font-size:12px}}
 
 /* Keep the original form controls in the DOM for React/form state, but move
-   visual interaction to the custom controls below. */
-.booking-date-grid input[type="date"].vx-native-control,
-.booking-date-grid select.vx-native-control{
+   visual interaction to the custom controls below. Date inputs stay visually
+   clipped for validation; slot selects must be fully non-rendered so iOS cannot
+   open its native picker through the wrapping <label>. */
+.booking-date-grid input[type="date"].vx-native-control{
   position:absolute;
   width:1px;
   height:1px;
@@ -62,6 +63,9 @@ html{scrollbar-gutter:stable;}
   pointer-events:none;
   clip-path:inset(50%);
   white-space:nowrap;
+}
+.booking-date-grid select.vx-native-control{
+  display:none;
 }
 
 .booking-date-grid>label{
