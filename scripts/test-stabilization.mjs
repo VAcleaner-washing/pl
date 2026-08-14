@@ -131,7 +131,7 @@ has(bookingEdge,'db.from("vacleaner_customers").update(profilePatch)','repeat pu
 
 has(pwaQa,'settings cards use full mobile width','mobile settings full-width is gated');
 has(e2e,'Selecting equipment does not auto-select dates','hidden auto-dates are forbidden');
-has(e2e,'base = \"http://127.0.0.1:4173\"','browser E2E uses a local origin instead of blocked synthetic DNS');
+has(e2e,'ThreadingHTTPServer((\"127.0.0.1\", 0)','browser E2E uses an isolated local HTTP origin instead of blocked synthetic DNS');
 has(admin,'https://t.me/+${phone}','Telegram opens the customer chat by phone without a long draft payload');
 lacks(admin,'t.me/share/url','Telegram no longer uses the share endpoint for client contact');
 has(admin,"const ADMIN_ALIAS_KEY='vac_admin_alias'",'second admin login alias is explicitly tracked');

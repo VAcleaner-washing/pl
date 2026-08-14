@@ -5,9 +5,11 @@ import argparse
 import json
 import os
 import time
-import mimetypes
-from urllib.parse import urlparse, unquote
+import threading
+from contextlib import contextmanager
 from datetime import date, timedelta
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
@@ -149,37 +151,37 @@ def session_script() -> str:
     """
 
 
-def install_routes(context: BrowserContext, base: str, api_handler, static_root: Path | None = None) -> None:
-    def serve_static(route: Route) -> None:
-        parsed = urlparse(route.request.url)
-        raw_path = unquote(parsed.path or "/")
-        relative = raw_path.lstrip("/")
-        candidate = (static_root / relative) if static_root else None
-        if candidate and candidate.is_dir():
-            candidate = candidate / "index.html"
-        elif candidate and not candidate.suffix:
-            directory_index = candidate / "index.html"
-            if directory_index.exists():
-                candidate = directory_index
-        if not candidate or not candidate.exists() or not candidate.is_file():
-            candidate = static_root / "404.html" if static_root else None
-            if not candidate or not candidate.exists():
-                route.fulfill(status=404, content_type="text/plain", body="Not found")
-                return
-        try:
-            candidate.resolve().relative_to(static_root.resolve())
-        except ValueError:
-            route.fulfill(status=403, content_type="text/plain", body="Forbidden")
-            return
-        content_type = mimetypes.guess_type(candidate.name)[0] or "application/octet-stream"
-        route.fulfill(status=200, content_type=content_type, body=candidate.read_bytes())
+class QuietStaticHandler(SimpleHTTPRequestHandler):
+    """Serve the built site exactly as a browser receives it, without noisy CI logs."""
+
+    def log_message(self, _format: str, *_args: Any) -> None:
+        return
+
+    def end_headers(self) -> None:
+        self.send_header("Cache-Control", "no-store")
+        super().end_headers()
+
+
+@contextmanager
+def static_server(root: Path):
+    handler = partial(QuietStaticHandler, directory=str(root))
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        yield f"http://127.0.0.1:{server.server_port}"
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+def install_routes(context: BrowserContext, base: str, api_handler) -> None:
 
     def route_handler(route: Route) -> None:
         url = route.request.url
         if url.startswith(SUPABASE_HOST):
             api_handler(route)
-        elif url.startswith(base) and static_root is not None:
-            serve_static(route)
         elif url.startswith(base):
             route.continue_()
         else:
@@ -273,6 +275,36 @@ class Checks:
         self.artifacts.mkdir(parents=True, exist_ok=True)
         page.screenshot(path=str(self.artifacts / name), full_page=True)
 
+    def capture_failure(self, page: Page, stem: str) -> None:
+        """Persist enough browser state to diagnose CI without reproducing it locally."""
+        self.artifacts.mkdir(parents=True, exist_ok=True)
+        diagnostics: dict[str, Any] = {"url": page.url}
+        try:
+            diagnostics.update(page.evaluate("""()=>({
+              title:document.title,
+              readyState:document.readyState,
+              bodyClass:document.body?.className||'',
+              viewportWidth:window.innerWidth,
+              summaryCount:document.querySelectorAll('.booking-summary').length,
+              summaryDisplay:document.querySelector('.booking-summary')
+                ? getComputedStyle(document.querySelector('.booking-summary')).display
+                : null
+            })"""))
+        except Exception as exc:
+            diagnostics["evaluationError"] = str(exc)
+        try:
+            (self.artifacts / f"{stem}.html").write_text(page.content(), encoding="utf-8")
+        except Exception as exc:
+            diagnostics["htmlError"] = str(exc)
+        try:
+            page.screenshot(path=str(self.artifacts / f"{stem}.png"), full_page=True)
+        except Exception as exc:
+            diagnostics["screenshotError"] = str(exc)
+        (self.artifacts / f"{stem}.json").write_text(
+            json.dumps(diagnostics, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
 
 def no_horizontal_overflow(page: Page) -> bool:
     return bool(page.evaluate("document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1"))
@@ -280,11 +312,13 @@ def no_horizontal_overflow(page: Page) -> bool:
 
 def public_tests(browser: Browser, base: str, api_handler, checks: Checks, static_root: Path) -> None:
     context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
-    install_routes(context, base, api_handler, static_root)
+    install_routes(context, base, api_handler)
     page = context.new_page()
     try:
-        page.goto(f"{base}/bronuvannia/", wait_until="networkidle")
-        page.wait_for_selector(".booking-summary")
+        response = page.goto(f"{base}/bronuvannia/", wait_until="networkidle")
+        checks.check(response is not None and response.ok, "Booking page is served over HTTP")
+        page.wait_for_selector(".booking-summary", state="attached")
+        expect(page.locator(".booking-summary")).to_be_visible()
         spot = page.locator(".booking-extras label", has_text="Універсальний плямовивідник")
         stain = page.locator(".booking-extras label", has_text="VA STAIN OX")
         checks.check(spot.count() == 1 and "100" in spot.locator("strong").inner_text(), "universal stain remover is shown once at 100 UAH")
@@ -364,13 +398,16 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.goto(f"{base}/", wait_until="networkidle")
         quiz_cta = page.locator("a", has_text="Підібрати рішення ↓").first
         checks.check(quiz_cta.count() == 1 and quiz_cta.get_attribute("href") == "/pidbir/", "Home solution CTA opens the dedicated quiz")
+    except Exception:
+        checks.capture_failure(page, "public-desktop-failure")
+        raise
     finally:
         context.close()
 
     # Full public small-desktop sweep: this is where long editorial headings and
     # breakpoint gaps tend to surface (for example /dostavka/ around 1024px).
     context = browser.new_context(viewport={"width": 1024, "height": 900}, service_workers="block")
-    install_routes(context, base, api_handler, static_root)
+    install_routes(context, base, api_handler)
     page = context.new_page()
     try:
         visual_paths = ["/", "/tekhnika/karcher-puzzi-8-1/", "/rishennia/", "/komplekty/", "/yak-tse-pratsiuie/", "/vidhuky/", "/faq/", "/kontakty/", "/umovy/", "/dostavka/", "/pro-nas/", "/blog/", "/polityka-konfidenciynosti/"]
@@ -402,7 +439,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
 
     # /pidbir/ must have a usable first paint even if JS is slow or unavailable.
     context = browser.new_context(viewport={"width": 1024, "height": 900}, java_script_enabled=False, service_workers="block")
-    install_routes(context, base, api_handler, static_root)
+    install_routes(context, base, api_handler)
     page = context.new_page()
     try:
         page.goto(f"{base}/pidbir/", wait_until="domcontentloaded")
@@ -412,7 +449,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         context.close()
 
     context = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, service_workers="block")
-    install_routes(context, base, api_handler, static_root)
+    install_routes(context, base, api_handler)
     page = context.new_page()
     try:
         page.goto(f"{base}/bronuvannia/", wait_until="networkidle")
@@ -571,7 +608,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
 def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static_root: Path) -> None:
     context = browser.new_context(viewport={"width": 1440, "height": 1000}, service_workers="block")
     context.add_init_script(session_script())
-    install_routes(context, base, api_handler, static_root)
+    install_routes(context, base, api_handler)
     page = context.new_page()
     try:
         page.goto(f"{base}/admin/bronuvannia/", wait_until="networkidle")
@@ -630,7 +667,7 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
 
     context = browser.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, service_workers="block")
     context.add_init_script(session_script())
-    install_routes(context, base, api_handler, static_root)
+    install_routes(context, base, api_handler)
     page = context.new_page()
     try:
         page.goto(f"{base}/admin/bronuvannia/", wait_until="networkidle")
@@ -706,8 +743,7 @@ def main() -> int:
     config = json.loads((PROJECT_ROOT / "config" / "vacleaner.json").read_text(encoding="utf-8"))
     checks = Checks(artifacts)
     api_handler = make_api_handler(config)
-    base = "http://127.0.0.1:4173"
-    with sync_playwright() as playwright:
+    with static_server(root) as base, sync_playwright() as playwright:
         executable = os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE")
         launch_options = {"headless": True, "args": ["--no-sandbox"]}
         if executable:
