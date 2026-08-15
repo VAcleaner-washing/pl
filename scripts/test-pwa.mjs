@@ -19,7 +19,7 @@ assert.equal(manifest.id,'/admin/'); passed++;
 assert.equal(manifest.display,'standalone'); passed++;
 ok(manifest.display_override?.includes('standalone'),'manifest keeps standalone override');
 ok(html.includes('viewport-fit=cover'),'admin viewport includes safe areas');
-ok(html.includes('maximum-scale=1,user-scalable=no'),'admin viewport blocks accidental page zoom');
+ok(html.includes('user-scalable=no')&&html.includes('maximum-scale=1'),'admin viewport intentionally keeps the mobile UI at a fixed scale');
 ok(html.includes('apple-mobile-web-app-status-bar-style\" content=\"black\"')&&!html.includes('black-translucent'),'Apple PWA uses opaque black status-bar mode; black-translucent is rejected');
 ok(html.includes('apple-mobile-web-app-title'),'Apple PWA title exists');
 
@@ -30,6 +30,10 @@ ok(sw.includes("caches.match(FALLBACK)"),'navigation has offline shell fallback'
 ok(sw.includes("existing.navigate(target.href)"),'push navigates an existing PWA window');
 ok(sw.includes("VACLEANER_OPEN_BOOKING"),'push passes booking deep-link message');
 ok(sw.includes("target.searchParams.set('booking'"),'push URL carries booking id');
+
+ok(sw.includes("'/admin/icon-192.png'")&&sw.includes("'/admin/icon-512.png'")&&!sw.includes("'/icon-192.png'"),'admin service worker caches only admin PWA icons');
+ok(sw.includes("icon:'/admin/icon-192.png'")&&sw.includes("badge:'/admin/icon-192.png'"),'push notifications use the admin icon');
+ok(runtime.includes("icon:'/admin/icon-192.png',badge:'/admin/icon-192.png'"),'local admin notifications use the admin icon');
 
 for(const token of [
   'showPwaUpdatePrompt','SKIP_WAITING','controllerchange','bookingIdFromUrl','queueBookingDeepLink','openPendingBooking','VACLEANER_OPEN_BOOKING','visualViewport',"classList.toggle('keyboard-open',keyboard)","let pwaKeyboardLatched=false","const keyboard=Boolean(reduced&&(focused||pwaKeyboardLatched))",
@@ -47,7 +51,7 @@ ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail capture
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');
 
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
-ok(runtime.includes('function lockStandaloneZoom()')&&runtime.includes("e.touches?.length>1"),'standalone PWA blocks pinch zoom without changing public pages');
+ok(runtime.includes('lockStandaloneZoom')&&runtime.includes("e.touches?.length>1"),'standalone PWA intentionally blocks pinch zoom to keep the manager UI static');
 ok(runtime.includes('booking-client-link')&&runtime.includes('openBookingClient'),'booking client block opens the client card');
 ok(runtime.includes('upcoming-client-info')&&!runtime.includes('upcoming-client-link\" data-client-card'),'upcoming keeps customer identity informational while phone remains actionable');
 ok(css.includes('.upcoming-client-info{display:flex;flex-direction:column;align-items:flex-start'),'upcoming phone is structurally placed below the customer name');

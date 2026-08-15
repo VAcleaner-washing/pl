@@ -55,6 +55,18 @@ jobs:
         run: npm run test:peer-admin-push
       - name: Verify issue payment workflow
         run: npm run test:issue-workflow
+      - name: Verify financial control
+        run: npm run test:financial-control
+      - name: Verify operational health contract
+        run: npm run test:operational-health
+      - name: Verify analytics decision formulas
+        run: npm run test:analytics
+      - name: Verify Smart Guide decision logic
+        run: npm run test:smart-guide-logic
+      - name: Verify booking return defaults to next day
+        run: npm run test:booking-date-default
+      - name: Verify PWA static contract
+        run: npm run test:pwa-static
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources
@@ -69,6 +81,10 @@ jobs:
         run: npm run test:e2e
       - name: Run public booking resilience QA
         run: npm run test:public-booking
+      - name: Run Smart Guide fit QA
+        run: npm run test:smart-guide-fit
+      - name: Run mobile client card QA
+        run: npm run test:client-card-mobile
       - name: Run installed-PWA visual QA
         run: npm run test:pwa
       - name: Run Liquid Glass primary UX QA

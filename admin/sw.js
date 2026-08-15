@@ -1,6 +1,6 @@
-const CACHE='vacleaner-manager-4067';
+const CACHE='vacleaner-manager-4068';
 const FALLBACK='/admin/bronuvannia/';
-const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4067','/assets/admin-v250.css?v=4067','/assets/admin-v250.js?v=4067','/assets/admin-glass-test.css?v=4067','/assets/admin-glass-test.js?v=4067','/admin/manifest.webmanifest','/icon-192.png','/icon-512.png','/apple-touch-icon.png?v=4067'];
+const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4068','/assets/admin-v250.css?v=4068','/assets/admin-v250.js?v=4068','/assets/admin-glass-test.css?v=4068','/assets/admin-glass-test.js?v=4068','/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png','/admin/apple-touch-icon.png?v=4068'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));
@@ -74,8 +74,8 @@ self.addEventListener('push',event=>{
   const notificationData=data.data&&typeof data.data==='object'?data.data:{url:'/admin/bronuvannia/'};
   event.waitUntil(self.registration.showNotification(data.title||'VAcleaner',{
     body:data.body||'Нова подія в адмінці',
-    icon:'/icon-192.png',
-    badge:'/icon-192.png',
+    icon:'/admin/icon-192.png',
+    badge:'/admin/icon-192.png',
     tag:data.tag||'vacleaner-notification',
     renotify:true,
     data:notificationData,

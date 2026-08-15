@@ -1,6 +1,6 @@
 {
-  "version": "4.0.67",
-  "build": 4067,
+  "version": "4.0.68",
+  "build": 4068,
   "releasedAt": "2026-08-15",
-  "label": "VAcleaner v4.0.67 — EXPENSE DATE & UAH FIELD FIX"
+  "label": "VAcleaner v4.0.68 — STABILIZATION & QA HARDENING"
 }
