@@ -14,13 +14,19 @@ for(const file of walk(root).filter(f=>f.endsWith('.html'))){
   s=s.replace(/(\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|public-quiz|admin-v250|admin-glass-test|public-fixes|mobile-home-fix|site-v400|puzzi-seo)\.(?:js|css))\?v=[^"']+/g,`$1?v=${build}`);
   fs.writeFileSync(file,s);
 }
-// The booking React chunk is patched in-place in this static export. Version every public/RSC reference
-// so a returning browser cannot hydrate new server HTML with a cached older booking component.
-for(const rel of ['bronuvannia/index.html','bronuvannia/index.txt','bronuvannia/__next.bronuvannia.__PAGE__.txt','bronuvannia/__next._full.txt']){
-  const file=path.join(root,rel);
-  if(!fs.existsSync(file))continue;
+// Patched Next chunks keep historical filenames in this static export. Version every HTML/RSC
+// reference so returning browsers cannot hydrate fresh server HTML with stale public components.
+const versionedNextChunks=[
+  '146ntlcv_t6~w-v4041.js', // booking
+  '01pb0x0z72e41.js',       // custom home page
+  '0x2bx8kerxrmz.js',       // shared public header/footer
+];
+for(const file of walk(root).filter(f=>f.endsWith('.html')||f.endsWith('.txt'))){
   let s=fs.readFileSync(file,'utf8');
-  s=s.replace(/(\/_next\/static\/chunks\/146ntlcv_t6~w-v4041\.js)(?:\?v=\d+)?/g,`$1?v=${build}`);
+  for(const chunk of versionedNextChunks){
+    const escaped=chunk.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    s=s.replace(new RegExp(`(\\/_next\\/static\\/chunks\\/${escaped})(?:\\?v=\\d+)?`,'g'),`$1?v=${build}`);
+  }
   fs.writeFileSync(file,s);
 }
 const adminSw=path.join(root,'admin','sw.js');

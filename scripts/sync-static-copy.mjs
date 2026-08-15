@@ -23,6 +23,12 @@ const apply=(files,replacements)=>{
 const homeFiles=['index.html','_next/static/chunks/01pb0x0z72e41.js','index.txt','__next.__PAGE__.txt','__next._full.txt','__next._head.txt','__next._index.txt','__next._tree.txt'];
 apply(homeFiles,[
   ['Засоби в комплекті','Засоби під задачу'],
+  ['<a href="/pidbir/">Підбір</a>','<a href="/pidbir/">Підбір за 30 сек</a>'],
+  ['children:"Підбір"','children:"Підбір за 30 сек"'],
+  ['children\":\"Підбір\"','children\":\"Підбір за 30 сек\"'],
+  ['<small>Для текстилю</small><h3>Puzzi + Jimmy</h3>','<small>Найчастіше обирають</small><h3>Глибоке очищення диванів і матраців</h3>'],
+  ['<small>Генеральне прибирання</small><h3>Puzzi + SC 2 + Jimmy</h3>','<small>М’які меблі + тверді поверхні</small><h3>Генеральне прибирання</h3>'],
+  ['<small>HOME RESET</small><h3>Увесь дім</h3>','<small>Повний цикл для дому</small><h3>HOME RESET</h3>'],
   ['<small>Генеральне</small>','<small>Генеральне прибирання</small>'],
   ['label:"Генеральне"','label:"Генеральне прибирання"'],
   ['Місце, де ви спите</small><h3>Матрац</h3>','Пилові кліщі й алергени</small><h3>Глибоке очищення матраца</h3>'],

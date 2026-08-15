@@ -74,6 +74,12 @@ for(const label of ['Глибоке очищення диванів і матр�
   if(!homeChunk.includes(`title:"${label}"`))failures.push(`hydrated home package card missing client-facing title: ${label}`);
 }
 for(const legacyTitle of ['<h3>Puzzi + Jimmy</h3>','<h3>Puzzi + SC 2 + Jimmy</h3>','<h3>Увесь дім</h3>'])if(homeHtml.includes(legacyTitle))failures.push(`home still exposes technical package title: ${legacyTitle}`);
+if(!homeHtml.includes('<a href="/pidbir/">Підбір за 30 сек</a>'))failures.push('home server header still uses the old “Підбір” label');
+if(homeChunk.includes('children:"Підбір"')||!homeChunk.includes('children:"Підбір за 30 сек"'))failures.push('home hydrated header still uses the old “Підбір” label');
+const sharedHeaderChunk=fs.readFileSync('_next/static/chunks/0x2bx8kerxrmz.js','utf8');
+if(sharedHeaderChunk.includes('["/pidbir/","Підбір"]')||!sharedHeaderChunk.includes('["/pidbir/","Підбір за 30 сек"]'))failures.push('shared hydrated header does not use “Підбір за 30 сек”');
+const releaseBuild=String(JSON.parse(fs.readFileSync('release.json','utf8')).build);
+if(!homeHtml.includes(`/_next/static/chunks/01pb0x0z72e41.js?v=${releaseBuild}`))failures.push('home React chunk is not cache-busted to the current build');
 if(!bookingChunk.includes('extraFitsProduct=')||!bookingChunk.includes('showAllExtras')||!bookingChunk.includes('Показати всі професійні засоби'))failures.push('booking relevant-chemistry progressive disclosure is missing');
 if(!bookingChunk.includes('booking-summary-extras')||!bookingChunk.includes('T.length?`${u(ep)} грн`'))failures.push('booking extras summary is not driven by local selection');
 if(!bookingChunk.includes('booking-conditions-steps')||!bookingChunk.includes('Докладніше про розрахунок'))failures.push('compact booking conditions are missing');
