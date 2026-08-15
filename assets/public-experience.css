@@ -1066,3 +1066,11 @@ html.vq-standalone-page .vq-progress__meta{
 @media(min-width:1051px) and (max-width:1199px){
   .package-page-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* v4.0.57 — final public package copy: preserve shared price baselines with longer client-facing titles */
+@media(min-width:1200px) and (max-width:1399px){
+  .package-page-grid .package-card-large h2{min-height:4em}
+}
+@media(min-width:1051px) and (max-width:1199px){
+  .package-page-grid .package-card-large .package-purpose{min-height:84px}
+}

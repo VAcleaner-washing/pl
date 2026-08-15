@@ -10,13 +10,20 @@ const adminSource=fs.readFileSync('assets/admin-v250.js','utf8');
 const failures=[];
 
 const expected={
-  puzzi_jimmy:'Глибоке очищення текстилю',
-  puzzi_abir:'Текстиль + вікна',
-  combo:'Текстиль + кухня та ванна',
+  puzzi_jimmy:'Глибоке очищення диванів і матраців',
+  puzzi_abir:'Дивани + вікна',
+  combo:'Дивани + кухня та ванна',
   general:'Генеральне прибирання',
   ideal_windows:'Ідеальні вікна',
   elite:'HOME RESET'
 };
+
+const unchangedCatalogLabels={
+  puzzi_jimmy:'Глибоке очищення текстилю',
+  puzzi_abir:'Текстиль + вікна',
+  combo:'Текстиль + кухня та ванна'
+};
+
 
 const expectedAdminLabels={
   puzzi:'Kärcher Puzzi',
@@ -36,12 +43,17 @@ for(const [code,label] of Object.entries(expectedAdminLabels)){
 if(!adminSource.includes('adminProductLabel(code,item.shortLabel||item.label)'))failures.push('admin booking selector does not use the short admin-only labels');
 
 for(const [code,label] of Object.entries(expected)){
-  const product=config.catalog.products[code];
-  if(product?.label!==label||product?.shortLabel!==label)failures.push(`${code}: canonical label mismatch`);
   if(!bookingChunk.includes(`label:"${label}"`))failures.push(`${code}: booking card label mismatch`);
   if(!bookingHtml.includes(`<strong>${label}</strong>`))failures.push(`${code}: server-rendered booking label mismatch`);
   if(!packageHtml.includes(`>${label}</h2>`))failures.push(`${code}: package page label mismatch`);
 }
+for(const [code,label] of Object.entries(unchangedCatalogLabels)){
+  const product=config.catalog.products[code];
+  if(product?.label!==label||product?.shortLabel!==label)failures.push(`${code}: shared backend catalog label changed; public copy must stay isolated`);
+}
+if(!bookingHtml.includes('<strong>Kärcher Puzzi 8/1</strong>')||!bookingChunk.includes('label:"Kärcher Puzzi 8/1"'))failures.push('Puzzi public booking title is not the full Kärcher Puzzi 8/1 model');
+if(!bookingHtml.includes('Очищення парою · кухня, ванна, плитка, шви'))failures.push('SC 2 public booking detail is not task-first');
+if(!bookingHtml.includes('Миючий пилосос · дивани, матраци, килими'))failures.push('Puzzi public booking detail is not client-readable');
 
 for(const [code,alias] of [
   ['puzzi_jimmy','Puzzi + Jimmy'],
@@ -70,9 +82,9 @@ if(!publicExperience.includes('const PUBLIC_PRODUCT_LABELS={'))failures.push('pu
 if(bookingHtml.includes('<strong>Генеральне</strong>'))failures.push('booking still uses the incomplete “Генеральне” title');
 if(bookingHtml.includes('<strong>Тариф «Комбо»</strong>'))failures.push('booking still uses the opaque “Тариф «Комбо»” title');
 if(!bookingChunk.includes('code:"puzzi_abir"'))failures.push('hydrated booking is missing the quiz-recommended textile + windows package');
-if(!packageHtml.includes('>Текстиль + кухня та ванна</h2>'))failures.push('package-page server HTML does not use the plain-language combo title');
-if(!packageHtml.includes('>Глибоке очищення текстилю</h2>')||!packageHtml.includes('Матрац і текстиль · 2 етапи'))failures.push('textile package page does not keep the clear canonical title and two-stage context');
-if(!packageHtml.includes('Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi промиває текстиль'))failures.push('general-cleaning package does not explain the role of each machine');
+if(!packageHtml.includes('>Дивани + кухня та ванна</h2>'))failures.push('package-page server HTML does not use the final client-facing combo title');
+if(!packageHtml.includes('>Глибоке очищення диванів і матраців</h2>')||!packageHtml.includes('Дивани й матраци · 2 етапи'))failures.push('deep-cleaning package does not use the final client-facing title and two-stage context');
+if(!packageHtml.includes('Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi промиває м’які меблі та матраци'))failures.push('general-cleaning package does not explain the role of each machine');
 if(!packageHtml.includes('Пилові кліщі й пов’язані алергени')||!packageHtml.includes('UV-світло й нагрівання до 60 °C'))failures.push('Jimmy positioning does not explain the client problem and the treatment method');
 if(!packageHtml.includes('Пилові кліщі й пов’язані алергени')||!packageHtml.includes('Вібраційна щітка, UV-світло й нагрівання до 60 °C'))failures.push('package cards do not make Jimmy benefits visible');
 if(!publicQuiz.includes('Пил, шерсть, пилові кліщі чи алергени')||!publicQuiz.includes('UV-світло й нагрівання до 60 °C'))failures.push('quiz does not trigger Jimmy for dust-mite and allergen concerns');
@@ -98,7 +110,7 @@ for(const stale of [
 }
 if(!fs.readFileSync('rishennia/index.html','utf8').includes('1 050 грн')||fs.readFileSync('rishennia/index.html','utf8').includes('350 грн'))failures.push('Jimmy public solution price must represent the required Puzzi + Jimmy package');
 if(!publicExperience.includes('syncBookingCatalog()'))failures.push('booking does not synchronize canonical catalog titles at runtime');
-if(!bookingChunk.includes('detail:"Puzzi + SC 2 + Jimmy · пилові кліщі й алергени, текстиль, кухня та ванна"'))failures.push('general-cleaning booking card lacks a plain-language scope');
+if(!bookingChunk.includes('detail:"Puzzi + SC 2 + Jimmy · пил, алергени, м’які меблі, кухня та ванна"'))failures.push('general-cleaning booking card lacks the final plain-language scope');
 
 if(config.catalog.extras.neutralix.label!=='Neutralix · 250 мл'||config.catalog.extras.neutralix.price!==200)failures.push('Neutralix must remain 250 ml / 200 UAH');
 if(!publicExperience.includes('Залоговий платіж'))failures.push('approved “Залоговий платіж” wording is missing');

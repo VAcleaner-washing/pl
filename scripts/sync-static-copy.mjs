@@ -31,13 +31,24 @@ apply(homeFiles,[
 
 const packageFiles=['komplekty/index.html','_next/static/chunks/09z99witl-xo-v4041.js',...textFiles('komplekty')];
 apply(packageFiles,[
+  ['Глибоке очищення текстилю','Глибоке очищення диванів і матраців'],
+  ['Текстиль + вікна','Дивани + вікна'],
+  ['Текстиль + кухня та ванна','Дивани + кухня та ванна'],
+  ['Матрац і текстиль · 2 етапи','Дивани й матраци · 2 етапи'],
+  ['Текстиль + скло','Дивани + вікна'],
+  ['Текстиль + тверді поверхні','М’які меблі + тверді поверхні'],
+  ['Puzzi після цього глибоко промиває текстиль.','Puzzi після цього глибоко промиває дивани, матраци та м’які меблі.'],
+  ['Puzzi промиває текстиль, а SC 2','Puzzi промиває м’які меблі та матраци, а SC 2'],
+  ['Puzzi: текстиль і матраци','Puzzi: м’які меблі й матраци'],
+  ['Puzzi — текстиль, SC 2','Puzzi — м’які меблі й матраци, SC 2'],
+  ['Jimmy + Puzzi: матраци й текстиль','Jimmy + Puzzi: матраци й м’які меблі'],
   ['Дві основні задачі','Найчастіше обирають'],
-  ['<h2>Комбо</h2>','<h2>Текстиль + кухня та ванна</h2>'],
-  ['"children":"Комбо"','"children":"Текстиль + кухня та ванна"'],
+  ['<h2>Комбо</h2>','<h2>Дивани + кухня та ванна</h2>'],
+  ['"children":"Комбо"','"children":"Дивани + кухня та ванна"'],
   ['children\\\":\\\"Комбо\\\"','children\\\":\\\"Текстиль + кухня та ванна\\\"'],
-  ['children:"Комбо"','children:"Текстиль + кухня та ванна"'],
-  ['["combo","Комбо"]','["combo","Текстиль + кухня та ванна"]'],
-  ['["$","article","Комбо",','["$","article","Текстиль + кухня та ванна",'],
+  ['children:"Комбо"','children:"Дивани + кухня та ванна"'],
+  ['["combo","Комбо"]','["combo","Дивани + кухня та ванна"]'],
+  ['["$","article","Комбо",','["$","article","Дивани + кухня та ванна",'],
   ['[\\"$\\",\\"article\\",\\"Комбо\\",','[\\"$\\",\\"article\\",\\"Текстиль + кухня та ванна\\",'],
   ['Текстиль, кухня та ванна одним бронюванням.','Puzzi глибоко промиває дивани й матраци, а SC 2 працює з кухнею, ванною, плиткою та швами.'],
   ['Повний день','Текстиль + тверді поверхні'],
@@ -51,14 +62,14 @@ apply(packageFiles,[
 // client-facing package names/set, while admin keeps its own short operational labels.
 const publicPackageCodes=['puzzi_jimmy','puzzi_abir','combo','general','ideal_windows','elite'];
 const textileWindows=config.catalog.products.puzzi_abir;
-const textileWindowsCard=`<article class="package-card package-card-large"><p class="package-eyebrow">Текстиль + скло</p><h2>${textileWindows.label}</h2><p class="package-items">Puzzi + робот для вікон</p><p class="package-purpose">Puzzi глибоко промиває дивани й матраци, а робот працює зі склом і дзеркалами.</p><ul><li>Дивани, матраци й крісла</li><li>Вікна й дзеркала</li><li>Гладкі скляні поверхні</li></ul><div class="package-price"><strong>${money(textileWindows.weekday)} грн</strong><span>будні / доба</span></div><p class="package-value">Будні — ${money(textileWindows.weekday)} грн · вихідний — ${money(textileWindows.weekend)} грн</p><a class="package-link" href="/bronuvannia?product=puzzi_abir">Перевірити вільну дату <svg aria-hidden="true" class="icon-arrow" focusable="false" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6"></path></svg></a></article>`;
-const textileWindowsBooking=`<button aria-pressed="false" class="" type="button"><strong>${textileWindows.shortLabel||textileWindows.label}</strong><span>Puzzi + робот для вікон · текстиль, скло, дзеркала</span><small>Будні · ${money(textileWindows.weekday)} грн  |  1 вихідний · ${money(textileWindows.weekend)} грн</small></button>`;
+const textileWindowsCard=`<article class="package-card package-card-large"><p class="package-eyebrow">Дивани + вікна</p><h2>Дивани + вікна</h2><p class="package-items">Puzzi + робот для вікон</p><p class="package-purpose">Puzzi глибоко промиває дивани й матраци, а робот працює зі склом і дзеркалами.</p><ul><li>Дивани, матраци й крісла</li><li>Вікна й дзеркала</li><li>Гладкі скляні поверхні</li></ul><div class="package-price"><strong>${money(textileWindows.weekday)} грн</strong><span>будні / доба</span></div><p class="package-value">Будні — ${money(textileWindows.weekday)} грн · вихідний — ${money(textileWindows.weekend)} грн</p><a class="package-link" href="/bronuvannia?product=puzzi_abir">Перевірити вільну дату <svg aria-hidden="true" class="icon-arrow" focusable="false" viewBox="0 0 16 16"><path d="M4 12 12 4M6 4h6v6"></path></svg></a></article>`;
+const textileWindowsBooking=`<button aria-pressed="false" class="" type="button"><strong>Дивани + вікна</strong><span>Puzzi + робот для вікон · м’які меблі, матраци, вікна й дзеркала</span><small>Будні · ${money(textileWindows.weekday)} грн  |  1 вихідний · ${money(textileWindows.weekend)} грн</small></button>`;
 
 {
   const file='komplekty/index.html';
   let html=read(file);
   if(!html.includes('href="/bronuvannia?product=puzzi_abir"')){
-    const anchor='<article class="package-card package-card-large"><p class="package-eyebrow">Найчастіше обирають</p><h2>Текстиль + кухня та ванна</h2>';
+    const anchor='<article class="package-card package-card-large"><p class="package-eyebrow">Найчастіше обирають</p><h2>Дивани + кухня та ванна</h2>';
     const at=html.indexOf(anchor);
     if(at<0)throw new Error('Cannot locate combo card while adding public textile + windows package');
     html=html.slice(0,at)+textileWindowsCard+html.slice(at);
@@ -72,9 +83,9 @@ const textileWindowsBooking=`<button aria-pressed="false" class="" type="button"
       const offers=service.hasOfferCatalog.itemListElement;
       const byUrl=new Map(offers.map(offer=>[offer.url,offer]));
       const canonical=[
-        ['puzzi_jimmy','Глибоке очищення текстилю · Puzzi + Jimmy'],
-        ['puzzi_abir','Текстиль + вікна · Puzzi + робот для вікон'],
-        ['combo','Текстиль + кухня та ванна · Puzzi + SC 2'],
+        ['puzzi_jimmy','Глибоке очищення диванів і матраців · Puzzi + Jimmy'],
+        ['puzzi_abir','Дивани + вікна · Puzzi + робот для вікон'],
+        ['combo','Дивани + кухня та ванна · Puzzi + SC 2'],
         ['general','Генеральне прибирання · Puzzi + SC 2 + Jimmy'],
         ['ideal_windows','Ідеальні вікна · SC 2 + робот для вікон'],
         ['elite','HOME RESET · повний комплект'],
@@ -93,7 +104,7 @@ const textileWindowsBooking=`<button aria-pressed="false" class="" type="button"
 {
   const file='bronuvannia/index.html';
   let html=read(file);
-  if(!html.includes('<strong>Текстиль + вікна</strong>')){
+  if(!html.includes('<strong>Текстиль + вікна</strong>')&&!html.includes('<strong>Дивани + вікна</strong>')){
     const strong='<strong>Робот для вікон</strong>';
     const strongAt=html.indexOf(strong);
     const end=strongAt<0?-1:html.indexOf('</button>',strongAt);
@@ -155,6 +166,23 @@ apply(faqFiles,[
 
 const bookingFiles=['bronuvannia/index.html','_next/static/chunks/146ntlcv_t6~w-v4041.js',...textFiles('bronuvannia')];
 apply(bookingFiles,[
+  ['<strong>Kärcher Puzzi</strong>','<strong>Kärcher Puzzi 8/1</strong>'],
+  ['label:"Kärcher Puzzi"','label:"Kärcher Puzzi 8/1"'],
+  ['children":"Kärcher Puzzi"','children":"Kärcher Puzzi 8/1"'],
+  ['children\":\"Kärcher Puzzi\"','children\":\"Kärcher Puzzi 8/1\"'],
+  ['Текстиль · 8 запечатаних порцій, оплата лише за використані','Миючий пилосос · дивани, матраци, килими'],
+  ['Глибоке очищення текстилю','Глибоке очищення диванів і матраців'],
+  ['Puzzi + Jimmy · сухий пил, пилові кліщі й алергени в матрацах та м’яких меблях','Puzzi + Jimmy · сухий пил, пилові кліщі й алергени + глибоке промивання'],
+  ['Кухня, ванна, плитка','Очищення парою · кухня, ванна, плитка, шви'],
+  ['Вікна, дзеркала, гладкі поверхні','Вікна, дзеркала, скляні поверхні'],
+  ['Текстиль + вікна','Дивани + вікна'],
+  ['Puzzi + робот для вікон · текстиль, скло, дзеркала','Puzzi + робот для вікон · м’які меблі, матраци, вікна й дзеркала'],
+  ['Текстиль + кухня та ванна','Дивани + кухня та ванна'],
+  ['Puzzi + SC 2 · дивани, кухня, ванна','Puzzi + SC 2 · м’які меблі, кухня, ванна, плитка та шви'],
+  ['Puzzi + SC 2 + Jimmy · пилові кліщі й алергени, текстиль, кухня та ванна','Puzzi + SC 2 + Jimmy · пил, алергени, м’які меблі, кухня та ванна'],
+  ['SC 2 + робот для вікон · рами, скло, плитка','SC 2 + робот для вікон · скло, рами, кути, стики та дзеркала'],
+  ['Повний комплект для дому · текстиль, кухня, ванна, вікна','Уся техніка · повний цикл прибирання дому'],
+  ['Уся техніка · текстиль, кухня, ванна та вікна','Уся техніка · повний цикл прибирання дому'],
   ['<strong>Комбо</strong>','<strong>Текстиль + кухня та ванна</strong>'],
   ['label:"Комбо"','label:"Текстиль + кухня та ванна"'],
   ['Текстиль · 8 порцій хімії видаємо в комплекті','Текстиль · 8 запечатаних порцій, оплата лише за використані'],

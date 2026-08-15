@@ -425,13 +425,13 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.goto(f"{base}/komplekty/", wait_until="networkidle")
         page.wait_for_selector(".package-page-grid .package-card h2")
         canonical_package_titles = [
-            "Глибоке очищення текстилю", "Текстиль + вікна", "Текстиль + кухня та ванна",
+            "Глибоке очищення диванів і матраців", "Дивани + вікна", "Дивани + кухня та ванна",
             "Генеральне прибирання", "Ідеальні вікна", "HOME RESET",
         ]
         live_titles = [title.strip() for title in page.locator(".package-page-grid .package-card h2").all_inner_texts()]
         title_history = page.evaluate("window.__vacPackageTitleHistory || []")
         checks.check(live_titles == canonical_package_titles, "Package page keeps all six canonical titles after hydration")
-        checks.check(all("Комбо" not in " ".join(entry.get("titles", [])) for entry in title_history), "Package titles never flash the legacy Kombo name during hydration")
+        checks.check(all(not any(stale in " ".join(entry.get("titles", [])) for stale in ["Комбо","Глибоке очищення текстилю","Текстиль + вікна","Текстиль + кухня та ванна"]) for entry in title_history), "Package titles never flash retired public names during hydration")
         price_geometry = page.locator(".package-page-grid .package-card").evaluate_all(r"""cards=>cards.map(card=>{
           const cardBox=card.getBoundingClientRect(),price=card.querySelector('.package-price')?.getBoundingClientRect();
           return price?{cardTop:cardBox.top,priceTop:price.top-cardBox.top}:null;
