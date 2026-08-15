@@ -424,9 +424,12 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(change_product.count() == 1 and "Змінити техніку" in change_product.inner_text(), "Product-aware booking keeps an explicit equipment change action")
         change_product.click()
         checks.check(page.locator("#booking-products .booking-products>button:visible").count() >= 8, "Equipment change action restores the complete catalogue")
-        consent = page.locator(".booking-consent span")
+        consent = page.locator(".booking-consent:not(.vx-marketing-consent) > span")
+        checks.check(consent.count() == 1, "Booking legal consent remains unique after optional marketing consent is injected")
         checks.check("умови бронювання і політику конфіденційності." in normalized_text(consent.inner_text()), "Booking consent has complete legal punctuation")
         checks.check(consent.locator('a[href="/umovy/"]').count() == 1 and consent.locator('a[href="/polityka-konfidenciynosti/"]').count() == 1, "Booking consent links to both legal pages")
+        marketing_consent = page.locator(".vx-marketing-consent > span")
+        checks.check(marketing_consent.count() == 1 and "Отримувати персональні пропозиції та бонуси VAcleaner" in normalized_text(marketing_consent.inner_text()), "Optional marketing consent is rendered separately from legal consent")
 
         page.goto(f"{base}/", wait_until="networkidle")
         quiz_cta = page.locator("a", has_text="Підібрати рішення ↓").first
