@@ -156,6 +156,15 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
           else if(payload.action==='lookup_customer')body={{customer:{{phone:'+380951111111',name:'Анна Коваленко',address:'Полтава, вул. Соборності, 10',documentType:'ID-картка',documentNumber:'000123456',documentVerifiedAt:new Date().toISOString(),hasDocument:true,isRepeatCustomer:true,completedOrders:4,totalOrders:5,totalSpent:4200,lastDate:'{iso(-20)}',lastProduct:'Kärcher Puzzi 8/1',loyalty:{{level:'Regular',percent:5}}}}}};
           else if(payload.action==='audit_log')body={{entries:[{{id:1,booking_id:window.__bookings[0].id,booking_code:window.__bookings[0].booking_code,event_type:'updated',changed_fields:['status'],old_values:{{status:'pending'}},new_values:{{status:'confirmed'}},actor_id:'a',source:'edge:update',created_at:new Date().toISOString()}}]}};
           else body={{booking:window.__bookings.find(x=>x.id===payload.bookingId)||window.__bookings[0],finance:{{refundAmount:350,dueAmount:0,totalAmount:850,receivedAmount:1200}}}};
+        }} else if(text.includes('vacleaner-campaigns-v1')){{
+          if(payload.action==='sms_status')body={{sender:'VACLEANER',provider:'SendPulse',senderStatus:{{found:true,status:1,statusLabel:'Активний',statusExplain:''}},cooldownDays:90,optOutUrl:'vacleaner.pp.ua/s'}};
+          else if(payload.action==='sms_dispatches')body={{dispatches:[]}};
+          else if(payload.action==='sms_audience')body={{segment:payload.segment||'sleeping',customers:[{{phone:'+380951111111',name:'Анна Коваленко',completedOrders:4,lastCompleted:'{iso(-220)}',daysDormant:220,consent:'explicit',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380672222222',name:'Олена Мельник',completedOrders:2,lastCompleted:'{iso(-410)}',daysDormant:410,consent:'legacy',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380633333333',name:'Ірина Тест',completedOrders:3,lastCompleted:'{iso(-500)}',daysDormant:500,consent:'opted_out',activeBooking:false,cooldown:false,selectable:false}}],summary:{{total:3,selectable:2,explicit:1,legacy:1,optedOut:1,cooldown:0,active:0}}}};
+          else if(payload.action==='customer_sms_history')body={{consent:'legacy',consentAt:null,consentSource:'',optedOutAt:null,history:[]}};
+          else if(payload.action==='set_customer_sms_consent')body={{ok:true,consent:payload.enabled?'explicit':'opted_out'}};
+          else if(payload.action==='sms_sync')body={{ok:true,sent:2,delivered:2,notDelivered:0,totalCost:0,currency:'UAH'}};
+          else if(payload.action==='sms_send')body={{ok:true,dispatchId:'20000000-0000-4000-8000-000000000001',campaignId:12345,sent:(payload.phones||[]).length,exceptions:0,parts:1}};
+          else body={{ok:true}};
         }} else if(text.includes('/auth/v1/token'))body={json.dumps(session)};
         else if(text.includes('vacleaner-push'))body={{publicKey:'B'.repeat(88),subscribedDevices:1,delivered:true}};
         return {{ok:true,status:200,json:async()=>body}};
@@ -444,6 +453,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         open_mobile_view(page,'campaigns');page.wait_for_timeout(60)
         qa.check(page.locator('.campaign-panel').count()==1, f"{label}: campaigns render in their dedicated view")
         qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible in campaigns view")
+        qa.check(page.locator('#smsCampaign').count()==1, f"{label}: campaigns view exposes SMS reactivation")
+        page.locator('#smsCampaign').click();page.wait_for_selector('.sms-campaign-modal #smsAudienceList');page.wait_for_timeout(80)
+        qa.check(page.locator('.sms-campaign-modal').count()==1 and 'Стара база' in page.locator('.sms-campaign-modal').inner_text(), f"{label}: SMS modal renders legacy audience state")
+        qa.check(page.locator('.sms-campaign-modal #smsMessage').input_value().count('vacleaner.pp.ua/s')==1, f"{label}: SMS draft contains opt-out URL")
+        qa.check(page.locator('.sms-campaign-modal .sms-recipient').count()==3 and page.locator('.sms-campaign-modal .sms-recipient input:disabled').count()==1, f"{label}: opted-out recipient is visibly blocked")
+        qa.check(no_overflow(page), f"{label}: SMS modal has no horizontal overflow")
+        page.locator('.sms-campaign-modal [data-close]').first.click();page.wait_for_timeout(30)
         open_mobile_view(page,'clients')
         qa.check('Сплячі 180+ днів' in page.locator('#clientSegment').inner_text(), f"{label}: sleeping segment uses 180 days")
         last_text=page.locator('.client-last-date').first.inner_text().strip() if page.locator('.client-last-date').count() else ''

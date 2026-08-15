@@ -67,6 +67,8 @@ jobs:
         run: npm run test:booking-date-default
       - name: Verify PWA static contract
         run: npm run test:pwa-static
+      - name: Test SMS campaigns and consent
+        run: npm run test:sms-campaigns
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources

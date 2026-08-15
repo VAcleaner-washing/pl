@@ -14,11 +14,11 @@ HTML='''<!doctype html><html><body>
 <section id="booking-products" class="booking-step"><div class="booking-products"><button type="button" class="is-selected">Kärcher Puzzi</button></div></section>
 <section id="booking-dates" class="booking-step"><div class="booking-date-grid">
 <label>Отримання<input type="date" min="2026-08-07" max="2027-01-01" value="2026-08-07"></label>
-<label>Вікно видачі<select><option value="morning">Ранок · 7:00–9:30</option><option value="evening" selected>Вечір · 17:30–20:00</option></select></label>
+<label>Вікно видачі<select><option value="morning">Ранок · 08:00–10:00</option><option value="evening" selected>Вечір · 17:30–20:00</option></select></label>
 <label>Повернення<input type="date" min="2026-08-07" max="2027-01-01" value="2026-08-08"></label>
-<label>Вікно повернення<select><option value="morning">Ранок · 7:00–9:30</option><option value="evening" selected>Вечір · 17:30–20:00</option></select></label>
+<label>Вікно повернення<select><option value="morning">Ранок · 08:00–10:00</option><option value="evening" selected>Вечір · 17:30–20:00</option></select></label>
 </div><div class="availability-card idle"><strong>Перевірка</strong><span>...</span></div></section>
-<section id="booking-extras" class="booking-step"></section><section id="booking-contact" class="booking-step"><label>Телефон<input type="tel"></label></section>
+<section id="booking-extras" class="booking-step"></section><section id="booking-contact" class="booking-step"><label>Телефон<input type="tel"></label><label class="booking-consent"><input type="checkbox" required><span>Погоджуюсь з умовами</span></label></section>
 <div class="booking-summary"><div class="booking-summary-total"><span>Разом</span><strong>700 грн</strong></div><p></p></div>
 <div class="booking-mobile-summary"><div></div></div>
 <div class="booking-conditions"><ul><li></li><li></li><li></li></ul></div>
@@ -27,7 +27,7 @@ HTML='''<!doctype html><html><body>
 def route_handler(route):
     url=route.request.url
     if url.startswith(SETTINGS_API):
-        route.fulfill(status=200,content_type='application/json',body=json.dumps({'slots':{'morningStart':'07:00','morningEnd':'09:30','eveningStart':'17:30','eveningEnd':'20:00'},'depositRules':{'oneUnit':{'day':1000,'weekend':2000}}}))
+        route.fulfill(status=200,content_type='application/json',body=json.dumps({'slots':{'morningStart':'08:00','morningEnd':'10:00','eveningStart':'17:30','eveningEnd':'20:00'},'depositRules':{'oneUnit':{'day':1000,'weekend':2000}}}))
         return
     if url.startswith(BOOKING_API):
         try: body=route.request.post_data_json or {}
@@ -48,6 +48,18 @@ def main():
         if executable: options['executable_path']=executable
         elif Path('/usr/bin/chromium').exists(): options['executable_path']='/usr/bin/chromium'
         browser=p.chromium.launch(**options)
+        consent_page=browser.new_page(viewport={'width':390,'height':844})
+        consent_page.route('**/*',route_handler)
+        consent_page.set_content(HTML,wait_until='domcontentloaded')
+        consent_page.add_script_tag(path=str(ROOT/'assets/vacleaner-core.js'))
+        consent_page.add_script_tag(path=str(ROOT/'assets/public-booking-slots.js'))
+        consent_page.add_script_tag(path=str(ROOT/'assets/public-experience.js'))
+        consent_page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
+        consent_page.wait_for_timeout(120)
+        assert consent_page.locator('.vx-marketing-consent').count()==1, 'Optional marketing consent was not injected'
+        assert consent_page.locator('.vx-marketing-consent input').is_checked() is False, 'Marketing consent must default to unchecked'
+        assert 'Отримувати персональні пропозиції та бонуси VAcleaner' in consent_page.locator('.vx-marketing-consent').inner_text()
+        consent_page.close()
         page=browser.new_page(viewport={'width':390,'height':844})
         errors=[]
         page.on('pageerror',lambda exc: errors.append(str(exc)))

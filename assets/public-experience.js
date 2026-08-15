@@ -638,6 +638,21 @@
     if(finishCopy)finishCopy.textContent='Фінальний штрих — аромадифузор VA HOME · Entry у подарунок';
   }
 
+
+  function enhanceMarketingConsent(){
+    const form=document.querySelector('.booking-form');
+    if(!form)return;
+    const required=form.querySelector('.booking-consent');
+    if(!required||form.querySelector('.vx-marketing-consent'))return;
+    if(typeof globalThis.__VAC_MARKETING_SMS_CONSENT__!=='boolean')globalThis.__VAC_MARKETING_SMS_CONSENT__=false;
+    const label=document.createElement('label');
+    label.className='booking-consent vx-marketing-consent';
+    label.innerHTML='<input type="checkbox"><span><b>Отримувати персональні пропозиції та бонуси VAcleaner</b><small>Необов’язково. Можна відмовитися будь-коли.</small></span>';
+    const input=label.querySelector('input');input.checked=globalThis.__VAC_MARKETING_SMS_CONSENT__===true;
+    input.addEventListener('change',()=>{globalThis.__VAC_MARKETING_SMS_CONSENT__=input.checked});
+    required.insertAdjacentElement('afterend',label);
+  }
+
   function bindBookingAnalytics(){
     const form=document.querySelector('.booking-form');
     if(!form||form.dataset.vxAnalyticsBound)return;
@@ -669,6 +684,7 @@
     syncDeliveryFee();
     enhanceHomeResetGift();
     enhanceMobileBookingFlow();
+    enhanceMarketingConsent();
     bindBookingAnalytics();
   }
 

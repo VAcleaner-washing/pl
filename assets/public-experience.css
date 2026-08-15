@@ -1115,3 +1115,9 @@ html.vq-standalone-page .vq-progress__meta{
   .v21-day-grid article h3{font-size:14px;line-height:1.15}
   .v21-day-grid article p{font-size:11px;margin-top:5px}
 }
+
+/* v4.0.69 — optional marketing consent */
+.vx-marketing-consent{margin-top:10px;align-items:flex-start}
+.vx-marketing-consent span{display:grid;gap:3px}
+.vx-marketing-consent span>b{font-size:14px;line-height:1.35}
+.vx-marketing-consent span>small{font-size:12px;line-height:1.4;color:var(--muted,#777)}
