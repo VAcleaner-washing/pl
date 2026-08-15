@@ -1,6 +1,6 @@
 {
-  "version": "4.0.65",
-  "build": 4065,
+  "version": "4.0.67",
+  "build": 4067,
   "releasedAt": "2026-08-15",
-  "label": "VAcleaner v4.0.65 — PICKER DEDUPLICATION PARITY"
+  "label": "VAcleaner v4.0.67 — EXPENSE DATE & UAH FIELD FIX"
 }
