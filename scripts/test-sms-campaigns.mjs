@@ -20,6 +20,10 @@ check(admin.includes("$$('[data-close]',root).forEach(x=>x.onclick=closeLayer)")
 check(admin.includes('SMS-розсилка')&&admin.includes('Розбудити клієнтів'),'campaign UI exposes SMS reactivation workflow');
 check(admin.includes('Стара база')&&admin.includes('Підтверджую право написати'),'admin distinguishes legacy recipients and asks for attestation');
 check(adminCss.includes('.sms-audience-list')&&adminCss.includes('.sms-consent.legacy'),'SMS UI has dedicated responsive styling');
+check(adminCss.includes('.sms-campaign-modal .client-section-head small')&&adminCss.includes('text-transform:uppercase'),'SMS section kickers use a non-overlapping compact hierarchy');
+check(adminCss.includes('.sms-campaign-modal #smsSend:disabled')&&adminCss.includes('cursor:not-allowed'),'inactive SMS route has a visibly disabled send action');
+check(adminCss.includes('.sms-form-body::-webkit-scrollbar')&&adminCss.includes('.sms-audience-list::-webkit-scrollbar'),'SMS modal hides native arrow scrollbars while retaining scroll');
+check(admin.includes("${h(statusData.sender||'VACLEANER')} · ${h(status.statusLabel||'невідомо')}")&&!admin.includes("status.statusExplain?` · ${h(status.statusExplain)}`"),'SMS header avoids duplicate provider-language moderation text');
 check(migration.includes('marketing_sms_consent boolean not null default false'),'existing customer base is migrated without pretending explicit consent');
 check(migration.includes('enable row level security')&&migration.includes('vacleaner_sms_recipients_client_deny'),'SMS audit tables are protected by RLS');
 check(privacy.includes('SendPulse')&&privacy.includes('vacleaner.pp.ua/s')&&privacy.includes('15 серпня 2026'),'privacy page documents SMS processing and opt-out');

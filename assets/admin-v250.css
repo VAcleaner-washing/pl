@@ -1931,3 +1931,70 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-audience-summary{grid-template-columns:1fr 1fr}
   .sms-recipient{grid-template-columns:22px minmax(0,1fr) auto}.sms-recipient em{grid-column:2/-1}.sms-consent{font-size:9px;padding:4px 6px}
 }
+
+
+/* v4.0.71 — SMS campaign modal polish: compact sections, unambiguous badges, quiet scroll and true disabled state. */
+.sms-campaign-modal .sms-form-body{
+  min-height:0;
+  align-content:start;
+  grid-auto-rows:max-content;
+  gap:12px;
+  padding:0 2px 14px;
+  scrollbar-width:none;
+}
+.sms-campaign-modal .sms-form-body::-webkit-scrollbar,
+.sms-campaign-modal .sms-audience-list::-webkit-scrollbar{display:none}
+.sms-campaign-modal .sms-audience-list{scrollbar-width:none;max-height:286px}
+.sms-campaign-modal .modal-section{padding:18px}
+.sms-campaign-modal .sms-compose textarea{min-height:76px}
+.sms-campaign-modal .client-section-head{margin-bottom:12px}
+.sms-campaign-modal .client-section-head>div{display:grid;gap:4px;min-width:0}
+.sms-campaign-modal .client-section-head small{
+  display:block;
+  width:auto;
+  min-width:0;
+  height:auto;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  color:var(--gold-2);
+  font-size:10px;
+  font-weight:800;
+  line-height:1.1;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.sms-campaign-modal .client-section-head h3{margin:0;font-size:19px;line-height:1.15}
+.sms-campaign-modal .sms-history{min-height:0}
+.sms-campaign-modal #smsHistory{min-height:0}
+.sms-campaign-modal #smsHistory>.empty{
+  min-height:54px;
+  margin:0;
+  padding:16px 10px;
+  display:grid;
+  place-items:center;
+  color:var(--muted);
+  text-align:center;
+}
+.sms-campaign-modal #smsSend:disabled{
+  opacity:1;
+  cursor:not-allowed;
+  color:#827766;
+  border-color:rgba(214,164,95,.12);
+  background:linear-gradient(145deg,#17191a,#141516);
+  box-shadow:none;
+  filter:saturate(.25);
+}
+@media(min-width:701px){
+  .sms-campaign-modal>header{padding-bottom:15px}
+  .sms-campaign-modal>header p{max-width:820px}
+}
+@media(max-width:700px){
+  .sms-campaign-modal .modal-section{padding:14px}
+  .sms-campaign-modal .sms-form-body{gap:10px;padding-bottom:12px}
+  .sms-campaign-modal .sms-audience-list{max-height:270px}
+  .sms-campaign-modal .client-section-head{align-items:center}
+  .sms-campaign-modal .client-section-head h3{font-size:18px}
+}

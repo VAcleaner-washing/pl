@@ -157,7 +157,7 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
           else if(payload.action==='audit_log')body={{entries:[{{id:1,booking_id:window.__bookings[0].id,booking_code:window.__bookings[0].booking_code,event_type:'updated',changed_fields:['status'],old_values:{{status:'pending'}},new_values:{{status:'confirmed'}},actor_id:'a',source:'edge:update',created_at:new Date().toISOString()}}]}};
           else body={{booking:window.__bookings.find(x=>x.id===payload.bookingId)||window.__bookings[0],finance:{{refundAmount:350,dueAmount:0,totalAmount:850,receivedAmount:1200}}}};
         }} else if(text.includes('vacleaner-campaigns-v1')){{
-          if(payload.action==='sms_status')body={{sender:'VACLEANER',provider:'SendPulse',senderStatus:{{found:true,status:1,statusLabel:'Активний',statusExplain:''}},cooldownDays:90,optOutUrl:'vacleaner.pp.ua/s'}};
+          if(payload.action==='sms_status')body={{sender:'VACLEANER',provider:'SendPulse',senderStatus:{{found:true,status:0,statusLabel:'На модерації',statusExplain:'On moderation.'}},cooldownDays:90,optOutUrl:'vacleaner.pp.ua/s'}};
           else if(payload.action==='sms_dispatches')body={{dispatches:[]}};
           else if(payload.action==='sms_audience')body={{segment:payload.segment||'sleeping',customers:[{{phone:'+380951111111',name:'Анна Коваленко',completedOrders:4,lastCompleted:'{iso(-220)}',daysDormant:220,consent:'explicit',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380672222222',name:'Олена Мельник',completedOrders:2,lastCompleted:'{iso(-410)}',daysDormant:410,consent:'legacy',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380633333333',name:'Ірина Тест',completedOrders:3,lastCompleted:'{iso(-500)}',daysDormant:500,consent:'opted_out',activeBooking:false,cooldown:false,selectable:false}}],summary:{{total:3,selectable:2,explicit:1,legacy:1,optedOut:1,cooldown:0,active:0}}}};
           else if(payload.action==='customer_sms_history')body={{consent:'legacy',consentAt:null,consentSource:'',optedOutAt:null,history:[]}};
@@ -458,6 +458,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.sms-campaign-modal').count()==1 and 'Стара база' in page.locator('.sms-campaign-modal').inner_text(), f"{label}: SMS modal renders legacy audience state")
         qa.check(page.locator('.sms-campaign-modal #smsMessage').input_value().count('vacleaner.pp.ua/s')==1, f"{label}: SMS draft contains opt-out URL")
         qa.check(page.locator('.sms-campaign-modal .sms-recipient').count()==3 and page.locator('.sms-campaign-modal .sms-recipient input:disabled').count()==1, f"{label}: opted-out recipient is visibly blocked")
+        qa.check(page.locator('.sms-campaign-modal #smsSend').is_disabled(), f"{label}: national SMS send stays disabled while Sender ID is under moderation")
+        qa.check('On moderation' not in page.locator('.sms-campaign-modal>header').inner_text(), f"{label}: SMS header has no duplicate English moderation status")
+        section_geometry=page.locator('.sms-campaign-modal .sms-history .client-section-head').evaluate("""el=>{const k=el.querySelector('small').getBoundingClientRect(),h=el.querySelector('h3').getBoundingClientRect();return{k:{r:k.right,b:k.bottom},h:{l:h.left,t:h.top},scroll:getComputedStyle(el.closest('.sms-form-body')).scrollbarWidth}}""")
+        qa.check(section_geometry['k']['b']<=section_geometry['h']['t']+1, f"{label}: SMS journal kicker never overlaps the section title")
+        qa.check(section_geometry['scroll']=='none', f"{label}: SMS modal uses quiet hidden native scrollbar chrome")
+        history_height=page.locator('.sms-campaign-modal .sms-history').evaluate("el=>el.getBoundingClientRect().height")
+        qa.check(history_height<190, f"{label}: empty SMS history stays compact")
         qa.check(no_overflow(page), f"{label}: SMS modal has no horizontal overflow")
         page.locator('.sms-campaign-modal [data-close]').first.click();page.wait_for_timeout(30)
         open_mobile_view(page,'clients')
