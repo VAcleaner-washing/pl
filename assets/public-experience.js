@@ -360,6 +360,8 @@
     const deposit=ensureDepositSummaryRow(summary,total,'vx-summary-deposit','Залоговий платіж','Сплачується під час отримання техніки.');
     setTextIfChanged(deposit.querySelector('strong'),value?formatMoney(value):'—');
     setTextIfChanged(summary.querySelector('.booking-summary-total span'),'Вартість оренди');
+    let flow=summary.querySelector('.vx-payment-flow');
+    if(!flow){flow=document.createElement('div');flow.className='vx-payment-flow';flow.innerHTML='<span><b>Заявка</b><small>200 грн</small></span><i>→</i><span><b>Отримання</b><small>залоговий платіж</small></span><i>→</i><span><b>Повернення</b><small>фінальний розрахунок</small></span>';total.insertAdjacentElement('afterend',flow);}
     const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
     if(note){if(note.className!=='vx-summary-deposit-note')note.className='vx-summary-deposit-note';setTextIfChanged(note,'Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');}
   }

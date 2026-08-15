@@ -1071,3 +1071,47 @@ html.vq-standalone-page .vq-progress__meta{
 @media(min-width:1051px) and (max-width:1199px){
   .package-page-grid .package-card-large .package-purpose{min-height:84px}
 }
+
+
+/* v4.0.62 — targeted booking clarity + compact mobile HOME RESET */
+.booking-extras-toggle{margin-top:14px;border:0;background:transparent;color:#8d672d;font:700 12px/1.2 inherit;letter-spacing:.02em;text-decoration:underline;text-underline-offset:4px;cursor:pointer;padding:4px 0}
+.booking-extras-all-note{margin:8px 0 12px;padding:9px 11px;border-left:2px solid rgba(160,116,53,.55);font-size:12px;color:#766b5d}
+.booking-summary-extras>span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.booking-summary-extras>span small{display:block;max-width:230px;color:#9d9589;font-size:10px;line-height:1.35;font-weight:500;overflow-wrap:anywhere}
+.booking-conditions-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.booking-conditions-steps article{display:grid;grid-template-columns:28px minmax(0,1fr);gap:9px;align-items:start;padding:11px;border:1px solid rgba(143,118,79,.18);border-radius:12px;background:rgba(255,255,255,.36)}
+.booking-conditions-steps article>b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#191b1b;color:#e6bd7d;font-size:10px}
+.booking-conditions-steps article span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.booking-conditions-steps article strong{font-size:12px;line-height:1.25;color:#171717}
+.booking-conditions-steps article small{font-size:10px;line-height:1.4;color:#776f65}
+.booking-conditions-more{margin-top:9px;border-top:1px solid rgba(143,118,79,.16);padding-top:8px}
+.booking-conditions-more summary{width:max-content;max-width:100%;cursor:pointer;color:#8d672d;font-size:11px;font-weight:700;list-style:none}
+.booking-conditions-more summary::-webkit-details-marker{display:none}
+.booking-conditions-more summary:after{content:' +';font-weight:700}
+.booking-conditions-more[open] summary:after{content:' −'}
+.booking-conditions-more>div{padding:9px 0 0;display:grid;gap:7px}
+.booking-conditions-more p{margin:0;color:#6f675d;font-size:10.5px;line-height:1.55}
+.vx-payment-flow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:6px;align-items:center;padding:12px 0;border-top:1px solid rgba(224,190,132,.13)}
+.vx-payment-flow span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.vx-payment-flow b{font-size:10px;color:#f0e9de;line-height:1.2}
+.vx-payment-flow small{font-size:9px;color:#a9a197;line-height:1.25}
+.vx-payment-flow i{font-style:normal;color:#b88949;font-size:11px}
+@media(max-width:720px){
+  .booking-conditions-steps{grid-template-columns:1fr;gap:6px}
+  .booking-conditions-steps article{padding:9px 10px}
+  .booking-summary-extras>span small{max-width:58vw}
+  .vx-payment-flow{grid-template-columns:1fr auto 1fr;row-gap:8px}
+  .vx-payment-flow span:last-of-type{grid-column:1/-1;border-top:1px solid rgba(224,190,132,.1);padding-top:7px}
+  .vx-payment-flow i:last-of-type{display:none}
+}
+@media(max-width:620px){
+  .v21-day{padding-top:56px;padding-bottom:56px}
+  .v21-day .v21-heading{margin-bottom:26px}
+  .v21-day-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .v21-day-grid article{min-height:0;padding:14px 12px}
+  .v21-day-grid article:last-child{grid-column:1/-1}
+  .v21-day-grid article span{font-size:9px}
+  .v21-day-grid article time{font-size:20px;margin:8px 0}
+  .v21-day-grid article h3{font-size:14px;line-height:1.15}
+  .v21-day-grid article p{font-size:11px;margin-top:5px}
+}

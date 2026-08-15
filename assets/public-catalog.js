@@ -7,6 +7,7 @@
   const PUBLIC_PRODUCT_LABELS={puzzi:'Kärcher Puzzi 8/1',puzzi_jimmy:'Глибоке очищення диванів і матраців',puzzi_abir:'Дивани + вікна',sc2:'Kärcher SC 2',abir:'Робот для вікон',combo:'Дивани + кухня та ванна',general:'Генеральне прибирання',ideal_windows:'Ідеальні вікна',elite:'HOME RESET'};
 
   const PUBLIC_EXTRA_PRESENTATION={
+    odour_zero:{label:'Odour Zero · 250 мл',detail:'Для загальної нейтралізації запахів і одночасного очищення текстилю та твердих поверхонь.'},
     neutralix:{label:'Neutralix · 250 мл',detail:'Нейтралізує запахи сечі, тварин, тютюну та вогкості на текстилі, м’яких меблях, в авто й приміщенні'},
     spot_lifter:{label:'VA SPOT FIX · 50 мл',detail:'Універсальний плямовивідник для локальної обробки свіжих і змішаних забруднень. Жирні сліди · їжа · косметика · побутові плями.'},
     stain_exit:{label:'VA STAIN OX · 30 мл',detail:'Для стійких плям від напоїв і харчових продуктів. Кава · чай · червоне вино · соки · ягоди.'},

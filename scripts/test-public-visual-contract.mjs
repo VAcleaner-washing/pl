@@ -12,7 +12,7 @@ const routes=[
 ];
 const expectedNav=[
   ['Що почистити','/rishennia/'],['Комплекти','/komplekty/'],['Як це працює','/yak-tse-pratsiuie/'],
-  ['Відгуки','/vidhuky/'],['Підбір','/pidbir/']
+  ['Відгуки','/vidhuky/'],['Підбір за 30 сек','/pidbir/']
 ];
 let passed=0;
 const failed=[];

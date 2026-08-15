@@ -67,6 +67,17 @@ for(const [code,alias] of [
 }
 
 
+const homeHtml=fs.readFileSync('index.html','utf8');
+const homeChunk=fs.readFileSync('_next/static/chunks/01pb0x0z72e41.js','utf8');
+for(const label of ['Глибоке очищення диванів і матраців','Генеральне прибирання','HOME RESET']){
+  if(!homeHtml.includes(`>${label}</h3>`))failures.push(`home package card missing client-facing title: ${label}`);
+  if(!homeChunk.includes(`title:"${label}"`))failures.push(`hydrated home package card missing client-facing title: ${label}`);
+}
+for(const legacyTitle of ['<h3>Puzzi + Jimmy</h3>','<h3>Puzzi + SC 2 + Jimmy</h3>','<h3>Увесь дім</h3>'])if(homeHtml.includes(legacyTitle))failures.push(`home still exposes technical package title: ${legacyTitle}`);
+if(!bookingChunk.includes('extraFitsProduct=')||!bookingChunk.includes('showAllExtras')||!bookingChunk.includes('Показати всі професійні засоби'))failures.push('booking relevant-chemistry progressive disclosure is missing');
+if(!bookingChunk.includes('booking-summary-extras')||!bookingChunk.includes('T.length?`${u(ep)} грн`'))failures.push('booking extras summary is not driven by local selection');
+if(!bookingChunk.includes('booking-conditions-steps')||!bookingChunk.includes('Докладніше про розрахунок'))failures.push('compact booking conditions are missing');
+if(!bookingChunk.includes('Odour Zero · 250 мл')||!bookingChunk.includes('Для загальної нейтралізації запахів і одночасного очищення'))failures.push('Odour Zero public distinction is missing');
 const publicPackageLabels=Object.values(expected);
 const bookingPublicLabels=publicPackageLabels.filter(label=>bookingHtml.includes(`<strong>${label}</strong>`));
 const packagePublicLabels=publicPackageLabels.filter(label=>packageHtml.includes(`>${label}</h2>`));

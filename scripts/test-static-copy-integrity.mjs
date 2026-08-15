@@ -82,6 +82,8 @@ for(const file of ['assets/admin-v250.js','assets/public-booking-slots.js','supa
 must(!experience.includes('syncPublicCopy'),'runtime static-copy rewriting returned');
 for(const marker of ['syncBookingCatalog()','syncDeliveryFee()','syncPublicSettings()','vacleaner-settings'])must(experience.includes(marker),`dynamic admin-controlled behavior is missing: ${marker}`);
 
+for(const rel of ['index.html','komplekty/index.html','bronuvannia/index.html']){const s=fs.readFileSync(rel,'utf8');if(!s.includes('Підбір за 30 сек'))failures.push(`quiz nav label missing: ${rel}`);}
+
 if(failures.length){
   console.error(failures.map(item=>`FAIL: ${item}`).join('\n'));
   process.exit(1);
