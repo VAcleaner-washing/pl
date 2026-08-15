@@ -14,6 +14,15 @@ for(const file of walk(root).filter(f=>f.endsWith('.html'))){
   s=s.replace(/(\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|public-quiz|admin-v250|admin-glass-test|public-fixes|mobile-home-fix|site-v400|puzzi-seo)\.(?:js|css))\?v=[^"']+/g,`$1?v=${build}`);
   fs.writeFileSync(file,s);
 }
+// The booking React chunk is patched in-place in this static export. Version every public/RSC reference
+// so a returning browser cannot hydrate new server HTML with a cached older booking component.
+for(const rel of ['bronuvannia/index.html','bronuvannia/index.txt','bronuvannia/__next.bronuvannia.__PAGE__.txt','bronuvannia/__next._full.txt']){
+  const file=path.join(root,rel);
+  if(!fs.existsSync(file))continue;
+  let s=fs.readFileSync(file,'utf8');
+  s=s.replace(/(\/_next\/static\/chunks\/146ntlcv_t6~w-v4041\.js)(?:\?v=\d+)?/g,`$1?v=${build}`);
+  fs.writeFileSync(file,s);
+}
 const adminSw=path.join(root,'admin','sw.js');
 let sw=fs.readFileSync(adminSw,'utf8').replace(/vacleaner-manager-\d+/g,`vacleaner-manager-${build}`).replace(/\?v=\d+/g,`?v=${build}`);
 fs.writeFileSync(adminSw,sw);

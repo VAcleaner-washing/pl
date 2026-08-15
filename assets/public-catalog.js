@@ -20,7 +20,10 @@
   const PUBLIC_CODE_BY_LABEL={};
   Object.entries(PUBLIC_PRODUCT_LABELS).forEach(([code,label])=>PUBLIC_CODE_BY_LABEL[label]=code);
   Object.entries(CORE?.products||{}).forEach(([code,item])=>[item.label,item.shortLabel,...(item.aliases||[])].filter(Boolean).forEach(label=>PUBLIC_CODE_BY_LABEL[label]=code));
+  let activeCatalog=CORE.catalog;
   function apply(catalog){
+    activeCatalog=catalog||activeCatalog||CORE.catalog;
+    catalog=activeCatalog;
     let changed=0;
     document.querySelectorAll('.booking-products button').forEach(btn=>{
       const title=btn.querySelector('strong')?.textContent.trim();
@@ -61,6 +64,11 @@
     });
     return changed;
   }
+  document.addEventListener('change',event=>{
+    const input=event.target;
+    if(!(input instanceof HTMLInputElement)||input.type!=='checkbox'||!input.closest('.booking-extras'))return;
+    requestAnimationFrame(()=>apply(activeCatalog));
+  });
   fetch(API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{
     const catalog=data.catalog||CORE.catalog;
     apply(catalog);

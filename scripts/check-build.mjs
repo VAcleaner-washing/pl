@@ -313,6 +313,16 @@ if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale S
     if(react.includes(legacy))errors.push(`legacy chemistry title can flash during hydration: ${legacy}`);
   }
   if(!quiz.includes('<h3>VA SPOT FIX</h3>')||!quiz.includes('<h3>VA STAIN OX</h3>'))errors.push('Smart Guide stain-care cards do not use VA product names as the primary heading');
+  if(!react.includes('(T.includes(e.code)?"is-selected ":"")+("spot_lifter"===e.code||"stain_exit"===e.code?"is-va-stain-care":"")'))errors.push('hydrated booking can drop the VA spot-care class when a checkbox is selected');
+  const fixes=fs.readFileSync(path.join(root,'assets','public-fixes.css'),'utf8');
+  if(!fixes.includes('label.is-va-stain-care.is-selected'))errors.push('selected VA spot-care cards do not have an explicit branded selected-state style');
+  const catalog=fs.readFileSync(path.join(root,'assets','public-catalog.js'),'utf8');
+  if(!catalog.includes("input.closest('.booking-extras')")||!catalog.includes('requestAnimationFrame(()=>apply(activeCatalog))'))errors.push('public catalog does not restore branded chemistry presentation after React checkbox rerender');
+  const expectedChunk=`/_next/static/chunks/146ntlcv_t6~w-v4041.js?v=${release.build}`;
+  for(const rel of ['bronuvannia/index.html','bronuvannia/index.txt','bronuvannia/__next.bronuvannia.__PAGE__.txt','bronuvannia/__next._full.txt']){
+    const body=fs.readFileSync(path.join(root,rel),'utf8');
+    if(!body.includes(expectedChunk))errors.push(`booking React chunk is not cache-busted in ${rel}`);
+  }
 }
 
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
