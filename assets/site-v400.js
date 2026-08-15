@@ -13,15 +13,6 @@ function pickerBridgeMarkup(title,copy,label='Підібрати за 30 сек'
  return `<div class="v4-picker-bridge v4-picker-bridge--${tone}"><div><strong>${title}</strong><span>${copy}</span></div><a href="/pidbir/">${label} ${ARROW}</a></div>`;
 }
 function contextualPickerBridges(){
- if(path==='/'){
-  const help=document.querySelector('.v21-choice-help');
-  if(help&&help.dataset.v4Picker!=='1'){
-   help.dataset.v4Picker='1';
-   help.innerHTML=`<div><strong>Кілька задач одразу?</strong><span>Відповідайте на кілька питань — підберемо техніку й комплект приблизно за 30 секунд.</span></div><a href="/pidbir/">Підібрати за 30 сек ${ARROW}</a>`;
-  }
-  const grid=document.querySelector('.v21-package-grid');
-  if(grid&&!grid.parentElement?.querySelector(':scope > .v4-picker-bridge'))grid.insertAdjacentHTML('afterend',pickerBridgeMarkup('Не впевнені, який комплект обрати?','Підбір врахує всі зони й запропонує один зрозумілий варіант без зайвої техніки.','Допоможіть підібрати комплект','dark'));
- }
  if(path==='/komplekty'){
   const grid=document.querySelector('.package-page-grid');
   if(grid){
@@ -29,31 +20,10 @@ function contextualPickerBridges(){
    grid.nextElementSibling?.classList.add('v4-picker-bridge--packages');
   }
  }
- if(path==='/rishennia'){
-  const strip=document.querySelector('.choice-strip');
-  if(strip&&strip.dataset.v4Picker!=='1'){
-   strip.dataset.v4Picker='1';
-   const p=strip.querySelector('p'),h=strip.querySelector('h2'),a=strip.querySelector('a');
-   if(p)p.textContent='Кілька задач одразу?';
-   if(h)h.textContent='Відповідайте на кілька питань — підберемо техніку й комплект під усі зони.';
-   if(a){a.href='/pidbir/';a.removeAttribute('target');a.removeAttribute('rel');a.innerHTML=`Підібрати за 30 сек ${ARROW}`;}
-  }
- }
  const detailPaths=new Set(['/rishennia/textile','/rishennia/steam','/rishennia/windows','/rishennia/mattress']);
  if(detailPaths.has(path)){
   const final=document.querySelector('.final-cta');
   if(final&&!final.previousElementSibling?.classList.contains('v4-picker-bridge'))final.insertAdjacentHTML('beforebegin',pickerBridgeMarkup('Є ще інші зони?','Підбір збере кілька задач в один комплект і покаже, що справді потрібно.','Підібрати комплект','light'));
- }
- if(path==='/bronuvannia'){
-  const step=document.querySelector('#booking-products');
-  const heading=step?.querySelector('.booking-step-heading');
-  if(heading){
-   let hint=heading.querySelector('.v4-booking-picker-hint');
-   if(!hint){hint=document.createElement('a');hint.className='v4-booking-picker-hint';hint.href='/pidbir/';hint.innerHTML=`Не впевнені, що обрати? <strong>Підбір за 30 сек →</strong>`;heading.appendChild(hint);}
-   const preselected=new URLSearchParams(location.search).has('product');
-   const selected=Boolean(step.querySelector('.booking-products button[aria-pressed="true"]'));
-   hint.hidden=preselected||selected;
-  }
  }
 }
 function mobileStickyCta(){

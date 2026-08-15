@@ -57,24 +57,7 @@ apply(homeFiles,[
   ['label:"Генеральне"','label:"Генеральне прибирання"'],
   ['Місце, де ви спите</small><h3>Матрац</h3>','Пилові кліщі й алергени</small><h3>Глибоке очищення матраца</h3>'],
   ['З Puzzi завжди видаємо 8 порцій хімії: після повернення оплачуєте лише використані по 50 грн','З Puzzi видаємо 8 запечатаних порцій хімії. Вони не входять у вартість оренди: після повернення оплачуєте лише використані по 50 грн'],
-  ['Не знаєте, що підійде?','Кілька задач одразу?'],
-  ['Опишіть задачу одним повідомленням — без бронювання й зобов’язань.','Відповідайте на кілька питань — підберемо техніку й комплект приблизно за 30 секунд.'],
-  ['Запитати менеджера','Підібрати за 30 сек'],
 ]);
-
-// The home choice helper used Telegram as its historical action. Keep the server HTML and hydrated chunk on the same /pidbir/ target.
-{
-  const file='index.html';
-  let html=read(file);
-  html=html.replace(/(<div class="v21-choice-help">[\s\S]*?<a )href="[^"]+" rel="noreferrer" target="_blank"/, '$1href="/pidbir/"');
-  write(file,html);
-}
-{
-  const file='_next/static/chunks/01pb0x0z72e41.js';
-  let js=read(file);
-  js=js.replace('(0,s.jsxs)("a",{href:r.telegram,target:"_blank",rel:"noreferrer",children:["Підібрати за 30 сек ",','(0,s.jsxs)("a",{href:"/pidbir/",children:["Підібрати за 30 сек ",');
-  write(file,js);
-}
 
 
 const packageFiles=['komplekty/index.html','_next/static/chunks/09z99witl-xo-v4041.js',...textFiles('komplekty')];
@@ -166,7 +149,6 @@ const textileWindowsBooking=`<button aria-pressed="false" class="" type="button"
 const solutionsFiles=['rishennia/index.html',...textFiles('rishennia')];
 apply(solutionsFiles,[
   ['Скло без драбини','Менше ручної роботи зі склом'],
-  ['Не знаєте, що підійде?','Кілька задач одразу?'],
   ['Надішліть фото або коротко опишіть задачу — ми зберемо рішення.','Відповідайте на кілька питань — підберемо техніку й комплект під усі зони.'],
   ['href="/kontakty">Як зв’язатися ','href="/pidbir/">Підібрати за 30 сек '],
   ['href":"/kontakty","children":["Як зв’язатися ','href":"/pidbir/","children":["Підібрати за 30 сек '],

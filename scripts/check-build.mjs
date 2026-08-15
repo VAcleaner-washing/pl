@@ -59,13 +59,18 @@ if(!fs.existsSync(googleVerify)||fs.readFileSync(googleVerify,'utf8').trim()!=='
 for(const file of files.filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(file,'utf8');if(/(?:favicon\.(?:ico|svg)|apple-touch-icon\.png)\?v=/.test(html))errors.push(`versioned favicon URL: ${path.relative(root,file)}`)}
 const siteRuntime=fs.readFileSync(path.join(root,'assets','site-v400.js'),'utf8');
 if(!siteRuntime.includes("'/tekhnika/karcher-puzzi-8-1/'")||!siteRuntime.includes('v4-inline-tech-link'))errors.push('textile → Puzzi contextual internal link is missing');
-for(const token of ['Позначка означає: відгук пов’язаний із фактичним бронюванням VAcleaner.','contextualPickerBridges','mobileStickyCta','Кілька задач одразу?','Підбір за 30 сек</a>'])if(!siteRuntime.includes(token))errors.push(`v4.0.64 public UX bridge missing: ${token}`);
+for(const token of ['Позначка означає: відгук пов’язаний із фактичним бронюванням VAcleaner.','contextualPickerBridges','mobileStickyCta'])if(!siteRuntime.includes(token))errors.push(`public UX bridge missing: ${token}`);
+if(siteRuntime.includes('v4-booking-picker-hint'))errors.push('duplicate booking picker hint must not be injected; public-quiz already owns this entry point');
+if(siteRuntime.includes("if(path==='/'){"))errors.push('duplicate home picker bridge must not be injected; the home Smart Guide already owns this flow');
 const homePickerChunk=fs.readFileSync(path.join(root,'_next','static','chunks','01pb0x0z72e41.js'),'utf8');
-for(const token of ['Кілька задач одразу?','приблизно за 30 секунд','href:"/pidbir/"','Підібрати за 30 сек'])if(!homePickerChunk.includes(token))errors.push(`home picker hydration parity missing: ${token}`);
+for(const token of ['Не знаєте, що підійде?','Опишіть задачу одним повідомленням — без бронювання й зобов’язань.','Запитати менеджера'])if(!homePickerChunk.includes(token))errors.push(`home non-duplicate helper parity missing: ${token}`);
+for(const token of ['Кілька задач одразу?','Підібрати за 30 сек'])if(homePickerChunk.includes(token))errors.push(`duplicate home picker copy leaked into hydrated chunk: ${token}`);
+const bookingGuide=fs.readFileSync(path.join(root,'assets','public-quiz.js'),'utf8');
+for(const token of ['data-vq-booking-help','Підібрати рішення за 30 секунд →'])if(!bookingGuide.includes(token))errors.push(`booking Smart Guide entry missing: ${token}`);
 const solutionsPicker=fs.readFileSync(path.join(root,'rishennia','__next.rishennia.__PAGE__.txt'),'utf8');
 for(const token of ['Кілька задач одразу?','Підібрати за 30 сек','/pidbir/'])if(!solutionsPicker.includes(token))errors.push(`solutions picker server parity missing: ${token}`);
 const siteV400Css=fs.readFileSync(path.join(root,'assets','site-v400.css'),'utf8');
-for(const token of ['html.v4-mobile-cta-visible .mobile-booking','grid-template-columns:minmax(0,2.15fr) minmax(92px,.85fr)','v4-review-proof__mark','v4-booking-picker-hint'])if(!siteV400Css.includes(token))errors.push(`v4.0.64 public UX CSS missing: ${token}`);
+for(const token of ['html.v4-mobile-cta-visible .mobile-booking','grid-template-columns:minmax(0,2.15fr) minmax(92px,.85fr)','v4-review-proof__mark'])if(!siteV400Css.includes(token))errors.push(`public UX CSS missing: ${token}`);
 
 
 const raw=fs.readFileSync(path.join(root,'config','vacleaner.json'),'utf8');
