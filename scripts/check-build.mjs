@@ -174,6 +174,9 @@ if(!publicExperience.includes('Чистота після використанн�
 if(!publicExperienceCss.includes('.vx-care-policy{')||!publicExperienceCss.includes('.vx-care-policy__grid{display:grid'))errors.push('Public care policy visual is missing');
 if(!publicExperienceCss.includes('.home-v21 .v21-package-grid h3{')||!publicExperienceCss.includes('min-height:2em'))errors.push('Home package cards must reserve a shared two-line desktop title zone');
 if(!publicExperienceCss.includes('.package-page-grid .package-price{justify-content:center;text-align:center}'))errors.push('Package page prices must be horizontally centered');
+if(!adminCss.includes('.calendar-grid{grid-template-columns:repeat(3,minmax(0,1fr))}'))errors.push('Desktop calendar grid must use minmax(0,1fr) containment');
+if(!adminCss.includes('.day-card .day-labels,.day-card .day-row{grid-template-columns:minmax(76px,1.15fr) repeat(2,minmax(0,1fr));width:100%;min-width:0}'))errors.push('Desktop calendar rows must use shrinkable slot columns');
+
 if(!publicExperienceCss.includes('@media(min-width:1051px){')||!publicExperienceCss.includes('.package-page-grid .package-card-large h2{min-height:2em}'))errors.push('Desktop package cards must reserve a shared two-line title zone so all following sections align');
 if(!publicExperienceCss.includes('.package-card.featured .vx-home-reset-gift{position:absolute'))errors.push('HOME RESET gift must have a dedicated non-overlapping featured-card layout');
 

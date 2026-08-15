@@ -648,6 +648,11 @@ def desktop_suite(browser: Browser, qa: QA) -> None:
             page.wait_for_timeout(90)
             qa.check(no_overflow(page), f"Desktop: {view} view has no horizontal overflow")
             qa.check(page.locator('.main').evaluate('el=>el.scrollTop')==0, f"Desktop: {view} view always opens at the top")
+            if view == "calendar":
+                calendar_fit=page.locator('.calendar-grid>.day-card').evaluate_all("""cards=>cards.map(card=>{const r=card.getBoundingClientRect();const children=[...card.querySelectorAll('.day-row>.slot')].map(el=>el.getBoundingClientRect());return children.every(c=>c.left>=r.left-1&&c.right<=r.right+1)})""")
+                qa.check(bool(calendar_fit) and all(calendar_fit), "Desktop: calendar slots stay inside each day card")
+                calendar_cols=page.locator('.calendar-grid').evaluate("el=>getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length")
+                qa.check(calendar_cols==3, "Desktop: calendar keeps three contained day columns")
             if view == "chemistry":
                 chem_cards=page.locator('.chem-grid>.chem-card').evaluate_all("els=>els.map(el=>el.getBoundingClientRect())")
                 qa.check(len(chem_cards)==2 and chem_cards[0]['width']<chem_cards[1]['width'], "Desktop: chemistry gives the product catalogue the wider column")
