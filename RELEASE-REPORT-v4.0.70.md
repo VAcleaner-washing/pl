@@ -46,3 +46,12 @@ The full legacy `npm run test:e2e` cannot be executed end-to-end in this working
 ## Release hygiene
 
 `dist/`, test artifact folders, visual evidence, `__pycache__`, `.pyc` files and OS/editor junk are excluded from the release ZIP.
+
+## CI dependency correction
+
+- GitHub Actions confirmed the main desktop/mobile browser suite and public-booking resilience suite pass after the consent-selector fixes.
+- The new internal-hero job then failed before assertions with `ModuleNotFoundError: No module named 'bs4'` because the first version of the QA script used BeautifulSoup, while `requirements-ci.txt` intentionally contains only Playwright.
+- Removed BeautifulSoup from `scripts/test-public-inner-heroes.py`; DOM-contract assertions now run through the already-installed Playwright browser.
+- Added `python -m py_compile scripts/test-public-inner-heroes.py` to the browser-source validation step.
+- `requirements-ci.txt` remains unchanged (`playwright==1.61.0` only); no extra CI/runtime dependency was added.
+- Re-ran `test:public-inner-heroes`: 259/259 PASS after removing `bs4`.
