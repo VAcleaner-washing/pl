@@ -83,6 +83,8 @@ jobs:
         run: npm run test:e2e
       - name: Run public booking resilience QA
         run: npm run test:public-booking
+      - name: Run internal public hero visual QA
+        run: npm run test:public-inner-heroes
       - name: Run Smart Guide fit QA
         run: npm run test:smart-guide-fit
       - name: Run mobile client card QA

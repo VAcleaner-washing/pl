@@ -54,25 +54,25 @@ def write_page(path, title, desc, body, graph=None, og_image='/assets/og-home.pn
 
 # ---------- new pages ----------
 about_body='''
-<section class="inner-hero v4-inner-hero"><p class="eyebrow"><span></span> Про VAcleaner</p><h1>Не просто техніка.<br><em>Людина поруч із процесом.</em></h1><p>VAcleaner — локальний сервіс у Полтаві: підбір під задачу, підготовлена техніка, зрозумілий інструктаж і підтримка під час прибирання.</p></section>
+<section class="inner-hero v4-inner-hero"><div><p class="eyebrow"><span></span> Про VAcleaner</p><h1>Не просто техніка.<br><em>Людина поруч із процесом.</em></h1></div><p>VAcleaner — локальний сервіс у Полтаві: підбір під задачу, підготовлена техніка, зрозумілий інструктаж і підтримка під час прибирання.</p></section>
 <section class="v4-story"><div><p class="v4-kicker">ANNA · FOUNDER</p><h2>Сервіс, де не потрібно розбиратися в техніці заздалегідь.</h2><p>Замість «ось апарат — далі самі» ми починаємо з вашої задачі: що саме потрібно очистити, який матеріал, які плями або запахи. Після цього підбираємо техніку й засоби без зайвих позицій.</p><p>Менеджер показує запуск і послідовність роботи, а якщо питання виникає вже вдома — залишається на зв’язку.</p></div><aside class="v4-principles"><article><span>01</span><strong>Підбір без переплати</strong><p>Радимо те, що реально впливає на результат.</p></article><article><span>02</span><strong>Підготовлена техніка</strong><p>Після повернення очищаємо, перевіряємо й комплектуємо заново.</p></article><article><span>03</span><strong>Інструктаж людською мовою</strong><p>Без довгих мануалів і технічного жаргону.</p></article></aside></section>
 <section class="v4-bridge"><div><p class="v4-kicker">Не знаєте, з чого почати?</p><h2>Опишіть задачу — Smart Guide збере рішення.</h2></div><a class="button button-gold" href="/pidbir/">Підібрати рішення →</a></section>'''
 write_page(Path('pro-nas'),'Про VAcleaner — сервіс самостійного прибирання у Полтаві','Хто стоїть за VAcleaner: підбір техніки під задачу, підготовка, інструктаж і підтримка менеджера під час оренди.',about_body,[{"@type":"AboutPage","name":"Про VAcleaner","url":"https://vacleaner.pp.ua/pro-nas/","mainEntity":{"@id":"https://vacleaner.pp.ua/#business"}}])
 
 delivery_body='''
-<section class="inner-hero v4-inner-hero"><p class="eyebrow"><span></span> Доставка й оплата</p><h1>Отримання без<br><em>зайвої невизначеності.</em></h1><p>Самовивіз у Полтаві або доставка по місту. Точні умови бачите до підтвердження бронювання.</p></section>
+<section class="inner-hero v4-inner-hero"><div><p class="eyebrow"><span></span> Доставка й оплата</p><h1>Отримання без<br><em>зайвої невизначеності.</em></h1></div><p>Самовивіз у Полтаві або доставка по місту. Точні умови бачите до підтвердження бронювання.</p></section>
 <section class="v4-service-grid"><article><span>01</span><h2>Самовивіз · 0 грн</h2><p>Самовивіз у Полтаві. Точне місце отримання менеджер повідомить під час опрацювання заявки.</p></article><article><span>02</span><h2>Доставка · 250 грн</h2><p>У межах Полтави. У вартість входить доставка техніки до вас і її повернення назад. У заявці вказується актуальна адреса доставки.</p></article><article><span>03</span><h2>Передплата · 200 грн</h2><p>Вноситься після підтвердження заявки менеджером, закріплює дату та входить у фінальний взаєморозрахунок.</p></article><article><span>04</span><h2>Залоговий платіж</h2><p>Сума залежить від техніки та періоду оренди. Сплачується під час отримання; фактично отриману суму менеджер фіксує при видачі.</p></article></section>
 <section class="v4-note"><strong>Важливо</strong><p>Конкретний час, місце самовивозу, склад комплекту й фінальну суму менеджер підтверджує під час опрацювання заявки.</p><a href="/umovy/">Переглянути правила оренди →</a></section>
 <section class="v4-bridge"><div><p class="v4-kicker">Готові перевірити дату?</p><h2>Оберіть техніку й період онлайн.</h2></div><a class="button button-gold" href="/bronuvannia/">До бронювання →</a></section>'''
 write_page(Path('dostavka'),'Доставка й оплата VAcleaner — Полтава','Самовивіз у Полтаві, доставка по місту, передплата 200 грн і правила залогового платежу для оренди техніки VAcleaner.',delivery_body,[{"@type":"WebPage","name":"Доставка й оплата VAcleaner","url":"https://vacleaner.pp.ua/dostavka/"}])
 
 privacy_body='''
-<section class="inner-hero v4-inner-hero"><p class="eyebrow"><span></span> Конфіденційність</p><h1>Як VAcleaner<br><em>працює з даними.</em></h1><p>Коротко й людською мовою: які дані потрібні для заявки та оренди, навіщо вони використовуються і як звернутися щодо своїх даних.</p></section>
+<section class="inner-hero v4-inner-hero v4-legal-hero"><div><p class="eyebrow"><span></span> Конфіденційність</p><h1>Політика конфіденційності</h1></div><p>які дані потрібні для заявки та оренди, навіщо вони використовуються і як звернутися щодо своїх даних.</p></section>
 <section class="v4-legal"><article><h2>1. Хто обробляє дані</h2><p>Володілець персональних даних — ФОП Невідома Анна Сергіївна, сервіс VAcleaner, Полтава. Контакт для звернень: +38 (095) 391 95 69 та офіційний Instagram VAcleaner.</p></article><article><h2>2. Що ми можемо отримувати</h2><p>ПІБ, номер телефону, Telegram за бажанням, адресу доставки, параметри бронювання, коментар до задачі, історію оренд і платежів. Для оформлення договору новий клієнт може приватно надати фото паспорта або водійського посвідчення.</p></article><article><h2>3. Для чого це потрібно</h2><p>Щоб опрацювати заявку, перевірити доступність, укласти й виконати договір оренди, організувати видачу/доставку, провести взаєморозрахунок, підтримувати клієнта та захищати права сторін. Персональні пропозиції та бонуси через SMS надсилаються лише за окремою необов’язковою згодою або на іншій належній правовій підставі.</p></article><article><h2>4. Аналітика сайту</h2><p>На сайті використовується Google Tag Manager і Google Analytics 4. Вони можуть обробляти технічну інформацію про відвідування, пристрій та взаємодію зі сторінками. Налаштування cookies можна контролювати у своєму браузері.</p></article><article><h2>5. Зберігання й доступ</h2><p>Доступ до даних мають лише уповноважені особи, яким вони потрібні для роботи сервісу. Дані зберігаються не довше, ніж це потрібно для мети обробки, договору, обліку та законного захисту прав сторін.</p></article><article><h2>6. Ваші права</h2><p>Ви можете звернутися щодо інформації про обробку, уточнення або виправлення даних, а також щодо видалення, якщо немає законної підстави для подальшого зберігання. Якщо обробка ґрунтується на згоді, її можна відкликати. Від рекламних SMS можна безкоштовно відмовитися будь-коли через коротку сторінку vacleaner.pp.ua/s або звернувшись до VAcleaner.</p></article><article><h2>7. Передача сервісам</h2><p>Для технічної роботи можуть використовуватися постачальники інфраструктури, аналітики та комунікацій, зокрема Supabase, Google і SendPulse. Для SMS SendPulse отримує номер телефону та текст/технічні дані, необхідні для відправки й статусу доставки. Передаємо лише те, що потрібно для відповідної функції.</p></article><article><h2>8. Оновлення політики</h2><p>Актуальна редакція цієї сторінки діє з 15 серпня 2026 року. При суттєвих змінах текст на цій сторінці буде оновлено.</p></article></section>'''
 write_page(Path('polityka-konfidenciynosti'),'Політика конфіденційності VAcleaner','Політика обробки персональних даних VAcleaner: заявки, бронювання, документи для договору, аналітика сайту та права користувача.',privacy_body,[{"@type":"WebPage","name":"Політика конфіденційності VAcleaner","url":"https://vacleaner.pp.ua/polityka-konfidenciynosti/"}])
 
 blog_body='''
-<section class="inner-hero v4-inner-hero"><p class="eyebrow"><span></span> VAcleaner · Поради</p><h1>Чистий дім<br><em>без випадкових рішень.</em></h1><p>Короткі практичні гайди: плями, запахи, текстиль, матраци й техніка. Без «магічних лайфхаків» — лише зрозуміла послідовність.</p></section>
+<section class="inner-hero v4-inner-hero"><div><p class="eyebrow"><span></span> VAcleaner · Поради</p><h1>Чистий дім<br><em>без випадкових рішень.</em></h1></div><p>Короткі практичні гайди: плями, запахи, текстиль, матраци й техніка. Без «магічних лайфхаків» — лише зрозуміла послідовність.</p></section>
 <section class="v4-blog-grid"><a href="/blog/yak-vyvesty-plyamu-z-dyvana/"><span>Текстиль · 6 хв</span><h2>Як працювати з плямою на дивані</h2><p>Що робити спочатку, чому не варто терти пляму навмання і коли потрібне глибоке промивання.</p><b>Читати →</b></a><a href="/blog/skilky-sokhne-dyvan-pislia-chyshchennia/"><span>Після чищення · 4 хв</span><h2>Скільки сохне диван після глибокого очищення</h2><p>Від чого залежить висихання і як не зіпсувати результат після Puzzi.</p><b>Читати →</b></a><a href="/blog/yak-pochystyty-matrats-pislia-dytyny/"><span>Матрац · 7 хв</span><h2>Як почистити матрац після дитини</h2><p>Окремо про пляму, запах сечі, сухий етап і правильну послідовність засобів.</p><b>Читати →</b></a></section>
 <section class="v4-bridge"><div><p class="v4-kicker">Не хочете розбиратися самі?</p><h2>Smart Guide підбере техніку й засоби під вашу задачу.</h2></div><a class="button button-gold" href="/pidbir/">Пройти підбір →</a></section>'''
 write_page(Path('blog'),'Поради VAcleaner — як чистити диван, матрац, кухню та вікна','Практичні гайди VAcleaner про домашнє глибоке прибирання, плями, запахи, сушіння текстилю та правильний підбір техніки.',blog_body,[{"@type":"CollectionPage","name":"Поради VAcleaner","url":"https://vacleaner.pp.ua/blog/"}])
@@ -143,6 +143,63 @@ main>footer:not(.v4-footer){visibility:hidden}
   }
 }
 
+
+/* v4.0.70 — internal-page hero system.
+   V4 static pages now use the same semantic grid contract as the original Next pages:
+   heading wrapper on the left, supporting copy on the right. Keep desktop editorial,
+   but stop oversized headings / overflow and reduce dead vertical space. */
+@media (min-width:1181px){
+  .inner-hero{
+    grid-template-columns:minmax(0,1.2fr) minmax(300px,.55fr);
+    gap:6vw;
+    min-height:540px;
+    padding:132px 7vw 72px;
+  }
+  .inner-hero.v4-inner-hero{width:100%;max-width:none;margin:0}
+  .inner-hero>div{min-width:0;max-width:960px}
+  .inner-hero h1{max-width:960px;font-size:clamp(56px,5.6vw,92px);line-height:.94}
+  .inner-hero>p{max-width:460px;align-self:end;margin-bottom:4px}
+}
+@media (min-width:901px) and (max-width:1180px){
+  .inner-hero,
+  .inner-hero.v4-inner-hero{
+    width:100%;
+    max-width:none;
+    margin:0;
+    grid-template-columns:minmax(0,1.08fr) minmax(280px,.62fr);
+    gap:5vw;
+    min-height:500px;
+    padding:120px 5vw 64px;
+  }
+  .inner-hero>div{min-width:0}
+  .inner-hero h1,
+  .inner-hero.v4-inner-hero h1,
+  body:has(.terms-grid) .inner-hero h1{
+    min-width:0;
+    max-width:100%;
+    font-size:clamp(52px,5.7vw,68px);
+    line-height:.95;
+  }
+  .inner-hero>p{max-width:410px;margin-bottom:3px}
+}
+@media (min-width:901px){
+  .inner-hero.v4-legal-hero,
+  body:has(.terms-grid) .inner-hero{
+    min-height:390px;
+    padding-top:118px;
+    padding-bottom:54px;
+    grid-template-columns:minmax(0,1fr) minmax(300px,.64fr);
+  }
+  .inner-hero.v4-legal-hero h1,
+  body:has(.terms-grid) .inner-hero h1{
+    max-width:760px;
+    font-size:clamp(46px,4.6vw,68px);
+    line-height:1;
+    letter-spacing:-.05em;
+  }
+}
+
+
 '''
 (ROOT/'assets'/'site-v400.css').write_text(css,encoding='utf-8')
 
@@ -179,7 +236,7 @@ if old in q:q=q.replace(old,new)
 quiz.write_text(q,encoding='utf-8')
 
 # ---------- rebuild pidbir as full structural page, keep modal opener ----------
-pid_body='''<section class="inner-hero v4-inner-hero"><p class="eyebrow"><span></span> Smart Guide · ~30 секунд</p><h1>Що почистити?<br><em>Підберемо рішення.</em></h1><p>Позначте одну або кілька зон. Поставимо лише ті уточнення, які реально впливають на техніку або засіб, а фінал одразу веде в передзаповнене бронювання.</p></section><section class="v4-bridge"><div><p class="v4-kicker">Підбір відкриється автоматично</p><h2>Без реєстрації й без списку «всього на світі».</h2></div><button type="button" class="button button-gold" onclick="location.reload()">Почати підбір →</button></section>'''
+pid_body='''<section class="inner-hero v4-inner-hero"><div><p class="eyebrow"><span></span> Smart Guide · ~30 секунд</p><h1>Що почистити?<br><em>Підберемо рішення.</em></h1></div><p>Позначте одну або кілька зон. Поставимо лише ті уточнення, які реально впливають на техніку або засіб, а фінал одразу веде в передзаповнене бронювання.</p></section><section class="v4-bridge"><div><p class="v4-kicker">Підбір відкриється автоматично</p><h2>Без реєстрації й без списку «всього на світі».</h2></div><button type="button" class="button button-gold" onclick="location.reload()">Почати підбір →</button></section>'''
 pid_doc=page_doc('Підібрати рішення для прибирання — VAcleaner','Розумний підбір техніки й засобів VAcleaner під диван, матрац, килим, кухню, ванну або вікна. Результат веде у передзаповнене бронювання.','/pidbir/',pid_body,[{"@type":"WebPage","name":"Підбір рішення VAcleaner","url":"https://vacleaner.pp.ua/pidbir/"}])
 pid_doc=pid_doc.replace('</body>',f'<script defer src="/assets/public-quiz.js?v={BUILD}"></script></body>')
 (ROOT/'pidbir'/'index.html').write_text(pid_doc,encoding='utf-8')

@@ -97,3 +97,59 @@ main>footer:not(.v4-footer){visibility:hidden}
 }
 .v4-picker-bridge--packages{margin-top:-80px}
 @media(max-width:620px){.v4-picker-bridge--packages{margin-top:-58px}}
+
+
+/* v4.0.70 — internal-page hero system.
+   V4 static pages now use the same semantic grid contract as the original Next pages:
+   heading wrapper on the left, supporting copy on the right. Keep desktop editorial,
+   but stop oversized headings / overflow and reduce dead vertical space. */
+@media (min-width:1181px){
+  .inner-hero{
+    grid-template-columns:minmax(0,1.2fr) minmax(300px,.55fr);
+    gap:6vw;
+    min-height:540px;
+    padding:132px 7vw 72px;
+  }
+  .inner-hero.v4-inner-hero{width:100%;max-width:none;margin:0}
+  .inner-hero>div{min-width:0;max-width:960px}
+  .inner-hero h1{max-width:960px;font-size:clamp(56px,5.6vw,92px);line-height:.94}
+  .inner-hero>p{max-width:460px;align-self:end;margin-bottom:4px}
+}
+@media (min-width:901px) and (max-width:1180px){
+  .inner-hero,
+  .inner-hero.v4-inner-hero{
+    width:100%;
+    max-width:none;
+    margin:0;
+    grid-template-columns:minmax(0,1.08fr) minmax(280px,.62fr);
+    gap:5vw;
+    min-height:500px;
+    padding:120px 5vw 64px;
+  }
+  .inner-hero>div{min-width:0}
+  .inner-hero h1,
+  .inner-hero.v4-inner-hero h1,
+  body:has(.terms-grid) .inner-hero h1{
+    min-width:0;
+    max-width:100%;
+    font-size:clamp(52px,5.7vw,68px);
+    line-height:.95;
+  }
+  .inner-hero>p{max-width:410px;margin-bottom:3px}
+}
+@media (min-width:901px){
+  .inner-hero.v4-legal-hero,
+  body:has(.terms-grid) .inner-hero{
+    min-height:390px;
+    padding-top:118px;
+    padding-bottom:54px;
+    grid-template-columns:minmax(0,1fr) minmax(300px,.64fr);
+  }
+  .inner-hero.v4-legal-hero h1,
+  body:has(.terms-grid) .inner-hero h1{
+    max-width:760px;
+    font-size:clamp(46px,4.6vw,68px);
+    line-height:1;
+    letter-spacing:-.05em;
+  }
+}
