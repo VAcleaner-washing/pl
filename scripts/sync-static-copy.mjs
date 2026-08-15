@@ -12,6 +12,22 @@ const textFiles=dir=>{
   if(!fs.existsSync(full))return[];
   return fs.readdirSync(full).filter(name=>name.endsWith('.txt')).map(name=>path.join(dir,name));
 };
+
+const publicTextFiles=()=>{
+  const skip=new Set(['admin','supabase','scripts','.github','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','__pycache__']);
+  const out=[];
+  const walk=(dir,rel='')=>{
+    for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+      if(skip.has(entry.name))continue;
+      const nextRel=rel?path.join(rel,entry.name):entry.name;
+      const full=path.join(dir,entry.name);
+      if(entry.isDirectory())walk(full,nextRel);
+      else if(/\.(?:html|txt|js)$/.test(entry.name))out.push(nextRel);
+    }
+  };
+  walk(root);
+  return out;
+};
 const apply=(files,replacements)=>{
   for(const file of existing(files)){
     let value=read(file);
@@ -19,6 +35,14 @@ const apply=(files,replacements)=>{
     write(file,value);
   }
 };
+
+
+// Shared public shell parity: the 30-second picker name must never fall back to the old footer label.
+apply(publicTextFiles(),[
+  ['<a href="/pidbir/">Підбір рішення</a>','<a href="/pidbir/">Підбір за 30 сек</a>'],
+  ['children:"Підбір рішення"','children:"Підбір за 30 сек"'],
+  ['children\":\"Підбір рішення\"','children\":\"Підбір за 30 сек\"'],
+]);
 
 const homeFiles=['index.html','_next/static/chunks/01pb0x0z72e41.js','index.txt','__next.__PAGE__.txt','__next._full.txt','__next._head.txt','__next._index.txt','__next._tree.txt'];
 apply(homeFiles,[
@@ -33,7 +57,25 @@ apply(homeFiles,[
   ['label:"Генеральне"','label:"Генеральне прибирання"'],
   ['Місце, де ви спите</small><h3>Матрац</h3>','Пилові кліщі й алергени</small><h3>Глибоке очищення матраца</h3>'],
   ['З Puzzi завжди видаємо 8 порцій хімії: після повернення оплачуєте лише використані по 50 грн','З Puzzi видаємо 8 запечатаних порцій хімії. Вони не входять у вартість оренди: після повернення оплачуєте лише використані по 50 грн'],
+  ['Не знаєте, що підійде?','Кілька задач одразу?'],
+  ['Опишіть задачу одним повідомленням — без бронювання й зобов’язань.','Відповідайте на кілька питань — підберемо техніку й комплект приблизно за 30 секунд.'],
+  ['Запитати менеджера','Підібрати за 30 сек'],
 ]);
+
+// The home choice helper used Telegram as its historical action. Keep the server HTML and hydrated chunk on the same /pidbir/ target.
+{
+  const file='index.html';
+  let html=read(file);
+  html=html.replace(/(<div class="v21-choice-help">[\s\S]*?<a )href="[^"]+" rel="noreferrer" target="_blank"/, '$1href="/pidbir/"');
+  write(file,html);
+}
+{
+  const file='_next/static/chunks/01pb0x0z72e41.js';
+  let js=read(file);
+  js=js.replace('(0,s.jsxs)("a",{href:r.telegram,target:"_blank",rel:"noreferrer",children:["Підібрати за 30 сек ",','(0,s.jsxs)("a",{href:"/pidbir/",children:["Підібрати за 30 сек ",');
+  write(file,js);
+}
+
 
 const packageFiles=['komplekty/index.html','_next/static/chunks/09z99witl-xo-v4041.js',...textFiles('komplekty')];
 apply(packageFiles,[
@@ -122,7 +164,14 @@ const textileWindowsBooking=`<button aria-pressed="false" class="" type="button"
 }
 
 const solutionsFiles=['rishennia/index.html',...textFiles('rishennia')];
-apply(solutionsFiles,[['Скло без драбини','Менше ручної роботи зі склом']]);
+apply(solutionsFiles,[
+  ['Скло без драбини','Менше ручної роботи зі склом'],
+  ['Не знаєте, що підійде?','Кілька задач одразу?'],
+  ['Надішліть фото або коротко опишіть задачу — ми зберемо рішення.','Відповідайте на кілька питань — підберемо техніку й комплект під усі зони.'],
+  ['href="/kontakty">Як зв’язатися ','href="/pidbir/">Підібрати за 30 сек '],
+  ['href":"/kontakty","children":["Як зв’язатися ','href":"/pidbir/","children":["Підібрати за 30 сек '],
+  ['href":"/kontakty","children":["Як зв’язатися ','href":"/pidbir/","children":["Підібрати за 30 сек '],
+]);
 
 const solutionPages={
   textile:{
