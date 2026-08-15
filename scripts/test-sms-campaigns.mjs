@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const read=f=>fs.readFileSync(f,'utf8');
 let pass=0,fail=0;const check=(ok,msg)=>{if(ok){pass++;console.log('PASS:',msg)}else{fail++;console.error('FAIL:',msg)}};
-const admin=read('assets/admin-v250.js'),adminCss=read('assets/admin-v250.css'),publicJs=read('assets/public-experience.js'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),consent=read('supabase/functions/vacleaner-sms-consent-v1/index.ts'),campaign=read('supabase/functions/vacleaner-campaigns-v1/index.ts'),migration=read('supabase/migrations/20260815223500_vacleaner_sms_reactivation_consent_v4069.sql'),privacy=read('polityka-konfidenciynosti/index.html'),stop=read('s/index.html');
+const admin=read('assets/admin-v250.js'),adminCss=read('assets/admin-v250.css'),publicJs=read('assets/public-experience.js'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),consent=read('supabase/functions/vacleaner-sms-consent-v1/index.ts'),campaign=read('supabase/functions/vacleaner-campaigns-v1/index.ts'),migration=read('supabase/migrations/20260815223500_vacleaner_sms_reactivation_consent_v4069.sql'),privacy=read('polityka-konfidenciynosti/index.html'),stop=read('s/index.html'),e2e=read('scripts/e2e_smoke.py');
 check(publicJs.includes('Отримувати персональні пропозиції та бонуси VAcleaner'),'public booking injects optional marketing consent');
 check(publicJs.includes('__VAC_MARKETING_SMS_CONSENT__=false'),'marketing consent defaults to false');
 check(chunk.includes('vacleaner-sms-consent-v1')&&chunk.includes('action:"opt_in"')&&chunk.includes('bookingCode:n.bookingCode'),'successful booking records explicit opt-in through dedicated endpoint');
@@ -24,4 +24,6 @@ check(migration.includes('marketing_sms_consent boolean not null default false')
 check(migration.includes('enable row level security')&&migration.includes('vacleaner_sms_recipients_client_deny'),'SMS audit tables are protected by RLS');
 check(privacy.includes('SendPulse')&&privacy.includes('vacleaner.pp.ua/s')&&privacy.includes('15 серпня 2026'),'privacy page documents SMS processing and opt-out');
 check(!admin.includes('SENDPULSE_API_KEY='),'SendPulse secret is not embedded in admin frontend');
+check(!e2e.includes("#booking-contact .booking-consent input")&&!e2e.includes('page.locator(".booking-consent span")'),'E2E has no ambiguous booking-consent selectors');
+check(e2e.includes('.booking-consent:not(.vx-marketing-consent) > input')&&e2e.includes('.vx-marketing-consent > input'),'E2E addresses legal and marketing consent checkboxes separately');
 console.log(JSON.stringify({passed:pass,failed:fail},null,2));if(fail)process.exit(1);

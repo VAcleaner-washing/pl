@@ -642,7 +642,7 @@
   function enhanceMarketingConsent(){
     const form=document.querySelector('.booking-form');
     if(!form)return;
-    const required=form.querySelector('.booking-consent');
+    const required=form.querySelector('.booking-consent:not(.vx-marketing-consent)');
     if(!required||form.querySelector('.vx-marketing-consent'))return;
     if(typeof globalThis.__VAC_MARKETING_SMS_CONSENT__!=='boolean')globalThis.__VAC_MARKETING_SMS_CONSENT__=false;
     const label=document.createElement('label');

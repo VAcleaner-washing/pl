@@ -589,7 +589,11 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check("Обрати дату" not in cta.inner_text(), "Promo entry never regresses CTA to date")
         page.wait_for_timeout(420)
         checks.check("Обрати дату" not in cta.inner_text(), "Promo estimate refresh keeps CTA on contacts")
-        page.locator('#booking-contact .booking-consent input').check()
+        legal_consent_input = page.locator('#booking-contact .booking-consent:not(.vx-marketing-consent) > input')
+        marketing_consent_input = page.locator('#booking-contact .vx-marketing-consent > input')
+        checks.check(legal_consent_input.count() == 1, "Mobile booking has exactly one required legal consent checkbox")
+        checks.check(marketing_consent_input.count() == 1 and not marketing_consent_input.is_checked(), "Optional marketing consent is separate and unchecked by default")
+        legal_consent_input.check()
         page.wait_for_timeout(50)
         checks.check("Надіслати заявку" in cta.inner_text(), "Completed contacts expose final submit CTA")
 

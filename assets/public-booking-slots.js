@@ -105,7 +105,7 @@ function renderDeposit(){
 }
 
 function renderConsent(){
-  const span=document.querySelector('.booking-consent span');
+  const span=document.querySelector('.booking-consent:not(.vx-marketing-consent) > span');
   if(!span||span.dataset.vxConsentFixed==='1')return;
   const terms=document.createElement('a');
   terms.href='/umovy/';terms.target='_blank';terms.rel='noopener';terms.textContent='умови бронювання';
