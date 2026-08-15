@@ -17,8 +17,8 @@
   const EXTRA_INFO={
     neutralix:{label:'Neutralix · 250 мл',price:200},
     odour_zero:{label:'Odour Zero Spring · 250 мл',price:250},
-    spot_lifter:{label:'Універсальний плямовивідник · 50 мл',price:100},
-    stain_exit:{label:'Плямовивідник від кави, вина та ягід · 30 мл',price:100},
+    spot_lifter:{label:'VA SPOT FIX · 50 мл',price:100},
+    stain_exit:{label:'VA STAIN OX · 30 мл',price:100},
     shower_care:{label:'Shower Care · 250 мл',price:250},
     scalex_pro:{label:'Scalex Pro · 250 мл',price:250},
     eco_clean:{label:'Eco Clean · 250 мл',price:250},
@@ -92,7 +92,7 @@
       ]
     }];
     if(hasTextile())list.push({id:'textileProblems',title:'Що є на текстилі?',note:'Позначте все, що бачите — так підберемо і техніку, і потрібні засоби.',type:'multi',options:[
-      ['common_stain','Їжа, жир, косметика або невідома пляма','Підберемо універсальний плямовивідник'],['color_stain','Кава, чай, вино, ягоди або сік','Для кольорових органічних слідів'],['odor','Неприємний запах','Сеча, домашні тварини або інші стійкі запахи'],['dry_debris','Пил, шерсть, пилові кліщі чи алергени','Додамо Jimmy: вібраційна щітка, UV-світло й нагрівання до 60 °C'],['none','Нічого з цього','Потрібне лише загальне очищення']
+      ['common_stain','Їжа, жир, косметика або невідома пляма','Підберемо універсальний плямовивідник'],['color_stain','Кава, чай, вино, ягоди або сік','Для стійких плям від напоїв і харчових продуктів'],['odor','Неприємний запах','Сеча, домашні тварини або інші стійкі запахи'],['dry_debris','Пил, шерсть, пилові кліщі чи алергени','Додамо Jimmy: вібраційна щітка, UV-світло й нагрівання до 60 °C'],['none','Нічого з цього','Потрібне лише загальне очищення']
     ]});
     if(hasTextile()&&state.textileProblems.includes('odor'))list.push({id:'textileOdor',title:'Який саме запах?',note:'Так збережемо чинний точний підбір Neutralix або Odour Zero.',type:'single',options:[
       ['urine','Сеча','Дитина або тварина'],['pet','Домашні тварини','Запах у текстилі або оббивці'],['musty','Затхлість / вогкість',''],['smoke','Тютюн / дим',''],['food','Їжа / кухня',''],['unknown','Не можу визначити','']
@@ -182,9 +182,9 @@
       if(['musty','smoke','food'].includes(state.textileOdor))add('odour_zero','Для загального стійкого запаху рекомендуємо Odour Zero.');
       else add('neutralix',state.textileOdor==='urine'?'Для запаху сечі в текстилі пріоритетно рекомендуємо Neutralix.':'Для локального стійкого запаху в текстилі рекомендуємо Neutralix.');
     }
-    if(state.textileProblems.includes('common_stain'))add('spot_lifter','VA SPOT FIX — для плям від їжі, жиру, косметики та забруднень невідомого походження.');
-    if(state.textileProblems.includes('color_stain'))add('stain_exit','VA STAIN OX — для кольорових органічних слідів від кави, чаю, вина, ягід і соків.');
-    if(state.textileProblems.includes('common_stain')&&state.textileProblems.includes('color_stain'))warnings.push('Використовуйте засоби окремо: спочатку VA SPOT FIX, потім ретельно промийте поверхню. VA STAIN OX наносьте лише на кольоровий слід, що залишився, і після нього знову промийте поверхню.');
+    if(state.textileProblems.includes('common_stain'))add('spot_lifter','VA SPOT FIX — універсальний плямовивідник для локальної обробки свіжих і змішаних забруднень: жирні сліди, їжа, косметика та побутові плями.');
+    if(state.textileProblems.includes('color_stain'))add('stain_exit','VA STAIN OX — для стійких плям від напоїв і харчових продуктів: кава, чай, червоне вино, соки та ягоди.');
+    if(state.textileProblems.includes('common_stain')&&state.textileProblems.includes('color_stain'))warnings.push('Використовуйте засоби окремо: спочатку VA SPOT FIX, потім ретельно промийте поверхню. VA STAIN OX наносьте лише на стійку пляму, що залишилась, і після нього знову промийте поверхню.');
     if(state.textileProblems.some(x=>['common_stain','color_stain'].includes(x)))warnings.push('Перед обробкою протестуйте засіб на невеликій непомітній ділянці. Для делікатної, нестійко пофарбованої або невідомої тканини спочатку погодьте засіб із менеджером.');
     if(state.kitchenProblems.includes('odor'))add('odour_zero','Є загальний кухонний запах — Odour Zero нейтралізує запахи в приміщенні та на стійких поверхнях.');
     if(state.kitchenProblems.includes('daily'))add('eco_clean','Для регулярного кухонного бруду достатньо м’якого універсального Eco Clean.');
@@ -350,7 +350,7 @@
     if(!['/rishennia/textile','/rishennia/mattress','/tekhnika/karcher-puzzi-8-1'].includes(path)||document.querySelector('[data-vq-stain-care]'))return;
     const target=document.querySelector('.final-cta,.puzzi-book,.mini-process');if(!target)return;
     const section=document.createElement('section');section.className='vq-stain-care';section.dataset.vqStainCare='1';
-    section.innerHTML=`<div class="vq-stain-care__head"><div><p>Точкова допомога до Puzzi</p><h2>Потрібна додаткова хімія?</h2></div><span>Додайте потрібний засіб до бронювання — його вартість одразу ввійде в замовлення.</span></div><div class="vq-stain-care__grid"><article class="vq-stain-product is-blue"><div class="vq-stain-product__top"><span>VA SPOT FIX</span><b>50 мл · 100 грн</b></div><h3>Універсальний плямовивідник</h3><p>Для локальних плям від їжі, напоїв, жиру, косметики та забруднень невідомого походження на диванах, матрацах, невеликих килимах і текстильній оббивці.</p><details><summary>Як використати</summary><p>Протестуйте на непомітній ділянці. Злегка обробіть пляму, промокніть білою серветкою від країв до центру, після чого ретельно промийте й витягніть засіб миючим пилососом.</p><small>Не додавайте в бак і не змішуйте з іншими засобами. Результат залежить від походження, давності плями та типу тканини.</small></details><div class="vq-stain-product__bottom"><a href="/bronuvannia?from=extras&product=puzzi&extras=spot_lifter">Додати до бронювання →</a></div></article><article class="vq-stain-product is-berry"><div class="vq-stain-product__top"><span>VA STAIN OX</span><b>30 мл · 100 грн</b></div><h3>Плямовивідник від кави, вина та ягід</h3><p>Для кольорових органічних слідів від кави, чаю, вина, ягід і соків, які можуть залишитися після звичайного очищення текстилю.</p><details><summary>Як використати</summary><p>Спочатку перевірте засіб на непомітній ділянці та переконайтеся у стійкості барвника. Нанесіть кілька крапель лише на пляму. Після її освітлення одразу ретельно промийте й витягніть засіб миючим пилососом.</p><small>Не використовуйте на делікатній або невідомій тканині без погодження. Не змішуйте з VA SPOT FIX і не давайте засобу висихати.</small></details><div class="vq-stain-product__bottom"><a href="/bronuvannia?from=extras&product=puzzi&extras=stain_exit">Додати до бронювання →</a></div></article></div><div class="vq-stain-care__note"><strong>Потрібні обидва?</strong><span>Використовуйте їх окремо та ретельно промивайте тканину між етапами.</span></div>`;
+    section.innerHTML=`<div class="vq-stain-care__head"><div><p>Точкова допомога до Puzzi</p><h2>Потрібна додаткова хімія?</h2></div><span>Додайте потрібний засіб до бронювання — його вартість одразу ввійде в замовлення.</span></div><div class="vq-stain-care__grid"><article class="vq-stain-product is-blue"><div class="vq-stain-product__top"><span>VA professional spot care</span><b>50 мл · 100 грн</b></div><h3>VA SPOT FIX</h3><p>Універсальний плямовивідник для локальної обробки свіжих і змішаних забруднень. Жирні сліди · їжа · косметика · побутові плями.</p><details><summary>Як використати</summary><p>Протестуйте на непомітній ділянці. Злегка обробіть пляму, промокніть білою серветкою від країв до центру, після чого ретельно промийте й витягніть засіб миючим пилососом.</p><small>Не додавайте в бак і не змішуйте з іншими засобами. Результат залежить від походження, давності плями та типу тканини.</small></details><div class="vq-stain-product__bottom"><a href="/bronuvannia?from=extras&product=puzzi&extras=spot_lifter">Додати до бронювання →</a></div></article><article class="vq-stain-product is-berry"><div class="vq-stain-product__top"><span>VA professional spot care</span><b>30 мл · 100 грн</b></div><h3>VA STAIN OX</h3><p>Для стійких плям від напоїв і харчових продуктів. Кава · чай · червоне вино · соки · ягоди.</p><details><summary>Як використати</summary><p>Спочатку перевірте засіб на непомітній ділянці та переконайтеся у стійкості барвника. Нанесіть кілька крапель лише на пляму. Після її освітлення одразу ретельно промийте й витягніть засіб миючим пилососом.</p><small>Не використовуйте на делікатній або невідомій тканині без погодження. Не змішуйте з VA SPOT FIX і не давайте засобу висихати.</small></details><div class="vq-stain-product__bottom"><a href="/bronuvannia?from=extras&product=puzzi&extras=stain_exit">Додати до бронювання →</a></div></article></div><div class="vq-stain-care__note"><strong>Потрібні обидва?</strong><span>Використовуйте їх окремо та ретельно промивайте тканину між етапами.</span></div>`;
     const spotFix=section.querySelector('.is-blue details');
     if(spotFix){spotFix.querySelector('p').textContent=SPOT_FIX_USE;spotFix.querySelector('small').textContent='Спочатку протестуйте засіб на непомітній ділянці. Не додавайте його в бак Puzzi. Результат залежить від походження, давності плями та типу тканини.';}
     const stainOx=section.querySelector('.is-berry details');
@@ -363,7 +363,7 @@
     if(path!=='/bronuvannia')return;
     const root=document.querySelector('.booking-extras');if(!root)return;
     const intro=root.querySelector(':scope > p');
-    if(intro)intro.textContent='Засоби купуються окремо. Якщо додали засіб до бронювання — його вартість одразу входить у замовлення.';
+    const heading=root.querySelector('h3');if(heading)heading.textContent='Професійні засоби';if(intro)intro.textContent='Підберіть під конкретне забруднення · засоби купуються окремо й залишаються у вас.';
     root.querySelector('.vq-extra-choice')?.remove();
   }
 

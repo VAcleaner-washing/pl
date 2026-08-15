@@ -266,39 +266,49 @@
         ]
       },
       "shower_care": {
-        "label": "Shower Care",
+        "label": "Shower Care · 250 мл",
         "price": 250,
         "aliases": [
           "Shower Care"
-        ]
+        ],
+        "volumeMl": 250,
+        "shortDescription": "Мильний і вапняний наліт у душовій, ванній та на сантехніці."
       },
       "soft_degreaser": {
-        "label": "Soft Degreaser",
+        "label": "Soft Degreaser · 250 мл",
         "price": 250,
         "aliases": [
           "Soft Degreaser"
-        ]
+        ],
+        "volumeMl": 250,
+        "shortDescription": "Жирові забруднення на кухонних і твердих поверхнях."
       },
       "grill_force": {
-        "label": "Grill Force",
+        "label": "Grill Force · 250 мл",
         "price": 250,
         "aliases": [
           "Grill Force"
-        ]
+        ],
+        "volumeMl": 250,
+        "shortDescription": "Нагар і стійкий пригорілий жир у духовках, на грилях і решітках."
       },
       "scalex_pro": {
-        "label": "Scalex Pro",
+        "label": "Scalex Pro · 250 мл",
         "price": 250,
         "aliases": [
           "Scalex Pro"
-        ]
+        ],
+        "volumeMl": 250,
+        "shortDescription": "Водний камінь, іржа та стійкі мінеральні відкладення."
       },
       "eco_clean": {
-        "label": "Eco Clean",
+        "label": "Eco Clean · 250 мл",
         "price": 250,
         "aliases": [
           "Eco Clean"
-        ]
+        ],
+        "volumeMl": 250,
+        "shortDescription": "Щоденні забруднення на сталі, склі, пластику та кераміці."
       },
       "carp_deta": {
         "label": "Плямовивідник Carp-Deta 30 мл",
@@ -316,7 +326,7 @@
         "label": "VA SPOT FIX · 50 мл",
         "price": 100,
         "volumeMl": 50,
-        "shortDescription": "Для більшості локальних плям від їжі, напоїв, жиру, косметики та побутових забруднень.",
+        "shortDescription": "Універсальний плямовивідник для локальної обробки свіжих і змішаних забруднень. Жирні сліди · їжа · косметика · побутові плями.",
         "aliases": [
           "VA SPOT FIX · 50 мл",
           "VA SPOT FIX",
@@ -331,7 +341,7 @@
         "label": "VA STAIN OX · 30 мл",
         "price": 100,
         "volumeMl": 30,
-        "shortDescription": "Кислотний плямовивідник pH 3,5 для органічних слідів від кави, чаю, вина, соків та інших харчових продуктів.",
+        "shortDescription": "Для стійких плям від напоїв і харчових продуктів. Кава · чай · червоне вино · соки · ягоди.",
         "aliases": [
           "Плямовивідник від кави, вина та ягід · 30 мл",
           "VA STAIN OX · 30 мл",
@@ -345,11 +355,13 @@
         ]
       },
       "glass_perfect": {
-        "label": "Glass Perfect Care",
+        "label": "Glass Perfect Care · 250 мл",
         "price": 150,
         "aliases": [
           "Glass Perfect Care"
-        ]
+        ],
+        "volumeMl": 250,
+        "shortDescription": "Скло, дзеркала та глянцеві поверхні без розводів."
       }
     }
   }

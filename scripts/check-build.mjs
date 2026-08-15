@@ -253,7 +253,7 @@ if(/refund_amount\s*:\s*cleanInt\(body\.refundAmount|due_amount\s*:\s*cleanInt\(
 for(const token of ['settlementConfirmation(body, finance)','status: "completed"','cleanInt(body.usedPackets, packetLimit)'])if(!adminEdge.includes(token))errors.push(`edge settlement guard missing: ${token}`);
 for(const token of ['export function settlementFromBooking','export function selectedExtrasAmount','export function settlementConfirmation','Math.min(2, usedPackets)','legacyRefund !== finance.refundAmount','settlement_mismatch'])if(!settlementModule.includes(token))errors.push(`settlement module guard missing: ${token}`);
 
-for(const token of ['code:"spot_lifter"','Універсальний плямовивідник · 50 мл','code:"stain_exit"','Плямовивідник від кави, вина та ягід · 30 мл'])if(!publicReactBundle.includes(token))errors.push(`stain-care product is missing from the hydrated public booking bundle: ${token}`);
+for(const token of ['code:"spot_lifter"','VA SPOT FIX · 50 мл','code:"stain_exit"','VA STAIN OX · 30 мл'])if(!publicReactBundle.includes(token))errors.push(`stain-care product is missing from the hydrated public booking bundle: ${token}`);
 if(publicReactBundle.includes('code:"carp_deta"')||bookingHtml.includes('Carp-Deta'))errors.push('legacy Carp-Deta remains in the public booking experience');
 if(!bookingEdgeV5.includes('selected_items: selected.items.map')||!bookingEdgeV5.includes('db.from("vacleaner_booking_resources").insert(resources)'))errors.push('booking v5 does not persist extras/resources directly');
 if(!adminEdge.includes('normalizeSelectedExtras(body.selectedExtras')||!adminEdge.includes('extras_amount: selectedAmount'))errors.push('admin v3 does not persist selected extras independently of admin v2');
@@ -287,5 +287,33 @@ for(const fn of ['vacleaner-booking-v5','vacleaner-admin-bookings-v3']){
 if(!bookingEdgeV5.includes('depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow'))errors.push('booking v5 deposit does not include pickup/return windows');
 if(!adminEdge.includes('calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow'))errors.push('admin v3 deposit does not include pickup/return windows');
 if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale Saturday→Sunday 2000 UAH E2E rule still present');
+
+// Public chemistry is a presentation contract independent of legacy aliases and backend catalog text.
+{
+  const booking=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'utf8');
+  const react=publicReactBundle;
+  const quiz=fs.readFileSync(path.join(root,'assets','public-quiz.js'),'utf8');
+  const required=[
+    'Професійні засоби',
+    'Підберіть під конкретне забруднення · засоби купуються окремо й залишаються у вас.',
+    'VA SPOT FIX · 50 мл',
+    'VA STAIN OX · 30 мл',
+    'Shower Care · 250 мл',
+    'Soft Degreaser · 250 мл',
+    'Grill Force · 250 мл',
+    'Scalex Pro · 250 мл',
+    'Eco Clean · 250 мл',
+    'Glass Perfect Care · 250 мл'
+  ];
+  for(const token of required){
+    if(!booking.includes(token))errors.push(`public booking chemistry copy missing from server HTML: ${token}`);
+    if(!react.includes(token))errors.push(`public booking chemistry copy missing from hydrated bundle: ${token}`);
+  }
+  for(const legacy of ['label:"Універсальний плямовивідник · 50 мл"','label:"Плямовивідник від кави, вина та ягід · 30 мл"']){
+    if(react.includes(legacy))errors.push(`legacy chemistry title can flash during hydration: ${legacy}`);
+  }
+  if(!quiz.includes('<h3>VA SPOT FIX</h3>')||!quiz.includes('<h3>VA STAIN OX</h3>'))errors.push('Smart Guide stain-care cards do not use VA product names as the primary heading');
+}
+
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
 console.log(`Build ${release.version} passed ${files.length} file checks. Shared config ${expected}.`);

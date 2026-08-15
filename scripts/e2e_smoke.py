@@ -347,7 +347,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(response is not None and response.ok, "Booking page is served over HTTP")
         page.wait_for_selector(".booking-summary", state="attached")
         expect(page.locator(".booking-summary")).to_be_visible()
-        spot = page.locator(".booking-extras label", has_text="Універсальний плямовивідник")
+        spot = page.locator(".booking-extras label", has_text="VA SPOT FIX")
         stain = page.locator(".booking-extras label", has_text="VA STAIN OX")
         checks.check(spot.count() == 1 and "100" in spot.locator("strong").inner_text(), "universal stain remover is shown once at 100 UAH")
         checks.check(stain.count() == 1 and "100" in stain.locator("strong").inner_text(), "VA STAIN OX is shown once at 100 UAH")

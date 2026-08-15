@@ -32,3 +32,13 @@
 /* v3.0.85 — pickup location is confirmed by manager after request processing. */
 .vx-pickup-location-note{margin:10px 0 0;padding:11px 13px;border:1px solid rgba(202,162,97,.18);border-radius:12px;background:rgba(202,162,97,.055);color:#b8b0a5;font-size:12px;line-height:1.45}
 .vx-pickup-location-note::before{content:"✦";margin-right:7px;color:#d8ae6b}
+
+/* v4.0.60 — canonical professional chemistry presentation. */
+.booking-extras label.is-va-stain-care{
+  border-color:color-mix(in srgb,var(--gold,#b8945d) 58%,transparent);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--gold,#b8945d) 9%,transparent),transparent 52%);
+}
+.booking-extras label.is-va-stain-care b::before{
+  content:"VA PROFESSIONAL SPOT CARE";display:block;margin-bottom:4px;
+  color:var(--gold,#b8945d);font-size:8px;line-height:1.2;letter-spacing:.11em;font-weight:700;
+}
