@@ -5,6 +5,7 @@ import vm from 'node:vm';
 const runtime=fs.readFileSync(new URL('../assets/admin-v250.js',import.meta.url),'utf8');
 const edge=fs.readFileSync(new URL('../supabase/functions/vacleaner-admin-data-v1/index.ts',import.meta.url),'utf8');
 const migration=fs.readFileSync(new URL('../supabase/migrations/20260812193000_vacleaner_financial_control.sql',import.meta.url),'utf8');
+const adminCss=fs.readFileSync(new URL('../assets/admin-v250.css',import.meta.url),'utf8');
 
 function functionSource(name){
   const marker=`function ${name}(`,start=runtime.indexOf(marker);assert.ok(start>=0,`missing helper: ${name}`);
@@ -26,5 +27,6 @@ assert.equal(summary.margin,80,'operating margin formula is wrong');
 for(const token of ['save_expense','archive_expense','INVESTMENT_CATEGORIES','spentOn>new Date().toISOString().slice(0,10)','is("archived_at",null)'])assert.ok(edge.includes(token),`Edge expense safety contract missing: ${token}`);
 for(const token of ['enable row level security','vacleaner_expenses_client_deny','revoke all on public.vacleaner_expenses','grant select,insert,update on public.vacleaner_expenses to service_role','archived_at','cost_type = \'investment\''])assert.ok(migration.includes(token),`database expense safety contract missing: ${token}`);
 for(const token of ['Фінансовий контроль','Операційний прибуток','Інвестиції окремо','прибуток навмисно показується як «—»','Амортизація техніки поки не нараховується'])assert.ok(runtime.includes(token),`financial UX contract missing: ${token}`);
+for(const token of ['.expense-form .field input[type=\"date\"]','max-inline-size:100%','overflow:hidden','.expense-form .expense-money input:focus','box-shadow:none','.expense-form .expense-money:focus-within'])assert.ok(adminCss.includes(token),`expense mobile containment contract missing: ${token}`);
 
 console.log('Financial control formulas, backend validation and RLS contract passed.');

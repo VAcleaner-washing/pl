@@ -701,6 +701,23 @@ def auth_suite(browser: Browser, qa: QA) -> None:
 
 
 
+def expense_form_controls_suite(browser: Browser, qa: QA) -> None:
+    css=(ROOT/'assets/admin-v250.css').read_text(encoding='utf-8')
+    html="""<!doctype html><html><head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'><style>:root{--line:rgba(255,255,255,.08);--muted:#8d9498;--gold-2:#efc77f}</style></head><body><form class='modal-form expense-form'><div class='expense-form-scroll'><section class='modal-section'><div class='fields'><label class='field'><span>Дата оплати</span><input name='spentOn' type='date' value='2026-08-15'></label><label class='field wide expense-amount-field'><span>Сума</span><div class='expense-money'><i>₴</i><input name='amount' type='number' inputmode='numeric' value='700'><em>грн</em></div></label></div></section></div></form></body></html>"""
+    for width in (320,390,430):
+        page=browser.new_page(viewport={"width":width,"height":844},is_mobile=True)
+        try:
+            page.set_content(html);page.add_style_tag(content=css)
+            geometry=page.evaluate("""()=>{const d=document.querySelector('input[type=date]'),f=d.closest('.field'),m=document.querySelector('.expense-money'),a=m.querySelector('input');const box=x=>{const r=x.getBoundingClientRect();return{left:r.left,right:r.right,width:r.width,clientWidth:x.clientWidth,scrollWidth:x.scrollWidth}};return{date:box(d),field:box(f),money:box(m),amount:box(a),doc:document.documentElement.scrollWidth,viewport:innerWidth}}""")
+            qa.check(geometry['date']['left']>=geometry['field']['left']-1 and geometry['date']['right']<=geometry['field']['right']+1 and geometry['date']['scrollWidth']<=geometry['date']['clientWidth']+1, f"Expense {width}: iOS date input stays inside its field")
+            qa.check(geometry['doc']<=geometry['viewport']+1, f"Expense {width}: expense form creates no horizontal overflow")
+            page.locator('.expense-money input').focus();page.wait_for_timeout(220)
+            focus=page.evaluate("""()=>{const a=document.querySelector('.expense-money input'),m=a.closest('.expense-money'),s=getComputedStyle(a),ms=getComputedStyle(m);return{inputBorder:s.borderTopWidth,inputShadow:s.boxShadow,inputBackground:s.backgroundImage,wrapperBorder:ms.borderTopColor,wrapperShadow:ms.boxShadow}}""")
+            qa.check(focus['inputBorder']=='0px' and focus['inputShadow']=='none' and focus['inputBackground']=='none', f"Expense {width}: amount input has no nested focus box")
+            qa.check(focus['wrapperShadow']!='none', f"Expense {width}: amount wrapper owns the single focus ring")
+        finally:
+            page.close()
+
 def public_date_suite(browser: Browser, qa: QA) -> None:
     page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
     try:
@@ -825,6 +842,7 @@ def main() -> int:
             tablet_suite(browser, qa)
             landscape_suite(browser, qa)
             auth_suite(browser, qa)
+            expense_form_controls_suite(browser, qa)
             public_date_suite(browser, qa)
             public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
