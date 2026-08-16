@@ -2003,3 +2003,21 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .sms-personalized-hint{display:block;margin-top:6px;color:var(--gold-2);font-size:10.5px;line-height:1.4}
 .sms-audience-summary .warning{border-color:rgba(217,168,91,.34);background:rgba(217,168,91,.07)}
 .sms-audience-summary .warning small{color:#d8b474}
+
+
+/* v4.0.74 — recipient rental count + local sorting inside SMS audience */
+.sms-campaign-modal .sms-audience-actions{display:flex;align-items:flex-end;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.sms-campaign-modal .sms-audience-sort{display:grid;gap:4px;min-width:190px}
+.sms-campaign-modal .sms-audience-sort>span{font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.sms-campaign-modal .sms-audience-sort select{min-height:42px;padding:0 34px 0 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel-2);color:var(--text);font:inherit;font-size:12px;font-weight:700}
+.sms-campaign-modal .sms-recipient>span>small strong{color:var(--text);font-weight:800}
+@media(max-width:700px){
+  .sms-campaign-modal .sms-audience-section .client-section-head{align-items:flex-end}
+  .sms-campaign-modal .sms-audience-actions{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto}
+  .sms-campaign-modal .sms-audience-sort{min-width:0}
+  .sms-campaign-modal .sms-audience-sort select{width:100%;min-width:0}
+}
+@media(max-width:430px){
+  .sms-campaign-modal .sms-audience-actions{grid-template-columns:1fr}
+  .sms-campaign-modal .sms-audience-actions .btn{width:100%}
+}

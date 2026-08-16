@@ -7,7 +7,7 @@ const publicFixes=fs.readFileSync('assets/public-fixes.css','utf8');
 const glassCss=fs.readFileSync('assets/admin-glass-test.css','utf8');
 const selectPositions=[...js.matchAll(/<select\b/g)].map(match=>match.index);
 const checkboxPositions=[...js.matchAll(/<input[^>]+type="checkbox"/g)].map(match=>match.index);
-const allSelectsCovered=selectPositions.length>=13&&selectPositions.every(index=>{const prefix=js.slice(Math.max(0,index-260),index);const tail=js.slice(index,index+90);return prefix.includes('class="field"')||prefix.includes('clients-toolbar')||prefix.includes('campaign-product-field')||prefix.includes('finance-ledger-head')||tail.includes('id="clientSegment"')||tail.includes('id="clientSort"')});
+const allSelectsCovered=selectPositions.length>=13&&selectPositions.every(index=>{const prefix=js.slice(Math.max(0,index-260),index);const tail=js.slice(index,index+90);return prefix.includes('class="field"')||prefix.includes('clients-toolbar')||prefix.includes('campaign-product-field')||prefix.includes('finance-ledger-head')||prefix.includes('sms-audience-sort')||tail.includes('id="clientSegment"')||tail.includes('id="clientSort"')});
 const allCheckboxesCovered=checkboxPositions.length>=13&&checkboxPositions.every(index=>{const prefix=js.slice(Math.max(0,index-260),index);return prefix.includes('class="switch')||prefix.includes('class="extra-check')||prefix.includes('class="sms-recipient')||prefix.includes('class="sms-legacy-attestation')});
 const checks=[
  ['operations dashboard',js.includes('operationsBar()')&&css.includes('.operations-bar')],

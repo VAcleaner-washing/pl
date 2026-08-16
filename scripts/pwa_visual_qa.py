@@ -159,7 +159,7 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
         }} else if(text.includes('vacleaner-campaigns-v1')){{
           if(payload.action==='sms_status')body={{sender:'VACLEANER',provider:'SendPulse',senderStatus:{{found:true,status:0,statusLabel:'На модерації',statusExplain:'On moderation.'}},cooldownDays:90,optOutUrl:'vacleaner.pp.ua/s'}};
           else if(payload.action==='sms_dispatches')body={{dispatches:[]}};
-          else if(payload.action==='sms_audience')body={{segment:payload.segment||'sleeping',customers:[{{phone:'+380951111111',name:'Анна Коваленко',completedOrders:4,lastCompleted:'{iso(-220)}',daysDormant:220,consent:'explicit',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380672222222',name:'Олена Мельник',completedOrders:2,lastCompleted:'{iso(-410)}',daysDormant:410,consent:'legacy',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380633333333',name:'Ірина Тест',completedOrders:3,lastCompleted:'{iso(-500)}',daysDormant:500,consent:'opted_out',activeBooking:false,cooldown:false,selectable:false}}],summary:{{total:3,selectable:2,explicit:1,legacy:1,optedOut:1,cooldown:0,active:0}}}};
+          else if(payload.action==='sms_audience')body={{segment:payload.segment||'sleeping',customers:[{{phone:'+380951111111',name:'Анна Коваленко',completedOrders:7,lastCompleted:'{iso(-220)}',daysDormant:220,consent:'explicit',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380672222222',name:'Олена Мельник',completedOrders:2,lastCompleted:'{iso(-410)}',daysDormant:410,consent:'legacy',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380633333333',name:'Ірина Тест',completedOrders:3,lastCompleted:'{iso(-500)}',daysDormant:500,consent:'opted_out',activeBooking:false,cooldown:false,selectable:false}}],summary:{{total:3,selectable:2,explicit:1,legacy:1,optedOut:1,cooldown:0,active:0}}}};
           else if(payload.action==='customer_sms_history')body={{consent:'legacy',consentAt:null,consentSource:'',optedOutAt:null,history:[]}};
           else if(payload.action==='set_customer_sms_consent')body={{ok:true,consent:payload.enabled?'explicit':'opted_out'}};
           else if(payload.action==='sms_sync')body={{ok:true,sent:2,delivered:2,notDelivered:0,totalCost:0,currency:'UAH'}};
@@ -458,6 +458,12 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.sms-campaign-modal').count()==1 and 'Стара база' in page.locator('.sms-campaign-modal').inner_text(), f"{label}: SMS modal renders legacy audience state")
         qa.check(page.locator('.sms-campaign-modal #smsMessage').input_value().count('vacleaner.pp.ua/s')==1, f"{label}: SMS draft contains opt-out URL")
         qa.check(page.locator('.sms-campaign-modal .sms-recipient').count()==3 and page.locator('.sms-campaign-modal .sms-recipient input:disabled').count()==1, f"{label}: opted-out recipient is visibly blocked")
+        qa.check('оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), f"{label}: SMS recipients show completed rental count")
+        qa.check(page.locator('.sms-campaign-modal #smsAudienceSort').count()==1, f"{label}: SMS audience exposes sorting control")
+        page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-desc');page.wait_for_timeout(20)
+        qa.check('Анна Коваленко' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text() and '7 оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), f"{label}: SMS audience sorts by most completed rentals")
+        page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-asc');page.wait_for_timeout(20)
+        qa.check('Олена Мельник' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text() and '2 оренди' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), f"{label}: SMS audience sorts by fewest completed rentals")
         qa.check(page.locator('.sms-campaign-modal #smsSend').is_disabled(), f"{label}: national SMS send stays disabled while Sender ID is under moderation")
         qa.check('On moderation' not in page.locator('.sms-campaign-modal>header').inner_text(), f"{label}: SMS header has no duplicate English moderation status")
         section_geometry=page.locator('.sms-campaign-modal .sms-history .client-section-head').evaluate("""el=>{const k=el.querySelector('small').getBoundingClientRect(),h=el.querySelector('h3').getBoundingClientRect();return{k:{r:k.right,b:k.bottom},h:{l:h.left,t:h.top},scroll:getComputedStyle(el.closest('.sms-form-body')).scrollbarWidth}}""")
@@ -676,6 +682,14 @@ def desktop_suite(browser: Browser, qa: QA) -> None:
                 qa.check(bool(calendar_fit) and all(calendar_fit), "Desktop: calendar slots stay inside each day card")
                 calendar_cols=page.locator('.calendar-grid').evaluate("el=>getComputedStyle(el).gridTemplateColumns.split(' ').filter(Boolean).length")
                 qa.check(calendar_cols==3, "Desktop: calendar keeps three contained day columns")
+            if view == "campaigns":
+                page.locator('#smsCampaign').click();page.wait_for_selector('.sms-campaign-modal #smsAudienceList');page.wait_for_timeout(60)
+                qa.check(page.locator('.sms-campaign-modal #smsAudienceSort').count()==1, "Desktop: SMS audience exposes rental-count sorting")
+                qa.check('оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), "Desktop: SMS recipient rows show completed rental count")
+                page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-desc');page.wait_for_timeout(20)
+                qa.check('7 оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), "Desktop: SMS audience sorts by most rentals")
+                qa.check(no_overflow(page), "Desktop: SMS audience sorting controls do not create horizontal overflow")
+                page.locator('.sms-campaign-modal [data-close]').first.click();page.wait_for_timeout(30)
             if view == "chemistry":
                 chem_cards=page.locator('.chem-grid>.chem-card').evaluate_all("els=>els.map(el=>el.getBoundingClientRect())")
                 qa.check(len(chem_cards)==2 and chem_cards[0]['width']<chem_cards[1]['width'], "Desktop: chemistry gives the product catalogue the wider column")

@@ -35,6 +35,9 @@ check(chunk.includes('q.get("promo")'),'booking page also auto-fills regular pro
 check(campaign.includes('const selectable=!optedOut&&!cooldown&&!activeBooking'),'active bookings are excluded even from all-base marketing sends');
 check(admin.includes("$$('[data-close]',root).forEach(x=>x.onclick=closeLayer)"),'SMS modal replacement rebinds close controls');
 check(admin.includes('SMS-розсилка')&&admin.includes('Розбудити клієнтів'),'campaign UI exposes SMS reactivation workflow');
+check(admin.includes('id=\"smsAudienceSort\"')&&admin.includes('Найбільше оренд')&&admin.includes('Найменше оренд'),'SMS audience exposes rental-count sorting controls');
+check(admin.includes('rentalCountText')&&admin.includes('completedOrders')&&admin.includes('sortAudience'),'SMS audience renders completed rental count and sorts locally without backend changes');
+check(adminCss.includes('.sms-audience-sort')&&adminCss.includes('.sms-recipient>span>small strong'),'SMS audience has responsive sorting and rental-count styling');
 check(admin.includes('Стара база')&&admin.includes('Підтверджую право написати'),'admin distinguishes legacy recipients and asks for attestation');
 check(adminCss.includes('.sms-audience-list')&&adminCss.includes('.sms-consent.legacy'),'SMS UI has dedicated responsive styling');
 check(adminCss.includes('.sms-campaign-modal .client-section-head small')&&adminCss.includes('text-transform:uppercase'),'SMS section kickers use a non-overlapping compact hierarchy');
