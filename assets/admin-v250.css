@@ -5025,3 +5025,103 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 @media (max-width:360px){
   .sms-campaign-modal .sms-sender-state{font-size:9.5px}
 }
+
+/* v4.0.94 — SMS JOURNAL DESKTOP TABLE RHYTHM.
+   Desktop uses the available width as a log/table; mobile remains a compact card. */
+.sms-campaign-modal.history-mode .sms-history-columns{
+  display:grid;
+  grid-template-columns:minmax(280px,1fr) 190px 110px 120px 92px;
+  align-items:center;
+  gap:14px;
+  padding:0 22px 7px 14px;
+  color:#7f8a90;
+  font-size:10.5px;
+  font-weight:750;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+  flex:0 0 auto;
+}
+.sms-campaign-modal.history-mode #smsHistory{
+  scrollbar-width:thin;
+  scrollbar-color:rgba(194,146,78,.72) transparent;
+  padding:0 8px 12px 0;
+  scroll-padding-bottom:12px;
+}
+.sms-campaign-modal.history-mode #smsHistory::-webkit-scrollbar{width:7px}
+.sms-campaign-modal.history-mode #smsHistory::-webkit-scrollbar-track{background:transparent}
+.sms-campaign-modal.history-mode #smsHistory::-webkit-scrollbar-thumb{background:rgba(194,146,78,.68);border-radius:999px}
+.sms-campaign-modal.history-mode #smsHistory::-webkit-scrollbar-button{display:none;width:0;height:0}
+.sms-campaign-modal.history-mode #smsHistory article{
+  grid-template-columns:minmax(280px,1fr) 190px 110px 120px 92px;
+  align-items:center;
+  min-height:62px;
+  padding:10px 14px;
+  gap:14px;
+}
+.sms-campaign-modal.history-mode #smsHistory .sms-history-campaign{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#eceae5;
+  font-size:15px;
+  line-height:1.2;
+  font-weight:720;
+}
+.sms-campaign-modal.history-mode #smsHistory .sms-history-date{
+  color:#b0b9be;
+  font-size:12px;
+  line-height:1.25;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.sms-campaign-modal.history-mode #smsHistory .sms-history-audience{
+  color:#d9dcde;
+  font-size:12.5px;
+  font-weight:680;
+  font-variant-numeric:tabular-nums;
+  text-align:left;
+}
+.sms-campaign-modal.history-mode #smsHistory .sms-history-status{display:flex;align-items:center;justify-content:flex-start}
+.sms-campaign-modal.history-mode #smsHistory .sms-history-sync{justify-self:stretch;width:100%}
+
+@media (min-width:901px) and (max-width:1180px){
+  .sms-campaign-modal.history-mode .sms-history-columns,
+  .sms-campaign-modal.history-mode #smsHistory article{
+    grid-template-columns:minmax(220px,1fr) 150px 94px 108px 86px;
+    gap:10px;
+  }
+  .sms-campaign-modal.history-mode .sms-history-columns{padding:0 20px 7px 12px;font-size:10px}
+  .sms-campaign-modal.history-mode #smsHistory article{padding-inline:12px}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-campaign{font-size:14.5px}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-date{font-size:11.5px}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-audience{font-size:12px}
+}
+
+@media (max-width:900px) and (min-width:0px){
+  .sms-campaign-modal.history-mode .sms-history-columns{display:none}
+  .sms-campaign-modal.history-mode #smsHistory{padding:0 3px 10px 0}
+  .sms-campaign-modal.history-mode #smsHistory article{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "campaign status"
+      "date action"
+      "audience action";
+    min-height:76px;
+    padding:10px 11px;
+    gap:3px 10px;
+  }
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-campaign{grid-area:campaign;font-size:13.5px}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-date{grid-area:date;font-size:10.5px;white-space:normal}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-audience{grid-area:audience;font-size:10.5px;color:#9da8ae;font-weight:520}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-audience::before{content:"Одержувачі: ";color:#7f8a90}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-status{grid-area:status;justify-self:end}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-sync{grid-area:action;align-self:end;justify-self:end;width:auto;min-width:82px}
+}
+
+@media (max-width:430px){
+  .sms-campaign-modal.history-mode #smsHistory article{min-height:80px;padding:10px;gap:3px 8px}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-campaign{font-size:13px}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-date,
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-audience{font-size:10px}
+  .sms-campaign-modal.history-mode #smsHistory .sms-history-sync{min-width:76px}
+}
