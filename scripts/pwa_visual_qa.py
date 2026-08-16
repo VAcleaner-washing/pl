@@ -159,7 +159,7 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
         }} else if(text.includes('vacleaner-campaigns-v1')){{
           if(payload.action==='sms_status')body={{sender:'VACLEANER',provider:'SendPulse',senderStatus:{{found:true,status:0,statusLabel:'На модерації',statusExplain:'On moderation.'}},cooldownDays:90,optOutUrl:'vacleaner.pp.ua/s'}};
           else if(payload.action==='sms_dispatches')body={{dispatches:[{{id:'30000000-0000-4000-8000-000000000001',audience_segment:'sleeping',audience_count:18,status:'failed',created_at:'2026-08-16T05:18:00.000Z',sent_at:null}}]}};
-          else if(payload.action==='sms_audience')body={{segment:payload.segment||'sleeping',customers:[{{phone:'+380951111111',name:'Анна Коваленко',completedOrders:7,lastCompleted:'{iso(-220)}',daysDormant:220,consent:'explicit',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380672222222',name:'Олена Мельник',completedOrders:2,lastCompleted:'{iso(-410)}',daysDormant:410,consent:'legacy',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380633333333',name:'Ірина Тест',completedOrders:3,lastCompleted:'{iso(-500)}',daysDormant:500,consent:'opted_out',activeBooking:false,cooldown:false,selectable:false}}],summary:{{total:3,selectable:2,explicit:1,legacy:1,optedOut:1,cooldown:0,active:0}}}};
+          else if(payload.action==='sms_audience')body={{segment:payload.segment||'sleeping',customers:[{{phone:'+380951111111',name:'Анна Коваленко',completedOrders:7,lastCompleted:'{iso(-220)}',daysDormant:220,consent:'explicit',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380672222222',name:'Олена Мельник',completedOrders:2,lastCompleted:'{iso(-410)}',daysDormant:410,consent:'legacy',activeBooking:false,cooldown:false,selectable:true}},{{phone:'+380633333333',name:'Ірина Тест',completedOrders:3,lastCompleted:'{iso(-500)}',daysDormant:500,consent:'opted_out',activeBooking:false,cooldown:false,selectable:false}},{{phone:'+380991234567',name:'SMS Уже Надіслано',completedOrders:4,lastCompleted:'{iso(-300)}',daysDormant:300,consent:'legacy',activeBooking:false,cooldown:true,selectable:false}}],summary:{{total:4,selectable:2,explicit:1,legacy:1,optedOut:1,cooldown:1,active:0}}}};
           else if(payload.action==='customer_sms_history')body={{consent:'legacy',consentAt:null,consentSource:'',optedOutAt:null,history:[]}};
           else if(payload.action==='set_customer_sms_consent')body={{ok:true,consent:payload.enabled?'explicit':'opted_out'}};
           else if(payload.action==='sms_sync')body={{ok:true,sent:2,delivered:2,notDelivered:0,totalCost:0,currency:'UAH'}};
@@ -674,13 +674,34 @@ def short_desktop_sms_suite(browser: Browser, qa: QA) -> None:
           const gap=parseFloat(getComputedStyle(el).rowGap||getComputedStyle(el).gap||0)||0;
           return {h,sampleH,gap,capacity:sampleH?((h+gap)/(sampleH+gap)):0,overflow:getComputedStyle(el).overflowY};
         }""")
-        qa.check(geometry['capacity']>=8.0, f"Short desktop 1650x760: at least eight real recipient rows fit before scrolling (capacity={geometry['capacity']:.1f})")
-        qa.check(geometry['h']>=360, "Short desktop 1650x760: recipient list gets at least 360px of working height")
+        qa.check(geometry['capacity']>=7.0, f"Short desktop 1650x760: at least seven readable recipient rows fit before scrolling (capacity={geometry['capacity']:.1f})")
+        qa.check(geometry['h']>=385, "Short desktop 1650x760: recipient list keeps a large working area without micro-typography")
         chrome = page.locator('.sms-campaign-modal').evaluate("""el=>{
           const r=el.getBoundingClientRect(),h=el.querySelector('.sms-workspace-header').getBoundingClientRect(),s=el.querySelector('.sms-stepper').getBoundingClientRect(),f=el.querySelector('.sms-workspace-footer').getBoundingClientRect();
           return {modal:r.height,header:h.height,stepper:s.height,footer:f.height};
         }""")
-        qa.check(chrome['header']<=82 and chrome['stepper']<=44 and chrome['footer']<=54, "Short desktop 1650x760: chrome stays compact so clients own the viewport")
+        qa.check(chrome['header']<=86 and chrome['stepper']<=46 and chrome['footer']<=54, "Short desktop 1650x760: chrome stays compact so clients own the viewport")
+        type_sizes = page.locator('.sms-campaign-modal').evaluate("""el=>({
+          title:parseFloat(getComputedStyle(el.querySelector('.sms-heading h2')).fontSize),
+          step:parseFloat(getComputedStyle(el.querySelector('.sms-stepper b')).fontSize),
+          control:parseFloat(getComputedStyle(el.querySelector('#smsAudienceSort')).fontSize),
+          name:parseFloat(getComputedStyle(el.querySelector('.sms-recipient-main>b')).fontSize),
+          meta:parseFloat(getComputedStyle(el.querySelector('.sms-recipient-meta')).fontSize),
+          badge:parseFloat(getComputedStyle(el.querySelector('.sms-consent')).fontSize)
+        })""")
+        qa.check(type_sizes['title']>=26 and type_sizes['step']>=11 and type_sizes['control']>=10.5, "Short desktop 1650x760: workspace chrome keeps normal readable typography")
+        qa.check(type_sizes['name']>=13 and type_sizes['meta']>=9.5 and type_sizes['badge']>=8, "Short desktop 1650x760: recipient rows never fall back to spreadsheet-sized text")
+        row_flow = page.locator('.sms-campaign-modal .sms-recipient').first.evaluate("""el=>{
+          const main=el.querySelector('.sms-recipient-main'),name=main.querySelector('b'),meta=main.querySelector('.sms-recipient-meta');
+          const n=name.getBoundingClientRect(),m=meta.getBoundingClientRect();
+          return {display:getComputedStyle(main).display,nameCy:n.top+n.height/2,metaCy:m.top+m.height/2,rowH:el.getBoundingClientRect().height,metaWrap:getComputedStyle(meta).flexWrap};
+        }""")
+        qa.check(row_flow['display']=='flex' and abs(row_flow['nameCy']-row_flow['metaCy'])<=4 and row_flow['metaWrap']=='nowrap', "Short desktop 1650x760: client name and all rental metadata stay on one horizontal line")
+        qa.check(row_flow['rowH']<=52, "Short desktop 1650x760: one-line client rows use width instead of wasting vertical space")
+        audience_text=page.locator('#smsAudienceList').inner_text()
+        summary_text=page.locator('#smsAudienceSummary').inner_text()
+        qa.check('SMS Уже Надіслано' not in audience_text, "Short desktop 1650x760: clients in the 90-day SMS cooldown are removed from the recipient list")
+        qa.check('1' in summary_text and 'пауза 90 днів' in summary_text, "Short desktop 1650x760: cooldown clients remain visible only in the pause KPI")
         qa.check(no_overflow(page), "Short desktop 1650x760: SMS workspace has no horizontal overflow")
     finally:
         page.close()

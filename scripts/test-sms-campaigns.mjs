@@ -45,6 +45,10 @@ check(chunk.includes('window.location.hash.slice(1)')&&chunk.includes('setPromoC
 check(chunk.includes('q.get("promo")'),'booking page also auto-fills regular promo query parameters such as PIDBIR5');
 
 check(campaign.includes('const selectable=!optedOut&&!cooldown&&!activeBooking'),'active bookings are excluded even from all-base marketing sends');
+check(campaign.includes('const visibleRows=rows.filter(row=>!row.cooldown)'),'campaign audience omits clients already contacted inside the 90-day cooldown');
+check(admin.includes('rows=rows.filter(row=>!row.cooldown)'),'admin defensively hides cooldown clients from the recipient list');
+check(admin.includes('const cooldownCount=Number(data.summary?.cooldown'),'cooldown KPI is preserved even though cooldown clients are hidden');
+
 check(admin.includes("$$('[data-close]',root).forEach(x=>x.onclick=closeLayer)"),'SMS modal replacement rebinds close controls');
 check(admin.includes('SMS-розсилка')&&admin.includes('Розбудити клієнтів'),'campaign UI exposes SMS reactivation workflow');
 check(admin.includes('id=\"smsAudienceSort\"')&&admin.includes('Найбільше оренд')&&admin.includes('Найменше оренд'),'SMS audience exposes rental-count sorting controls');
@@ -55,7 +59,8 @@ check(adminCss.includes('.sms-audience-list')&&adminCss.includes('.sms-consent.l
 check(admin.includes('sms-selected-count')&&admin.includes("selectAvailable.dataset.mode=allSelected?'clear':'select'"),'SMS audience shows selected count and turns bulk-select into a reversible action');
 check(admin.includes('id="smsHistoryOpen"')&&admin.includes('id="smsHistoryPanel"')&&admin.includes('historyMode=true'),'SMS journal is a separate workspace mode instead of competing with recipient selection');
 check(admin.includes("smsAudienceLabel(value)")&&admin.includes("all:'Уся база'"),'SMS journal humanizes internal audience segment codes');
-check(adminCss.includes('v4.0.83 — SMS FLOW REBUILD')&&adminCss.includes('v4.0.84 — SHORT DESKTOP SMS WORKSPACE')&&adminCss.includes('.sms-stage')&&adminCss.includes('.sms-audience-list')&&adminCss.includes('max-height:820px'),'SMS flow gives recipients the viewport and has an explicit short-desktop capacity contract');
+check(adminCss.includes('v4.0.83 — SMS FLOW REBUILD')&&adminCss.includes('v4.0.85 — SHORT DESKTOP TYPOGRAPHY RECOVERY')&&adminCss.includes('.sms-stage')&&adminCss.includes('.sms-audience-list')&&adminCss.includes('max-height:820px'),'SMS flow gives recipients the viewport and has an explicit short-desktop capacity contract');
+check(adminCss.includes('DESKTOP RECIPIENT SINGLE-LINE DENSITY')&&adminCss.includes('align-items:baseline')&&adminCss.includes('flex-wrap:nowrap'),'Desktop SMS recipient rows keep client identity and rental metadata on one horizontal line');
 check(adminCss.includes('.sms-workspace-footer')&&adminCss.includes('grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr)'),'SMS mobile footer keeps one compact, stable action row');
 check(adminCss.includes('.sms-campaign-modal .client-section-head small')&&adminCss.includes('text-transform:uppercase'),'SMS section kickers use a non-overlapping compact hierarchy');
 check(adminCss.includes('.sms-campaign-modal #smsSend:disabled')&&adminCss.includes('cursor:not-allowed'),'inactive SMS route has a visibly disabled send action');

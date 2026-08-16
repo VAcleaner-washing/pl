@@ -3531,7 +3531,7 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 }
 
 
-/* v4.0.84 — SHORT DESKTOP SMS WORKSPACE: real 700–800px browser viewport must still show 8+ recipients. */
+/* v4.0.85 — SHORT DESKTOP TYPOGRAPHY RECOVERY: keep the list dense without shrinking the UI into spreadsheet text. */
 @media (min-width:701px) and (max-height:820px){
   .modal:has(.sms-campaign-modal){padding:6px 10px}
   .modal-card:has(.sms-campaign-modal){
@@ -3543,49 +3543,135 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
     gap:12px;
     padding:10px 16px 9px;
   }
-  .sms-heading>small{margin-bottom:3px;font-size:8px}
-  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:23px;line-height:1}
-  .sms-header-meta{gap:2px 10px;margin-top:5px;font-size:9px;line-height:1.05}
+  .sms-heading>small{margin-bottom:3px;font-size:9.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:27px;line-height:1.02}
+  .sms-header-meta{gap:2px 10px;margin-top:5px;font-size:10.5px;line-height:1.08}
   .sms-header-meta span+span::before{margin-right:10px}
-  .sms-history-open{min-height:32px;padding:0 9px;font-size:9px}
-  .sms-campaign-modal>.sms-workspace-header .close{width:34px;min-width:34px;height:34px;min-height:34px;border-radius:10px;font-size:21px}
-  .sms-stepper{gap:4px;padding:4px 10px}
-  .sms-stepper button{min-height:34px;gap:6px;padding:4px 7px;border-radius:9px}
-  .sms-stepper i{flex-basis:22px;width:22px;height:22px;border-radius:7px;font-size:9px}
-  .sms-stepper b{font-size:10px}
+  .sms-history-open{min-height:32px;padding:0 10px;font-size:10.5px}
+  .sms-campaign-modal>.sms-workspace-header .close{width:36px;min-width:36px;height:36px;min-height:36px;border-radius:10px;font-size:22px}
+  .sms-stepper{gap:5px;padding:4px 10px}
+  .sms-stepper button{min-height:35px;gap:7px;padding:4px 8px;border-radius:9px}
+  .sms-stepper i{flex-basis:23px;width:23px;height:23px;border-radius:7px;font-size:10px}
+  .sms-stepper b{font-size:11.5px}
   .sms-stepper small{display:none}
   .sms-step-panel,.sms-history-panel{padding:7px 12px}
   .sms-recipient-step{gap:5px}
-  .sms-recipient-toolbar{grid-template-columns:minmax(240px,1fr) 210px auto;gap:6px}
-  .sms-audience-rule{min-height:32px;padding:4px 9px;border-radius:8px}
-  .sms-audience-rule small,.sms-toolbar-field>span{font-size:7px}
-  .sms-audience-rule b{font-size:9.5px}
-  .sms-toolbar-field select,.sms-bulk-select{min-height:32px;height:32px;border-radius:8px;font-size:9.5px}
+  .sms-recipient-toolbar{grid-template-columns:minmax(240px,1fr) 220px auto;gap:7px}
+  .sms-audience-rule{min-height:34px;padding:4px 9px;border-radius:8px}
+  .sms-audience-rule small,.sms-toolbar-field>span{font-size:8px}
+  .sms-audience-rule b{font-size:10.5px}
+  .sms-toolbar-field select,.sms-bulk-select{min-height:34px;height:34px;border-radius:8px;font-size:10.8px}
   .sms-toolbar-field select{padding-left:9px}
-  .sms-bulk-select{padding-inline:10px}
+  .sms-bulk-select{padding-inline:11px}
   .sms-campaign-modal .sms-audience-summary{gap:5px}
-  .sms-campaign-modal .sms-audience-summary span{min-height:29px;gap:5px;padding:4px 8px;border-radius:8px}
-  .sms-campaign-modal .sms-audience-summary b{font-size:15px}
-  .sms-campaign-modal .sms-audience-summary small{font-size:7.5px}
-  .sms-recipient-head{min-height:23px;align-items:center}
+  .sms-campaign-modal .sms-audience-summary span{min-height:31px;gap:6px;padding:4px 9px;border-radius:8px}
+  .sms-campaign-modal .sms-audience-summary b{font-size:17px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:8.5px}
+  .sms-recipient-head{min-height:25px;align-items:center}
   .sms-recipient-head small{display:none}
-  .sms-recipient-head h3{font-size:13px}
-  .sms-selected-count{min-height:19px;padding-inline:6px;font-size:7.5px}
+  .sms-recipient-head h3{font-size:14px}
+  .sms-selected-count{min-height:20px;padding-inline:7px;font-size:8.5px}
   .sms-campaign-modal .sms-audience-list{gap:4px;padding-right:4px}
   .sms-campaign-modal .sms-recipient{
-    grid-template-columns:18px minmax(0,1fr) auto;
-    gap:7px;
-    min-height:46px;
-    padding:5px 8px;
-    border-radius:8px;
+    grid-template-columns:19px minmax(0,1fr) auto;
+    gap:8px;
+    min-height:54px;
+    padding:6px 9px;
+    border-radius:9px;
   }
-  .sms-campaign-modal .sms-recipient input{width:16px;height:16px}
-  .sms-campaign-modal .sms-recipient-main{gap:1px}
-  .sms-campaign-modal .sms-recipient-main>b{font-size:11.2px;line-height:1.05}
-  .sms-campaign-modal .sms-recipient-meta{gap:1px 5px;font-size:8px;line-height:1.05}
+  .sms-campaign-modal .sms-recipient input{width:18px;height:18px}
+  .sms-campaign-modal .sms-recipient-main{gap:2px}
+  .sms-campaign-modal .sms-recipient-main>b{font-size:13.5px;line-height:1.08}
+  .sms-campaign-modal .sms-recipient-meta{gap:2px 6px;font-size:10px;line-height:1.08}
   .sms-campaign-modal .sms-recipient-meta>span::before{margin-right:5px}
-  .sms-campaign-modal .sms-consent{padding:3px 5px;font-size:7px}
+  .sms-campaign-modal .sms-consent{padding:3px 6px;font-size:8.5px}
   .sms-campaign-modal>.sms-workspace-footer{min-height:50px;padding:5px 14px;gap:7px}
-  .sms-campaign-modal>.sms-workspace-footer .btn{min-height:38px;height:38px;min-width:104px;padding-inline:12px;font-size:10px}
+  .sms-campaign-modal>.sms-workspace-footer .btn{min-height:38px;height:38px;min-width:104px;padding-inline:13px;font-size:11px}
   .sms-campaign-modal>.sms-workspace-footer #smsPrimary{min-width:174px}
+}
+
+/* v4.0.85 — DESKTOP RECIPIENT SINGLE-LINE DENSITY: use horizontal space instead of stacking client metadata. */
+@media (min-width:701px){
+  .sms-campaign-modal .sms-recipient{
+    min-height:50px;
+    padding:6px 10px;
+  }
+  .sms-campaign-modal .sms-recipient-main{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+    overflow:hidden;
+  }
+  .sms-campaign-modal .sms-recipient-main>b{
+    flex:0 1 auto;
+    min-width:0;
+    max-width:34ch;
+    font-size:14px;
+    line-height:1.15;
+  }
+  .sms-campaign-modal .sms-recipient-meta{
+    flex:1 1 auto;
+    min-width:0;
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:0 7px;
+    overflow:hidden;
+    white-space:nowrap;
+    font-size:10.5px;
+    line-height:1.15;
+  }
+  .sms-campaign-modal .sms-recipient-meta>strong,
+  .sms-campaign-modal .sms-recipient-meta>span{
+    flex:0 0 auto;
+  }
+}
+@media (min-width:701px) and (max-height:820px){
+  .sms-campaign-modal .sms-recipient{
+    min-height:46px;
+    padding:5px 9px;
+  }
+  .sms-campaign-modal .sms-recipient-main{gap:9px}
+  .sms-campaign-modal .sms-recipient-main>b{font-size:13.5px}
+  .sms-campaign-modal .sms-recipient-meta{font-size:10.5px;line-height:1.1}
+}
+
+/* v4.0.85 — DESKTOP CLIENT ROW FINAL: use the available width; never stack client identity + metadata. */
+@media (min-width:701px){
+  .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    gap:10px;
+    min-width:0;
+    overflow:hidden;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main>b{
+    flex:0 1 auto;
+    min-width:0;
+    max-width:30ch;
+    margin:0;
+    font-size:14px;
+    line-height:1.15;
+    white-space:nowrap;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main>.sms-recipient-meta{
+    flex:1 1 auto;
+    display:flex;
+    flex-direction:row;
+    flex-wrap:nowrap;
+    align-items:center;
+    min-width:0;
+    gap:0 8px;
+    overflow:hidden;
+    white-space:nowrap;
+    font-size:10.5px;
+    line-height:1.15;
+  }
+}
+@media (min-width:701px) and (max-height:820px){
+  .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main{gap:9px}
+  .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main>b{font-size:13.5px}
+  .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main>.sms-recipient-meta{font-size:10.5px}
 }
