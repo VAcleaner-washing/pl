@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const read=f=>fs.readFileSync(f,'utf8');
 let pass=0,fail=0;const check=(ok,msg)=>{if(ok){pass++;console.log('PASS:',msg)}else{fail++;console.error('FAIL:',msg)}};
-const admin=read('assets/admin-v250.js'),adminCss=read('assets/admin-v250.css'),publicJs=read('assets/public-experience.js'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),consent=read('supabase/functions/vacleaner-sms-consent-v1/index.ts'),campaign=read('supabase/functions/vacleaner-campaigns-v1/index.ts'),migration=read('supabase/migrations/20260815223500_vacleaner_sms_reactivation_consent_v4069.sql'),privacy=read('polityka-konfidenciynosti/index.html'),stop=read('s/index.html'),e2e=read('scripts/e2e_smoke.py');
+const admin=read('assets/admin-v250.js'),adminCss=read('assets/admin-v250.css'),publicJs=read('assets/public-experience.js'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),consent=read('supabase/functions/vacleaner-sms-consent-v1/index.ts'),campaign=read('supabase/functions/vacleaner-campaigns-v1/index.ts'),migration=read('supabase/migrations/20260815223500_vacleaner_sms_reactivation_consent_v4069.sql'),personalizedMigration=read('supabase/migrations/20260816001000_vacleaner_personalized_sms_links_v4072.sql'),bookingBridge=read('b/index.html'),privacy=read('polityka-konfidenciynosti/index.html'),stop=read('s/index.html'),e2e=read('scripts/e2e_smoke.py');
 check(publicJs.includes('Отримувати персональні пропозиції та бонуси VAcleaner'),'public booking injects optional marketing consent');
 check(publicJs.includes('__VAC_MARKETING_SMS_CONSENT__=false'),'marketing consent defaults to false');
 check(chunk.includes('vacleaner-sms-consent-v1')&&chunk.includes('action:"opt_in"')&&chunk.includes('bookingCode:n.bookingCode'),'successful booking records explicit opt-in through dedicated endpoint');
@@ -14,6 +14,23 @@ check(campaign.includes('legacy_consent_confirmation_required'),'legacy customer
 check(campaign.includes('SMS_COOLDOWN_DAYS=90'),'repeat SMS has a 90-day cooldown');
 check(campaign.includes('sms_optout_required')&&campaign.includes('vacleaner.pp.ua/s'),'marketing SMS requires opt-out link');
 check(campaign.includes('sender_not_active'),'national route blocks inactive sender');
+
+check(admin.includes('smsCampaignDefaultText')&&admin.includes("{link}")&&admin.includes('Повідомлення клієнту'),'campaign SMS UI uses an automatic promo-link template');
+check(admin.includes('давно не освіжали диван? 🙂')&&admin.includes('на повторну оренду Puzzi')&&admin.includes('Перевірити: {link}'),'RETURN default copy is a human two-part SMS');
+const returnPreview='VAcleaner: давно не освіжали диван? 🙂 -10% на повторну оренду Puzzi. Перевірити: vacleaner.pp.ua/b#XXXXXXX Стоп: vacleaner.pp.ua/s';
+check([...returnPreview].length>70&&[...returnPreview].length<=134,'RETURN default preview stays within exactly two Unicode SMS parts');
+check(admin.includes('RETURN · повернення клієнтів')&&!admin.includes('<option value="return">RETURN · сплячі 180+</option>'),'RETURN campaign type is not hard-coded to 180 days');
+check(admin.includes('campaign?.dormant_days')&&admin.includes('за умовами кампанії'),'RETURN SMS label follows each campaign dormant_days value');
+check(admin.includes("serverPersonalizedCampaign=campaignType==='return'")&&admin.includes('rows=rows.filter(row=>row.promoReady===true)'),'RETURN keeps server-side personal promo linking and filters to codes issued by that campaign');
+check(admin.includes("campaignType==='personal'")&&admin.includes('directPromoPhone'),'PERSONAL SMS audience is restricted to the promo-code owner');
+check(admin.includes('campaignDirectPromoLink')&&admin.includes("outgoingMessage=outgoingMessage.split('{link}').join(directPromoLink)"),'WEEKDAY, PRODUCT, QUIZ and PERSONAL automatically insert their campaign promo link before sending');
+check(campaign.includes('campaignPromoContext')&&campaign.includes('promoShortLink')&&campaign.includes('promo_codes_missing'),'production-compatible backend still resolves one active RETURN promo code per selected customer');
+check(campaign.includes('https://api.sendpulse.com/sms/numbers/variables')&&campaign.includes('https://api.sendpulse.com/sms/campaigns'),'RETURN personalization uses one SendPulse mailing-list campaign with per-phone variables');
+check(campaign.includes('SMS_LINK_TOKEN="{link}"')&&campaign.includes('PromoLink'),'SendPulse RETURN personalization replaces {link} with a per-recipient PromoLink variable');
+check(personalizedMigration.includes('sendpulse_addressbook_id')&&personalizedMigration.includes('promo_code text')&&personalizedMigration.includes('promo_link text'),'personalized SMS audit schema stores temporary SendPulse list and recipient promo linkage');
+check(bookingBridge.includes("location.search+location.hash"),'short /b bridge preserves personalized promo fragment when redirecting to booking');
+check(chunk.includes('window.location.hash.slice(1)')&&chunk.includes('setPromoCode(code)'),'booking page auto-fills promo code from the personalized short-link fragment');
+check(chunk.includes('q.get("promo")'),'booking page also auto-fills regular promo query parameters such as PIDBIR5');
 
 check(campaign.includes('const selectable=!optedOut&&!cooldown&&!activeBooking'),'active bookings are excluded even from all-base marketing sends');
 check(admin.includes("$$('[data-close]',root).forEach(x=>x.onclick=closeLayer)"),'SMS modal replacement rebinds close controls');

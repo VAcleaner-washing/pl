@@ -1998,3 +1998,8 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal .client-section-head{align-items:center}
   .sms-campaign-modal .client-section-head h3{font-size:18px}
 }
+
+/* v4.0.72 — personalized RETURN SMS bridge */
+.sms-personalized-hint{display:block;margin-top:6px;color:var(--gold-2);font-size:10.5px;line-height:1.4}
+.sms-audience-summary .warning{border-color:rgba(217,168,91,.34);background:rgba(217,168,91,.07)}
+.sms-audience-summary .warning small{color:#d8b474}
