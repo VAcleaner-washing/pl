@@ -459,12 +459,12 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.sms-campaign-modal #smsMessage').input_value().count('vacleaner.pp.ua/s')==1, f"{label}: SMS draft contains opt-out URL")
         qa.check(page.locator('.sms-campaign-modal .sms-stepper [data-sms-step="1"].active').count()==1, f"{label}: SMS workflow opens directly on recipient selection")
         qa.check(page.locator('.sms-campaign-modal .sms-recipient').count()==3 and page.locator('.sms-campaign-modal .sms-recipient input:disabled').count()==1, f"{label}: opted-out recipient is visibly blocked")
-        qa.check('оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), f"{label}: SMS recipients show completed rental count")
+        qa.check(page.locator('.sms-campaign-modal .sms-client-rentals span').first.inner_text().strip().isdigit(), f"{label}: SMS recipients show completed rental count")
         qa.check(page.locator('.sms-campaign-modal #smsAudienceSort').count()==1, f"{label}: SMS audience exposes sorting control")
         page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-desc');page.wait_for_timeout(20)
-        qa.check('Анна Коваленко' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text() and '7 оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), f"{label}: SMS audience sorts by most completed rentals")
+        qa.check('Анна Коваленко' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text() and page.locator('.sms-campaign-modal .sms-client-rentals').first.inner_text().strip().startswith('7'), f"{label}: SMS audience sorts by most completed rentals")
         page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-asc');page.wait_for_timeout(20)
-        qa.check('Олена Мельник' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text() and '2 оренди' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), f"{label}: SMS audience sorts by fewest completed rentals")
+        qa.check('Олена Мельник' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text() and page.locator('.sms-campaign-modal .sms-client-rentals').first.inner_text().strip().startswith('2'), f"{label}: SMS audience sorts by fewest completed rentals")
         mobile_audience_scroll=page.locator('.sms-campaign-modal #smsAudienceList').evaluate("""el=>{const h=el.clientHeight,overflow=getComputedStyle(el).overflowY;const sample=el.querySelector('.sms-recipient');const sampleH=sample?sample.getBoundingClientRect().height:0;if(sample){for(let i=0;i<12;i++){const c=sample.cloneNode(true);c.classList.add('qa-clone');el.append(c);}}el.scrollTop=140;const out={h,overflow,scrollTop:el.scrollTop,scrollHeight:el.scrollHeight,sampleH,capacity:sampleH?h/sampleH:0};el.querySelectorAll('.qa-clone').forEach(x=>x.remove());el.scrollTop=0;return out}""")
         min_mobile_capacity=5.8 if width<=360 else 6.5
         qa.check(mobile_audience_scroll['capacity']>=min_mobile_capacity, f"{label}: recipient-first SMS step shows about seven clients before scrolling")
@@ -680,24 +680,28 @@ def short_desktop_sms_suite(browser: Browser, qa: QA) -> None:
           const r=el.getBoundingClientRect(),h=el.querySelector('.sms-workspace-header').getBoundingClientRect(),s=el.querySelector('.sms-stepper').getBoundingClientRect(),f=el.querySelector('.sms-workspace-footer').getBoundingClientRect();
           return {modal:r.height,header:h.height,stepper:s.height,footer:f.height};
         }""")
-        qa.check(chrome['header']<=86 and chrome['stepper']<=46 and chrome['footer']<=54, "Short desktop 1650x760: chrome stays compact so clients own the viewport")
+        qa.check(chrome['header']<=72 and chrome['stepper']<=36 and chrome['footer']<=50, "Short desktop 1650x760: top chrome is genuinely compact before recipient selection")
+        recipient_start = page.locator('.sms-campaign-modal').evaluate("""el=>{const m=el.getBoundingClientRect(),h=el.querySelector('.sms-recipient-head').getBoundingClientRect();return h.top-m.top}""")
+        qa.check(recipient_start<=190, f"Short desktop 1650x760: recipient selection starts high in the workspace ({recipient_start:.0f}px from modal top)")
         type_sizes = page.locator('.sms-campaign-modal').evaluate("""el=>({
           title:parseFloat(getComputedStyle(el.querySelector('.sms-heading h2')).fontSize),
           step:parseFloat(getComputedStyle(el.querySelector('.sms-stepper b')).fontSize),
           control:parseFloat(getComputedStyle(el.querySelector('#smsAudienceSort')).fontSize),
-          name:parseFloat(getComputedStyle(el.querySelector('.sms-recipient-main>b')).fontSize),
-          meta:parseFloat(getComputedStyle(el.querySelector('.sms-recipient-meta')).fontSize),
+          name:parseFloat(getComputedStyle(el.querySelector('.sms-client-name')).fontSize),
+          phone:parseFloat(getComputedStyle(el.querySelector('.sms-client-phone')).fontSize),
           badge:parseFloat(getComputedStyle(el.querySelector('.sms-consent')).fontSize)
         })""")
-        qa.check(type_sizes['title']>=26 and type_sizes['step']>=11 and type_sizes['control']>=10.5, "Short desktop 1650x760: workspace chrome keeps normal readable typography")
-        qa.check(type_sizes['name']>=13 and type_sizes['meta']>=9.5 and type_sizes['badge']>=8, "Short desktop 1650x760: recipient rows never fall back to spreadsheet-sized text")
+        qa.check(type_sizes['title']>=24 and type_sizes['step']>=10 and type_sizes['control']>=10, "Short desktop 1650x760: compact chrome remains readable")
+        qa.check(type_sizes['name']>=13 and type_sizes['phone']>=10 and type_sizes['badge']>=8, "Short desktop 1650x760: recipient table keeps readable typography")
+        columns = page.locator('.sms-campaign-modal .sms-recipient-columns').evaluate("""el=>({display:getComputedStyle(el).display,text:el.innerText})""")
+        qa.check(columns['display']=='grid' and all(x in columns['text'].lower() for x in ['клієнт','телефон','оренд','остання оренда','днів','статус']), "Short desktop 1650x760: recipient list has explicit operator columns")
         row_flow = page.locator('.sms-campaign-modal .sms-recipient').first.evaluate("""el=>{
-          const main=el.querySelector('.sms-recipient-main'),name=main.querySelector('b'),meta=main.querySelector('.sms-recipient-meta');
-          const n=name.getBoundingClientRect(),m=meta.getBoundingClientRect();
-          return {display:getComputedStyle(main).display,nameCy:n.top+n.height/2,metaCy:m.top+m.height/2,rowH:el.getBoundingClientRect().height,metaWrap:getComputedStyle(meta).flexWrap};
+          const name=el.querySelector('.sms-client-name'),phone=el.querySelector('.sms-client-phone'),rentals=el.querySelector('.sms-client-rentals'),last=el.querySelector('.sms-client-last'),days=el.querySelector('.sms-client-days');
+          const cy=x=>{const r=x.getBoundingClientRect();return r.top+r.height/2};
+          return {display:getComputedStyle(el).display,rowH:el.getBoundingClientRect().height,centers:[cy(name),cy(phone),cy(rentals),cy(last),cy(days)]};
         }""")
-        qa.check(row_flow['display']=='flex' and abs(row_flow['nameCy']-row_flow['metaCy'])<=4 and row_flow['metaWrap']=='nowrap', "Short desktop 1650x760: client name and all rental metadata stay on one horizontal line")
-        qa.check(row_flow['rowH']<=52, "Short desktop 1650x760: one-line client rows use width instead of wasting vertical space")
+        qa.check(row_flow['display']=='grid' and max(row_flow['centers'])-min(row_flow['centers'])<=3, "Short desktop 1650x760: client data aligns in one table row")
+        qa.check(row_flow['rowH']<=46, "Short desktop 1650x760: table rows use width instead of wasting vertical space")
         audience_text=page.locator('#smsAudienceList').inner_text()
         summary_text=page.locator('#smsAudienceSummary').inner_text()
         qa.check('SMS Уже Надіслано' not in audience_text, "Short desktop 1650x760: clients in the 90-day SMS cooldown are removed from the recipient list")
@@ -753,9 +757,9 @@ def desktop_suite(browser: Browser, qa: QA) -> None:
                 page.locator('#smsCampaign').click();page.wait_for_selector('.sms-campaign-modal #smsAudienceList');page.wait_for_timeout(60)
                 qa.check(page.locator('.sms-campaign-modal .sms-stepper [data-sms-step="1"].active').count()==1, "Desktop: SMS opens on recipient selection instead of a long all-in-one form")
                 qa.check(page.locator('.sms-campaign-modal #smsAudienceSort').count()==1, "Desktop: SMS audience exposes rental-count sorting")
-                qa.check('оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), "Desktop: SMS recipient rows show completed rental count")
+                qa.check(page.locator('.sms-campaign-modal .sms-client-rentals span').first.inner_text().strip().isdigit(), "Desktop: SMS recipient rows show completed rental count")
                 page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-desc');page.wait_for_timeout(20)
-                qa.check('7 оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), "Desktop: SMS audience sorts by most rentals")
+                qa.check(page.locator('.sms-campaign-modal .sms-client-rentals').first.inner_text().strip().startswith('7'), "Desktop: SMS audience sorts by most rentals")
                 audience_scroll=page.locator('.sms-campaign-modal #smsAudienceList').evaluate("""el=>{const h=el.clientHeight,overflow=getComputedStyle(el).overflowY;const sample=el.querySelector('.sms-recipient');if(sample){for(let i=0;i<18;i++){const c=sample.cloneNode(true);c.classList.add('qa-clone');el.append(c);}}el.scrollTop=180;const out={h,overflow,scrollTop:el.scrollTop,scrollHeight:el.scrollHeight};el.querySelectorAll('.qa-clone').forEach(x=>x.remove());el.scrollTop=0;return out}""")
                 qa.check(audience_scroll['h']>=380, "Desktop: recipient step gives the customer list most of the working height")
                 qa.check(audience_scroll['overflow'] in ('auto','scroll') and audience_scroll['scrollTop']>0, "Desktop: recipients own the workflow scroll")

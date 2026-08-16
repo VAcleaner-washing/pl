@@ -1,6 +1,6 @@
 {
-  "version": "4.0.85",
-  "build": 4085,
+  "version": "4.0.86",
+  "build": 4086,
   "releasedAt": "2026-08-16",
-  "label": "VAcleaner v4.0.85 — SMS RECIPIENT ROW & COOLDOWN UX FIX"
+  "label": "VAcleaner v4.0.86 — SMS RECIPIENT TABLE & COMPACT HEADER UX FIX"
 }

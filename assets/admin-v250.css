@@ -3675,3 +3675,187 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main>b{font-size:13.5px}
   .modal-form.sms-campaign-modal .sms-recipient>.sms-recipient-main>.sms-recipient-meta{font-size:10.5px}
 }
+
+/* v4.0.86 — RECIPIENT TABLE + COMPACT WORKSPACE CHROME.
+   Desktop uses the available width as a real operator table instead of stacking metadata. */
+.sms-recipient-columns{display:none}
+.sms-client-name,.sms-client-phone,.sms-client-last,.sms-client-days,.sms-client-rentals{min-width:0}
+.sms-client-rentals i,.sms-client-days i{font-style:normal;font-weight:inherit}
+.sms-client-status{display:flex;justify-content:flex-end;align-items:center;gap:6px;min-width:0}
+.sms-client-status em{font-style:normal;color:var(--muted);white-space:nowrap}
+
+@media (min-width:701px){
+  .modal-card:has(.sms-campaign-modal){
+    width:min(1400px,calc(100vw - 24px));
+    height:min(900px,calc(100dvh - 20px));
+    max-height:calc(100dvh - 20px);
+  }
+  .sms-campaign-modal>.sms-workspace-header{
+    padding:9px 14px 8px;
+    gap:12px;
+  }
+  .sms-heading>small{margin-bottom:2px;font-size:8.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:25px;line-height:1.02}
+  .sms-header-meta{gap:2px 9px;margin-top:4px;font-size:9.5px;line-height:1.05}
+  .sms-header-meta span+span::before{margin-right:9px}
+  .sms-history-open{min-height:32px;height:32px;padding:0 9px;font-size:10px}
+  .sms-campaign-modal>.sms-workspace-header .close{width:34px;min-width:34px;height:34px;min-height:34px;border-radius:10px;font-size:21px}
+
+  .sms-stepper{gap:4px;padding:3px 10px}
+  .sms-stepper button{min-height:31px;height:31px;gap:6px;padding:3px 7px;border-radius:8px}
+  .sms-stepper i{flex-basis:21px;width:21px;height:21px;border-radius:6px;font-size:9px}
+  .sms-stepper b{font-size:10.5px}
+  .sms-stepper small{display:none}
+
+  .sms-step-panel,.sms-history-panel{padding:6px 12px}
+  .sms-recipient-step{gap:4px}
+  .sms-recipient-toolbar{grid-template-columns:minmax(230px,1fr) 210px 170px;gap:6px}
+  .sms-audience-rule{display:flex;align-items:center;gap:7px;min-height:31px;height:31px;padding:0 9px;border-radius:8px}
+  .sms-audience-rule small{font-size:7.5px;white-space:nowrap}
+  .sms-audience-rule small::after{content:":"}
+  .sms-audience-rule b{overflow:hidden;font-size:10px;text-overflow:ellipsis;white-space:nowrap}
+  .sms-toolbar-field{gap:2px}
+  .sms-toolbar-field>span{display:none}
+  .sms-toolbar-field select,.sms-bulk-select{min-height:31px;height:31px;border-radius:8px;font-size:10.5px}
+  .sms-toolbar-field select{padding-left:9px}
+  .sms-bulk-select{padding-inline:10px}
+
+  .sms-campaign-modal .sms-audience-summary{gap:5px}
+  .sms-campaign-modal .sms-audience-summary span{min-height:29px;height:29px;gap:5px;padding:3px 8px;border-radius:8px}
+  .sms-campaign-modal .sms-audience-summary b{font-size:16px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:8px}
+  .sms-recipient-head{min-height:23px;height:23px;align-items:center}
+  .sms-recipient-head small{display:none}
+  .sms-recipient-head h3{font-size:13.5px}
+  .sms-selected-count{min-height:19px;height:19px;padding-inline:7px;font-size:8px}
+
+  .sms-recipient-columns{
+    display:grid;
+    grid-template-columns:26px minmax(190px,1.65fr) minmax(132px,.9fr) 70px 116px 68px 108px;
+    align-items:center;
+    gap:8px;
+    flex:0 0 auto;
+    min-height:22px;
+    padding:0 9px;
+    color:#748087;
+    font-size:8px;
+    font-weight:850;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+  }
+  .sms-recipient-columns span:nth-child(n+4):nth-child(-n+6){text-align:center}
+  .sms-recipient-columns span:last-child{text-align:right}
+
+  .sms-campaign-modal .sms-audience-list{gap:4px;padding-right:4px}
+  .modal-form.sms-campaign-modal .sms-recipient{
+    display:grid;
+    grid-template-columns:26px minmax(190px,1.65fr) minmax(132px,.9fr) 70px 116px 68px 108px;
+    align-items:center;
+    gap:8px;
+    min-height:44px;
+    height:44px;
+    padding:4px 9px;
+    border-radius:8px;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient input{width:18px;height:18px}
+  .modal-form.sms-campaign-modal .sms-client-name{
+    overflow:hidden;
+    color:#f1efea;
+    font-size:13px;
+    font-weight:800;
+    line-height:1.1;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient-data{display:contents}
+  .modal-form.sms-campaign-modal .sms-client-phone,
+  .modal-form.sms-campaign-modal .sms-client-last,
+  .modal-form.sms-campaign-modal .sms-client-days,
+  .modal-form.sms-campaign-modal .sms-client-rentals{
+    overflow:hidden;
+    color:#aab3b8;
+    font-size:10.5px;
+    font-weight:650;
+    line-height:1.1;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .modal-form.sms-campaign-modal .sms-client-rentals,
+  .modal-form.sms-campaign-modal .sms-client-last,
+  .modal-form.sms-campaign-modal .sms-client-days{text-align:center}
+  .modal-form.sms-campaign-modal .sms-client-rentals{color:#d8dcde;font-weight:800}
+  .modal-form.sms-campaign-modal .sms-client-rentals i,
+  .modal-form.sms-campaign-modal .sms-client-days i{display:none}
+  .modal-form.sms-campaign-modal .sms-client-status{justify-self:stretch}
+  .modal-form.sms-campaign-modal .sms-client-status .sms-consent{margin-left:auto;padding:3px 6px;font-size:8px}
+  .modal-form.sms-campaign-modal .sms-client-status em{display:none}
+
+  .sms-campaign-modal>.sms-workspace-footer{min-height:48px;padding:5px 12px;gap:7px}
+  .sms-campaign-modal>.sms-workspace-footer .btn{min-height:36px;height:36px;min-width:102px;padding-inline:12px;font-size:10.5px}
+  .sms-campaign-modal>.sms-workspace-footer #smsPrimary{min-width:170px}
+}
+
+@media (min-width:701px) and (max-height:820px){
+  .modal:has(.sms-campaign-modal){padding:4px 8px}
+  .modal-card:has(.sms-campaign-modal){width:calc(100vw - 16px);height:calc(100dvh - 8px);max-height:calc(100dvh - 8px)}
+  .sms-campaign-modal>.sms-workspace-header{padding:7px 12px 6px}
+  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:24px}
+  .sms-header-meta{margin-top:3px}
+  .sms-stepper{padding:2px 8px}
+  .sms-stepper button{min-height:28px;height:28px}
+  .sms-step-panel,.sms-history-panel{padding:5px 10px}
+  .sms-recipient-step{gap:3px}
+  .sms-recipient-toolbar{grid-template-columns:minmax(220px,1fr) 205px 165px}
+  .sms-audience-rule,.sms-toolbar-field select,.sms-bulk-select{min-height:29px;height:29px}
+  .sms-campaign-modal .sms-audience-summary span{min-height:27px;height:27px}
+  .sms-recipient-head{min-height:21px;height:21px}
+  .sms-recipient-columns{min-height:20px}
+  .modal-form.sms-campaign-modal .sms-recipient{min-height:43px;height:43px}
+  .sms-campaign-modal>.sms-workspace-footer{min-height:44px;padding:4px 10px}
+  .sms-campaign-modal>.sms-workspace-footer .btn{min-height:34px;height:34px}
+}
+
+@media (max-width:700px){
+  .sms-recipient-columns{display:none}
+  .sms-campaign-modal .sms-recipient{
+    grid-template-columns:18px minmax(0,1fr) auto;
+    grid-template-areas:"check name status" "check meta meta";
+  }
+  .sms-campaign-modal .sms-recipient>input{grid-area:check}
+  .sms-campaign-modal .sms-client-name{grid-area:name;overflow:hidden;color:#f1efea;font-size:12px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+  .sms-campaign-modal .sms-recipient-data{grid-area:meta;display:flex;align-items:center;gap:0 6px;min-width:0;overflow:hidden;color:var(--muted);font-size:8.5px;white-space:nowrap}
+  .sms-campaign-modal .sms-recipient-data>*{flex:0 0 auto}
+  .sms-campaign-modal .sms-recipient-data>*+*::before{content:"·";margin-right:6px;color:#3d474c}
+  .sms-campaign-modal .sms-client-rentals{order:-1;color:#d8dcde;font-weight:800}
+  .sms-campaign-modal .sms-client-rentals i,.sms-campaign-modal .sms-client-days i{display:inline}
+  .sms-campaign-modal .sms-client-status{grid-area:status;justify-self:end}
+  .sms-campaign-modal .sms-client-status em{display:none}
+}
+
+/* v4.0.86 — mobile cards keep metadata on one compact line; beat legacy span/grid rules explicitly. */
+@media (max-width:700px){
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data{
+    grid-area:meta;
+    display:flex;
+    flex-direction:row;
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:0 6px;
+    min-width:0;
+    height:auto;
+    overflow:hidden;
+    color:var(--muted);
+    font-size:8.5px;
+    line-height:1.15;
+    white-space:nowrap;
+  }
+  .sms-campaign-modal .sms-recipient>span.sms-client-status{
+    grid-area:status;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:4px;
+    min-width:0;
+    height:auto;
+  }
+}
