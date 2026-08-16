@@ -3222,36 +3222,36 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 }
 .sms-message-editor,
 .sms-route-picker{padding:16px}
-.sms-section-heading{margin-bottom:11px}
-.sms-section-heading>small{margin-bottom:5px}
-.sms-section-heading h3{margin:0;font-size:18px;line-height:1.1}
+.sms-section-heading{margin-bottom:12px}
+.sms-section-heading>small{margin-bottom:6px;font-size:10px;letter-spacing:.08em}
+.sms-section-heading h3{margin:0;font-size:19px;line-height:1.1}
 .sms-message-editor textarea{
   display:block;
   width:100%;
-  min-height:150px;
+  min-height:160px;
   resize:vertical;
-  padding:13px 14px;
+  padding:14px 15px;
   border:1px solid #2b383e;
   border-radius:11px;
   background:#091115;
   color:var(--text);
   font:inherit;
-  font-size:13px;
-  line-height:1.5;
+  font-size:14.5px;
+  line-height:1.58;
 }
 .sms-message-meta{
   display:flex;
   flex-wrap:wrap;
   justify-content:space-between;
-  gap:6px 12px;
-  margin-top:8px;
+  gap:7px 14px;
+  margin-top:10px;
   color:var(--muted);
-  font-size:9.5px;
+  font-size:11px;
 }
 .sms-message-meta span:last-child{color:#c7a66f}
 .sms-preview-card{
-  margin-top:13px;
-  padding:11px 12px;
+  margin-top:14px;
+  padding:13px 14px;
   border:1px solid rgba(214,164,95,.17);
   border-radius:11px;
   background:rgba(214,164,95,.045);
@@ -3259,24 +3259,24 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .sms-preview-card small,
 .sms-review-message>small{
   display:block;
-  margin-bottom:5px;
+  margin-bottom:6px;
   color:#aab3b8;
-  font-size:8px;
+  font-size:9px;
   font-weight:800;
   letter-spacing:.07em;
   text-transform:uppercase;
 }
 .sms-preview-card p,
-.sms-review-message p{margin:0;color:#e6e3dc;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
-.sms-route-picker{display:grid;align-content:start;gap:8px}
-.sms-route-picker .sms-section-heading{margin-bottom:3px}
+.sms-review-message p{margin:0;color:#e6e3dc;font-size:13.5px;line-height:1.5;overflow-wrap:anywhere}
+.sms-route-picker{display:grid;align-content:start;gap:10px}
+.sms-route-picker .sms-section-heading{margin-bottom:4px}
 .sms-route-card{
   display:grid;
-  grid-template-columns:18px minmax(0,1fr) auto;
+  grid-template-columns:19px minmax(0,1fr) auto;
   align-items:center;
-  gap:10px;
-  min-height:66px;
-  padding:10px 11px;
+  gap:11px;
+  min-height:74px;
+  padding:12px 13px;
   border:1px solid #2a363c;
   border-radius:11px;
   background:#0a1317;
@@ -3284,21 +3284,21 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 }
 .sms-route-card:has(input:checked){border-color:rgba(214,164,95,.6);background:rgba(214,164,95,.075);box-shadow:inset 0 0 0 1px rgba(214,164,95,.1)}
 .sms-route-card.disabled{opacity:.5;cursor:not-allowed}
-.sms-route-card input{width:17px;height:17px;margin:0;accent-color:#d6a45f}
-.sms-route-card>span{display:grid;gap:3px;min-width:0}
-.sms-route-card b{font-size:12px}
-.sms-route-card small{color:var(--muted);font-size:9px}
-.sms-route-card em{color:#c5a36d;font-size:8.5px;font-style:normal;font-weight:750;text-align:right}
+.sms-route-card input{width:18px;height:18px;margin:0;accent-color:#d6a45f}
+.sms-route-card>span{display:grid;gap:4px;min-width:0}
+.sms-route-card b{font-size:14px;line-height:1.18}
+.sms-route-card small{color:var(--muted);font-size:10.5px;line-height:1.3}
+.sms-route-card em{color:#c5a36d;font-size:10px;font-style:normal;font-weight:750;text-align:right}
 .sms-inline-alert{
   display:grid;
-  gap:3px;
+  gap:4px;
   margin-top:4px;
-  padding:9px 10px;
+  padding:11px 12px;
   border:1px solid rgba(214,164,95,.18);
   border-radius:10px;
   background:rgba(214,164,95,.045);
-  font-size:9.5px;
-  line-height:1.35;
+  font-size:11px;
+  line-height:1.4;
 }
 .sms-inline-alert span{color:var(--muted)}
 .sms-inline-alert.error{border-color:rgba(237,121,121,.24);background:rgba(237,121,121,.05)}
@@ -3451,14 +3451,14 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-section-heading{margin-bottom:7px}
   .sms-section-heading>small{font-size:8px}
   .sms-section-heading h3{font-size:15px}
-  .sms-message-editor textarea{min-height:118px;padding:10px 11px;font-size:11.5px}
-  .sms-message-meta{font-size:8.5px}
+  .sms-message-editor textarea{min-height:126px;padding:12px 13px;font-size:13px;line-height:1.5}
+  .sms-message-meta{font-size:10px}
   .sms-preview-card{margin-top:8px;padding:8px 9px}
-  .sms-preview-card p,.sms-review-message p{font-size:10px}
-  .sms-route-card{min-height:57px;padding:8px 9px}
-  .sms-route-card b{font-size:11px}
-  .sms-route-card small,.sms-route-card em{font-size:8px}
-  .sms-inline-alert{padding:7px 8px;font-size:8.5px}
+  .sms-preview-card p,.sms-review-message p{font-size:11.5px;line-height:1.45}
+  .sms-route-card{min-height:64px;padding:10px 11px}
+  .sms-route-card b{font-size:12.5px}
+  .sms-route-card small,.sms-route-card em{font-size:9px}
+  .sms-inline-alert{padding:9px 10px;font-size:9.5px;line-height:1.38}
   .sms-review-step{gap:8px}
   .sms-review-grid{grid-template-columns:1fr;gap:6px}
   .sms-review-card{grid-template-columns:auto 1fr;align-items:baseline;gap:3px 8px;padding:9px 10px;border-radius:10px}
@@ -4131,6 +4131,17 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .sms-campaign-modal .sms-route-card b{font-weight:680}
 .sms-campaign-modal .sms-route-card small{font-weight:450}
 .sms-campaign-modal .sms-route-card em{font-weight:600}
+
+@media (min-width:1181px){
+  .sms-campaign-modal .sms-message-editor textarea{font-size:15px;line-height:1.6;min-height:168px}
+  .sms-campaign-modal .sms-message-meta{font-size:11.5px}
+  .sms-campaign-modal .sms-preview-card p{font-size:14px;line-height:1.52}
+  .sms-campaign-modal .sms-route-card{min-height:78px;padding:13px 14px}
+  .sms-campaign-modal .sms-route-card b{font-size:14.5px}
+  .sms-campaign-modal .sms-route-card small{font-size:11px}
+  .sms-campaign-modal .sms-route-card em{font-size:10.25px}
+  .sms-campaign-modal .sms-inline-alert{font-size:11.25px;line-height:1.42}
+}
 .sms-campaign-modal .sms-inline-alert b{font-weight:680}
 .sms-campaign-modal .sms-review-card>small{font-weight:600}
 .sms-campaign-modal .sms-review-card>b{font-weight:720}
@@ -4305,7 +4316,7 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:7px}
 }
 
-/* v4.0.90 — CAMPAIGNS + SMS READABILITY PASS.
+/* v4.0.91 — STEP 2 SMS TYPOGRAPHY PASS.
    Match the visual scale of Clients: readable operator UI first, density second. */
 .campaign-workspace{
   padding:0;
@@ -4626,7 +4637,7 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal .sms-sender-state{font-size:7.5px}
 }
 
-/* v4.0.90a — mobile containment after the readability pass. */
+/* v4.0.91a — step 2 SMS readability follow-up. */
 @media (max-width:700px){
   .campaign-workspace .campaign-panel-head{
     display:grid;
