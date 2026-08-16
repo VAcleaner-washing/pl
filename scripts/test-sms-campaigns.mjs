@@ -2,6 +2,9 @@ import fs from 'node:fs';
 const read=f=>fs.readFileSync(f,'utf8');
 let pass=0,fail=0;const check=(ok,msg)=>{if(ok){pass++;console.log('PASS:',msg)}else{fail++;console.error('FAIL:',msg)}};
 const admin=read('assets/admin-v250.js'),adminCss=read('assets/admin-v250.css'),publicJs=read('assets/public-experience.js'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),consent=read('supabase/functions/vacleaner-sms-consent-v1/index.ts'),campaign=read('supabase/functions/vacleaner-campaigns-v1/index.ts'),migration=read('supabase/migrations/20260815223500_vacleaner_sms_reactivation_consent_v4069.sql'),personalizedMigration=read('supabase/migrations/20260816001000_vacleaner_personalized_sms_links_v4072.sql'),bookingBridge=read('b/index.html'),privacy=read('polityka-konfidenciynosti/index.html'),stop=read('s/index.html'),e2e=read('scripts/e2e_smoke.py');
+
+check(/const dateTime=v=>/.test(admin),'SMS history defines its date-time formatter');
+check(/dateTime\(d\.sent_at\|\|d\.created_at\)/.test(admin),'SMS dispatch history uses the defined date-time formatter');
 check(publicJs.includes('Отримувати персональні пропозиції та бонуси VAcleaner'),'public booking injects optional marketing consent');
 check(publicJs.includes('__VAC_MARKETING_SMS_CONSENT__=false'),'marketing consent defaults to false');
 check(chunk.includes('vacleaner-sms-consent-v1')&&chunk.includes('action:"opt_in"')&&chunk.includes('bookingCode:n.bookingCode'),'successful booking records explicit opt-in through dedicated endpoint');

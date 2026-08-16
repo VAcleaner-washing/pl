@@ -1,6 +1,6 @@
 {
-  "version": "4.0.75",
-  "build": 4075,
+  "version": "4.0.76",
+  "build": 4076,
   "releasedAt": "2026-08-16",
-  "label": "VAcleaner v4.0.75 — SENDPULSE PREFLIGHT DIAGNOSTICS"
+  "label": "VAcleaner v4.0.76 — SMS HISTORY & BOOKING TIME ALIGNMENT FIX"
 }
