@@ -28,7 +28,7 @@ check(admin.includes('давно не освіжали диван? 🙂')&&admin
 const returnPreview='VAcleaner: давно не освіжали диван? 🙂 -10% на повторну оренду Puzzi. Перевірити: vacleaner.pp.ua/b#XXXXXXX Стоп: vacleaner.pp.ua/s';
 check([...returnPreview].length>70&&[...returnPreview].length<=134,'RETURN default preview stays within exactly two Unicode SMS parts');
 check(admin.includes('RETURN · повернення клієнтів')&&!admin.includes('<option value="return">RETURN · сплячі 180+</option>'),'RETURN campaign type is not hard-coded to 180 days');
-check(admin.includes('campaign?.dormant_days')&&admin.includes('sms-audience-rule')&&admin.includes('Не орендували ${Math.max(1,Number(campaign?.dormant_days||0))}+ днів'),'RETURN SMS audience rule follows each campaign dormant_days value');
+check(admin.includes('campaign?.dormant_days')&&admin.includes('sms-audience-rule')&&admin.includes('Не орендували <b>${Math.max(1,Number(campaign?.dormant_days||0))}+ днів</b>'),'RETURN SMS audience rule follows each campaign dormant_days value');
 check(admin.includes("serverPersonalizedCampaign=campaignType==='return'")&&admin.includes('rows=rows.filter(row=>row.promoReady===true)'),'RETURN keeps server-side personal promo linking and filters to codes issued by that campaign');
 check(admin.includes("campaignType==='personal'")&&admin.includes('directPromoPhone'),'PERSONAL SMS audience is restricted to the promo-code owner');
 check(admin.includes('campaignDirectPromoLink')&&admin.includes("outgoingMessage=outgoingMessage.split('{link}').join(directPromoLink)"),'WEEKDAY, PRODUCT, QUIZ and PERSONAL automatically insert their campaign promo link before sending');
@@ -65,7 +65,7 @@ check(adminCss.includes('.sms-workspace-footer')&&adminCss.includes('grid-templa
 check(adminCss.includes('.sms-campaign-modal .client-section-head small')&&adminCss.includes('text-transform:uppercase'),'SMS section kickers use a non-overlapping compact hierarchy');
 check(adminCss.includes('.sms-campaign-modal #smsSend:disabled')&&adminCss.includes('cursor:not-allowed'),'inactive SMS route has a visibly disabled send action');
 check(adminCss.includes('.sms-form-body::-webkit-scrollbar')&&adminCss.includes('.sms-audience-list::-webkit-scrollbar'),'SMS modal hides native arrow scrollbars while retaining scroll');
-check(admin.includes("${h(statusData.sender||'VACLEANER')} · <b>${h(status.statusLabel||'невідомо')}</b>")&&!admin.includes('status.statusExplain'),'SMS header avoids duplicate provider-language moderation text');
+check(admin.includes('sms-meta-sender')&&admin.includes('sms-sender-state')&&admin.includes("${h(status.statusLabel||'невідомо')}")&&!admin.includes('status.statusExplain'),'SMS header separates sender state from provider metadata without duplicate moderation text');
 check(admin.includes('class="sms-stepper"')&&admin.includes('data-sms-panel="1"')&&admin.includes('data-sms-panel="2"')&&admin.includes('data-sms-panel="3"'),'SMS workflow is rebuilt into recipients, message and review steps');
 check(admin.includes("recipientWord=n=>")&&admin.includes("m===1)return'одержувачу'"),'SMS CTA uses correct Ukrainian recipient grammar');
 check(admin.includes('Щоб не витратити дорожчий тариф випадково')&&admin.includes('name="smsRoute" value="international"'),'international route requires an explicit conscious choice while Sender ID is inactive');
