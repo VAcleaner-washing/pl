@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const read=f=>fs.readFileSync(f,'utf8');
 let pass=0,fail=0;const check=(ok,msg)=>{if(ok){pass++;console.log('PASS:',msg)}else{fail++;console.error('FAIL:',msg)}};
-const admin=read('assets/admin-v250.js'),adminCss=read('assets/admin-v250.css'),publicJs=read('assets/public-experience.js'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),consent=read('supabase/functions/vacleaner-sms-consent-v1/index.ts'),campaign=read('supabase/functions/vacleaner-campaigns-v1/index.ts'),migration=read('supabase/migrations/20260815223500_vacleaner_sms_reactivation_consent_v4069.sql'),personalizedMigration=read('supabase/migrations/20260816001000_vacleaner_personalized_sms_links_v4072.sql'),bookingBridge=read('b/index.html'),privacy=read('polityka-konfidenciynosti/index.html'),stop=read('s/index.html'),e2e=read('scripts/e2e_smoke.py');
+const admin=read('assets/admin-v250.js'),adminCss=read('assets/admin-v250.css'),publicJs=read('assets/public-experience.js'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),consent=read('supabase/functions/vacleaner-sms-consent-v1/index.ts'),campaign=read('supabase/functions/vacleaner-campaigns-v1/index.ts'),smsDirect=read('supabase/functions/vacleaner-sms-v2/index.ts'),smsDirectLib=read('supabase/functions/vacleaner-sms-v2/lib.ts'),migration=read('supabase/migrations/20260815223500_vacleaner_sms_reactivation_consent_v4069.sql'),personalizedMigration=read('supabase/migrations/20260816001000_vacleaner_personalized_sms_links_v4072.sql'),recipientCampaignMigration=read('supabase/migrations/20260816064323_vacleaner_sms_recipient_campaign_ids_v4080.sql'),bookingBridge=read('b/index.html'),privacy=read('polityka-konfidenciynosti/index.html'),stop=read('s/index.html'),e2e=read('scripts/e2e_smoke.py');
 
 check(/const dateTime=v=>/.test(admin),'SMS history defines its date-time formatter');
 check(/dateTime\(d\.sent_at\|\|d\.created_at\)/.test(admin),'SMS dispatch history uses the defined date-time formatter');
@@ -20,7 +20,7 @@ check(campaign.includes('sender_not_active'),'national route blocks inactive sen
 check(campaign.includes('action==="sms_preflight"')&&campaign.includes('emulate:true'),'SMS uses a provider preflight before any real SendPulse campaign');
 check(campaign.includes('https://api.sendpulse.com/balance')&&campaign.includes('sendpulseBalance'),'SMS status and preflight can surface the current SendPulse balance');
 check(campaign.includes('sendpulseErrorDetail')&&campaign.includes('sendpulse_http_${res.status}${detail?":"+detail:""}'),'SendPulse HTTP errors preserve the provider error message for diagnostics');
-check(admin.includes("action:'sms_preflight'")&&admin.includes('Перевіряємо SendPulse'),'admin performs SendPulse preflight before arming the final send action');
+check(admin.includes("SMS_API=SUPABASE+'/functions/v1/vacleaner-sms-v2'")&&admin.includes("invokeSms({action:'sms_preflight'")&&admin.includes('Перевіряємо SendPulse'),'admin performs SendPulse preflight through the direct SMS Edge Function before arming final send');
 check(admin.includes('SendPulse відхилив перевірку розсилки.')&&admin.includes('e.detail=detail'),'admin surfaces provider error details instead of a generic SendPulse toast');
 
 check(admin.includes('smsCampaignDefaultText')&&admin.includes("{link}")&&admin.includes('Повідомлення клієнту'),'campaign SMS UI uses an automatic promo-link template');
@@ -32,13 +32,14 @@ check(admin.includes('campaign?.dormant_days')&&admin.includes('за умова�
 check(admin.includes("serverPersonalizedCampaign=campaignType==='return'")&&admin.includes('rows=rows.filter(row=>row.promoReady===true)'),'RETURN keeps server-side personal promo linking and filters to codes issued by that campaign');
 check(admin.includes("campaignType==='personal'")&&admin.includes('directPromoPhone'),'PERSONAL SMS audience is restricted to the promo-code owner');
 check(admin.includes('campaignDirectPromoLink')&&admin.includes("outgoingMessage=outgoingMessage.split('{link}').join(directPromoLink)"),'WEEKDAY, PRODUCT, QUIZ and PERSONAL automatically insert their campaign promo link before sending');
-check(campaign.includes('campaignPromoContext')&&campaign.includes('promoShortLink')&&campaign.includes('promo_codes_missing'),'production-compatible backend still resolves one active RETURN promo code per selected customer');
-check(campaign.includes('https://api.sendpulse.com/sms/numbers/variables')&&campaign.includes('https://api.sendpulse.com/sms/campaigns'),'RETURN personalization uses one SendPulse mailing-list campaign with per-phone variables');
-check(campaign.includes('waitForSendpulseAddressBook')&&campaign.includes('active_phones_quantity')&&campaign.includes('new_phones_quantity')&&campaign.includes('Date.now()+85000'),'personalized SMS waits up to ~85 seconds for SendPulse to activate imported phones before preflight/send');
-check(campaign.includes('/sms/numbers/info/')&&campaign.includes('sendpulsePhoneReady')&&campaign.includes('phones.length<=10'),'small SMS test batches verify per-phone status when SendPulse address-book counters lag');
-check(campaign.includes('sendpulse_addressbook_processing')&&campaign.includes('sendpulse_addressbook_rejected'),'address-book activation failures distinguish provider processing from rejected phones');
-check(campaign.includes('SMS_LINK_TOKEN="{link}"')&&campaign.includes('PromoLink'),'SendPulse RETURN personalization replaces {link} with a per-recipient PromoLink variable');
-check(personalizedMigration.includes('sendpulse_addressbook_id')&&personalizedMigration.includes('promo_code text')&&personalizedMigration.includes('promo_link text'),'personalized SMS audit schema stores temporary SendPulse list and recipient promo linkage');
+check(smsDirectLib.includes('campaignPromoContext')&&smsDirectLib.includes('promoShortLink')&&smsDirect.includes('promo_codes_missing'),'direct SMS backend resolves one active RETURN promo code per selected customer');
+check(smsDirect.includes('preflightPersonalized')&&smsDirect.includes('phones:[smsPhone(sample.phone)]')&&smsDirect.includes('emulate:true'),'RETURN preflight bypasses SendPulse address books and validates a ready personalized direct SMS');
+check(smsDirect.includes('sendOne')&&smsDirect.includes('expandSmsTemplate(message,String(row.promoLink||""))'),'RETURN actual send expands each customer promo link inside VAcleaner before provider submission');
+check(smsDirect.includes('off+=5')&&smsDirect.includes('Promise.allSettled(batch.map(r=>sendOne'),'personalized RETURN sends are throttled in small concurrent batches instead of one fragile address-book campaign');
+check(!smsDirect.includes('addressbooks')&&!smsDirect.includes('sms/numbers/variables'),'RETURN direct transport no longer depends on New/Active SendPulse address-book activation');
+check(smsDirect.includes('sendpulse_campaign_id:x.value')&&smsDirect.includes('d.personalized===true'),'each personalized recipient stores its own SendPulse campaign ID for delivery sync');
+check(recipientCampaignMigration.includes('sendpulse_campaign_id bigint')&&recipientCampaignMigration.includes('vacleaner_sms_dispatch_recipients_sendpulse_campaign_idx'),'v4.0.80 schema stores indexed per-recipient SendPulse campaign IDs');
+check(personalizedMigration.includes('promo_code text')&&personalizedMigration.includes('promo_link text'),'personalized SMS audit still stores the client promo code and short link');
 check(bookingBridge.includes("location.search+location.hash"),'short /b bridge preserves personalized promo fragment when redirecting to booking');
 check(chunk.includes('window.location.hash.slice(1)')&&chunk.includes('setPromoCode(code)'),'booking page auto-fills promo code from the personalized short-link fragment');
 check(chunk.includes('q.get("promo")'),'booking page also auto-fills regular promo query parameters such as PIDBIR5');
