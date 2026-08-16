@@ -4821,3 +4821,207 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal.history-mode #smsHistory article small{font-size:10px}
   .sms-campaign-modal.history-mode #smsHistory article .btn{min-height:36px;height:36px;padding:0 9px;font-size:11px}
 }
+
+
+/* v4.0.93 — CAMPAIGNS + SMS FULL UX READABILITY LOCK.
+   Final layer: operator readability follows the Clients view scale; density must not win by shrinking type. */
+
+/* Campaigns main workspace */
+.campaign-workspace .campaign-type,
+.campaign-workspace .campaign-status{font-size:10.5px;min-height:23px;padding-inline:8px}
+.campaign-workspace .campaign-metrics small{font-size:11px}
+.campaign-list-head{font-size:11px}
+.campaign-more-menu button{font-size:12.5px}
+.campaign-code-field small{font-size:11.5px;line-height:1.4}
+.campaign-code-list code{font-size:13.5px}
+.campaign-code-list span{font-size:12.5px}
+
+@media (min-width:901px){
+  .modal-card:has(.campaign-codes-modal){height:auto;max-height:min(760px,calc(100dvh - 32px))}
+  .campaign-codes-modal{height:auto;max-height:min(760px,calc(100dvh - 32px));grid-template-rows:auto minmax(0,1fr) auto}
+  .campaign-code-list{min-height:76px;max-height:62vh}
+}
+@media (min-width:901px) and (max-width:1180px){
+  .campaign-workspace .campaign-summary small{font-size:10.5px}
+  .campaign-workspace .campaign-type,
+  .campaign-workspace .campaign-status{font-size:10.5px}
+  .campaign-workspace .campaign-metrics small{font-size:10.5px}
+}
+@media (min-width:701px) and (max-width:900px){
+  .campaign-workspace .campaign-summary small{font-size:10.5px}
+  .campaign-workspace .campaign-type,
+  .campaign-workspace .campaign-status{font-size:10.5px}
+  .campaign-workspace .campaign-metrics small{font-size:10.5px}
+  .campaign-code-field small{font-size:11px}
+  .campaign-code-list span{font-size:12px}
+}
+@media (max-width:700px){
+  .campaign-workspace .campaign-type,
+  .campaign-workspace .campaign-status{font-size:10px}
+  .campaign-workspace .campaign-metrics small{font-size:10.5px}
+  .campaign-code-field small{font-size:10.5px}
+  .campaign-code-list code{font-size:13px}
+  .campaign-code-list span{font-size:11.5px;white-space:normal;overflow:visible;text-overflow:clip}
+}
+
+/* SMS header: keep it compact, but never micro. */
+@media (min-width:901px){
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:10px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:12px}
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:10px;min-height:21px}
+  .sms-history-open{font-size:12px}
+  .sms-history-open span{font-size:10.5px}
+  .sms-stepper i{font-size:10.5px}
+  .sms-recipient-columns{font-size:11px}
+  .sms-campaign-modal .sms-audience-rule small{font-size:10.5px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:10.5px}
+  .sms-selected-count{font-size:11px}
+  .modal-form.sms-campaign-modal .sms-client-phone,
+  .modal-form.sms-campaign-modal .sms-client-last,
+  .modal-form.sms-campaign-modal .sms-client-days,
+  .modal-form.sms-campaign-modal .sms-client-rentals{font-size:13px}
+  .modal-form.sms-campaign-modal .sms-client-status .sms-consent{font-size:11px}
+}
+@media (min-width:901px) and (max-height:820px){
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:9.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:11.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:9.5px}
+}
+@media (min-width:701px) and (max-width:900px){
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:9.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:11px}
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:9.5px}
+  .sms-stepper i{font-size:10px}
+  .sms-campaign-modal .sms-audience-rule small{font-size:10px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:10px}
+  .sms-selected-count{font-size:10.5px}
+  .modal-form.sms-campaign-modal .sms-client-status .sms-consent{font-size:10.5px}
+}
+
+/* Step 2 + Step 3: all informational text is readable, including helper/attestation/preflight states. */
+.sms-campaign-modal .sms-review-card>small{font-size:11px}
+.sms-campaign-modal .sms-review-card>span{font-size:12px;line-height:1.4}
+.sms-campaign-modal .sms-review-message>small{font-size:10.5px}
+.sms-campaign-modal .sms-review-message p{font-size:14px;line-height:1.5}
+.sms-campaign-modal .sms-legacy-attestation b{font-size:13px;line-height:1.3}
+.sms-campaign-modal .sms-legacy-attestation small{font-size:11.5px;line-height:1.45}
+.sms-campaign-modal .sms-preflight-state b{font-size:13px;line-height:1.3}
+.sms-campaign-modal .sms-preflight-state small{font-size:11.5px;line-height:1.45}
+.sms-campaign-modal .sms-section-heading>small{font-size:10.5px}
+.sms-campaign-modal .sms-preview-card small{font-size:10px}
+.sms-campaign-modal .sms-route-card em{font-size:10.5px}
+
+/* Journal inherits the same header readability, and its kicker/status are not micro. */
+.sms-campaign-modal.history-mode .sms-history-head>div>small{font-size:10.5px}
+.sms-campaign-modal.history-mode .sms-history-list .sms-dispatch-status{font-size:11px}
+
+/* Mobile: remove tiny redundant subtitles instead of shrinking them. */
+@media (max-width:700px){
+  .sms-stepper small{display:none}
+  .sms-heading>small{font-size:9.5px}
+  .sms-campaign-modal .sms-meta-item>small{display:none}
+  .sms-campaign-modal .sms-meta-item{min-height:25px;padding-inline:7px;gap:4px}
+  .sms-campaign-modal .sms-meta-item>b{font-size:10.5px}
+  .sms-campaign-modal .sms-sender-state{font-size:9.5px;min-height:19px;padding-inline:6px}
+  .sms-history-open{font-size:10.5px;min-height:34px;padding-inline:9px}
+  .sms-history-open::before{content:none}
+  .sms-history-open span{font-size:9.5px}
+  .sms-stepper b{font-size:11px}
+  .sms-stepper i{font-size:10px}
+  .sms-audience-rule small,
+  .sms-toolbar-field>span{font-size:9.5px}
+  .sms-audience-rule b{font-size:11px}
+  .sms-toolbar-field select,
+  .sms-bulk-select{font-size:11.5px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:10px}
+  .sms-selected-count{font-size:10px}
+  .sms-section-heading>small{font-size:9.5px}
+  .sms-message-editor textarea{font-size:14px;line-height:1.55}
+  .sms-message-meta{font-size:10.5px;line-height:1.4}
+  .sms-preview-card small{font-size:9.5px}
+  .sms-preview-card p,.sms-review-message p{font-size:12.5px;line-height:1.5}
+  .sms-route-card b{font-size:13.5px}
+  .sms-route-card small{font-size:10.5px}
+  .sms-route-card em{font-size:10px}
+  .sms-inline-alert{font-size:10.5px;line-height:1.45}
+  .sms-review-card>small{font-size:9.5px}
+  .sms-review-card>b{font-size:18px}
+  .sms-review-card>span{font-size:10.5px;line-height:1.4}
+  .sms-review-message>small{font-size:9.5px}
+  .sms-campaign-modal .sms-legacy-attestation{padding:10px 11px}
+  .sms-campaign-modal .sms-legacy-attestation b{font-size:11.5px}
+  .sms-campaign-modal .sms-legacy-attestation small{font-size:10.5px;line-height:1.4}
+  .sms-preflight-state{padding:10px 11px}
+  .sms-preflight-state b{font-size:11.5px}
+  .sms-preflight-state small{font-size:10.5px;line-height:1.4}
+  .sms-campaign-modal.history-mode .sms-history-head>div>small{font-size:9.5px}
+  .sms-campaign-modal.history-mode .sms-history-list .sms-dispatch-status{font-size:10px}
+}
+@media (max-width:360px){
+  .sms-history-open{font-size:10px;padding-inline:8px}
+  .sms-history-open span{display:none}
+  .sms-stepper b{font-size:0}
+  .sms-stepper b::after{content:attr(data-short);font-size:10.5px;line-height:1.1}
+  .sms-campaign-modal .sms-meta-item>b{font-size:10px}
+  .sms-campaign-modal .sms-sender-state{font-size:9px}
+}
+
+/* v4.0.93b — specificity cleanup: legacy density rules must not win over the UX lock. */
+@media (min-width:901px) and (max-width:1180px){
+  .campaign-workspace .campaign-summary small,
+  .campaign-workspace .campaign-type,
+  .campaign-workspace .campaign-status,
+  .campaign-workspace .campaign-metrics small{font-size:11px}
+}
+@media (min-width:901px) and (max-height:820px){
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small,
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:10px}
+  .sms-campaign-modal .sms-selected-count{font-size:11px}
+  .sms-campaign-modal .sms-preview-card small{font-size:10.5px}
+}
+@media (min-width:901px){
+  .sms-campaign-modal .sms-history-open span{font-size:10.5px}
+  .sms-campaign-modal.history-mode .sms-history-head>div>small{font-size:11px}
+}
+@media (min-width:701px) and (max-width:900px){
+  .sms-campaign-modal .sms-history-open span{font-size:10px}
+}
+@media (max-width:700px){
+  .sms-campaign-modal .sms-heading>small{font-size:9.5px}
+  .sms-campaign-modal .sms-audience-sort>span,
+  .sms-campaign-modal .sms-toolbar-field>span{font-size:9.5px}
+  .sms-campaign-modal .sms-selected-count{font-size:10px}
+  .sms-campaign-modal .sms-history-open span{font-size:9.5px}
+}
+@media (max-width:360px){
+  .sms-campaign-modal .sms-meta-sender{min-width:144px;flex:1 1 144px;padding-right:6px}
+  .sms-campaign-modal .sms-meta-item:not(.sms-meta-sender){flex:0 0 auto}
+}
+
+/* 320px: recover list capacity from chrome/padding, never from font size. */
+@media (max-width:360px){
+  .sms-campaign-modal>.sms-workspace-header{padding:6px 9px 6px;row-gap:4px}
+  .sms-stepper{padding:3px 6px;gap:3px}
+  .sms-stepper button{min-height:36px;height:36px;padding:3px 5px;gap:5px}
+  .sms-stepper i{width:21px;height:21px;flex-basis:21px}
+  .sms-recipient-toolbar{gap:4px}
+  .sms-audience-rule{min-height:32px;height:32px;padding:3px 7px}
+  .sms-toolbar-field select,.sms-bulk-select{min-height:34px;height:34px}
+  .sms-campaign-modal .sms-audience-summary{gap:3px}
+  .sms-campaign-modal .sms-audience-summary span{min-height:31px;height:31px;padding-block:3px}
+}
+@media (max-width:360px){
+  .sms-campaign-modal>.sms-workspace-header{padding-top:5px;padding-bottom:5px}
+  .sms-campaign-modal .sms-audience-summary{gap:2px}
+  .sms-campaign-modal .sms-audience-summary span{min-height:30px;height:30px}
+  .sms-recipient-head{min-height:25px;height:25px}
+}
+/* v4.0.93c — eliminate inherited micro-type from mobile SMS header metadata. */
+@media (max-width:700px){
+  .sms-campaign-modal .sms-header-meta{font-size:10px}
+  .sms-campaign-modal .sms-meta-item{font-size:10px}
+  .sms-campaign-modal .sms-sender-state{font-size:9.5px}
+}
+@media (max-width:360px){
+  .sms-campaign-modal .sms-sender-state{font-size:9.5px}
+}

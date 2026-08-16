@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.0.92",
+  "version": "4.0.93",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -36,6 +36,7 @@
     "test:booking-date-default": "node scripts/test-public-booking-date-default.mjs",
     "test:pwa-static": "node scripts/test-pwa.mjs",
     "test:sms-campaigns": "node scripts/test-sms-campaigns.mjs",
-    "test:public-inner-heroes": "python scripts/test-public-inner-heroes.py"
+    "test:public-inner-heroes": "python scripts/test-public-inner-heroes.py",
+    "test:campaign-sms-ux": "python scripts/campaign_sms_ux_qa.py"
   }
 }
