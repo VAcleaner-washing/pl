@@ -4240,3 +4240,46 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal .sms-meta-item>small{font-size:6px}
   .sms-campaign-modal .sms-meta-item>b{font-size:7.5px}
 }
+
+
+/* v4.0.88 — CI/UX FIX: keep desktop SMS status metadata in the same compact header row.
+   The labels remain visually separated, but no longer consume a full second header row. */
+@media (min-width:701px){
+  .sms-campaign-modal>.sms-workspace-header{
+    grid-template-columns:minmax(250px,auto) minmax(0,1fr) auto;
+    grid-template-areas:"heading meta actions";
+    column-gap:12px;
+    row-gap:0;
+  }
+  .sms-campaign-modal>.sms-workspace-header .sms-heading{grid-area:heading}
+  .sms-campaign-modal>.sms-workspace-header .sms-header-meta{
+    grid-area:meta;
+    display:flex;
+    flex-wrap:nowrap;
+    align-items:center;
+    justify-content:flex-start;
+    width:auto;
+    min-width:0;
+    max-width:none;
+    margin-top:0;
+    overflow:hidden;
+  }
+  .sms-campaign-modal>.sms-workspace-header .sms-header-actions{grid-area:actions}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item{
+    flex:0 1 auto;
+    min-width:0;
+    white-space:nowrap;
+  }
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-sender{flex:0 1 auto}
+}
+@media (min-width:701px) and (max-height:820px){
+  .sms-campaign-modal>.sms-workspace-header{
+    grid-template-columns:minmax(230px,auto) minmax(0,1fr) auto;
+    padding:7px 12px 6px;
+  }
+  .sms-campaign-modal>.sms-workspace-header .sms-header-meta{gap:4px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item{min-height:23px;padding-inline:6px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:7px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:8.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:7px}
+}
