@@ -453,12 +453,16 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         open_mobile_view(page,'campaigns');page.wait_for_timeout(60)
         qa.check(page.locator('.campaign-panel').count()==1, f"{label}: campaigns render in their dedicated view")
         qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible in campaigns view")
+        campaign_type=page.locator('.campaign-panel').evaluate("""el=>({name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize)})""")
+        qa.check(campaign_type['name']>=16 and campaign_type['sub']>=11 and campaign_type['kpi']>=18 and campaign_type['metric']>=13, f"{label}: Campaigns keeps readable typography instead of density micro-type")
         qa.check(page.locator('#smsCampaign').count()==1, f"{label}: campaigns view exposes SMS reactivation")
         page.locator('#smsCampaign').click();page.wait_for_selector('.sms-campaign-modal #smsAudienceList');page.wait_for_timeout(80)
         qa.check(page.locator('.sms-campaign-modal').count()==1 and 'Стара база' in page.locator('.sms-campaign-modal').inner_text(), f"{label}: SMS modal renders legacy audience state")
         qa.check(page.locator('.sms-campaign-modal #smsMessage').input_value().count('vacleaner.pp.ua/s')==1, f"{label}: SMS draft contains opt-out URL")
         qa.check(page.locator('.sms-campaign-modal .sms-stepper [data-sms-step="1"].active').count()==1, f"{label}: SMS workflow opens directly on recipient selection")
         qa.check(page.locator('.sms-campaign-modal .sms-recipient').count()==3 and page.locator('.sms-campaign-modal .sms-recipient input:disabled').count()==1, f"{label}: opted-out recipient is visibly blocked")
+        mobile_sms_type=page.locator('.sms-campaign-modal').evaluate("""el=>({name:parseFloat(getComputedStyle(el.querySelector('.sms-client-name')).fontSize),phone:parseFloat(getComputedStyle(el.querySelector('.sms-client-phone')).fontSize),badge:parseFloat(getComputedStyle(el.querySelector('.sms-consent')).fontSize)})""")
+        qa.check(mobile_sms_type['name']>=14 and mobile_sms_type['phone']>=(10.5 if width<=350 else 11) and mobile_sms_type['badge']>=(9 if width<=350 else 9.5), f"{label}: SMS recipient cards avoid micro-typography")
         qa.check(page.locator('.sms-campaign-modal .sms-client-rentals span').first.inner_text().strip().isdigit(), f"{label}: SMS recipients show completed rental count")
         qa.check(page.locator('.sms-campaign-modal #smsAudienceSort').count()==1, f"{label}: SMS audience exposes sorting control")
         page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-desc');page.wait_for_timeout(20)
@@ -667,6 +671,8 @@ def short_desktop_sms_suite(browser: Browser, qa: QA) -> None:
     try:
         dismiss_update(page, qa)
         page.locator('.nav button[data-view="campaigns"]').click(); page.wait_for_timeout(90)
+        campaign_type=page.locator('.campaign-panel').evaluate("""el=>({name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize),action:parseFloat(getComputedStyle(el.querySelector('.campaign-actions .btn')).fontSize)})""")
+        qa.check(campaign_type['name']>=17 and campaign_type['sub']>=11 and campaign_type['kpi']>=20 and campaign_type['metric']>=14 and campaign_type['action']>=12, "Short desktop 1650x760: Campaigns matches the readable scale of the Clients view")
         page.locator('#smsCampaign').click(); page.wait_for_selector('.sms-campaign-modal #smsAudienceList'); page.wait_for_timeout(80)
         geometry = page.locator('.sms-campaign-modal #smsAudienceList').evaluate("""el=>{
           const sample=el.querySelector('.sms-recipient');
@@ -691,8 +697,8 @@ def short_desktop_sms_suite(browser: Browser, qa: QA) -> None:
           phone:parseFloat(getComputedStyle(el.querySelector('.sms-client-phone')).fontSize),
           badge:parseFloat(getComputedStyle(el.querySelector('.sms-consent')).fontSize)
         })""")
-        qa.check(type_sizes['title']>=24 and type_sizes['step']>=10 and type_sizes['control']>=10, "Short desktop 1650x760: compact chrome remains readable")
-        qa.check(type_sizes['name']>=13 and type_sizes['phone']>=10 and type_sizes['badge']>=8, "Short desktop 1650x760: recipient table keeps readable typography")
+        qa.check(type_sizes['title']>=24 and type_sizes['step']>=11 and type_sizes['control']>=12, "Short desktop 1650x760: compact chrome remains readable")
+        qa.check(type_sizes['name']>=14 and type_sizes['phone']>=12.5 and type_sizes['badge']>=10.5, "Short desktop 1650x760: recipient table matches the readable scale of the Clients view")
         columns = page.locator('.sms-campaign-modal .sms-recipient-columns').evaluate("""el=>({display:getComputedStyle(el).display,text:el.innerText})""")
         qa.check(columns['display']=='grid' and all(x in columns['text'].lower() for x in ['клієнт','телефон','оренд','остання оренда','днів','статус']), "Short desktop 1650x760: recipient list has explicit operator columns")
         row_flow = page.locator('.sms-campaign-modal .sms-recipient').first.evaluate("""el=>{
@@ -721,6 +727,21 @@ def tablet_suite(browser: Browser, qa: QA) -> None:
         qa.check(no_overflow(page), "Tablet: booking modal has no horizontal overflow")
         qa.check(page.locator("#bookingForm>footer").bounding_box()["height"] >= 44, "Tablet: modal footer actions remain usable")
         qa.shot(page, "tablet-booking-modal.png")
+        page.locator("#bookingForm .close").click();page.wait_for_timeout(30)
+        open_mobile_view(page,'campaigns');page.wait_for_timeout(60)
+        qa.check(no_overflow(page), "Tablet: Campaigns stays inside the viewport")
+        tablet_campaign_type=page.locator('.campaign-panel').evaluate("""el=>({name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize)})""")
+        qa.check(tablet_campaign_type['name']>=16.5 and tablet_campaign_type['sub']>=11 and tablet_campaign_type['kpi']>=18 and tablet_campaign_type['metric']>=14, "Tablet: Campaigns keeps readable operator typography")
+        page.locator('.campaign-more summary').first.click();page.wait_for_timeout(20)
+        menu=page.locator('.campaign-more-menu').first.bounding_box()
+        qa.check(menu is not None and menu['x']>=-1 and menu['x']+menu['width']<=768+1, "Tablet: Campaigns overflow menu opens inward instead of clipping past the viewport")
+        page.locator('.campaign-more summary').first.click();page.wait_for_timeout(10)
+        page.locator('#smsCampaign').click();page.wait_for_selector('.sms-campaign-modal #smsAudienceList');page.wait_for_timeout(50)
+        qa.check(no_overflow(page), "Tablet: SMS workflow has no horizontal overflow")
+        qa.check(page.locator('.sms-recipient-columns').evaluate("el=>getComputedStyle(el).display")=='none', "Tablet: SMS switches from the seven-column desktop table to a dedicated tablet card layout")
+        tablet_type=page.locator('.sms-campaign-modal').evaluate("""el=>({name:parseFloat(getComputedStyle(el.querySelector('.sms-client-name')).fontSize),phone:parseFloat(getComputedStyle(el.querySelector('.sms-client-phone')).fontSize),badge:parseFloat(getComputedStyle(el.querySelector('.sms-consent')).fontSize)})""")
+        qa.check(tablet_type['name']>=14 and tablet_type['phone']>=11.5 and tablet_type['badge']>=10, "Tablet: SMS cards keep readable customer typography")
+        qa.shot(page, "tablet-campaigns-sms.png")
     finally:
         page.close()
 

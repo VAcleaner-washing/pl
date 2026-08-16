@@ -64,10 +64,11 @@ def view_suite(page:Page,qa:QA,width:int):
         if view=='clients':
             qa.check(page.locator('.clients-table').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: clients stay readable without horizontal table scrolling')
         if view=='campaigns':
-            campaign_layout=page.locator('.campaign-panel').evaluate("""el=>{const head=el.querySelector('.campaign-panel-head'),summary=el.querySelector('.campaign-summary'),row=el.querySelector('.campaign-row');return{head:getComputedStyle(head).display,summary:getComputedStyle(summary).display,summaryCols:getComputedStyle(summary).gridTemplateColumns.split(' ').filter(Boolean).length,row:row?getComputedStyle(row).display:'none'}}""")
+            campaign_layout=page.locator('.campaign-panel').evaluate("""el=>{const head=el.querySelector('.campaign-panel-head'),summary=el.querySelector('.campaign-summary'),row=el.querySelector('.campaign-row');return{head:getComputedStyle(head).display,summary:getComputedStyle(summary).display,summaryCols:getComputedStyle(summary).gridTemplateColumns.split(' ').filter(Boolean).length,row:row?getComputedStyle(row).display:'none',name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize),action:parseFloat(getComputedStyle(el.querySelector('.campaign-actions .btn')).fontSize)}}""")
             qa.check(campaign_layout['head']=='flex',f'{width}: campaigns desktop header uses styled flex layout')
             qa.check(campaign_layout['summary']=='grid' and campaign_layout['summaryCols']==4,f'{width}: campaigns desktop KPI summary uses four-column grid')
             qa.check(campaign_layout['row']=='grid',f'{width}: campaigns desktop row uses styled grid layout')
+            qa.check(campaign_layout['name']>=17 and campaign_layout['sub']>=11 and campaign_layout['kpi']>=18 and campaign_layout['metric']>=14 and campaign_layout['action']>=12,f'{width}: campaigns typography stays readable instead of shrinking to fit')
         qa.shot(page,f'{width}-{view}.png')
     qa.check(not runtime_errors,f'{width}: all 8 desktop views render without JavaScript errors' + (f' ({runtime_errors[0]})' if runtime_errors else ''))
 

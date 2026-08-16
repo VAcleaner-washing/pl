@@ -4137,7 +4137,7 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .sms-campaign-modal .sms-legacy-attestation b,
 .sms-campaign-modal .sms-preflight-state b{font-weight:680}
 
-/* v4.0.89 — medium desktop campaign rows use two tiers instead of squeezing actions past the viewport. */
+/* Medium desktop campaign rows use two tiers instead of squeezing actions past the viewport. */
 @media (min-width:901px) and (max-width:1180px){
   .campaign-workspace .campaign-row{
     grid-template-columns:minmax(0,1fr) auto;
@@ -4303,4 +4303,444 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:7px}
   .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:8.5px}
   .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:7px}
+}
+
+/* v4.0.90 — CAMPAIGNS + SMS READABILITY PASS.
+   Match the visual scale of Clients: readable operator UI first, density second. */
+.campaign-workspace{
+  padding:0;
+  border:0;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+}
+.campaign-workspace .campaign-panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin:0 0 14px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#0f161a;
+}
+.campaign-workspace .campaign-summary{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(110px,1fr));
+  flex:1 1 auto;
+  width:auto;
+  max-width:720px;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+.campaign-workspace .campaign-summary>span{
+  min-height:44px;
+  padding:5px 18px;
+  gap:7px;
+}
+.campaign-workspace .campaign-summary>span:first-child{padding-left:2px}
+.campaign-workspace .campaign-summary small{
+  font-size:11px;
+  font-weight:550;
+  color:#8e999f;
+}
+.campaign-workspace .campaign-summary b{
+  font-size:20px;
+  line-height:1;
+  font-weight:720;
+}
+.campaign-workspace .campaign-head-actions{display:flex;align-items:center;gap:9px}
+.campaign-workspace .campaign-head-actions .btn{
+  min-height:44px;
+  height:44px;
+  padding-inline:16px;
+  border-radius:11px;
+  font-size:13px;
+  font-weight:680;
+  white-space:nowrap;
+}
+.campaign-list-head{
+  display:grid;
+  grid-template-columns:minmax(330px,1.35fr) minmax(280px,.75fr) 176px;
+  gap:20px;
+  align-items:center;
+  padding:0 17px 8px;
+  color:#7f8a90;
+  font-size:10.5px;
+  font-weight:720;
+  letter-spacing:.055em;
+  text-transform:uppercase;
+}
+.campaign-list-head span:nth-child(2){padding-left:14px}
+.campaign-list-head span:last-child{text-align:right;padding-right:4px}
+.campaign-workspace .campaign-list{gap:8px;margin:0;padding:0}
+.campaign-workspace .campaign-row{
+  grid-template-columns:minmax(330px,1.35fr) minmax(280px,.75fr) auto;
+  gap:20px;
+  min-height:88px;
+  padding:14px 14px 14px 18px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#0f171b;
+}
+.campaign-workspace .campaign-row::before{inset:12px auto 12px 0;width:3px}
+.campaign-workspace .campaign-main{gap:5px;align-content:center}
+.campaign-workspace .campaign-badges{gap:7px}
+.campaign-workspace .campaign-type,
+.campaign-workspace .campaign-status{
+  min-height:22px;
+  padding:0 8px;
+  font-size:9.5px;
+}
+.campaign-workspace .campaign-main>strong{
+  font-size:17px;
+  line-height:1.18;
+  font-weight:700;
+}
+.campaign-workspace .campaign-main>small{
+  font-size:12px;
+  line-height:1.3;
+  color:#919ba1;
+}
+.campaign-workspace .campaign-metrics{grid-template-columns:repeat(3,minmax(82px,1fr))}
+.campaign-workspace .campaign-metrics>span{gap:5px;padding:0 14px}
+.campaign-workspace .campaign-metrics small{font-size:10px;font-weight:560;color:#879299}
+.campaign-workspace .campaign-metrics b{font-size:14px;font-weight:680}
+.campaign-workspace .campaign-actions{gap:7px}
+.campaign-workspace .campaign-actions .btn{
+  min-height:40px;
+  height:40px;
+  padding:0 13px;
+  border-radius:10px;
+  font-size:12.5px;
+  font-weight:680;
+}
+.campaign-more>summary{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  font-size:17px;
+}
+.campaign-more-menu{top:46px;right:0;left:auto;min-width:184px}
+.campaign-more-menu button{min-height:38px;font-size:12px}
+
+/* SMS: keep the compact workflow, but remove micro-type. */
+@media (min-width:901px){
+  .sms-campaign-modal>.sms-workspace-header{
+    grid-template-columns:minmax(270px,auto) minmax(0,1fr) auto;
+    padding:9px 14px 8px;
+    column-gap:16px;
+  }
+  .sms-heading>small{font-size:10px;margin-bottom:3px}
+  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:27px;line-height:1.02}
+  .sms-campaign-modal>.sms-workspace-header .sms-header-meta{gap:0;overflow:visible}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item{
+    min-height:26px;
+    padding:0 12px;
+    gap:5px;
+    border:0;
+    border-radius:0;
+    background:transparent;
+    overflow:visible;
+    font-size:11px;
+  }
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item:first-child{padding-left:0}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item+.sms-meta-item{border-left:1px solid rgba(255,255,255,.075)}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{display:inline;font-size:9px;color:#727e84}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:11px;font-weight:650;color:#d6dbde}
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{min-height:20px;padding-inline:6px;font-size:9px}
+  .sms-history-open{min-height:36px;height:36px;padding-inline:11px;font-size:11.5px}
+  .sms-campaign-modal>.sms-workspace-header .close{width:38px;min-width:38px;height:38px;min-height:38px}
+
+  .sms-stepper{padding:4px 10px;gap:5px}
+  .sms-stepper button{min-height:34px;height:34px;padding:4px 9px;gap:7px}
+  .sms-stepper i{width:22px;height:22px;flex-basis:22px;font-size:10px}
+  .sms-stepper b{font-size:12px}
+
+  .sms-step-panel,.sms-history-panel{padding:7px 12px}
+  .sms-recipient-step{gap:6px}
+  .sms-recipient-toolbar{grid-template-columns:minmax(260px,1fr) 220px 190px;gap:8px}
+  .sms-audience-rule{min-height:34px;height:34px;padding:0 10px;gap:8px}
+  .sms-audience-rule small{font-size:9.5px}
+  .sms-campaign-modal .sms-audience-rule>span{font-size:12px}
+  .sms-toolbar-field select,.sms-bulk-select{min-height:34px;height:34px;font-size:12.5px}
+  .sms-campaign-modal .sms-audience-summary{gap:7px}
+  .sms-campaign-modal .sms-audience-summary span{min-height:34px;height:34px;padding:4px 10px;gap:7px}
+  .sms-campaign-modal .sms-audience-summary b{font-size:17px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:10px}
+  .sms-recipient-head{min-height:27px;height:27px}
+  .sms-recipient-head h3{font-size:15px}
+  .sms-selected-count{min-height:22px;height:22px;padding-inline:8px;font-size:10px}
+
+  .sms-recipient-columns{
+    grid-template-columns:28px minmax(210px,1.65fr) minmax(145px,.9fr) 74px 124px 70px 116px;
+    min-height:25px;
+    padding:0 10px;
+    gap:9px;
+    font-size:10px;
+    font-weight:720;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient{
+    grid-template-columns:28px minmax(210px,1.65fr) minmax(145px,.9fr) 74px 124px 70px 116px;
+    gap:9px;
+    min-height:46px;
+    height:46px;
+    padding:4px 10px;
+    border-radius:9px;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient input{width:19px;height:19px}
+  .modal-form.sms-campaign-modal .sms-client-name{font-size:14px;font-weight:700}
+  .modal-form.sms-campaign-modal .sms-client-phone,
+  .modal-form.sms-campaign-modal .sms-client-last,
+  .modal-form.sms-campaign-modal .sms-client-days,
+  .modal-form.sms-campaign-modal .sms-client-rentals{
+    font-size:12px;
+    font-weight:560;
+  }
+  .modal-form.sms-campaign-modal .sms-client-rentals{font-weight:720}
+  .modal-form.sms-campaign-modal .sms-client-status .sms-consent{padding:4px 7px;font-size:10px}
+  .sms-campaign-modal>.sms-workspace-footer{min-height:48px;padding:5px 12px}
+  .sms-campaign-modal>.sms-workspace-footer .btn{min-height:36px;height:36px;font-size:12px}
+}
+
+/* Short desktop: preserve the working area, not tiny text. */
+@media (min-width:901px) and (max-height:820px){
+  .sms-campaign-modal>.sms-workspace-header{padding:7px 12px 6px;grid-template-columns:minmax(255px,auto) minmax(0,1fr) auto}
+  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:25px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item{min-height:24px;padding-inline:9px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:8.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:10.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:8.5px}
+  .sms-history-open{min-height:34px;height:34px}
+  .sms-campaign-modal>.sms-workspace-header .close{width:36px;min-width:36px;height:36px;min-height:36px}
+  .sms-stepper{padding:1px 8px}
+  .sms-stepper button{min-height:32px;height:32px}
+  .sms-stepper b{font-size:11.5px}
+  .sms-step-panel,.sms-history-panel{padding:6px 10px}
+  .sms-recipient-step{gap:5px}
+  .sms-audience-rule,.sms-toolbar-field select,.sms-bulk-select{min-height:32px;height:32px}
+  .sms-campaign-modal .sms-audience-summary span{min-height:31px;height:31px}
+  .sms-recipient-head{min-height:24px;height:24px}
+  .sms-recipient-columns{min-height:22px}
+  .modal-form.sms-campaign-modal .sms-recipient{min-height:46px;height:46px}
+}
+
+/* Tablet: a seven-column desktop table is the wrong component at this width. */
+@media (min-width:701px) and (max-width:900px){
+  .campaign-workspace .campaign-panel-head{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:13px 14px}
+  .campaign-workspace .campaign-summary{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none;width:100%}
+  .campaign-workspace .campaign-summary>span{min-height:42px;padding:5px 11px}
+  .campaign-workspace .campaign-summary small{font-size:10px}
+  .campaign-workspace .campaign-summary b{font-size:18px}
+  .campaign-workspace .campaign-head-actions{justify-content:flex-end}
+  .campaign-list-head{display:none}
+  .campaign-workspace .campaign-row{grid-template-columns:minmax(0,1fr);gap:11px;min-height:0;padding:14px 15px 14px 18px}
+  .campaign-workspace .campaign-metrics{max-width:none;width:100%;padding-top:11px;border-top:1px solid var(--line)}
+  .campaign-workspace .campaign-metrics small{font-size:10px}
+  .campaign-workspace .campaign-metrics b{font-size:14px}
+  .campaign-workspace .campaign-actions{justify-content:flex-start}
+  .campaign-more-menu{right:0;left:auto}
+
+  .sms-recipient-columns{display:none}
+  .sms-campaign-modal .sms-audience-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding-right:3px}
+  .modal-form.sms-campaign-modal .sms-recipient{
+    display:grid;
+    grid-template-columns:20px minmax(0,1fr) auto;
+    grid-template-areas:"check name status" "check meta meta";
+    align-items:center;
+    gap:5px 8px;
+    min-height:62px;
+    height:auto;
+    padding:8px 9px;
+    border-radius:10px;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient>input{grid-area:check;width:19px;height:19px}
+  .modal-form.sms-campaign-modal .sms-client-name{grid-area:name;font-size:13.5px;font-weight:700}
+  .modal-form.sms-campaign-modal .sms-recipient-data{
+    grid-area:meta;
+    display:flex;
+    align-items:center;
+    gap:0 6px;
+    min-width:0;
+    overflow:hidden;
+    color:#9fa9ae;
+    font-size:10.5px;
+    white-space:nowrap;
+  }
+  .modal-form.sms-campaign-modal .sms-recipient-data>*{flex:0 0 auto;text-align:left;font-size:10.5px}
+  .modal-form.sms-campaign-modal .sms-recipient-data>*+*::before{content:"·";margin-right:6px;color:#48545a}
+  .modal-form.sms-campaign-modal .sms-client-rentals{order:-1}
+  .modal-form.sms-campaign-modal .sms-client-rentals i,
+  .modal-form.sms-campaign-modal .sms-client-days i{display:inline}
+  .modal-form.sms-campaign-modal .sms-client-status{grid-area:status;justify-self:end}
+  .modal-form.sms-campaign-modal .sms-client-status .sms-consent{margin:0;padding:4px 6px;font-size:9.5px}
+  .modal-form.sms-campaign-modal .sms-client-status em{display:none}
+}
+
+/* Mobile: cards stay compact, but every piece of customer data is actually readable. */
+@media (max-width:700px){
+  .campaign-workspace .campaign-panel-head{margin-bottom:10px;padding:12px;border-radius:13px}
+  .campaign-workspace .campaign-summary{grid-template-columns:1fr 1fr;max-width:none;width:100%}
+  .campaign-workspace .campaign-summary>span{min-height:48px;padding:7px 10px}
+  .campaign-workspace .campaign-summary small{font-size:10px}
+  .campaign-workspace .campaign-summary b{font-size:19px}
+  .campaign-workspace .campaign-head-actions .btn{min-height:42px;height:42px;font-size:12.5px}
+  .campaign-list-head{display:none}
+  .campaign-workspace .campaign-main>strong{font-size:16px}
+  .campaign-workspace .campaign-main>small{font-size:11.5px}
+  .campaign-workspace .campaign-type,.campaign-workspace .campaign-status{font-size:9px;min-height:21px}
+  .campaign-workspace .campaign-metrics small{font-size:9.5px}
+  .campaign-workspace .campaign-metrics b{font-size:13.5px}
+  .campaign-workspace .campaign-actions .btn{font-size:12px;min-height:40px;height:40px}
+  .campaign-more>summary{width:40px;height:40px}
+
+  .sms-campaign-modal>.sms-workspace-header{padding:9px 10px 8px;row-gap:6px}
+  .sms-heading>small{font-size:9px}
+  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:22px;line-height:1.05}
+  .sms-campaign-modal .sms-header-meta{gap:5px;margin-top:0}
+  .sms-campaign-modal .sms-meta-item{min-height:25px;gap:4px;padding-inline:7px}
+  .sms-campaign-modal .sms-meta-item>small{font-size:8px}
+  .sms-campaign-modal .sms-meta-item>b{font-size:10px}
+  .sms-campaign-modal .sms-sender-state{min-height:17px;padding-inline:5px;font-size:8px}
+  .sms-stepper button{min-height:34px;height:34px}
+  .sms-stepper b{font-size:11px}
+  .sms-audience-rule small{font-size:9px}
+  .sms-campaign-modal .sms-audience-rule>span{font-size:11px}
+  .sms-toolbar-field select,.sms-bulk-select{font-size:12px}
+  .sms-campaign-modal .sms-audience-summary b{font-size:16px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:9.5px}
+  .sms-recipient-head h3{font-size:14px}
+  .sms-selected-count{font-size:9.5px}
+  .sms-campaign-modal .sms-client-name{font-size:14px;font-weight:700}
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data{font-size:11px;line-height:1.25}
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data>*{font-size:11px}
+  .sms-campaign-modal .sms-client-status .sms-consent{font-size:9.5px;padding:4px 6px}
+  .sms-campaign-modal .sms-recipient{min-height:60px;padding:8px 8px}
+}
+@media (max-width:340px){
+  .sms-campaign-modal .sms-meta-item>small{font-size:7.5px}
+  .sms-campaign-modal .sms-meta-item>b{font-size:9.5px}
+  .sms-campaign-modal .sms-sender-state{font-size:7.5px}
+}
+
+/* v4.0.90a — mobile containment after the readability pass. */
+@media (max-width:700px){
+  .campaign-workspace .campaign-panel-head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:11px;
+  }
+  .campaign-workspace .campaign-summary{min-width:0}
+  .campaign-workspace .campaign-head-actions{width:100%}
+  .campaign-workspace .campaign-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:10px;
+    min-height:0;
+    padding:13px 12px 13px 15px;
+  }
+  .campaign-workspace .campaign-main,
+  .campaign-workspace .campaign-metrics,
+  .campaign-workspace .campaign-actions{width:100%;min-width:0}
+  .campaign-workspace .campaign-metrics{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    padding-top:10px;
+    border-top:1px solid var(--line);
+  }
+  .campaign-workspace .campaign-metrics>span{min-width:0;padding-inline:7px}
+  .campaign-workspace .campaign-metrics>span:first-child{padding-left:0}
+  .campaign-workspace .campaign-actions{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) 40px;
+    gap:7px;
+  }
+  .campaign-workspace .campaign-actions .btn{width:100%;min-width:0}
+  .campaign-more{width:40px;min-width:40px}
+  .campaign-more-menu{right:0;left:auto}
+  .sms-history-open{min-width:40px}
+}
+@media (max-width:350px){
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:3px 6px;
+    overflow:visible;
+    white-space:normal;
+  }
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data .sms-client-phone{
+    grid-column:1/-1;
+  }
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data .sms-client-rentals::before{content:"";margin:0}
+  .sms-campaign-modal .sms-recipient{min-height:72px}
+}
+
+@media (min-width:901px) and (max-width:1180px){
+  .campaign-list-head{display:none}
+  .campaign-workspace .campaign-summary{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    min-width:0;
+    max-width:430px;
+  }
+  .campaign-workspace .campaign-summary>span{min-width:0;padding-inline:9px}
+  .campaign-workspace .campaign-summary>span:first-child{padding-left:0}
+  .campaign-workspace .campaign-summary small{font-size:9.5px;white-space:nowrap}
+  .campaign-workspace .campaign-summary b{font-size:18px}
+}
+
+@media (min-width:701px) and (max-width:900px){
+  .sms-campaign-modal>.sms-workspace-header{padding:9px 12px 8px}
+  .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:25px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item{min-height:25px;padding-inline:7px;gap:4px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:8.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:10.5px}
+  .sms-campaign-modal>.sms-workspace-header .sms-sender-state{font-size:8.5px;min-height:18px}
+  .sms-stepper b{font-size:11.5px}
+  .sms-audience-rule small{font-size:9px}
+  .sms-campaign-modal .sms-audience-rule>span{font-size:11.5px}
+  .sms-toolbar-field select,.sms-bulk-select{font-size:12px}
+  .sms-campaign-modal .sms-audience-summary small{font-size:9.5px}
+  .sms-recipient-head h3{font-size:14.5px}
+}
+@media (max-width:350px){
+  .sms-campaign-modal .sms-recipient{
+    min-height:68px;
+    padding:6px 7px;
+    gap:4px 7px;
+  }
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data{
+    grid-template-columns:auto auto minmax(0,1fr);
+    grid-template-rows:auto auto;
+    gap:2px 6px;
+    font-size:10.5px;
+    line-height:1.15;
+  }
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data>*{font-size:10.5px}
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data .sms-client-phone{grid-column:1/-1;grid-row:1}
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data .sms-client-rentals{grid-column:1;grid-row:2}
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data .sms-client-last{grid-column:2;grid-row:2}
+  .sms-campaign-modal .sms-recipient>span.sms-recipient-data .sms-client-days{grid-column:3;grid-row:2}
+  .sms-campaign-modal .sms-client-status .sms-consent{font-size:9px;padding:3px 5px}
+}
+
+@media (min-width:701px) and (max-width:900px){
+  .modal-form.sms-campaign-modal .sms-client-name{font-size:14px}
+  .modal-form.sms-campaign-modal .sms-recipient-data,
+  .modal-form.sms-campaign-modal .sms-recipient-data>*{font-size:11.5px}
+  .modal-form.sms-campaign-modal .sms-client-status .sms-consent{font-size:10px}
+}
+@media (min-width:901px){
+  .modal-form.sms-campaign-modal .sms-client-name{font-size:14.5px}
+  .modal-form.sms-campaign-modal .sms-client-phone,
+  .modal-form.sms-campaign-modal .sms-client-last,
+  .modal-form.sms-campaign-modal .sms-client-days,
+  .modal-form.sms-campaign-modal .sms-client-rentals{font-size:12.5px}
+  .modal-form.sms-campaign-modal .sms-client-status .sms-consent{font-size:10.5px}
+}
+@media (min-width:901px) and (max-height:820px){
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:9px}
+  .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:11px}
 }
