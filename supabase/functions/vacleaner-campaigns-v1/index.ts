@@ -38,9 +38,18 @@ function sendpulseAddressBookRow(payload:any,addressBookId:number){
   const candidates=Array.isArray(payload)?payload:Array.isArray(payload?.data)?payload.data:Array.isArray(payload?.result)?payload.result:[payload?.data??payload];
   return candidates.find((row:any)=>Number(row?.id||row?.addressBookId||0)===addressBookId)||candidates.find((row:any)=>row&&typeof row==="object")||{};
 }
-async function waitForSendpulseAddressBook(key:string,addressBookId:number,expectedPhones:number){
+async function sendpulsePhoneReady(key:string,addressBookId:number,phone:string){
+  const raw=await spJson(key,`https://api.sendpulse.com/sms/numbers/info/${addressBookId}/${smsPhone(phone)}`);
+  const row=Array.isArray(raw)?raw.find((item:any)=>item?.result===true)??raw[0]:raw;
+  const data=row?.data??row;
+  return Number(data?.status||0)===1;
+}
+async function waitForSendpulseAddressBook(key:string,addressBookId:number,phones:string[]){
+  const expectedPhones=Math.max(1,phones.length);
+  const deadline=Date.now()+85000;
   let last={active:0,excluded:0,newPhones:expectedPhones,status:0,statusExplain:""};
-  for(let attempt=0;attempt<24;attempt+=1){
+  let attempt=0;
+  while(Date.now()<deadline){
     const info=await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`);
     const row=sendpulseAddressBookRow(info,addressBookId);
     const active=Math.max(0,Number(row?.active_phones_quantity??row?.activePhonesQuantity??0)||0);
@@ -50,9 +59,16 @@ async function waitForSendpulseAddressBook(key:string,addressBookId:number,expec
     last={active,excluded,newPhones,status:Number(row?.status||0),statusExplain:cleanText(String(row?.status_explain||""),120)};
     if(active>=expectedPhones)return last;
     if(active+excluded>=expectedPhones&&excluded>0)throw new Error(`sendpulse_addressbook_rejected:${active}_active:${excluded}_excluded`);
-    if(attempt<23)await sleep(attempt<4?500:1000);
+    // SendPulse's aggregate counters may lag. For small test batches, verify the actual phone status too.
+    if(phones.length<=10&&attempt%3===2){
+      const states=await Promise.allSettled(phones.map(phone=>sendpulsePhoneReady(key,addressBookId,phone)));
+      const exactActive=states.filter(state=>state.status==='fulfilled'&&state.value===true).length;
+      if(exactActive>=expectedPhones)return {...last,active:exactActive,newPhones:0};
+    }
+    attempt+=1;
+    if(Date.now()<deadline)await sleep(attempt<4?1000:2500);
   }
-  throw new Error(`sendpulse_addressbook_not_ready:${last.active}/${expectedPhones}_active:${last.newPhones}_new:${last.excluded}_excluded`);
+  throw new Error(`sendpulse_addressbook_processing:${last.active}/${expectedPhones}_active:${last.newPhones}_new:${last.excluded}_excluded`);
 }
 async function createPersonalizedAddressBook(key:string,label:string,recipients:Array<any>){
   let addressBookId=0;
@@ -62,7 +78,7 @@ async function createPersonalizedAddressBook(key:string,label:string,recipients:
     const phones:Record<string,any>={};for(const row of recipients)phones[smsPhone(row.phone)]=[[{name:SP_PROMO_VAR,type:"string",value:String(row.promoLink||"")}]];
     const add=await spJson(key,"https://api.sendpulse.com/sms/numbers/variables",{method:"POST",body:JSON.stringify({addressBookId,phones})});
     const added=Array.isArray(add)?add.find((item:any)=>item?.result===true):add;if(!added?.result)throw new Error("sendpulse_variables_error");
-    await waitForSendpulseAddressBook(key,addressBookId,recipients.length);
+    await waitForSendpulseAddressBook(key,addressBookId,recipients.map((row:any)=>String(row.phone||"")));
     return addressBookId;
   }catch(error){await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null);throw error}
 }
