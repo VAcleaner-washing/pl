@@ -52,6 +52,11 @@ check(admin.includes('rentalCountText')&&admin.includes('completedOrders')&&admi
 check(adminCss.includes('.sms-audience-sort')&&adminCss.includes('.sms-recipient>span>small strong'),'SMS audience has responsive sorting and rental-count styling');
 check(admin.includes('Стара база')&&admin.includes('Підтверджую право написати'),'admin distinguishes legacy recipients and asks for attestation');
 check(adminCss.includes('.sms-audience-list')&&adminCss.includes('.sms-consent.legacy'),'SMS UI has dedicated responsive styling');
+check(admin.includes('sms-selected-count')&&admin.includes("selectAvailable.dataset.mode=allSelected?'clear':'select'"),'SMS audience shows selected count and turns bulk-select into a reversible action');
+check(admin.includes('<details class=\"modal-section sms-history\">')&&admin.includes('sms-history-summary'),'SMS journal is a collapsible secondary surface instead of competing with recipient selection');
+check(admin.includes("smsAudienceLabel(value)")&&admin.includes("all:'Уся база'"),'SMS journal humanizes internal audience segment codes');
+check(adminCss.includes('v4.0.81 — SMS campaign UX pass')&&adminCss.includes('height:clamp(430px,52dvh,570px)')&&adminCss.includes('height:clamp(500px,66dvh,680px)'),'SMS campaign UX allocates a larger recipient work area on desktop and mobile');
+check(adminCss.includes('.sms-campaign-modal>footer')&&adminCss.includes('grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr)'),'SMS mobile footer keeps one compact, stable action row');
 check(adminCss.includes('.sms-campaign-modal .client-section-head small')&&adminCss.includes('text-transform:uppercase'),'SMS section kickers use a non-overlapping compact hierarchy');
 check(adminCss.includes('.sms-campaign-modal #smsSend:disabled')&&adminCss.includes('cursor:not-allowed'),'inactive SMS route has a visibly disabled send action');
 check(adminCss.includes('.sms-form-body::-webkit-scrollbar')&&adminCss.includes('.sms-audience-list::-webkit-scrollbar'),'SMS modal hides native arrow scrollbars while retaining scroll');
