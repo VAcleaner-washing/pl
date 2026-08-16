@@ -14,6 +14,11 @@ check(campaign.includes('legacy_consent_confirmation_required'),'legacy customer
 check(campaign.includes('SMS_COOLDOWN_DAYS=90'),'repeat SMS has a 90-day cooldown');
 check(campaign.includes('sms_optout_required')&&campaign.includes('vacleaner.pp.ua/s'),'marketing SMS requires opt-out link');
 check(campaign.includes('sender_not_active'),'national route blocks inactive sender');
+check(campaign.includes('action==="sms_preflight"')&&campaign.includes('emulate:true'),'SMS uses a provider preflight before any real SendPulse campaign');
+check(campaign.includes('https://api.sendpulse.com/balance')&&campaign.includes('sendpulseBalance'),'SMS status and preflight can surface the current SendPulse balance');
+check(campaign.includes('sendpulseErrorDetail')&&campaign.includes('sendpulse_http_${res.status}${detail?":"+detail:""}'),'SendPulse HTTP errors preserve the provider error message for diagnostics');
+check(admin.includes("action:'sms_preflight'")&&admin.includes('Перевіряємо SendPulse'),'admin performs SendPulse preflight before arming the final send action');
+check(admin.includes('SendPulse відхилив перевірку розсилки.')&&admin.includes('e.detail=detail'),'admin surfaces provider error details instead of a generic SendPulse toast');
 
 check(admin.includes('smsCampaignDefaultText')&&admin.includes("{link}")&&admin.includes('Повідомлення клієнту'),'campaign SMS UI uses an automatic promo-link template');
 check(admin.includes('давно не освіжали диван? 🙂')&&admin.includes('на повторну оренду Puzzi')&&admin.includes('Перевірити: {link}'),'RETURN default copy is a human two-part SMS');

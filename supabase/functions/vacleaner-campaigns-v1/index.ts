@@ -13,7 +13,9 @@ const smsParts=(text:string)=>{const unicode=/[^\u0000-\u007f]/.test(text),len=[
 const promoShortLink=(code:unknown)=>{const value=String(code||"").toUpperCase().replace(/[^A-Z0-9_-]/g,"");return /^VA-[A-Z0-9]{7}$/.test(value)?`vacleaner.pp.ua/b#${value.slice(3)}`:""};
 const senderStatusLabel=(status:number)=>status===1?"Активний":status===2?"Відхилено":"На модерації";
 const spHeaders=(key:string)=>({Authorization:`Bearer ${key}`,"Content-Type":"application/json"});
-async function spJson(key:string,url:string,init:RequestInit={}){const res=await fetch(url,{...init,headers:{...spHeaders(key),...(init.headers||{})},signal:AbortSignal.timeout(15000)});let data:any=null;try{data=await res.json()}catch{}if(!res.ok)throw new Error(`sendpulse_http_${res.status}`);return data}
+function sendpulseErrorDetail(data:any){const raw=data?.error??data?.message??data?.error_description??data?.data?.error??data?.data?.message??"";return cleanText(String(raw||""),220)}
+async function spJson(key:string,url:string,init:RequestInit={}){const res=await fetch(url,{...init,headers:{...spHeaders(key),...(init.headers||{})},signal:AbortSignal.timeout(15000)});const raw=await res.text();let data:any=null;try{data=raw?JSON.parse(raw):null}catch{data=raw?{message:raw}:null}if(!res.ok){const detail=sendpulseErrorDetail(data);throw new Error(`sendpulse_http_${res.status}${detail?":"+detail:""}`)}return data}
+async function sendpulseBalance(key:string){const data=await spJson(key,"https://api.sendpulse.com/balance");return {currency:String(data?.currency||""),amount:Number(data?.balance_currency||0)}}
 async function sendpulseSender(key:string){const rows=await spJson(key,"https://api.sendpulse.com/sms/senders");const list=Array.isArray(rows)?rows:[];const row=list.find((item:any)=>String(item?.sender||"").toUpperCase()===SMS_SENDER&&String(item?.country_code||"").toUpperCase()==="UA")||list.find((item:any)=>String(item?.sender||"").toUpperCase()===SMS_SENDER)||null;return row?{found:true,status:Number(row.status),statusLabel:senderStatusLabel(Number(row.status)),statusExplain:String(row.status_explain||""),country:String(row.country||""),countryCode:String(row.country_code||"")}:{found:false,status:null,statusLabel:"Не знайдено",statusExplain:"",country:"",countryCode:""}}
 async function campaignPromoContext(db:any,campaignId:string,phones:string[]){
   if(!validUuid(campaignId))return {personalized:false,campaign:null,byPhone:new Map<string,any>()};
@@ -31,19 +33,40 @@ async function campaignPromoContext(db:any,campaignId:string,phones:string[]){
   for(const row of codes||[]){const phone=normalizePhone(row.customer_phone),link=promoShortLink(row.code),expired=row.expires_at&&new Date(row.expires_at).getTime()<=now;if(!phone||!link||expired||used.has(String(row.id)))continue;byPhone.set(phone,{promoCode:String(row.code),promoLink:link,promoCodeId:String(row.id)})}
   return {personalized,campaign,byPhone};
 }
-async function createPersonalizedSendpulseCampaign(key:string,dispatchId:string,route:string,message:string,recipients:Array<any>){
+async function createPersonalizedAddressBook(key:string,label:string,recipients:Array<any>){
   let addressBookId=0;
+  const book=await spJson(key,"https://api.sendpulse.com/addressbooks",{method:"POST",body:JSON.stringify({bookName:`VAcleaner ${label} ${new Date().toISOString().slice(0,16)}`})});
+  addressBookId=Number(book?.id||0);if(!addressBookId)throw new Error("sendpulse_addressbook_error");
   try{
-    const book=await spJson(key,"https://api.sendpulse.com/addressbooks",{method:"POST",body:JSON.stringify({bookName:`VAcleaner ${dispatchId.slice(0,8)} ${new Date().toISOString().slice(0,16)}`})});
-    addressBookId=Number(book?.id||0);if(!addressBookId)throw new Error("sendpulse_addressbook_error");
     const phones:Record<string,any>={};for(const row of recipients)phones[smsPhone(row.phone)]=[[{name:SP_PROMO_VAR,type:"string",value:String(row.promoLink||"")}]];
     const add=await spJson(key,"https://api.sendpulse.com/sms/numbers/variables",{method:"POST",body:JSON.stringify({addressBookId,phones})});
     const added=Array.isArray(add)?add.find((item:any)=>item?.result===true):add;if(!added?.result)throw new Error("sendpulse_variables_error");
+    return addressBookId;
+  }catch(error){await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null);throw error}
+}
+async function deleteSendpulseAddressBook(key:string,addressBookId:number){if(addressBookId>0)await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null)}
+async function createPersonalizedSendpulseCampaign(key:string,dispatchId:string,route:string,message:string,recipients:Array<any>){
+  const addressBookId=await createPersonalizedAddressBook(key,dispatchId.slice(0,8),recipients);
+  try{
     const body=String(message).split(SMS_LINK_TOKEN).join(`{{${SP_PROMO_VAR}}}`);
     const result=await spJson(key,"https://api.sendpulse.com/sms/campaigns",{method:"POST",body:JSON.stringify({sender:SMS_SENDER,addressBookId,body,route:{UA:route},emulate:false,use_dynamic_list:false,stat_link_tracking:false,stat_link_need_protocol:false})});
     if(!result?.result||!result?.campaign_id)throw new Error("sendpulse_api_error");
     return {campaignId:Number(result.campaign_id),addressBookId};
-  }catch(error){if(addressBookId)await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null);throw error}
+  }catch(error){await deleteSendpulseAddressBook(key,addressBookId);throw error}
+}
+async function preflightPersonalizedSendpulseCampaign(key:string,route:string,message:string,recipients:Array<any>){
+  const addressBookId=await createPersonalizedAddressBook(key,"preflight",recipients);
+  try{
+    const body=String(message).split(SMS_LINK_TOKEN).join(`{{${SP_PROMO_VAR}}}`);
+    const result=await spJson(key,"https://api.sendpulse.com/sms/campaigns",{method:"POST",body:JSON.stringify({sender:SMS_SENDER,addressBookId,body,route:{UA:route},emulate:true,use_dynamic_list:false,stat_link_tracking:false,stat_link_need_protocol:false})});
+    if(result?.result===false)throw new Error(`sendpulse_preflight_rejected:${sendpulseErrorDetail(result)||"provider_rejected"}`);
+    return {ok:true};
+  }finally{await deleteSendpulseAddressBook(key,addressBookId)}
+}
+async function preflightDirectSendpulseCampaign(key:string,route:string,message:string,recipients:Array<any>){
+  const result=await spJson(key,"https://api.sendpulse.com/sms/send",{method:"POST",body:JSON.stringify({sender:SMS_SENDER,phones:recipients.map((r:any)=>smsPhone(r.phone)),body:message,route:{UA:route},emulate:true,stat_link_tracking:false,stat_link_need_protocol:false})});
+  if(result?.result===false)throw new Error(`sendpulse_preflight_rejected:${sendpulseErrorDetail(result)||"provider_rejected"}`);
+  return {ok:true};
 }
 
 type AudienceRow={phone:string;name:string;completedOrders:number;lastCompleted:string;daysDormant:number;consent:"explicit"|"legacy"|"opted_out";consentAt:string|null;consentSource:string;activeBooking:boolean;lastSmsAt:string|null;cooldown:boolean;selectable:boolean};
@@ -83,7 +106,7 @@ Deno.serve(async request=>{
 
     if(action==="sms_status"){
       const key=Deno.env.get("SENDPULSE_API_KEY");if(!key)return json({error:"sendpulse_not_configured"},503);
-      try{return json({sender:SMS_SENDER,provider:"SendPulse",senderStatus:await sendpulseSender(key),cooldownDays:SMS_COOLDOWN_DAYS,optOutUrl:SMS_OPT_OUT})}catch{return json({sender:SMS_SENDER,provider:"SendPulse",senderStatus:{found:false,status:null,statusLabel:"API недоступне",statusExplain:""},cooldownDays:SMS_COOLDOWN_DAYS,optOutUrl:SMS_OPT_OUT})}
+      try{const [senderStatus,balance]=await Promise.all([sendpulseSender(key),sendpulseBalance(key)]);return json({sender:SMS_SENDER,provider:"SendPulse",senderStatus,balance,cooldownDays:SMS_COOLDOWN_DAYS,optOutUrl:SMS_OPT_OUT})}catch{return json({sender:SMS_SENDER,provider:"SendPulse",senderStatus:{found:false,status:null,statusLabel:"API недоступне",statusExplain:""},balance:null,cooldownDays:SMS_COOLDOWN_DAYS,optOutUrl:SMS_OPT_OUT})}
     }
     if(action==="sms_audience"){
       const segment=["all","sleeping","sleeping_warm","sleeping_long"].includes(String(body.segment))?String(body.segment):"sleeping";let rows=await buildAudience(db,segment);
@@ -99,6 +122,16 @@ Deno.serve(async request=>{
     }
     if(action==="set_customer_sms_consent"){
       const phone=normalizePhone(body.phone);if(!phone)return json({error:"invalid_customer"},400);const enabled=body.enabled===true,now=new Date().toISOString(),patch=enabled?{marketing_sms_consent:true,marketing_sms_consent_at:now,marketing_sms_consent_source:"admin_confirmed",marketing_sms_opted_out_at:null,updated_at:now}:{marketing_sms_consent:false,marketing_sms_opted_out_at:now,marketing_sms_consent_source:"admin_opt_out",updated_at:now};const {data,error}=await db.from("vacleaner_customers").update(patch).eq("phone",phone).select("phone").maybeSingle();if(error)throw error;if(!data)return json({error:"invalid_customer"},404);return json({ok:true,consent:enabled?"explicit":"opted_out"})
+    }
+    if(action==="sms_preflight"){
+      const key=Deno.env.get("SENDPULSE_API_KEY");if(!key)return json({error:"sendpulse_not_configured"},503);
+      const segment=["all","sleeping","sleeping_warm","sleeping_long"].includes(String(body.segment))?String(body.segment):"sleeping",route=body.route==="international"?"international":"national",message=cleanText(body.message,402),selected=[...new Set((Array.isArray(body.phones)?body.phones:[]).map(normalizePhone).filter(Boolean))].slice(0,500);if(!message||!selected.length)return json({error:"invalid_sms_campaign"},400);if(!message.toLowerCase().includes(SMS_OPT_OUT))return json({error:"sms_optout_required"},400);
+      const audience=await buildAudience(db,segment),map=new Map(audience.map(row=>[row.phone,row])),recipients=selected.map(phone=>map.get(phone)).filter(Boolean) as AudienceRow[];if(recipients.length!==selected.length||recipients.some(r=>!r.selectable))return json({error:"audience_changed"},409);const legacy=recipients.filter(r=>r.consent==="legacy");if(legacy.length&&body.legacyAttestation!==true)return json({error:"legacy_consent_confirmation_required",legacyCount:legacy.length},409);
+      const promo=await campaignPromoContext(db,campaignId,selected),personalized=promo.personalized;if(personalized&&!message.includes(SMS_LINK_TOKEN))return json({error:"promo_link_required"},400);const recipientsWithPromo=recipients.map(row=>{const personal=promo.byPhone.get(row.phone);return {...row,promoCode:personal?.promoCode||null,promoLink:personal?.promoLink||null}});if(personalized&&recipientsWithPromo.some(row=>!row.promoCode||!row.promoLink))return json({error:"promo_codes_missing"},409);
+      const measuredMessage=personalized?expandSmsTemplate(message):message;if([...measuredMessage].length>402||smsParts(measuredMessage)>6)return json({error:"sms_too_long"},400);
+      const sender=await sendpulseSender(key);if(route==="national"&&sender.status!==1)return json({error:"sender_not_active",senderStatus:sender},409);
+      try{const balance=await sendpulseBalance(key);if(personalized)await preflightPersonalizedSendpulseCampaign(key,route,message,recipientsWithPromo);else await preflightDirectSendpulseCampaign(key,route,message,recipients);return json({ok:true,parts:smsParts(measuredMessage),recipients:recipients.length,personalized,balance,senderStatus:sender})}
+      catch(error){const detail=error instanceof Error?error.message:"sendpulse_preflight_failed";return json({error:"sendpulse_preflight_failed",detail},422)}
     }
     if(action==="sms_send"){
       const key=Deno.env.get("SENDPULSE_API_KEY");if(!key)return json({error:"sendpulse_not_configured"},503);
