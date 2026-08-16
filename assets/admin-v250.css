@@ -3350,26 +3350,33 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .sms-preflight-state.success>i{background:rgba(75,199,130,.12);color:#61d39a}
 .sms-preflight-state.error{border-color:rgba(237,121,121,.28);background:rgba(237,121,121,.055)}
 .sms-preflight-state.error>i{background:rgba(237,121,121,.12);color:#ed8383}
-.sms-history-panel{flex-direction:column;gap:12px;overflow:hidden}
-.sms-history-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex:0 0 auto}
-.sms-history-head h3{margin:0;font-size:20px;line-height:1.1}
-.sms-history-head p{margin:4px 0 0;color:var(--muted);font-size:10px}
-.sms-history-list{display:grid;align-content:start;gap:7px;flex:1;min-height:0;overflow-y:auto;padding-right:5px}
+.sms-history-panel{flex-direction:column;gap:16px;overflow:hidden}
+.sms-history-head{display:flex;align-items:center;justify-content:space-between;gap:18px;flex:0 0 auto}
+.sms-history-head>div>small{display:block;margin-bottom:5px;color:var(--gold-2);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.sms-history-head h3{margin:0;font-size:24px;line-height:1.06;font-weight:720}
+.sms-history-head p{margin:6px 0 0;color:var(--muted);font-size:11.5px;line-height:1.3}
+.sms-history-head .btn{min-height:42px;height:42px;padding-inline:14px;font-size:12.5px}
+.sms-history-list{display:grid;align-content:start;gap:8px;flex:1;min-height:0;overflow-y:auto;padding-right:6px}
 .sms-history-list article{
   display:grid;
   grid-template-columns:minmax(0,1fr) auto;
   align-items:center;
-  gap:10px;
-  min-height:58px;
-  padding:9px 11px;
+  gap:16px;
+  min-height:68px;
+  padding:11px 13px;
   border:1px solid var(--line);
   border-radius:11px;
   background:#0e171b;
 }
-.sms-history-list article>div:first-child{display:grid;gap:4px;min-width:0}
-.sms-history-list article>div:first-child b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px}
-.sms-history-list article small{color:var(--muted);font-size:9px}
-.sms-history-list article>div:last-child{display:flex;align-items:center;gap:8px}
+.sms-history-list article>div:first-child{display:grid;gap:5px;min-width:0}
+.sms-history-list article>div:first-child b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px;line-height:1.2;font-weight:720;color:#eceae5}
+.sms-history-list article small{color:var(--muted);font-size:11px;line-height:1.25}
+.sms-history-list article>div:last-child{display:flex;align-items:center;gap:10px}
+.sms-history-list .sms-dispatch-status{padding:6px 9px;font-size:10.5px}
+.sms-history-list [data-sms-sync]{min-height:40px;height:40px;padding-inline:12px;font-size:12px}
+.sms-campaign-modal.history-mode .sms-stepper,
+.sms-campaign-modal.history-mode>.sms-workspace-footer{display:none}
+.sms-campaign-modal.history-mode .sms-history-panel{padding:16px 20px 18px}
 .sms-workspace-footer{
   flex:0 0 auto;
   display:flex;
@@ -3473,11 +3480,19 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-preflight-state>i{width:30px;height:30px}
   .sms-preflight-state b{font-size:10px}
   .sms-preflight-state small{font-size:8px}
-  .sms-history-head{align-items:flex-start}
-  .sms-history-head h3{font-size:17px}
-  .sms-history-head p{font-size:8.5px}
-  .sms-history-list article{min-height:54px;padding:8px 9px}
+  .sms-history-head{align-items:flex-start;gap:10px}
+  .sms-history-head>div>small{font-size:9px}
+  .sms-history-head h3{font-size:20px}
+  .sms-history-head p{font-size:10px}
+  .sms-history-head .btn{min-height:38px;height:38px;padding-inline:10px;font-size:10.5px}
+  .sms-history-list{gap:7px;padding-right:3px}
+  .sms-history-list article{grid-template-columns:minmax(0,1fr) auto;gap:8px;min-height:64px;padding:10px 10px}
+  .sms-history-list article>div:first-child b{font-size:12.5px}
+  .sms-history-list article small{font-size:9.5px}
   .sms-history-list article>div:last-child{gap:5px}
+  .sms-history-list .sms-dispatch-status{padding:5px 7px;font-size:9px}
+  .sms-history-list [data-sms-sync]{min-height:36px;height:36px;padding-inline:9px;font-size:10px}
+  .sms-campaign-modal.history-mode .sms-history-panel{padding:10px 9px 12px}
   .sms-workspace-footer{
     display:grid;
     grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);
@@ -4519,6 +4534,13 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 
 /* Short desktop: preserve the working area, not tiny text. */
 @media (min-width:901px) and (max-height:820px){
+  .sms-campaign-modal.history-mode .sms-history-panel{padding:12px 16px 14px}
+  .sms-campaign-modal.history-mode .sms-history-head{gap:14px}
+  .sms-campaign-modal.history-mode .sms-history-head h3{font-size:22px}
+  .sms-campaign-modal.history-mode .sms-history-head p{font-size:10.5px}
+  .sms-campaign-modal.history-mode .sms-history-list article{min-height:64px;padding:10px 12px}
+  .sms-campaign-modal.history-mode .sms-history-list article>div:first-child b{font-size:13.5px}
+  .sms-campaign-modal.history-mode .sms-history-list article small{font-size:10.5px}
   .sms-campaign-modal>.sms-workspace-header{padding:7px 12px 6px;grid-template-columns:minmax(255px,auto) minmax(0,1fr) auto}
   .sms-campaign-modal>.sms-workspace-header .sms-heading h2{font-size:25px}
   .sms-campaign-modal>.sms-workspace-header .sms-meta-item{min-height:24px;padding-inline:9px}
@@ -4754,4 +4776,48 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 @media (min-width:901px) and (max-height:820px){
   .sms-campaign-modal>.sms-workspace-header .sms-meta-item>small{font-size:9px}
   .sms-campaign-modal>.sms-workspace-header .sms-meta-item>b{font-size:11px}
+}
+
+/* v4.0.92 — SMS JOURNAL READABILITY LOCK. */
+@media (min-width:901px){
+  .sms-campaign-modal.history-mode .sms-history-head h3{font-size:25px}
+  .sms-campaign-modal.history-mode .sms-history-head p{font-size:12px}
+  .sms-campaign-modal.history-mode .sms-history-list article{min-height:70px;padding:12px 14px}
+  .sms-campaign-modal.history-mode .sms-history-list article>div:first-child b{font-size:15px}
+  .sms-campaign-modal.history-mode .sms-history-list article small{font-size:11.5px}
+  .sms-campaign-modal.history-mode .sms-history-list .sms-dispatch-status{font-size:10.5px;padding:6px 9px}
+  .sms-campaign-modal.history-mode .sms-history-list [data-sms-sync]{min-height:40px;height:40px;padding-inline:12px;font-size:12.5px}
+}
+@media (min-width:901px) and (max-height:820px){
+  .sms-campaign-modal.history-mode .sms-history-head h3{font-size:24px}
+  .sms-campaign-modal.history-mode .sms-history-head p{font-size:11px}
+  .sms-campaign-modal.history-mode .sms-history-list article{min-height:66px;padding:10px 13px}
+  .sms-campaign-modal.history-mode .sms-history-list article>div:first-child b{font-size:14.5px}
+  .sms-campaign-modal.history-mode .sms-history-list article small{font-size:11px}
+}
+@media (min-width:701px) and (max-width:900px){
+  .sms-campaign-modal.history-mode .sms-history-list article>div:first-child b{font-size:14.5px}
+  .sms-campaign-modal.history-mode .sms-history-list article small{font-size:11px}
+  .sms-campaign-modal.history-mode .sms-history-list [data-sms-sync]{font-size:11.5px}
+}
+
+/* v4.0.92b — neutralize legacy #smsHistory density/padding inside the new journal workspace. */
+.sms-campaign-modal.history-mode #smsHistory{padding:0 4px 0 0;gap:8px}
+.sms-campaign-modal.history-mode #smsHistory article{display:grid;grid-template-columns:minmax(0,1fr) auto;min-height:68px;padding:11px 13px;gap:14px}
+.sms-campaign-modal.history-mode #smsHistory article small{font-size:11px;line-height:1.3}
+.sms-campaign-modal.history-mode #smsHistory article .btn{min-height:40px;height:40px;padding:0 12px;font-size:12px}
+@media (min-width:901px){
+  .sms-campaign-modal.history-mode #smsHistory article{min-height:70px;padding:12px 14px;gap:16px}
+  .sms-campaign-modal.history-mode #smsHistory article small{font-size:11.5px}
+  .sms-campaign-modal.history-mode #smsHistory article .btn{font-size:12.5px}
+}
+@media (min-width:901px) and (max-height:820px){
+  .sms-campaign-modal.history-mode #smsHistory article{min-height:66px;padding:10px 13px}
+  .sms-campaign-modal.history-mode #smsHistory article small{font-size:11px}
+}
+@media (max-width:700px){
+  .sms-campaign-modal.history-mode #smsHistory{padding:0 2px 0 0;gap:7px}
+  .sms-campaign-modal.history-mode #smsHistory article{min-height:64px;padding:10px;gap:8px}
+  .sms-campaign-modal.history-mode #smsHistory article small{font-size:10px}
+  .sms-campaign-modal.history-mode #smsHistory article .btn{min-height:36px;height:36px;padding:0 9px;font-size:11px}
 }
