@@ -2023,3 +2023,28 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal .sms-audience-actions{grid-template-columns:1fr}
   .sms-campaign-modal .sms-audience-actions .btn{width:100%}
 }
+
+/* v4.0.77 — larger recipient viewport; recipient list owns its own scroll. */
+@media (min-width:701px){
+  .sms-campaign-modal .sms-audience-list{
+    height:clamp(360px,44dvh,480px);
+    max-height:none;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-gutter:stable;
+    padding-right:7px;
+  }
+  .sms-campaign-modal .sms-audience-list::-webkit-scrollbar{display:block;width:6px;height:6px}
+  .sms-campaign-modal .sms-audience-list::-webkit-scrollbar-button{display:none;width:0;height:0}
+}
+@media (max-width:700px){
+  .sms-campaign-modal .sms-audience-list{
+    height:clamp(250px,38dvh,340px);
+    max-height:none;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:none;
+  }
+  .sms-campaign-modal .sms-audience-list::-webkit-scrollbar{display:none}
+}

@@ -688,6 +688,9 @@ def desktop_suite(browser: Browser, qa: QA) -> None:
                 qa.check('оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), "Desktop: SMS recipient rows show completed rental count")
                 page.locator('.sms-campaign-modal #smsAudienceSort').select_option('rentals-desc');page.wait_for_timeout(20)
                 qa.check('7 оренд' in page.locator('.sms-campaign-modal .sms-recipient').first.inner_text(), "Desktop: SMS audience sorts by most rentals")
+                audience_scroll=page.locator('.sms-campaign-modal #smsAudienceList').evaluate("""el=>{const h=el.clientHeight,overflow=getComputedStyle(el).overflowY;const sample=el.querySelector('.sms-recipient');if(sample){for(let i=0;i<18;i++)el.append(sample.cloneNode(true));}el.scrollTop=180;return{h,overflow,scrollTop:el.scrollTop,scrollHeight:el.scrollHeight}}""")
+                qa.check(audience_scroll['h']>=360, "Desktop: SMS recipient viewport is large enough for practical selection")
+                qa.check(audience_scroll['overflow'] in ('auto','scroll') and audience_scroll['scrollHeight']>audience_scroll['h'] and audience_scroll['scrollTop']>0, "Desktop: SMS recipients scroll inside their own enlarged list")
                 qa.check(no_overflow(page), "Desktop: SMS audience sorting controls do not create horizontal overflow")
                 page.locator('.sms-campaign-modal [data-close]').first.click();page.wait_for_timeout(30)
             if view == "chemistry":

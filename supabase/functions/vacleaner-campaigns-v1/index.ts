@@ -33,6 +33,27 @@ async function campaignPromoContext(db:any,campaignId:string,phones:string[]){
   for(const row of codes||[]){const phone=normalizePhone(row.customer_phone),link=promoShortLink(row.code),expired=row.expires_at&&new Date(row.expires_at).getTime()<=now;if(!phone||!link||expired||used.has(String(row.id)))continue;byPhone.set(phone,{promoCode:String(row.code),promoLink:link,promoCodeId:String(row.id)})}
   return {personalized,campaign,byPhone};
 }
+const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
+function sendpulseAddressBookRow(payload:any,addressBookId:number){
+  const candidates=Array.isArray(payload)?payload:Array.isArray(payload?.data)?payload.data:Array.isArray(payload?.result)?payload.result:[payload?.data??payload];
+  return candidates.find((row:any)=>Number(row?.id||row?.addressBookId||0)===addressBookId)||candidates.find((row:any)=>row&&typeof row==="object")||{};
+}
+async function waitForSendpulseAddressBook(key:string,addressBookId:number,expectedPhones:number){
+  let last={active:0,excluded:0,newPhones:expectedPhones,status:0,statusExplain:""};
+  for(let attempt=0;attempt<24;attempt+=1){
+    const info=await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`);
+    const row=sendpulseAddressBookRow(info,addressBookId);
+    const active=Math.max(0,Number(row?.active_phones_quantity??row?.activePhonesQuantity??0)||0);
+    const excluded=Math.max(0,Number(row?.exc_phones_quantity??row?.excluded_phones_quantity??row?.inactive_phones_quantity??0)||0);
+    const explicitNew=Number(row?.new_phones_quantity);
+    const newPhones=Number.isFinite(explicitNew)?Math.max(0,explicitNew):Math.max(0,expectedPhones-active-excluded);
+    last={active,excluded,newPhones,status:Number(row?.status||0),statusExplain:cleanText(String(row?.status_explain||""),120)};
+    if(active>=expectedPhones)return last;
+    if(active+excluded>=expectedPhones&&excluded>0)throw new Error(`sendpulse_addressbook_rejected:${active}_active:${excluded}_excluded`);
+    if(attempt<23)await sleep(attempt<4?500:1000);
+  }
+  throw new Error(`sendpulse_addressbook_not_ready:${last.active}/${expectedPhones}_active:${last.newPhones}_new:${last.excluded}_excluded`);
+}
 async function createPersonalizedAddressBook(key:string,label:string,recipients:Array<any>){
   let addressBookId=0;
   const book=await spJson(key,"https://api.sendpulse.com/addressbooks",{method:"POST",body:JSON.stringify({bookName:`VAcleaner ${label} ${new Date().toISOString().slice(0,16)}`})});
@@ -41,6 +62,7 @@ async function createPersonalizedAddressBook(key:string,label:string,recipients:
     const phones:Record<string,any>={};for(const row of recipients)phones[smsPhone(row.phone)]=[[{name:SP_PROMO_VAR,type:"string",value:String(row.promoLink||"")}]];
     const add=await spJson(key,"https://api.sendpulse.com/sms/numbers/variables",{method:"POST",body:JSON.stringify({addressBookId,phones})});
     const added=Array.isArray(add)?add.find((item:any)=>item?.result===true):add;if(!added?.result)throw new Error("sendpulse_variables_error");
+    await waitForSendpulseAddressBook(key,addressBookId,recipients.length);
     return addressBookId;
   }catch(error){await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null);throw error}
 }
