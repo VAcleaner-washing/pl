@@ -4137,6 +4137,27 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .sms-campaign-modal .sms-legacy-attestation b,
 .sms-campaign-modal .sms-preflight-state b{font-weight:680}
 
+/* v4.0.89 — medium desktop campaign rows use two tiers instead of squeezing actions past the viewport. */
+@media (min-width:901px) and (max-width:1180px){
+  .campaign-workspace .campaign-row{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"main actions" "metrics metrics";
+    gap:10px 12px;
+    min-height:0;
+  }
+  .campaign-workspace .campaign-main{grid-area:main}
+  .campaign-workspace .campaign-actions{grid-area:actions;justify-self:end;min-width:0}
+  .campaign-workspace .campaign-metrics{
+    grid-area:metrics;
+    width:100%;
+    max-width:none;
+    padding-top:9px;
+    border-top:1px solid var(--line);
+  }
+  .campaign-workspace .campaign-metrics>span{padding:0 12px}
+  .campaign-workspace .campaign-metrics>span:first-child{padding-left:0}
+  .campaign-workspace .campaign-more{flex:0 0 36px}
+}
 @media (min-width:701px) and (max-width:900px){
   .campaign-workspace .campaign-panel-head{align-items:start}
   .campaign-workspace .campaign-row{grid-template-columns:minmax(0,1fr);gap:10px}
