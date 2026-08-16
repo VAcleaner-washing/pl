@@ -2570,3 +2570,300 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .sms-campaign-modal #smsSelectAvailable{width:100%}
   .sms-campaign-modal .sms-recipient-meta>span:nth-of-type(2){display:none}
 }
+
+/* v4.0.82 — SMS workspace containment + recipient-first viewport on desktop and mobile. */
+.sms-campaign-modal,
+.sms-campaign-modal .sms-form-body,
+.sms-campaign-modal .modal-section,
+.sms-campaign-modal .client-section-head,
+.sms-campaign-modal .sms-audience-actions,
+.sms-campaign-modal>footer{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+.sms-campaign-modal{
+  width:min(1240px,calc(100vw - 48px));
+}
+.sms-campaign-modal .sms-form-body{
+  padding-inline:18px;
+}
+.sms-campaign-modal .sms-audience-section{
+  height:clamp(490px,58dvh,640px);
+  overflow:hidden;
+}
+.sms-campaign-modal .sms-audience-section .client-section-head{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(350px,440px);
+  align-items:end;
+  gap:16px;
+}
+.sms-campaign-modal .sms-audience-actions{
+  display:grid;
+  grid-template-columns:minmax(210px,1fr) minmax(148px,auto);
+  align-items:end;
+  gap:8px;
+  justify-self:stretch;
+}
+.sms-campaign-modal .sms-audience-sort,
+.sms-campaign-modal .sms-audience-sort select,
+.sms-campaign-modal #smsSelectAvailable{
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+.sms-campaign-modal .sms-audience-summary{
+  width:100%;
+  min-width:0;
+}
+.sms-campaign-modal .sms-audience-list{
+  width:100%;
+  min-width:0;
+}
+.sms-campaign-modal>footer{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  overflow:hidden;
+  padding-inline:18px;
+}
+.sms-campaign-modal>footer .btn{
+  flex:0 1 auto;
+  max-width:100%;
+}
+.sms-campaign-modal>footer #smsSend{
+  flex-basis:240px;
+  min-width:180px;
+  max-width:240px;
+}
+
+@media (max-width:900px) and (min-width:701px){
+  .sms-campaign-modal .sms-audience-section .client-section-head{
+    grid-template-columns:minmax(0,1fr);
+    align-items:stretch;
+  }
+  .sms-campaign-modal .sms-audience-actions{
+    grid-template-columns:minmax(0,1fr) minmax(160px,auto);
+  }
+}
+
+@media (max-width:700px){
+  .sms-campaign-modal{
+    width:100vw;
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+  }
+  .modal:has(.sms-campaign-modal){padding:0}
+  .sms-campaign-modal>header{
+    padding:calc(10px + var(--pwa-safe-top)) 14px 9px;
+    gap:10px;
+  }
+  .sms-campaign-modal>header small{
+    margin-bottom:4px;
+    font-size:9px;
+  }
+  .sms-campaign-modal>header h2{
+    font-size:24px;
+    line-height:1;
+  }
+  .sms-campaign-modal>header .close{
+    flex-basis:38px;
+    width:38px;
+    height:38px;
+    min-width:38px;
+    min-height:38px;
+    font-size:23px;
+  }
+  .sms-campaign-modal .sms-status-line{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:1px 10px;
+    margin-top:5px;
+    font-size:10px;
+    line-height:1.25;
+  }
+  .sms-campaign-modal .sms-status-line>span:first-child{
+    grid-column:1/-1;
+  }
+  .sms-campaign-modal .sms-form-body{
+    gap:7px;
+    padding:7px 8px 8px;
+  }
+  .sms-campaign-modal .modal-section{
+    padding:10px;
+    border-radius:13px;
+  }
+  .sms-campaign-modal .sms-compose .fields{
+    gap:6px;
+  }
+  .sms-campaign-modal .sms-compose textarea{
+    min-height:56px;
+    max-height:88px;
+  }
+  .sms-campaign-modal .sms-route-note{
+    margin-top:6px;
+    padding:7px 8px;
+    font-size:10px;
+    line-height:1.3;
+  }
+  .sms-campaign-modal .sms-audience-section{
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    padding:10px;
+    grid-template-rows:auto auto auto auto;
+  }
+  .sms-campaign-modal .sms-audience-section .client-section-head{
+    grid-template-columns:minmax(0,1fr);
+    gap:6px;
+    margin-bottom:6px;
+  }
+  .sms-campaign-modal .sms-audience-title-row h3{
+    font-size:17px;
+  }
+  .sms-campaign-modal .sms-selected-count{
+    min-height:20px;
+    padding-inline:7px;
+    font-size:9px;
+  }
+  .sms-campaign-modal .sms-audience-actions{
+    grid-template-columns:minmax(0,1fr) minmax(138px,.8fr);
+    gap:6px;
+  }
+  .sms-campaign-modal .sms-audience-sort>span{
+    font-size:7.5px;
+  }
+  .sms-campaign-modal .sms-audience-sort select,
+  .sms-campaign-modal #smsSelectAvailable{
+    min-height:35px;
+    height:35px;
+    border-radius:9px;
+    font-size:10.5px;
+  }
+  .sms-campaign-modal #smsSelectAvailable{
+    padding-inline:8px;
+  }
+  .sms-campaign-modal .sms-audience-summary{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:5px;
+    margin:0 0 6px;
+  }
+  .sms-campaign-modal .sms-audience-summary span{
+    min-height:50px;
+    padding:6px 7px;
+    border-radius:10px;
+  }
+  .sms-campaign-modal .sms-audience-summary b{
+    font-size:18px;
+  }
+  .sms-campaign-modal .sms-audience-summary small{
+    font-size:8px;
+    line-height:1.15;
+  }
+  .sms-campaign-modal .sms-audience-list{
+    height:clamp(500px,64dvh,610px);
+    min-height:500px;
+    max-height:610px;
+    gap:5px;
+    padding:1px 1px 1px 0;
+  }
+  .sms-campaign-modal .sms-recipient{
+    grid-template-columns:20px minmax(0,1fr) auto;
+    gap:7px;
+    min-height:64px;
+    padding:7px 8px;
+    border-radius:10px;
+  }
+  .sms-campaign-modal .sms-recipient input{
+    width:18px;
+    height:18px;
+    min-width:18px;
+    min-height:18px;
+  }
+  .sms-campaign-modal .sms-recipient-main{
+    gap:3px;
+  }
+  .sms-campaign-modal .sms-recipient-main>b{
+    font-size:13px;
+    line-height:1.1;
+  }
+  .sms-campaign-modal .sms-recipient-meta{
+    gap:1px 5px;
+    font-size:9px;
+    line-height:1.2;
+  }
+  .sms-campaign-modal .sms-recipient-meta>span::before{
+    margin-right:5px;
+  }
+  .sms-campaign-modal .sms-consent{
+    padding:3px 6px;
+    font-size:7.5px;
+  }
+  .sms-campaign-modal .sms-recipient em{
+    margin-top:-1px;
+    font-size:8px;
+  }
+  .sms-campaign-modal .sms-legacy-attestation{
+    margin-top:6px;
+    padding:8px;
+  }
+  .sms-campaign-modal .sms-history>summary{
+    min-height:48px;
+    padding:8px 10px;
+  }
+  .sms-campaign-modal .sms-history>summary h3{
+    font-size:15px;
+  }
+  .sms-campaign-modal .sms-history>summary small{
+    font-size:8px;
+  }
+  .sms-campaign-modal .sms-history-summary-meta{
+    font-size:9px;
+  }
+  .sms-campaign-modal .sms-history-summary-meta i{
+    width:22px;
+    height:22px;
+    border-radius:7px;
+    font-size:14px;
+  }
+  .sms-campaign-modal>footer{
+    display:grid;
+    grid-template-columns:minmax(0,.85fr) minmax(0,1.25fr);
+    gap:7px;
+    padding:7px 10px calc(7px + var(--pwa-safe-bottom));
+  }
+  .sms-campaign-modal>footer .btn,
+  .sms-campaign-modal>footer #smsSend{
+    width:100%;
+    min-width:0;
+    max-width:none;
+    min-height:42px;
+    height:42px;
+    font-size:11.5px;
+  }
+}
+
+@media (max-width:360px){
+  .sms-campaign-modal .sms-audience-summary{
+    grid-template-columns:1fr 1fr;
+  }
+  .sms-campaign-modal .sms-audience-summary span{
+    min-height:46px;
+  }
+  .sms-campaign-modal .sms-audience-list{
+    height:clamp(440px,58dvh,520px);
+    min-height:440px;
+    max-height:520px;
+  }
+}
+.sms-campaign-modal .sms-audience-list{
+  align-content:start;
+  grid-auto-rows:max-content;
+}
+@media (min-width:701px){
+  .modal-card:has(.sms-campaign-modal){
+    width:min(1280px,calc(100vw - 32px));
+    height:min(900px,calc(100dvh - 32px));
+    max-height:calc(100dvh - 32px);
+  }
+}
