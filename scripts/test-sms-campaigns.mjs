@@ -55,7 +55,7 @@ check(adminCss.includes('.sms-audience-list')&&adminCss.includes('.sms-consent.l
 check(admin.includes('sms-selected-count')&&admin.includes("selectAvailable.dataset.mode=allSelected?'clear':'select'"),'SMS audience shows selected count and turns bulk-select into a reversible action');
 check(admin.includes('id="smsHistoryOpen"')&&admin.includes('id="smsHistoryPanel"')&&admin.includes('historyMode=true'),'SMS journal is a separate workspace mode instead of competing with recipient selection');
 check(admin.includes("smsAudienceLabel(value)")&&admin.includes("all:'Уся база'"),'SMS journal humanizes internal audience segment codes');
-check(adminCss.includes('v4.0.83 — SMS FLOW REBUILD')&&adminCss.includes('.sms-stage')&&adminCss.includes('.sms-audience-list')&&adminCss.includes('flex:1 1 auto'),'SMS flow gives the active step the viewport and makes recipients the primary scroll owner');
+check(adminCss.includes('v4.0.83 — SMS FLOW REBUILD')&&adminCss.includes('v4.0.84 — SHORT DESKTOP SMS WORKSPACE')&&adminCss.includes('.sms-stage')&&adminCss.includes('.sms-audience-list')&&adminCss.includes('max-height:820px'),'SMS flow gives recipients the viewport and has an explicit short-desktop capacity contract');
 check(adminCss.includes('.sms-workspace-footer')&&adminCss.includes('grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr)'),'SMS mobile footer keeps one compact, stable action row');
 check(adminCss.includes('.sms-campaign-modal .client-section-head small')&&adminCss.includes('text-transform:uppercase'),'SMS section kickers use a non-overlapping compact hierarchy');
 check(adminCss.includes('.sms-campaign-modal #smsSend:disabled')&&adminCss.includes('cursor:not-allowed'),'inactive SMS route has a visibly disabled send action');

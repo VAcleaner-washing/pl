@@ -660,6 +660,31 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
     finally:
         page.close()
 
+
+def short_desktop_sms_suite(browser: Browser, qa: QA) -> None:
+    # Reproduces a 1650px desktop with a short browser content viewport (Chrome chrome + Windows taskbar).
+    page = render_page(browser, 1650, 760)
+    try:
+        dismiss_update(page, qa)
+        page.locator('.nav button[data-view="campaigns"]').click(); page.wait_for_timeout(90)
+        page.locator('#smsCampaign').click(); page.wait_for_selector('.sms-campaign-modal #smsAudienceList'); page.wait_for_timeout(80)
+        geometry = page.locator('.sms-campaign-modal #smsAudienceList').evaluate("""el=>{
+          const sample=el.querySelector('.sms-recipient');
+          const h=el.clientHeight,sampleH=sample?sample.getBoundingClientRect().height:0;
+          const gap=parseFloat(getComputedStyle(el).rowGap||getComputedStyle(el).gap||0)||0;
+          return {h,sampleH,gap,capacity:sampleH?((h+gap)/(sampleH+gap)):0,overflow:getComputedStyle(el).overflowY};
+        }""")
+        qa.check(geometry['capacity']>=8.0, f"Short desktop 1650x760: at least eight real recipient rows fit before scrolling (capacity={geometry['capacity']:.1f})")
+        qa.check(geometry['h']>=360, "Short desktop 1650x760: recipient list gets at least 360px of working height")
+        chrome = page.locator('.sms-campaign-modal').evaluate("""el=>{
+          const r=el.getBoundingClientRect(),h=el.querySelector('.sms-workspace-header').getBoundingClientRect(),s=el.querySelector('.sms-stepper').getBoundingClientRect(),f=el.querySelector('.sms-workspace-footer').getBoundingClientRect();
+          return {modal:r.height,header:h.height,stepper:s.height,footer:f.height};
+        }""")
+        qa.check(chrome['header']<=82 and chrome['stepper']<=44 and chrome['footer']<=54, "Short desktop 1650x760: chrome stays compact so clients own the viewport")
+        qa.check(no_overflow(page), "Short desktop 1650x760: SMS workspace has no horizontal overflow")
+    finally:
+        page.close()
+
 def tablet_suite(browser: Browser, qa: QA) -> None:
     page = render_page(browser, 768, 1024)
     try:
@@ -930,6 +955,7 @@ def main() -> int:
             public_date_suite(browser, qa)
             public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
+            short_desktop_sms_suite(browser, qa)
         except Exception as exc:
             qa.failed.append(f"Unhandled PWA visual error: {exc}")
             print(f"FAIL: Unhandled PWA visual error: {exc}")
