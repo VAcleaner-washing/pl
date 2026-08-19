@@ -13,6 +13,11 @@ import {
   slotIndex,
 } from "./config.ts";
 
+const ADMIN_PRODUCT_LABELS: Record<string,string> = {
+  puzzi: "Kärcher Puzzi", puzzi_jimmy: "Puzzi + Jimmy", puzzi_abir: "Puzzi + робот", sc2: "Kärcher SC 2", abir: "Робот ABIR", combo: "Puzzi + SC 2", general: "Puzzi + SC 2 + Jimmy", ideal_windows: "SC 2 + робот", elite: "HOME RESET",
+};
+const adminProductLabel = (code: unknown, fallback: unknown) => ADMIN_PRODUCT_LABELS[String(code ?? "")] || String(fallback ?? "Техніка").trim() || "Техніка";
+
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -209,7 +214,7 @@ async function availability(db: any, product: any, startDate: string, returnDate
 }
 async function notifyTelegram(booking: any) {
   const token = Deno.env.get("VACLEANER_TELEGRAM_BOT_TOKEN"), chatId = Deno.env.get("VACLEANER_TELEGRAM_CHAT_ID"); if (!token || !chatId) return;
-  const text = [`Нова заявка ${booking.booking_code}`, String(booking.product_label), `${booking.start_date} → ${booking.return_date}`, `${booking.customer_name} · ${booking.customer_phone}`, `Орієнтовно: ${booking.total_amount} грн`].join("\n");
+  const text = [`Нова заявка ${booking.booking_code}`, adminProductLabel(booking.product_code, booking.product_label), `${booking.start_date} → ${booking.return_date}`, `${booking.customer_name} · ${booking.customer_phone}`, `Орієнтовно: ${booking.total_amount} грн`].join("\n");
   await fetch(`https://api.telegram.org/bot${token}/sendMessage`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ chat_id: chatId, text }) });
 }
 async function notifyWebPush(db: any, booking: any) {
@@ -219,7 +224,7 @@ async function notifyWebPush(db: any, booking: any) {
   ]);
   if (!config || !subs?.length) return;
   webpush.setVapidDetails("https://vacleaner.pp.ua", config.vapid_public_key, config.vapid_private_key);
-  const payload = JSON.stringify({ title: "Нове бронювання VAcleaner", body: `${booking.product_label} · ${booking.start_date} · ${booking.total_amount} грн`, tag: String(booking.booking_code), data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id } });
+  const payload = JSON.stringify({ title: "Нове бронювання VAcleaner", body: `${adminProductLabel(booking.product_code, booking.product_label)} · ${booking.start_date} · ${booking.total_amount} грн`, tag: String(booking.booking_code), data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id } });
   await Promise.allSettled(subs.map(async (sub: any) => {
     try {
       await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth_key } }, payload, { TTL: 3600, urgency: "high" });

@@ -2,6 +2,18 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 import webpush from "npm:web-push@3.6.7";
 import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, isWeekendDeposit, rentalBase, paidDayMoments, slotIndex } from "./config.deploy.js";
+const ADMIN_PRODUCT_LABELS = {
+    puzzi: "Kärcher Puzzi",
+    puzzi_jimmy: "Puzzi + Jimmy",
+    puzzi_abir: "Puzzi + робот",
+    sc2: "Kärcher SC 2",
+    abir: "Робот ABIR",
+    combo: "Puzzi + SC 2",
+    general: "Puzzi + SC 2 + Jimmy",
+    ideal_windows: "SC 2 + робот",
+    elite: "HOME RESET"
+};
+const adminProductLabel = (code, fallback)=>ADMIN_PRODUCT_LABELS[String(code ?? "")] || String(fallback ?? "Техніка").trim() || "Техніка";
 const cors = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -346,7 +358,7 @@ async function notifyTelegram(booking) {
     if (!token || !chatId) return;
     const text = [
         `Нова заявка ${booking.booking_code}`,
-        String(booking.product_label),
+        adminProductLabel(booking.product_code, booking.product_label),
         `${booking.start_date} → ${booking.return_date}`,
         `${booking.customer_name} · ${booking.customer_phone}`,
         `Орієнтовно: ${booking.total_amount} грн`
@@ -371,7 +383,7 @@ async function notifyWebPush(db, booking) {
     webpush.setVapidDetails("https://vacleaner.pp.ua", config.vapid_public_key, config.vapid_private_key);
     const payload = JSON.stringify({
         title: "Нове бронювання VAcleaner",
-        body: `${booking.product_label} · ${booking.start_date} · ${booking.total_amount} грн`,
+        body: `${adminProductLabel(booking.product_code, booking.product_label)} · ${booking.start_date} · ${booking.total_amount} грн`,
         tag: String(booking.booking_code),
         data: {
             url: `/admin/bronuvannia/?booking=${booking.id}`,
