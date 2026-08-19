@@ -37,7 +37,7 @@ for(const [name,source] of [['edge source',edgeTs],['edge deploy',edgeDeploy]]){
   check(source.includes('admin_note: cleanAdminNote(body.adminNote, 800) || null'),`${name} refuses to re-store workflow text/marker during create/edit`);
 }
 
-check(reminders.includes('title: `Нове бронювання · ${compactProductLabel(booking.product_label)}`'),'new-booking push uses concise Ukrainian title');
+check(reminders.includes('title: `Нове бронювання · ${adminProductLabel(booking.product_code, booking.product_label)}`'),'new-booking push uses the internal admin equipment label');
 check(reminders.includes('${booking.customer_name || "Клієнт"}\\n${shortDate(booking.start_date)} ${pickupTime} → ${shortDate(booking.return_date)} ${returnTime} · ${money(booking.total_amount)} грн\\nПотрібне підтвердження'),'new-booking push body is compact and structured');
 check(!`${reminders}\n${worker}\n${bookingPush}`.includes('from VAcleaner'),'VAcleaner push payload contains no literal "from VAcleaner" copy');
 check(worker.includes("if(data.title==='Нове бронювання VAcleaner')return"),'legacy duplicate public-booking push remains suppressed');
