@@ -33,6 +33,9 @@ with sync_playwright() as p:
   rental_label=page.locator('.glass-client-actions button span')
   rental_box=rental_label.bounding_box()
   check(rental_label.evaluate("el=>getComputedStyle(el).whiteSpace")=='nowrap' and rental_box is not None and rental_box['height']<20,f'{w}: New rental quick action stays on one line without shrinking')
+  if w>=390:
+   widths=page.locator('.glass-client-actions>*').evaluate_all('els=>els.map(el=>el.getBoundingClientRect().width)')
+   check(max(widths)-min(widths)<=2,f'{w}: client quick actions have equal visual width')
   check(mod.no_overflow(page),f'{w}: client card no horizontal overflow')
   if w==390: page.screenshot(path=str(ROOT/'glass-test-results/client-card-glass-v4-390.png'),full_page=True)
   page.locator('#clientEditor [data-close]').first.click();page.wait_for_timeout(50)
