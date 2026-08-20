@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const root=process.cwd();
+const expected=['Що почистити','Комплекти','Як це працює','Відгуки','Підбір'];
+let pass=0,fail=[];
+const ok=(c,m)=>{if(c){pass++;console.log('PASS:',m)}else{fail.push(m);console.log('FAIL:',m)}};
+const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.name==='admin'||e.name==='_not-found'?[]:e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
+const htmls=walk(root).filter(f=>f.endsWith('index.html')&&!f.includes(`${path.sep}dist${path.sep}`));
+for(const file of htmls){
+ const s=fs.readFileSync(file,'utf8'); if(!s.includes('class="site-header"'))continue;
+ const nav=s.match(/<nav[^>]*class="desktop-nav"[^>]*>([\s\S]*?)<\/nav>/)?.[1]||'';
+ const labels=[...nav.matchAll(/<a[^>]*>([^<]+)<\/a>/g)].map(m=>m[1].trim());
+ ok(JSON.stringify(labels)===JSON.stringify(expected),`${path.relative(root,file)} has canonical 5-item desktop nav`);
+ ok(/class="header-cta"[^>]*>Забронювати онлайн/.test(s),`${path.relative(root,file)} has canonical booking CTA`);
+}
+const fixes=fs.readFileSync(path.join(root,'assets/public-fixes.css'),'utf8');
+ok(!/\.site-header a,\.site-header button[^\{]*\{[^}]*display:inline-flex/.test(fixes),'public-fixes does not force hamburger display on desktop');
+const exp=fs.readFileSync(path.join(root,'assets/public-experience.css'),'utf8');
+ok(/html\.vq-standalone-page \.site-header\{display:grid\}/.test(exp),'standalone Smart Guide keeps global header visible');
+ok(!/html\.vq-standalone-page \.site-header,[\s\S]{0,240}\{display:none\}/.test(exp),'standalone Smart Guide never hides global header');
+ok(/min-width:961px[^}]*max-width:1180px/.test(exp),'961–1180 compact-nav breakpoint exists');
+ok(/min-width:621px[^}]*max-width:860px/.test(exp),'621–860 three-column header breakpoint exists');
+const site=fs.readFileSync(path.join(root,'assets/site-v400.js'),'utf8');
+ok(!/desktop-nav[^\n]*innerHTML|mobile-menu nav[^\n]*innerHTML/.test(site),'site-v400 does not rewrite nav after first paint');
+ok(/if\(document\.getElementById\('_R_'\)\)return/.test(site),'site-v400 does not double-bind React mobile menu');
+const home=fs.readFileSync(path.join(root,'_next/static/chunks/01pb0x0z72e41.js'),'utf8');
+const hStart=home.indexOf('className:"site-header"'),hEnd=home.indexOf('className:`mobile-menu',hStart);
+const headerSlice=home.slice(hStart,hEnd>hStart?hEnd:hStart+5000);
+ok(headerSlice.includes('children:"Відгуки"')&&headerSlice.includes('children:"Підбір"'),'home React desktop header uses current labels');
+ok(!headerSlice.includes('children:"Процес"')&&!headerSlice.includes('children:"FAQ"'),'home React desktop header contains no legacy labels');
+console.log(JSON.stringify({passed:pass,failed:fail,status:fail.length?'failed':'passed'},null,2));
+process.exit(fail.length?1:0);

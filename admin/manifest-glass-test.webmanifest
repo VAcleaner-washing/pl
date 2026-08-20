@@ -1,0 +1,33 @@
+{
+  "name": "VAcleaner Manager",
+  "short_name": "VAcleaner",
+  "description": "Сумісність для попереднього Liquid Glass test URL",
+  "start_url": "/admin/bronuvannia-glass/",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#070b0e",
+  "theme_color": "#070b0e",
+  "icons": [
+    {
+      "src": "/admin/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/admin/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "id": "/admin/bronuvannia-glass/",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "lang": "uk",
+  "dir": "ltr"
+}
