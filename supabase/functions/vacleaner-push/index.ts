@@ -3,6 +3,10 @@ import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 import webpush from "npm:web-push@3.6.7";
 
 const MAX_ACTIVE_DEVICES = 2;
+const ADMIN_PRODUCT_LABELS: Record<string,string> = {
+  puzzi: "Kärcher Puzzi", puzzi_jimmy: "Puzzi + Jimmy", puzzi_abir: "Puzzi + робот", sc2: "Kärcher SC 2", abir: "Робот ABIR", combo: "Puzzi + SC 2", general: "Puzzi + SC 2 + Jimmy", ideal_windows: "SC 2 + робот", elite: "HOME RESET",
+};
+const adminProductLabel = (code: unknown, fallback: unknown) => ADMIN_PRODUCT_LABELS[String(code ?? "")] || String(fallback ?? "Техніка").trim() || "Техніка";
 const ADMIN_ALIASES = new Set(["vacleaner", "annanevidoma"]);
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -204,7 +208,7 @@ Deno.serve(async (request: Request) => {
       if (!actorAlias && actorDeviceId.length < 8) return json({ error: "invalid_actor" }, 400);
 
       const { data: booking, error: bookingError } = await supabase.from("vacleaner_bookings")
-        .select("id,status,product_label,customer_name,start_date,return_date,pickup_window,return_window,extras,created_at")
+        .select("id,status,product_code,product_label,customer_name,start_date,return_date,pickup_window,return_window,extras,created_at")
         .eq("id", bookingId).single();
       if (bookingError || !booking) return json({ error: "booking_not_found" }, 404);
       const expectedStatus = eventType === "issued" ? "issued" : eventType === "completed" ? "completed" : "";
@@ -223,7 +227,7 @@ Deno.serve(async (request: Request) => {
         if (actorAlias && recipientAlias) return recipientAlias !== actorAlias;
         return !actorDeviceId || row.device_id !== actorDeviceId;
       });
-      const product = cleanText(booking.product_label, 80) || "техніка";
+      const product = cleanText(adminProductLabel(booking.product_code, booking.product_label), 80) || "техніка";
       const customer = cleanText(booking.customer_name, 100) || "Клієнт";
       const actor = adminName(actorAlias);
       const title = eventType === "new" ? `Нове бронювання · ${product}` : eventType === "issued" ? `Техніку видано · ${product}` : `Оренду повернено · ${product}`;

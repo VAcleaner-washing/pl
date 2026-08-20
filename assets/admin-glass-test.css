@@ -1067,3 +1067,14 @@ html.glass-test .main{
     box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
   }
 }
+
+/* v4.0.97 — client quick actions: keep “Нова оренда” on one line without shrinking text. */
+html.glass-test .glass-client-actions button span{white-space:nowrap}
+@media (min-width:361px) and (max-width:900px){
+  html.glass-test .glass-client-actions{
+    grid-template-columns:minmax(88px,.9fr) minmax(88px,.95fr) minmax(116px,1.15fr);
+    max-width:100%;
+  }
+  html.glass-test .glass-client-actions a,
+  html.glass-test .glass-client-actions button{padding-inline:7px}
+}

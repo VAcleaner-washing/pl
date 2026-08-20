@@ -1,12 +1,18 @@
 import fs from 'node:fs';
 const admin=fs.readFileSync('assets/admin-v250.js','utf8');
 const reminder=fs.readFileSync('supabase/functions/vacleaner-reminders-v1/index.ts','utf8');
-const fail=[];const check=(ok,msg)=>{if(!ok)fail.push(msg);else console.log('PASS:',msg)};
+const fail=[];let passed=0;const check=(ok,msg)=>{if(!ok)fail.push(msg);else{passed++;console.log('PASS:',msg)}};
 check(admin.includes('function issueLive(b,o)'), 'issue modal has a dedicated issue-only finance summary');
 check(admin.includes('Зараз отримуємо від клієнта'), 'issue modal explicitly shows only the amount collected at issue');
-check(admin.includes('Фінальний розрахунок при поверненні'), 'pre-return UI defers settlement to return');
-check(admin.includes("!f.depositPaid&&!['issued','completed'].includes(b.status)"), 'booking cards hide fake due before deposit is received');
-check(admin.includes("Клієнт доплачує при поверненні"), 'detail due copy is explicitly tied to return');
+check(admin.includes('Фінальний розрахунок при поверненні'), 'issue UI defers final settlement to return');
+check(admin.includes('function settlementStage(b,f=calc(b))'), 'booking finance has an explicit rental-stage resolver');
+check(admin.includes("beforeIssue=!['issued','completed'].includes(status)"), 'confirmed bookings are classified before issue regardless of deposit math');
+check(admin.includes("settlement.phase==='before_issue'?'':`<em"), 'booking card renders no fake due/refund badge before issue');
+check(admin.includes("const finance=b.status==='issued'?'<button class=\"btn\" data-action=\"finance\">Розрахунок</button>':'';"), 'intermediate calculation is available only after issue');
+check(admin.includes('Попередньо повернути')&&admin.includes('Попередньо доплатити'), 'issued bookings expose a clearly preliminary settlement result');
+check(admin.includes('Попередньо повернути при поверненні')&&admin.includes('Попередньо доплатити при поверненні'), 'detail/upcoming copy ties preliminary settlement to return');
+check(admin.includes("<h2>${complete?'Закриття оренди':'Попередній розрахунок'}</h2>"), 'issued finance modal is named preliminary, not final');
+check(admin.includes("complete?'Фінальний взаєморозрахунок при поверненні':'Попередній взаєморозрахунок при поверненні'"), 'finance modal labels intermediate and final stages separately');
 const issueStart=admin.indexOf('function openIssue(b)');
 const issueEnd=admin.indexOf('function openExtendRental',issueStart);
 const issueBlock=admin.slice(issueStart,issueEnd);
@@ -19,5 +25,5 @@ check(pushWindow.includes('Залоговий платіж'), 'issue reminder as
 check(!pushWindow.includes('доплата'), 'issue reminder has no rental-balance payment copy');
 check(!pushWindow.includes('оренда оплачена'), 'issue reminder does not classify rental as paid at issue');
 check(admin.includes("if(complete&&!form.settlementCompleted?.checked)return toast(result.refund?`Підтвердіть повернення"), 'final settlement still happens in the return flow');
-if(fail.length){console.error(JSON.stringify({passed:12-fail.length,failed:fail},null,2));process.exit(1)}
-console.log(JSON.stringify({passed:12,failed:[]},null,2));
+if(fail.length){console.error(JSON.stringify({passed,failed:fail},null,2));process.exit(1)}
+console.log(JSON.stringify({passed,failed:[]},null,2));

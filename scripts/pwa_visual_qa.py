@@ -432,13 +432,20 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.booking-card', has_text='HIST-PWA-001').count()==0, f"{label}: recent returned rental is absent from Finished rentals")
         if page.locator('[data-filter="all"]').count(): page.locator('[data-filter="all"]').click()
 
-        # Finance badges must remain rectangular, aligned and contained on narrow cards.
+        # Finance UI follows the rental stage. Before issue there is no fake due/refund
+        # control; after issue the preliminary settlement and the received deposit must
+        # both remain contained and non-overlapping.
         page.locator('[data-filter="confirmed"]').click();page.wait_for_timeout(30)
-        finance_card=page.locator(f'.booking-card[data-id="{BOOKINGS[2]["id"]}"]')
-        finance_geometry=finance_card.locator('.booking-finance').evaluate("""el=>{const p=el.getBoundingClientRect(),due=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},due:due?{l:due.left,r:due.right,t:due.top,b:due.bottom,h:due.height}:null,dep:dep?{l:dep.left,r:dep.right,t:dep.top,b:dep.bottom,h:dep.height}:null}}""")
-        fg=finance_geometry
-        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['l']>=fg['p']['l']-1 and fg['dep']['r']<=fg['p']['r']+1, f"{label}: due and deposit controls stay inside finance card")
-        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['h']>=48 and fg['dep']['h']>=48 and not (fg['due']['r']>fg['dep']['l'] and fg['dep']['r']>fg['due']['l'] and fg['due']['b']>fg['dep']['t'] and fg['dep']['b']>fg['due']['t']), f"{label}: due and deposit controls never overlap")
+        confirmed_finance=page.locator(f'.booking-card[data-id="{BOOKINGS[2]["id"]}"] .booking-finance')
+        confirmed_geometry=confirmed_finance.evaluate("""el=>{const p=el.getBoundingClientRect(),badge=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},badge:Boolean(badge),dep:dep?{l:dep.left,r:dep.right,h:dep.height}:null}}""")
+        qa.check(not confirmed_geometry['badge'], f"{label}: confirmed booking shows no settlement amount before issue")
+        qa.check(confirmed_geometry['dep'] is not None and confirmed_geometry['dep']['l']>=confirmed_geometry['p']['l']-1 and confirmed_geometry['dep']['r']<=confirmed_geometry['p']['r']+1 and confirmed_geometry['dep']['h']>=46, f"{label}: pre-issue deposit control stays inside finance card")
+        page.locator('[data-filter="issued"]').click();page.wait_for_timeout(30)
+        issued_finance=page.locator(f'.booking-card[data-id="{BOOKINGS[3]["id"]}"] .booking-finance')
+        issued_geometry=issued_finance.evaluate("""el=>{const p=el.getBoundingClientRect(),due=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},due:due?{l:due.left,r:due.right,t:due.top,b:due.bottom,h:due.height}:null,dep:dep?{l:dep.left,r:dep.right,t:dep.top,b:dep.bottom,h:dep.height}:null}}""")
+        fg=issued_geometry
+        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['l']>=fg['p']['l']-1 and fg['dep']['r']<=fg['p']['r']+1, f"{label}: issued preliminary settlement and deposit stay inside finance card")
+        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['h']>=48 and fg['dep']['h']>=48 and not (fg['due']['r']>fg['dep']['l'] and fg['dep']['r']>fg['due']['l'] and fg['due']['b']>fg['dep']['t'] and fg['dep']['b']>fg['due']['t']), f"{label}: issued preliminary settlement and deposit never overlap")
         page.locator('[data-filter="all"]').click();page.wait_for_timeout(30)
 
         # Client search is contextual and the card can be edited.

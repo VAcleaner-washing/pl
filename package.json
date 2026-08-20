@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.0.94",
+  "version": "4.0.97",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -9,6 +9,7 @@
     "test:e2e": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
     "check:backend": "node scripts/check-backend-inventory.mjs",
     "test:pwa": "python scripts/pwa_visual_qa.py --artifacts pwa-test-results",
+    "test:booking-extras": "node scripts/test-booking-extra-summary.mjs",
     "test:density": "node scripts/test-density.mjs",
     "test:desktop-density": "python scripts/desktop_density_qa.py --artifacts density-test-results",
     "test:desktop-final": "python scripts/final_desktop_visual_qa.py --artifacts final-desktop-test-results",
@@ -37,6 +38,7 @@
     "test:pwa-static": "node scripts/test-pwa.mjs",
     "test:sms-campaigns": "node scripts/test-sms-campaigns.mjs",
     "test:public-inner-heroes": "python scripts/test-public-inner-heroes.py",
-    "test:campaign-sms-ux": "python scripts/campaign_sms_ux_qa.py"
+    "test:campaign-sms-ux": "python scripts/campaign_sms_ux_qa.py",
+    "test:admin-labels": "node scripts/test-admin-product-labels.mjs"
   }
 }
