@@ -97,9 +97,18 @@ def run(page,w,h):
  page.evaluate("()=>{const b=document.querySelector('#smsHistory'),a=b?.querySelector('article');if(a)while(b.querySelectorAll('article').length<7)b.append(a.cloneNode(true));}")
  ck(disp(page,'.sms-stepper')=='none' and disp(page,'.sms-workspace-footer')=='none',f'{w}: journal has no dead workflow chrome')
  ck(pwa.no_overflow(page),f'{w}: 7-row SMS journal has no horizontal overflow')
- ck(fs(page,'.sms-history-list article>div:first-child b')>=(12.5 if w<=700 else 14.5),f'{w}: journal campaign title is readable')
- ck(fs(page,'.sms-history-list article small')>=(10 if w<=700 else 11),f'{w}: journal date/count meta is readable')
- ck(fs(page,'.sms-dispatch-status')>=(10 if w<=700 else 11),f'{w}: journal status badge is readable')
+ ck(fs(page,'.sms-history-campaign')>=(13 if w<=700 else 14.5),f'{w}: journal campaign title is readable')
+ ck(fs(page,'.sms-history-date')>=(10.5 if w<=700 else 11.5),f'{w}: journal date meta is readable')
+ ck(fs(page,'.sms-history-audience')>=(10.5 if w<=700 else 12),f'{w}: journal recipient count is readable')
+ ck(fs(page,'.sms-dispatch-status')>=(10 if w<=700 else 10.5),f'{w}: journal status badge is readable')
+ hb=page.locator('#smsHistoryOpen').bounding_box();cb=page.locator('.sms-workspace-header .close').bounding_box();ck(hb and cb and abs(hb['height']-cb['height'])<=2,f'{w}: Journal and close controls share one header geometry')
+ if page.locator('[data-sms-details]').count():
+  page.locator('[data-sms-details]').first.click();page.wait_for_selector('#smsHistoryDetail:not(.hidden)');page.wait_for_timeout(15)
+  ck(pwa.no_overflow(page),f'{w}: SMS recipient drill-down has no horizontal overflow')
+  ck(page.locator('#smsDispatchRecipients article').count()>=3,f'{w}: SMS recipient drill-down shows actual recipients')
+  ck(fs(page,'.sms-dispatch-client b')>=(13 if w<=700 else 13.5),f'{w}: SMS recipient names remain readable')
+  ck(page.locator('.sms-dispatch-promo code').count()>=1,f'{w}: SMS recipient drill-down exposes promo codes')
+  page.locator('#smsDispatchBack').click();page.wait_for_timeout(10)
 
 with sync_playwright() as pw:
  opts={'headless':True,'args':['--no-sandbox']};ex=os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE')

@@ -165,6 +165,14 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
           else if(payload.action==='sms_sync')body={{ok:true,sent:2,delivered:2,notDelivered:0,totalCost:0,currency:'UAH'}};
           else if(payload.action==='sms_send')body={{ok:true,dispatchId:'20000000-0000-4000-8000-000000000001',campaignId:12345,sent:(payload.phones||[]).length,exceptions:0,parts:1}};
           else body={{ok:true}};
+        }} else if(text.includes('vacleaner-sms-audit-v1')){{
+          if(payload.action==='dispatch_recipients')body={{dispatch:{{id:payload.dispatchId,audience_count:3,status:'sent',created_at:'2026-08-16T07:06:06.000Z',sent_at:'2026-08-16T07:06:06.000Z'}},recipients:[{{id:'r1',customer_name:'Тетяна Куцевол',customer_phone:'+380507352687',status:'delivered',promo_code:'VA-5AC12CB',promo_link:'vacleaner.pp.ua/b#5AC12CB',sendpulse_campaign_id:123456,created_at:'2026-08-16T07:06:06.000Z'}},{{id:'r2',customer_name:'Олена Мельник',customer_phone:'+380672222222',status:'sent',promo_code:'VA-ABC1234',promo_link:'vacleaner.pp.ua/b#ABC1234',sendpulse_campaign_id:123457,created_at:'2026-08-16T07:06:06.000Z'}},{{id:'r3',customer_name:'Анна Коваленко',customer_phone:'+380951111111',status:'not_delivered',promo_code:null,promo_link:null,sendpulse_campaign_id:123458,created_at:'2026-08-16T07:06:06.000Z'}}]}};
+          else body={{ok:true}};
+        }} else if(text.includes('vacleaner-sms-v2')){{
+          if(payload.action==='sms_sync')body={{ok:true,sent:2,delivered:2,notDelivered:0,totalCost:0,currency:'UAH'}};
+          else if(payload.action==='sms_send')body={{ok:true,dispatchId:'20000000-0000-4000-8000-000000000001',sent:(payload.phones||[]).length,exceptions:0,parts:1}};
+          else if(payload.action==='sms_preflight')body={{ok:true,parts:2,recipients:(payload.phones||[]).length,personalized:true,balance:{{amount:5,currency:'UAH'}}}};
+          else body={{ok:true}};
         }} else if(text.includes('/auth/v1/token'))body={json.dumps(session)};
         else if(text.includes('vacleaner-push'))body={{publicKey:'B'.repeat(88),subscribedDevices:1,delivered:true}};
         return {{ok:true,status:200,json:async()=>body}};

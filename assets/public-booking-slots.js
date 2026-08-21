@@ -150,7 +150,9 @@ function renderPrefilledProduct(){
 
 
 const LOYALTY_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5';
+const PHONE_PROMO_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-phone-promo-v1';
 let loyaltyTimer=0;
+let autoSmsPromoCode='';
 function normalizePhone(value){
   const digits=String(value||'').replace(/\D/g,'');
   if(digits.length===10&&digits.startsWith('0'))return '+38'+digits;
@@ -166,17 +168,53 @@ function loyaltyBox(input){
   }
   return box;
 }
+function promoInput(){return document.querySelector('.booking-promo-field input')}
+function setNativeInputValue(input,value){
+  if(!input)return;
+  const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set;
+  if(setter)setter.call(input,value);else input.value=value;
+  input.dispatchEvent(new Event('input',{bubbles:true}));
+  input.dispatchEvent(new Event('change',{bubbles:true}));
+}
+function applySmsPromoCode(code,phone){
+  const input=promoInput();if(!input)return false;
+  const clean=String(code||'').toUpperCase().replace(/[^A-Z0-9_-]/g,'').slice(0,32);
+  const current=String(input.value||'').toUpperCase();
+  const previous=String(input.dataset.autoSmsPromo||autoSmsPromoCode||'').toUpperCase();
+  if(!clean){
+    if(previous&&current===previous){setNativeInputValue(input,'');delete input.dataset.autoSmsPromo;delete input.dataset.autoSmsPromoPhone;autoSmsPromoCode=''}
+    return false;
+  }
+  // A code from the SMS link or one typed by the client always wins over phone discovery.
+  if(current&&current!==previous)return false;
+  if(current!==clean)setNativeInputValue(input,clean);
+  input.dataset.autoSmsPromo=clean;input.dataset.autoSmsPromoPhone=phone;autoSmsPromoCode=clean;
+  return true;
+}
 async function checkLoyalty(input){
   const phone=normalizePhone(input.value);
   const box=loyaltyBox(input);
-  if(!phone){box.hidden=true;box.textContent='';return}
-  box.hidden=false;box.className='public-loyalty-status checking';box.textContent='Перевіряємо програму лояльності…';
+  const promoField=promoInput();
+  if(promoField?.dataset.autoSmsPromoPhone&&promoField.dataset.autoSmsPromoPhone!==phone)applySmsPromoCode('',phone);
+  if(!phone){applySmsPromoCode('',phone);box.hidden=true;box.textContent='';return}
+  box.hidden=false;box.className='public-loyalty-status checking';box.textContent='Перевіряємо бонуси за номером…';
   try{
-    const response=await fetch(LOYALTY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'loyalty_lookup',customerPhone:phone})});
-    const data=await response.json();
+    const [loyaltyResponse,promoResponse]=await Promise.all([
+      fetch(LOYALTY_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'loyalty_lookup',customerPhone:phone})}),
+      fetch(PHONE_PROMO_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'lookup',customerPhone:phone})})
+    ]);
+    const [data,promoData]=await Promise.all([loyaltyResponse.json(),promoResponse.json().catch(()=>({promo:null}))]);
     const loyalty=data?.loyalty;
-    if(!response.ok||!loyalty)throw new Error('lookup_failed');
-    if(loyalty.percent>0){
+    const smsPromo=promoResponse.ok?promoData?.promo||null:null;
+    if(!loyaltyResponse.ok||!loyalty)throw new Error('lookup_failed');
+    if(smsPromo&&smsPromo.code){
+      const applied=applySmsPromoCode(smsPromo.code,phone);
+      const benefit=smsPromo.discountType==='fixed'?`${Math.max(0,Number(smsPromo.discountValue)||0)} грн`:`−${Math.max(0,Number(smsPromo.discountValue)||0)}%`;
+      box.className='public-loyalty-status active';
+      box.innerHTML=`<small>Персональний бонус із SMS</small><strong>${smsPromo.campaignName||'Ваш бонус'} · ${benefit}</strong><span>${applied?'Знайшли за вашим номером — промокод уже підставлено в бронювання.':'За номером є активний SMS-бонус. Ваш введений промокод залишили без змін.'}</span><em>${applied?'Нічого вводити вручну не потрібно':'Перевіримо найвигіднішу знижку при розрахунку'}</em>`;
+    }else{
+      applySmsPromoCode('',phone);
+      if(loyalty.percent>0){
       const completed=Math.max(0,Number(loyalty.completedOrders)||0);
       const isVip=Number(loyalty.percent)>=10||String(loyalty.level||'').toLowerCase()==='vip';
       const nextTarget=isVip?null:completed<3?3:6;
@@ -188,6 +226,7 @@ async function checkLoyalty(input){
       const remaining=Math.max(0,3-completed);
       box.className='public-loyalty-status neutral';
       box.innerHTML=`<small>Ваш рівень лояльності</small><strong>Start · ${completed} завершених оренд</strong><span>До знижки −5% залишилось <b>${remaining} ${remaining===1?'оренда':'оренди'}</b>.</span><em>Далі: VIP · −10% після 6 оренд</em>`;
+      }
     }
   }catch{
     box.className='public-loyalty-status neutral';
@@ -204,6 +243,11 @@ function renderLoyaltyHint(){
   heading.insertAdjacentElement('afterend',hint);
 }
 function bindLoyalty(){
+  const promo=promoInput();
+  if(promo&&!promo.dataset.smsManualBound){
+    promo.dataset.smsManualBound='1';
+    promo.addEventListener('input',event=>{if(event.isTrusted&&promo.dataset.autoSmsPromo&&String(promo.value||'').toUpperCase()!==String(promo.dataset.autoSmsPromo).toUpperCase()){delete promo.dataset.autoSmsPromo;delete promo.dataset.autoSmsPromoPhone;autoSmsPromoCode=''}});
+  }
   document.querySelectorAll('input[type="tel"]').forEach(input=>{
     if(input.dataset.loyaltyBound)return;
     input.dataset.loyaltyBound='1';
