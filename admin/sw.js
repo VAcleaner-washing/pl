@@ -1,6 +1,6 @@
-const CACHE='vacleaner-manager-4100';
+const CACHE='vacleaner-manager-4101';
 const FALLBACK='/admin/bronuvannia/';
-const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4100','/assets/admin-v250.css?v=4100','/assets/admin-v250.js?v=4100','/assets/admin-glass-test.css?v=4100','/assets/admin-glass-test.js?v=4100','/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png','/admin/apple-touch-icon.png?v=4100'];
+const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4101','/assets/admin-v250.css?v=4101','/assets/admin-v250.js?v=4101','/assets/admin-glass-test.css?v=4101','/assets/admin-glass-test.js?v=4101','/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png','/admin/apple-touch-icon.png?v=4101'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));

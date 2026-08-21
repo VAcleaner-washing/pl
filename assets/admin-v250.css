@@ -5402,3 +5402,13 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 }
 .sms-campaign-modal .sms-history-open{position:static;width:auto}
 .sms-campaign-modal .sms-history-open span{position:static;top:auto;right:auto}
+
+/* v4.1.01 — CI root-cause fix: recover mobile recipient capacity from SMS header chrome,
+   not from typography or recipient-row density. Keep Journal/count/close readable. */
+@media (max-width:700px){
+  .sms-campaign-modal>.sms-workspace-header{
+    padding-top:6px;
+    padding-bottom:6px;
+    row-gap:4px;
+  }
+}
