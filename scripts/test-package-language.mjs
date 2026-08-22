@@ -135,11 +135,13 @@ const puzziLanding=fs.readFileSync('tekhnika/karcher-puzzi-8-1/index.html','utf8
 if(!puzziLanding.includes('8 запечатаних порцій')||!puzziLanding.includes('не входять у вартість оренди'))failures.push('Puzzi chemistry payment is not explicit in initial HTML');
 if(publicExperience.includes('function syncPublicCopy'))failures.push('runtime static-copy patch must not return');
 if(!publicQuiz.includes("const SPOT_FIX_USE='Не розбавляйте."))failures.push('VA SPOT FIX instruction does not say to use it undiluted');
-if(!publicQuiz.includes('Потім промокніть — не тріть — чистою сухою білою тканиною'))failures.push('VA SPOT FIX instruction does not distinguish blotting from rubbing');
-if(!publicQuiz.includes('Завершіть промиванням водою або очищенням усієї поверхні миючим засобом'))failures.push('VA SPOT FIX instruction is missing the rinse/full-cleaning step');
+if(!publicQuiz.includes('Легко опрацюйте м’якою щіткою без агресивного втирання')||!publicQuiz.includes('промокніть чистою білою серветкою від країв до центру'))failures.push('VA SPOT FIX instruction is missing the gentle brush + blot workflow');
+if(!publicQuiz.includes('Завершіть ретельним промиванням водою та відбором вологи Puzzi'))failures.push('VA SPOT FIX instruction is missing the final rinse/extraction step');
 if(!publicQuiz.includes("const STAIN_OX_USE='Не розбавляйте."))failures.push('VA STAIN OX instruction does not say to use it undiluted');
 if(!publicQuiz.includes('Якщо на тканину перейшов колір матеріалу — засіб не використовуйте'))failures.push('VA STAIN OX instruction is missing the dye-transfer stop rule');
-if(!publicQuiz.includes('залиште діяти до 15 хвилин')||!publicQuiz.includes('Кислотний засіб, pH 3,5'))failures.push('VA STAIN OX dwell time or pH warning is missing');
+if(!publicQuiz.includes('залиште діяти до 15 хвилин')||!publicQuiz.includes('не допускаючи висихання'))failures.push('VA STAIN OX dwell time or no-dry instruction is missing');
+if(publicQuiz.includes('pH 3,5')||publicQuiz.includes('Кислотний плямовивідник')||publicQuiz.includes('Кислотний засіб'))failures.push('VA STAIN OX must be described as oxidizing, not as an acid/pH 3.5 spotter');
+if(!publicQuiz.includes('Окиснювальний плямовивідник')||!publicQuiz.includes('натуральні фруктові соки'))failures.push('VA STAIN OX oxidizing/natural-dye positioning is missing');
 
 if(failures.length){
   console.error(failures.map(item=>`FAIL: ${item}`).join('\n'));

@@ -20,6 +20,11 @@ const check=(ok,label)=>{if(!ok)throw new Error(label);passed+=1};
 check(!source.includes("if(q.id==='textileProblems'){render();return;}"),'textile multi-select never rerenders and resets the scroll position');
 check(source.includes("body.querySelectorAll('.vq-option').forEach(option=>{"),'all multi-select questions synchronize option state in place');
 
+check(!source.includes('pH 3,5')&&!source.includes('Кислотний плямовивідник')&&!source.includes('Кислотний засіб'),'STAIN OX copy never mislabels the oxidizing spotter as an acid/pH 3.5 product');
+check(source.includes('Кава, чай, вино, ягоди або натуральний сік'),'Smart Guide distinguishes natural fruit juice from generic/synthetic colored drinks');
+check(source.includes('натуральні фруктові соки'),'STAIN OX descriptions explicitly target natural fruit juices');
+check(source.includes('Легко опрацюйте м’якою щіткою без агресивного втирання')&&!source.includes('акуратно протріть забруднення'),'SPOT FIX instructions use one non-contradictory gentle-brush workflow');
+
 quiz.setState({zones:['textile'],textileProblems:['common_stain','odor'],textileOdor:'urine'});
 quiz.setAnswer('zones','textile','multi');
 let state=quiz.getState();
