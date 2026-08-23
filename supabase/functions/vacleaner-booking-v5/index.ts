@@ -111,6 +111,18 @@ function selectedExtras(value: unknown, productCode: string, catalog: any) {
 }
 const loyaltyFor = (completed: number) => completed >= 6 ? { level: "VIP", percent: 10 } : completed >= 3 ? { level: "Regular", percent: 5 } : { level: "Start", percent: 0 };
 const normalizePromoCode = (value: unknown) => cleanText(value, 32).toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+const GIFT_SCENTS: Record<string, string> = {
+  signature_relax: "Signature Relax",
+  forbidden_fruit: "Forbidden Fruit",
+  doux_moment: "DOUX Moment",
+  wild_berry_way: "Wild Berry Way",
+  hotel_spring: "Hotel Spring",
+  later: "Обрати після підтвердження",
+};
+const normalizeGiftScent = (value: unknown) => {
+  const code = cleanText(value, 40).toLowerCase().replace(/[^a-z0-9_]/g, "");
+  return GIFT_SCENTS[code] ? { code, label: GIFT_SCENTS[code] } : { code: "later", label: GIFT_SCENTS.later };
+};
 function promoDiscountAmount(campaign: any, rawBase: number) {
   if (!campaign) return 0;
   const value = Math.max(0, Number(campaign.discount_value || 0));
@@ -282,25 +294,37 @@ Deno.serve(async (req: Request) => {
     const days = rentalDays(startDate, returnDate, pickupWindow, returnWindow); if (days < 1 || days > 14) return json({ error: "invalid_rental_period" }, 400);
     const av = await availability(db, product, startDate, returnDate, pickupWindow, returnWindow);
     const selected = selectedExtras(body.extras, productCode, catalog), rawBase = rentalBase(product, startDate, returnDate, pickupWindow, returnWindow);
+    const hasPuzzi = Boolean(product.resources?.puzzi);
+    const storyGiftEligible = rawBase >= 1000;
+    const storyMention = storyGiftEligible && body.storyMention === true;
+    const requestedStoryGift = cleanText(body.storyGiftChoice, 24);
+    const storyGiftChoice = !storyMention ? "" : productCode === "elite" ? "chemistry2" : !hasPuzzi ? "diffuser50" : ["diffuser50", "chemistry2"].includes(requestedStoryGift) ? requestedStoryGift : "";
+    const storyDiffuserScent = normalizeGiftScent(body.storyDiffuserScent);
+    const homeResetDiffuserScent = normalizeGiftScent(body.homeResetDiffuserScent);
     const promo = await validatePromo(db, { code: String(body.promoCode || ""), phone, productCode, startDate, returnDate, pickupWindow, returnWindow, completed, lastCompleted });
     const loyaltyDiscount = Math.round(rawBase * loyalty.percent / 100), promoDiscount = promo?.valid ? promoDiscountAmount({ discount_type: promo.discountType, discount_value: promo.discountValue }, rawBase) : 0;
     const promoApplied = Boolean(promo?.valid && promoDiscount > loyaltyDiscount), discount = promoApplied ? promoDiscount : loyaltyDiscount, discountSource = promoApplied ? "promo" : loyalty.percent ? "loyalty" : "none";
     const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = body.fulfillment === "delivery" ? deliveryFee : 0, totalAmount = baseAmount + selected.amount + deliveryAmount;
     const securityDeposit = depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow, rules, catalog);
-    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed } };
+    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite" };
     if (body.action === "availability" || body.action === "promo_lookup") return json({ ...av, estimate });
     if (body.action !== "create") return json({ error: "invalid_action" }, 400);
+    if (storyMention && hasPuzzi && productCode !== "elite" && !storyGiftChoice) return json({ error: "gift_choice_required", estimate }, 400);
     if (body.promoCode && !promo?.valid) return json({ error: "invalid_promo", promo: promo || { valid: false, reason: "invalid_code" }, estimate }, 400);
     if (!av.available) return json({ error: "not_available", ...av, estimate }, 409);
 
     const customerName = cleanText(body.customerName, 80), fulfillment = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "", address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 180) : fulfillment === "pickup" ? "Полтава, вул. Європейська, 146Е" : "";
     if (customerName.length < 2 || !phone || !fulfillment || body.privacyAccepted !== true || (fulfillment === "delivery" && address.length < 8)) return json({ error: "invalid_customer_data" }, 400);
-    const chemistry = product.resources?.puzzi ? [
-      { code: "carpet_chemistry_kit", label: "Хімія для Puzzi · видано 8 порцій, оплата після повернення за використані", quantity: 8, unitPrice: 0, amount: 0 },
-      ...(body.storyMention === true ? [{ code: "story_mention_bonus", label: "Відмітка у сторіс · 2 використані порції безкоштовно", quantity: 1, unitPrice: 0, amount: 0 }] : []),
+    const chemistry = hasPuzzi ? [
+      { code: "carpet_chemistry_kit", label: "Хімія для Puzzi · 8 запечатаних порцій · оплата після повернення лише за використані", quantity: 8, unitPrice: 0, amount: 0 },
+      ...(storyMention && storyGiftChoice === "chemistry2" ? [{ code: "story_mention_bonus", label: "Сторіс-бонус · 2 використані порції Puzzi безкоштовно", quantity: 1, unitPrice: 0, amount: 0 }] : []),
     ] : [];
+    const giftItems = [
+      ...(storyMention && storyGiftChoice === "diffuser50" ? [{ code: "story_mention_bonus_diffuser_50", label: `Сторіс-бонус · аромадифузор VA HOME 50 мл · ${storyDiffuserScent.label}`, quantity: 1, unitPrice: 0, amount: 0 }] : []),
+      ...(productCode === "elite" ? [{ code: "home_reset_diffuser_gift", label: `HOME RESET · аромадифузор VA HOME Entry · ${homeResetDiffuserScent.label}`, quantity: 1, unitPrice: 0, amount: 0 }] : []),
+    ];
     const discountPercent = discountSource === "promo" && promo?.discountType === "percent" ? Number(promo.discountValue || 0) : discountSource === "loyalty" ? loyalty.percent : 0;
-    const extras = { items: [...selected.items, ...chemistry], selected_items: selected.items.map(item => ({ code: item.code, label: item.label, price: item.unitPrice * item.quantity, payment_mode: "upfront" })), selected_items_amount: selected.amount, loyalty: { ...loyalty, completed_orders: completed }, discount: { source: discountSource, percent: discountPercent, amount: discount }, promo: promo?.valid ? { code: promo.code, campaign_id: promo.campaignId, campaign_name: promo.campaignName, campaign_type: promo.campaignType, discount_type: promo.discountType, discount_value: promo.discountValue, applied: promoApplied } : null, base_before_discount: rawBase };
+    const extras = { items: [...selected.items, ...chemistry, ...giftItems], selected_items: selected.items.map(item => ({ code: item.code, label: item.label, price: item.unitPrice * item.quantity, payment_mode: "upfront" })), selected_items_amount: selected.amount, gifts: { story: storyMention ? { mention: true, eligible: true, choice: storyGiftChoice, scent: storyGiftChoice === "diffuser50" ? storyDiffuserScent : null } : null, home_reset: productCode === "elite" ? { included: true, scent: homeResetDiffuserScent } : null }, loyalty: { ...loyalty, completed_orders: completed }, discount: { source: discountSource, percent: discountPercent, amount: discount }, promo: promo?.valid ? { code: promo.code, campaign_id: promo.campaignId, campaign_name: promo.campaignName, campaign_type: promo.campaignType, discount_type: promo.discountType, discount_value: promo.discountValue, applied: promoApplied } : null, base_before_discount: rawBase };
     const suffix = crypto.randomUUID().replaceAll("-", "").slice(0, 5).toUpperCase(), bookingCode = `VAC-${startDate.replaceAll("-", "").slice(2)}-${suffix}`;
     const pickupTime = pickupWindow === "morning" ? slots.morningStart : slots.eveningStart, returnTime = returnWindow === "morning" ? slots.morningEnd : slots.eveningEnd;
     const { data: booking, error } = await db.from("vacleaner_bookings").insert({
