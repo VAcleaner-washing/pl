@@ -331,11 +331,6 @@
     });
     window.VACLEANER_DELIVERY_FEE=deliveryFee;
   }
-  function depositGroup(code){
-    if(code==='elite')return'elite';if(code==='general')return'general';
-    if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';
-    return'oneUnit';
-  }
   function fullWeekend(start,finish,pickupWindow='morning',returnWindow='evening'){
     return Boolean(CORE?.isWeekendDeposit?.(start,finish,pickupWindow,returnWindow));
   }
@@ -347,7 +342,7 @@
     return PRODUCT_ALIASES[title]||FALLBACK_ALIASES[title]||'';
   }
   function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];return{start:dates[0]?.value||'',finish:dates[1]?.value||'',pickupWindow:windows[0]?.value||'morning',returnWindow:windows[1]?.value||'evening'}}
-  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}
+  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=CORE?.depositGroup?.(code)||'oneUnit',rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group]||DEFAULT_DEPOSIT_RULES.oneUnit;return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}
   function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
   function setTextIfChanged(el,text){if(el&&el.textContent!==text)el.textContent=text}
   function ensureDepositSummaryRow(summary,total,className,title,subtitle){
@@ -431,6 +426,19 @@
     const box=document.createElement('div');box.innerHTML=termsMarkup();
     const section=box.firstElementChild,footer=document.querySelector('footer'),cta=document.querySelector('.final-cta');
     if(cta)cta.insertAdjacentElement('beforebegin',section);else footer?.insertAdjacentElement('beforebegin',section);
+  }
+
+  function enhanceProcessSmartGuide(){
+    const path=location.pathname.replace(/\/+$/,'')||'/';
+    if(path!=='/yak-tse-pratsiuie'||document.querySelector('[data-vx-process-smart-guide]'))return;
+    const manifesto=document.querySelector('.process-page .process-manifesto');
+    if(!manifesto)return;
+    const box=document.createElement('aside');
+    box.className='vx-process-smart-guide';
+    box.dataset.vxProcessSmartGuide='1';
+    box.setAttribute('aria-labelledby','vx-process-smart-guide-title');
+    box.innerHTML='<small>Не знаєте, що саме обрати?</small><h3 id="vx-process-smart-guide-title">Підбір за 30 секунд</h3><p>Відповідаєте на кілька коротких запитань — сайт запропонує техніку, комплект і потрібні засоби під вашу задачу. Без реєстрації.</p><a class="button button-gold" href="/pidbir/">Підібрати рішення →</a>';
+    manifesto.append(box);
   }
 
   function enhanceCarePolicy(){
@@ -683,6 +691,7 @@
     injectProof();
     injectTerms();
     enhanceCarePolicy();
+    enhanceProcessSmartGuide();
     enhanceDepositSummary();
     syncDeliveryFee();
     enhanceHomeResetGift();

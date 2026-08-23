@@ -44,6 +44,24 @@ apply(publicTextFiles(),[
   ['children\":\"Підбір рішення\"','children\":\"Підбір за 30 сек\"'],
 ]);
 
+
+// /yak-tse-pratsiuie/: the Smart Guide must be visible inside the service flow, not only in global navigation.
+{
+  const file='yak-tse-pratsiuie/index.html';
+  let html=read(file);
+  if(!html.includes('data-vx-process-smart-guide="1"')){
+    const start=html.indexOf('<div class="process-manifesto">');
+    const marker='<ol>';
+    const at=start<0?-1:html.indexOf(marker,start);
+    if(at<0)throw new Error('Cannot locate process manifesto while adding Smart Guide bridge');
+    const close=html.lastIndexOf('</div>',at);
+    if(close<start)throw new Error('Cannot locate process manifesto closing tag');
+    const bridge='<aside class="vx-process-smart-guide" data-vx-process-smart-guide="1" aria-labelledby="vx-process-smart-guide-title"><small>Не знаєте, що саме обрати?</small><h3 id="vx-process-smart-guide-title">Підбір за 30 секунд</h3><p>Відповідаєте на кілька коротких запитань — сайт запропонує техніку, комплект і потрібні засоби під вашу задачу. Без реєстрації.</p><a class="button button-gold" href="/pidbir/">Підібрати рішення →</a></aside>';
+    html=html.slice(0,close)+bridge+html.slice(close);
+  }
+  write(file,html);
+}
+
 const homeFiles=['index.html','_next/static/chunks/01pb0x0z72e41.js','index.txt','__next.__PAGE__.txt','__next._full.txt','__next._head.txt','__next._index.txt','__next._tree.txt'];
 apply(homeFiles,[
   ['Засоби в комплекті','Засоби під задачу'],
@@ -76,11 +94,11 @@ apply(packageFiles,[
   ['Дві основні задачі','Найчастіше обирають'],
   ['<h2>Комбо</h2>','<h2>Дивани + кухня та ванна</h2>'],
   ['"children":"Комбо"','"children":"Дивани + кухня та ванна"'],
-  ['children\\\":\\\"Комбо\\\"','children\\\":\\\"Текстиль + кухня та ванна\\\"'],
+  ['children\\\":\\\"Комбо\\\"','children\\\":\\\"Дивани + кухня та ванна\\\"'],
   ['children:"Комбо"','children:"Дивани + кухня та ванна"'],
   ['["combo","Комбо"]','["combo","Дивани + кухня та ванна"]'],
   ['["$","article","Комбо",','["$","article","Дивани + кухня та ванна",'],
-  ['[\\"$\\",\\"article\\",\\"Комбо\\",','[\\"$\\",\\"article\\",\\"Текстиль + кухня та ванна\\",'],
+  ['[\\"$\\",\\"article\\",\\"Комбо\\",','[\\"$\\",\\"article\\",\\"Дивани + кухня та ванна\\",'],
   ['Текстиль, кухня та ванна одним бронюванням.','Puzzi глибоко промиває дивани й матраци, а SC 2 працює з кухнею, ванною, плиткою та швами.'],
   ['Повний день','Текстиль + тверді поверхні'],
   ['Вікна, дзеркала, плитка та гладкі поверхні без зайвої ручної роботи.','Скло, рами, кути й стики — одним комплектом техніки.'],
@@ -220,8 +238,8 @@ apply(bookingFiles,[
   ['SC 2 + робот для вікон · рами, скло, плитка','SC 2 + робот для вікон · скло, рами, кути, стики та дзеркала'],
   ['Повний комплект для дому · текстиль, кухня, ванна, вікна','Уся техніка · повний цикл прибирання дому'],
   ['Уся техніка · текстиль, кухня, ванна та вікна','Уся техніка · повний цикл прибирання дому'],
-  ['<strong>Комбо</strong>','<strong>Текстиль + кухня та ванна</strong>'],
-  ['label:"Комбо"','label:"Текстиль + кухня та ванна"'],
+  ['<strong>Комбо</strong>','<strong>Дивани + кухня та ванна</strong>'],
+  ['label:"Комбо"','label:"Дивани + кухня та ванна"'],
   ['Текстиль · 8 порцій хімії видаємо в комплекті','Текстиль · 8 запечатаних порцій, оплата лише за використані'],
   ['Хімія для Puzzi · 8 порцій','Хімія для Puzzi · 8 запечатаних порцій'],
   ['<h3>Додати до замовлення</h3>','<h3>Професійні засоби</h3>'],

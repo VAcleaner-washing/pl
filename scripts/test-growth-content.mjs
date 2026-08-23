@@ -23,6 +23,12 @@ for(const [name,html,url,product,price] of [
   assert.ok(sitemap.includes(url),`${name} URL missing from sitemap`);
 }
 
+
+const processPage=read('yak-tse-pratsiuie/index.html');
+assert.ok(processPage.includes('data-vx-process-smart-guide="1"'),'how-it-works page must expose Smart Guide inside the service flow');
+assert.ok(processPage.includes('Підбір за 30 секунд')&&processPage.includes('href="/pidbir/"'),'how-it-works Smart Guide bridge must clearly link to /pidbir/');
+assert.ok(processPage.includes('техніку, комплект і потрібні засоби'),'how-it-works Smart Guide bridge must explain what the picker actually does');
+
 const reviews=read('vidhuky/index.html');
 assert.ok(reviews.includes('370+')&&reviews.includes('290+'),'reviews page must expose durable real social-proof counts');
 assert.ok(reviews.includes('живі відгуки')||reviews.includes('Живі відгуки'),'reviews page must point to real live review evidence');

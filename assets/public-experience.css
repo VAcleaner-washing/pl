@@ -1136,3 +1136,12 @@ html.vq-standalone-page .vq-progress__meta{
 .booking-summary-gift strong{max-width:210px;text-align:right;line-height:1.25;color:#d1aa70}
 @media(max-width:620px){.booking-gift{padding:15px;border-radius:16px}.booking-gift-options{grid-template-columns:1fr}.booking-gift-options>label{min-height:0}.booking-gift-select{grid-template-columns:1fr;gap:7px}.booking-summary-gift strong{max-width:160px;font-size:11px}}
 .booking-success-warning{max-width:720px;margin:14px auto 0;padding:12px 14px;border:1px solid rgba(174,123,53,.28);border-radius:12px;background:rgba(174,123,53,.07);color:#7a5a2d;font-size:14px;line-height:1.45}
+
+/* v4.1.19 — make the 30-second Smart Guide part of the actual “How it works” flow. */
+.vx-process-smart-guide{display:grid;gap:10px;margin-top:34px;padding:20px;border:1px solid rgba(207,174,123,.24);background:linear-gradient(145deg,rgba(207,174,123,.09),rgba(255,255,255,.025));box-shadow:0 12px 36px rgba(0,0,0,.12)}
+.vx-process-smart-guide>small{color:var(--gold,#cfae7b);font-size:10px;font-weight:750;letter-spacing:.1em;text-transform:uppercase}
+.process-page .vx-process-smart-guide>h3{margin:0;font-size:20px;line-height:1.12;letter-spacing:-.03em}
+.vx-process-smart-guide>p{max-width:470px;margin:0;color:var(--muted,#aaa7a1);font-size:12px;line-height:1.6}
+.vx-process-smart-guide>.button{width:max-content;min-height:44px;margin-top:4px;padding:0 18px;font-size:12px}
+@media(max-width:860px){.vx-process-smart-guide{max-width:640px;margin-top:26px}}
+@media(max-width:620px){.vx-process-smart-guide{margin-top:22px;padding:17px}.vx-process-smart-guide>.button{width:100%}}
