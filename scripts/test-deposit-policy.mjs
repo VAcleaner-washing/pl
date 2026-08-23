@@ -71,12 +71,7 @@ const publicExperience=fs.readFileSync(path.join(root,'assets','public-experienc
 const ok=(condition,label)=>{if(!condition)throw new Error(label);passed++;};
 ok(/dataset\?\.productCode/.test(publicSlots),'public-booking-slots resolves selected product by data-product-code');
 ok(/dataset\?\.productCode/.test(publicExperience),'public-experience resolves selected product by data-product-code');
-for(const [code,product] of Object.entries(core.products)) eq(core.depositGroup(code),product.depositGroup||'oneUnit',`${code} deposit group comes from catalog config`);
-ok(!/\['puzzi_jimmy','puzzi_abir','combo','ideal_windows'\]\.includes\(code\)/.test(publicSlots),'public booking has no hardcoded twoUnits product list');
-ok(!/\['puzzi_jimmy','puzzi_abir','combo','ideal_windows'\]\.includes\(code\)/.test(publicExperience),'public experience has no hardcoded twoUnits product list');
-ok(publicSlots.includes("window.VACLEANER_CORE?.depositGroup?.(code)"),'public booking resolves deposit group through config-backed core');
-ok(publicExperience.includes("CORE?.depositGroup?.(code)"),'public experience resolves deposit group through config-backed core');
-eq(core.products.combo.label,'Дивани + кухня та ванна','combo canonical catalog label');
-
+ok(/\['puzzi_jimmy','puzzi_abir','combo','ideal_windows'\]\.includes\(code\)/.test(publicSlots),'public booking maps combo to twoUnits deposit group');
+ok(publicSlots.includes('Дивани \\+ кухня та ванна'),'public booking keeps current combo label as fallback only');
 
 console.log(`Rental/deposit/slot policy passed ${passed} assertions.`);

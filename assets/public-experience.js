@@ -331,6 +331,11 @@
     });
     window.VACLEANER_DELIVERY_FEE=deliveryFee;
   }
+  function depositGroup(code){
+    if(code==='elite')return'elite';if(code==='general')return'general';
+    if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';
+    return'oneUnit';
+  }
   function fullWeekend(start,finish,pickupWindow='morning',returnWindow='evening'){
     return Boolean(CORE?.isWeekendDeposit?.(start,finish,pickupWindow,returnWindow));
   }
@@ -342,7 +347,7 @@
     return PRODUCT_ALIASES[title]||FALLBACK_ALIASES[title]||'';
   }
   function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];return{start:dates[0]?.value||'',finish:dates[1]?.value||'',pickupWindow:windows[0]?.value||'morning',returnWindow:windows[1]?.value||'evening'}}
-  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=CORE?.depositGroup?.(code)||'oneUnit',rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group]||DEFAULT_DEPOSIT_RULES.oneUnit;return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}
+  function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}
   function formatMoney(value){return new Intl.NumberFormat('uk-UA').format(Number(value)||0)+' грн'}
   function setTextIfChanged(el,text){if(el&&el.textContent!==text)el.textContent=text}
   function ensureDepositSummaryRow(summary,total,className,title,subtitle){

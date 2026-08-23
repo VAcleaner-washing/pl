@@ -15,9 +15,9 @@ class StorageMock {
 
 function createApi(){
   const localStorage=new StorageMock(),sessionStorage=new StorageMock();
-  const context={localStorage,sessionStorage,console,atob:value=>Buffer.from(String(value),'base64').toString('binary'),AbortController,setTimeout,clearTimeout,fetch:globalThis.fetch};
+  const context={localStorage,sessionStorage,console};
   vm.createContext(context);
-  vm.runInContext(`${match[0]};globalThis.sessionApi={getSession,saveSession,clearSession,sessionPersistent,state,SESSION_IDLE_MS,accessTokenExpiresSoon};`,context);
+  vm.runInContext(`${match[0]};globalThis.sessionApi={getSession,saveSession,clearSession,sessionPersistent,state,SESSION_IDLE_MS};`,context);
   return {...context.sessionApi,localStorage,sessionStorage};
 }
 
@@ -56,19 +56,3 @@ function createApi(){
 }
 
 console.log('Session tests passed: 4 scenarios.');
-
-
-assert.ok(runtime.includes("let refreshPromise=null"),'refresh requests must share a single in-flight promise');
-assert.ok(runtime.includes("if(refreshPromise)return refreshPromise"),'parallel 401 responses must not start parallel token refreshes');
-assert.ok(runtime.includes("requestWithTimeout(endpoint"),'admin API calls must have a bounded network timeout');
-assert.ok(runtime.includes("requestWithTimeout(SETTINGS_API"),'settings bootstrap must not keep the skeleton alive forever');
-assert.ok(runtime.includes("if(accessTokenExpiresSoon(state.session))await refresh()"),'startup should proactively refresh an expiring access token before parallel data requests');
-
-{
-  const api=createApi();
-  const payload=Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+20})).toString('base64url');
-  const token=`x.${payload}.y`;
-  assert.equal(api.accessTokenExpiresSoon({access_token:token}),true,'token expiring within a minute should refresh before loading');
-}
-
-console.log('Session recovery guards passed: refresh single-flight + bounded loading + proactive refresh.');

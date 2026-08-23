@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
 import pwa_visual_qa as pwa
-PUBLIC='Дивани + кухня та ванна'; INTERNAL='Puzzi + SC 2'
+PUBLIC='Текстиль + кухня та ванна'; INTERNAL='Puzzi + SC 2'
 for b in pwa.BOOKINGS:
     if b.get('source')!='historical_import': b['product_code']='combo'; b['product_label']=PUBLIC
 

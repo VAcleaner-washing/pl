@@ -35,6 +35,6 @@ ok(push.includes('select("id,status,product_code,product_label'),'peer push fetc
 ok(reminders.includes('slots?.morningStart || "08:00"')&&reminders.includes('slots?.morningEnd || "10:00"'),'reminder fallbacks preserve approved morning slot');
 ok(push.includes('kind === "pickup" ? "08:00" : "10:00"')&&push.includes('kind === "pickup" ? "17:30" : "20:00"'),'peer push fallbacks preserve approved slot windows');
 // Public catalog remains public/customer-facing, not rewritten to admin names.
-ok(config.catalog.products.combo.label==='Дивани + кухня та ванна','public combo label matches current client-facing title');
+ok(config.catalog.products.combo.label==='Текстиль + кухня та ванна','public combo label remains client-facing');
 ok(config.catalog.products.general.label==='Генеральне прибирання','public general label remains client-facing');
 console.log(`Admin product labels PASS: ${passed} checks.`);
