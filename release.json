@@ -1,6 +1,6 @@
 {
-  "version": "4.1.25",
-  "build": "4125",
+  "version": "4.1.26",
+  "build": 4126,
   "releasedAt": "2026-08-23",
-  "label": "VAcleaner v4.1.25 — STABLE AUTH + CONFIG DEPOSITS"
+  "label": "VAcleaner v4.1.26 — PWA EDIT SCROLL FIX"
 }
