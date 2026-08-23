@@ -4,7 +4,7 @@ import path from 'node:path';
 const ROOT=process.cwd();
 const read=(p)=>fs.readFileSync(path.join(ROOT,p),'utf8');
 const routes=[
-  '', 'tekhnika/karcher-puzzi-8-1','rishennia','rishennia/textile','rishennia/steam','rishennia/mattress','rishennia/windows',
+  '', 'tekhnika/karcher-puzzi-8-1','tekhnika/karcher-sc-2-deluxe','tekhnika/robot-dlia-vikon-abir','rishennia','rishennia/textile','rishennia/steam','rishennia/mattress','rishennia/windows',
   'komplekty','yak-tse-pratsiuie','vidhuky','pidbir','bronuvannia','faq','kontakty','umovy',
   'dostavka','pro-nas','blog','blog/yak-pochystyty-matrats-pislia-dytyny',
   'blog/yak-vyvesty-plyamu-z-dyvana','blog/skilky-sokhne-dyvan-pislia-chyshchennia',
@@ -32,7 +32,12 @@ for(const route of routes){
   check((html.match(/class="site-header"/g)||[]).length===1,`${label} has exactly one global header`);
   check(JSON.stringify(navPairs(html))===JSON.stringify(expectedNav),`${label} uses the canonical desktop nav`);
   const headerCtaTag=(html.match(/<a[^>]*class="header-cta"[^>]*>/i)||html.match(/<a[^>]*href="\/bronuvannia\/"[^>]*class="header-cta"[^>]*>/i)||[''])[0];
-  const expectedBookingHref=route==='tekhnika/karcher-puzzi-8-1'?'/bronuvannia/?product=puzzi':'/bronuvannia/';
+  const productRoute={
+    'tekhnika/karcher-puzzi-8-1':'puzzi',
+    'tekhnika/karcher-sc-2-deluxe':'sc2',
+    'tekhnika/robot-dlia-vikon-abir':'abir',
+  }[route];
+  const expectedBookingHref=productRoute?`/bronuvannia/?product=${productRoute}`:'/bronuvannia/';
   check(headerCtaTag.includes(`href="${expectedBookingHref}"`),`${label} header CTA points to the correct booking context`);
   check(!/(>\s*Процес\s*<|>\s*FAQ\s*<)/.test((html.match(/<nav[^>]*class="desktop-nav"[\s\S]*?<\/nav>/)||[''])[0]||''),`${label} has no stale header labels`);
   check(!html.includes('↗'),`${label} contains no browser/emoji external-arrow glyph`);

@@ -190,3 +190,5 @@
 .puzzi-final>div{display:grid;width:100%}
 .puzzi-final .button{width:100%}
 }
+/* v4.1.05 — keep long equipment copy inside the mobile kit grid. */
+.puzzi-kit>*{min-width:0}

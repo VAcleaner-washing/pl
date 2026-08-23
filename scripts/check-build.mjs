@@ -141,6 +141,7 @@ execFileSync(process.execPath,[path.join(root,'scripts','test-pwa.mjs')],{stdio:
 execFileSync(process.execPath,[path.join(root,'scripts','test-css-architecture.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-operational-health.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-analytics-decision.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-growth-content.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-financial-control.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-package-language.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-retention.mjs')],{stdio:'pipe'});
@@ -206,7 +207,7 @@ if(!publicExperience.includes('setMobileBookingStep(index,{scroll:true})')||!pub
 if(!publicExperienceCss.includes('.booking-form .booking-step{scroll-margin-top:112px}'))errors.push('public booking anchors need fixed-header scroll margin');
 const faqHtml=fs.readFileSync(path.join(root,'faq','index.html'),'utf8');
 const packagesHtml=fs.readFileSync(path.join(root,'komplekty','index.html'),'utf8');
-for(const rel of ['index.html','bronuvannia/index.html','faq/index.html','komplekty/index.html','kontakty/index.html','umovy/index.html','vidhuky/index.html','yak-tse-pratsiuie/index.html','rishennia/index.html','rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html','tekhnika/karcher-puzzi-8-1/index.html']){
+for(const rel of ['index.html','bronuvannia/index.html','faq/index.html','komplekty/index.html','kontakty/index.html','umovy/index.html','vidhuky/index.html','yak-tse-pratsiuie/index.html','rishennia/index.html','rishennia/textile/index.html','rishennia/mattress/index.html','rishennia/steam/index.html','rishennia/windows/index.html','tekhnika/karcher-puzzi-8-1/index.html','tekhnika/karcher-sc-2-deluxe/index.html','tekhnika/robot-dlia-vikon-abir/index.html']){
  const html=fs.readFileSync(path.join(root,...rel.split('/')),'utf8');
  for(const token of ['"@type":"PostalAddress"','"addressLocality":"Полтава"','"areaServed"','"openingHoursSpecification"','"logo":"https://vacleaner.pp.ua/apple-touch-icon.png"','"image":"https://vacleaner.pp.ua/assets/og-home.png"'])if(!html.includes(token))errors.push(`LocalBusiness SEO field missing in ${rel}: ${token}`);
  if(html.includes('\"streetAddress\":\"вул. Європейська, 146Е\"')||html.includes('\"@type\":\"GeoCoordinates\"'))errors.push(`Variable pickup point must not be published as permanent LocalBusiness address/geo in ${rel}`);
@@ -247,7 +248,7 @@ const requiredCopy=[
 ];
 for(const phrase of requiredCopy)if(!businessCopy.includes(phrase))errors.push(`required booking copy missing: ${phrase}`);
 for(const phrase of ['базова сума, фактичну фіксує менеджер','Базова сума; фактичну менеджер фіксує при видачі','залог повертається окремо','оплата оренди при видачі','входить у суму оренди','входить у вартість оренди','Поворотний залог'])if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
-if(!bookingHtml.includes('7:00–9:30')||!bookingHtml.includes('17:30–20:00'))errors.push('public fallback slots are stale');
+if(!bookingHtml.includes('08:00–10:00')||!bookingHtml.includes('17:30–20:00')||bookingHtml.includes('7:00–9:30')||bookingHtml.includes('07:00–09:30'))errors.push('public fallback slots are stale');
 if(!adminHtml.includes('Content-Security-Policy'))errors.push('admin CSP is missing');
 if(!adminRuntime.includes("SESSION_IDLE_MS=30*24*60*60*1000"))errors.push('trusted-device session expiry is missing');
 if(!adminRuntime.includes('primary=state.rememberSession?localStorage:sessionStorage')||!adminRuntime.includes('primary.setItem(SESSION_KEY'))errors.push('persistent/session-only storage modes are incomplete');
@@ -308,7 +309,8 @@ if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale S
   const quiz=fs.readFileSync(path.join(root,'assets','public-quiz.js'),'utf8');
   const required=[
     'Професійні засоби',
-    'Підберіть під конкретне забруднення · засоби купуються окремо й залишаються у вас.',
+    'Базові порції для Puzzi видаємо окремо й рахуємо після повернення.',
+    'додаткові засоби під конкретні плями, запахи й поверхні',
     'VA SPOT FIX · 50 мл',
     'VA STAIN OX · 30 мл',
     'Shower Care · 250 мл',

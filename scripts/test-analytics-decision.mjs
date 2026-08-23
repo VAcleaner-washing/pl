@@ -23,7 +23,7 @@ const context={
   console,
 };
 vm.createContext(context);
-for(const name of ['recordedChemistryRevenue','revenueBreakdown','analyticsSourceKey','analyticsSourceLabel','sourcePerformance','weekdayDemand'])vm.runInContext(functionSource(name),context);
+for(const name of ['recordedChemistryRevenue','revenueBreakdown','analyticsSourceKey','analyticsSourceLabel','sourcePerformance','weekdayDemand','analyticsFunnel'])vm.runInContext(functionSource(name),context);
 
 const monday={status:'completed',source:'vacleaner_website',start_date:'2026-08-10',total_amount:1200,base_amount:800,delivery_amount:200,extras_amount:200,rawBase:900,extras:{chemistry:{amount:100}}};
 const saturday={status:'completed',source:'phone',start_date:'2026-08-08',total_amount:700,base_amount:700,delivery_amount:0,extras_amount:0,rawBase:700,extras:{}};
@@ -42,6 +42,25 @@ assert.equal(demand.rows[5].count,1,'Saturday issue demand missing');
 assert.equal(demand.weekday,1,'weekday summary mismatch');
 assert.equal(demand.weekend,1,'weekend summary mismatch');
 
-for(const token of ['З чого складається виручка','Звідки приходять заявки','Попит за днями видачі','Воронка заявок','Виручка не означає прибуток','історію кількості техніки не підмінюємо сьогоднішнім парком'])assert.ok(runtime.includes(token),`decision analytics copy missing: ${token}`);
+
+const funnelBookings=[
+  {status:'pending'},
+  {status:'waiting_payment'},
+  {status:'confirmed',prepayment_paid:true},
+  {status:'issued',prepayment_paid:true,confirmed_at:'2026-08-10T08:00:00Z',issued_at:'2026-08-11T08:00:00Z'},
+  {status:'completed',prepayment_paid:true,confirmed_at:'2026-08-08T08:00:00Z',issued_at:'2026-08-09T08:00:00Z'},
+  {status:'cancelled'},
+];
+const funnel=JSON.parse(JSON.stringify(context.analyticsFunnel(funnelBookings)));
+assert.deepEqual(funnel.stages.map(row=>row.label),['Заявка','Передоплата','Підтверджено','Видано','Завершено'],'funnel stages must describe cumulative workflow');
+assert.deepEqual(funnel.stages.map(row=>row.count),[6,3,3,2,1],'funnel must count reached stages cumulatively, not current status buckets');
+assert.equal(funnel.cancelled,1,'cancelled applications must remain visible outside cumulative stages');
+assert.equal(funnel.conversion,17,'funnel completion conversion must use created cohort denominator');
+assert.ok(runtime.includes('<strong>${created.length}</strong>'),'source panel headline must show application count, not number of channels');
+assert.ok(!runtime.includes('<strong>${sources.length}</strong>'),'source panel must not expose channel count as primary KPI');
+assert.ok(runtime.includes('data-trend-metric="revenue"')&&runtime.includes('data-trend-metric="rentals"'),'business trend must switch between revenue and rentals');
+assert.ok(runtime.includes('<svg viewBox="0 0 ${w} ${hgt}"'),'business trend must render a real SVG chart rather than another progress bar');
+
+for(const token of ['Динаміка бізнесу','З чого складається виручка','Звідки приходять заявки','Попит за днями видачі','Воронка заявок','Виручка не означає прибуток','історію кількості техніки не підмінюємо сьогоднішнім парком'])assert.ok(runtime.includes(token),`decision analytics copy missing: ${token}`);
 
 console.log('Decision analytics formulas and UX contract passed.');

@@ -21,7 +21,7 @@ for(const [where,content] of [
   ['packages HTML',packageHtml],['packages hydrated JS',packageChunk],['packages RSC',packageRsc],
   ['home HTML',homeHtml],['home hydrated JS',homeChunk],
 ]){
-  for(const stale of ['Засоби в комплекті','8 порцій хімії','Дві основні задачі','Скло без драбини','07:00–09:30','Ранок · 7:00–9:00'])absent(content,stale,where);
+  for(const stale of ['Засоби в комплекті','8 порцій хімії','Дві основні задачі','Скло без драбини','07:00–09:30','Ранок · 7:00–9:00','Ранок · 7:00–9:30'])absent(content,stale,where);
 }
 
 for(const content of [bookingHtml,bookingChunk]){

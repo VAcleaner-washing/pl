@@ -120,8 +120,9 @@ lacks(adminDataEdge,'base_amount','admin data endpoint never recalculates rental
 lacks(adminDataEdge,'deposit_amount','admin data endpoint never touches deposits');
 has(css,'.catalog-toolbar,.analytics-toolbar{display:grid','320px equipment and analytics toolbars share mobile containment');
 
-has(css,'.status-dashboard{grid-template-columns:minmax(0,1fr)}','320px analytics statuses collapse to one column');
-has(pwaQa,'analytics status dashboard contains its own content','analytics status dashboard has direct geometry coverage');
+has(css,'.analytics-funnel-row>div:first-child{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}','mobile cumulative funnel keeps labels and values inside the card');
+has(pwaQa,'cumulative analytics funnel contains its own content','analytics cumulative funnel has direct geometry coverage');
+has(pwaQa,'five cumulative funnel stages stay inside the panel','analytics cumulative funnel keeps all five workflow stages visible');
 has(pwaQa,'returned historical booking shows mapped premium nozzles','returned historical extras have runtime coverage');
 has(admin,'function isHistoricalBooking(b)','historical booking presentation is explicit');
 has(admin,'у складі історичної суми','historical extras never invent a current price');

@@ -5413,3 +5413,44 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
     row-gap:4px;
   }
 }
+
+/* v4.1.05 — analytics decision layer: one real trend chart + cumulative funnel. */
+.analytics-trend-panel{grid-column:1/-1;margin-bottom:16px;overflow:hidden}
+.analytics-trend-head{align-items:center}
+.analytics-trend-head .analytics-metric-switch{flex-shrink:0}
+.analytics-trend-chart{height:260px;min-height:220px;margin:2px -2px 0;overflow:hidden}
+.analytics-trend-chart svg{display:block;width:100%;height:100%;overflow:visible}
+.analytics-trend-grid-line{stroke:rgba(255,255,255,.07);stroke-width:1;vector-effect:non-scaling-stroke}
+.analytics-trend-y-label,.analytics-trend-x-label{fill:#7f898e;font-size:10px;font-weight:650;font-family:inherit}
+.analytics-trend-area{fill:rgba(214,164,95,.095);stroke:none}
+.analytics-trend-line{fill:none;stroke:var(--gold-2);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.analytics-trend-dot{fill:#f2c77c;stroke:#11191d;stroke-width:2;vector-effect:non-scaling-stroke}
+.analytics-trend-summary{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:4px;padding-top:12px;border-top:1px solid var(--line)}
+.analytics-trend-summary span{display:flex;align-items:baseline;gap:7px;color:var(--muted);font-size:10.5px}
+.analytics-trend-summary b{color:var(--text);font-size:13px}
+.analytics-funnel{display:grid;gap:11px}
+.analytics-funnel-row{display:grid;gap:6px}
+.analytics-funnel-row>div:first-child{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:baseline;gap:9px}
+.analytics-funnel-row span{font-size:12px;font-weight:720}
+.analytics-funnel-row strong{color:var(--gold-2);font-size:14px}
+.analytics-funnel-row small{color:var(--muted);font-size:9.5px;text-align:right}
+.analytics-funnel-track{height:8px;border-radius:999px;background:rgba(255,255,255,.055);overflow:hidden}
+.analytics-funnel-track i{display:block;height:100%;min-width:2px;border-radius:inherit;background:linear-gradient(90deg,rgba(214,164,95,.55),rgba(240,194,118,.95))}
+.analytics-funnel-note{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:10.5px}
+.analytics-funnel-note strong{color:#e9a09a;font-size:13px}
+@media(max-width:900px){
+  .analytics-trend-panel{margin-bottom:12px;padding:14px}
+  .analytics-trend-head{display:grid;gap:10px}
+  .analytics-trend-head .analytics-metric-switch{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .analytics-trend-chart{height:220px;min-height:200px;margin-inline:-7px}
+  .analytics-trend-y-label,.analytics-trend-x-label{font-size:9px}
+  .analytics-funnel-row>div:first-child{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
+  .analytics-funnel-row small{grid-column:1/-1;text-align:left}
+}
+@media(max-width:360px){
+  .analytics-trend-chart{height:205px}
+  .analytics-trend-summary{gap:12px}
+}
+@media(max-width:500px){
+  .analytics-trend-y-label,.analytics-trend-x-label{font-size:18px}
+}

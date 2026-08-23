@@ -390,12 +390,12 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             if view=='analytics':
                 qa.check(page.locator('.analytics-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics toolbar stays inside its own width")
                 qa.check(page.locator('.analytics-periods').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics period controls never widen 320px viewport")
-                qa.check(page.locator('.status-dashboard').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics status dashboard contains its own content")
-                status_geometry=page.locator('.status-dashboard').evaluate("""el=>{const d=el.getBoundingClientRect(),items=[...el.querySelectorAll('.analytics-status-item')].map(x=>x.getBoundingClientRect());return{dashboard:{left:d.left,right:d.right},items:items.map(r=>({left:r.left,right:r.right,width:r.width}))}}""")
-                qa.check(bool(status_geometry['items']) and all(r['left']>=status_geometry['dashboard']['left']-1 and r['right']<=status_geometry['dashboard']['right']+1 for r in status_geometry['items']), f"{label}: analytics status cards stay inside dashboard")
+                qa.check(page.locator('.analytics-funnel').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: cumulative analytics funnel contains its own content")
+                funnel_geometry=page.locator('.analytics-funnel').evaluate("""el=>{const d=el.getBoundingClientRect(),items=[...el.querySelectorAll('.analytics-funnel-row')].map(x=>x.getBoundingClientRect());return{funnel:{left:d.left,right:d.right},items:items.map(r=>({left:r.left,right:r.right,width:r.width}))}}""")
+                qa.check(len(funnel_geometry['items'])==5 and all(r['left']>=funnel_geometry['funnel']['left']-1 and r['right']<=funnel_geometry['funnel']['right']+1 for r in funnel_geometry['items']), f"{label}: five cumulative funnel stages stay inside the panel")
                 if width<=360:
-                    lefts=[round(r['left'],1) for r in status_geometry['items']]
-                    qa.check(len(set(lefts))==1, f"{label}: analytics statuses collapse to one stable column")
+                    lefts=[round(r['left'],1) for r in funnel_geometry['items']]
+                    qa.check(len(set(lefts))==1, f"{label}: analytics funnel keeps one stable mobile column")
                 qa.check(page.locator('.utilization-panel').count()==1 and page.locator('.utilization-row').count()>=4, f"{label}: analytics exposes utilization by physical equipment")
                 qa.check(page.locator('.customer-health-panel').count()==1 and page.locator('.customer-health-panel').inner_text().find('Repeat-rate')==-1, f"{label}: repeat customer decision panel renders without duplicating KPI copy")
                 qa.check(page.locator('#showSleepingClients').count()==1, f"{label}: sleeping-client segment has a direct action")
