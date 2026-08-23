@@ -341,7 +341,10 @@
   }
   function selectedProductCode(){
     const btn=document.querySelector('.booking-products button[aria-pressed="true"],.booking-products button.is-selected,.booking-products button.selected');
-    const title=btn?.querySelector('strong')?.textContent?.trim()||'';return PRODUCT_ALIASES[title]||'';
+    const stableCode=String(btn?.dataset?.productCode||'').trim();
+    if(stableCode)return stableCode;
+    const title=btn?.querySelector('strong')?.textContent?.trim()||'';
+    return PRODUCT_ALIASES[title]||FALLBACK_ALIASES[title]||'';
   }
   function currentBookingDates(){const dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];return{start:dates[0]?.value||'',finish:dates[1]?.value||'',pickupWindow:windows[0]?.value||'morning',returnWindow:windows[1]?.value||'evening'}}
   function currentDeposit(){const code=selectedProductCode();if(!code)return 0;const dates=currentBookingDates();if(!dates.start||!dates.finish)return 0;const group=depositGroup(code),rule=depositRules[group]||DEFAULT_DEPOSIT_RULES[group];return Number(fullWeekend(dates.start,dates.finish,dates.pickupWindow,dates.returnWindow)?rule.weekend:rule.day)||0}

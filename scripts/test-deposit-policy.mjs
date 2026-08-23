@@ -64,4 +64,14 @@ eq(core.rentalBase(combo,'2026-08-08','2026-08-10','morning','morning'),1800,'Co
 eq(core.rentalBase(combo,'2026-08-07','2026-08-09','evening','morning'),1800,'Combo Friday evening → Sunday morning uses full-weekend bundle');
 eq(core.rentalBase(combo,'2026-08-09','2026-08-11','evening','evening'),2000,'Combo Sunday evening → Tuesday evening uses two weekday days');
 
+// Public booking deposit rendering must resolve products by stable identity, not marketing copy.
+// This guards against a client-facing rename (e.g. “Дивани + кухня та ванна”) silently turning 1 500 грн into “—”.
+const publicSlots=fs.readFileSync(path.join(root,'assets','public-booking-slots.js'),'utf8');
+const publicExperience=fs.readFileSync(path.join(root,'assets','public-experience.js'),'utf8');
+const ok=(condition,label)=>{if(!condition)throw new Error(label);passed++;};
+ok(/dataset\?\.productCode/.test(publicSlots),'public-booking-slots resolves selected product by data-product-code');
+ok(/dataset\?\.productCode/.test(publicExperience),'public-experience resolves selected product by data-product-code');
+ok(/\['puzzi_jimmy','puzzi_abir','combo','ideal_windows'\]\.includes\(code\)/.test(publicSlots),'public booking maps combo to twoUnits deposit group');
+ok(publicSlots.includes('Дивани \\+ кухня та ванна'),'public booking keeps current combo label as fallback only');
+
 console.log(`Rental/deposit/slot policy passed ${passed} assertions.`);
