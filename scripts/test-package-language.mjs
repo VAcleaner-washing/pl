@@ -20,8 +20,7 @@ const expected={
 
 const unchangedCatalogLabels={
   puzzi_jimmy:'Глибоке очищення текстилю',
-  puzzi_abir:'Текстиль + вікна',
-  combo:'Текстиль + кухня та ванна'
+  puzzi_abir:'Текстиль + вікна'
 };
 
 
@@ -51,6 +50,7 @@ for(const [code,label] of Object.entries(unchangedCatalogLabels)){
   const product=config.catalog.products[code];
   if(product?.label!==label||product?.shortLabel!==label)failures.push(`${code}: shared backend catalog label changed; public copy must stay isolated`);
 }
+if(config.catalog.products.combo?.label!==expected.combo||config.catalog.products.combo?.shortLabel!==expected.combo)failures.push('combo: canonical config label is not synchronized with the public title');
 if(!bookingHtml.includes('<strong>Kärcher Puzzi 8/1</strong>')||!bookingChunk.includes('label:"Kärcher Puzzi 8/1"'))failures.push('Puzzi public booking title is not the full Kärcher Puzzi 8/1 model');
 if(!bookingHtml.includes('Очищення парою · кухня, ванна, плитка, шви'))failures.push('SC 2 public booking detail is not task-first');
 if(!bookingHtml.includes('Миючий пилосос · дивани, матраци, килими'))failures.push('Puzzi public booking detail is not client-readable');

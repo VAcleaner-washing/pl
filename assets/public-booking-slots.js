@@ -44,11 +44,10 @@ function selectedProductCode(){
 function fullWeekend(start,finish,pickupWindow='morning',returnWindow='evening'){
   return Boolean(window.VACLEANER_CORE?.isWeekendDeposit?.(start,finish,pickupWindow,returnWindow));
 }
-function depositGroup(code){if(code==='elite')return'elite';if(code==='general')return'general';if(['puzzi_jimmy','puzzi_abir','combo','ideal_windows'].includes(code))return'twoUnits';return'oneUnit'}
 function depositAmount(){
   const code=selectedProductCode(),dates=[...document.querySelectorAll('.booking-date-grid input[type="date"]')],windows=[...document.querySelectorAll('.booking-date-grid select')];
   if(!code||!dates[0]?.value||!dates[1]?.value)return 0;
-  const row=depositRules[depositGroup(code)],pickupWindow=windows[0]?.value||'morning',returnWindow=windows[1]?.value||'evening';
+  const group=window.VACLEANER_CORE?.depositGroup?.(code)||'oneUnit',row=depositRules[group]||depositRules.oneUnit,pickupWindow=windows[0]?.value||'morning',returnWindow=windows[1]?.value||'evening';
   return Number(fullWeekend(dates[0].value,dates[1].value,pickupWindow,returnWindow)?row.weekend:row.day)||0;
 }
 function formatMoney(v){return new Intl.NumberFormat('uk-UA').format(Number(v)||0)+' грн'}

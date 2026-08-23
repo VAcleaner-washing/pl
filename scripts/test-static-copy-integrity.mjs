@@ -16,6 +16,10 @@ const packageRsc=read('komplekty/__next._full.txt');
 const homeHtml=read('index.html');
 const homeChunk=read('_next/static/chunks/01pb0x0z72e41.js');
 
+const syncStatic=read('scripts/sync-static-copy.mjs');
+must(!syncStatic.split(/\r?\n/).some(line=>line.includes('Комбо')&&line.includes('Текстиль + кухня та ванна')),'static-copy sync must not regenerate the retired combo title');
+must(core.catalog.products.combo.label==='Дивани + кухня та ванна'&&core.catalog.products.combo.shortLabel==='Дивани + кухня та ванна','central combo label must match the current public title');
+
 for(const [where,content] of [
   ['booking HTML',bookingHtml],['booking hydrated JS',bookingChunk],['booking RSC',bookingRsc],
   ['packages HTML',packageHtml],['packages hydrated JS',packageChunk],['packages RSC',packageRsc],
