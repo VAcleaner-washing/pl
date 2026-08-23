@@ -407,6 +407,7 @@ body.modal-open{overflow: hidden;}
 .slot.full{background: #11181c; color: #8e989d; border-color: #202a2f;}
 .slot.low{background: rgba(214,164,95,.13); color: #e5b971; border-color: rgba(214,164,95,.38);}
 .slot.zero{background: rgba(198,76,76,.12); color: #e98d8d; border-color: rgba(198,76,76,.35);}
+.slot.past{background:#0d1316;color:#657079;border-color:#1b252a;opacity:.72;}
 .slot:not(:disabled){cursor: pointer;}
 .slot:not(:disabled):hover{transform: translateY(-1px); border-color: var(--gold);}
 .upcoming-time i{display: grid; place-items: center; width: 28px; height: 28px; margin-bottom: 4px; border-radius: 50%; font-style: normal; font-size: 18px;}

@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.3",
+  "version": "4.1.4",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -41,6 +41,7 @@
     "test:campaign-sms-ux": "python scripts/campaign_sms_ux_qa.py",
     "test:admin-labels": "node scripts/test-admin-product-labels.mjs",
     "test:client-promo-regression": "node scripts/test-client-promo-regression.mjs",
-    "test:client-stats-browser": "python scripts/test-client-completed-stats-browser.py"
+    "test:client-stats-browser": "python scripts/test-client-completed-stats-browser.py",
+    "test:calendar-live": "node scripts/test-calendar-live-consistency.mjs"
   }
 }
