@@ -1079,3 +1079,37 @@ html.glass-test .glass-client-actions button span{white-space:nowrap}
   html.glass-test .glass-client-actions a,
   html.glass-test .glass-client-actions button{padding-inline:5px;gap:5px}
 }
+
+/* v4.1.13 — calm desktop hover light: illuminate controls without moving them. */
+@media (hover:hover) and (pointer:fine){
+  html.glass-test button:not(:disabled),
+  html.glass-test a.btn,
+  html.glass-test .glass-client-actions a{
+    transition:filter .16s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease,color .18s ease,transform .18s ease;
+  }
+  html.glass-test button:not(:disabled):hover,
+  html.glass-test a.btn:hover,
+  html.glass-test .glass-client-actions a:hover{
+    filter:brightness(1.06) saturate(1.02);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 0 0 1px rgba(239,199,127,.10),0 0 16px rgba(214,164,95,.085),0 8px 22px rgba(0,0,0,.12);
+  }
+  html.glass-test .btn.primary:not(:disabled):hover,
+  html.glass-test .new-btn:not(:disabled):hover,
+  html.glass-test .upcoming-row.issue .upcoming-actions .btn:last-child:not(:disabled):hover{
+    filter:brightness(1.045) saturate(1.035);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 0 0 1px rgba(255,218,151,.22),0 0 20px rgba(226,174,91,.17),0 11px 26px rgba(151,91,22,.18);
+  }
+  html.glass-test .btn.green:not(:disabled):hover,
+  html.glass-test .upcoming-row.return .upcoming-actions .btn:last-child:not(:disabled):hover,
+  html.glass-test .glass-client-actions a:first-child:hover{
+    filter:brightness(1.055) saturate(1.035);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 0 0 1px rgba(128,239,187,.17),0 0 18px rgba(55,201,138,.14),0 11px 25px rgba(10,102,61,.15);
+  }
+  html.glass-test .btn.danger:not(:disabled):hover{
+    filter:brightness(1.06) saturate(1.025);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px rgba(255,123,115,.14),0 0 17px rgba(255,123,115,.11),0 9px 23px rgba(0,0,0,.13);
+  }
+  html.glass-test .glass-client-actions a:nth-child(2):hover{
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 0 0 1px rgba(111,184,255,.14),0 0 17px rgba(111,184,255,.11),0 9px 23px rgba(0,0,0,.12);
+  }
+}
