@@ -51,6 +51,12 @@ def view_suite(page:Page,qa:QA,width:int):
         qa.check(not bad,f'{width}: {view} has no visible element outside viewport' + (f' ({bad[0]})' if bad else ''))
         head=page.locator('.page-head').bounding_box(); top=page.locator('.topbar').bounding_box()
         qa.check(head is not None and top is not None and head['y']>=top['y']+top['height']+12,f'{width}: {view} heading clears topbar')
+        if view=='upcoming' and width>=1280:
+            sides=page.locator('.upcoming-row .upcoming-side').evaluate_all("""nodes=>nodes.map(side=>{const sr=side.getBoundingClientRect(),money=side.querySelector('.upcoming-money')?.getBoundingClientRect(),buttons=[...side.querySelectorAll('.upcoming-actions .btn')].map(b=>b.getBoundingClientRect());return{side:sr,money,buttons}})""")
+            aligned=bool(sides) and all(row['money'] and abs(row['money']['x']-row['side']['x'])<=1.5 and abs(row['money']['width']-row['side']['width'])<=1.5 and all(abs(b['x']-row['side']['x'])<=1.5 and abs(b['width']-row['side']['width'])<=1.5 for b in row['buttons']) for row in sides)
+            stacked=bool(sides) and all(all(row['buttons'][i]['y']+row['buttons'][i]['height']<=row['buttons'][i+1]['y']+1 for i in range(len(row['buttons'])-1)) for row in sides)
+            qa.check(aligned,f'{width}: upcoming finance and actions share one aligned right column')
+            qa.check(stacked,f'{width}: upcoming desktop actions stack vertically without overlap')
         if view=='analytics':
             page_title=page.locator('#pageTitle').inner_text().strip(); sub_title=page.locator('.analytics-toolbar h2').inner_text().strip()
             qa.check(page_title!=sub_title and sub_title=='Показники',f'{width}: analytics hierarchy has no duplicated heading')
@@ -137,7 +143,7 @@ def main():
         elif Path('/usr/bin/chromium').exists():opts['executable_path']='/usr/bin/chromium'
         browser=pw.chromium.launch(**opts)
         try:
-            run_size(browser,qa,1440,1000);run_size(browser,qa,1280,900);run_size(browser,qa,1024,768)
+            run_size(browser,qa,1650,760);run_size(browser,qa,1440,1000);run_size(browser,qa,1280,900);run_size(browser,qa,1024,768)
         except Exception as exc:
             qa.failed.append(f'Unhandled final desktop QA error: {exc}');print('FAIL:',qa.failed[-1])
         finally:browser.close()

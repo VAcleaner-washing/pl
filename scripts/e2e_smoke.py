@@ -643,10 +643,10 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.screenshot(page, "puzzi-mobile.png")
 
         page.goto(f"{base}/vidhuky/", wait_until="networkidle")
-        page.wait_for_selector(".vx-proof__cta")
-        review_cta = page.locator(".vx-proof__cta")
-        review_style = review_cta.evaluate("el=>({background:getComputedStyle(el).backgroundImage,color:getComputedStyle(el).color,fill:getComputedStyle(el).webkitTextFillColor,appearance:getComputedStyle(el).appearance})")
-        checks.check("linear-gradient" in review_style["background"] and review_style["appearance"] == "none" and review_style["fill"] not in ("", "auto"), "Review first-collection CTA keeps VAcleaner styling instead of Safari browser blue")
+        page.wait_for_selector(".social-proof .button-gold")
+        review_cta = page.locator(".social-proof .button-gold")
+        review_style = review_cta.evaluate("el=>({background:getComputedStyle(el).backgroundImage,color:getComputedStyle(el).color,href:el.getAttribute('href')||'',visible:!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length)})")
+        checks.check(review_style["visible"] and "linear-gradient" in review_style["background"] and "instagram.com/vacleaner_washing.pl" in review_style["href"] and review_style["color"] not in ("rgb(0, 0, 238)", "rgb(0, 102, 204)"), "Reviews Instagram CTA is visible, points to the live profile and keeps VAcleaner styling instead of browser blue")
 
         page.goto(f"{base}/", wait_until="networkidle")
         page.wait_for_selector(".vx-home-reset-gift")
