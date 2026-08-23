@@ -247,14 +247,14 @@ if(!adminCss.includes('/* v3.0.64 — discount editor stays inside the one mobil
 if(!publicExperience.includes('Програма лояльності')||!publicExperience.includes('0–2 завершені оренди')||!publicExperience.includes('після 3 завершених оренд')||!publicExperience.includes('після 6 завершених оренд'))errors.push('public loyalty program copy is missing or ambiguous');
 if(!adminEdge.includes('action === "save_finance"')||!adminEdge.includes('manual_discount: discount.manualType === "none" ? null')||!adminEdge.includes('base_amount: discount.baseAmount'))errors.push('return settlement must support and persist manual discount changes');
 const requiredCopy=[
- 'Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.',
+ 'Передплата 200 грн вноситься тільки після підтвердження заявки, закріплює дату та входить у загальну вартість.',
  'Новий клієнт надсилає документ менеджеру приватно.',
- 'Сплачується під час отримання техніки.',
+ 'Сплачуєте при отриманні. Після розрахунку повертаємо залишок.',
  'Що потрібно для оформлення',
  'Залоговий платіж',
 ];
 for(const phrase of requiredCopy)if(!businessCopy.includes(phrase))errors.push(`required booking copy missing: ${phrase}`);
-for(const phrase of ['базова сума, фактичну фіксує менеджер','Базова сума; фактичну менеджер фіксує при видачі','залог повертається окремо','оплата оренди при видачі','входить у суму оренди','входить у вартість оренди','Поворотний залог'])if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
+for(const phrase of ['базова сума, фактичну фіксує менеджер','Базова сума; фактичну менеджер фіксує при видачі','залог повертається окремо','оплата оренди при видачі','входить у суму оренди','Поворотний залог'])if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
 if(!bookingHtml.includes('08:00–10:00')||!bookingHtml.includes('17:30–20:00')||bookingHtml.includes('7:00–9:30')||bookingHtml.includes('07:00–09:30'))errors.push('public fallback slots are stale');
 if(!adminHtml.includes('Content-Security-Policy'))errors.push('admin CSP is missing');
 if(!adminRuntime.includes("SESSION_IDLE_MS=30*24*60*60*1000"))errors.push('trusted-device session expiry is missing');
@@ -316,8 +316,8 @@ if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale S
   const quiz=fs.readFileSync(path.join(root,'assets','public-quiz.js'),'utf8');
   const required=[
     'Професійні засоби',
-    'Базові порції для Puzzi видаємо окремо й рахуємо після повернення.',
-    'додаткові засоби під конкретні плями, запахи й поверхні',
+    'За потреби додайте засоби для плям, запахів або інших поверхонь.',
+    'Вони оплачуються окремо й залишаються у вас.',
     'VA SPOT FIX · 50 мл',
     'VA STAIN OX · 30 мл',
     'Shower Care · 250 мл',

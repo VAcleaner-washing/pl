@@ -85,9 +85,9 @@ function renderDeposit(){
   if(summary){
     const total=summary.querySelector('.booking-summary-total');
     if(total){
-      const prepayment=ensureSummaryFinanceRow(summary,total,'vx-summary-prepayment','Бронювання дати','Сплачується після підтвердження заявки.');
+      const prepayment=ensureSummaryFinanceRow(summary,total,'vx-summary-prepayment','Передплата','Сплачуєте після підтвердження. Входить у вартість.');
       setTextIfChanged(prepayment.querySelector('strong'),'200 грн');
-      const row=ensureSummaryFinanceRow(summary,total,'vx-summary-deposit','Залоговий платіж','Сплачується під час отримання техніки.');
+      const row=ensureSummaryFinanceRow(summary,total,'vx-summary-deposit','Залоговий платіж','Сплачуєте при отриманні. Після розрахунку повертаємо залишок.');
       setTextIfChanged(row.querySelector('strong'),amount?formatMoney(amount):'—');
       const totalLabel=summary.querySelector('.booking-summary-total span');setTextIfChanged(totalLabel,'Вартість оренди');
       const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
@@ -99,7 +99,7 @@ function renderDeposit(){
     setTextIfChanged(note,amount?`Залоговий платіж: ${formatMoney(amount)}`:'Залоговий платіж — після вибору дат');
   }
   const conditions=document.querySelector('.booking-conditions ul');
-  if(conditions&&conditions.children[0])setTextIfChanged(conditions.children[0],'Передоплата 200 грн вноситься після підтвердження заявки, закріплює дату та входить у фінальний взаєморозрахунок.');
+  if(conditions&&conditions.children[0])setTextIfChanged(conditions.children[0],'Передплата 200 грн сплачується тільки після підтвердження заявки, закріплює дату та входить у вартість оренди.');
   if(conditions&&conditions.children[1])setTextIfChanged(conditions.children[1],'Новий клієнт надсилає документ менеджеру приватно. Повторному клієнту, чиї дані вже є в базі, повторно надсилати документ не потрібно.');
   if(conditions&&conditions.children[2])setTextIfChanged(conditions.children[2],amount?`Залоговий платіж ${formatMoney(amount)} сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.`:'Залоговий платіж сплачується під час отримання техніки. Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');
 }

@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
     } else {
       items.push({
         code: "story_mention_bonus_diffuser_50",
-        label: "Сторіс-бонус · VA HOME Special Edition · 50 мл",
+        label: "Сторіс-бонус · аромадифузор VA HOME · 50 мл",
         quantity: 1,
         unitPrice: 0,
         amount: 0,

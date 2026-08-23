@@ -30,12 +30,12 @@ assert.ok(!/<title>Реальні відгуки клієнтів/i.test(reviews
 assert.ok(reviews.includes('https://www.instagram.com/vacleaner_washing.pl/'),'reviews page Instagram evidence CTA missing');
 
 const booking=read('bronuvannia/index.html');
-assert.ok(booking.includes('Базові порції для Puzzi видаємо окремо й рахуємо після повернення.'),'booking must distinguish consumable Puzzi portions from optional purchased chemistry');
-assert.ok(booking.includes('додаткові засоби під конкретні плями, запахи й поверхні'),'booking optional-chemistry explanation missing');
+assert.ok(booking.includes('За потреби додайте засоби для плям, запахів або інших поверхонь.'),'booking optional chemistry intro must be plain-language');
+assert.ok(booking.includes('Вони оплачуються окремо й залишаються у вас.'),'booking optional chemistry payment rule missing');
 for(const stale of ['Ранок · 7:00–9:30','07:00–09:30'])assert.ok(!booking.includes(stale),`stale public slot copy remains: ${stale}`);
 assert.ok(booking.includes('Ранок · 08:00–10:00'),'server-rendered booking must expose current morning slot');
 const bookingBundle=read('_next/static/chunks/146ntlcv_t6~w-v4041.js');
-assert.ok(bookingBundle.includes('Базові порції для Puzzi видаємо окремо й рахуємо після повернення.'),'hydrated booking bundle must preserve chemistry distinction');
+assert.ok(bookingBundle.includes('За потреби додайте засоби для плям, запахів або інших поверхонь.'),'hydrated booking bundle must preserve plain-language extras intro');
 assert.ok(bookingBundle.includes('Ранок · 08:00–10:00')&&!bookingBundle.includes('Ранок · 7:00–9:30'),'hydrated booking bundle must preserve current morning slot');
 
 for(const rel of [
