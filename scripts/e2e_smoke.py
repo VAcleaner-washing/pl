@@ -559,7 +559,9 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.wait_for_timeout(420)
         checks.check("До контактів" in cta.inner_text(), "Delivery estimate refresh keeps CTA on contacts")
 
-        story = page.locator('#booking-extras .booking-chemistry input[type="checkbox"]')
+        story = page.locator('#booking-extras .booking-story-toggle input[type="checkbox"]')
+        if story.count() == 0:
+            story = page.locator('#booking-extras .booking-chemistry input[type="checkbox"]')
         story.check()
         page.wait_for_timeout(50)
         checks.check("До контактів" in cta.inner_text(), "Stories checkbox never regresses CTA to date")
