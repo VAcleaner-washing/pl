@@ -35,6 +35,9 @@ def run(page,w,h):
  ck(fs(page,'.campaign-main>strong')>=16,f'{w}: campaign name stays readable')
  ck(fs(page,'.campaign-type')>=(10 if w<=700 else 10.5),f'{w}: campaign type/status is not micro text')
  ck(fs(page,'.campaign-metrics small')>=10.5,f'{w}: campaign metric labels stay readable')
+ if 901<=w<=1180:
+  kpi_ok=page.locator('.campaign-summary').evaluate("e=>e.scrollWidth<=e.clientWidth+1&&[...e.children].every(x=>x.scrollWidth<=x.clientWidth+1)")
+  ck(kpi_ok,f'{w}: campaign KPI summary has no internal collision')
  page.locator('.campaign-more summary').first.click();page.wait_for_timeout(10)
  ck(inside(page,'.campaign-more-menu'),f'{w}: campaign ••• menu stays inside viewport')
  page.locator('.campaign-more summary').first.click()

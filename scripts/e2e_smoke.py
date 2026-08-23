@@ -534,7 +534,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         # Any step-3/4 change may refresh the estimate, but it must never send the CTA back to dates.
         cta = page.locator(".booking-mobile-summary button")
         checks.check("Обрати техніку" in cta.inner_text(), "Mobile CTA starts on equipment")
-        eligible_product = page.locator(".booking-products button", has_text="Глибоке очищення текстилю")
+        eligible_product = page.locator('.booking-products button[data-product-code="puzzi_jimmy"]')
         checks.check(eligible_product.count() == 1, "Mobile Stories regression uses a real 1000+ UAH Puzzi bundle")
         eligible_product.click()
         page.wait_for_timeout(60)

@@ -72,7 +72,8 @@ def view_suite(page:Page,qa:QA,width:int):
         if view=='campaigns':
             campaign_layout=page.locator('.campaign-panel').evaluate("""el=>{const head=el.querySelector('.campaign-panel-head'),summary=el.querySelector('.campaign-summary'),row=el.querySelector('.campaign-row');return{head:getComputedStyle(head).display,summary:getComputedStyle(summary).display,summaryCols:getComputedStyle(summary).gridTemplateColumns.split(' ').filter(Boolean).length,row:row?getComputedStyle(row).display:'none',name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize),action:parseFloat(getComputedStyle(el.querySelector('.campaign-actions .btn')).fontSize)}}""")
             qa.check(campaign_layout['head']=='flex',f'{width}: campaigns desktop header uses styled flex layout')
-            qa.check(campaign_layout['summary']=='grid' and campaign_layout['summaryCols']==4,f'{width}: campaigns desktop KPI summary uses four-column grid')
+            expected_kpi_cols=2 if 901<=width<=1180 else 4
+            qa.check(campaign_layout['summary']=='grid' and campaign_layout['summaryCols']==expected_kpi_cols,f'{width}: campaigns desktop KPI summary uses responsive {expected_kpi_cols}-column grid')
             qa.check(campaign_layout['row']=='grid',f'{width}: campaigns desktop row uses styled grid layout')
             qa.check(campaign_layout['name']>=17 and campaign_layout['sub']>=11 and campaign_layout['kpi']>=18 and campaign_layout['metric']>=14 and campaign_layout['action']>=12,f'{width}: campaigns typography stays readable instead of shrinking to fit')
         qa.shot(page,f'{width}-{view}.png')

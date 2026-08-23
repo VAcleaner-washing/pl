@@ -22,7 +22,7 @@ ok('Admin shows gift selection operationally',admin.includes('function bookingGi
 ok('Finance only applies 2 free packets when chemistry story gift selected',admin.includes('storyChemistryGiftSelected(b)')&&admin.includes('showStoryChemistryControl'));
 ok('Gift UI has mobile responsive contract',css.includes('.booking-gift-options')&&css.includes('@media(max-width:620px){.booking-gift'));
 ok('E2E availability fixture mirrors product price for Stories eligibility',e2e.includes('product_code = str(payload.get("productCode") or "puzzi")')&&e2e.includes('story_gift_eligible = base_amount >= 1000')&&e2e.includes('"storyGiftEligible": story_gift_eligible'));
-ok('E2E Stories flow uses an eligible 1000+ Puzzi bundle',e2e.includes('has_text="Глибоке очищення текстилю"')&&e2e.includes('Stories reward is visible for an eligible 1000+ UAH rental')&&!e2e.includes("story = page.locator('#booking-extras .booking-chemistry input[type=\"checkbox\"]')"));
+ok('E2E Stories flow uses stable identity for an eligible 1000+ Puzzi bundle',e2e.includes('button[data-product-code=\"puzzi_jimmy\"]')&&!e2e.includes('has_text=\"Глибоке очищення текстилю\"')&&chunk.includes('\"data-product-code\":n.code')&&e2e.includes('Stories reward is visible for an eligible 1000+ UAH rental')&&!e2e.includes("story = page.locator('#booking-extras .booking-chemistry input[type=\"checkbox\"]')"));
 for(const [name,pass] of checks)console.log(`${pass?'PASS':'FAIL'}: ${name}`);
 const failed=checks.filter(([,p])=>!p);
 console.log(JSON.stringify({passed:checks.length-failed.length,failed:failed.map(([n])=>n),status:failed.length?'failed':'passed'}));

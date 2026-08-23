@@ -44,7 +44,7 @@ function privacyConsent(){if(path!=='/bronuvannia')return;const span=document.qu
 function quizCta(){if(path!=='/')return;document.querySelectorAll('a,button').forEach(control=>{if((control.textContent||'').replace(/\s+/g,' ').trim()!=='Підібрати рішення ↓')return;if(control.tagName==='A')control.setAttribute('href','/pidbir/');else if(!control.dataset.v4QuizBound){control.dataset.v4QuizBound='1';control.addEventListener('click',()=>{location.href='/pidbir/'})}})}
 function solutionTechBridge(){
  const routes={
-  '/rishennia/textile':{needle:'Kärcher Puzzi 8/1',href:'/tekhnika/karcher-puzzi-8-1/',mode:'context',label:'Про Kärcher Puzzi 8/1 →'},
+  '/rishennia/textile':{needle:'Kärcher Puzzi 8/1',href:'/tekhnika/karcher-puzzi-8-1/',mode:'name',label:'Kärcher Puzzi 8/1 і насадка для меблів'},
   '/rishennia/steam':{needle:'Kärcher SC 2 Deluxe',href:'/tekhnika/karcher-sc-2-deluxe/',mode:'name',label:'Kärcher SC 2 Deluxe'},
   '/rishennia/windows':{needle:'ABIR WD8',href:'/tekhnika/robot-dlia-vikon-abir/',mode:'name',label:'Робот для вікон · ABIR WD8'}
  };
