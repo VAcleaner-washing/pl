@@ -42,10 +42,22 @@ function mobileStickyCta(){
 function termsDelivery(){if(path!=='/umovy')return;document.querySelectorAll('.terms-grid article,.terms-grid>div').forEach(card=>{const t=card.textContent||'';if(t.includes('Самовивіз або доставка')){const p=card.querySelector('p');if(p)p.innerHTML='Умови отримання та оплати винесені окремо: самовивіз у Полтаві, доставка по місту та передплата. <a href="/dostavka/"><strong>Доставка й оплата →</strong></a>';}})}
 function privacyConsent(){if(path!=='/bronuvannia')return;const span=document.querySelector('.booking-consent:not(.vx-marketing-consent) > span');if(!span||span.dataset.v4ConsentFixed==='1')return;const terms=document.createElement('a');terms.href='/umovy/';terms.target='_blank';terms.rel='noopener';terms.textContent='умови бронювання';const privacy=document.createElement('a');privacy.href='/polityka-konfidenciynosti/';privacy.target='_blank';privacy.rel='noopener';privacy.textContent='політику конфіденційності';span.replaceChildren(document.createTextNode('Погоджуюсь на обробку контактних даних для цієї заявки та приймаю '),terms,document.createTextNode(' і '),privacy,document.createTextNode('.'));span.dataset.v4ConsentFixed='1';}
 function quizCta(){if(path!=='/')return;document.querySelectorAll('a,button').forEach(control=>{if((control.textContent||'').replace(/\s+/g,' ').trim()!=='Підібрати рішення ↓')return;if(control.tagName==='A')control.setAttribute('href','/pidbir/');else if(!control.dataset.v4QuizBound){control.dataset.v4QuizBound='1';control.addEventListener('click',()=>{location.href='/pidbir/'})}})}
-function puzziSeoBridge(){if(path!=='/rishennia/textile')return;const list=document.querySelector('.feature-list');if(!list||list.querySelector('.v4-inline-tech-link'))return;const first=[...list.querySelectorAll('li')].find(li=>(li.textContent||'').includes('Kärcher Puzzi 8/1'));if(!first)return;const a=document.createElement('a');a.className='v4-inline-tech-link';a.href='/tekhnika/karcher-puzzi-8-1/';a.textContent='Про Kärcher Puzzi 8/1 →';first.classList.add('v4-has-tech-link');first.appendChild(a)}
+function solutionTechBridge(){
+ const routes={
+  '/rishennia/textile':{needle:'Kärcher Puzzi 8/1',href:'/tekhnika/karcher-puzzi-8-1/',mode:'context',label:'Про Kärcher Puzzi 8/1 →'},
+  '/rishennia/steam':{needle:'Kärcher SC 2 Deluxe',href:'/tekhnika/karcher-sc-2-deluxe/',mode:'name',label:'Kärcher SC 2 Deluxe'},
+  '/rishennia/windows':{needle:'ABIR WD8',href:'/tekhnika/robot-dlia-vikon-abir/',mode:'name',label:'Робот для вікон · ABIR WD8'}
+ };
+ const cfg=routes[path];if(!cfg)return;const list=document.querySelector('.feature-list');if(!list)return;
+ const first=[...list.querySelectorAll('li')].find(li=>(li.textContent||'').includes(cfg.needle));if(!first)return;
+ if(cfg.mode==='context'){
+  if(first.querySelector('.v4-inline-tech-link'))return;const a=document.createElement('a');a.className='v4-inline-tech-link';a.href=cfg.href;a.textContent=cfg.label;first.classList.add('v4-has-tech-link');first.appendChild(a);return;
+ }
+ if(first.querySelector('.v4-feature-tech-name'))return;const number=first.querySelector(':scope>span');[...first.childNodes].forEach(node=>{if(node!==number)node.remove()});const a=document.createElement('a');a.className='v4-feature-tech-name';a.href=cfg.href;a.textContent=cfg.label;first.appendChild(a)
+}
 function vahomeBridge(){if(path!=='/bronuvannia')return;const success=document.querySelector('.booking-success');if(!success||success.querySelector('.v4-vahome-success'))return;const box=document.createElement('div');box.className='v4-vahome-success';box.innerHTML='<strong>Простір чистий — тепер атмосфера.</strong><p>Після прибирання можна продовжити VA ecosystem у VA HOME.</p><a href="https://vahome.com.ua/" rel="noreferrer" target="_blank">Перейти до VA HOME →</a>';success.appendChild(box);}
-function boot(){patchFooter();mobileMenu();reviewsProof();contextualPickerBridges();mobileStickyCta();termsDelivery();privacyConsent();quizCta();puzziSeoBridge();vahomeBridge()}
+function boot(){patchFooter();mobileMenu();reviewsProof();contextualPickerBridges();mobileStickyCta();termsDelivery();privacyConsent();quizCta();solutionTechBridge();vahomeBridge()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 window.addEventListener('load',boot,{once:true});
-new MutationObserver(()=>{privacyConsent();quizCta();contextualPickerBridges();mobileStickyCta();puzziSeoBridge();vahomeBridge();if(document.querySelector('main>footer:not(.v4-footer)'))patchFooter();}).observe(document.body,{childList:true,subtree:true});
+new MutationObserver(()=>{privacyConsent();quizCta();contextualPickerBridges();mobileStickyCta();solutionTechBridge();vahomeBridge();if(document.querySelector('main>footer:not(.v4-footer)'))patchFooter();}).observe(document.body,{childList:true,subtree:true});
 })();

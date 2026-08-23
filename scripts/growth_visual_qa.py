@@ -46,6 +46,19 @@ with sync_playwright() as p:
       boxes=[page.locator('.proof-stat-grid article').nth(i).bounding_box() for i in range(3)]
       check(all(boxes) and boxes[1]['y']>boxes[0]['y'] and boxes[2]['y']>boxes[1]['y'],f'{label}: social proof stacks cleanly on mobile')
     page.close()
+  solution_links=[
+   ('steam-link','rishennia/steam/index.html','/tekhnika/karcher-sc-2-deluxe/','Kärcher SC 2 Deluxe'),
+   ('windows-link','rishennia/windows/index.html','/tekhnika/robot-dlia-vikon-abir/','Робот для вікон · ABIR WD8'),
+  ]
+  for name,rel,href,text in solution_links:
+   html=(ROOT/rel).read_text(encoding='utf-8')
+   for w,h in [(390,844),(1280,800)]:
+    page=browser.new_page(viewport={'width':w,'height':h},is_mobile=w<=900);page.set_content(html,wait_until='domcontentloaded');page.add_style_tag(content=CSS);page.wait_for_timeout(30)
+    label=f'{name} {w}x{h}'; link=page.locator(f'.feature-list a[href="{href}"]'); ov=overflow(page)
+    check(link.count()==1 and link.is_visible(),f'{label}: equipment name is a visible product link')
+    check(link.inner_text().strip()==text,f'{label}: product link keeps the canonical equipment name')
+    check(ov['sw']<=ov['cw']+2 and not ov['bad'],f'{label}: linked equipment row creates no overflow')
+    page.close()
   booking=(ROOT/'bronuvannia/index.html').read_text(encoding='utf-8')
   for w,h in [(390,844),(1280,800)]:
    page=browser.new_page(viewport={'width':w,'height':h},is_mobile=w<=900);page.set_content(booking,wait_until='domcontentloaded');page.add_style_tag(content=CSS);page.wait_for_timeout(50)

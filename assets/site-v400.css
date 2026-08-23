@@ -51,6 +51,8 @@ main>footer:not(.v4-footer){visibility:hidden}
 /* v4.0.25 — keep the contextual Puzzi link out of the narrow number column. */
 .feature-list li.v4-has-tech-link{grid-template-columns:48px minmax(0,1fr) auto;align-items:start}
 .v4-inline-tech-link{grid-column:3;grid-row:1;align-self:center;margin-left:16px;color:#d6b77f;font-size:11px;font-weight:750;line-height:1.45;white-space:nowrap}
+.v4-feature-tech-name{min-width:0;color:#e5c083;text-decoration:none;text-decoration-thickness:1px;text-underline-offset:4px;font-weight:760;transition:color .16s ease,text-decoration-color .16s ease}
+.v4-feature-tech-name:hover,.v4-feature-tech-name:focus-visible{color:#f0cd92;text-decoration:underline;text-decoration-color:rgba(240,205,146,.58);outline:none}
 @media(max-width:620px){
   .feature-list li.v4-has-tech-link{grid-template-columns:48px minmax(0,1fr)}
   .v4-inline-tech-link{grid-column:2;grid-row:2;justify-self:start;width:auto;max-width:100%;margin:9px 0 0;white-space:nowrap}

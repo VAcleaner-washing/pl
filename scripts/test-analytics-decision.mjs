@@ -69,6 +69,7 @@ assert.ok(runtime.includes('<strong>${created.length}</strong>'),'source panel h
 assert.ok(!runtime.includes('<strong>${sources.length}</strong>'),'source panel must not expose channel count as primary KPI');
 assert.ok(runtime.includes('data-trend-metric="revenue"')&&runtime.includes('data-trend-metric="rentals"'),'business trend must switch between revenue and rentals');
 assert.ok(runtime.includes('<svg viewBox="0 0 ${w} ${hgt}"'),'business trend must render a real SVG chart rather than another progress bar');
+assert.ok(runtime.includes('analytics-trend-mobile-scale')&&runtime.includes("matchMedia('(max-width:700px)')"),'business trend must use a dedicated mobile composition instead of squeezing the desktop axis');
 
 for(const token of ['Динаміка бізнесу','З чого складається виручка','Звідки приходять заявки','Попит за днями видачі','Воронка заявок','Виручка не означає прибуток','історію кількості техніки не підмінюємо сьогоднішнім парком'])assert.ok(runtime.includes(token),`decision analytics copy missing: ${token}`);
 

@@ -5457,3 +5457,23 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .analytics-trend-line{stroke-width:2.1}
   .analytics-trend-dot{r:3}
 }
+
+/* v4.1.08 — mobile-native analytics trend: full-width plot, sparse dates, scale outside the SVG. */
+.analytics-trend-mobile-scale{display:none}
+@media(max-width:700px){
+  .analytics-trend-panel{padding:16px}
+  .analytics-trend-head{gap:11px}
+  .analytics-trend-head>div>p{display:none}
+  .analytics-trend-mobile-scale{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 4px;padding:8px 10px;border:1px solid rgba(255,255,255,.065);border-radius:11px;background:rgba(255,255,255,.022);color:var(--muted);font-size:10px}
+  .analytics-trend-mobile-scale b{color:#c9ced0;font-size:11px;font-weight:760;white-space:nowrap}
+  .analytics-trend-chart{height:198px;min-height:198px;margin:0;overflow:hidden}
+  .analytics-trend-y-label{display:none}
+  .analytics-trend-x-label{font-size:9.5px;font-weight:680}
+  .analytics-trend-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:2px;padding-top:11px}
+  .analytics-trend-summary span{display:grid;gap:3px;align-content:start;padding:9px 10px;border:1px solid rgba(255,255,255,.055);border-radius:11px;background:rgba(255,255,255,.018);font-size:9.5px}
+  .analytics-trend-summary b{font-size:12.5px}
+}
+@media(max-width:360px){
+  .analytics-trend-panel{padding:14px}
+  .analytics-trend-chart{height:184px;min-height:184px}
+}
