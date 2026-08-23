@@ -248,7 +248,8 @@ def make_api_handler(config: dict[str, Any]):
                 product_code = str(payload.get("productCode") or "puzzi")
                 product = catalog.get("products", {}).get(product_code, {})
                 base_amount = int(product.get("weekday") or 700)
-                story_gift_eligible = base_amount >= 1000
+                has_puzzi = product_code in {"puzzi", "puzzi_jimmy", "puzzi_abir", "combo", "general", "elite"}
+                story_gift_eligible = has_puzzi or base_amount >= 1000
                 body = {
                     "available": True,
                     "remaining": {"puzzi": 2},
