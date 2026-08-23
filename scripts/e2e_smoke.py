@@ -245,16 +245,21 @@ def make_api_handler(config: dict[str, Any]):
             if action == "loyalty_lookup":
                 body = {"loyalty": {"level": "Start", "percent": 0, "completedOrders": 0}}
             elif action == "availability":
+                product_code = str(payload.get("productCode") or "puzzi")
+                product = catalog.get("products", {}).get(product_code, {})
+                base_amount = int(product.get("weekday") or 700)
+                story_gift_eligible = base_amount >= 1000
                 body = {
                     "available": True,
                     "remaining": {"puzzi": 2},
                     "estimate": {
                         "rentalDays": 1,
-                        "baseAmount": 700,
+                        "baseAmount": base_amount,
                         "extrasAmount": 0,
                         "deliveryAmount": 0,
-                        "totalAmount": 700,
+                        "totalAmount": base_amount,
                         "prepaymentAmount": 200,
+                        "storyGiftEligible": story_gift_eligible,
                     },
                 }
             else:
@@ -529,7 +534,9 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         # Any step-3/4 change may refresh the estimate, but it must never send the CTA back to dates.
         cta = page.locator(".booking-mobile-summary button")
         checks.check("Обрати техніку" in cta.inner_text(), "Mobile CTA starts on equipment")
-        page.locator(".booking-products button").first.click()
+        eligible_product = page.locator(".booking-products button", has_text="Глибоке очищення текстилю")
+        checks.check(eligible_product.count() == 1, "Mobile Stories regression uses a real 1000+ UAH Puzzi bundle")
+        eligible_product.click()
         page.wait_for_timeout(60)
         checks.check("Обрати дату" in cta.inner_text(), "Mobile CTA advances equipment → date")
         cta.click()
@@ -560,8 +567,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check("До контактів" in cta.inner_text(), "Delivery estimate refresh keeps CTA on contacts")
 
         story = page.locator('#booking-extras .booking-story-toggle input[type="checkbox"]')
-        if story.count() == 0:
-            story = page.locator('#booking-extras .booking-chemistry input[type="checkbox"]')
+        checks.check(story.count() == 1 and story.is_visible(), "Stories reward is visible for an eligible 1000+ UAH rental")
         story.check()
         page.wait_for_timeout(50)
         checks.check("До контактів" in cta.inner_text(), "Stories checkbox never regresses CTA to date")

@@ -6,6 +6,7 @@ const chunk=fs.readFileSync(path.join(root,'_next/static/chunks/146ntlcv_t6~w-v4
 const backend=fs.readFileSync(path.join(root,'supabase/functions/vacleaner-booking-v5/index.ts'),'utf8');
 const admin=fs.readFileSync(path.join(root,'assets/admin-v250.js'),'utf8');
 const css=fs.readFileSync(path.join(root,'assets/public-experience.css'),'utf8');
+const e2e=fs.readFileSync(path.join(root,'scripts/e2e_smoke.py'),'utf8');
 const checks=[];
 const ok=(name,cond)=>checks.push([name,!!cond]);
 ok('Puzzi chemistry covers Puzzi + ABIR frontend',chunk.includes('["puzzi","puzzi_jimmy","puzzi_abir","combo","general","elite"]'));
@@ -20,6 +21,8 @@ ok('Frontend submits all gift fields',chunk.includes('storyGiftChoice:storyActiv
 ok('Admin shows gift selection operationally',admin.includes('function bookingGiftLines(b)')&&admin.includes('upcoming-gift')&&admin.includes('gift-panel'));
 ok('Finance only applies 2 free packets when chemistry story gift selected',admin.includes('storyChemistryGiftSelected(b)')&&admin.includes('showStoryChemistryControl'));
 ok('Gift UI has mobile responsive contract',css.includes('.booking-gift-options')&&css.includes('@media(max-width:620px){.booking-gift'));
+ok('E2E availability fixture mirrors product price for Stories eligibility',e2e.includes('product_code = str(payload.get("productCode") or "puzzi")')&&e2e.includes('story_gift_eligible = base_amount >= 1000')&&e2e.includes('"storyGiftEligible": story_gift_eligible'));
+ok('E2E Stories flow uses an eligible 1000+ Puzzi bundle',e2e.includes('has_text="Глибоке очищення текстилю"')&&e2e.includes('Stories reward is visible for an eligible 1000+ UAH rental')&&!e2e.includes("story = page.locator('#booking-extras .booking-chemistry input[type=\"checkbox\"]')"));
 for(const [name,pass] of checks)console.log(`${pass?'PASS':'FAIL'}: ${name}`);
 const failed=checks.filter(([,p])=>!p);
 console.log(JSON.stringify({passed:checks.length-failed.length,failed:failed.map(([n])=>n),status:failed.length?'failed':'passed'}));

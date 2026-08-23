@@ -1,6 +1,6 @@
 {
-  "version": "4.1.10",
-  "build": 4110,
+  "version": "4.1.11",
+  "build": 4111,
   "releasedAt": "2026-08-23",
-  "label": "VAcleaner v4.1.10 — BOOKING UX + STORY BONUS CI FIX"
+  "label": "VAcleaner v4.1.11 — STORY ELIGIBILITY E2E ROOT-CAUSE FIX"
 }
