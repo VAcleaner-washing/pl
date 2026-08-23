@@ -63,7 +63,8 @@ with sync_playwright() as p:
   for w,h in [(390,844),(1280,800)]:
    page=browser.new_page(viewport={'width':w,'height':h},is_mobile=w<=900);page.set_content(booking,wait_until='domcontentloaded');page.add_style_tag(content=CSS);page.wait_for_timeout(50)
    label=f'booking {w}x{h}';txt=page.locator('body').inner_text();ov=overflow(page)
-   check('Базові порції для Puzzi видаємо окремо' in txt,f'{label}: chemistry distinction is visible in server layout')
+   check('Професійні засоби' in txt and 'Вони оплачуються окремо й залишаються у вас' in txt,f'{label}: optional professional products section is visible in server layout')
+   check('Базові порції для Puzzi видаємо окремо' not in txt and 'Хімія для Puzzi · 8 запечатаних порцій' not in txt,f'{label}: removed Puzzi chemistry explainer stays removed in server layout')
    check('7:00–9:30' not in txt and '08:00–10:00' in txt,f'{label}: current morning slot is visible in server layout')
    check(ov['sw']<=ov['cw']+2 and not ov['bad'],f'{label}: no horizontal/outside-viewport layout')
    page.close()
