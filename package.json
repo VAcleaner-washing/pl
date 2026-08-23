@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.21",
+  "version": "4.1.22",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -48,6 +48,7 @@
     "test:growth-visual": "python scripts/growth_visual_qa.py",
     "test:booking-gifts": "node scripts/test-booking-gift-policy.mjs",
     "test:booking-gifts-visual": "python scripts/booking_gift_visual_qa.py",
-    "test:pwa-session": "python scripts/pwa_session_recovery_qa.py"
+    "test:pwa-session": "python scripts/pwa_session_recovery_qa.py",
+    "test:pwa-resume": "python scripts/pwa_resume_boot_qa.py"
   }
 }

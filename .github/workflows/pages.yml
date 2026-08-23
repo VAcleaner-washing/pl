@@ -80,6 +80,8 @@ jobs:
           python -m py_compile scripts/test-public-inner-heroes.py
           python -m py_compile scripts/analytics_visual_qa.py
           python -m py_compile scripts/growth_visual_qa.py
+          python -m py_compile scripts/pwa_session_recovery_qa.py
+          python -m py_compile scripts/pwa_resume_boot_qa.py
       - name: Install Playwright browser tests
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
@@ -98,6 +100,10 @@ jobs:
         run: npm run test:smart-guide-fit
       - name: Run mobile client card QA
         run: npm run test:client-card-mobile
+      - name: Run PWA expired-session recovery QA
+        run: npm run test:pwa-session
+      - name: Run PWA resume-data recovery QA
+        run: npm run test:pwa-resume
       - name: Run installed-PWA visual QA
         run: npm run test:pwa
       - name: Run Liquid Glass primary UX QA
