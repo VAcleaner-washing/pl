@@ -5443,15 +5443,17 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .analytics-trend-panel{margin-bottom:12px;padding:14px}
   .analytics-trend-head{display:grid;gap:10px}
   .analytics-trend-head .analytics-metric-switch{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
-  .analytics-trend-chart{height:220px;min-height:200px;margin-inline:-7px}
-  .analytics-trend-y-label,.analytics-trend-x-label{font-size:9px}
+  .analytics-trend-chart{height:210px;min-height:190px;margin-inline:-4px}
+  .analytics-trend-y-label,.analytics-trend-x-label{font-size:10.5px}
   .analytics-funnel-row>div:first-child{grid-template-columns:minmax(0,1fr) auto;gap:5px 8px}
   .analytics-funnel-row small{grid-column:1/-1;text-align:left}
 }
 @media(max-width:360px){
-  .analytics-trend-chart{height:205px}
+  .analytics-trend-chart{height:195px}
   .analytics-trend-summary{gap:12px}
 }
 @media(max-width:500px){
-  .analytics-trend-y-label,.analytics-trend-x-label{font-size:18px}
+  .analytics-trend-y-label,.analytics-trend-x-label{font-size:11px}
+  .analytics-trend-line{stroke-width:2.1}
+  .analytics-trend-dot{r:3}
 }

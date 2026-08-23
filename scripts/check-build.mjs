@@ -218,6 +218,13 @@ for(const rel of ['rishennia/textile/index.html','rishennia/mattress/index.html'
  if(!html.includes('"@type":"Service"')||!html.includes('"@type":"Offer"')||!html.includes('"priceCurrency":"UAH"'))errors.push(`Service/Offer JSON-LD missing in ${rel}`);
 }
 if(!packagesHtml.includes('"@type":"Service"')||!packagesHtml.includes('"@type":"OfferCatalog"')||((packagesHtml.match(/"@type":"Offer"/g)||[]).length<5))errors.push('package page must expose Service + OfferCatalog JSON-LD');
+
+for(const rel of ['tekhnika/karcher-sc-2-deluxe/index.html','tekhnika/robot-dlia-vikon-abir/index.html']){
+ const html=fs.readFileSync(path.join(root,...rel.split('/')),'utf8');
+ for(const token of ['<main class="puzzi-seo-page">','class="puzzi-breadcrumb"','class="puzzi-price"','class="puzzi-glow"','class="puzzi-float p1"','class="puzzi-zone-grid"','class="puzzi-cleaning-steps"','class="puzzi-term-grid"'])if(!html.includes(token))errors.push(`equipment page must reuse the Puzzi visual contract in ${rel}: ${token}`);
+ for(const legacy of ['puzzi-breadcrumbs','puzzi-price-row','puzzi-prepay-note','puzzi-visual-label','puzzi-use-grid','puzzi-process-list','puzzi-terms-grid'])if(html.includes(legacy))errors.push(`stale one-off equipment markup remains in ${rel}: ${legacy}`);
+}
+
 if(!adminRuntime.includes('vacleaner-status-correction-v1')||!adminRuntime.includes('Виправити статус')||!adminRuntime.includes('invokeStatus({bookingId:b.id,status:target,reason})'))errors.push('admin status correction UI/endpoint binding is missing');
 if(!statusEdge.includes('edge:correct_status:')||!statusEdge.includes('vacleaner_apply_reservation')||!statusEdge.includes('admin_users'))errors.push('dedicated server-side controlled status correction is missing');
 if(adminEdge.includes('action === "correct_status"'))errors.push('status correction logic is duplicated inside vacleaner-admin-bookings-v3');

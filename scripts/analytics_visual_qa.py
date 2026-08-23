@@ -34,6 +34,18 @@ with sync_playwright() as p:
    box=page.locator('.analytics-trend-chart').bounding_box()
    check(bool(box and box['width']>min(280,w-70) and box['height']>=180),f'{label}: trend chart has useful readable area')
    check(page.locator('[data-trend-metric]').count()==2,f'{label}: revenue/rentals switch is present')
+   rev_labels=page.eval_on_selector_all('.analytics-trend-y-label','els=>els.map(e=>e.textContent||"")')
+   check(all('k' not in x.lower() for x in rev_labels),f'{label}: revenue axis uses full values instead of k-abbreviations')
+   x_boxes=page.eval_on_selector_all('.analytics-trend-x-label','els=>els.map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right}})')
+   chart_box=page.locator('.analytics-trend-chart').bounding_box()
+   check(bool(chart_box and all(x['left']>=chart_box['x']-2 and x['right']<=chart_box['x']+chart_box['width']+2 for x in x_boxes)),f'{label}: first/last date labels stay inside chart')
+   if w<=500:
+    font=float(page.locator('.analytics-trend-y-label').first.evaluate('el=>parseFloat(getComputedStyle(el).fontSize)'))
+    check(font<=12,f'{label}: PWA axis typography stays compact and readable')
+   page.locator('[data-trend-metric="rentals"]').click(); page.wait_for_timeout(20)
+   rent_labels=page.eval_on_selector_all('.analytics-trend-y-label','els=>els.map(e=>e.textContent||"")')
+   check(len(rent_labels)==len(set(rent_labels)) and all(x.isdigit() for x in rent_labels),f'{label}: rental axis uses unique whole-number ticks')
+   page.locator('[data-trend-metric="revenue"]').click(); page.wait_for_timeout(20)
    check(page.locator('.analytics-funnel-row').count()==5,f'{label}: cumulative funnel exposes five workflow stages')
    check(page.locator('.source-performance-panel .analytics-panel-head>strong').inner_text().strip()=='7',f'{label}: source KPI shows applications, not channel count')
    if w in (390,1280):

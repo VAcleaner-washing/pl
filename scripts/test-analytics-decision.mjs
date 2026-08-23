@@ -23,7 +23,7 @@ const context={
   console,
 };
 vm.createContext(context);
-for(const name of ['recordedChemistryRevenue','revenueBreakdown','analyticsSourceKey','analyticsSourceLabel','sourcePerformance','weekdayDemand','analyticsFunnel'])vm.runInContext(functionSource(name),context);
+for(const name of ['recordedChemistryRevenue','revenueBreakdown','analyticsSourceKey','analyticsSourceLabel','sourcePerformance','weekdayDemand','analyticsNiceStep','analyticsAxisScale','analyticsAxisLabel','analyticsFunnel'])vm.runInContext(functionSource(name),context);
 
 const monday={status:'completed',source:'vacleaner_website',start_date:'2026-08-10',total_amount:1200,base_amount:800,delivery_amount:200,extras_amount:200,rawBase:900,extras:{chemistry:{amount:100}}};
 const saturday={status:'completed',source:'phone',start_date:'2026-08-08',total_amount:700,base_amount:700,delivery_amount:0,extras_amount:0,rawBase:700,extras:{}};
@@ -56,6 +56,15 @@ assert.deepEqual(funnel.stages.map(row=>row.label),['Заявка','Передо
 assert.deepEqual(funnel.stages.map(row=>row.count),[6,3,3,2,1],'funnel must count reached stages cumulatively, not current status buckets');
 assert.equal(funnel.cancelled,1,'cancelled applications must remain visible outside cumulative stages');
 assert.equal(funnel.conversion,17,'funnel completion conversion must use created cohort denominator');
+
+const revenueAxis=JSON.parse(JSON.stringify(context.analyticsAxisScale(2900,true)));
+assert.deepEqual(revenueAxis.ticks,[0,1000,2000,3000],'revenue axis must use readable full-money ticks for a 2 900 грн peak');
+assert.equal(context.analyticsAxisLabel(2900,true),'2 900','revenue labels must use Ukrainian thousands grouping instead of 2.9k shorthand');
+const rentalAxis=JSON.parse(JSON.stringify(context.analyticsAxisScale(3,false)));
+assert.deepEqual(rentalAxis.ticks,[0,1,2,3],'rental axis must expose unique integer ticks only');
+assert.equal(new Set(rentalAxis.ticks).size,rentalAxis.ticks.length,'rental axis must never duplicate rounded labels');
+assert.ok(!runtime.includes('Math.round(value/100)/10}k'),'analytics trend must not abbreviate money as 2.9k-style labels');
+
 assert.ok(runtime.includes('<strong>${created.length}</strong>'),'source panel headline must show application count, not number of channels');
 assert.ok(!runtime.includes('<strong>${sources.length}</strong>'),'source panel must not expose channel count as primary KPI');
 assert.ok(runtime.includes('data-trend-metric="revenue"')&&runtime.includes('data-trend-metric="rentals"'),'business trend must switch between revenue and rentals');
