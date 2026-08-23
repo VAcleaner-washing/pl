@@ -18,6 +18,8 @@ const homeChunk=read('_next/static/chunks/01pb0x0z72e41.js');
 
 const syncStatic=read('scripts/sync-static-copy.mjs');
 must(!syncStatic.split(/\r?\n/).some(line=>line.includes('Комбо')&&line.includes('Текстиль + кухня та ванна')),'static-copy sync must not regenerate the retired combo title');
+must(!syncStatic.includes('Базові порції для Puzzi видаємо окремо й рахуємо після повернення'),'static-copy sync must not regenerate the removed booking Puzzi explainer');
+must(!syncStatic.includes("['Хімія для Puzzi · 8 порцій','Хімія для Puzzi · 8 запечатаних порцій']"),'static-copy sync must not recreate the removed booking chemistry heading');
 must(core.catalog.products.combo.label==='Дивани + кухня та ванна'&&core.catalog.products.combo.shortLabel==='Дивани + кухня та ванна','central combo label must match the current public title');
 
 for(const [where,content] of [

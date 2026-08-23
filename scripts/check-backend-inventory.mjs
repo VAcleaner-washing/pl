@@ -33,4 +33,4 @@ if(!errors.length){
   if(db.retentionVerification?.sleepingDays!==180)errors.push('retention inventory does not record the 180-day sleeping threshold');
 }
 if(errors.length){console.error(errors.join('\n'));process.exit(1)}
-console.log('Production backend inventory is complete and internally consistent.');
+console.log('Committed backend inventory snapshot is internally consistent (not a live Supabase verification).');

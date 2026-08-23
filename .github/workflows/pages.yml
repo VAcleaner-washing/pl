@@ -39,7 +39,7 @@ jobs:
         run: npm run test:public-seo
       - name: Verify growth content and booking clarity
         run: npm run test:growth-content
-      - name: Verify production backend inventory
+      - name: Verify committed backend inventory snapshot
         run: npm run check:backend
       - name: Verify rental day and deposit policy
         run: npm run test:deposit-policy

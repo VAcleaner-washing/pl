@@ -46,6 +46,7 @@ ok(runtime.includes('function modal(html){'),'modal shell helper exists');
 ok(runtime.includes("$('.mobile-more-close')||$('.modal-close')"),'Escape closes mobile More sheet cleanly');
 ok(runtime.includes('data-mobile-logout'),'mobile More contains the logout action');
 ok(runtime.includes("/auth/v1/logout?scope=local"),'PWA logout is isolated to the current device session');
+ok(runtime.includes("const logout=$('.top-logout');if(logout)logout.onclick=()=>logoutCurrentDevice(logout)"),'desktop logout uses the same server-revoking flow as mobile logout');
 ok(css.includes('.mobile-more-logout{width:100%'),'mobile logout has an explicit contained visual contract');
 ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail captures main scroll container');
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');

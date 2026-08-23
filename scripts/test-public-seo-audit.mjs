@@ -42,6 +42,16 @@ for(const url of urls){
 const lastmods=[...sitemap.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(match=>match[1]);
 check(lastmods.length===urls.length&&lastmods.every(value=>value===release.releasedAt),'sitemap lastmod matches the current release date');
 
+const localAssetRefs=new Set();
+for(const url of urls){
+  const pathname=new URL(url).pathname;
+  const rel=pathname==='/'?'index.html':`${pathname.replace(/^\//,'')}index.html`;
+  const full=path.join(root,rel);if(!fs.existsSync(full))continue;
+  const html=fs.readFileSync(full,'utf8');
+  for(const match of html.matchAll(/(?:href|src|content)="(?:https:\/\/vacleaner\.pp\.ua)?(\/[^"?#]+\.(?:png|jpe?g|webp|ico))[^"']*"/gi))localAssetRefs.add(match[1]);
+}
+for(const ref of [...localAssetRefs].sort())check(fs.existsSync(path.join(root,ref.replace(/^\//,''))),`referenced local media exists: ${ref}`);
+
 const puzzi=fs.readFileSync(path.join(root,'tekhnika/karcher-puzzi-8-1/index.html'),'utf8');
 const puzziCss=fs.readFileSync(path.join(root,'assets/puzzi-seo.css'),'utf8');
 check(!puzzi.includes('"streetAddress"'),'Puzzi JSON-LD does not expose a fixed pickup address');

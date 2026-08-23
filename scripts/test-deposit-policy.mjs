@@ -78,5 +78,11 @@ ok(publicSlots.includes("window.VACLEANER_CORE?.depositGroup?.(code)"),'public b
 ok(publicExperience.includes("CORE?.depositGroup?.(code)"),'public experience resolves deposit group through config-backed core');
 eq(core.products.combo.label,'Дивани + кухня та ванна','combo canonical catalog label');
 
+const publicCatalog=fs.readFileSync(path.join(root,'assets','public-catalog.js'),'utf8');
+ok(/dataset\?\.productCode|dataset\.productCode/.test(publicCatalog),'public catalog resolves product by data-product-code before marketing copy');
+ok(publicExperience.includes('function depositRuleMarkup(group,label)')&&publicExperience.includes('function syncTermsDepositRules()'),'terms deposit table is generated from the live depositRules object');
+ok(publicExperience.includes("syncDeliveryFee();syncTermsDepositRules()"),'terms deposit table resyncs after live settings load');
+ok(!publicExperience.includes('<em>1 000 грн</em><small>2+ доби у вікенд · 2 000 грн</small>'),'terms page has no hardcoded oneUnit deposit amounts');
+
 
 console.log(`Rental/deposit/slot policy passed ${passed} assertions.`);

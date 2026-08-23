@@ -27,8 +27,9 @@
     catalog=activeCatalog;
     let changed=0;
     document.querySelectorAll('.booking-products button').forEach(btn=>{
+      const stableCode=String(btn.dataset?.productCode||'').trim();
       const title=btn.querySelector('strong')?.textContent.trim();
-      const code=PUBLIC_CODE_BY_LABEL[title]||CORE.productAliases[title];
+      const code=stableCode||PUBLIC_CODE_BY_LABEL[title]||CORE.productAliases[title];
       const product=catalog.products?.[code];
       if(!product)return;
       const strong=btn.querySelector('strong');
