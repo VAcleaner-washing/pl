@@ -13,13 +13,13 @@ check(consent.includes('action==="opt_out"')&&consent.includes('marketing_sms_op
 check(stop.includes("action:'opt_out'")&&stop.includes('vacleaner-sms-consent-v1')&&stop.includes('Відмовитися від SMS'),'short opt-out page is functional');
 check(campaign.includes('SENDPULSE_API_KEY')&&campaign.includes('https://api.sendpulse.com/sms/send'),'SMS provider key remains server-side in Edge Function');
 check(campaign.includes('vacleaner_admin_users'),'SMS admin actions use VAcleaner-specific admin allowlist');
-check(campaign.includes('legacy_consent_confirmation_required'),'legacy customer send requires explicit admin attestation');
+check(smsDirect.includes('legacy_consent_confirmation_required'),'legacy customer send requires explicit admin attestation');
 check(campaign.includes('SMS_COOLDOWN_DAYS=90'),'repeat SMS has a 90-day cooldown');
-check(campaign.includes('sms_optout_required')&&campaign.includes('vacleaner.pp.ua/s'),'marketing SMS requires opt-out link');
-check(campaign.includes('sender_not_active'),'national route blocks inactive sender');
-check(campaign.includes('action==="sms_preflight"')&&campaign.includes('emulate:true'),'SMS uses a provider preflight before any real SendPulse campaign');
+check(smsDirect.includes('sms_optout_required')&&smsDirectLib.includes('vacleaner.pp.ua/s'),'marketing SMS requires opt-out link');
+check(smsDirect.includes('sender_not_active'),'national route blocks inactive sender');
+check(smsDirect.includes('action==="sms_preflight"')&&smsDirect.includes('emulate:true'),'SMS uses a provider preflight before any real SendPulse campaign');
 check(campaign.includes('https://api.sendpulse.com/balance')&&campaign.includes('sendpulseBalance'),'SMS status and preflight can surface the current SendPulse balance');
-check(campaign.includes('sendpulseErrorDetail')&&campaign.includes('sendpulse_http_${res.status}${detail?":"+detail:""}'),'SendPulse HTTP errors preserve the provider error message for diagnostics');
+check(smsDirectLib.includes('sendpulseErrorDetail')&&smsDirectLib.includes('sendpulse_http_${res.status}${detail?":"+detail:""}'),'SendPulse HTTP errors preserve the provider error message for diagnostics');
 check(admin.includes("SMS_API=SUPABASE+'/functions/v1/vacleaner-sms-v2'")&&admin.includes("invokeSms({action:'sms_preflight'")&&admin.includes('Перевіряємо SendPulse'),'admin performs SendPulse preflight through the direct SMS Edge Function before arming final send');
 check(admin.includes('SendPulse відхилив перевірку розсилки.')&&admin.includes('e.detail=detail'),'admin surfaces provider error details instead of a generic SendPulse toast');
 
@@ -29,10 +29,10 @@ const returnPreview='VAcleaner: давно не освіжали диван? �
 check([...returnPreview].length>70&&[...returnPreview].length<=134,'RETURN default preview stays within exactly two Unicode SMS parts');
 check(admin.includes('RETURN · повернення клієнтів')&&!admin.includes('<option value="return">RETURN · сплячі 180+</option>'),'RETURN campaign type is not hard-coded to 180 days');
 check(admin.includes('campaign?.dormant_days')&&admin.includes('sms-audience-rule')&&admin.includes('Не орендували <b>${Math.max(1,Number(campaign?.dormant_days||0))}+ днів</b>'),'RETURN SMS audience rule follows each campaign dormant_days value');
-check(admin.includes("serverPersonalizedCampaign=campaignType==='return'")&&admin.includes('rows=rows.filter(row=>row.promoReady===true)'),'RETURN keeps server-side personal promo linking and filters to codes issued by that campaign');
-check(admin.includes("campaignType==='personal'")&&admin.includes('directPromoPhone'),'PERSONAL SMS audience is restricted to the promo-code owner');
-check(admin.includes('campaignDirectPromoLink')&&admin.includes("outgoingMessage=outgoingMessage.split('{link}').join(directPromoLink)"),'WEEKDAY, PRODUCT, QUIZ and PERSONAL automatically insert their campaign promo link before sending');
-check(smsDirectLib.includes('campaignPromoContext')&&smsDirectLib.includes('promoShortLink')&&smsDirect.includes('promo_codes_missing'),'direct SMS backend resolves one active RETURN promo code per selected customer');
+check(admin.includes("serverPersonalizedCampaign=['return','personal'].includes(campaignType)")&&admin.includes('rows=rows.filter(row=>row.promoReady===true)'),'RETURN and PERSONAL use server-side recipient promo linking');
+check(admin.includes("campaignType==='personal'")&&admin.includes('directPromoPhone')&&admin.includes('campaign?.targetPhone'),'PERSONAL SMS audience is restricted to the reserved campaign phone');
+check(admin.includes('campaignDirectPromoLink')&&admin.includes("outgoingMessage=outgoingMessage.split('{link}').join(directPromoLink)"),'WEEKDAY, PRODUCT and QUIZ automatically insert their shared campaign promo link before sending');
+check(smsDirectLib.includes('campaignPromoContext')&&smsDirectLib.includes('promoShortLink')&&smsDirectLib.includes('["return","personal"]')&&smsDirect.includes('promo_codes_missing'),'direct SMS backend resolves recipient-bound RETURN and PERSONAL promo links');
 check(smsDirect.includes('preflightPersonalized')&&smsDirect.includes('phones:[smsPhone(sample.phone)]')&&smsDirect.includes('emulate:true'),'RETURN preflight bypasses SendPulse address books and validates a ready personalized direct SMS');
 check(smsDirect.includes('sendOne')&&smsDirect.includes('expandSmsTemplate(message,String(row.promoLink||""))'),'RETURN actual send expands each customer promo link inside VAcleaner before provider submission');
 check(smsDirect.includes('off+=5')&&smsDirect.includes('Promise.allSettled(batch.map(r=>sendOne'),'personalized RETURN sends are throttled in small concurrent batches instead of one fragile address-book campaign');
@@ -45,7 +45,7 @@ check(!bookingBridge.includes('http-equiv="refresh"')&&bookingBridge.includes("p
 check(chunk.includes('window.location.hash.slice(1)')&&chunk.includes('hash&&code&&!code.startsWith("VA-")')&&chunk.includes('setPromoCode(code)'),'booking page auto-fills short or full personalized promo fragments without double VA-prefixing');
 check(chunk.includes('q.get("promo")'),'booking page also auto-fills regular promo query parameters such as PIDBIR5');
 
-check(campaign.includes('const selectable=!optedOut&&!cooldown&&!activeBooking'),'active bookings are excluded even from all-base marketing sends');
+check(campaign.includes('selectable:!optedOut&&!cooldown&&!activeBooking'),'active bookings are excluded even from all-base marketing sends');
 check(campaign.includes('const visibleRows=rows.filter(row=>!row.cooldown)'),'campaign audience omits clients already contacted inside the 90-day cooldown');
 check(admin.includes('rows=rows.filter(row=>!row.cooldown)'),'admin defensively hides cooldown clients from the recipient list');
 check(admin.includes('const cooldownCount=Number(data.summary?.cooldown'),'cooldown KPI is preserved even though cooldown clients are hidden');
