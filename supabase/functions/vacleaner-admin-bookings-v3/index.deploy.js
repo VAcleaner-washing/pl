@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
-import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, rentalBase, isWeekendDeposit, slotIndex } from "./config.deploy.js";
+import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, rentalBase, paidDayMoments, isWeekendDeposit, slotIndex } from "./config.deploy.js";
 import { productUsesPuzzi, settlementConfirmation, settlementFromBooking } from "./settlement.mjs";
 import { discountInfo } from "./pricing.mjs";
 const corsHeaders = {
@@ -267,6 +267,110 @@ async function notifyPeerAdmin(request, supabaseUrl, bookingId, eventType, body)
         console.warn("peer_push_failed", eventType, error instanceof Error ? error.message : "unknown_error");
     }
 }
+function promoExtraFromCandidate(promo, applied = false) {
+    return promo ? {
+        code: String(promo.code || ""),
+        campaign_id: String(promo.campaignId || ""),
+        campaign_name: String(promo.campaignName || ""),
+        campaign_type: String(promo.campaignType || ""),
+        discount_type: promo.discountType === "fixed" ? "fixed" : "percent",
+        discount_value: Math.max(0, Number(promo.discountValue || 0)),
+        applied: applied === true
+    } : null;
+}
+function promoScore(promo, rawBase = 0) {
+    const value = Math.max(0, Number(promo.discountValue || 0));
+    return promo.discountType === "fixed" ? value : rawBase > 0 ? Math.round(rawBase * Math.min(100, value) / 100) : value * 10;
+}
+async function resolvePhonePromo(supabase, args) {
+    const phone = normalizePhone(args.phone);
+    if (!phone) return null;
+    const { data: promoCodes, error: codeError } = await supabase.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,created_at").eq("customer_phone", phone).eq("active", true).order("created_at", {
+        ascending: false
+    }).limit(20);
+    if (codeError) throw codeError;
+    if (!promoCodes?.length) return null;
+    const campaignIds = [
+        ...new Set(promoCodes.map((row)=>String(row.campaign_id || "")).filter(Boolean))
+    ];
+    if (!campaignIds.length) return null;
+    const historyPromise = Array.isArray(args.history) ? Promise.resolve({
+        data: args.history,
+        error: null
+    }) : supabase.from("vacleaner_bookings").select("id,status,hold_expires_at,start_date,return_date,created_at").eq("customer_phone", phone).order("created_at", {
+        ascending: false
+    }).limit(200);
+    const [{ data: campaigns, error: campaignError }, { data: redemptions, error: redemptionError }, historyResult] = await Promise.all([
+        supabase.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,dormant_days,allowed_product_codes,allowed_weekdays,min_completed_orders,starts_at,ends_at,usage_limit_total,usage_limit_per_customer").in("id", campaignIds),
+        supabase.from("vacleaner_promo_redemptions").select("promo_code_id,campaign_id,customer_phone").in("campaign_id", campaignIds),
+        historyPromise
+    ]);
+    if (campaignError || redemptionError || historyResult.error) throw campaignError || redemptionError || historyResult.error;
+    const history = Array.isArray(historyResult.data) ? historyResult.data : [];
+    const completed = history.filter((row)=>String(row.status) === "completed");
+    const lastCompleted = completed.reduce((latest, row)=>{
+        const value = String(row.return_date || row.start_date || "").slice(0, 10);
+        return value > latest ? value : latest;
+    }, "");
+    const hasActiveBooking = history.some((row)=>[
+            "waiting_payment",
+            "confirmed",
+            "issued"
+        ].includes(String(row.status)));
+    const now = Date.now(), productCode = String(args.productCode || ""), rawBase = Math.max(0, Number(args.rawBase || 0));
+    const hasRentalContext = Boolean(productCode && dateValue(args.startDate) && dateValue(args.returnDate));
+    const pickupWindow = args.pickupWindow === "evening" ? "evening" : "morning", returnWindow = args.returnWindow === "evening" ? "evening" : "morning";
+    const candidates = [];
+    for (const promoCode of promoCodes){
+        const campaign = campaigns?.find((row)=>String(row.id) === String(promoCode.campaign_id));
+        if (!campaign || campaign.status !== "active") continue;
+        const starts = new Date(campaign.starts_at).getTime(), ends = campaign.ends_at ? new Date(campaign.ends_at).getTime() : 0, codeEnds = promoCode.expires_at ? new Date(promoCode.expires_at).getTime() : 0;
+        if (Number.isFinite(starts) && starts > now || ends && ends <= now || codeEnds && codeEnds <= now) continue;
+        const codeUses = (redemptions || []).filter((row)=>String(row.promo_code_id) === String(promoCode.id)).length;
+        const customerUses = (redemptions || []).filter((row)=>String(row.campaign_id) === String(campaign.id) && normalizePhone(row.customer_phone) === phone).length;
+        const campaignUses = (redemptions || []).filter((row)=>String(row.campaign_id) === String(campaign.id)).length;
+        if (codeUses >= Math.max(1, Number(promoCode.usage_limit || 1))) continue;
+        if (customerUses >= Math.max(1, Number(campaign.usage_limit_per_customer || 1))) continue;
+        if (campaign.usage_limit_total && campaignUses >= Number(campaign.usage_limit_total)) continue;
+        if (campaign.campaign_type === "personal" && normalizePhone(promoCode.customer_phone) !== phone) continue;
+        let blockedReason = "";
+        if (completed.length < Number(campaign.min_completed_orders || 0)) blockedReason = "not_eligible";
+        if (!blockedReason && campaign.campaign_type === "return") {
+            if (!lastCompleted) blockedReason = "not_eligible";
+            else {
+                const dormantDays = Math.max(1, Number(campaign.dormant_days || 180)), cutoff = now - dormantDays * 86400000;
+                if (new Date(lastCompleted + "T12:00:00Z").getTime() > cutoff) blockedReason = "not_dormant_long_enough";
+                else if (hasActiveBooking) blockedReason = "active_booking";
+            }
+        }
+        if (!blockedReason && hasRentalContext) {
+            const products = Array.isArray(campaign.allowed_product_codes) ? campaign.allowed_product_codes.map(String) : [];
+            if (products.length && !products.includes(productCode)) blockedReason = "product_not_eligible";
+            const weekdays = Array.isArray(campaign.allowed_weekdays) ? campaign.allowed_weekdays.map(Number) : [];
+            if (!blockedReason && weekdays.length) {
+                const moments = paidDayMoments(String(args.startDate), String(args.returnDate), pickupWindow, returnWindow);
+                if (!moments.length || moments.some((item)=>!weekdays.includes(new Date(item.date + "T12:00:00Z").getUTCDay()))) blockedReason = "weekday_not_eligible";
+            }
+        }
+        candidates.push({
+            code: String(promoCode.code || ""),
+            promoCodeId: promoCode.id,
+            campaignId: campaign.id,
+            campaignName: campaign.name,
+            campaignType: campaign.campaign_type,
+            discountType: campaign.discount_type === "fixed" ? "fixed" : "percent",
+            discountValue: Number(campaign.discount_value || 0),
+            expiresAt: promoCode.expires_at || campaign.ends_at || null,
+            eligible: !blockedReason,
+            blockedReason
+        });
+    }
+    if (!candidates.length) return null;
+    const eligible = candidates.filter((row)=>row.eligible).sort((a, b)=>promoScore(b, rawBase) - promoScore(a, rawBase));
+    if (eligible.length) return eligible[0];
+    if (args.includeBlocked === true) return candidates.sort((a, b)=>promoScore(b, rawBase) - promoScore(a, rawBase))[0];
+    return null;
+}
 async function upsertCustomer(supabase, body, fallback = {}) {
     const phone = normalizePhone(body.customerPhone ?? fallback.customer_phone);
     if (!phone) return;
@@ -466,12 +570,28 @@ Deno.serve(async (request)=>{
             });
             const [{ data: profile }, { data: orders, error }] = await Promise.all([
                 supabase.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
-                supabase.from("vacleaner_bookings").select("customer_name,customer_telegram,fulfillment,fulfillment_address,product_label,start_date,status,total_amount,created_at").eq("customer_phone", phone).order("created_at", {
+                supabase.from("vacleaner_bookings").select("id,customer_name,customer_telegram,fulfillment,fulfillment_address,product_label,start_date,return_date,status,hold_expires_at,total_amount,created_at").eq("customer_phone", phone).order("created_at", {
                     ascending: false
                 }).limit(100)
             ]);
             if (error) throw error;
-            if (!profile && !orders?.length) return json({
+            let promoRawBase = 0;
+            const promoProductCode = String(body.productCode || ""), promoProduct = catalog.products?.[promoProductCode];
+            if (promoProduct && dateValue(body.startDate) && dateValue(body.returnDate)) {
+                promoRawBase = rentalBase(promoProduct, String(body.startDate), String(body.returnDate), body.pickupWindow === "evening" ? "evening" : "morning", body.returnWindow === "evening" ? "evening" : "morning");
+            }
+            const promo = await resolvePhonePromo(supabase, {
+                phone,
+                productCode: promoProductCode,
+                startDate: body.startDate,
+                returnDate: body.returnDate,
+                pickupWindow: body.pickupWindow,
+                returnWindow: body.returnWindow,
+                rawBase: promoRawBase,
+                history: orders || [],
+                includeBlocked: true
+            });
+            if (!profile && !orders?.length && !promo) return json({
                 customer: null
             });
             const completed = (orders || []).filter((row)=>row.status === "completed"), latest = orders?.[0], latestDelivery = (orders || []).find((row)=>row.fulfillment === "delivery" && row.fulfillment_address);
@@ -510,7 +630,8 @@ Deno.serve(async (request)=>{
                     totalSpent: completed.reduce((sum, row)=>sum + Number(row.total_amount || 0), 0),
                     lastDate: latest?.start_date || "",
                     lastProduct: latest?.product_label || "",
-                    loyalty
+                    loyalty,
+                    promo
                 }
             });
         }
@@ -551,7 +672,22 @@ Deno.serve(async (request)=>{
             if (action === "edit" && !existing) return json({
                 error: "invalid_booking"
             }, 404);
-            const currentExtras = existing?.extras && typeof existing.extras === "object" ? existing.extras : {}, discount = discountInfo(body, rawBase, currentExtras), selected = normalizeSelectedExtras(body.selectedExtras, productCode, catalog);
+            const currentExtras = existing?.extras && typeof existing.extras === "object" ? existing.extras : {};
+            const autoPromo = action === "create" ? await resolvePhonePromo(supabase, {
+                phone: customerPhone,
+                productCode,
+                startDate: period.startDate,
+                returnDate: period.returnDate,
+                pickupWindow: period.pickupWindow,
+                returnWindow: period.returnWindow,
+                rawBase,
+                includeBlocked: false
+            }) : null;
+            const promoPricingExtras = autoPromo ? {
+                ...currentExtras,
+                promo: promoExtraFromCandidate(autoPromo, true)
+            } : currentExtras;
+            const discount = discountInfo(body, rawBase, promoPricingExtras), promoApplied = Boolean(autoPromo && discount.source === "promo"), selected = normalizeSelectedExtras(body.selectedExtras, productCode, catalog);
             const depositSnapshotLocked = Boolean(existing && (currentExtras?.processing?.confirmation_sent === true || [
                 "waiting_payment",
                 "confirmed",
@@ -602,6 +738,7 @@ Deno.serve(async (request)=>{
                     percent: discount.loyaltyPercent,
                     completed_orders: cleanInt(body.completedOrders ?? currentExtras?.loyalty?.completed_orders, 10000)
                 },
+                promo: promoApplied ? promoExtraFromCandidate(autoPromo, true) : currentExtras?.promo || null,
                 base_before_discount: rawBase,
                 selected_items: selectedItems,
                 selected_items_amount: selectedAmount
@@ -680,10 +817,31 @@ Deno.serve(async (request)=>{
                 saved = data;
             }
             await upsertCustomer(supabase, body, saved);
+            if (action === "create" && promoApplied && autoPromo?.promoCodeId && autoPromo?.campaignId) {
+                const { error: promoError } = await supabase.rpc("vacleaner_redeem_promo", {
+                    p_promo_code_id: autoPromo.promoCodeId,
+                    p_campaign_id: autoPromo.campaignId,
+                    p_booking_id: saved.id,
+                    p_customer_phone: customerPhone,
+                    p_discount_amount: discount.amount,
+                    p_base_before_discount: rawBase
+                });
+                if (promoError) {
+                    await supabase.from("vacleaner_booking_resources").delete().eq("booking_id", saved.id);
+                    await supabase.from("vacleaner_bookings").delete().eq("id", saved.id);
+                    return json({
+                        error: "promo_unavailable"
+                    }, 409);
+                }
+            }
             await tagAudit(supabase, saved.id, userData.user.id, `edge:${action}`, actionStartedAt);
             if (action === "create") await notifyPeerAdmin(request, supabaseUrl, saved.id, "new", body);
             return json({
-                booking: safeBooking(saved)
+                booking: safeBooking(saved),
+                promo: autoPromo ? {
+                    ...autoPromo,
+                    applied: promoApplied
+                } : null
             }, action === "create" ? 201 : 200);
         }
         if (action === "update") {
