@@ -5698,3 +5698,112 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .booking-promo-editor-actions{grid-template-columns:1fr}
   .booking-promo-editor-actions .btn{min-height:42px}
 }
+
+/* v4.1.33 — admin typography hierarchy + delivery route affordance */
+.brand-copy strong,.profile strong{font-weight:620}
+.badge{font-weight:650}
+.page-head h1{font-weight:640}
+.page-head p{font-weight:400}
+.nav button{font-weight:500}
+.chip{font-weight:560}
+.chip b{font-weight:620}
+.new-btn{font-weight:600}
+.btn,.actions .btn,.detail-actions .btn,.modal-form footer .btn{font-weight:540}
+.btn.primary,.btn.green,.new-btn{font-weight:600}
+.status,.hero-status{font-weight:560}
+.card h2,.card h3{font-weight:600}
+.meta small,.booking-identity small,.booking-row-body small,.booking-note span,.equipment-body small,.clients-head{font-weight:600}
+.meta strong,.finance-mini strong,.client-row strong{font-weight:560}
+.kpi strong{font-weight:650}
+.equipment-body h3,.settings-head h2{font-weight:620}
+.formula{font-weight:560}
+.modal-form header small,.modal-form>header small{font-weight:620}
+.modal-form>header h2{font-weight:620}
+.section-title>span,.group-label,.rental-moment .group-label{font-weight:600}
+.section-title h3{font-weight:590}
+.field>span{font-weight:520}
+.switch b,.extra-check b,.window-choice b{font-weight:540}
+.time-chip.active{font-weight:620}
+.customer-found-head span,.loyalty-auto-card>span{font-weight:600}
+.client-section-head small,.client-section-head>span,.document-photo-head>span,.document-photo-picker>span,.document-private-badge{font-weight:600}
+.client-editor-summary strong,.client-rental-history article strong,.client-rental-history article b{font-weight:560}
+.detail-top .back{font-weight:560}
+.detail-top-meta span{font-weight:580}
+.detail-hero h1{font-weight:620}
+.detail-hero .period{font-weight:520}
+.detail-hero .period b{font-weight:620}
+.detail-hero .period small{font-weight:500}
+.panel h2{font-weight:580}
+.panel h3{font-weight:560}
+.flow-compact h3{font-weight:580}
+.flow-compact p b,.step b{font-weight:540}
+.money-row strong{font-weight:560}
+.money-row.received-total strong,.money-row.expenses-total strong{font-weight:620}
+.balance{font-size:16px;font-weight:500;line-height:1.25;padding:13px 15px}
+.balance span{font-weight:520}
+.balance strong{font-weight:620}
+.balance.due strong,.balance.refund strong{font-weight:650}
+.audit-panel-head small{font-weight:600}
+.audit-panel-head h3{font-weight:600}
+.audit-entry-body>header strong{font-weight:560}
+.audit-entry-changes strong{font-weight:520}
+.upcoming-day>header span{font-weight:620}
+.upcoming-day>header b{font-weight:560}
+.upcoming-time strong{font-weight:620}
+.upcoming-time span{font-weight:560}
+.upcoming-title h3{font-weight:600}
+.upcoming-client-info strong{font-weight:540}
+.upcoming-extra,.upcoming-money em{font-weight:560}
+.analytics-picker-field{font-weight:560}
+.analytics-picker-trigger strong{font-weight:600}
+.analytics-picker-head strong,.analytics-picker-year-group>header span{font-weight:620}
+.analytics-picker-year-group>header b,.analytics-month-grid button,.analytics-year-grid button{font-weight:560}
+.analytics-funnel-row span{font-weight:560}
+.analytics-trend-mobile-scale b{font-weight:600}
+.campaign-workspace .campaign-summary b{font-weight:650}
+.campaign-workspace .campaign-metrics b{font-weight:620}
+.sms-campaign-modal .sms-heading>small,.sms-campaign-modal .sms-section-heading>small,.sms-dispatch-detail-head small{font-weight:600}
+.sms-campaign-modal .sms-heading h2,.sms-history-head h3{font-weight:620}
+.sms-campaign-modal .sms-client-name,.sms-history-list article>div:first-child b{font-weight:600}
+.sms-campaign-modal .sms-client-rentals,.sms-campaign-modal .sms-recipient-meta strong{font-weight:580}
+.sms-campaign-modal .sms-stepper button.active b,.sms-campaign-modal .sms-audience-rule>span b,.sms-campaign-modal .sms-audience-summary b,.sms-campaign-modal .sms-review-card>b{font-weight:620}
+.customer-promo-card span,.client-promo-card small{font-weight:600}
+.customer-promo-card code,.client-promo-card code{font-weight:600}
+
+.delivery-route-link{display:inline-flex;align-items:center;gap:5px;max-width:100%;color:#ddb879;text-decoration:none;font-weight:520;line-height:1.35;vertical-align:baseline}
+.delivery-route-link>span{min-width:0;overflow-wrap:anywhere;text-decoration:underline;text-decoration-color:rgba(221,184,121,.32);text-underline-offset:3px;text-decoration-thickness:1px}
+.delivery-route-link>i{flex:0 0 auto;font-style:normal;font-weight:500;font-size:.92em;opacity:.82}
+.delivery-route-link:hover,.delivery-route-link:focus-visible{color:#f2c982;outline:none}
+.delivery-route-link:focus-visible{border-radius:5px;box-shadow:0 0 0 2px rgba(214,164,95,.18)}
+.booking-delivery .delivery-route-link{font-size:inherit}
+.booking-delivery .delivery-route-link>span{display:inline;margin:0;color:inherit;font-size:inherit}
+.upcoming-route-link{display:inline;color:inherit}
+.upcoming-route-link>span{display:inline;color:#d9bb86}
+.detail-route-link{width:fit-content;padding:7px 9px;border:1px solid rgba(214,164,95,.18);border-radius:9px;background:rgba(214,164,95,.055);color:#e2bd7d}
+.detail-route-link>span{text-decoration:none}
+.delivery-address-field{align-content:start}
+.delivery-route-inline{display:inline-flex;width:fit-content;align-items:center;gap:6px;margin-top:7px;color:#d9b675;text-decoration:none;font-size:11.5px;font-weight:520;line-height:1.2}
+.delivery-route-inline[hidden]{display:none}
+.delivery-route-inline i{font-style:normal;font-weight:500}
+.delivery-route-inline:hover,.delivery-route-inline:focus-visible{color:#f0c77f;outline:none}
+
+@media(max-width:900px){
+  .page-head h1{font-weight:620}
+  .modal-form>header h2,.booking-form>header h2{font-weight:590}
+  .balance{font-size:15px;padding:12px 13px}
+  .detail-route-link{padding:7px 8px}
+}
+
+/* v4.1.33 — typography audit: secondary UI should never shout */
+.booking-head small,.issue-block-head small,.campaign-panel-head small,.passport-data-head>span,.catalog-section-head>div>span,.process-section-head>span{font-weight:600}
+.finance-method>div.total,.deposit-settings-badge,.deposit-rule-field em,.finance-saved-payment>span,.packet-control input,.connection-state,.chem-product-row>span>em{font-weight:600}
+.deposit-rule-field>span,.process-deposit-summary span,.top-profile-copy strong,.status-correct-options span,.booking-mobile-flags span,.mobile-booking-progress span{font-weight:560}
+.process-client-avatar{font-weight:620}
+.campaign-row>div:first-child>span,.campaign-code-list code,.campaign-workspace .campaign-panel-copy>small,.campaign-workspace .campaign-type,.campaign-workspace .campaign-status{font-weight:600}
+.campaign-more>summary,.mobile-more-logout,.document-preview-meta .btn,.client-document-preview.preview-unavailable .document-preview-meta .btn{font-weight:560}
+.sms-consent,.sms-dispatch-status,.sms-campaign-modal .client-section-head small,.sms-campaign-modal .sms-audience-sort>span,.sms-campaign-modal .sms-recipient>span>small strong,.sms-campaign-modal .sms-history>summary small{font-weight:600}
+.sms-campaign-modal .sms-audience-sort select,.sms-sender-state,.sms-audience-rule small,.sms-toolbar-field>span,.sms-selected-count,.sms-preview-card small,.sms-review-message>small,.sms-review-card>small,.sms-history-head>div>small,.sms-recipient-columns{font-weight:560}
+.sms-stepper i,.sms-history-open::before{font-weight:600}
+.sms-campaign-modal .sms-recipient-meta strong,.modal-form.sms-campaign-modal .sms-client-rentals,.sms-campaign-modal .sms-client-rentals{font-weight:560}
+.extend-preview-error{font-weight:560}
+.customer-promo-card span,.client-promo-card small,.booking-promo-editor span,.sms-dispatch-detail-head small{font-weight:600}

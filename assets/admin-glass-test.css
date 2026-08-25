@@ -1113,3 +1113,11 @@ html.glass-test .glass-client-actions button span{white-space:nowrap}
     box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 0 0 1px rgba(111,184,255,.14),0 0 17px rgba(111,184,255,.11),0 9px 23px rgba(0,0,0,.12);
   }
 }
+
+/* v4.1.33 — keep the glass skin visually light, not uniformly bold */
+html.glass-test .mobile-nav .mobile-new-nav span{font-weight:560}
+html.glass-test .day-labels{font-weight:560}
+html.glass-test .day-row>b{font-weight:560}
+html.glass-test .booking-form .time-chip.active{font-weight:620}
+html.glass-test .glass-client-actions a,
+html.glass-test .glass-client-actions button{font-weight:560}

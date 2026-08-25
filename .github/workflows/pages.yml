@@ -83,6 +83,8 @@ jobs:
         run: npm run test:v4.1.31-admin-booking-meta
       - name: Verify v4.1.32 RETURN detach and booking hierarchy
         run: npm run test:v4.1.32-return-detach-ux
+      - name: Verify v4.1.33 navigation and typography hierarchy
+        run: npm run test:v4.1.33-navigation-typography
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources
