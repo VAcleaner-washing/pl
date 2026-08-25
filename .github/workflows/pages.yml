@@ -71,6 +71,10 @@ jobs:
         run: npm run test:pwa-static
       - name: Test SMS campaigns and consent
         run: npm run test:sms-campaigns
+      - name: Verify admin auth refresh coordination
+        run: npm run test:auth-refresh
+      - name: Verify v4.1.28 campaign and phone-promo regressions
+        run: npm run test:v4.1.28-regressions
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources

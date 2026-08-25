@@ -212,7 +212,7 @@ async function checkLoyalty(input){
       const applied=applySmsPromoCode(smsPromo.code,phone);
       const benefit=smsPromo.discountType==='fixed'?`${Math.max(0,Number(smsPromo.discountValue)||0)} грн`:`−${Math.max(0,Number(smsPromo.discountValue)||0)}%`;
       box.className='public-loyalty-status active';
-      box.innerHTML=`<small>Персональний бонус із SMS</small><strong>${smsPromo.campaignName||'Ваш бонус'} · ${benefit}</strong><span>${applied?'Знайшли за вашим номером — промокод уже підставлено в бронювання.':'За номером є активний SMS-бонус. Ваш введений промокод залишили без змін.'}</span><em>${applied?'Нічого вводити вручну не потрібно':'Перевіримо найвигіднішу знижку при розрахунку'}</em>`;
+      box.innerHTML=`<small>Активований персональний бонус</small><strong>${smsPromo.campaignName||'Ваш бонус'} · ${benefit}</strong><span>${applied?'Бонус уже активований за вашим номером — знижку підставлено в бронювання.':'За номером є активний SMS-бонус. Ваш введений промокод залишили без змін.'}</span><em>${applied?'Нічого вводити вручну не потрібно':'Перевіримо найвигіднішу знижку при розрахунку'}</em>`;
     }else{
       applySmsPromoCode('',phone);
       if(loyalty.percent>0){

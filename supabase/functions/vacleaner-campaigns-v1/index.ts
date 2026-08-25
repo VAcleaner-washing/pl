@@ -6,201 +6,114 @@ const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,
 const validUuid=(value:unknown)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value??""));
 const cleanText=(value:unknown,max:number)=>typeof value==="string"?value.trim().replace(/[<>]/g,"").slice(0,max):"";
 const normalizePhone=(value:unknown)=>{const digits=String(value??"").replace(/\D/g,"");if(digits.length===10&&digits.startsWith("0"))return `+38${digits}`;if(digits.length===12&&digits.startsWith("380"))return `+${digits}`;return ""};
-const smsPhone=(value:unknown)=>normalizePhone(value).replace(/^\+/,"");
-const SMS_SENDER="VACLEANER",SMS_COOLDOWN_DAYS=90,SMS_OPT_OUT="vacleaner.pp.ua/s",SMS_LINK_TOKEN="{link}",SMS_LINK_SAMPLE="vacleaner.pp.ua/b#XXXXXXX",SP_PROMO_VAR="PromoLink";
-const expandSmsTemplate=(text:string,link=SMS_LINK_SAMPLE)=>String(text||"").split(SMS_LINK_TOKEN).join(link);
-const smsParts=(text:string)=>{const unicode=/[^\u0000-\u007f]/.test(text),len=[...text].length;if(unicode)return len<=70?1:Math.min(6,Math.ceil(len/67));return len<=160?1:Math.min(6,Math.ceil(len/153))};
+const SMS_SENDER="VACLEANER",SMS_COOLDOWN_DAYS=90,SMS_OPT_OUT="vacleaner.pp.ua/s",PERSONAL_PROMO_VALID_DAYS=21;
 const promoShortLink=(code:unknown)=>{const value=String(code||"").toUpperCase().replace(/[^A-Z0-9_-]/g,"");return /^VA-[A-Z0-9]{7}$/.test(value)?`vacleaner.pp.ua/b#${value.slice(3)}`:""};
-const senderStatusLabel=(status:number)=>status===1?"Активний":status===2?"Відхилено":"На модерації";
+async function personalPromoCode(campaignId:string,phone:string){const bytes=new TextEncoder().encode(`${campaignId}:${normalizePhone(phone)}`),hash=await crypto.subtle.digest("SHA-256",bytes),hex=[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,"0")).join("").toUpperCase();return `VA-${hex.slice(0,7)}`}
 const spHeaders=(key:string)=>({Authorization:`Bearer ${key}`,"Content-Type":"application/json"});
-function sendpulseErrorDetail(data:any){const raw=data?.error??data?.message??data?.error_description??data?.data?.error??data?.data?.message??"";return cleanText(String(raw||""),220)}
-async function spJson(key:string,url:string,init:RequestInit={}){const res=await fetch(url,{...init,headers:{...spHeaders(key),...(init.headers||{})},signal:AbortSignal.timeout(15000)});const raw=await res.text();let data:any=null;try{data=raw?JSON.parse(raw):null}catch{data=raw?{message:raw}:null}if(!res.ok){const detail=sendpulseErrorDetail(data);throw new Error(`sendpulse_http_${res.status}${detail?":"+detail:""}`)}return data}
+async function spJson(key:string,url:string){const res=await fetch(url,{headers:spHeaders(key),signal:AbortSignal.timeout(15000)});const raw=await res.text();let data:any=null;try{data=raw?JSON.parse(raw):null}catch{data=null}if(!res.ok)throw new Error(`sendpulse_http_${res.status}`);return data}
 async function sendpulseBalance(key:string){const data=await spJson(key,"https://api.sendpulse.com/balance");return {currency:String(data?.currency||""),amount:Number(data?.balance_currency||0)}}
-async function sendpulseSender(key:string){const rows=await spJson(key,"https://api.sendpulse.com/sms/senders");const list=Array.isArray(rows)?rows:[];const row=list.find((item:any)=>String(item?.sender||"").toUpperCase()===SMS_SENDER&&String(item?.country_code||"").toUpperCase()==="UA")||list.find((item:any)=>String(item?.sender||"").toUpperCase()===SMS_SENDER)||null;return row?{found:true,status:Number(row.status),statusLabel:senderStatusLabel(Number(row.status)),statusExplain:String(row.status_explain||""),country:String(row.country||""),countryCode:String(row.country_code||"")}:{found:false,status:null,statusLabel:"Не знайдено",statusExplain:"",country:"",countryCode:""}}
-async function campaignPromoContext(db:any,campaignId:string,phones:string[]){
-  if(!validUuid(campaignId))return {personalized:false,campaign:null,byPhone:new Map<string,any>()};
-  const {data:campaign,error:campaignError}=await db.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,starts_at,ends_at").eq("id",campaignId).maybeSingle();
-  if(campaignError)throw campaignError;if(!campaign)return {personalized:false,campaign:null,byPhone:new Map<string,any>()};
-  const now=Date.now(),starts=campaign.starts_at?new Date(campaign.starts_at).getTime():0,ends=campaign.ends_at?new Date(campaign.ends_at).getTime():0;
-  if(campaign.status!=="active"||(starts&&starts>now)||(ends&&ends<=now))throw new Error("campaign_inactive");
-  const personalized=String(campaign.campaign_type||"")==="return";
-  if(!personalized||!phones.length)return {personalized,campaign,byPhone:new Map<string,any>()};
-  const {data:codes,error:codeError}=await db.from("vacleaner_promo_codes").select("id,code,customer_phone,active,expires_at").eq("campaign_id",campaignId).eq("active",true).in("customer_phone",phones);
-  if(codeError)throw codeError;
-  const ids=(codes||[]).map((row:any)=>row.id).filter(Boolean);let used=new Set<string>();
-  if(ids.length){const {data:redemptions,error:redemptionError}=await db.from("vacleaner_promo_redemptions").select("promo_code_id").in("promo_code_id",ids);if(redemptionError)throw redemptionError;used=new Set((redemptions||[]).map((row:any)=>String(row.promo_code_id)))}
-  const byPhone=new Map<string,any>();
-  for(const row of codes||[]){const phone=normalizePhone(row.customer_phone),link=promoShortLink(row.code),expired=row.expires_at&&new Date(row.expires_at).getTime()<=now;if(!phone||!link||expired||used.has(String(row.id)))continue;byPhone.set(phone,{promoCode:String(row.code),promoLink:link,promoCodeId:String(row.id)})}
-  return {personalized,campaign,byPhone};
-}
-const sleep=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
-function sendpulseAddressBookRow(payload:any,addressBookId:number){
-  const candidates=Array.isArray(payload)?payload:Array.isArray(payload?.data)?payload.data:Array.isArray(payload?.result)?payload.result:[payload?.data??payload];
-  return candidates.find((row:any)=>Number(row?.id||row?.addressBookId||0)===addressBookId)||candidates.find((row:any)=>row&&typeof row==="object")||{};
-}
-async function sendpulsePhoneReady(key:string,addressBookId:number,phone:string){
-  const raw=await spJson(key,`https://api.sendpulse.com/sms/numbers/info/${addressBookId}/${smsPhone(phone)}`);
-  const row=Array.isArray(raw)?raw.find((item:any)=>item?.result===true)??raw[0]:raw;
-  const data=row?.data??row;
-  return Number(data?.status||0)===1;
-}
-async function waitForSendpulseAddressBook(key:string,addressBookId:number,phones:string[]){
-  const expectedPhones=Math.max(1,phones.length);
-  const deadline=Date.now()+85000;
-  let last={active:0,excluded:0,newPhones:expectedPhones,status:0,statusExplain:""};
-  let attempt=0;
-  while(Date.now()<deadline){
-    const info=await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`);
-    const row=sendpulseAddressBookRow(info,addressBookId);
-    const active=Math.max(0,Number(row?.active_phones_quantity??row?.activePhonesQuantity??0)||0);
-    const excluded=Math.max(0,Number(row?.exc_phones_quantity??row?.excluded_phones_quantity??row?.inactive_phones_quantity??0)||0);
-    const explicitNew=Number(row?.new_phones_quantity);
-    const newPhones=Number.isFinite(explicitNew)?Math.max(0,explicitNew):Math.max(0,expectedPhones-active-excluded);
-    last={active,excluded,newPhones,status:Number(row?.status||0),statusExplain:cleanText(String(row?.status_explain||""),120)};
-    if(active>=expectedPhones)return last;
-    if(active+excluded>=expectedPhones&&excluded>0)throw new Error(`sendpulse_addressbook_rejected:${active}_active:${excluded}_excluded`);
-    // SendPulse's aggregate counters may lag. For small test batches, verify the actual phone status too.
-    if(phones.length<=10&&attempt%3===2){
-      const states=await Promise.allSettled(phones.map(phone=>sendpulsePhoneReady(key,addressBookId,phone)));
-      const exactActive=states.filter(state=>state.status==='fulfilled'&&state.value===true).length;
-      if(exactActive>=expectedPhones)return {...last,active:exactActive,newPhones:0};
-    }
-    attempt+=1;
-    if(Date.now()<deadline)await sleep(attempt<4?1000:2500);
-  }
-  throw new Error(`sendpulse_addressbook_processing:${last.active}/${expectedPhones}_active:${last.newPhones}_new:${last.excluded}_excluded`);
-}
-async function createPersonalizedAddressBook(key:string,label:string,recipients:Array<any>){
-  let addressBookId=0;
-  const book=await spJson(key,"https://api.sendpulse.com/addressbooks",{method:"POST",body:JSON.stringify({bookName:`VAcleaner ${label} ${new Date().toISOString().slice(0,16)}`})});
-  addressBookId=Number(book?.id||0);if(!addressBookId)throw new Error("sendpulse_addressbook_error");
-  try{
-    const phones:Record<string,any>={};for(const row of recipients)phones[smsPhone(row.phone)]=[[{name:SP_PROMO_VAR,type:"string",value:String(row.promoLink||"")}]];
-    const add=await spJson(key,"https://api.sendpulse.com/sms/numbers/variables",{method:"POST",body:JSON.stringify({addressBookId,phones})});
-    const added=Array.isArray(add)?add.find((item:any)=>item?.result===true):add;if(!added?.result)throw new Error("sendpulse_variables_error");
-    await waitForSendpulseAddressBook(key,addressBookId,recipients.map((row:any)=>String(row.phone||"")));
-    return addressBookId;
-  }catch(error){await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null);throw error}
-}
-async function deleteSendpulseAddressBook(key:string,addressBookId:number){if(addressBookId>0)await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null)}
-async function createPersonalizedSendpulseCampaign(key:string,dispatchId:string,route:string,message:string,recipients:Array<any>){
-  const addressBookId=await createPersonalizedAddressBook(key,dispatchId.slice(0,8),recipients);
-  try{
-    const body=String(message).split(SMS_LINK_TOKEN).join(`{{${SP_PROMO_VAR}}}`);
-    const result=await spJson(key,"https://api.sendpulse.com/sms/campaigns",{method:"POST",body:JSON.stringify({sender:SMS_SENDER,addressBookId,body,route:{UA:route},emulate:false,use_dynamic_list:false,stat_link_tracking:false,stat_link_need_protocol:false})});
-    if(!result?.result||!result?.campaign_id)throw new Error("sendpulse_api_error");
-    return {campaignId:Number(result.campaign_id),addressBookId};
-  }catch(error){await deleteSendpulseAddressBook(key,addressBookId);throw error}
-}
-async function preflightPersonalizedSendpulseCampaign(key:string,route:string,message:string,recipients:Array<any>){
-  const addressBookId=await createPersonalizedAddressBook(key,"preflight",recipients);
-  try{
-    const body=String(message).split(SMS_LINK_TOKEN).join(`{{${SP_PROMO_VAR}}}`);
-    const result=await spJson(key,"https://api.sendpulse.com/sms/campaigns",{method:"POST",body:JSON.stringify({sender:SMS_SENDER,addressBookId,body,route:{UA:route},emulate:true,use_dynamic_list:false,stat_link_tracking:false,stat_link_need_protocol:false})});
-    if(result?.result===false)throw new Error(`sendpulse_preflight_rejected:${sendpulseErrorDetail(result)||"provider_rejected"}`);
-    return {ok:true};
-  }finally{await deleteSendpulseAddressBook(key,addressBookId)}
-}
-async function preflightDirectSendpulseCampaign(key:string,route:string,message:string,recipients:Array<any>){
-  const result=await spJson(key,"https://api.sendpulse.com/sms/send",{method:"POST",body:JSON.stringify({sender:SMS_SENDER,phones:recipients.map((r:any)=>smsPhone(r.phone)),body:message,route:{UA:route},emulate:true,stat_link_tracking:false,stat_link_need_protocol:false})});
-  if(result?.result===false)throw new Error(`sendpulse_preflight_rejected:${sendpulseErrorDetail(result)||"provider_rejected"}`);
-  return {ok:true};
-}
+async function sendpulseSender(key:string){const rows=await spJson(key,"https://api.sendpulse.com/sms/senders");const list=Array.isArray(rows)?rows:[];const row=list.find((x:any)=>String(x?.sender||"").toUpperCase()===SMS_SENDER&&String(x?.country_code||"").toUpperCase()==="UA")||list.find((x:any)=>String(x?.sender||"").toUpperCase()===SMS_SENDER)||null;const label=(status:number)=>status===1?"Активний":status===2?"Відхилено":"На модерації";return row?{found:true,status:Number(row.status),statusLabel:label(Number(row.status)),statusExplain:String(row.status_explain||""),country:String(row.country||""),countryCode:String(row.country_code||"")}:{found:false,status:null,statusLabel:"Не знайдено",statusExplain:"",country:"",countryCode:""}}
 
 type AudienceRow={phone:string;name:string;completedOrders:number;lastCompleted:string;daysDormant:number;consent:"explicit"|"legacy"|"opted_out";consentAt:string|null;consentSource:string;activeBooking:boolean;lastSmsAt:string|null;cooldown:boolean;selectable:boolean};
-async function buildAudience(db:any,segment:string){
-  const [{data:customers,error:customerError},{data:completed,error:completedError},{data:active,error:activeError},{data:recentSms,error:smsError}]=await Promise.all([
+async function buildAudience(db:any,segment:string,forcedPhones:string[]=[]){
+  const [{data:customers,error:ce},{data:completed,error:co},{data:active,error:ae},{data:recentSms,error:se}]=await Promise.all([
     db.from("vacleaner_customers").select("phone,name,marketing_sms_consent,marketing_sms_consent_at,marketing_sms_consent_source,marketing_sms_opted_out_at").limit(5000),
     db.from("vacleaner_bookings").select("customer_phone,customer_name,return_date").eq("status","completed").order("return_date",{ascending:false}).limit(10000),
     db.from("vacleaner_bookings").select("customer_phone").in("status",["waiting_payment","confirmed","issued"]).limit(5000),
     db.from("vacleaner_sms_dispatch_recipients").select("customer_phone,status,created_at").in("status",["submitted","sent","delivered","not_delivered"]).gte("created_at",new Date(Date.now()-SMS_COOLDOWN_DAYS*86400000).toISOString()).order("created_at",{ascending:false}).limit(10000),
-  ]);if(customerError||completedError||activeError||smsError)throw customerError||completedError||activeError||smsError;
+  ]);if(ce||co||ae||se)throw ce||co||ae||se;
   const profiles=new Map<string,any>();for(const row of customers||[]){const phone=normalizePhone(row.phone);if(phone)profiles.set(phone,row)}
   const activePhones=new Set((active||[]).map((r:any)=>normalizePhone(r.customer_phone)).filter(Boolean));
   const recentMap=new Map<string,string>();for(const row of recentSms||[]){const phone=normalizePhone(row.customer_phone);if(phone&&!recentMap.has(phone))recentMap.set(phone,String(row.created_at||""))}
-  const stats=new Map<string,{phone:string;name:string;count:number;last:string}>();for(const row of completed||[]){const phone=normalizePhone(row.customer_phone);if(!phone)continue;const date=String(row.return_date||"");const cur=stats.get(phone)||{phone,name:cleanText(row.customer_name,120),count:0,last:date};cur.count+=1;if(date>cur.last){cur.last=date;cur.name=cleanText(row.customer_name,120)||cur.name}stats.set(phone,cur)}
-  const today=Date.now(),rows:AudienceRow[]=[];for(const item of stats.values()){
-    const profile=profiles.get(item.phone)||{},lastTime=Date.parse(`${item.last}T12:00:00Z`),daysDormant=Number.isFinite(lastTime)?Math.max(0,Math.floor((today-lastTime)/86400000)):0,activeBooking=activePhones.has(item.phone),lastSmsAt=recentMap.get(item.phone)||null,cooldown=Boolean(lastSmsAt);
-    const optedOut=Boolean(profile.marketing_sms_opted_out_at),explicit=profile.marketing_sms_consent===true&&!optedOut,consent=optedOut?"opted_out":explicit?"explicit":"legacy";
-    const segmentMatch=segment==="all"?true:segment==="sleeping_long"?daysDormant>=365:segment==="sleeping_warm"?daysDormant>=180&&daysDormant<365:daysDormant>=180;
-    if(!segmentMatch)continue;
-    const selectable=!optedOut&&!cooldown&&!activeBooking;
-    rows.push({phone:item.phone,name:String(profile.name||item.name||item.phone),completedOrders:item.count,lastCompleted:item.last,daysDormant,consent,consentAt:profile.marketing_sms_consent_at||null,consentSource:String(profile.marketing_sms_consent_source||""),activeBooking,lastSmsAt,cooldown,selectable});
+  const stats=new Map<string,{phone:string;name:string;count:number;last:string}>();
+  for(const row of completed||[]){const phone=normalizePhone(row.customer_phone);if(!phone)continue;const date=String(row.return_date||""),cur=stats.get(phone)||{phone,name:cleanText(row.customer_name,120),count:0,last:date};cur.count+=1;if(date>cur.last){cur.last=date;cur.name=cleanText(row.customer_name,120)||cur.name}stats.set(phone,cur)}
+  for(const rawPhone of forcedPhones||[]){const phone=normalizePhone(rawPhone);if(!phone||stats.has(phone))continue;const profile=profiles.get(phone);if(profile)stats.set(phone,{phone,name:String(profile.name||phone),count:0,last:""})}
+  const now=Date.now(),rows:AudienceRow[]=[];
+  for(const item of stats.values()){
+    const profile=profiles.get(item.phone)||{},lastTime=item.last?Date.parse(`${item.last}T12:00:00Z`):NaN,daysDormant=Number.isFinite(lastTime)?Math.max(0,Math.floor((now-lastTime)/86400000)):0,activeBooking=activePhones.has(item.phone),lastSmsAt=recentMap.get(item.phone)||null,cooldown=Boolean(lastSmsAt),optedOut=Boolean(profile.marketing_sms_opted_out_at),explicit=profile.marketing_sms_consent===true&&!optedOut,consent=optedOut?"opted_out":explicit?"explicit":"legacy";
+    const match=segment==="all"?true:segment==="sleeping_long"?daysDormant>=365:segment==="sleeping_warm"?daysDormant>=180&&daysDormant<365:daysDormant>=180;if(!match)continue;
+    rows.push({phone:item.phone,name:String(profile.name||item.name||item.phone),completedOrders:item.count,lastCompleted:item.last,daysDormant,consent,consentAt:profile.marketing_sms_consent_at||null,consentSource:String(profile.marketing_sms_consent_source||""),activeBooking,lastSmsAt,cooldown,selectable:!optedOut&&!cooldown&&!activeBooking});
   }
   rows.sort((a,b)=>b.daysDormant-a.daysDormant||a.name.localeCompare(b.name,"uk"));return rows;
 }
-function deliveryStatus(code:number){return code===2?"delivered":code===12?"not_delivered":code===1?"sent":"submitted"}
+
+async function campaignPromoContext(db:any,campaignId:string,phones:string[]){
+  if(!validUuid(campaignId))return {personalized:false,campaign:null,byPhone:new Map<string,any>()};
+  const {data:campaign,error}=await db.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,dormant_days,min_completed_orders,starts_at,ends_at,issuance_ends_at").eq("id",campaignId).maybeSingle();if(error)throw error;
+  if(!campaign)return {personalized:false,campaign:null,byPhone:new Map<string,any>()};
+  const now=Date.now(),starts=campaign.starts_at?new Date(campaign.starts_at).getTime():0,issueEnd=campaign.issuance_ends_at?new Date(campaign.issuance_ends_at).getTime():(campaign.ends_at?new Date(campaign.ends_at).getTime():0);
+  if(campaign.status!=="active"||(starts&&starts>now)||(issueEnd&&issueEnd<=now))throw new Error("campaign_inactive");
+  const personalized=["return","personal"].includes(String(campaign.campaign_type||""));if(!personalized||!phones.length)return {personalized,campaign,byPhone:new Map<string,any>()};
+  const normalized=[...new Set(phones.map(normalizePhone).filter(Boolean))];
+  const {data:codes,error:codeError}=await db.from("vacleaner_promo_codes").select("id,code,customer_phone,active,expires_at").eq("campaign_id",campaignId).in("customer_phone",normalized);if(codeError)throw codeError;
+  const ids=(codes||[]).map((r:any)=>r.id).filter(Boolean);let used=new Set<string>();if(ids.length){const {data:redemptions,error:redemptionError}=await db.from("vacleaner_promo_redemptions").select("promo_code_id").in("promo_code_id",ids);if(redemptionError)throw redemptionError;used=new Set((redemptions||[]).map((r:any)=>String(r.promo_code_id)))}
+  const existing=new Map<string,any>();for(const row of codes||[]){const phone=normalizePhone(row.customer_phone),expired=row.expires_at&&new Date(row.expires_at).getTime()<=now;if(phone&&!expired&&!used.has(String(row.id)))existing.set(phone,row)}
+  const isPersonal=String(campaign.campaign_type||"")==="personal",byPhone=new Map<string,any>();
+  for(const phone of normalized){const row=existing.get(phone);if(isPersonal&&!row)continue;const code=row?.code||await personalPromoCode(campaignId,phone),link=promoShortLink(code);if(link)byPhone.set(phone,{promoCode:String(code),promoLink:link,promoCodeId:row?.id?String(row.id):null})}
+  return {personalized,campaign,byPhone};
+}
+
+async function proxySms(request:Request,url:string,service:string,body:Record<string,any>){
+  const auth=request.headers.get("Authorization")||"",response=await fetch(`${url}/functions/v1/vacleaner-sms-v2`,{method:"POST",headers:{Authorization:auth,apikey:service,"Content-Type":"application/json"},body:JSON.stringify(body),signal:AbortSignal.timeout(30000)});const raw=await response.text();return new Response(raw,{status:response.status,headers:{...cors,"Content-Type":"application/json; charset=utf-8"}})
+}
 
 Deno.serve(async request=>{
   if(request.method==="OPTIONS")return new Response("ok",{headers:cors});
   if(request.method!=="POST")return json({error:"method_not_allowed"},405);
   try{
-    const url=Deno.env.get("SUPABASE_URL"),service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),token=(request.headers.get("Authorization")??"").replace(/^Bearer\s+/i,"");
-    if(!url||!service||!token)return json({error:"unauthorized"},401);
-    const db=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
-    const {data:userData,error:userError}=await db.auth.getUser(token);if(userError||!userData.user)return json({error:"unauthorized"},401);
+    const url=Deno.env.get("SUPABASE_URL"),service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),token=(request.headers.get("Authorization")||"").replace(/^Bearer\s+/i,"");if(!url||!service||!token)return json({error:"unauthorized"},401);
+    const db=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}}),{data:userData,error:userError}=await db.auth.getUser(token);if(userError||!userData.user)return json({error:"unauthorized"},401);
     const {data:admin,error:adminError}=await db.from("vacleaner_admin_users").select("user_id").eq("user_id",userData.user.id).maybeSingle();if(adminError)throw adminError;if(!admin)return json({error:"forbidden"},403);
-    const body=await request.json() as Record<string,any>,action=String(body.action??""),campaignId=String(body.campaignId??"");
+    const body=await request.json() as Record<string,any>,action=String(body.action||""),campaignId=String(body.campaignId||"");
 
+    if(["sms_preflight","sms_send","sms_sync"].includes(action))return await proxySms(request,url,service,body);
     if(action==="sms_status"){
       const key=Deno.env.get("SENDPULSE_API_KEY");if(!key)return json({error:"sendpulse_not_configured"},503);
       try{const [senderStatus,balance]=await Promise.all([sendpulseSender(key),sendpulseBalance(key)]);return json({sender:SMS_SENDER,provider:"SendPulse",senderStatus,balance,cooldownDays:SMS_COOLDOWN_DAYS,optOutUrl:SMS_OPT_OUT})}catch{return json({sender:SMS_SENDER,provider:"SendPulse",senderStatus:{found:false,status:null,statusLabel:"API недоступне",statusExplain:""},balance:null,cooldownDays:SMS_COOLDOWN_DAYS,optOutUrl:SMS_OPT_OUT})}
     }
     if(action==="sms_audience"){
-      const segment=["all","sleeping","sleeping_warm","sleeping_long"].includes(String(body.segment))?String(body.segment):"sleeping";let rows=await buildAudience(db,segment);
-      let personalized=false,promoMissing=0;
-      if(validUuid(campaignId)){const promo=await campaignPromoContext(db,campaignId,rows.map(r=>r.phone));personalized=promo.personalized;if(personalized){rows=rows.map(row=>{const promoRow=promo.byPhone.get(row.phone),selectable=row.selectable&&Boolean(promoRow);if(row.selectable&&!promoRow)promoMissing+=1;return {...row,selectable,promoReady:Boolean(promoRow)}})}}
-      const visibleRows=rows.filter(row=>!row.cooldown);
-      return json({segment,personalized,customers:visibleRows,summary:{total:rows.length,selectable:rows.filter(r=>r.selectable).length,explicit:rows.filter(r=>r.selectable&&r.consent==="explicit").length,legacy:rows.filter(r=>r.selectable&&r.consent==="legacy").length,optedOut:rows.filter(r=>r.consent==="opted_out").length,cooldown:rows.filter(r=>r.cooldown).length,active:rows.filter(r=>r.activeBooking).length,promoMissing}})
+      const segment=["all","sleeping","sleeping_warm","sleeping_long"].includes(String(body.segment))?String(body.segment):"sleeping";let forcedPhones:string[]=[];let scopeCampaign:any=null;
+      if(validUuid(campaignId)){const {data,error}=await db.from("vacleaner_campaigns").select("id,campaign_type,dormant_days,min_completed_orders").eq("id",campaignId).maybeSingle();if(error)throw error;scopeCampaign=data;if(String(data?.campaign_type||"")==="personal"){const {data:target,error:targetError}=await db.from("vacleaner_promo_codes").select("customer_phone").eq("campaign_id",campaignId).not("customer_phone","is",null).limit(1).maybeSingle();if(targetError)throw targetError;const phone=normalizePhone(target?.customer_phone);if(phone)forcedPhones=[phone]}}
+      let rows=await buildAudience(db,segment,forcedPhones),personalized=false,promoMissing=0;
+      if(validUuid(campaignId)){const promo=await campaignPromoContext(db,campaignId,rows.map(r=>r.phone));personalized=promo.personalized;if(personalized){const isReturn=String(promo.campaign?.campaign_type||"")==="return",dormant=Math.max(1,Number(promo.campaign?.dormant_days||180)),minimum=Math.max(1,Number(promo.campaign?.min_completed_orders||1));rows=rows.map(row=>{const eligible=!row.activeBooking&&(!isReturn||(Number(row.daysDormant||0)>=dormant&&Number(row.completedOrders||0)>=minimum)),promoRow=eligible?promo.byPhone.get(row.phone):null,selectable=row.selectable&&eligible&&Boolean(promoRow);if(row.selectable&&eligible&&!promoRow)promoMissing+=1;return {...row,selectable,promoReady:Boolean(promoRow)}})}}
+      const visibleRows=rows.filter(row=>!row.cooldown);return json({segment,personalized,customers:visibleRows,summary:{total:rows.length,selectable:rows.filter(r=>r.selectable).length,explicit:rows.filter(r=>r.selectable&&r.consent==="explicit").length,legacy:rows.filter(r=>r.selectable&&r.consent==="legacy").length,optedOut:rows.filter(r=>r.consent==="opted_out").length,cooldown:rows.filter(r=>r.cooldown).length,active:rows.filter(r=>r.activeBooking).length,promoMissing}})
     }
-    if(action==="sms_dispatches"){
-      const {data,error}=await db.from("vacleaner_sms_dispatches").select("id,campaign_id,sender,route,audience_segment,message_body,message_parts,status,sendpulse_campaign_id,sendpulse_addressbook_id,personalized,audience_count,explicit_consent_count,legacy_count,sent_count,delivered_count,not_delivered_count,legacy_attestation,total_cost,currency,error_code,created_at,sent_at,last_synced_at").order("created_at",{ascending:false}).limit(50);if(error)throw error;return json({dispatches:data||[]})
+    if(action==="sms_dispatches"){const {data,error}=await db.from("vacleaner_sms_dispatches").select("id,campaign_id,sender,route,audience_segment,message_body,message_parts,status,sendpulse_campaign_id,sendpulse_addressbook_id,personalized,audience_count,explicit_consent_count,legacy_count,sent_count,delivered_count,not_delivered_count,legacy_attestation,total_cost,currency,error_code,created_at,sent_at,last_synced_at").order("created_at",{ascending:false}).limit(50);if(error)throw error;return json({dispatches:data||[]})}
+    if(action==="customer_sms_history"){const phone=normalizePhone(body.phone);if(!phone)return json({error:"invalid_customer"},400);const [{data:customer,error:ce},{data:rows,error:re}]=await Promise.all([db.from("vacleaner_customers").select("phone,marketing_sms_consent,marketing_sms_consent_at,marketing_sms_consent_source,marketing_sms_opted_out_at").eq("phone",phone).maybeSingle(),db.from("vacleaner_sms_dispatch_recipients").select("status,status_explain,money_spent,created_at,dispatch_id,vacleaner_sms_dispatches(message_body,audience_segment,status,sent_at)").eq("customer_phone",phone).order("created_at",{ascending:false}).limit(30)]);if(ce||re)throw ce||re;const consent=customer?.marketing_sms_opted_out_at?"opted_out":customer?.marketing_sms_consent===true?"explicit":"legacy";return json({consent,consentAt:customer?.marketing_sms_consent_at||null,consentSource:customer?.marketing_sms_consent_source||"",optedOutAt:customer?.marketing_sms_opted_out_at||null,history:rows||[]})}
+    if(action==="set_customer_sms_consent"){const phone=normalizePhone(body.phone);if(!phone)return json({error:"invalid_customer"},400);const enabled=body.enabled===true,now=new Date().toISOString(),patch=enabled?{marketing_sms_consent:true,marketing_sms_consent_at:now,marketing_sms_consent_source:"admin_confirmed",marketing_sms_opted_out_at:null,updated_at:now}:{marketing_sms_consent:false,marketing_sms_opted_out_at:now,marketing_sms_consent_source:"admin_opt_out",updated_at:now};const {data,error}=await db.from("vacleaner_customers").update(patch).eq("phone",phone).select("phone").maybeSingle();if(error)throw error;if(!data)return json({error:"invalid_customer"},404);return json({ok:true,consent:enabled?"explicit":"opted_out"})}
+
+    if(action==="pending_bonus"){
+      const phone=normalizePhone(body.phone);if(!phone)return json({pendingPromo:null});
+      const {data:promos,error:promoError}=await db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,usage_limit,created_at").eq("customer_phone",phone).eq("active",false).order("created_at",{ascending:false}).limit(30);if(promoError)throw promoError;
+      for(const promo of promos||[]){
+        const {count:uses,error:usesError}=await db.from("vacleaner_promo_redemptions").select("id",{count:"exact",head:true}).eq("promo_code_id",promo.id);if(usesError)throw usesError;if(Number(uses||0)>0)continue;
+        const {data:campaign,error:campaignError}=await db.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,starts_at,ends_at,issuance_ends_at").eq("id",promo.campaign_id).maybeSingle();if(campaignError)throw campaignError;if(!campaign||!["return","personal"].includes(String(campaign.campaign_type||"")))continue;
+        const now=Date.now(),starts=campaign.starts_at?new Date(campaign.starts_at).getTime():0,issueEnd=campaign.issuance_ends_at?new Date(campaign.issuance_ends_at).getTime():(campaign.ends_at?new Date(campaign.ends_at).getTime():0);if(campaign.status!=="active"||(starts&&starts>now)||(issueEnd&&issueEnd<=now))continue;
+        const {data:recipients,error:recipientError}=await db.from("vacleaner_sms_dispatch_recipients").select("dispatch_id,status").eq("customer_phone",phone).ilike("promo_code",String(promo.code||"")).in("status",["submitted","sent","delivered"]).order("created_at",{ascending:false}).limit(20);if(recipientError)throw recipientError;
+        const dispatchIds=[...new Set((recipients||[]).map((r:any)=>String(r.dispatch_id||"")).filter(Boolean))];if(!dispatchIds.length)continue;
+        const {data:dispatches,error:dispatchError}=await db.from("vacleaner_sms_dispatches").select("id,campaign_id").in("id",dispatchIds);if(dispatchError)throw dispatchError;if(!(dispatches||[]).some((r:any)=>String(r.campaign_id||"")===String(campaign.id)))continue;
+        return json({pendingPromo:{campaignId:String(campaign.id),campaignName:String(campaign.name||"Персональний бонус"),campaignType:String(campaign.campaign_type||""),discountType:String(campaign.discount_type||"percent"),discountValue:Number(campaign.discount_value||0),validDays:PERSONAL_PROMO_VALID_DAYS}})
+      }
+      return json({pendingPromo:null})
     }
-    if(action==="customer_sms_history"){
-      const phone=normalizePhone(body.phone);if(!phone)return json({error:"invalid_customer"},400);const [{data:customer,error:ce},{data:rows,error:re}]=await Promise.all([db.from("vacleaner_customers").select("phone,marketing_sms_consent,marketing_sms_consent_at,marketing_sms_consent_source,marketing_sms_opted_out_at").eq("phone",phone).maybeSingle(),db.from("vacleaner_sms_dispatch_recipients").select("status,status_explain,money_spent,created_at,dispatch_id,vacleaner_sms_dispatches(message_body,audience_segment,status,sent_at)").eq("customer_phone",phone).order("created_at",{ascending:false}).limit(30)]);if(ce||re)throw ce||re;const consent=customer?.marketing_sms_opted_out_at?"opted_out":customer?.marketing_sms_consent===true?"explicit":"legacy";return json({consent,consentAt:customer?.marketing_sms_consent_at||null,consentSource:customer?.marketing_sms_consent_source||"",optedOutAt:customer?.marketing_sms_opted_out_at||null,history:rows||[]})
-    }
-    if(action==="set_customer_sms_consent"){
-      const phone=normalizePhone(body.phone);if(!phone)return json({error:"invalid_customer"},400);const enabled=body.enabled===true,now=new Date().toISOString(),patch=enabled?{marketing_sms_consent:true,marketing_sms_consent_at:now,marketing_sms_consent_source:"admin_confirmed",marketing_sms_opted_out_at:null,updated_at:now}:{marketing_sms_consent:false,marketing_sms_opted_out_at:now,marketing_sms_consent_source:"admin_opt_out",updated_at:now};const {data,error}=await db.from("vacleaner_customers").update(patch).eq("phone",phone).select("phone").maybeSingle();if(error)throw error;if(!data)return json({error:"invalid_customer"},404);return json({ok:true,consent:enabled?"explicit":"opted_out"})
-    }
-    if(action==="sms_preflight"){
-      const key=Deno.env.get("SENDPULSE_API_KEY");if(!key)return json({error:"sendpulse_not_configured"},503);
-      const segment=["all","sleeping","sleeping_warm","sleeping_long"].includes(String(body.segment))?String(body.segment):"sleeping",route=body.route==="international"?"international":"national",message=cleanText(body.message,402),selected=[...new Set((Array.isArray(body.phones)?body.phones:[]).map(normalizePhone).filter(Boolean))].slice(0,500);if(!message||!selected.length)return json({error:"invalid_sms_campaign"},400);if(!message.toLowerCase().includes(SMS_OPT_OUT))return json({error:"sms_optout_required"},400);
-      const audience=await buildAudience(db,segment),map=new Map(audience.map(row=>[row.phone,row])),recipients=selected.map(phone=>map.get(phone)).filter(Boolean) as AudienceRow[];if(recipients.length!==selected.length||recipients.some(r=>!r.selectable))return json({error:"audience_changed"},409);const legacy=recipients.filter(r=>r.consent==="legacy");if(legacy.length&&body.legacyAttestation!==true)return json({error:"legacy_consent_confirmation_required",legacyCount:legacy.length},409);
-      const promo=await campaignPromoContext(db,campaignId,selected),personalized=promo.personalized;if(personalized&&!message.includes(SMS_LINK_TOKEN))return json({error:"promo_link_required"},400);const recipientsWithPromo=recipients.map(row=>{const personal=promo.byPhone.get(row.phone);return {...row,promoCode:personal?.promoCode||null,promoLink:personal?.promoLink||null}});if(personalized&&recipientsWithPromo.some(row=>!row.promoCode||!row.promoLink))return json({error:"promo_codes_missing"},409);
-      const measuredMessage=personalized?expandSmsTemplate(message):message;if([...measuredMessage].length>402||smsParts(measuredMessage)>6)return json({error:"sms_too_long"},400);
-      const sender=await sendpulseSender(key);if(route==="national"&&sender.status!==1)return json({error:"sender_not_active",senderStatus:sender},409);
-      try{const balance=await sendpulseBalance(key);if(personalized)await preflightPersonalizedSendpulseCampaign(key,route,message,recipientsWithPromo);else await preflightDirectSendpulseCampaign(key,route,message,recipients);return json({ok:true,parts:smsParts(measuredMessage),recipients:recipients.length,personalized,balance,senderStatus:sender})}
-      catch(error){const detail=error instanceof Error?error.message:"sendpulse_preflight_failed";return json({error:"sendpulse_preflight_failed",detail},422)}
-    }
-    if(action==="sms_send"){
-      const key=Deno.env.get("SENDPULSE_API_KEY");if(!key)return json({error:"sendpulse_not_configured"},503);
-      const segment=["all","sleeping","sleeping_warm","sleeping_long"].includes(String(body.segment))?String(body.segment):"sleeping",route=body.route==="international"?"international":"national",message=cleanText(body.message,402),selected=[...new Set((Array.isArray(body.phones)?body.phones:[]).map(normalizePhone).filter(Boolean))].slice(0,500);if(!message||!selected.length)return json({error:"invalid_sms_campaign"},400);if(!message.toLowerCase().includes(SMS_OPT_OUT))return json({error:"sms_optout_required"},400);
-      const audience=await buildAudience(db,segment),map=new Map(audience.map(row=>[row.phone,row])),recipients=selected.map(phone=>map.get(phone)).filter(Boolean) as AudienceRow[];if(recipients.length!==selected.length||recipients.some(r=>!r.selectable))return json({error:"audience_changed"},409);const legacy=recipients.filter(r=>r.consent==="legacy"),explicit=recipients.filter(r=>r.consent==="explicit");if(legacy.length&&body.legacyAttestation!==true)return json({error:"legacy_consent_confirmation_required",legacyCount:legacy.length},409);
-      const promo=await campaignPromoContext(db,campaignId,selected);const personalized=promo.personalized;if(personalized&&!message.includes(SMS_LINK_TOKEN))return json({error:"promo_link_required"},400);
-      const recipientsWithPromo=recipients.map(row=>{const personal=promo.byPhone.get(row.phone);return {...row,promoCode:personal?.promoCode||null,promoLink:personal?.promoLink||null}});
-      if(personalized&&recipientsWithPromo.some(row=>!row.promoCode||!row.promoLink))return json({error:"promo_codes_missing"},409);
-      const measuredMessage=personalized?expandSmsTemplate(message):message;if([...measuredMessage].length>402||smsParts(measuredMessage)>6)return json({error:"sms_too_long"},400);
-      const sender=await sendpulseSender(key);if(route==="national"&&sender.status!==1)return json({error:"sender_not_active",senderStatus:sender},409);
-      const now=new Date().toISOString(),parts=smsParts(measuredMessage);const {data:dispatch,error:dispatchError}=await db.from("vacleaner_sms_dispatches").insert({campaign_id:validUuid(campaignId)?campaignId:null,sender:SMS_SENDER,route,audience_segment:segment,message_body:message,message_parts:parts,status:"draft",personalized,audience_count:recipients.length,explicit_consent_count:explicit.length,legacy_count:legacy.length,legacy_attestation:legacy.length?true:false,created_by:userData.user.id}).select("*").single();if(dispatchError||!dispatch)throw dispatchError||new Error("dispatch_insert_failed");
-      const recipientRows=recipientsWithPromo.map(r=>({dispatch_id:dispatch.id,customer_phone:r.phone,customer_name:r.name,consent_basis:r.consent==="explicit"?"explicit":"legacy_admin_attested",status:"queued",promo_code:r.promoCode,promo_link:r.promoLink}));const {error:recipientError}=await db.from("vacleaner_sms_dispatch_recipients").insert(recipientRows);if(recipientError){await db.from("vacleaner_sms_dispatches").delete().eq("id",dispatch.id);throw recipientError}
-      try{
-        let campaignResult:any;
-        if(personalized){const result=await createPersonalizedSendpulseCampaign(key,dispatch.id,route,message,recipientsWithPromo);campaignResult={campaignId:result.campaignId,addressBookId:result.addressBookId,sends:recipients.length,exceptions:0}}
-        else{const result=await spJson(key,"https://api.sendpulse.com/sms/send",{method:"POST",body:JSON.stringify({sender:SMS_SENDER,phones:recipients.map(r=>smsPhone(r.phone)),body:message,route:{UA:route},emulate:false,stat_link_tracking:true,stat_link_need_protocol:true})});if(!result?.result||!result?.campaign_id)throw new Error("sendpulse_api_error");campaignResult={campaignId:Number(result.campaign_id),addressBookId:null,sends:Math.max(0,Number(result?.counters?.sends||recipients.length)),exceptions:Number(result?.counters?.exceptions||0)}}
-        const sends=Math.max(0,Number(campaignResult.sends||recipients.length)),status=sends===recipients.length?"submitted":"partial";await Promise.all([db.from("vacleaner_sms_dispatches").update({status,sendpulse_campaign_id:campaignResult.campaignId,sendpulse_addressbook_id:campaignResult.addressBookId,sent_count:personalized?0:sends,sent_at:now,last_synced_at:now}).eq("id",dispatch.id),db.from("vacleaner_sms_dispatch_recipients").update({status:"submitted",updated_at:now}).eq("dispatch_id",dispatch.id)]);return json({ok:true,dispatchId:dispatch.id,campaignId:campaignResult.campaignId,sent:sends,exceptions:campaignResult.exceptions,parts,personalized})
-      }catch(error){const code=error instanceof Error?error.message:"sendpulse_api_error";await Promise.all([db.from("vacleaner_sms_dispatches").update({status:"failed",error_code:code,last_synced_at:now}).eq("id",dispatch.id),db.from("vacleaner_sms_dispatch_recipients").update({status:"failed",status_explain:code,updated_at:now}).eq("dispatch_id",dispatch.id)]);return json({error:"sendpulse_api_error",detail:code},502)}
-    }
-    if(action==="sms_sync"){
-      const key=Deno.env.get("SENDPULSE_API_KEY");if(!key)return json({error:"sendpulse_not_configured"},503);const dispatchId=String(body.dispatchId||"");if(!validUuid(dispatchId))return json({error:"invalid_dispatch"},400);const {data:dispatch,error}=await db.from("vacleaner_sms_dispatches").select("*").eq("id",dispatchId).maybeSingle();if(error)throw error;if(!dispatch||!dispatch.sendpulse_campaign_id)return json({error:"invalid_dispatch"},404);const raw=await spJson(key,`https://api.sendpulse.com/sms/campaigns/info/${dispatch.sendpulse_campaign_id}`),payload=Array.isArray(raw)?raw.find((x:any)=>x?.result)?.data:raw?.data;if(!payload)return json({error:"sendpulse_api_error"},502);const infos=Array.isArray(payload.task_phones_info)?payload.task_phones_info:[],now=new Date().toISOString();for(const info of infos){const phone=normalizePhone(String(info.phone||""));if(!phone)continue;await db.from("vacleaner_sms_dispatch_recipients").update({status:deliveryStatus(Number(info.status)),status_explain:String(info.status_explain||""),money_spent:Number(info.money_spent||0),updated_at:now}).eq("dispatch_id",dispatch.id).eq("customer_phone",phone)}const {data:statuses,error:statusError}=await db.from("vacleaner_sms_dispatch_recipients").select("status,money_spent").eq("dispatch_id",dispatch.id);if(statusError)throw statusError;const delivered=(statuses||[]).filter((r:any)=>r.status==="delivered").length,notDelivered=(statuses||[]).filter((r:any)=>r.status==="not_delivered").length,sent=(statuses||[]).filter((r:any)=>["sent","delivered","not_delivered"].includes(r.status)).length,totalCost=(statuses||[]).reduce((sum:number,r:any)=>sum+Number(r.money_spent||0),0),finalStatus=notDelivered&&delivered?"partial":notDelivered&&!delivered?"partial":sent?"sent":"submitted",terminal=delivered+notDelivered>=Number(dispatch.audience_count||0)&&Number(dispatch.audience_count||0)>0;let addressBookId=Number(dispatch.sendpulse_addressbook_id||0);if(terminal&&addressBookId){await spJson(key,`https://api.sendpulse.com/addressbooks/${addressBookId}`,{method:"DELETE"}).catch(()=>null);addressBookId=0}await db.from("vacleaner_sms_dispatches").update({status:finalStatus,sent_count:sent,delivered_count:delivered,not_delivered_count:notDelivered,total_cost:totalCost||Number(payload.company_price||0)||null,currency:String(payload.currency||"")||null,last_synced_at:now,sendpulse_addressbook_id:addressBookId||null}).eq("id",dispatch.id);return json({ok:true,dispatchId:dispatch.id,sent,delivered,notDelivered,totalCost:totalCost||Number(payload.company_price||0)||0,currency:String(payload.currency||"")})
+
+    if(action==="activate_bonus"){
+      const phone=normalizePhone(body.phone);if(!validUuid(campaignId)||!phone)return json({error:"invalid_campaign"},400);
+      const {data:campaign,error:campaignError}=await db.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,starts_at,ends_at,issuance_ends_at").eq("id",campaignId).maybeSingle();if(campaignError)throw campaignError;if(!campaign||!["return","personal"].includes(String(campaign.campaign_type||"")))return json({error:"invalid_campaign"},404);
+      const {data:promo,error:promoError}=await db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,activated_at,activation_source").eq("campaign_id",campaignId).eq("customer_phone",phone).order("created_at",{ascending:false}).limit(1).maybeSingle();if(promoError)throw promoError;if(!promo)return json({error:"bonus_not_issued"},409);
+      const nowMs=Date.now(),codeEnds=promo.expires_at?new Date(promo.expires_at).getTime():0;if(promo.active&&(!codeEnds||codeEnds>nowMs))return json({ok:true,alreadyActivated:true,promo:{code:promo.code,campaignId,campaignName:campaign.name,discountType:campaign.discount_type,discountValue:Number(campaign.discount_value||0),expiresAt:promo.expires_at,activationSource:promo.activation_source||"admin"}});
+      const starts=campaign.starts_at?new Date(campaign.starts_at).getTime():0,issueEnd=campaign.issuance_ends_at?new Date(campaign.issuance_ends_at).getTime():(campaign.ends_at?new Date(campaign.ends_at).getTime():0);if(campaign.status!=="active"||(starts&&starts>nowMs)||(issueEnd&&issueEnd<=nowMs))return json({error:"activation_window_expired"},409);
+      const {count:uses,error:usesError}=await db.from("vacleaner_promo_redemptions").select("id",{count:"exact",head:true}).eq("promo_code_id",promo.id);if(usesError)throw usesError;if(Number(uses||0)>0)return json({error:"promo_used"},409);
+      const {data:recipients,error:recipientError}=await db.from("vacleaner_sms_dispatch_recipients").select("dispatch_id,status").eq("customer_phone",phone).ilike("promo_code",String(promo.code||"")).in("status",["submitted","sent","delivered"]).order("created_at",{ascending:false}).limit(20);if(recipientError)throw recipientError;
+      const dispatchIds=[...new Set((recipients||[]).map((r:any)=>String(r.dispatch_id||"")).filter(Boolean))];if(!dispatchIds.length)return json({error:"bonus_not_issued"},409);
+      const {data:dispatches,error:dispatchError}=await db.from("vacleaner_sms_dispatches").select("id,campaign_id").in("id",dispatchIds);if(dispatchError)throw dispatchError;const dispatch=(dispatches||[]).find((r:any)=>String(r.campaign_id||"")===campaignId);if(!dispatch)return json({error:"bonus_not_issued"},409);
+      const activatedAt=new Date(),expiresAtDate=new Date(activatedAt.getTime()+PERSONAL_PROMO_VALID_DAYS*86400000),expiresAt=expiresAtDate.toISOString();const campaignEnd=campaign.ends_at?new Date(campaign.ends_at).getTime():0;if(!campaignEnd||campaignEnd<expiresAtDate.getTime()){const {error:extendError}=await db.from("vacleaner_campaigns").update({ends_at:expiresAt,updated_at:activatedAt.toISOString()}).eq("id",campaign.id);if(extendError)throw extendError}const {data:updated,error:updateError}=await db.from("vacleaner_promo_codes").update({active:true,activated_at:activatedAt.toISOString(),activation_source:"admin",activation_dispatch_id:dispatch.id,activated_by:userData.user.id,expires_at:expiresAt}).eq("id",promo.id).eq("active",false).select("code,expires_at,activation_source").maybeSingle();if(updateError)throw updateError;if(!updated)return json({error:"promo_unavailable"},409);
+      return json({ok:true,alreadyActivated:false,validDays:PERSONAL_PROMO_VALID_DAYS,promo:{code:updated.code,campaignId,campaignName:campaign.name,discountType:campaign.discount_type,discountValue:Number(campaign.discount_value||0),expiresAt:updated.expires_at,activationSource:updated.activation_source}})
     }
 
     if(!validUuid(campaignId))return json({error:"invalid_campaign"},400);
-    if(action==="archive_campaign"){
-      const now=new Date().toISOString();const {data:campaign,error:campaignError}=await db.from("vacleaner_campaigns").select("id,status,starts_at,ends_at").eq("id",campaignId).maybeSingle();if(campaignError)throw campaignError;if(!campaign)return json({error:"invalid_campaign"},404);const endedAt=campaign.ends_at&&new Date(campaign.ends_at).getTime()<Date.now()?campaign.ends_at:now;const {error:updateError}=await db.from("vacleaner_campaigns").update({status:"ended",ends_at:endedAt,updated_at:now}).eq("id",campaignId);if(updateError)throw updateError;await db.from("vacleaner_promo_codes").update({active:false}).eq("campaign_id",campaignId);return json({ok:true,status:"ended"});
-    }
-    if(action==="delete_campaign"){
-      const {count,error:historyError}=await db.from("vacleaner_promo_redemptions").select("id",{count:"exact",head:true}).eq("campaign_id",campaignId);if(historyError)throw historyError;if(Number(count||0)>0)return json({error:"campaign_has_history"},409);const {error}=await db.from("vacleaner_campaigns").delete().eq("id",campaignId);if(error)throw error;return json({ok:true,deleted:true});
-    }
+    if(action==="archive_campaign"){const now=new Date().toISOString(),{data:campaign,error:ce}=await db.from("vacleaner_campaigns").select("id,ends_at").eq("id",campaignId).maybeSingle();if(ce)throw ce;if(!campaign)return json({error:"invalid_campaign"},404);const endedAt=campaign.ends_at&&new Date(campaign.ends_at).getTime()<Date.now()?campaign.ends_at:now;const {error}=await db.from("vacleaner_campaigns").update({status:"ended",ends_at:endedAt,updated_at:now}).eq("id",campaignId);if(error)throw error;await db.from("vacleaner_promo_codes").update({active:false}).eq("campaign_id",campaignId);return json({ok:true,status:"ended"})}
+    if(action==="delete_campaign"){const {count,error:he}=await db.from("vacleaner_promo_redemptions").select("id",{count:"exact",head:true}).eq("campaign_id",campaignId);if(he)throw he;if(Number(count||0)>0)return json({error:"campaign_has_history"},409);const {error}=await db.from("vacleaner_campaigns").delete().eq("id",campaignId);if(error)throw error;return json({ok:true,deleted:true})}
     return json({error:"invalid_action"},400);
   }catch(error){const message=error instanceof Error?error.message:String(error||"service_error");if(message==="campaign_inactive")return json({error:"campaign_inactive"},409);console.error("vacleaner-campaigns-v1",message);return json({error:"service_error"},500)}
 });
