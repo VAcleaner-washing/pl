@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
+const admin=read('assets/admin-v250.js');
+const css=read('assets/admin-v250.css');
+const migration=read('supabase/migrations/20260825193000_vacleaner_return_detach_guard_fix.sql');
+const checks=[];
+const check=(name,fn)=>{try{fn();checks.push(`✓ ${name}`)}catch(e){console.error(`✗ ${name}`);throw e}};
+check('explicit detach bypass is transaction-local and service RPC scoped',()=>{assert.ok(migration.includes("current_setting('vacleaner.allow_promo_detach', true)"));assert.ok(migration.includes("set_config('vacleaner.allow_promo_detach','1',true)"));assert.ok(migration.includes('grant execute on function public.vacleaner_admin_detach_booking_promo'))});
+check('ordinary promo edit guard remains present',()=>{assert.ok(migration.includes("old.extras -> 'promo'"));assert.ok(migration.includes("new.extras -> 'discount' ->> 'source'"));assert.ok(migration.includes("jsonb_set(jsonb_set(new.extras,'{promo}',v_promo,true),'{discount}',v_discount,true)"))});
+check('detach UI clears local promo state and refreshes booking cards',()=>{assert.ok(admin.includes("b.extras={...(result.booking.extras||{}),promo:null}"));assert.ok(admin.includes("render();lastLookupPhone='';await lookupCustomer()"));assert.ok(admin.includes("RETURN прибрано з броні · суму перераховано"))});
+check('booking edit header no longer carries redundant explainer',()=>{assert.ok(!admin.includes('Видача, повернення, клієнт і оплата — без прихованої логіки.'))});
+check('RETURN and manual discount blocks are compact and calmer',()=>{assert.ok(admin.includes('Враховано у фінальній сумі'));assert.ok(admin.includes('Прибрати з броні'));assert.ok(!admin.includes('Система автоматично залишить вигіднішу для клієнта: loyalty, promo або ручну.'));assert.ok(css.includes('v4.1.32 — calmer booking hierarchy + compact discount controls'));assert.ok(css.includes('.booking-card .booking-identity h2{font-weight:610}'));assert.ok(css.includes('.booking-form .switch b{font-weight:560}'))});
+console.log(checks.join('\n'));

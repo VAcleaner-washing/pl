@@ -16,6 +16,11 @@ declare
   v_loyalty_amount integer;
   v_type text;
 begin
+  -- Explicit manager detach runs through a service-role-only RPC and is allowed to clear promo state.
+  if coalesce(current_setting('vacleaner.allow_promo_detach', true),'') = '1' then
+    return new;
+  end if;
+
   v_promo := old.extras -> 'promo';
   if coalesce(old.extras -> 'discount' ->> 'source','') <> 'promo'
      or coalesce(v_promo ->> 'applied','false') <> 'true' then

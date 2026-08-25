@@ -5650,3 +5650,51 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .booking-origin-row>em{font-size:10px}
   .booking-finance .booking-discount-reason{margin-top:5px}
 }
+
+
+/* v4.1.32 — calmer booking hierarchy + compact discount controls */
+.booking-card .booking-identity h2{font-weight:610}
+.booking-card .booking-time strong{font-weight:600}
+.booking-card .booking-person strong,.booking-card .booking-delivery strong{font-weight:580}
+.booking-card .booking-finance>strong{font-weight:650}
+.booking-card .status{font-weight:580}
+.booking-card .booking-identity-extras{font-weight:480;color:#cdbb9d}
+.booking-card .booking-identity-extras i{font-weight:580}
+.booking-form>header small{font-weight:700}
+.booking-form>header h2{font-weight:620;letter-spacing:-.025em}
+.booking-form .section-title h3{font-weight:600}
+.booking-form .field>span{font-weight:540}
+.booking-form .switch b{font-weight:560}
+.booking-form .extra-check b{font-weight:540}
+.booking-form .deposit-preview strong{font-weight:620}
+.booking-form .manual-discount-editor{gap:11px;padding:13px 14px}
+.booking-form .manual-discount-head{align-items:center}
+.booking-form .manual-discount-head>div{gap:0}
+.booking-form .manual-discount-head b{font-weight:600}
+.booking-form .manual-discount-head>span{font-weight:560}
+.booking-form .discount-choice button{font-weight:560}
+.booking-form .discount-reason-chips button{font-weight:540}
+.booking-form .discount-fixed-row>label>span,.booking-form .discount-reason>span{font-weight:540}
+.booking-form .discount-fixed-row input{font-weight:580}
+.booking-promo-editor{gap:10px 14px;padding:12px 13px}
+.booking-promo-editor>div:first-child{gap:3px}
+.booking-promo-editor span{font-weight:650;letter-spacing:.065em}
+.booking-promo-editor strong{font-weight:600}
+.booking-promo-editor small{font-size:10.5px;line-height:1.35}
+.booking-promo-editor code{font-weight:600}
+.booking-promo-editor-actions .btn{min-height:40px;font-weight:560}
+@media(max-width:900px){
+  .booking-form>header{padding-bottom:13px}
+  .booking-form>header h2{font-size:23px;font-weight:600;line-height:1.12}
+  .booking-form>header .mobile-booking-progress{margin-top:9px}
+  .booking-promo-editor{grid-template-columns:minmax(0,1fr);padding:12px}
+  .booking-promo-editor-actions{display:grid;grid-template-columns:auto minmax(0,1fr);justify-content:stretch;gap:8px}
+  .booking-promo-editor-actions code{align-self:center;justify-self:start}
+  .booking-promo-editor-actions .btn{width:100%;min-height:42px}
+  .booking-form .switch.wide{padding-top:10px;padding-bottom:10px}
+}
+@media(max-width:390px){
+  .booking-form>header h2{font-size:22px}
+  .booking-promo-editor-actions{grid-template-columns:1fr}
+  .booking-promo-editor-actions .btn{min-height:42px}
+}

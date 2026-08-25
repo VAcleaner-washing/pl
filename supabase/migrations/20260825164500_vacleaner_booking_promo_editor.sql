@@ -22,6 +22,8 @@ begin
   limit 1
   for update;
 
+  perform set_config('vacleaner.allow_promo_detach','1',true);
+
   update public.vacleaner_bookings
   set extras = p_extras,
       base_amount = greatest(0, p_base_amount),
