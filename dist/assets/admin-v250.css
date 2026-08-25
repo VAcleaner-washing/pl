@@ -5807,3 +5807,8 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .sms-campaign-modal .sms-recipient-meta strong,.modal-form.sms-campaign-modal .sms-client-rentals,.sms-campaign-modal .sms-client-rentals{font-weight:560}
 .extend-preview-error{font-weight:560}
 .customer-promo-card span,.client-promo-card small,.booking-promo-editor span,.sms-dispatch-detail-head small{font-weight:600}
+
+/* v4.1.37 — keep long delivery routes inside desktop booking cards without changing card density. */
+.booking-delivery>span{min-width:0;max-width:100%}
+.booking-delivery .delivery-route-link{min-width:0;max-width:100%;overflow:hidden}
+.booking-delivery .delivery-route-link>span{display:block;width:100%;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}

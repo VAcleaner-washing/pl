@@ -7,7 +7,7 @@ const pkg=JSON.parse(read('package.json'));
 const rel=JSON.parse(read('release.json'));
 let n=0;
 function ok(name,cond){n++; if(!cond){console.error(`FAIL ${name}`);process.exitCode=1}else console.log(`OK   ${name}`)}
-ok('release is 4.1.36',pkg.version==='4.1.36'&&rel.version==='4.1.36'&&Number(rel.build)===4136);
+ok('release keeps v4.1.36+ entrance-delivery feature',pkg.version===rel.version&&Number(rel.build)>=4136);
 ok('delivery detail says entrance / landmark',runtime.includes('Під’їзд / орієнтир')&&runtime.includes('зі сторони двору'));
 ok('delivery note states to entrance',runtime.includes('Доставка техніки — до під’їзду.'));
 ok('apartment and floor are not prompted',!runtime.includes('Під’їзд / квартира / поверх')&&!runtime.includes('кв. 24, 5 поверх'));
