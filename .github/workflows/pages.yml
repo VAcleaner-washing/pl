@@ -75,6 +75,12 @@ jobs:
         run: npm run test:auth-refresh
       - name: Verify v4.1.28 campaign and phone-promo regressions
         run: npm run test:v4.1.28-regressions
+      - name: Verify v4.1.29 promo issuance and v4.1.30 RETURN activation
+        run: |
+          npm run test:v4.1.29-promo-issuance
+          npm run test:v4.1.30-return-activation
+      - name: Verify v4.1.31 admin booking clarity
+        run: npm run test:v4.1.31-admin-booking-meta
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources
