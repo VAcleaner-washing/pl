@@ -20,3 +20,6 @@
 .delivery-address-field .vac-address-details input{min-height:42px;border:1px solid var(--line,#263238);border-radius:10px;background:#0d1418;color:var(--text,#eef1f0);padding:0 12px;font:inherit}
 .delivery-address-field .vac-address-details input:focus{outline:none;border-color:rgba(214,164,95,.55);box-shadow:0 0 0 3px rgba(214,164,95,.08)}
 @media(max-width:640px){.vac-address-list{max-height:216px;border-radius:12px}.vac-address-list button{padding:11px 10px}.vac-address-status{align-items:flex-start}.vac-address-details{margin-top:10px}}
+
+/* v4.1.36 — delivery is to the entrance; keep the operational note quiet. */
+.vac-address-delivery-note{display:block;margin-top:7px;color:var(--muted,#8e979d);font-size:11px;line-height:1.35;font-weight:430}

@@ -54,7 +54,7 @@ function selectItem(ctx,index){
   setInputValue(ctx.input,item.address);
   ctx.setting=false;
   ctx.selected=item.houseNumber?item.address:'';
-  if(item.houseNumber){ctx.input.dataset.vacAddressSelected='1';setStatus(ctx,'ok','Адресу знайдено. Нижче можна додати під’їзд, квартиру або поверх.');closeList(ctx);ctx.details?.focus()}
+  if(item.houseNumber){ctx.input.dataset.vacAddressSelected='1';setStatus(ctx,'ok','Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир.');closeList(ctx);ctx.details?.focus()}
   else{delete ctx.input.dataset.vacAddressSelected;setStatus(ctx,'hint','Вулицю знайшли — допишіть номер будинку.');closeList(ctx);ctx.input.focus();const len=ctx.input.value.length;ctx.input.setSelectionRange?.(len,len)}
 }
 function setActive(ctx,index){
@@ -118,7 +118,7 @@ function attach(input,mode){
   const list=document.createElement('div');list.className='vac-address-list';list.setAttribute('role','listbox');list.hidden=true;wrap.appendChild(list);
   const status=document.createElement('div');status.className='vac-address-status hint';wrap.insertAdjacentElement('afterend',status);
   const detailBox=document.createElement('div');detailBox.className='vac-address-details';
-  detailBox.innerHTML='<span>Під’їзд / квартира / поверх <small>необов’язково</small></span><input type="text" data-vac-address-detail="1" maxlength="120" autocomplete="off" placeholder="Наприклад: 2 під’їзд, кв. 24, 5 поверх, домофон 24" aria-label="Під’їзд, квартира, поверх, домофон або примітка для доставки">';
+  detailBox.innerHTML='<span>Під’їзд / орієнтир <small>необов’язково</small></span><input type="text" data-vac-address-detail="1" maxlength="120" autocomplete="off" placeholder="Наприклад: 2 під’їзд, зі сторони двору" aria-label="Під’їзд або орієнтир для доставки"><small class="vac-address-delivery-note">Доставка техніки — до під’їзду.</small>';
   status.insertAdjacentElement('afterend',detailBox);
   const details=detailBox.querySelector('input');details.value=original.details;
   const ctx={input,mode,wrap,list,status,detailBox,details,items:[],active:-1,selected:'',timer:0,abort:null,setting:false};
