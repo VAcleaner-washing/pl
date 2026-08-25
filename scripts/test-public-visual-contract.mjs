@@ -1,0 +1,134 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const ROOT=process.cwd();
+const read=(p)=>fs.readFileSync(path.join(ROOT,p),'utf8');
+const routes=[
+  '', 'tekhnika/karcher-puzzi-8-1','tekhnika/karcher-sc-2-deluxe','tekhnika/robot-dlia-vikon-abir','rishennia','rishennia/textile','rishennia/steam','rishennia/mattress','rishennia/windows',
+  'komplekty','yak-tse-pratsiuie','vidhuky','pidbir','bronuvannia','faq','kontakty','umovy',
+  'dostavka','pro-nas','blog','blog/yak-pochystyty-matrats-pislia-dytyny',
+  'blog/yak-vyvesty-plyamu-z-dyvana','blog/skilky-sokhne-dyvan-pislia-chyshchennia',
+  'polityka-konfidenciynosti'
+];
+const expectedNav=[
+  ['Що почистити','/rishennia/'],['Комплекти','/komplekty/'],['Як це працює','/yak-tse-pratsiuie/'],
+  ['Відгуки','/vidhuky/'],['Підбір за 30 сек','/pidbir/']
+];
+let passed=0;
+const failed=[];
+function check(ok,label){if(ok){passed++;console.log(`PASS: ${label}`)}else{failed.push(label);console.error(`FAIL: ${label}`)}}
+function htmlFor(route){return read(route?`${route}/index.html`:'index.html')}
+function navPairs(html){
+  const m=html.match(/<nav[^>]*class="desktop-nav"[^>]*>([\s\S]*?)<\/nav>/i);
+  if(!m)return [];
+  return [...m[1].matchAll(/<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi)].map(x=>[
+    x[2].replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(),x[1]
+  ]);
+}
+
+for(const route of routes){
+  const label=route?`/${route}/`:'/';
+  const html=htmlFor(route);
+  check((html.match(/class="site-header"/g)||[]).length===1,`${label} has exactly one global header`);
+  check(JSON.stringify(navPairs(html))===JSON.stringify(expectedNav),`${label} uses the canonical desktop nav`);
+  const headerCtaTag=(html.match(/<a[^>]*class="header-cta"[^>]*>/i)||html.match(/<a[^>]*href="\/bronuvannia\/"[^>]*class="header-cta"[^>]*>/i)||[''])[0];
+  const productRoute={
+    'tekhnika/karcher-puzzi-8-1':'puzzi',
+    'tekhnika/karcher-sc-2-deluxe':'sc2',
+    'tekhnika/robot-dlia-vikon-abir':'abir',
+  }[route];
+  const expectedBookingHref=productRoute?`/bronuvannia/?product=${productRoute}`:'/bronuvannia/';
+  check(headerCtaTag.includes(`href="${expectedBookingHref}"`),`${label} header CTA points to the correct booking context`);
+  check(!/(>\s*Процес\s*<|>\s*FAQ\s*<)/.test((html.match(/<nav[^>]*class="desktop-nav"[\s\S]*?<\/nav>/)||[''])[0]||''),`${label} has no stale header labels`);
+  check(!html.includes('↗'),`${label} contains no browser/emoji external-arrow glyph`);
+  check((html.match(/<footer[^>]*class="v4-footer"/g)||[]).length===1,`${label} has exactly one canonical footer`);
+}
+
+const experienceCss=read('assets/public-experience.css');
+const siteCss=read('assets/site-v400.css');
+const experienceJs=read('assets/public-experience.js');
+const quizJs=read('assets/public-quiz.js');
+const bookingSlots=read('assets/public-booking-slots.js');
+const siteJs=read('assets/site-v400.js');
+const generator=read('scripts/make_v400.py');
+
+check(experienceCss.includes('html.vq-standalone-page.vq-ready .inner-hero'),'/pidbir/ hides fallback only after quiz readiness');
+check(experienceCss.includes('html.vq-standalone-page.vq-ready body{overflow:hidden}'),'/pidbir/ locks page scroll only after quiz readiness');
+check(quizJs.includes("document.documentElement.classList.add('vq-ready')"),'/pidbir/ marks quiz ready only after openQuiz');
+check(experienceCss.includes('html.vx-booking-standalone-mobile main>.booking-form~*:not(.booking-mobile-summary){display:none}'),'mobile booking isolates the four-step wizard from footer/reviews');
+check(/if\(index>=0&&prerequisite\)setMobileBookingStep\(index,\{scroll:true\}\)/.test(experienceJs) && experienceJs.includes("index===3&&liveButtons[2]?.classList.contains('is-complete')"),'mobile booking progress buttons switch only to unlocked steps');
+check(bookingSlots.includes("'Залоговий платіж — після вибору дат'"),'mobile booking uses a short non-truncated deposit hint');
+check(bookingSlots.includes('const CORE_SLOTS=window.VACLEANER_CORE?.slots') && bookingSlots.includes('const remoteSlots=validSlots(d?.slots)'),'public booking uses the shared slot configuration and validates remote overrides');
+check(/\.booking-date-grid select\.vx-native-control\{\s*display:none;\s*\}/.test(experienceCss),'custom booking slot UI fully removes the native select from iOS hit-testing');
+check(experienceJs.includes("btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setNativeValue(select,option.value);updateSlots(select)})"),'custom booking slot buttons suppress wrapping-label native select activation');
+check(experienceJs.includes("trigger.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openCalendar(input)})"),'custom booking date trigger suppresses wrapping-label native date activation');
+check(bookingSlots.includes("section.classList.add('vx-product-prefilled')") && experienceCss.includes('#booking-products.vx-product-prefilled:not(.vx-product-expanded)'),'product-aware booking collapses the catalogue behind an explicit change action');
+check(bookingSlots.includes('<small>Ваш вибір</small>')&&bookingSlots.includes('<span>Змінити техніку</span>')&&experienceCss.includes('.vx-product-prefill-bar button:hover{background:#a97738;color:#fff'),'equipment-change action is visually explicit and keeps the selected package named');
+check(experienceCss.includes('/* v4.0.34 — desktop polish for add-ons in booking and quiz results. */') && /@media\(min-width:1200px\)\{[\s\S]*?\.booking-extras label>span b\{[\s\S]*?white-space:nowrap/.test(experienceCss),'desktop booking keeps long stain-remover titles on one line');
+check(/\.booking-extras label\{[\s\S]*?position:relative;[\s\S]*?grid-template-columns:22px minmax\(0,1fr\)/.test(experienceCss) && /\.booking-extras label>strong\{[\s\S]*?position:absolute;[\s\S]*?bottom:15px/.test(experienceCss),'booking add-on price has a dedicated anchored position');
+check(/\.vq-result__extras article,[\s\S]*?grid-template-columns:minmax\(0,1fr\) 144px;[\s\S]*?border-radius:17px/.test(experienceCss),'quiz recommendation uses a contained card and stable action column');
+check(/\.vq-result__extra-action\{[\s\S]*?width:144px;[\s\S]*?gap:11px/.test(experienceCss) && /\.vq-result__extra-action button\{[\s\S]*?width:100%;[\s\S]*?min-height:46px/.test(experienceCss),'quiz price and Added action are visually separated');
+check(quizJs.includes("meta.textContent=q.id==='zones'?'Початок · оберіть зони':`Етап ${stepIndex+1} · уточнюємо деталі`") && !quizJs.includes('Крок ${stepIndex+1} з ${qs.length}'),'quiz progress never claims a false dynamic total');
+check(experienceCss.includes('/* v4.0.38 — Smart Guide progress owns the full header width. */') && /html\.vq-standalone-page \.vq-dialog__header>\.vq-progress\{[^}]*grid-column:2;[^}]*width:100%;[^}]*min-width:0/.test(experienceCss) && /html\.vq-standalone-page \.vq-progress__meta\{[^}]*white-space:nowrap/.test(experienceCss),'Smart Guide progress stays centered, single-line and clear of the close button');
+check(quizJs.includes('function sanitizeState()') && quizJs.includes("if(!hasTextile()){") && quizJs.includes("if(!hasKitchen()){") && quizJs.includes("if(!hasBath()){") && quizJs.includes("if(!hasWindows())state.windowsMode=''"),'quiz clears answers that belong to removed zones');
+check(quizJs.includes("['dry_debris','Пил, шерсть, пилові кліщі чи алергени'") && quizJs.includes("const needJimmy=state.textileProblems.includes('dry_debris')"),'quiz can actually recommend Jimmy for dry textile preparation');
+check(quizJs.includes("['frames','Скло + рами, кути / стики'") && !quizJs.includes("['full','Скло + рами + кути / стики'") && quizJs.includes("product=(needWindowSteam||needJimmy)?'elite':'puzzi_abir'"),'quiz merges duplicate window modes and includes SC 2 when frames or joints are selected');
+check(quizJs.includes("r.productInfo.price-Math.round(r.productInfo.price*.05)") && quizJs.includes('vq-result__rental-price') && !quizJs.includes('vq-result__bonus'),'quiz shows one backend-matching discounted rental price without a duplicate bonus block');
+check(quizJs.includes('class="vq-result-cta" hidden') && experienceCss.includes('.vq-dialog__footer.is-result') && experienceCss.includes('.vq-result-cta .vq-book'),'quiz result keeps total and booking CTA visible in the fixed dialog footer');
+check(htmlFor('bronuvannia').includes('Універсальний плямовивідник для локальної обробки свіжих і змішаних забруднень. Жирні сліди · їжа · косметика · побутові плями.'),'booking uses the final VA SPOT FIX professional explanation');
+check(bookingSlots.includes("terms.href='/umovy/'") && bookingSlots.includes("privacy.href='/polityka-konfidenciynosti/'") && bookingSlots.includes("document.createTextNode(' і ')"),'booking consent has complete legal links and punctuation');
+check(siteJs.includes("control.setAttribute('href','/pidbir/')") && siteJs.includes("'Підібрати рішення ↓'"),'home solution CTA opens the dedicated quiz route');
+check(htmlFor('rishennia/textile').includes('<a class="v4-feature-tech-name" href="/tekhnika/karcher-puzzi-8-1/">Kärcher Puzzi 8/1 і насадка для меблів</a>') && siteJs.includes("'/rishennia/textile':{needle:'Kärcher Puzzi 8/1',href:'/tekhnika/karcher-puzzi-8-1/',mode:'name',label:'Kärcher Puzzi 8/1 і насадка для меблів'}") && !siteJs.includes("label:'Про Kärcher Puzzi 8/1 →'"),'textile solution makes the equipment name itself clickable without a separate Puzzi CTA');
+check(htmlFor('rishennia/steam').includes('<a class="v4-feature-tech-name" href="/tekhnika/karcher-sc-2-deluxe/">Kärcher SC 2 Deluxe</a>') && htmlFor('rishennia/windows').includes('<a class="v4-feature-tech-name" href="/tekhnika/robot-dlia-vikon-abir/">Робот для вікон · ABIR WD8</a>') && siteJs.includes('function solutionTechBridge()') && siteCss.includes('.v4-feature-tech-name{'),'steam and windows solution pages expose server-rendered equipment links with a runtime safety bridge');
+check(!htmlFor('rishennia/windows').includes('Робот для вікон Робот для вікон · ABIR WD8'),'windows solution does not duplicate the ABIR product label');
+check(siteCss.includes('@media (min-width:901px) and (max-width:1180px)') && siteCss.includes('.inner-hero.v4-inner-hero'),'small-desktop editorial heroes have a dedicated safe grid');
+check(/\.v4-service-grid\{[^}]*background:#f4efe8;[^}]*color:#111315/.test(siteCss),'light service cards explicitly restore dark text contrast');
+check(!siteJs.includes('function patchNav('),'runtime no longer rewrites the global navigation after first paint');
+check(!siteJs.includes('[120,500,1200,2400]'),'runtime no longer uses delayed header/footer patch timers');
+check(!generator.includes('function patchNav('),'historical v4 generator cannot reintroduce runtime nav rewriting');
+check(!generator.includes('[120,500,1200,2400]'),'historical v4 generator cannot reintroduce delayed patch timers');
+check(!generator.includes('VA HOME ↗'),'historical v4 generator cannot reintroduce emoji arrow glyphs');
+check(generator.includes('color:#111315') && generator.includes('small-desktop editorial hero safety'),'historical v4 generator preserves current public visual hardening');
+
+const hydratedChunks=['_next/static/chunks/01pb0x0z72e41.js','_next/static/chunks/146ntlcv_t6~w-v4041.js','_next/static/chunks/0x2bx8kerxrmz.js'];
+for(const chunk of hydratedChunks){
+  const text=read(chunk);
+  check(!text.includes('children:"Процес"') && !text.includes('children:"Рішення"') && !text.includes('children:"Умови сервісу"'),`${chunk} contains no stale hydrated footer labels`);
+}
+
+const publicFiles=routes.map(r=>r?`${r}/index.html`:'index.html');
+const stalePrice=publicFiles.filter(f=>read(f).includes('350–3500 UAH'));
+check(stalePrice.length===0,'public structured data no longer advertises the stale 350 UAH minimum');
+const versionedFavicons=publicFiles.filter(f=>/(?:favicon\.(?:ico|svg)|apple-touch-icon\.png)\?v=/.test(read(f)));
+check(versionedFavicons.length===0,'public favicon URLs are stable and unversioned');
+
+
+const packageHtml=htmlFor('komplekty');
+const bookingHtml=htmlFor('bronuvannia');
+const publicPackageLabels=['Глибоке очищення диванів і матраців','Дивани + вікна','Дивани + кухня та ванна','Генеральне прибирання','Ідеальні вікна','HOME RESET'];
+check((packageHtml.match(/class="package-card package-card-large/g)||[]).length===6,'packages desktop catalogue has a complete 3×2 set with no empty third slot');
+check(publicPackageLabels.every(label=>packageHtml.includes(`>${label}</h2>`)),'packages page exposes all six canonical client-facing package names');
+check(publicPackageLabels.every(label=>bookingHtml.includes(`<strong>${label}</strong>`)),'booking exposes the same six canonical client-facing package names');
+check(bookingHtml.includes('data-product-code="puzzi_jimmy"') && read('_next/static/chunks/146ntlcv_t6~w-v4041.js').includes('\"data-product-code\":n.code'),'booking exposes stable product identity for browser regressions independently from marketing copy');
+check((bookingHtml.match(/class="booking-products"[\s\S]*?<\/div>/)?.[0].match(/<button /g)||[]).length===9,'booking catalogue contains exactly three standalone items plus six packages');
+check(bookingHtml.includes('<strong>Kärcher Puzzi 8/1</strong>')&&bookingHtml.includes('Миючий пилосос · дивани, матраци, килими'),'booking presents Puzzi by model first and task second');
+check(bookingHtml.includes('<strong>Kärcher SC 2</strong>')&&bookingHtml.includes('Очищення парою · кухня, ванна, плитка, шви'),'booking presents SC 2 by model first and task second');
+check(bookingHtml.includes('<strong>Робот для вікон</strong>')&&bookingHtml.includes('Вікна, дзеркала, скляні поверхні'),'booking keeps the window robot copy plain-language');
+check(!bookingHtml.includes('<strong>Комбо</strong>')&&!packageHtml.includes('>Комбо</h2>'),'public catalogue never exposes the legacy “Комбо” name');
+check(experienceJs.includes('function syncPackageCatalog()')&&experienceJs.includes("path!=='/komplekty'"),'soft navigation restores the six-card package catalogue after RSC transitions');
+check(experienceJs.includes('const PUBLIC_PRODUCT_LABELS={')&&experienceJs.includes('PUBLIC_PRODUCT_LABELS.combo'),'public package titles are canonical before and after async catalog refreshes');
+check(!packageHtml.includes('\\\"article\\\",\\\"Комбо\\\"')&&!read('komplekty/__next._full.txt').includes('[\"$\",\"article\",\"Комбо\",'),'package hydration payload contains no legacy combo reconciliation key');
+check(/@media\(min-width:1200px\)\{[\s\S]*?\.package-page-grid \.package-card-large h2\{min-height:4em\}[\s\S]*?\.package-page-grid \.package-card-large \.package-items\{min-height:36px\}[\s\S]*?\.package-page-grid \.package-card-large \.package-purpose\{min-height:104px\}[\s\S]*?\.package-page-grid \.package-card-large ul\{min-height:123px\}[\s\S]*?\.package-page-grid \.package-card-large \.package-price\{min-height:44px/.test(experienceCss),'desktop package cards reserve shared title/items/purpose/list/price zones for aligned amounts');
+check(/@media\(min-width:1051px\) and \(max-width:1199px\)\{[\s\S]*?\.package-page-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)\}/.test(experienceCss),'package catalogue uses a two-column bridge before the three-column desktop layout becomes cramped');
+check(/@media\(min-width:1200px\)\{[\s\S]*?\.package-page-grid \.package-card-large h2\{min-height:4em\}/.test(experienceCss),'long final package title reserves a four-line zone across all three-column desktops');
+check(/@media\(min-width:1051px\) and \(max-width:1199px\)\{[\s\S]*?\.package-page-grid \.package-card-large \.package-purpose\{min-height:84px\}/.test(experienceCss),'two-column package bridge reserves a shared purpose zone so prices stay aligned');
+
+const puzziHtml=read('tekhnika/karcher-puzzi-8-1/index.html');
+const puzziCss=read('assets/puzzi-seo.css');
+check(!puzziHtml.includes('"streetAddress"'),'Puzzi landing does not publish a fixed pickup address');
+check(puzziHtml.includes('width="1086" height="1448"'),'Puzzi hero image reserves its intrinsic aspect ratio');
+check((puzziHtml.match(/class="mobile-booking"/g)||[]).length===1 && puzziHtml.includes('<div class="mobile-booking"><a href="/bronuvannia/?product=puzzi">'),'Puzzi landing includes one product-aware mobile booking bar');
+check(/\.puzzi-hero-visual img\{[^}]*inset:-1px;[^}]*width:calc\(100% \+ 2px\);[^}]*max-width:none;[^}]*height:calc\(100% \+ 2px\);[^}]*object-fit:cover/.test(puzziCss),'Puzzi hero image covers the complete bordered visual panel');
+
+console.log(JSON.stringify({passed,failed,status:failed.length?'failed':'passed'}));
+if(failed.length)process.exit(1);
