@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.34",
+  "version": "4.1.35",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -55,6 +55,7 @@
     "test:v4.1.31-admin-booking-meta": "node scripts/test-v4-1-31-admin-booking-meta.mjs",
     "test:v4.1.32-return-detach-ux": "node scripts/test-v4-1-32-return-detach-ux.mjs",
     "test:v4.1.33-navigation-typography": "node scripts/test-v4-1-33-navigation-typography.mjs",
-    "test:v4.1.34-address-assist": "node scripts/test-v4-1-34-address-assist.mjs"
+    "test:v4.1.34-address-assist": "node scripts/test-v4-1-34-address-assist.mjs",
+    "test:v4.1.35-suburb-address": "node scripts/test-v4-1-35-suburb-address.mjs"
   }
 }

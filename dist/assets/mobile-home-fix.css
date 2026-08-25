@@ -1,0 +1,36 @@
+/* VAcleaner mobile homepage structural fix v2.9.4.3 */
+@media (max-width: 900px) {
+  /* Keep the founder placeholder inside its own section. */
+  .v21-anna-media {
+    position: relative !important;
+    top: auto !important;
+  }
+
+  .v21-anna-placeholder {
+    position: absolute !important;
+    inset: 0 !important;
+  }
+}
+
+@media (max-width: 620px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .v21-hero {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .v21-hero-copy,
+  .v21-hero-media,
+  .v21-trust-strip,
+  .v21-service,
+  .v21-light,
+  .v21-packages,
+  .v21-faq,
+  .v21-final {
+    max-width: 100%;
+  }
+}

@@ -8,7 +8,9 @@ const ALLOWED_ORIGINS = new Set([
   "http://localhost:4173",
   "http://127.0.0.1:4173",
 ]);
-const POLTAVA_BBOX = "34.43,49.50,34.72,49.69";
+const CENTER = { lat: 49.5883, lon: 34.5514 };
+const SERVICE_RADIUS_KM = 30;
+const SERVICE_BBOX = "34.16,49.34,34.96,49.84";
 const PHOTON_URL = "https://photon.komoot.io/api/";
 
 function cors(req: Request) {
@@ -29,39 +31,74 @@ function json(req: Request, body: unknown, status = 200) {
 }
 
 function cleanQuery(value: unknown) {
-  return String(value || "").replace(/[<>\u0000-\u001f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100);
+  return String(value || "").replace(/[<>\u0000-\u001f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120);
 }
 
 function text(value: unknown) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
 
-function isPoltava(props: Record<string, unknown>) {
-  const haystack = [props.city, props.locality, props.district, props.county, props.state, props.name]
-    .map(text).join(" ").toLocaleLowerCase("uk-UA");
-  return haystack.includes("полтав") || haystack.includes("poltav");
+function distanceKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const toRad = (v: number) => v * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function coordinates(feature: any) {
+  const coords = Array.isArray(feature?.geometry?.coordinates) ? feature.geometry.coordinates : [];
+  const lon = Number(coords[0]);
+  const lat = Number(coords[1]);
+  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
+function inServiceArea(feature: any) {
+  const point = coordinates(feature);
+  return Boolean(point && distanceKm(CENTER.lat, CENTER.lon, point.lat, point.lon) <= SERVICE_RADIUS_KM);
+}
+
+function settlementOf(p: Record<string, unknown>) {
+  const candidates = [p.city, p.locality, p.town, p.village, p.hamlet, p.municipality];
+  for (const candidate of candidates) {
+    const value = text(candidate);
+    if (value) return value;
+  }
+  const district = text(p.district);
+  if (/полтав/i.test(district)) return "Полтава";
+  return "";
+}
+
+function isPoltavaSettlement(value: string) {
+  const v = value.toLocaleLowerCase("uk-UA");
+  return v === "полтава" || v === "poltava" || v.includes("м. полтава");
 }
 
 function formatFeature(feature: any) {
   const p = feature?.properties || {};
-  const coords = Array.isArray(feature?.geometry?.coordinates) ? feature.geometry.coordinates : [];
+  const point = coordinates(feature);
+  if (!point) return null;
   const street = text(p.street) || (p.osm_key === "highway" ? text(p.name) : "") || (p.type === "street" ? text(p.name) : "");
   const houseNumber = text(p.housenumber);
   const placeName = text(p.name);
+  const settlement = settlementOf(p) || (distanceKm(CENTER.lat, CENTER.lon, point.lat, point.lon) < 8 ? "Полтава" : "Передмістя Полтави");
   const main = street || placeName;
   if (!main) return null;
   const base = houseNumber && !main.includes(houseNumber) ? `${main}, ${houseNumber}` : main;
-  const district = text(p.district || p.locality);
-  const address = `Полтава, ${base}`;
-  const meta = [district && !/полтав/i.test(district) ? district : "", houseNumber ? "точний будинок" : "вулиця"].filter(Boolean).join(" · ");
+  const address = `${settlement}, ${base}`;
+  const areaType = isPoltavaSettlement(settlement) ? "city" : "suburb";
+  const meta = [settlement, areaType === "suburb" ? "передмістя" : "Полтава", houseNumber ? "точний будинок" : "вулиця"].filter((v, i, a) => v && a.indexOf(v) === i).join(" · ");
   return {
     label: base,
     address,
     meta,
     street: street || main,
     houseNumber,
-    lat: Number(coords[1]) || null,
-    lon: Number(coords[0]) || null,
+    settlement,
+    areaType,
+    distanceKm: Math.round(distanceKm(CENTER.lat, CENTER.lon, point.lat, point.lon) * 10) / 10,
+    lat: point.lat,
+    lon: point.lon,
   };
 }
 
@@ -80,20 +117,20 @@ Deno.serve(async (req: Request) => {
   }
   if (q.length < 3) return json(req, { suggestions: [], minChars: 3 });
 
-  const search = /полтав/i.test(q) ? q : `${q}, Полтава`;
+  const search = `${q}, Полтавська область`;
   const url = new URL(PHOTON_URL);
   url.searchParams.set("q", search);
-  url.searchParams.set("bbox", POLTAVA_BBOX);
+  url.searchParams.set("bbox", SERVICE_BBOX);
   url.searchParams.set("countrycode", "UA");
   url.searchParams.set("lang", "uk");
-  url.searchParams.set("limit", "8");
-  url.searchParams.set("lat", "49.5883");
-  url.searchParams.set("lon", "34.5514");
-  url.searchParams.set("zoom", "13");
-  url.searchParams.set("location_bias_scale", "0.1");
+  url.searchParams.set("limit", "12");
+  url.searchParams.set("lat", String(CENTER.lat));
+  url.searchParams.set("lon", String(CENTER.lon));
+  url.searchParams.set("zoom", "11");
+  url.searchParams.set("location_bias_scale", "0.15");
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 3500);
+  const timer = setTimeout(() => controller.abort(), 4000);
   try {
     const response = await fetch(url, {
       signal: controller.signal,
@@ -103,17 +140,18 @@ Deno.serve(async (req: Request) => {
     const payload = await response.json();
     const seen = new Set<string>();
     const suggestions = (Array.isArray(payload?.features) ? payload.features : [])
-      .filter((feature: any) => isPoltava(feature?.properties || {}))
+      .filter(inServiceArea)
       .map(formatFeature)
       .filter(Boolean)
+      .sort((a: any, b: any) => Number(Boolean(b.houseNumber)) - Number(Boolean(a.houseNumber)) || a.distanceKm - b.distanceKm)
       .filter((item: any) => {
         const key = String(item.address).toLocaleLowerCase("uk-UA");
         if (seen.has(key)) return false;
         seen.add(key);
         return true;
       })
-      .slice(0, 6);
-    return json(req, { suggestions, provider: "OpenStreetMap / Photon" });
+      .slice(0, 8);
+    return json(req, { suggestions, provider: "OpenStreetMap / Photon", serviceRadiusKm: SERVICE_RADIUS_KM });
   } catch {
     return json(req, { suggestions: [], providerUnavailable: true });
   } finally {
