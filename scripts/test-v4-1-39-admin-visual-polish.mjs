@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const css=read('assets/admin-v250.css');
+const addressJs=read('assets/address-autocomplete.js');
+const addressCss=read('assets/address-autocomplete.css');
+const workflow=read('.github/workflows/pages.yml');
+const pkg=JSON.parse(read('package.json'));
+const rel=JSON.parse(read('release.json'));
+let n=0, failed=0;
+function ok(name,cond){n++;if(cond)console.log(`OK   ${name}`);else{failed++;console.error(`FAIL ${name}`)}}
+ok('release is v4.1.39+',pkg.version===rel.version&&Number(rel.build)>=4139);
+ok('booking fields align to content start',css.includes('.booking-form .fields{align-items:start}')&&css.includes('.booking-form .fields>.field{align-self:start;align-content:start;min-width:0}'));
+ok('intermediate clients use explicit mobile stats',css.includes('@media (min-width:761px) and (max-width:1100px)')&&css.includes('.client-mobile-stats{display:flex;grid-column:1')&&css.includes('.client-row>span.client-open-indicator::before{content:none}'));
+ok('old giant client pseudo labels are neutralized',css.includes('.client-row>strong:first-of-type::before,.client-row>strong:nth-of-type(2)::before{content:none}'));
+ok('provider outage is a quiet manual fallback',addressJs.includes("setStatus(ctx,'manual','Введіть адресу вручну.',false)")&&!addressJs.includes('Підказки тимчасово недоступні. Адресу можна ввести вручну.'));
+ok('manual address status does not force OSM attribution',addressJs.includes('showAttribution=true')&&addressJs.includes("showAttribution?'<a href=\"https://www.openstreetmap.org/copyright\""));
+ok('manual helper has muted styling',addressCss.includes('.vac-address-status.manual{color:#7f8b8e}')&&addressCss.includes('.delivery-address-field .vac-address-status.manual'));
+ok('catalog action stays on one line',css.includes('.catalog-toolbar .btn{white-space:nowrap}'));
+ok('workflow runs v4.1.39 visual regression',workflow.includes('test:v4.1.39-admin-visual-polish'));
+if(failed)process.exit(1);
+console.log(`v4.1.39 admin visual polish: ${n}/${n} OK`);

@@ -16,7 +16,7 @@ pwa.BOOKINGS[0]['fulfillment']='delivery'
 pwa.BOOKINGS[0]['fulfillment_address']='Полтава, вулиця Героїв України, будинок 123-А, під’їзд 4, квартира 158, домофон 3478'
 pwa.BOOKINGS[0]['customer_comment']='Дуже довгий коментар клієнта: потрібно почистити великий кутовий диван, два матраци, кілька крісел та килим у вітальні; доступ до квартири через другий під’їзд.'
 
-VIEWS=['bookings','calendar','upcoming','equipment','clients','campaigns','analytics','chemistry','settings']
+VIEWS=['bookings','calendar','upcoming','equipment','clients','campaigns','finances','analytics','chemistry','settings']
 
 class QA:
     def __init__(self, artifacts: Path): self.artifacts=artifacts; self.passed=0; self.failed=[]
@@ -69,6 +69,14 @@ def view_suite(page:Page,qa:QA,width:int):
                 qa.check(' ' not in cols.strip(),f'{width}: settings use one-column tablet-desktop layout')
         if view=='clients':
             qa.check(page.locator('.clients-table').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: clients stay readable without horizontal table scrolling')
+            if 761<=width<=1100:
+                client_layout=page.locator('.client-row').first.evaluate("""el=>{const arrow=el.querySelector('.client-open-indicator'),stats=el.querySelector('.client-mobile-stats'),last=el.querySelector('.client-last-date'),r=el.getBoundingClientRect();return{height:r.height,arrowBefore:getComputedStyle(arrow,'::before').content,statsDisplay:getComputedStyle(stats).display,lastSize:parseFloat(getComputedStyle(last).fontSize)}}""")
+                qa.check(client_layout['height']<160,f'{width}: intermediate client rows stay compact instead of stretching into pseudo-label cards')
+                qa.check(client_layout['arrowBefore'] in ('none','normal','""'),f'{width}: client chevron has no injected “Остання оренда” pseudo-label')
+                qa.check(client_layout['statsDisplay']!='none' and client_layout['lastSize']<=12,f'{width}: intermediate client stats use explicit compact metadata')
+        if view=='finances':
+            qa.check(page.locator('.finance-kpis').count()==1 and page.locator('.finance-dashboard').count()==1,f'{width}: finances render KPI and decision sections')
+            qa.check(page.locator('.finance-ledger').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: finance ledger stays inside the main column')
         if view=='campaigns':
             campaign_layout=page.locator('.campaign-panel').evaluate("""el=>{const head=el.querySelector('.campaign-panel-head'),summary=el.querySelector('.campaign-summary'),row=el.querySelector('.campaign-row');return{head:getComputedStyle(head).display,summary:getComputedStyle(summary).display,summaryCols:getComputedStyle(summary).gridTemplateColumns.split(' ').filter(Boolean).length,row:row?getComputedStyle(row).display:'none',name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize),action:parseFloat(getComputedStyle(el.querySelector('.campaign-actions .btn')).fontSize)}}""")
             qa.check(campaign_layout['head']=='flex',f'{width}: campaigns desktop header uses styled flex layout')
@@ -119,11 +127,34 @@ def modal_suite(page:Page,qa:QA,width:int):
     qa.check(date_state['opacity']<=0.01 and date_state['pointer']=='auto' and date_state['hit'],f'{width}: desktop date field click reaches only the native input')
     qa.check(date_state['displayText'] and not date_state['interactiveDisplay'],f'{width}: desktop date has one noninteractive display layer without duplicate native text')
     modal_check(page,qa,width,'new-booking','#bookingForm')
+    # Production parity: address helper is loaded and mutates the edit form after render.
+    # Verify that this async wrapper cannot stretch the sibling fulfillment field.
+    delivery_id=pwa.BOOKINGS[1]['id']
+    page.locator(f'.booking-card[data-id="{delivery_id}"] [data-action="edit"]').click();page.wait_for_selector('#bookingForm');page.wait_for_timeout(90)
+    step4=page.locator('#bookingForm [data-mobile-step="4"]')
+    fulfillment=step4.locator('.field').first
+    address=step4.locator('.delivery-address-field')
+    gap=fulfillment.evaluate("""el=>{const label=el.querySelector(':scope>span'),select=el.querySelector('select'),lr=label.getBoundingClientRect(),sr=select.getBoundingClientRect();return sr.top-lr.bottom}""")
+    field_metrics=fulfillment.evaluate("""el=>{const r=el.getBoundingClientRect(),s=el.querySelector('select').getBoundingClientRect();return{height:r.height,selectBottom:s.bottom,fieldBottom:r.bottom}}""")
+    qa.check(gap>=4 and gap<=14,f'{width}: booking fulfillment label/select keep one compact 8px rhythm after address helper attaches')
+    qa.check(field_metrics['fieldBottom']-field_metrics['selectBottom']<4,f'{width}: booking fulfillment field no longer stretches to address-helper height')
+    qa.check(address.locator('.vac-address-status').count()==1 and address.locator('.vac-address-details').count()==1,f'{width}: address helper remains present without breaking booking layout')
+    address.locator('input[name="deliveryAddress"]').fill('Богдана');page.wait_for_timeout(520)
+    manual=address.locator('.vac-address-status').evaluate("el=>({text:el.textContent.trim(),hasLink:!!el.querySelector('a'),cls:el.className})")
+    qa.check('введіть її вручну' in manual['text'].lower() and not manual['hasLink'] and 'manual' in manual['cls'],f'{width}: unavailable/no-result address assist falls back quietly without yellow OSM warning clutter')
+    qa.shot(page,f'{width}-modal-booking-edit-address.png')
+    page.locator('#bookingForm .close').click();page.wait_for_timeout(30)
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[0]["id"]}"] [data-action="process"]').click();modal_check(page,qa,width,'process','#processForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[2]["id"]}"] [data-action="issue"]').click();modal_check(page,qa,width,'issue','#issueForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="complete"]').click();modal_check(page,qa,width,'complete','#financeForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="finance"]').click();modal_check(page,qa,width,'finance','#financeForm')
     page.locator('.nav button[data-view="equipment"]').click();page.wait_for_timeout(30);page.locator('#editPrices').click();modal_check(page,qa,width,'catalog','#catalogForm')
+    page.locator('.nav button[data-view="clients"]').click();page.wait_for_timeout(40);page.locator('[data-client-open]').first.click();modal_check(page,qa,width,'client','#clientEditor')
+    page.locator('.nav button[data-view="finances"]').click();page.wait_for_timeout(40);page.locator('#addExpense').click();modal_check(page,qa,width,'expense','#expenseForm')
+    page.locator('.nav button[data-view="bookings"]').click();page.wait_for_timeout(40)
+    page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[1]["id"]}"] [data-action="status"]').click();modal_check(page,qa,width,'status-correction','#statusCorrectForm')
+    page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="extend"]').click();modal_check(page,qa,width,'extend-rental','#extendRentalForm')
+    page.locator('.nav button[data-view="campaigns"]').click();page.wait_for_timeout(40);page.locator('#smsCampaign').click();page.wait_for_selector('.sms-workspace-footer',timeout=5000);modal_check(page,qa,width,'sms-campaign','.sms-campaign-modal')
 
 def run_size(browser,qa,width,height):
     page=pwa.render_page(browser,width,height)

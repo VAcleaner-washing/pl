@@ -33,10 +33,10 @@ function isDeliveryContext(ctx){
   if(ctx.mode==='public')return Boolean(ctx.input.closest('.booking-delivery-address'));
   const form=ctx.input.closest('form');return form?.querySelector('[name="fulfillment"]')?.value==='delivery';
 }
-function setStatus(ctx,type,text){
+function setStatus(ctx,type,text,showAttribution=true){
   if(!ctx.status)return;
   ctx.status.className=`vac-address-status ${type||''}`.trim();
-  ctx.status.innerHTML=`<span>${esc(text)}</span><a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>`;
+  ctx.status.innerHTML=`<span>${esc(text)}</span>${showAttribution?'<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>':''}`;
 }
 function closeList(ctx){
   ctx.items=[];ctx.active=-1;ctx.list.hidden=true;ctx.input.setAttribute('aria-expanded','false');ctx.list.innerHTML='';
@@ -72,14 +72,14 @@ async function search(ctx){
     const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({q}),signal:ctx.abort.signal});
     if(!res.ok)throw new Error('address_lookup_failed');
     const data=await res.json();
-    if(data.providerUnavailable){closeList(ctx);setStatus(ctx,'warn','Підказки тимчасово недоступні. Адресу можна ввести вручну.');return}
+    if(data.providerUnavailable){closeList(ctx);setStatus(ctx,'manual','Введіть адресу вручну.',false);return}
     const items=Array.isArray(data.suggestions)?data.suggestions:[];
-    if(!items.length){closeList(ctx);setStatus(ctx,'warn','Не знайшли точну адресу. Перевірте написання або введіть її вручну.');return}
+    if(!items.length){closeList(ctx);setStatus(ctx,'manual','Не знайшли адресу — введіть її вручну.',false);return}
     renderList(ctx,items);
     setStatus(ctx,'hint','Оберіть адресу зі списку — так маршрут відкриється точно.');
   }catch(err){
     if(err?.name==='AbortError')return;
-    closeList(ctx);setStatus(ctx,'warn','Підказки недоступні. Адресу можна ввести вручну.');
+    closeList(ctx);setStatus(ctx,'manual','Введіть адресу вручну.',false);
   }
 }
 function validate(ctx,show=true){
@@ -91,7 +91,7 @@ function validate(ctx,show=true){
     return false;
   }
   ctx.input.setCustomValidity('');
-  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'warn','Адресу введено вручну — менеджер перевірить її перед доставкою.');
+  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'manual','Адреса введена вручну.',false);
   return true;
 }
 function bindSubmit(ctx){

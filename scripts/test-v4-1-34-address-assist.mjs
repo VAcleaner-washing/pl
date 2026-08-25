@@ -16,7 +16,7 @@ const build=String(release.build);
 ok('public loads address helper',pub.includes(`/assets/address-autocomplete.js?v=${build}`)&&pub.includes(`/assets/address-autocomplete.css?v=${build}`));
 ok('admin loads address helper',admin.includes(`/assets/address-autocomplete.js?v=${build}`)&&admin.includes(`/assets/address-autocomplete.css?v=${build}`));
 ok('autocomplete endpoint is Supabase proxy',runtime.includes('vacleaner-address-v1')&&runtime.includes('Почніть вводити адресу'));
-ok('manual fallback keeps booking possible',runtime.includes('Адресу введено вручну')&&runtime.includes('Підказки недоступні. Адресу можна ввести вручну.'));
+ok('manual fallback keeps booking possible',runtime.includes('Адреса введена вручну')&&runtime.includes("setStatus(ctx,'manual','Введіть адресу вручну.',false)"));
 ok('house number validation exists',runtime.includes('Вкажіть вулицю і номер будинку')&&runtime.includes('hasHouseNumber'));
 ok('delivery details are separate',runtime.includes('Під’їзд / орієнтир')&&runtime.includes('DETAILS_SEPARATOR'));
 ok('public create submits composed address',bookingChunk.includes('globalThis.__VAC_DELIVERY_ADDRESS__?.(S)'));

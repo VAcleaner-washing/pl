@@ -92,6 +92,8 @@ jobs:
           npm run test:v4.1.36-delivery-entrance
       - name: Verify desktop booking address containment
         run: npm run test:v4.1.37-booking-address-overflow
+      - name: Verify v4.1.39 admin visual polish
+        run: npm run test:v4.1.39-admin-visual-polish
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources

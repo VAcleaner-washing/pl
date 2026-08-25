@@ -5817,3 +5817,36 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 @media(max-width:359px){
   .booking-card .booking-row-body>div{padding-top:9px;padding-bottom:9px}
 }
+
+
+/* v4.1.39 — full admin visual pass: booking form alignment, intermediate client layout and toolbar polish. */
+.booking-form .fields{align-items:start}
+.booking-form .fields>.field{align-self:start;align-content:start;min-width:0}
+.booking-form .fields>.field>span:first-child{align-self:start}
+.booking-form .delivery-address-field{align-self:start;align-content:start}
+.catalog-toolbar .btn{white-space:nowrap}
+.clients-toolbar>div{white-space:nowrap}
+
+@media (min-width:901px) and (max-width:1100px){
+  .clients-toolbar{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1fr);align-items:center;gap:10px 12px}
+  .clients-toolbar>div{margin-right:0}
+  .clients-toolbar label{min-width:0}
+  .clients-toolbar select{width:100%;min-width:0}
+}
+
+@media (min-width:761px) and (max-width:1100px){
+  .clients-head{display:none}
+  .client-row{grid-template-columns:minmax(0,1fr) 42px;grid-auto-rows:auto;gap:5px 12px;min-height:0;padding:13px 14px}
+  .client-row .client-name{grid-column:1;grid-row:auto}
+  .client-row>a,.client-row>.client-no-phone{grid-column:1;grid-row:auto;font-size:12px}
+  .client-row>strong{display:none}
+  .client-mobile-stats{display:flex;grid-column:1;grid-row:auto;flex-wrap:wrap;gap:5px 14px;color:var(--muted);font-size:11px;line-height:1.35}
+  .client-mobile-stats span{display:inline-flex;align-items:baseline;gap:4px}
+  .client-mobile-stats b{color:var(--text);font-size:12px}
+  .client-last-date{display:block;grid-column:1;grid-row:auto;color:var(--muted);font-size:11px;line-height:1.35}
+  .client-last-date::before{content:'Остання оренда · ';color:#6f7a7f;font-weight:430}
+  .client-row>span.client-open-indicator{grid-column:2;grid-row:1/5;align-self:center;justify-self:end;width:38px;height:38px}
+  .client-row>span.client-open-indicator::before{content:none}
+  .client-row>strong:first-of-type::before,.client-row>strong:nth-of-type(2)::before{content:none}
+}
+

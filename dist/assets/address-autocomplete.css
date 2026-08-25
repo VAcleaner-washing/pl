@@ -9,7 +9,7 @@
 .vac-address-status{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:7px;font-size:11px;font-weight:450;line-height:1.35;color:#98a3a2}
 .vac-address-status>span{min-width:0}
 .vac-address-status a{flex:0 0 auto;color:#8d9695;text-decoration:none;font-size:10px;font-weight:440}
-.vac-address-status.ok{color:#71c79f}.vac-address-status.warn{color:#d4b16e}.vac-address-status.error{color:#e38b8b}.vac-address-status.loading{color:#aeb7b6}
+.vac-address-status.ok{color:#71c79f}.vac-address-status.warn{color:#c3a46d}.vac-address-status.manual{color:#7f8b8e}.vac-address-status.error{color:#e38b8b}.vac-address-status.loading{color:#aeb7b6}
 .vac-address-details{display:grid;gap:6px;margin-top:11px}
 .vac-address-details>span{font-size:11px;font-weight:520;color:#a9b0af}
 .vac-address-details>span small{font-weight:430;color:#7d8786}
@@ -23,3 +23,11 @@
 
 /* v4.1.36 — delivery is to the entrance; keep the operational note quiet. */
 .vac-address-delivery-note{display:block;margin-top:7px;color:var(--muted,#8e979d);font-size:11px;line-height:1.35;font-weight:430}
+
+
+/* v4.1.39 — address helper is supportive UI, not a primary warning block. */
+.delivery-address-field .vac-address-status{min-height:0;margin-top:6px;color:#879195;font-size:10.5px;font-weight:430}
+.delivery-address-field .vac-address-status.manual{color:#818b8e}
+.delivery-address-field .vac-address-status.manual>span{opacity:.92}
+.delivery-address-field .vac-address-details{margin-top:9px}
+.delivery-address-field .vac-address-delivery-note{margin-top:5px}
