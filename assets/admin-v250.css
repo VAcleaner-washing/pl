@@ -5812,3 +5812,8 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .booking-delivery>span{min-width:0;max-width:100%}
 .booking-delivery .delivery-route-link{min-width:0;max-width:100%;overflow:hidden}
 .booking-delivery .delivery-route-link>span{display:block;width:100%;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal}
+
+/* v4.1.38 — preserve stacked mobile booking detail while keeping 320px cards inside the tested phone viewport. */
+@media(max-width:359px){
+  .booking-card .booking-row-body>div{padding-top:9px;padding-bottom:9px}
+}
