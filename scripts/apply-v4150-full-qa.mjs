@@ -24,7 +24,7 @@ const config=JSON.parse(read('config/vacleaner.json'));
 // 2) Remove stale v4144 cache key from the booking hardening layer.
 {
   const rel='assets/public-experience.js';
-  let js=read(rel).replaceAll('booking-hardening-v4144.css?v=4144',`booking-hardening-v4144.css?v=${build}`).replaceAll('booking-hardening-v4144.js?v=4144',`booking-hardening-v4144.js?v=${build}`);
+  let js=read(rel).replace(/booking-hardening-v4144\.css\?v=\d+/g,`booking-hardening-v4144.css?v=${build}`).replace(/booking-hardening-v4144\.js\?v=\d+/g,`booking-hardening-v4144.js?v=${build}`);
   write(rel,js);
 }
 

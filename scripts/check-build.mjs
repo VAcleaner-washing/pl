@@ -65,8 +65,10 @@ if(siteRuntime.includes("if(path==='/'){"))errors.push('duplicate home picker br
 const homePickerChunk=fs.readFileSync(path.join(root,'_next','static','chunks','01pb0x0z72e41.js'),'utf8');
 for(const token of ['Не знаєте, що підійде?','Опишіть задачу одним повідомленням — без бронювання й зобов’язань.','Запитати менеджера'])if(!homePickerChunk.includes(token))errors.push(`home non-duplicate helper parity missing: ${token}`);
 for(const token of ['Кілька задач одразу?','Підібрати за 30 сек'])if(homePickerChunk.includes(token))errors.push(`duplicate home picker copy leaked into hydrated chunk: ${token}`);
-const bookingGuide=fs.readFileSync(path.join(root,'assets','public-quiz.js'),'utf8');
-for(const token of ['data-vq-booking-help','Підібрати рішення за 30 секунд →'])if(!bookingGuide.includes(token))errors.push(`booking Smart Guide entry missing: ${token}`);
+const bookingGuide=fs.readFileSync(path.join(root,'assets','booking-hardening-v4144.js'),'utf8');
+for(const token of ['Що плануєте почистити?','Пройти точний підбір за 30 секунд →','Врахуємо тип забруднення, плями, запах і кількість зон.'])if(!bookingGuide.includes(token))errors.push(`booking task/quiz positioning missing: ${token}`);
+const bookingEntry=fs.readFileSync(path.join(root,'assets','booking-entry-v4149.js'),'utf8');
+if(bookingEntry.includes('function injectHelp')||bookingEntry.includes("box.className='vq-booking-help'"))errors.push('legacy duplicate quiz banner is still injected above booking task choice');
 const solutionsPicker=fs.readFileSync(path.join(root,'rishennia','__next.rishennia.__PAGE__.txt'),'utf8');
 for(const token of ['Кілька задач одразу?','Підібрати за 30 сек','/pidbir/'])if(!solutionsPicker.includes(token))errors.push(`solutions picker server parity missing: ${token}`);
 const siteV400Css=fs.readFileSync(path.join(root,'assets','site-v400.css'),'utf8');

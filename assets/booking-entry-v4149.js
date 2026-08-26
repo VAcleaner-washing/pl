@@ -12,11 +12,7 @@
   function setControlled(input,value){
     if(!input)return false;const descriptor=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');descriptor?.set?.call(input,value);input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));return true;
   }
-  function injectHelp(){
-    if(document.querySelector('[data-vq-booking-help]'))return;
-    const heading=document.querySelector('.booking-step .booking-step-heading');if(!heading)return;
-    const box=document.createElement('div');box.className='vq-booking-help';box.dataset.vqBookingHelp='1';box.innerHTML='<span>Не знаєте, що обрати?</span><a href="/pidbir/">Підібрати рішення за 30 секунд →</a>';heading.insertAdjacentElement('afterend',box);
-  }
+  function removeLegacyHelp(){document.querySelectorAll('[data-vq-booking-help]').forEach(node=>node.remove())}
   function decorateExtras(){
     const root=document.querySelector('.booking-extras');if(!root)return;
     const heading=root.querySelector('h3'),intro=root.querySelector(':scope > p');if(heading)heading.textContent='Професійні засоби';if(intro)intro.textContent='Підберіть під конкретне забруднення · засоби купуються окремо й залишаються у вас.';root.querySelector('.vq-extra-choice')?.remove();
@@ -45,7 +41,7 @@
     const banner=ensureBanner(product,extras,promo,source);banner?.scrollIntoView({block:'nearest'});return true;
   }
   let attempts=0,timer=0;
-  function boot(){injectHelp();decorateExtras();if(applyPreset()||attempts>=10)return;attempts+=1;clearTimeout(timer);timer=setTimeout(boot,240)}
+  function boot(){removeLegacyHelp();decorateExtras();if(applyPreset()||attempts>=10)return;attempts+=1;clearTimeout(timer);timer=setTimeout(boot,240)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
   window.addEventListener('load',boot,{once:true});
 })();

@@ -339,12 +339,9 @@
     if(a){a.href='/pidbir/';a.textContent='Підібрати рішення';}
   }
 
-  function injectBookingEscape(){
-    if(path!=='/bronuvannia'||document.querySelector('[data-vq-booking-help]'))return;
-    const heading=document.querySelector('.booking-step .booking-step-heading');if(!heading)return;
-    const box=document.createElement('div');box.className='vq-booking-help';box.dataset.vqBookingHelp='1';
-    box.innerHTML='<span>Не знаєте, що обрати?</span><a href="/pidbir/">Підібрати рішення за 30 секунд →</a>';
-    heading.insertAdjacentElement('afterend',box);
+  function removeBookingEscape(){
+    if(path!=='/bronuvannia')return;
+    document.querySelectorAll('[data-vq-booking-help]').forEach(node=>node.remove());
   }
 
   function injectStainCareSection(){
@@ -433,7 +430,7 @@
   function bootPublicQuiz(){
     injectTeaser();
     injectSolutionsEntry();
-    injectBookingEscape();
+    removeBookingEscape();
     injectStainCareSection();
     decorateBookingExtras();
     applyBookingPreset();

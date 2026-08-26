@@ -110,12 +110,13 @@ const TASKS={
   whole:{label:'Кілька зон / весь дім',title:'Кілька зон або весь дім',copy:'Оберіть масштаб: дивани + кухня/ванна, генеральне прибирання або повний HOME RESET з усією технікою.',codes:['combo','general','elite'],primary:'general',badges:{combo:'2 основні зони',general:'Рекомендуємо',elite:'Максимальний комплект'}},
   know:{label:'Я знаю, яку техніку хочу',title:'Уся техніка та комплекти',copy:'Показуємо весь каталог — оберіть конкретну техніку або комплект.',codes:null,primary:''}
 };
-function smartHtml(){return `<div class="vx-smart-entry" data-vx-smart-entry><div class="vx-smart-entry__head"><small>Швидший вибір</small><h3>Що саме хочете прибрати?</h3><p>Не потрібно розбиратися в усій техніці. Оберіть задачу — покажемо 1–3 доречні варіанти.</p></div><div class="vx-smart-entry__grid">${Object.entries(TASKS).map(([k,t])=>`<button type="button" data-vx-task="${k}"><span>${t.label}</span><i aria-hidden="true">→</i></button>`).join('')}</div><a href="/pidbir/" class="vx-smart-entry__guide">Не впевнені? Підбір за 30 секунд →</a></div><div class="vx-smart-taskbar" hidden><span><small>Ваша задача</small><strong></strong></span><button type="button">Змінити</button></div>`}
+function smartHtml(){return `<div class="vx-smart-entry" data-vx-smart-entry><div class="vx-smart-entry__head"><small>Оберіть задачу</small><h3>Що плануєте почистити?</h3><p>Один клік — покажемо відповідну техніку та комплекти.</p></div><div class="vx-smart-entry__grid">${Object.entries(TASKS).map(([k,t])=>`<button type="button" data-vx-task="${k}"><span>${t.label}</span><i aria-hidden="true">→</i></button>`).join('')}</div><div class="vx-smart-entry__guide"><span><strong>Не впевнені, який комплект потрібен?</strong><small>Врахуємо тип забруднення, плями, запах і кількість зон.</small></span><a href="/pidbir/">Пройти точний підбір за 30 секунд →</a></div></div><div class="vx-smart-taskbar" hidden><span><small>Ваша задача</small><strong></strong></span><button type="button">Змінити</button></div>`}
 function clearProductMeta(grid){$$('button[data-product-code]',grid).forEach(b=>{b.hidden=false;b.style.removeProperty('order');delete b.dataset.vxSmartBadge;delete b.dataset.vxSmartNote;b.classList.remove('vx-smart-primary')})}
 function setTask(task,{silent=false}={}){
   const cfg=TASKS[task],section=$('#booking-products'),grid=section?.querySelector('.booking-products');if(!cfg||!section||!grid)return;
   section.dataset.vxSmartTask=task;
   const entry=$('[data-vx-smart-entry]',section),bar=$('.vx-smart-taskbar',section),heading=$('.booking-step-heading h2',section),copy=$('.booking-step-heading p',section);
+  const stepHeading=$('.booking-step-heading',section);if(stepHeading)stepHeading.hidden=false;
   if(entry)entry.hidden=true;if(bar){bar.hidden=false;$('strong',bar).textContent=cfg.label}
   clearProductMeta(grid);grid.classList.add('vx-smart-products-visible');
   if(cfg.codes){
@@ -132,7 +133,7 @@ function resetTask(){
   const section=$('#booking-products'),grid=section?.querySelector('.booking-products');if(!section||!grid)return;
   delete section.dataset.vxSmartTask;clearProductMeta(grid);grid.classList.remove('vx-smart-products-visible');
   $('[data-vx-smart-entry]',section)?.removeAttribute('hidden');const bar=$('.vx-smart-taskbar',section);if(bar)bar.hidden=true;
-  const h=$('.booking-step-heading h2',section),p=$('.booking-step-heading p',section);if(h)h.textContent='Оберіть техніку або комплект';if(p)p.textContent='Спочатку оберіть задачу — покажемо тільки релевантні варіанти. Якщо вже знаєте техніку, відкрийте весь список.';
+  const stepHeading=$('.booking-step-heading',section);if(stepHeading)stepHeading.hidden=true;
   save();
 }
 function enhanceSmartEntry(){
@@ -141,10 +142,10 @@ function enhanceSmartEntry(){
   const pref=selectedProduct();
   if(!pref&&!hasExternalPreset()){
     section.querySelector('.booking-step-heading')?.insertAdjacentHTML('afterend',smartHtml());
+    const stepHeading=section.querySelector('.booking-step-heading');if(stepHeading)stepHeading.hidden=true;
     grid.classList.add('vx-smart-products');
     $$('[data-vx-task]',section).forEach(b=>b.addEventListener('click',()=>setTask(b.dataset.vxTask)));
     $('.vx-smart-taskbar button',section)?.addEventListener('click',resetTask);
-    const p=$('.booking-step-heading p',section);if(p)p.textContent='Спочатку оберіть задачу — покажемо тільки релевантні варіанти. Якщо вже знаєте техніку, відкрийте весь список.';
   }else grid.classList.add('vx-smart-products-visible');
   window.__VAC_SMART_BOOKING_SET_TASK__=setTask;
 }

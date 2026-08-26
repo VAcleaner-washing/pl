@@ -116,6 +116,8 @@ jobs:
         run: npm run test:v4.1.49-performance-ci
       - name: Verify v4.1.50 full QA and consistency
         run: npm run test:v4.1.50-full-qa
+      - name: Verify v4.1.51 task choice and quiz positioning
+        run: npm run test:v4.1.51-quiz-positioning
       - name: Build clean Pages artifact
         run: npm run build
       - name: Upload Pages artifact
