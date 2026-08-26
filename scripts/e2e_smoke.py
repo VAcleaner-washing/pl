@@ -610,6 +610,12 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.wait_for_timeout(420)
         checks.check("Обрати дату" not in cta.inner_text(), "Phone estimate refresh keeps CTA on contacts")
         promo = page.locator('#booking-contact .booking-promo-field input')
+        if not promo.is_visible():
+            promo_toggle = page.locator('#booking-contact .booking-promo-field .vx-promo-toggle')
+            checks.check(promo_toggle.count() == 1 and promo_toggle.is_visible(), "Manual promo disclosure is available on contacts step")
+            promo_toggle.click()
+            expect(promo).to_be_visible()
+        checks.check(promo.is_visible(), "Manual promo field opens before promo entry")
         promo.fill('RETURN10')
         page.wait_for_timeout(50)
         checks.check("Обрати дату" not in cta.inner_text(), "Promo entry never regresses CTA to date")

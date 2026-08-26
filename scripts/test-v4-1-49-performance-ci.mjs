@@ -13,6 +13,7 @@ ok('home bootstrap lazy-loads the quiz only on user intent',read('assets/home-sm
 ok('full quiz exposes an explicit lazy-open bridge',quiz.includes('window.__VAC_OPEN_SMART_GUIDE__=openQuiz'));
 ok('generic E2E selects a Smart Entry task before clicking equipment',e2e.includes('data-vx-task="sofa"')&&e2e.indexOf('data-vx-task="sofa"')<e2e.indexOf('.booking-products button:visible'));
 ok('mobile E2E reveals Smart Entry task before Puzzi + Jimmy bundle',e2e.includes('data-vx-task="mattress"')&&e2e.indexOf('data-vx-task="mattress"')<e2e.indexOf('expect(eligible_product).to_be_visible()'));
+ok('mobile E2E opens collapsed promo disclosure before filling promo',e2e.includes('.vx-promo-toggle')&&e2e.includes('expect(promo).to_be_visible()')&&e2e.indexOf('.vx-promo-toggle')<e2e.indexOf("promo.fill('RETURN10')"));
 ok('PWA/browser QA mock follows production admin-bookings-v4 gateway',pwaQa.includes("vacleaner-admin-bookings-v4")&&pwaQa.includes("payload.action==='calendar'"));
 ok('E2E deposit assertion follows current final-settlement wording',e2e.includes('Deposit copy explains final settlement')&&!e2e.includes('Deposit copy is clear'));
 ok('workflow has independent static and browser gates',/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&workflow.includes('needs: validate'));
