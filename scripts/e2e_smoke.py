@@ -382,6 +382,9 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.locator(".vx-calendar-close").click()
         smart_task = page.locator('[data-vx-task="sofa"]')
         checks.check(smart_task.count() == 1 and smart_task.is_visible(), "Generic booking starts with visible Smart Entry tasks")
+        smart_task.hover()
+        hover_state = smart_task.evaluate("""el => { const s=getComputedStyle(el); return {color:s.color, background:s.backgroundColor}; }""")
+        checks.check(hover_state["color"] in {"rgb(238, 241, 242)", "rgb(255, 255, 255)"} and hover_state["background"] != "rgba(214, 164, 95, 0.08)", "Smart Entry hover contrast stays readable")
         smart_task.click()
         product_choice = page.locator('.booking-products button:visible').first
         expect(product_choice).to_be_visible()

@@ -143,18 +143,113 @@ function setActive(ctx,index){
   buttons.forEach((b,i)=>{b.classList.toggle('active',i===ctx.active);b.setAttribute('aria-selected',i===ctx.active?'true':'false')});
   buttons[ctx.active]?.scrollIntoView({block:'nearest'});
 }
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
+function addressVariants(raw){
+  const q=String(raw||'').trim().replace(/\s+/g,' ');
+  const clean=q.replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i,'').trim();
+  const m=clean.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  const variants=[q,clean];
+  if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
+  else variants.push(clean+', Полтава');
+  return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
+}
 async function search(ctx){
   const q=String(ctx.input.value||'').trim();
-  if(q.length<3){closeList(ctx);setStatus(ctx,'hint','Почніть вводити адресу — підкажемо Полтаву та населені пункти поруч.');return}
+  if(q.length<3){closeList(ctx);setStatus(ctx,'hint','Введіть вулицю й номер будинку — знайдемо адресу та порахуємо доставку.');return}
   ctx.abort?.abort();ctx.abort=new AbortController();
   setStatus(ctx,'loading','Шукаємо адресу…');
   try{
-    const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({q}),signal:ctx.abort.signal});
-    if(!res.ok)throw new Error('address_lookup_failed');
-    const data=await res.json();
-    if(data.providerUnavailable){closeList(ctx);setStatus(ctx,'manual','Введіть адресу вручну.',false);return}
-    const items=Array.isArray(data.suggestions)?data.suggestions:[];
-    if(!items.length){closeList(ctx);setStatus(ctx,'manual','Не знайшли адресу — введіть її вручну.',false);return}
+    let data=null,items=[];
+    for(const candidate of addressVariants(q)){
+      const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({q:candidate}),signal:ctx.abort.signal});
+      if(!res.ok)continue;
+      data=await res.json();
+      items=Array.isArray(data.suggestions)?data.suggestions:[];
+      if(items.length)break;
+      if(data.providerUnavailable)break;
+    }
+    if(data?.providerUnavailable){closeList(ctx);setStatus(ctx,'manual','Пошук адрес тимчасово недоступний. Введіть адресу повністю — менеджер перевірить її до передоплати.',false);return}
+    if(!items.length){closeList(ctx);setStatus(ctx,'manual','Не знайшли точний збіг. Перевірте назву вулиці й номер або введіть адресу повністю.',false);return}
     renderList(ctx,items);
     setStatus(ctx,'hint','Оберіть адресу зі списку — так маршрут відкриється точно.');
   }catch(err){
@@ -203,7 +298,7 @@ function attach(input,mode){
   const details=detailBox.querySelector('input');details.value=original.details;
   const ctx={input,mode,wrap,list,status,detailBox,details,items:[],active:-1,selected:'',timer:0,abort:null,setting:false};
   attached.set(input,ctx);if(mode==='admin')activeAdmin=ctx;else activePublic=ctx;
-  setStatus(ctx,'hint','Почніть вводити адресу — підкажемо Полтаву та населені пункти поруч.');
+  setStatus(ctx,'hint','Введіть вулицю й номер будинку — знайдемо адресу та порахуємо доставку.');
   if(original.base&&hasHouseNumber(original.base))setStatus(ctx,'hint','Збережена адреса. За потреби оберіть її зі списку ще раз.');
   input.addEventListener('input',()=>{
     if(ctx.setting)return;

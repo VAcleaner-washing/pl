@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.49.3",
+  "version": "4.1.50",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -71,6 +71,7 @@
     "test:v4.1.48-content-visual": "python scripts/content_v4148_visual_qa.py",
     "test:v4.1.49-performance-ci": "node scripts/test-v4-1-49-performance-ci.mjs",
     "ci:browser": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
-    "ci": "npm run stamp && npm run check && npm run test:v4.1.49-performance-ci && npm run build && npm run ci:browser"
+    "ci": "npm run stamp && npm run check && npm run test:v4.1.49-performance-ci && npm run build && npm run ci:browser",
+    "test:v4.1.50-full-qa": "node scripts/test-v4-1-50-full-qa.mjs"
   }
 }

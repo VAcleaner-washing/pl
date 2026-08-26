@@ -138,6 +138,35 @@ async function pricingDistance(targetLat: number, targetLon: number) {
   }
 }
 
+
+function parseHouseQuery(value: string) {
+  const q = cleanQuery(value).replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i, "").replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i, "").trim();
+  const m = q.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  return m ? { street: m[1].trim(), houseNumber: m[2].trim() } : { street: q, houseNumber: "" };
+}
+function searchVariants(value: string) {
+  const raw = cleanQuery(value);
+  const parsed = parseHouseQuery(raw);
+  const out = [raw, `${raw}, Полтава`, parsed.houseNumber ? `${parsed.street}, ${parsed.houseNumber}, Полтава` : "", parsed.street ? `${parsed.street}, Полтава` : ""];
+  return [...new Set(out.map(cleanQuery).filter((v) => v.length >= 3))].slice(0, 4);
+}
+async function photonSearch(query: string, signal: AbortSignal) {
+  const url = new URL(PHOTON_URL);
+  url.searchParams.set("q", `${query}, Полтавська область`);
+  url.searchParams.set("bbox", SERVICE_BBOX);
+  url.searchParams.set("countrycode", "UA");
+  url.searchParams.set("lang", "uk");
+  url.searchParams.set("limit", "16");
+  url.searchParams.set("lat", String(CENTER.lat));
+  url.searchParams.set("lon", String(CENTER.lon));
+  url.searchParams.set("zoom", "10");
+  url.searchParams.set("location_bias_scale", "0.15");
+  const response = await fetch(url, { signal, headers: { "Accept": "application/json", "Accept-Language": "uk,en;q=0.7" } });
+  if (!response.ok) throw new Error("photon_failed");
+  const payload = await response.json();
+  return Array.isArray(payload?.features) ? payload.features : [];
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors(req) });
   const origin = req.headers.get("origin");
@@ -163,28 +192,46 @@ Deno.serve(async (req: Request) => {
   const q = req.method === "GET" ? cleanQuery(new URL(req.url).searchParams.get("q")) : cleanQuery(body?.q);
   if (q.length < 3) return json(req, { suggestions: [], minChars: 3 });
 
-  const search = `${q}, Полтавська область`, url = new URL(PHOTON_URL);
-  url.searchParams.set("q", search);
-  url.searchParams.set("bbox", SERVICE_BBOX);
-  url.searchParams.set("countrycode", "UA");
-  url.searchParams.set("lang", "uk");
-  url.searchParams.set("limit", "12");
-  url.searchParams.set("lat", String(CENTER.lat));
-  url.searchParams.set("lon", String(CENTER.lon));
-  url.searchParams.set("zoom", "10");
-  url.searchParams.set("location_bias_scale", "0.15");
-
-  const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 4000);
+  const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 5200);
   try {
-    const response = await fetch(url, { signal: controller.signal, headers: { "Accept": "application/json", "Accept-Language": "uk,en;q=0.7" } });
-    if (!response.ok) return json(req, { suggestions: [], providerUnavailable: true });
-    const payload = await response.json(), seen = new Set<string>();
-    const suggestions = (Array.isArray(payload?.features) ? payload.features : [])
-      .filter(inSearchArea).map(formatFeature).filter(Boolean)
+    const seenFeatures = new Set<string>();
+    const features: any[] = [];
+    let providerFailed = false;
+    for (const candidate of searchVariants(q)) {
+      try {
+        const batch = await photonSearch(candidate, controller.signal);
+        for (const feature of batch) {
+          const point = coordinates(feature);
+          const p = feature?.properties || {};
+          const key = `${p.osm_type || ""}:${p.osm_id || ""}:${point?.lat || ""}:${point?.lon || ""}`;
+          if (seenFeatures.has(key)) continue;
+          seenFeatures.add(key);
+          features.push(feature);
+        }
+      } catch (err) {
+        if ((err as any)?.name === "AbortError") throw err;
+        providerFailed = true;
+      }
+      if (features.some((feature) => Boolean(text(feature?.properties?.housenumber)))) break;
+    }
+
+    const seen = new Set<string>();
+    let suggestions: any[] = features.filter(inSearchArea).map(formatFeature).filter(Boolean)
       .sort((a: any, b: any) => Number(Boolean(b.houseNumber)) - Number(Boolean(a.houseNumber)) || a.distanceKm - b.distanceKm)
-      .filter((item: any) => { const key = String(item.address).toLocaleLowerCase("uk-UA"); if (seen.has(key)) return false; seen.add(key); return true; })
-      .slice(0, 8);
-    return json(req, { suggestions, provider: "OpenStreetMap / Photon", quoteProvider: "OSRM", addressSearchRadiusKm: ADDRESS_SEARCH_RADIUS_KM });
+      .filter((item: any) => { const key = String(item.address).toLocaleLowerCase("uk-UA"); if (seen.has(key)) return false; seen.add(key); return true; });
+
+    // Photon can know a Poltava street but not every building number. For a typed
+    // house in the fixed 250 UAH city zone, keep the street result usable instead
+    // of failing the whole autocomplete. Coordinates are marked approximate and
+    // are never used for distance pricing outside the local zone.
+    const parsed = parseHouseQuery(q);
+    if (parsed.houseNumber && !suggestions.some((item: any) => Boolean(item.houseNumber))) {
+      const streetItem = suggestions.find((item: any) => isPoltavaSettlement(item.settlement) && !item.houseNumber);
+      if (streetItem) suggestions.unshift({ ...streetItem, label: `${streetItem.street || streetItem.label}, ${parsed.houseNumber}`, address: `Полтава, ${streetItem.street || streetItem.label}, ${parsed.houseNumber}`, houseNumber: parsed.houseNumber, approximateCoordinates: true, meta: `Полтава · точний номер введено · координати вулиці` });
+    }
+
+    suggestions = suggestions.slice(0, 8);
+    return json(req, { suggestions, provider: "OpenStreetMap / Photon", quoteProvider: "OSRM", addressSearchRadiusKm: ADDRESS_SEARCH_RADIUS_KM, retried: true, providerDegraded: providerFailed && !suggestions.length });
   } catch {
     return json(req, { suggestions: [], providerUnavailable: true });
   } finally {

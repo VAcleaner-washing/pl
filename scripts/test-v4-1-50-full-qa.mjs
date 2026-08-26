@@ -1,0 +1,25 @@
+import fs from 'node:fs';import path from 'node:path';
+const root=process.cwd();let pass=0;const fail=[];const read=f=>fs.readFileSync(path.join(root,f),'utf8');const ok=(n,c)=>{if(c){pass++;console.log('OK  ',n)}else{fail.push(n);console.error('FAIL',n)}};
+const rel=JSON.parse(read('release.json'));const booking=read('bronuvannia/index.html');const slots=read('assets/public-booking-slots.js');const addr=read('assets/address-autocomplete.js');const addrFn=read('supabase/functions/vacleaner-address-v1/index.ts');const hard=read('assets/booking-hardening-v4144.css');const exp=read('assets/public-experience.js');const kits=read('komplekty/index.html');
+ok('release is v4.1.50',rel.version==='4.1.50'&&Number(rel.build)===4150);
+ok('Smart Entry hover keeps dark readable state',hard.includes('background:#162126;color:#fff')&&hard.includes('background:#efe3cf;color:#11181b'));
+ok('booking hardening uses current cache key',booking.includes('/assets/booking-hardening-v4144.css?v=4150')&&booking.includes('/assets/booking-hardening-v4144.js?v=4150')&&exp.includes('booking-hardening-v4144.css?v=4150'));
+ok('delivery has no ambiguous pre-address from-label',!slots.includes("/ від ${formatMoney")&&!slots.includes("від ${formatMoney(deliveryPricing.local)}")&&slots.includes("'розрахуємо за адресою'"));
+ok('delivery hint promises automatic address pricing',slots.includes('точну доставку порахуємо автоматично'));
+ok('address client retries normalized variants',addr.includes('function addressVariants')&&addr.includes('for(const candidate of addressVariants(q))'));
+ok('address backend retries Photon variants',addrFn.includes('function searchVariants')&&addrFn.includes('for (const candidate of searchVariants(q))'));
+ok('Poltava street fallback can keep typed house number',addrFn.includes('approximateCoordinates: true')&&addrFn.includes('точний номер введено'));
+for(const code of ['puzzi_jimmy','puzzi_abir','combo','general','ideal_windows','elite'])ok(`package ${code} uses price grid`,kits.includes(`data-price-code="${code}"`));
+ok('all package cards show weekday and weekend labels',(kits.match(/Будні · 1 доба/g)||[]).length>=6&&(kits.match(/Вихідний · 1 доба/g)||[]).length>=6);
+const articleFiles=['yak-pochystyty-dyvan-vdoma','yak-pochystyty-matrats-vdoma','yak-vyvesty-plyamu-z-dyvana','skilky-sokhne-dyvan-pislia-chyshchennia','yak-pochystyty-matrats-pislia-dytyny','yak-prybraty-zapakh-z-dyvana','shcho-mozhna-i-ne-mozhna-chystyty-paroochysnykom','yak-pomyty-vikna-robotom'].map(s=>`blog/${s}/index.html`);
+const joined=articleFiles.map(read).join('\n');
+ok('no universal soft-brush instruction remains',!/легко опрацю(?:вати|ють) м.?якою щіткою/i.test(joined));
+ok('no amateur immediate-extraction phrase remains',!/короткий прохід із подачею, одразу відбір/i.test(joined));
+ok('core upholstery process includes 5–10 minute dwell',read(articleFiles[0]).includes('5–10 хвилин')&&read(articleFiles[1]).includes('5–10 хвилин'));
+ok('core process explicitly extracts before adding more solution',read(articleFiles[0]).includes('Перший відбір — без нової подачі')&&read(articleFiles[1]).includes('спочатку відберіть вологу'));
+ok('SPOT FIX uses white-towel blotting',read('blog/yak-vyvesty-plyamu-z-dyvana/index.html').includes('білою серветкою від краю до центру'));
+ok('STAIN OX has controlled dwell and rinse/extract',read('blog/yak-vyvesty-plyamu-z-dyvana/index.html').includes('10–15 хвилин')&&read('blog/yak-vyvesty-plyamu-z-dyvana/index.html').includes('промийте й екстрагуйте'));
+ok('Jimmy is described as more than a normal vacuum',read('blog/yak-pochystyty-matrats-vdoma/index.html').includes('частинки епідермісу')&&read('blog/yak-pochystyty-matrats-vdoma/index.html').includes('пилових кліщів')&&read('blog/yak-pochystyty-matrats-vdoma/index.html').includes('до 60 °C'));
+ok('window robot article requires power and safety rope',read('blog/yak-pomyty-vikna-robotom/index.html').includes('Живлення і страхувальний трос — обов’язкові'));
+ok('browser E2E checks Smart Entry hover contrast',read('scripts/e2e_smoke.py').includes('Smart Entry hover contrast stays readable'));
+console.log(`v4.1.50 full QA: ${pass}/${pass+fail.length} OK`);if(fail.length){console.error(JSON.stringify({fail},null,2));process.exit(1)}
