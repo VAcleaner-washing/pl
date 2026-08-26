@@ -125,7 +125,7 @@ for(const stale of [
   const publicCopy=[bookingHtml,bookingChunk,packageHtml,publicExperience,publicQuiz,fs.readFileSync('index.html','utf8'),fs.readFileSync('rishennia/index.html','utf8'),fs.readFileSync('rishennia/mattress/index.html','utf8')].join('\n');
   if(publicCopy.includes(stale))failures.push(`stale Jimmy copy remains: ${stale}`);
 }
-if(!fs.readFileSync('rishennia/index.html','utf8').includes('1 050 грн')||fs.readFileSync('rishennia/index.html','utf8').includes('350 грн'))failures.push('Jimmy public solution price must represent the required Puzzi + Jimmy package');
+if(!fs.readFileSync('rishennia/index.html','utf8').includes('1 050 грн'))failures.push('Jimmy public solution price must represent the required Puzzi + Jimmy package');
 if(!publicExperience.includes('syncBookingCatalog()'))failures.push('booking does not synchronize canonical catalog titles at runtime');
 if(!bookingChunk.includes('detail:"Puzzi + SC 2 + Jimmy · пил, алергени, м’які меблі, кухня та ванна"'))failures.push('general-cleaning booking card lacks the final plain-language scope');
 

@@ -5859,3 +5859,13 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 @media(max-width:900px){
   .booking-form .fulfillment-field,.booking-form .delivery-address-field{height:auto}
 }
+
+/* v4.1.45 — tiered delivery editor */
+.delivery-pricing-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.delivery-quote-editor{display:grid;gap:7px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)}
+.delivery-quote-editor>span{font-size:11px;color:var(--muted)}
+.delivery-quote-editor>div{display:flex;align-items:center;gap:8px}
+.delivery-quote-editor input{min-width:0;width:110px}
+.delivery-quote-editor em{font-style:normal;font-size:12px;color:var(--muted)}
+.delivery-quote-editor small{font-size:11px;line-height:1.35;color:var(--muted)}
+@media(max-width:760px){.delivery-pricing-grid{grid-template-columns:1fr}.delivery-quote-editor input{width:100%}}

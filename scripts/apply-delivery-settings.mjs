@@ -4,6 +4,8 @@ import path from 'node:path';
 const root=process.cwd();
 const adminPath=path.join(root,'assets','admin-v250.js');
 let admin=fs.readFileSync(adminPath,'utf8');
+const hasTieredDelivery=admin.includes('function getDeliveryPricing()')&&(admin.includes('deliverySuburb')||admin.includes('deliveryBaseOutside')||admin.includes('baseOutside'));
+if(!hasTieredDelivery){
 const once=(from,to,label)=>{
   if(!admin.includes(from)){
     if(admin.includes(to))return;
@@ -29,6 +31,10 @@ once(
 );
 admin=admin.replaceAll('Доставка · 250 грн','Доставка · ${getDeliveryFee()} грн');
 fs.writeFileSync(adminPath,admin);
+
+}else{
+  console.log('Tiered v4.1.45 delivery pricing already applied; skipping legacy scalar patch.');
+}
 
 const deliveryPage=path.join(root,'dostavka','index.html');
 let deliveryHtml=fs.readFileSync(deliveryPage,'utf8');

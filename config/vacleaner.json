@@ -365,5 +365,20 @@
         "shortDescription": "Скло, дзеркала та глянцеві поверхні без розводів."
       }
     }
+  },
+  "deliveryPricing": {
+    "local": 250,
+    "suburb": 350,
+    "baseOutside": 350,
+    "includedKm": 10,
+    "perKm": 15,
+    "maxOutsideKm": 30,
+    "localSettlements": [
+      "Полтава",
+      "Розсошенці",
+      "Щербані",
+      "Горбанівка"
+    ],
+    "outsideZone": "agreement"
   }
 }

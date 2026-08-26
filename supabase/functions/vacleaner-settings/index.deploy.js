@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
-import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, VACLEANER_RELEASE_VERSION } from "./config.deploy.js";
+import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DELIVERY_PRICING, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, VACLEANER_RELEASE_VERSION } from "./config.deploy.js";
 const cors = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
@@ -16,6 +16,7 @@ const json = (body, status = 200)=>new Response(JSON.stringify(body), {
     });
 const defaultSlots = structuredClone(DEFAULT_SLOTS);
 const defaultDeliveryFee = Number(DEFAULT_DELIVERY_FEE) || 250;
+const defaultDeliveryPricing = structuredClone(DEFAULT_DELIVERY_PRICING);
 const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultCatalog = structuredClone(DEFAULT_CATALOG);
 const validTime = (v)=>typeof v === "string" && /^\d{2}:\d{2}$/.test(v);
@@ -73,9 +74,36 @@ function normCatalog(v) {
     if (pp !== null) out.puzziPacketPrice = pp;
     return out;
 }
+function normDeliveryPricing(v) {
+    const source = v && typeof v === "object" ? v : {
+        local: v
+    };
+    const local = num(source?.local ?? source?.amount ?? source);
+    const baseOutside = num(source?.baseOutside ?? source?.suburb ?? defaultDeliveryPricing.baseOutside ?? defaultDeliveryPricing.suburb);
+    const includedKm = num(source?.includedKm ?? defaultDeliveryPricing.includedKm ?? 10);
+    const perKm = num(source?.perKm ?? defaultDeliveryPricing.perKm ?? 15);
+    const maxOutsideKm = num(source?.maxOutsideKm ?? source?.serviceRadiusKm ?? defaultDeliveryPricing.maxOutsideKm ?? 30);
+    if (local === null || baseOutside === null || includedKm === null || perKm === null || maxOutsideKm === null || includedKm < 1 || perKm < 1 || maxOutsideKm < includedKm) return null;
+    return {
+        local,
+        suburb: baseOutside,
+        baseOutside,
+        includedKm,
+        perKm,
+        maxOutsideKm,
+        localSettlements: Array.isArray(defaultDeliveryPricing.localSettlements) ? [
+            ...defaultDeliveryPricing.localSettlements
+        ] : [
+            "Полтава",
+            "Розсошенці",
+            "Щербані",
+            "Горбанівка"
+        ],
+        outsideZone: String(defaultDeliveryPricing.outsideZone || "agreement")
+    };
+}
 function normDeliveryFee(v) {
-    const value = v && typeof v === "object" ? v.amount : v;
-    return num(value);
+    return normDeliveryPricing(v)?.local ?? null;
 }
 Deno.serve(async (req)=>{
     if (req.method === "OPTIONS") return new Response("ok", {
@@ -106,7 +134,8 @@ Deno.serve(async (req)=>{
             slots: normSlots(map.booking_slots) ?? defaultSlots,
             catalog: normCatalog(map.catalog) ?? defaultCatalog,
             depositRules: normDepositRules(map.deposit_rules) ?? defaultDepositRules,
-            deliveryFee: normDeliveryFee(map.delivery_fee) ?? defaultDeliveryFee,
+            deliveryPricing: normDeliveryPricing(map.delivery_fee) ?? defaultDeliveryPricing,
+            deliveryFee: (normDeliveryPricing(map.delivery_fee) ?? defaultDeliveryPricing).local ?? defaultDeliveryFee,
             version: VACLEANER_RELEASE_VERSION
         });
     }
@@ -164,17 +193,18 @@ Deno.serve(async (req)=>{
         });
         response.depositRules = depositRules;
     }
-    if (body.deliveryFee !== undefined) {
-        const deliveryFee = normDeliveryFee(body.deliveryFee);
-        if (deliveryFee === null) return json({
+    if (body.deliveryPricing !== undefined || body.deliveryFee !== undefined) {
+        const deliveryPricing = normDeliveryPricing(body.deliveryPricing ?? body.deliveryFee);
+        if (!deliveryPricing) return json({
             error: "invalid_delivery_fee"
         }, 400);
         rows.push({
             key: "delivery_fee",
-            value: deliveryFee,
+            value: deliveryPricing,
             updated_at: new Date().toISOString()
         });
-        response.deliveryFee = deliveryFee;
+        response.deliveryPricing = deliveryPricing;
+        response.deliveryFee = deliveryPricing.local;
     }
     if (!rows.length) return json({
         error: "nothing_to_save"

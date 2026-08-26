@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
 import webpush from "npm:web-push@3.6.7";
-import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, isWeekendDeposit, rentalBase, paidDayMoments, slotIndex } from "./config.deploy.js";
+import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DELIVERY_PRICING, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, isWeekendDeposit, rentalBase, paidDayMoments, slotIndex } from "./config.deploy.js";
 const ADMIN_PRODUCT_LABELS = {
     puzzi: "Kärcher Puzzi",
     puzzi_jimmy: "Puzzi + Jimmy",
@@ -30,6 +30,7 @@ const defaults = structuredClone(DEFAULT_CATALOG);
 const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultSlots = structuredClone(DEFAULT_SLOTS);
 const defaultDeliveryFee = Number(DEFAULT_DELIVERY_FEE) || 250;
+const defaultDeliveryPricing = structuredClone(DEFAULT_DELIVERY_PRICING);
 const cleanText = (value, max)=>typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
 const normalizePhone = (value)=>{
     const digits = String(value ?? "").replace(/\D/g, "");
@@ -94,10 +95,131 @@ function normalizeDepositRules(value) {
     }
     return out;
 }
-function normalizeDeliveryFee(value) {
-    const raw = value && typeof value === "object" ? value.amount : value;
-    const fee = Number(raw);
-    return Number.isFinite(fee) && fee >= 0 && fee <= 100000 ? Math.round(fee) : defaultDeliveryFee;
+function normalizeDeliveryPricing(value) {
+    const source = value && typeof value === "object" ? value : {
+        local: value
+    };
+    const amount = (raw, fallback, min = 0, max = 100000)=>{
+        const n = Number(raw);
+        return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : fallback;
+    };
+    const local = amount(source?.local ?? source?.amount ?? source, defaultDeliveryFee);
+    const baseOutside = amount(source?.baseOutside ?? source?.suburb, Number(defaultDeliveryPricing.baseOutside ?? defaultDeliveryPricing.suburb ?? 350));
+    const includedKm = amount(source?.includedKm, Number(defaultDeliveryPricing.includedKm || 10), 1, 100);
+    const perKm = amount(source?.perKm, Number(defaultDeliveryPricing.perKm || 15), 1, 1000);
+    const maxOutsideKm = amount(source?.maxOutsideKm ?? source?.serviceRadiusKm, Number(defaultDeliveryPricing.maxOutsideKm || 30), includedKm, 200);
+    return {
+        local,
+        suburb: baseOutside,
+        baseOutside,
+        includedKm,
+        perKm,
+        maxOutsideKm,
+        localSettlements: Array.isArray(defaultDeliveryPricing.localSettlements) ? [
+            ...defaultDeliveryPricing.localSettlements
+        ] : [
+            "Полтава",
+            "Розсошенці",
+            "Щербані",
+            "Горбанівка"
+        ],
+        outsideZone: String(defaultDeliveryPricing.outsideZone || "agreement")
+    };
+}
+function normalizeSettlement(value) {
+    return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
+}
+function deliveryQuote(fulfillment, address, verified, distanceKmValue, pricing) {
+    if (fulfillment !== "delivery") return {
+        amount: 0,
+        zone: "pickup",
+        quoteRequired: false,
+        pending: false,
+        settlement: "",
+        distanceKm: null,
+        extraKm: 0
+    };
+    const base = String(address || "").split(" · ")[0].trim();
+    if (!base) return {
+        amount: pricing.local,
+        zone: "pending",
+        quoteRequired: false,
+        pending: true,
+        settlement: "",
+        distanceKm: null,
+        extraKm: 0
+    };
+    const settlement = base.split(",")[0].trim(), normalized = normalizeSettlement(settlement);
+    const local = (pricing.localSettlements || []).some((item)=>normalizeSettlement(item) === normalized);
+    if (local) return {
+        amount: pricing.local,
+        zone: "local",
+        quoteRequired: false,
+        pending: false,
+        settlement,
+        distanceKm: 0,
+        extraKm: 0
+    };
+    const distanceKm = Number(distanceKmValue);
+    if (verified && Number.isFinite(distanceKm) && distanceKm >= 0) {
+        if (distanceKm > pricing.maxOutsideKm) return {
+            amount: 0,
+            zone: "agreement",
+            quoteRequired: true,
+            pending: false,
+            settlement,
+            distanceKm,
+            extraKm: 0
+        };
+        const extraKm = Math.max(0, Math.ceil(distanceKm - pricing.includedKm - 1e-9));
+        return {
+            amount: pricing.baseOutside + extraKm * pricing.perKm,
+            zone: extraKm > 0 ? "distance" : "nearby",
+            quoteRequired: false,
+            pending: false,
+            settlement,
+            distanceKm,
+            extraKm
+        };
+    }
+    return {
+        amount: 0,
+        zone: "agreement",
+        quoteRequired: true,
+        pending: false,
+        settlement,
+        distanceKm: Number.isFinite(distanceKm) ? distanceKm : null,
+        extraKm: 0
+    };
+}
+async function authoritativeDistanceQuote(supabaseUrl, serviceKey, latValue, lonValue) {
+    const lat = Number(latValue), lon = Number(lonValue);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    try {
+        const response = await fetch(`${supabaseUrl}/functions/v1/vacleaner-address-v1`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": serviceKey
+            },
+            body: JSON.stringify({
+                action: "quote",
+                lat,
+                lon
+            }),
+            signal: AbortSignal.timeout(5500)
+        });
+        if (!response.ok) return null;
+        const data = await response.json();
+        const distanceKm = Number(data?.pricingDistanceKm);
+        return Number.isFinite(distanceKm) && distanceKm >= 0 ? {
+            distanceKm,
+            routeKm: Number(data?.routeKm) || null,
+            source: String(data?.distanceSource || "")
+        } : null;
+    } catch  {
+        return null;
+    }
 }
 function depositAmount(code, startDate, returnDate, pickupWindow, returnWindow, rules, catalog) {
     const group = catalog?.products?.[code]?.depositGroup || defaults.products?.[code]?.depositGroup || "oneUnit";
@@ -470,7 +592,7 @@ Deno.serve(async (req)=>{
                 row.key,
                 row.value
             ]));
-        const catalog = mergeCatalog(map.catalog), rules = normalizeDepositRules(map.deposit_rules), slots = normalizeSlots(map.booking_slots), deliveryFee = normalizeDeliveryFee(map.delivery_fee);
+        const catalog = mergeCatalog(map.catalog), rules = normalizeDepositRules(map.deposit_rules), slots = normalizeSlots(map.booking_slots), deliveryPricing = normalizeDeliveryPricing(map.delivery_fee);
         const phone = normalizePhone(body.customerPhone);
         let completed = 0, lastCompleted = null;
         if ((publicAction === "create" || publicAction === "loyalty_lookup") && phone) {
@@ -536,7 +658,10 @@ Deno.serve(async (req)=>{
             discount_value: promo.discountValue
         }, rawBase) : 0;
         const promoApplied = Boolean(promo?.valid && promoDiscount > loyaltyDiscount), discount = promoApplied ? promoDiscount : loyaltyDiscount, discountSource = promoApplied ? "promo" : loyalty.percent ? "loyalty" : "none";
-        const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = body.fulfillment === "delivery" ? deliveryFee : 0, totalAmount = baseAmount + selected.amount + deliveryAmount;
+        const fulfillmentForEstimate = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "";
+        const estimateAddress = fulfillmentForEstimate === "delivery" ? cleanText(body.deliveryAddress, 180) : "";
+        const delivery = deliveryQuote(fulfillmentForEstimate, estimateAddress, body.deliveryAddressVerified === true, body.deliveryDistanceKm, deliveryPricing);
+        const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = delivery.amount, totalAmount = baseAmount + selected.amount + deliveryAmount;
         const securityDeposit = depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow, rules, catalog);
         const estimate = {
             rentalDays: days,
@@ -544,6 +669,11 @@ Deno.serve(async (req)=>{
             baseAmount,
             extrasAmount: selected.amount,
             deliveryAmount,
+            deliveryZone: delivery.zone,
+            deliveryDistanceKm: delivery.distanceKm,
+            deliveryExtraKm: delivery.extraKm,
+            deliveryQuoteRequired: delivery.quoteRequired,
+            deliveryQuotePending: delivery.pending,
             totalAmount,
             prepaymentAmount: 200,
             loyaltyDiscountAmount: loyaltyDiscount,
@@ -591,6 +721,24 @@ Deno.serve(async (req)=>{
         if (customerName.length < 2 || !phone || !fulfillment || body.privacyAccepted !== true || fulfillment === "delivery" && address.length < 8) return json({
             error: "invalid_customer_data"
         }, 400);
+        let finalDistanceKm = body.deliveryDistanceKm;
+        let finalRouteKm = Number.isFinite(Number(body.deliveryRouteKm)) ? Number(body.deliveryRouteKm) : null;
+        let finalDistanceSource = cleanText(body.deliveryDistanceSource, 24);
+        if (fulfillment === "delivery" && body.deliveryAddressVerified === true) {
+            const normalizedSettlement = normalizeSettlement(address.split(",")[0] || "");
+            const isLocal = (deliveryPricing.localSettlements || []).some((item)=>normalizeSettlement(item) === normalizedSettlement);
+            if (!isLocal) {
+                const authoritative = await authoritativeDistanceQuote(url, key, body.deliveryLat, body.deliveryLon);
+                if (authoritative) {
+                    finalDistanceKm = authoritative.distanceKm;
+                    finalRouteKm = authoritative.routeKm;
+                    finalDistanceSource = authoritative.source || "server";
+                }
+            }
+        }
+        const finalDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, finalDistanceKm, deliveryPricing);
+        const finalDeliveryAmount = finalDelivery.amount;
+        const finalTotalAmount = baseAmount + selected.amount + finalDeliveryAmount;
         const chemistry = hasPuzzi ? [
             {
                 code: "carpet_chemistry_kit",
@@ -636,6 +784,17 @@ Deno.serve(async (req)=>{
                 ...chemistry,
                 ...giftItems
             ],
+            delivery: {
+                zone: finalDelivery.zone,
+                quote_required: finalDelivery.quoteRequired,
+                verified: body.deliveryAddressVerified === true,
+                settlement: finalDelivery.settlement,
+                amount: finalDeliveryAmount,
+                pricing_distance_km: finalDelivery.distanceKm,
+                extra_km: finalDelivery.extraKm,
+                route_km: finalRouteKm,
+                distance_source: finalDistanceSource || null
+            },
             selected_items: selected.items.map((item)=>({
                     code: item.code,
                     label: item.label,
@@ -697,8 +856,8 @@ Deno.serve(async (req)=>{
             extras,
             base_amount: baseAmount,
             extras_amount: selected.amount,
-            delivery_amount: deliveryAmount,
-            total_amount: totalAmount,
+            delivery_amount: finalDeliveryAmount,
+            total_amount: finalTotalAmount,
             prepayment_amount: 200,
             prepayment_paid: false,
             deposit_amount: securityDeposit,

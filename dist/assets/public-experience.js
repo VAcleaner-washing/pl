@@ -727,3 +727,30 @@
   document.addEventListener('click',e=>{if(e.target.closest('.booking-products button'))requestAnimationFrame(enhanceDepositSummary)});
   document.addEventListener('change',e=>{if(e.target.matches('.booking-date-grid input[type="date"],.booking-date-grid select'))requestAnimationFrame(enhanceDepositSummary)});
 })();
+
+/* v4.1.44 booking hardening route loader */
+;(()=>{
+  const loadBookingHardening=()=>{
+    if(!document.querySelector('.booking-form'))return;
+    if(!document.querySelector('link[href*="booking-hardening-v4144.css"]')){
+      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/booking-hardening-v4144.css?v=4144';document.head.appendChild(link);
+    }
+    if(!document.querySelector('script[src*="booking-hardening-v4144.js"]')){
+      const script=document.createElement('script');script.src='/assets/booking-hardening-v4144.js?v=4144';script.defer=true;document.head.appendChild(script);
+    }
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBookingHardening,{once:true});else loadBookingHardening();
+  new MutationObserver(()=>requestAnimationFrame(loadBookingHardening)).observe(document.documentElement,{childList:true,subtree:true});
+})();
+
+
+/* v4.1.45 trust & rules route loader */
+;(()=>{
+  const loadBookingTrust=()=>{
+    if(!document.querySelector('.booking-form'))return;
+    if(!document.querySelector('link[href*="booking-trust-v4145.css"]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/booking-trust-v4145.css?v=4145';document.head.appendChild(link)}
+    if(!document.querySelector('script[src*="booking-trust-v4145.js"]')){const script=document.createElement('script');script.src='/assets/booking-trust-v4145.js?v=4145';script.defer=true;document.head.appendChild(script)}
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBookingTrust,{once:true});else loadBookingTrust();
+  new MutationObserver(()=>requestAnimationFrame(loadBookingTrust)).observe(document.documentElement,{childList:true,subtree:true});
+})();

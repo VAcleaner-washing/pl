@@ -71,6 +71,10 @@ Deno.serve(async (request: Request) => {
 
     const now = new Date().toISOString(), currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
     const patch: Record<string, any> = { updated_at: now };
+    if (currentStatus === "cancelled") {
+      const { cancellation: _cancellation, ...restExtras } = currentExtras;
+      patch.extras = restExtras;
+    }
     if (["pending", "waiting_payment"].includes(nextStatus)) { patch.confirmed_at = null; patch.issued_at = null; patch.completed_at = null; }
     if (currentStatus === "confirmed" && ["pending", "waiting_payment"].includes(nextStatus)) { patch.prepayment_paid = false; patch.prepayment_paid_at = null; }
     if (nextStatus === "confirmed") { patch.confirmed_at = current.confirmed_at || now; patch.issued_at = null; patch.completed_at = null; }

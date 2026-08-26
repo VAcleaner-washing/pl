@@ -4,6 +4,7 @@ import webpush from "npm:web-push@3.6.7";
 import {
   DEFAULT_CATALOG,
   DEFAULT_DELIVERY_FEE,
+  DEFAULT_DELIVERY_PRICING,
   DEFAULT_DEPOSIT_RULES,
   DEFAULT_SLOTS,
   rentalDays,
@@ -31,6 +32,7 @@ const defaults: any = structuredClone(DEFAULT_CATALOG);
 const defaultDepositRules: any = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultSlots: any = structuredClone(DEFAULT_SLOTS);
 const defaultDeliveryFee = Number(DEFAULT_DELIVERY_FEE) || 250;
+const defaultDeliveryPricing: any = structuredClone(DEFAULT_DELIVERY_PRICING);
 const cleanText = (value: unknown, max: number) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
 const normalizePhone = (value: unknown) => {
   const digits = String(value ?? "").replace(/\D/g, "");
@@ -83,10 +85,55 @@ function normalizeDepositRules(value: any) {
   }
   return out;
 }
-function normalizeDeliveryFee(value: unknown) {
-  const raw = value && typeof value === "object" ? (value as any).amount : value;
-  const fee = Number(raw);
-  return Number.isFinite(fee) && fee >= 0 && fee <= 100000 ? Math.round(fee) : defaultDeliveryFee;
+function normalizeDeliveryPricing(value: unknown) {
+  const source: any = value && typeof value === "object" ? value : { local: value };
+  const amount = (raw: unknown, fallback: number, min = 0, max = 100000) => {
+    const n = Number(raw); return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : fallback;
+  };
+  const local = amount(source?.local ?? source?.amount ?? source, defaultDeliveryFee);
+  const baseOutside = amount(source?.baseOutside ?? source?.suburb, Number(defaultDeliveryPricing.baseOutside ?? defaultDeliveryPricing.suburb ?? 350));
+  const includedKm = amount(source?.includedKm, Number(defaultDeliveryPricing.includedKm || 10), 1, 100);
+  const perKm = amount(source?.perKm, Number(defaultDeliveryPricing.perKm || 15), 1, 1000);
+  const maxOutsideKm = amount(source?.maxOutsideKm ?? source?.serviceRadiusKm, Number(defaultDeliveryPricing.maxOutsideKm || 30), includedKm, 200);
+  return {
+    local, suburb: baseOutside, baseOutside, includedKm, perKm, maxOutsideKm,
+    localSettlements: Array.isArray(defaultDeliveryPricing.localSettlements) ? [...defaultDeliveryPricing.localSettlements] : ["Полтава","Розсошенці","Щербані","Горбанівка"],
+    outsideZone: String(defaultDeliveryPricing.outsideZone || "agreement"),
+  };
+}
+function normalizeSettlement(value: unknown) {
+  return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
+}
+function deliveryQuote(fulfillment: string, address: string, verified: boolean, distanceKmValue: unknown, pricing: any) {
+  if (fulfillment !== "delivery") return { amount: 0, zone: "pickup", quoteRequired: false, pending: false, settlement: "", distanceKm: null, extraKm: 0 };
+  const base = String(address || "").split(" · ")[0].trim();
+  if (!base) return { amount: pricing.local, zone: "pending", quoteRequired: false, pending: true, settlement: "", distanceKm: null, extraKm: 0 };
+  const settlement = base.split(",")[0].trim(), normalized = normalizeSettlement(settlement);
+  const local = (pricing.localSettlements || []).some((item: string) => normalizeSettlement(item) === normalized);
+  if (local) return { amount: pricing.local, zone: "local", quoteRequired: false, pending: false, settlement, distanceKm: 0, extraKm: 0 };
+  const distanceKm = Number(distanceKmValue);
+  if (verified && Number.isFinite(distanceKm) && distanceKm >= 0) {
+    if (distanceKm > pricing.maxOutsideKm) return { amount: 0, zone: "agreement", quoteRequired: true, pending: false, settlement, distanceKm, extraKm: 0 };
+    const extraKm = Math.max(0, Math.ceil((distanceKm - pricing.includedKm) - 1e-9));
+    return { amount: pricing.baseOutside + extraKm * pricing.perKm, zone: extraKm > 0 ? "distance" : "nearby", quoteRequired: false, pending: false, settlement, distanceKm, extraKm };
+  }
+  return { amount: 0, zone: "agreement", quoteRequired: true, pending: false, settlement, distanceKm: Number.isFinite(distanceKm) ? distanceKm : null, extraKm: 0 };
+}
+async function authoritativeDistanceQuote(supabaseUrl: string, serviceKey: string, latValue: unknown, lonValue: unknown) {
+  const lat = Number(latValue), lon = Number(lonValue);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  try {
+    const response = await fetch(`${supabaseUrl}/functions/v1/vacleaner-address-v1`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": serviceKey },
+      body: JSON.stringify({ action: "quote", lat, lon }),
+      signal: AbortSignal.timeout(5500),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const distanceKm = Number(data?.pricingDistanceKm);
+    return Number.isFinite(distanceKm) && distanceKm >= 0 ? { distanceKm, routeKm: Number(data?.routeKm) || null, source: String(data?.distanceSource || "") } : null;
+  } catch { return null; }
 }
 function depositAmount(code: string, startDate: string, returnDate: string, pickupWindow: string, returnWindow: string, rules: any, catalog: any) {
   const group = catalog?.products?.[code]?.depositGroup || defaults.products?.[code]?.depositGroup || "oneUnit";
@@ -267,7 +314,7 @@ Deno.serve(async (req: Request) => {
     if (!actionAllowed) return json({ error: "rate_limited" }, 429);
     const { data: settings } = await db.from("vacleaner_settings").select("key,value").in("key", ["catalog", "deposit_rules", "booking_slots", "delivery_fee"]);
     const map = Object.fromEntries((settings || []).map((row: any) => [row.key, row.value]));
-    const catalog = mergeCatalog(map.catalog), rules = normalizeDepositRules(map.deposit_rules), slots = normalizeSlots(map.booking_slots), deliveryFee = normalizeDeliveryFee(map.delivery_fee);
+    const catalog = mergeCatalog(map.catalog), rules = normalizeDepositRules(map.deposit_rules), slots = normalizeSlots(map.booking_slots), deliveryPricing = normalizeDeliveryPricing(map.delivery_fee);
 
     const phone = normalizePhone(body.customerPhone); let completed = 0, lastCompleted: string | null = null;
     if ((publicAction === "create" || publicAction === "loyalty_lookup") && phone) {
@@ -304,9 +351,12 @@ Deno.serve(async (req: Request) => {
     const promo = await validatePromo(db, { code: String(body.promoCode || ""), phone, productCode, startDate, returnDate, pickupWindow, returnWindow, completed, lastCompleted });
     const loyaltyDiscount = Math.round(rawBase * loyalty.percent / 100), promoDiscount = promo?.valid ? promoDiscountAmount({ discount_type: promo.discountType, discount_value: promo.discountValue }, rawBase) : 0;
     const promoApplied = Boolean(promo?.valid && promoDiscount > loyaltyDiscount), discount = promoApplied ? promoDiscount : loyaltyDiscount, discountSource = promoApplied ? "promo" : loyalty.percent ? "loyalty" : "none";
-    const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = body.fulfillment === "delivery" ? deliveryFee : 0, totalAmount = baseAmount + selected.amount + deliveryAmount;
+    const fulfillmentForEstimate = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "";
+    const estimateAddress = fulfillmentForEstimate === "delivery" ? cleanText(body.deliveryAddress, 180) : "";
+    const delivery = deliveryQuote(fulfillmentForEstimate, estimateAddress, body.deliveryAddressVerified === true, body.deliveryDistanceKm, deliveryPricing);
+    const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = delivery.amount, totalAmount = baseAmount + selected.amount + deliveryAmount;
     const securityDeposit = depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow, rules, catalog);
-    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite" };
+    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, deliveryZone: delivery.zone, deliveryDistanceKm: delivery.distanceKm, deliveryExtraKm: delivery.extraKm, deliveryQuoteRequired: delivery.quoteRequired, deliveryQuotePending: delivery.pending, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite" };
     if (body.action === "availability" || body.action === "promo_lookup") return json({ ...av, estimate });
     if (body.action !== "create") return json({ error: "invalid_action" }, 400);
     if (storyMention && hasPuzzi && productCode !== "elite" && !storyGiftChoice) return json({ error: "gift_choice_required", estimate }, 400);
@@ -315,6 +365,20 @@ Deno.serve(async (req: Request) => {
 
     const customerName = cleanText(body.customerName, 80), fulfillment = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "", address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 180) : fulfillment === "pickup" ? "Полтава, вул. Європейська, 146Е" : "";
     if (customerName.length < 2 || !phone || !fulfillment || body.privacyAccepted !== true || (fulfillment === "delivery" && address.length < 8)) return json({ error: "invalid_customer_data" }, 400);
+    let finalDistanceKm: unknown = body.deliveryDistanceKm;
+    let finalRouteKm: number | null = Number.isFinite(Number(body.deliveryRouteKm)) ? Number(body.deliveryRouteKm) : null;
+    let finalDistanceSource = cleanText(body.deliveryDistanceSource, 24);
+    if (fulfillment === "delivery" && body.deliveryAddressVerified === true) {
+      const normalizedSettlement = normalizeSettlement(address.split(",")[0] || "");
+      const isLocal = (deliveryPricing.localSettlements || []).some((item: string) => normalizeSettlement(item) === normalizedSettlement);
+      if (!isLocal) {
+        const authoritative = await authoritativeDistanceQuote(url, key, body.deliveryLat, body.deliveryLon);
+        if (authoritative) { finalDistanceKm = authoritative.distanceKm; finalRouteKm = authoritative.routeKm; finalDistanceSource = authoritative.source || "server"; }
+      }
+    }
+    const finalDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, finalDistanceKm, deliveryPricing);
+    const finalDeliveryAmount = finalDelivery.amount;
+    const finalTotalAmount = baseAmount + selected.amount + finalDeliveryAmount;
     const chemistry = hasPuzzi ? [
       { code: "carpet_chemistry_kit", label: "Хімія для Puzzi · 8 запечатаних порцій · оплата після повернення лише за використані", quantity: 8, unitPrice: 0, amount: 0 },
       ...(storyMention && storyGiftChoice === "chemistry2" ? [{ code: "story_mention_bonus", label: "Сторіс-бонус · 2 використані порції Puzzi безкоштовно", quantity: 1, unitPrice: 0, amount: 0 }] : []),
@@ -324,14 +388,14 @@ Deno.serve(async (req: Request) => {
       ...(productCode === "elite" ? [{ code: "home_reset_diffuser_gift", label: `HOME RESET · аромадифузор VA HOME Entry · ${homeResetDiffuserScent.label}`, quantity: 1, unitPrice: 0, amount: 0 }] : []),
     ];
     const discountPercent = discountSource === "promo" && promo?.discountType === "percent" ? Number(promo.discountValue || 0) : discountSource === "loyalty" ? loyalty.percent : 0;
-    const extras = { items: [...selected.items, ...chemistry, ...giftItems], selected_items: selected.items.map(item => ({ code: item.code, label: item.label, price: item.unitPrice * item.quantity, payment_mode: "upfront" })), selected_items_amount: selected.amount, gifts: { story: storyMention ? { mention: true, eligible: true, choice: storyGiftChoice, scent: storyGiftChoice === "diffuser50" ? storyDiffuserScent : null } : null, home_reset: productCode === "elite" ? { included: true, scent: homeResetDiffuserScent } : null }, loyalty: { ...loyalty, completed_orders: completed }, discount: { source: discountSource, percent: discountPercent, amount: discount }, promo: promo?.valid ? { code: promo.code, campaign_id: promo.campaignId, campaign_name: promo.campaignName, campaign_type: promo.campaignType, discount_type: promo.discountType, discount_value: promo.discountValue, applied: promoApplied } : null, base_before_discount: rawBase };
+    const extras = { items: [...selected.items, ...chemistry, ...giftItems], delivery: { zone: finalDelivery.zone, quote_required: finalDelivery.quoteRequired, verified: body.deliveryAddressVerified === true, settlement: finalDelivery.settlement, amount: finalDeliveryAmount, pricing_distance_km: finalDelivery.distanceKm, extra_km: finalDelivery.extraKm, route_km: finalRouteKm, distance_source: finalDistanceSource || null }, selected_items: selected.items.map(item => ({ code: item.code, label: item.label, price: item.unitPrice * item.quantity, payment_mode: "upfront" })), selected_items_amount: selected.amount, gifts: { story: storyMention ? { mention: true, eligible: true, choice: storyGiftChoice, scent: storyGiftChoice === "diffuser50" ? storyDiffuserScent : null } : null, home_reset: productCode === "elite" ? { included: true, scent: homeResetDiffuserScent } : null }, loyalty: { ...loyalty, completed_orders: completed }, discount: { source: discountSource, percent: discountPercent, amount: discount }, promo: promo?.valid ? { code: promo.code, campaign_id: promo.campaignId, campaign_name: promo.campaignName, campaign_type: promo.campaignType, discount_type: promo.discountType, discount_value: promo.discountValue, applied: promoApplied } : null, base_before_discount: rawBase };
     const suffix = crypto.randomUUID().replaceAll("-", "").slice(0, 5).toUpperCase(), bookingCode = `VAC-${startDate.replaceAll("-", "").slice(2)}-${suffix}`;
     const pickupTime = pickupWindow === "morning" ? slots.morningStart : slots.eveningStart, returnTime = returnWindow === "morning" ? slots.morningEnd : slots.eveningEnd;
     const { data: booking, error } = await db.from("vacleaner_bookings").insert({
       booking_code: bookingCode, product_code: productCode, product_label: product.label || productCode, start_date: startDate, return_date: returnDate,
       start_at: `${startDate}T${pickupTime}:00.000Z`, end_at: `${returnDate}T${returnTime}:00.000Z`, pickup_window: pickupWindow, return_window: returnWindow, rental_days: days,
       fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: phone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_comment: cleanText(body.customerComment, 800) || null,
-      extras, base_amount: baseAmount, extras_amount: selected.amount, delivery_amount: deliveryAmount, total_amount: totalAmount, prepayment_amount: 200, prepayment_paid: false,
+      extras, base_amount: baseAmount, extras_amount: selected.amount, delivery_amount: finalDeliveryAmount, total_amount: finalTotalAmount, prepayment_amount: 200, prepayment_paid: false,
       deposit_amount: securityDeposit, deposit_paid: false, deposit_returned: false, status: "pending", source: "vacleaner_website",
     }).select("*").single();
     if (error || !booking) throw error || new Error("insert_failed");

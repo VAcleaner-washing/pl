@@ -40,7 +40,7 @@ for(const url of urls){
 }
 
 const lastmods=[...sitemap.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(match=>match[1]);
-check(lastmods.length===urls.length&&lastmods.every(value=>value===release.releasedAt),'sitemap lastmod matches the current release date');
+check(lastmods.length===urls.length&&lastmods.every(value=>/^\d{4}-\d{2}-\d{2}$/.test(value)&&value<=release.releasedAt),'sitemap lastmod contains valid content dates, not future deploy dates');
 
 const localAssetRefs=new Set();
 for(const url of urls){

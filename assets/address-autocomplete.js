@@ -25,6 +25,34 @@ function compose(ctx,fallback=''){
   const details=String(ctx.details?.value||'').trim().replace(/\s+/g,' ');
   return base+(details?`${DETAILS_SEPARATOR}${details}`:'');
 }
+function clearMeta(input){
+  if(!input)return;
+  delete input.dataset.vacAddressSelected;
+  delete input.dataset.vacAddressSettlement;
+  delete input.dataset.vacAddressDistanceKm;
+  delete input.dataset.vacAddressPricingDistanceKm;
+  delete input.dataset.vacAddressRouteKm;
+  delete input.dataset.vacAddressDistanceSource;
+  delete input.dataset.vacAddressLat;
+  delete input.dataset.vacAddressLon;
+  delete input.dataset.vacAddressAreaType;
+}
+function addressMeta(ctx){
+  if(!ctx?.input)return {verified:false,settlement:'',distanceKm:null,pricingDistanceKm:null,routeKm:null,distanceSource:'',lat:null,lon:null,areaType:'',address:''};
+  const numberMeta=name=>{const raw=ctx.input.dataset[name];const value=raw===''||raw==null?null:Number(raw);return Number.isFinite(value)?value:null};
+  return {
+    verified:ctx.input.dataset.vacAddressSelected==='1',
+    settlement:String(ctx.input.dataset.vacAddressSettlement||''),
+    distanceKm:numberMeta('vacAddressDistanceKm'),
+    pricingDistanceKm:numberMeta('vacAddressPricingDistanceKm'),
+    routeKm:numberMeta('vacAddressRouteKm'),
+    distanceSource:String(ctx.input.dataset.vacAddressDistanceSource||''),
+    lat:numberMeta('vacAddressLat'),
+    lon:numberMeta('vacAddressLon'),
+    areaType:String(ctx.input.dataset.vacAddressAreaType||''),
+    address:String(ctx.input.value||'').trim(),
+  };
+}
 function hasHouseNumber(value){
   const base=splitStored(value).base.replace(/^полтава\s*,?/i,'').trim();
   return /(?:^|[\s,])\d+[\p{L}\p{N}\/-]*\s*$/u.test(base)||/\d+[\p{L}\p{N}\/-]*(?:\s*,\s*)?$/.test(base);
@@ -48,14 +76,66 @@ function renderList(ctx,items){
   ctx.list.hidden=false;ctx.input.setAttribute('aria-expanded','true');
   ctx.list.querySelectorAll('[data-vac-address-index]').forEach(btn=>btn.addEventListener('mousedown',e=>{e.preventDefault();selectItem(ctx,Number(btn.dataset.vacAddressIndex))}));
 }
+
+function normalizeSettlement(value){return String(value||'').toLocaleLowerCase('uk-UA').replace(/^[смт.\s]+/u,'').replace(/[’`]/g,"'").trim()}
+function localDeliverySettlement(value){
+  const pricing=window.VACLEANER_CORE?.deliveryPricing||{};
+  const local=Array.isArray(pricing.localSettlements)?pricing.localSettlements:['Полтава','Розсошенці','Щербані','Горбанівка'];
+  const normalized=normalizeSettlement(value);
+  return local.some(item=>normalizeSettlement(item)===normalized);
+}
+async function hydrateDistanceQuote(ctx,item){
+  if(!ctx?.input||!item?.houseNumber)return;
+  if(localDeliverySettlement(item.settlement)){
+    ctx.input.dataset.vacAddressPricingDistanceKm='0';
+    ctx.input.dataset.vacAddressRouteKm='0';
+    ctx.input.dataset.vacAddressDistanceSource='local';
+    setStatus(ctx,'ok','Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир.');
+    document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
+    return;
+  }
+  setStatus(ctx,'loading','Адресу знайдено. Рахуємо відстань для доставки…');
+  try{
+    const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({action:'quote',lat:item.lat,lon:item.lon})});
+    if(!res.ok)throw new Error('distance_quote_failed');
+    const data=await res.json();
+    const pricingDistance=Number(data.pricingDistanceKm),routeKm=Number(data.routeKm);
+    if(Number.isFinite(pricingDistance))ctx.input.dataset.vacAddressPricingDistanceKm=String(pricingDistance);
+    if(Number.isFinite(routeKm))ctx.input.dataset.vacAddressRouteKm=String(routeKm);
+    ctx.input.dataset.vacAddressDistanceSource=String(data.distanceSource||'');
+    setStatus(ctx,'ok','Адресу знайдено. Відстань для доставки розраховано.');
+  }catch{
+    delete ctx.input.dataset.vacAddressPricingDistanceKm;
+    delete ctx.input.dataset.vacAddressRouteKm;
+    ctx.input.dataset.vacAddressDistanceSource='unavailable';
+    setStatus(ctx,'manual','Адресу знайшли, але тариф за відстанню не розрахувався. Менеджер підтвердить його до передоплати.',false);
+  }
+  document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
+}
 function selectItem(ctx,index){
   const item=ctx.items[index];if(!item)return;
   ctx.setting=true;
   setInputValue(ctx.input,item.address);
   ctx.setting=false;
   ctx.selected=item.houseNumber?item.address:'';
-  if(item.houseNumber){ctx.input.dataset.vacAddressSelected='1';setStatus(ctx,'ok','Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир.');closeList(ctx);ctx.details?.focus()}
-  else{delete ctx.input.dataset.vacAddressSelected;setStatus(ctx,'hint','Вулицю знайшли — допишіть номер будинку.');closeList(ctx);ctx.input.focus();const len=ctx.input.value.length;ctx.input.setSelectionRange?.(len,len)}
+  if(item.houseNumber){
+    clearMeta(ctx.input);
+    ctx.input.dataset.vacAddressSelected='1';
+    ctx.input.dataset.vacAddressSettlement=String(item.settlement||'');
+    ctx.input.dataset.vacAddressDistanceKm=item.distanceKm==null?'':String(item.distanceKm);
+    ctx.input.dataset.vacAddressLat=item.lat==null?'':String(item.lat);
+    ctx.input.dataset.vacAddressLon=item.lon==null?'':String(item.lon);
+    ctx.input.dataset.vacAddressAreaType=String(item.areaType||'');
+    closeList(ctx);
+    document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
+    hydrateDistanceQuote(ctx,item);
+    ctx.setting=true;
+    ctx.input.dispatchEvent(new Event('input',{bubbles:true}));
+    ctx.input.dispatchEvent(new Event('change',{bubbles:true}));
+    ctx.setting=false;
+    ctx.details?.focus();
+  }
+  else{clearMeta(ctx.input);setStatus(ctx,'hint','Вулицю знайшли — допишіть номер будинку.');closeList(ctx);ctx.input.focus();const len=ctx.input.value.length;ctx.input.setSelectionRange?.(len,len)}
 }
 function setActive(ctx,index){
   const buttons=[...ctx.list.querySelectorAll('[role="option"]')];if(!buttons.length)return;
@@ -65,7 +145,7 @@ function setActive(ctx,index){
 }
 async function search(ctx){
   const q=String(ctx.input.value||'').trim();
-  if(q.length<3){closeList(ctx);setStatus(ctx,'hint','Почніть вводити адресу — підкажемо Полтаву та передмістя.');return}
+  if(q.length<3){closeList(ctx);setStatus(ctx,'hint','Почніть вводити адресу — підкажемо Полтаву та населені пункти поруч.');return}
   ctx.abort?.abort();ctx.abort=new AbortController();
   setStatus(ctx,'loading','Шукаємо адресу…');
   try{
@@ -123,11 +203,11 @@ function attach(input,mode){
   const details=detailBox.querySelector('input');details.value=original.details;
   const ctx={input,mode,wrap,list,status,detailBox,details,items:[],active:-1,selected:'',timer:0,abort:null,setting:false};
   attached.set(input,ctx);if(mode==='admin')activeAdmin=ctx;else activePublic=ctx;
-  setStatus(ctx,'hint','Почніть вводити адресу — підкажемо Полтаву та передмістя.');
+  setStatus(ctx,'hint','Почніть вводити адресу — підкажемо Полтаву та населені пункти поруч.');
   if(original.base&&hasHouseNumber(original.base))setStatus(ctx,'hint','Збережена адреса. За потреби оберіть її зі списку ще раз.');
   input.addEventListener('input',()=>{
     if(ctx.setting)return;
-    ctx.selected='';delete input.dataset.vacAddressSelected;input.setCustomValidity('');
+    ctx.selected='';clearMeta(input);input.setCustomValidity('');
     clearTimeout(ctx.timer);ctx.timer=setTimeout(()=>search(ctx),420);
   });
   input.addEventListener('focus',()=>{if(ctx.items.length)renderList(ctx,ctx.items)});
@@ -148,11 +228,13 @@ function scan(){
 function installGlobals(){
   window.__VAC_DELIVERY_ADDRESS__=(fallback='')=>compose(activePublic,fallback);
   window.__VAC_ADMIN_DELIVERY_ADDRESS__=(fallback='')=>compose(activeAdmin,fallback);
+  window.__VAC_DELIVERY_META__=()=>addressMeta(activePublic);
+  window.__VAC_ADMIN_DELIVERY_META__=()=>addressMeta(activeAdmin);
   window.__VAC_SET_ADMIN_DELIVERY_ADDRESS__=(value='')=>{
     if(!activeAdmin)return false;
     const parsed=splitStored(value);
     activeAdmin.setting=true;setInputValue(activeAdmin.input,parsed.base);activeAdmin.setting=false;
-    activeAdmin.details.value=parsed.details;activeAdmin.selected='';delete activeAdmin.input.dataset.vacAddressSelected;
+    activeAdmin.details.value=parsed.details;activeAdmin.selected='';clearMeta(activeAdmin.input);
     setStatus(activeAdmin,'hint','Збережена адреса. За потреби оберіть її зі списку ще раз.');
     return true;
   };

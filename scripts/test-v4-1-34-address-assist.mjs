@@ -23,7 +23,7 @@ ok('public create submits composed address',bookingChunk.includes('globalThis.__
 ok('admin create/edit submits composed address',adminJs.includes('window.__VAC_ADMIN_DELIVERY_ADDRESS__?.(fd.get(\'deliveryAddress\'))'));
 ok('navigator ignores apartment details',adminJs.includes("full.split(' · ')[0].trim()"));
 ok('admin customer lookup restores split details',adminJs.includes('__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(customer.address)'));
-ok('edge function scopes lookup to Poltava service area',edge.includes('SERVICE_BBOX')&&edge.includes('SERVICE_RADIUS_KM')&&edge.includes('countrycode'));
+ok('edge function scopes lookup to Poltava search area',edge.includes('SERVICE_BBOX')&&edge.includes('ADDRESS_SEARCH_RADIUS_KM')&&edge.includes('countrycode'));
 ok('edge function uses OSM Photon with timeout',edge.includes('photon.komoot.io')&&edge.includes('4000'));
 ok('combobox is keyboard accessible',runtime.includes("e.key==='ArrowDown'")&&runtime.includes('aria-autocomplete'));
 ok('mobile dropdown is bounded',css.includes('max-height:216px')&&css.includes('overflow:auto'));

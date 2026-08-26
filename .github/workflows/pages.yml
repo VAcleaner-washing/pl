@@ -96,6 +96,18 @@ jobs:
         run: npm run test:v4.1.39-admin-visual-polish
       - name: Verify v4.1.41 fulfillment UX and CI stability
         run: npm run test:v4.1.41-fulfillment-ux
+      - name: Verify v4.1.47 Local SEO service-area patch
+        run: npm run test:v4.1.47-area-patch
+      - name: Verify v4.1.47.2 distance delivery pricing
+        run: npm run test:v4.1.47.2-delivery-distance
+      - name: Verify v4.1.44 booking hardening and smart entry
+        run: npm run test:v4.1.44-booking-hardening
+      - name: Verify v4.1.45 trust, cancellation and delivery rules
+        run: npm run test:v4.1.45-trust-rules
+      - name: Verify v4.1.46 booking funnel analytics
+        run: npm run test:v4.1.46-funnel-analytics
+      - name: Verify v4.1.47 SEO and Local SEO structure
+        run: npm run test:v4.1.47-seo-local
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources

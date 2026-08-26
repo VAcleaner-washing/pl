@@ -4,7 +4,17 @@ const API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-setti
 const CORE_SLOTS=window.VACLEANER_CORE?.slots||{morningStart:'08:00',morningEnd:'10:00',eveningStart:'17:30',eveningEnd:'20:00'};
 let slots={...CORE_SLOTS};
 let depositRules={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
-let deliveryFee=Number(window.VACLEANER_CORE?.deliveryFee)||250;
+const CORE_DELIVERY_PRICING=window.VACLEANER_CORE?.deliveryPricing||{};
+let deliveryPricing={
+  local:Number(CORE_DELIVERY_PRICING.local??window.VACLEANER_CORE?.deliveryFee)||250,
+  suburb:Number(CORE_DELIVERY_PRICING.suburb)||350,
+  baseOutside:Number(CORE_DELIVERY_PRICING.baseOutside??CORE_DELIVERY_PRICING.suburb)||350,
+  includedKm:Number(CORE_DELIVERY_PRICING.includedKm)||10,
+  perKm:Number(CORE_DELIVERY_PRICING.perKm)||15,
+  maxOutsideKm:Number(CORE_DELIVERY_PRICING.maxOutsideKm)||30,
+  localSettlements:Array.isArray(CORE_DELIVERY_PRICING.localSettlements)?[...CORE_DELIVERY_PRICING.localSettlements]:['Полтава','Розсошенці','Щербані','Горбанівка'],
+  outsideZone:String(CORE_DELIVERY_PRICING.outsideZone||'agreement')
+};
 const label=(kind)=>kind==='morning'?`Ранок · ${slots.morningStart}–${slots.morningEnd}`:`Вечір · ${slots.eveningStart}–${slots.eveningEnd}`;
 function validSlots(value){
   const keys=['morningStart','morningEnd','eveningStart','eveningEnd'];
@@ -72,13 +82,61 @@ function renderPickupLocationNote(){
     note.hidden=false;
   }else if(note)note.hidden=true;
 }
+function normalizeSettlement(value){return String(value||'').toLocaleLowerCase('uk-UA').replace(/^[смт.\s]+/u,'').replace(/[’`]/g,"'").trim()}
+function deliveryAddressInput(){return document.querySelector('.booking-delivery-address input[type="text"]:not([data-vac-address-detail])')}
+function currentDeliveryQuote(){
+  const input=deliveryAddressInput(),address=String(input?.value||'').trim();
+  if(!address)return {amount:deliveryPricing.local,zone:'pending',pending:true,quoteRequired:false,distanceKm:null};
+  const meta=window.__VAC_DELIVERY_META__?.()||{};
+  const settlement=String(meta.settlement||address.split(',')[0]||'').trim();
+  const normalized=normalizeSettlement(settlement);
+  const local=(deliveryPricing.localSettlements||[]).some(item=>normalizeSettlement(item)===normalized);
+  if(local)return {amount:deliveryPricing.local,zone:'local',pending:false,quoteRequired:false,settlement,distanceKm:0};
+  const distance=Number(meta.pricingDistanceKm);
+  if(meta.verified===true&&Number.isFinite(distance)&&distance>=0){
+    if(distance>deliveryPricing.maxOutsideKm)return {amount:0,zone:'agreement',pending:false,quoteRequired:true,settlement,distanceKm:distance};
+    const extraKm=Math.max(0,Math.ceil((distance-deliveryPricing.includedKm)-1e-9));
+    const amount=deliveryPricing.baseOutside+extraKm*deliveryPricing.perKm;
+    return {amount,zone:extraKm>0?'distance':'nearby',pending:false,quoteRequired:false,settlement,distanceKm:distance,extraKm};
+  }
+  return {amount:0,zone:'agreement',pending:false,quoteRequired:true,settlement,distanceKm:Number.isFinite(distance)?distance:null};
+}
 function renderDeliveryFee(){
   const row=document.querySelector('.booking-choice-row');if(!row)return;
   const delivery=[...row.querySelectorAll('button')].find(btn=>/Доставка/.test(btn.textContent||''));
-  const amount=formatMoney(deliveryFee);
-  if(delivery){const span=delivery.querySelector('span');setTextIfChanged(span,`до вас і назад · ${amount}`)}
-  const address=document.querySelector('.booking-delivery-address small');
-  if(address)setTextIfChanged(address,`${amount} включає доставку техніки до вас і її повернення назад.`);
+  const quote=currentDeliveryQuote();
+  const label=quote.quoteRequired?'тариф підтвердить менеджер':quote.pending?`${formatMoney(deliveryPricing.local)} / від ${formatMoney(deliveryPricing.baseOutside)}`:formatMoney(quote.amount);
+  if(delivery){const span=delivery.querySelector('span');setTextIfChanged(span,`до вас і назад · ${label}`)}
+  const address=document.querySelector('.booking-delivery-address > small,.booking-delivery-address .booking-field-hint');
+  if(address){
+    const text=quote.quoteRequired
+      ?'Для адреси, введеної вручну поза визначеною зоною, вартість доставки підтвердить менеджер до передоплати.'
+      :quote.pending
+        ?`Полтава, Розсошенці, Щербані та Горбанівка — ${formatMoney(deliveryPricing.local)}. За межі Полтави: до ${deliveryPricing.includedKm} км — ${formatMoney(deliveryPricing.baseOutside)}, далі +${deliveryPricing.perKm} грн/км. Понад ${deliveryPricing.maxOutsideKm} км — за погодженням.`
+        :quote.zone==='distance'
+          ?`${formatMoney(quote.amount)} · ${quote.distanceKm.toFixed(1).replace('.',',')} км за межами Полтави. Базові ${deliveryPricing.includedKm} км — ${formatMoney(deliveryPricing.baseOutside)}, далі +${deliveryPricing.perKm} грн/км.`
+          :`${formatMoney(quote.amount)} включає доставку техніки до вас і її повернення назад.`;
+    setTextIfChanged(address,text);
+  }
+  const summary=document.querySelector('.booking-summary');
+  if(summary){
+    const deliveryRow=[...summary.querySelectorAll(':scope > div')].find(el=>/Доставка/.test(el.querySelector('span')?.textContent||''));
+    if(deliveryRow){
+      const strong=deliveryRow.querySelector('strong');
+      if(strong)setTextIfChanged(strong,quote.quoteRequired?'за погодженням':quote.pending?`від ${formatMoney(deliveryPricing.local)}`:formatMoney(quote.amount));
+    }
+    let note=summary.querySelector('.vx-summary-delivery-note');
+    if(quote.quoteRequired){if(!note){note=document.createElement('p');note.className='vx-summary-delivery-note';summary.querySelector('.booking-summary-total')?.insertAdjacentElement('afterend',note)}setTextIfChanged(note,'Вартість бронювання зараз показана без доставки. Тариф підтвердить менеджер до передоплати.');note.hidden=false}else if(note)note.hidden=true;
+  }
+  const mobile=document.querySelector('.booking-mobile-summary');
+  if(mobile){
+    let note=mobile.querySelector('.vx-mobile-delivery');
+    if(!note){note=document.createElement('small');note.className='vx-mobile-delivery';mobile.querySelector('div')?.appendChild(note)}
+    const selected=row.querySelector('button.is-selected');
+    const isDelivery=Boolean(selected&&/Доставка/.test(selected.textContent||''));
+    note.hidden=!isDelivery;
+    if(isDelivery)setTextIfChanged(note,quote.quoteRequired?'Доставка — після підтвердження адреси':quote.pending?`Доставка: ${formatMoney(deliveryPricing.local)} / від ${formatMoney(deliveryPricing.baseOutside)}`:`Доставка: ${formatMoney(quote.amount)}${quote.distanceKm>deliveryPricing.includedKm?` · ${quote.distanceKm.toFixed(1).replace('.',',')} км`:''}`);
+  }
 }
 
 function renderDeposit(){
@@ -88,9 +146,9 @@ function renderDeposit(){
     if(total){
       const prepayment=ensureSummaryFinanceRow(summary,total,'vx-summary-prepayment','Передплата','Сплачуєте після підтвердження. Входить у вартість.');
       setTextIfChanged(prepayment.querySelector('strong'),'200 грн');
-      const row=ensureSummaryFinanceRow(summary,total,'vx-summary-deposit','Залоговий платіж','Сплачуєте при отриманні. Після розрахунку повертаємо залишок.');
+      const row=ensureSummaryFinanceRow(summary,total,'vx-summary-deposit','Залоговий платіж','Не входить у вартість. Сплачуєте при отриманні; залишок повертаємо після фінального розрахунку.');
       setTextIfChanged(row.querySelector('strong'),amount?formatMoney(amount):'—');
-      const totalLabel=summary.querySelector('.booking-summary-total span');setTextIfChanged(totalLabel,'Вартість оренди');
+      const totalLabel=summary.querySelector('.booking-summary-total span');setTextIfChanged(totalLabel,'Вартість бронювання');
       const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
       if(note){if(note.className!=='vx-summary-deposit-note')note.className='vx-summary-deposit-note';setTextIfChanged(note,'Після повернення техніки з передоплати та залогового платежу віднімається вартість оренди, доставки, додаткових засобів і використаної хімії. Залишок повертається клієнту або клієнт доплачує різницю.');}
     }
@@ -274,10 +332,41 @@ function refreshBindings(){
 }
 fetch(API,{cache:'no-store'})
   .then(r=>r.ok?r.json():Promise.reject(new Error('settings_failed')))
-  .then(d=>{const remoteSlots=validSlots(d?.slots);if(remoteSlots)slots=remoteSlots;if(d?.depositRules)depositRules={...depositRules,...d.depositRules};if(Number.isFinite(Number(d?.deliveryFee))&&Number(d.deliveryFee)>=0)deliveryFee=Math.round(Number(d.deliveryFee));refreshBindings()})
+  .then(d=>{const remoteSlots=validSlots(d?.slots);if(remoteSlots)slots=remoteSlots;if(d?.depositRules)depositRules={...depositRules,...d.depositRules};if(d?.deliveryPricing&&typeof d.deliveryPricing==='object')deliveryPricing={...deliveryPricing,...d.deliveryPricing,localSettlements:Array.isArray(d.deliveryPricing.localSettlements)?[...d.deliveryPricing.localSettlements]:deliveryPricing.localSettlements};else if(Number.isFinite(Number(d?.deliveryFee))&&Number(d.deliveryFee)>=0)deliveryPricing.local=Math.round(Number(d.deliveryFee));refreshBindings()})
   .catch(()=>refreshBindings());
-const depositObserver=new MutationObserver(()=>requestAnimationFrame(renderDeposit));
-document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},true);document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},0),true)});
+const depositObserver=new MutationObserver(()=>requestAnimationFrame(()=>{renderDeposit();renderDeliveryFee()}));
+document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},true);document.addEventListener('input',event=>{if(event.target?.closest?.('.booking-delivery-address'))requestAnimationFrame(renderDeliveryFee)},true);document.addEventListener('vacleaner:address-selected',event=>{if(event.detail?.mode==='public')requestAnimationFrame(renderDeliveryFee)});document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},0),true)});
+})();
+
+
+// v4.1.47.2 — attach verified distance metadata to booking estimates/creation.
+(()=>{
+  const BOOKING_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5';
+  const priorFetch=window.fetch.bind(window);
+  window.fetch=(input,init)=>{
+    try{
+      const url=typeof input==='string'?input:input?.url||'';
+      if(String(url).startsWith(BOOKING_API)&&typeof init?.body==='string'){
+        const body=JSON.parse(init.body),action=String(body?.action||'');
+        if(['availability','promo_lookup','create'].includes(action)){
+          const mode=document.querySelector('#booking-extras .booking-choice-row button.is-selected,#booking-extras .booking-choice-row button[aria-pressed="true"]')?.textContent||'';
+          if(/Доставка/.test(mode)){
+            const meta=window.__VAC_DELIVERY_META__?.()||{};
+            body.fulfillment='delivery';
+            body.deliveryAddress=window.__VAC_DELIVERY_ADDRESS__?.(body.deliveryAddress)||body.deliveryAddress;
+            body.deliveryAddressVerified=meta.verified===true;
+            if(Number.isFinite(Number(meta.pricingDistanceKm)))body.deliveryDistanceKm=Number(meta.pricingDistanceKm);
+            if(Number.isFinite(Number(meta.routeKm)))body.deliveryRouteKm=Number(meta.routeKm);
+            if(Number.isFinite(Number(meta.lat)))body.deliveryLat=Number(meta.lat);
+            if(Number.isFinite(Number(meta.lon)))body.deliveryLon=Number(meta.lon);
+            if(meta.distanceSource)body.deliveryDistanceSource=String(meta.distanceSource);
+          }
+          init={...init,body:JSON.stringify(body)};
+        }
+      }
+    }catch{}
+    return priorFetch(input,init);
+  };
 })();
 
 // v3.0.23 — public nearest-availability UX.

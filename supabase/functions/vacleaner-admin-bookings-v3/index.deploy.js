@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
-import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, rentalBase, paidDayMoments, isWeekendDeposit, slotIndex } from "./config.deploy.js";
+import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DELIVERY_PRICING, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, rentalBase, paidDayMoments, isWeekendDeposit, slotIndex } from "./config.deploy.js";
 import { productUsesPuzzi, settlementConfirmation, settlementFromBooking } from "./settlement.mjs";
 import { discountInfo } from "./pricing.mjs";
 const corsHeaders = {
@@ -19,6 +19,7 @@ const defaultCatalog = structuredClone(DEFAULT_CATALOG);
 const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultSlots = structuredClone(DEFAULT_SLOTS);
 const defaultDeliveryFee = Number(DEFAULT_DELIVERY_FEE) || 250;
+const defaultDeliveryPricing = structuredClone(DEFAULT_DELIVERY_PRICING);
 const cleanInt = (value, max = 100000)=>Math.max(0, Math.min(max, Math.floor(Number(value) || 0)));
 const cleanText = (value, max)=>typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
 const cleanAdminAlias = (value)=>{
@@ -80,10 +81,96 @@ function normalizeDepositRules(value) {
     }
     return out;
 }
-function normalizeDeliveryFee(value) {
-    const raw = value && typeof value === "object" ? value.amount : value;
-    const fee = Number(raw);
-    return Number.isFinite(fee) && fee >= 0 && fee <= 100000 ? Math.round(fee) : defaultDeliveryFee;
+function normalizeDeliveryPricing(value) {
+    const source = value && typeof value === "object" ? value : {
+        local: value
+    };
+    const amount = (raw, fallback, min = 0, max = 100000)=>{
+        const n = Number(raw);
+        return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : fallback;
+    };
+    const local = amount(source?.local ?? source?.amount ?? source, defaultDeliveryFee);
+    const baseOutside = amount(source?.baseOutside ?? source?.suburb, Number(defaultDeliveryPricing.baseOutside ?? defaultDeliveryPricing.suburb ?? 350));
+    const includedKm = amount(source?.includedKm, Number(defaultDeliveryPricing.includedKm || 10), 1, 100);
+    const perKm = amount(source?.perKm, Number(defaultDeliveryPricing.perKm || 15), 1, 1000);
+    const maxOutsideKm = amount(source?.maxOutsideKm ?? source?.serviceRadiusKm, Number(defaultDeliveryPricing.maxOutsideKm || 30), includedKm, 200);
+    return {
+        local,
+        suburb: baseOutside,
+        baseOutside,
+        includedKm,
+        perKm,
+        maxOutsideKm,
+        localSettlements: [
+            ...defaultDeliveryPricing.localSettlements || [
+                "Полтава",
+                "Розсошенці",
+                "Щербані",
+                "Горбанівка"
+            ]
+        ],
+        outsideZone: String(defaultDeliveryPricing.outsideZone || "agreement")
+    };
+}
+function normalizeSettlement(value) {
+    return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
+}
+function deliveryQuote(fulfillment, address, verified, distanceValue, pricing) {
+    if (fulfillment !== "delivery") return {
+        amount: 0,
+        zone: "pickup",
+        quoteRequired: false,
+        settlement: "",
+        distanceKm: null,
+        extraKm: 0
+    };
+    const base = String(address || "").split(" · ")[0].trim();
+    if (!base) return {
+        amount: pricing.local,
+        zone: "pending",
+        quoteRequired: false,
+        settlement: "",
+        distanceKm: null,
+        extraKm: 0
+    };
+    const settlement = base.split(",")[0].trim(), normalized = normalizeSettlement(settlement);
+    const local = (pricing.localSettlements || []).some((item)=>normalizeSettlement(item) === normalized);
+    if (local) return {
+        amount: pricing.local,
+        zone: "local",
+        quoteRequired: false,
+        settlement,
+        distanceKm: 0,
+        extraKm: 0
+    };
+    const distanceKm = Number(distanceValue);
+    if (verified && Number.isFinite(distanceKm) && distanceKm >= 0) {
+        if (distanceKm > pricing.maxOutsideKm) return {
+            amount: 0,
+            zone: "agreement",
+            quoteRequired: true,
+            settlement,
+            distanceKm,
+            extraKm: 0
+        };
+        const extraKm = Math.max(0, Math.ceil(distanceKm - pricing.includedKm - 1e-9));
+        return {
+            amount: pricing.baseOutside + extraKm * pricing.perKm,
+            zone: extraKm > 0 ? "distance" : "nearby",
+            quoteRequired: false,
+            settlement,
+            distanceKm,
+            extraKm
+        };
+    }
+    return {
+        amount: 0,
+        zone: "agreement",
+        quoteRequired: true,
+        settlement,
+        distanceKm: Number.isFinite(distanceKm) ? distanceKm : null,
+        extraKm: 0
+    };
 }
 function normalizeSlots(value) {
     if (!value || typeof value !== "object") return structuredClone(defaultSlots);
@@ -439,7 +526,7 @@ Deno.serve(async (request)=>{
                 row.key,
                 row.value
             ]));
-        const depositRules = normalizeDepositRules(settingsMap.deposit_rules), catalog = mergeCatalog(settingsMap.catalog), slots = normalizeSlots(settingsMap.booking_slots), deliveryFee = normalizeDeliveryFee(settingsMap.delivery_fee);
+        const depositRules = normalizeDepositRules(settingsMap.deposit_rules), catalog = mergeCatalog(settingsMap.catalog), slots = normalizeSlots(settingsMap.booking_slots), deliveryPricing = normalizeDeliveryPricing(settingsMap.delivery_fee);
         if (action === "list") {
             const { data, error } = await supabase.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").order("start_at", {
                 ascending: false
@@ -841,7 +928,10 @@ Deno.serve(async (request)=>{
             ].includes(String(existing.status || ""))));
             const calculatedDeposit = calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow, depositRules, catalog);
             const depositAmount = depositSnapshotLocked ? Math.max(0, Number(existing?.deposit_amount || calculatedDeposit) || 0) : calculatedDeposit;
-            const deliveryAmount = fulfillment === "delivery" ? existing?.fulfillment === "delivery" ? Math.max(0, Number(existing.delivery_amount) || 0) : deliveryFee : 0, prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
+            const requestedDeliveryOverride = body.deliveryAmountOverride === undefined || body.deliveryAmountOverride === null || body.deliveryAmountOverride === "" ? null : cleanInt(body.deliveryAmountOverride, 100000);
+            const autoDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, body.deliveryDistanceKm, deliveryPricing);
+            const preserveExistingDelivery = Boolean(existing?.fulfillment === "delivery" && Number(existing.delivery_amount) > 0 && requestedDeliveryOverride === null);
+            const deliveryAmount = fulfillment === "delivery" ? requestedDeliveryOverride !== null ? requestedDeliveryOverride : preserveExistingDelivery ? Math.max(0, Number(existing.delivery_amount) || 0) : autoDelivery.amount : 0, prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
             const requestedProcessing = body.processing && typeof body.processing === "object" ? body.processing : null;
             const processing = requestedProcessing ? {
                 contacted: requestedProcessing.contacted === true,
@@ -884,6 +974,21 @@ Deno.serve(async (request)=>{
                     completed_orders: cleanInt(body.completedOrders ?? currentExtras?.loyalty?.completed_orders, 10000)
                 },
                 promo: promoApplied ? promoExtraFromCandidate(autoPromo, true) : currentExtras?.promo || null,
+                delivery: fulfillment === "delivery" ? {
+                    zone: requestedDeliveryOverride !== null ? "manual" : preserveExistingDelivery ? currentExtras?.delivery?.zone || "snapshot" : autoDelivery.zone,
+                    quote_required: requestedDeliveryOverride !== null ? false : preserveExistingDelivery ? Boolean(currentExtras?.delivery?.quote_required) : autoDelivery.quoteRequired,
+                    verified: body.deliveryAddressVerified === true,
+                    settlement: autoDelivery.settlement,
+                    amount: deliveryAmount,
+                    pricing_distance_km: autoDelivery.distanceKm,
+                    extra_km: autoDelivery.extraKm,
+                    route_km: Number.isFinite(Number(body.deliveryRouteKm)) ? Number(body.deliveryRouteKm) : null,
+                    distance_source: cleanText(body.deliveryDistanceSource, 24) || null
+                } : {
+                    zone: "pickup",
+                    quote_required: false,
+                    amount: 0
+                },
                 base_before_discount: rawBase,
                 selected_items: selectedItems,
                 selected_items_amount: selectedAmount
@@ -1061,6 +1166,22 @@ Deno.serve(async (request)=>{
                 admin_note: cleanAdminNote(body.adminNote, 800) || cleanAdminNote(current.admin_note, 800) || null,
                 updated_at: now
             };
+            if (nextStatus === "cancelled") {
+                const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+                const startMs = new Date(current.start_at || `${current.start_date}T${current.pickup_window === "evening" ? slots.eveningStart : slots.morningStart}:00.000Z`).getTime();
+                const hoursBefore = Number.isFinite(startMs) ? Math.max(0, (startMs - Date.now()) / 3600000) : 0;
+                const refundable = current.prepayment_paid !== true || hoursBefore >= 72;
+                patch.extras = {
+                    ...currentExtras,
+                    cancellation: {
+                        policy_days: 3,
+                        cancelled_at: now,
+                        hours_before_start: Math.round(hoursBefore * 10) / 10,
+                        prepayment_refundable: refundable,
+                        prepayment_retained: current.prepayment_paid === true && !refundable ? Math.max(0, Number(current.prepayment_amount || 200)) : 0
+                    }
+                };
+            }
             if (nextStatus === "waiting_payment") patch.hold_expires_at = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
             else patch.hold_expires_at = null;
             if (nextStatus === "confirmed") {

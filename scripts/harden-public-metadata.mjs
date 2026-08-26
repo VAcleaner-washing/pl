@@ -138,6 +138,8 @@ for(const url of urls){
   }
 }
 
-sitemap=sitemap.replace(/<lastmod>[^<]+<\/lastmod>/g,`<lastmod>${release.releasedAt}</lastmod>`);
+// Preserve route-specific lastmod values. Deployment time is not a content-change signal.
+// Only repair malformed dates; route updates should explicitly update their sitemap entry.
+sitemap=sitemap.replace(/<lastmod>([^<]+)<\/lastmod>/g,(full,value)=>/^\d{4}-\d{2}-\d{2}$/.test(value)?full:`<lastmod>${release.releasedAt}</lastmod>`);
 fs.writeFileSync(sitemapPath,sitemap);
 console.log(`Hardened public metadata for ${urls.length} sitemap routes.`);
