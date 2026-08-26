@@ -1,6 +1,6 @@
 {
-  "version": "4.1.39",
-  "build": "4139",
-  "releasedAt": "2026-08-25",
-  "label": "VAcleaner v4.1.39 — ADMIN VISUAL POLISH"
+  "version": "4.1.40",
+  "build": "4140",
+  "releasedAt": "2026-08-26",
+  "label": "VAcleaner v4.1.40 — ADDRESS RESILIENCE + CACHE BUST"
 }
