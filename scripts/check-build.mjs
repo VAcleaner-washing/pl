@@ -154,7 +154,9 @@ const playwrightInstall=workflow.indexOf('python -m playwright install --with-de
 const playwrightRun=workflow.indexOf('npm run test:e2e');
 const publicBookingRun=workflow.indexOf('npm run test:public-booking');
 const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
-if(playwrightInstall<0||playwrightRun<0||publicBookingRun<0||pagesUpload<0||!(playwrightInstall<playwrightRun&&playwrightRun<publicBookingRun&&publicBookingRun<pagesUpload))errors.push('GitHub Pages deploy is not gated by installed Playwright and public booking resilience QA in the correct order');
+const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&workflow.includes('needs: validate')&&workflow.includes('needs: [validate, browser]');
+const hasAggregateGate=workflow.includes('continue-on-error: true')&&workflow.includes('Browser QA aggregate gate');
+if(playwrightInstall<0||playwrightRun<0||publicBookingRun<0||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by split static/browser QA with an aggregate browser failure gate');
 if(!workflow.includes('python -m py_compile scripts/e2e_smoke.py'))errors.push('GitHub workflow does not validate browser test source');
 if(!workflow.includes('python -m py_compile scripts/public_booking_resilience_qa.py'))errors.push('GitHub workflow does not validate public booking resilience test source');
 if(!workflow.includes('npm run test:retention'))errors.push('GitHub workflow does not gate retention rules');

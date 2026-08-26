@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.47.2",
+  "version": "4.1.49",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -66,6 +66,11 @@
     "test:v4.1.46-funnel-analytics": "node scripts/test-v4-1-46-funnel-analytics.mjs",
     "test:v4.1.47-seo-local": "node scripts/test-v4-1-47-seo-local.mjs",
     "test:v4.1.47-area-patch": "node scripts/test-v4-1-47-local-area-patch.mjs",
-    "test:v4.1.47.2-delivery-distance": "node scripts/test-v4-1-47-2-delivery-distance.mjs"
+    "test:v4.1.47.2-delivery-distance": "node scripts/test-v4-1-47-2-delivery-distance.mjs",
+    "test:v4.1.48-content-local-demand": "node scripts/test-v4-1-48-content-local-demand.mjs",
+    "test:v4.1.48-content-visual": "python scripts/content_v4148_visual_qa.py",
+    "test:v4.1.49-performance-ci": "node scripts/test-v4-1-49-performance-ci.mjs",
+    "ci:browser": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
+    "ci": "npm run stamp && npm run check && npm run test:v4.1.49-performance-ci && npm run build && npm run ci:browser"
   }
 }

@@ -318,6 +318,7 @@
     setTimeout(()=>modal.querySelector('.vq-close')?.focus(),30);
   }
   function closeQuiz(){if(!modal)return;if(path==='/pidbir'){location.href='/';return;}modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');}
+  window.__VAC_OPEN_SMART_GUIDE__=openQuiz;
 
   function injectTeaser(){
     if(path!=='/'||document.querySelector('[data-vq-guide]'))return;

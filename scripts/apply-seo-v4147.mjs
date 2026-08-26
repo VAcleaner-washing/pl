@@ -65,6 +65,11 @@ const crumbMap={
   '/blog/yak-vyvesty-plyamu-z-dyvana/':['Поради','Пляма на дивані'],
   '/blog/skilky-sokhne-dyvan-pislia-chyshchennia/':['Поради','Скільки сохне диван'],
   '/blog/yak-pochystyty-matrats-pislia-dytyny/':['Поради','Матрац після дитини'],
+  '/blog/yak-pochystyty-dyvan-vdoma/':['Поради','Як почистити диван вдома'],
+  '/blog/yak-prybraty-zapakh-z-dyvana/':['Поради','Як прибрати запах із дивана'],
+  '/blog/yak-pochystyty-matrats-vdoma/':['Поради','Як почистити матрац вдома'],
+  '/blog/shcho-mozhna-i-ne-mozhna-chystyty-paroochysnykom/':['Поради','Що можна і не можна чистити пароочисником'],
+  '/blog/yak-pomyty-vikna-robotom/':['Поради','Як помити вікна роботом'],
   '/polityka-konfidenciynosti/':['Конфіденційність'],
 };
 const urlForCrumb=(route,index,names)=>{

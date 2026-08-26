@@ -1145,3 +1145,5 @@ html.vq-standalone-page .vq-progress__meta{
 .vx-process-smart-guide>.button{width:max-content;min-height:44px;margin-top:4px;padding:0 18px;font-size:12px}
 @media(max-width:860px){.vx-process-smart-guide{max-width:640px;margin-top:26px}}
 @media(max-width:620px){.vx-process-smart-guide{margin-top:22px;padding:17px}.vx-process-smart-guide>.button{width:100%}}
+/* v4.1.49: Smart Guide trigger is a progressive-enhancement link; full quiz JS is lazy-loaded on interaction. */
+.vq-guide__button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}

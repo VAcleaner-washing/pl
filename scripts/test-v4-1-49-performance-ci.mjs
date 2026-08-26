@@ -1,0 +1,26 @@
+import fs from 'node:fs';import path from 'node:path';
+const root=process.cwd();let passed=0;const failed=[];
+const ok=(label,cond)=>{if(cond){passed++;console.log('OK  ',label)}else{failed.push(label);console.error('FAIL',label)}};
+const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const rel=JSON.parse(read('release.json'));const pkg=JSON.parse(read('package.json'));
+const home=read('index.html'),booking=read('bronuvannia/index.html'),pidbir=read('pidbir/index.html'),e2e=read('scripts/e2e_smoke.py'),workflow=read('.github/workflows/pages.yml'),quiz=read('assets/public-quiz.js');
+const scriptBytes=html=>[...html.matchAll(/<script[^>]+src="([^"]+)"/g)].reduce((sum,m)=>{const src=m[1].split('?')[0];if(!src.startsWith('/'))return sum;const file=path.join(root,src.slice(1));return sum+(fs.existsSync(file)?fs.statSync(file).size:0)},0);
+ok('release is v4.1.49',rel.version==='4.1.49'&&Number(rel.build)===4149&&pkg.version==='4.1.49');
+ok('home no longer eagerly downloads the full Smart Guide engine',!home.includes('/assets/public-quiz.js')&&home.includes('/assets/home-smart-guide-v4149.js'));
+ok('booking no longer eagerly downloads the full Smart Guide engine',!booking.includes('/assets/public-quiz.js')&&booking.includes('/assets/booking-entry-v4149.js'));
+ok('/pidbir keeps the complete interactive quiz engine',pidbir.includes('/assets/public-quiz.js'));
+ok('home bootstrap lazy-loads the quiz only on user intent',read('assets/home-smart-guide-v4149.js').includes('data-vx-lazy-quiz')&&read('assets/home-smart-guide-v4149.js').includes('__VAC_OPEN_SMART_GUIDE__'));
+ok('full quiz exposes an explicit lazy-open bridge',quiz.includes('window.__VAC_OPEN_SMART_GUIDE__=openQuiz'));
+ok('generic E2E selects a Smart Entry task before clicking equipment',e2e.includes('data-vx-task="sofa"')&&e2e.indexOf('data-vx-task="sofa"')<e2e.indexOf('.booking-products button:visible'));
+ok('E2E deposit assertion follows current final-settlement wording',e2e.includes('Deposit copy explains final settlement')&&!e2e.includes('Deposit copy is clear'));
+ok('workflow has independent static and browser gates',/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&workflow.includes('needs: validate'));
+ok('browser suites use continue-on-error only to aggregate results',workflow.includes('continue-on-error: true')&&workflow.includes('Browser QA aggregate gate'));
+ok('deploy waits for both validation and browser QA',workflow.includes('needs: [validate, browser]'));
+ok('v4.1.48 content tests are part of CI',workflow.includes('test:v4.1.48-content-local-demand')&&workflow.includes('test:v4.1.48-content-visual'));
+ok('v4.1.49 performance contract is part of CI',workflow.includes('test:v4.1.49-performance-ci'));
+const homeBytes=scriptBytes(home),bookingBytes=scriptBytes(booking),pidbirBytes=scriptBytes(pidbir);
+ok(`home raw local JS stays within 760 KiB (${Math.round(homeBytes/1024)} KiB)`,homeBytes<=760*1024);
+ok(`booking raw local JS stays within 1100 KiB (${Math.round(bookingBytes/1024)} KiB)`,bookingBytes<=1100*1024);
+ok(`Smart Guide route raw local JS stays within 90 KiB (${Math.round(pidbirBytes/1024)} KiB)`,pidbirBytes<=90*1024);
+ok('route bootstraps remain lightweight',fs.statSync(path.join(root,'assets/home-smart-guide-v4149.js')).size<=8*1024&&fs.statSync(path.join(root,'assets/booking-entry-v4149.js')).size<=12*1024);
+console.log(`v4.1.49 performance + CI: ${passed}/${passed+failed.length} OK`);if(failed.length){console.error(JSON.stringify({failed},null,2));process.exit(1)}

@@ -2,12 +2,14 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const release=JSON.parse(read('release.json'));
 const pkg=JSON.parse(read('package.json'));
+const semverParts=v=>String(v||'').split('.').map(x=>Number(x)||0);
+const versionAtLeast=(v,min)=>{const a=semverParts(v),b=semverParts(min);for(let i=0;i<Math.max(a.length,b.length);i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true};
 const routes=['index.html','dostavka/index.html','faq/index.html','tekhnika/karcher-puzzi-8-1/index.html','rishennia/textile/index.html'];
 let n=0, failed=0;
 function ok(name,cond){n++;if(cond)console.log(`OK   ${name}`);else{failed++;console.error(`FAIL ${name}`)}}
 function schemas(html){return [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].flatMap(m=>{try{return [JSON.parse(m[1])]}catch{return []}})}
 function walk(node,out=[]){if(Array.isArray(node)){for(const x of node)walk(x,out);return out}if(!node||typeof node!=='object')return out;out.push(node);for(const v of Object.values(node))walk(v,out);return out}
-ok('patch release is coherent',pkg.version===release.version&&Number(release.build)>=41471);
+ok('patch release is coherent',pkg.version===release.version&&versionAtLeast(release.version,'4.1.47.1'));
 for(const file of routes){
   const html=read(file),nodes=schemas(html).flatMap(x=>walk(x));
   const local=nodes.find(x=>x['@type']==='LocalBusiness');

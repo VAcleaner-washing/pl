@@ -10,8 +10,10 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: true
+
 jobs:
-  build:
+  validate:
+    name: Static / build gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -96,10 +98,6 @@ jobs:
         run: npm run test:v4.1.39-admin-visual-polish
       - name: Verify v4.1.41 fulfillment UX and CI stability
         run: npm run test:v4.1.41-fulfillment-ux
-      - name: Verify v4.1.47 Local SEO service-area patch
-        run: npm run test:v4.1.47-area-patch
-      - name: Verify v4.1.47.2 distance delivery pricing
-        run: npm run test:v4.1.47.2-delivery-distance
       - name: Verify v4.1.44 booking hardening and smart entry
         run: npm run test:v4.1.44-booking-hardening
       - name: Verify v4.1.45 trust, cancellation and delivery rules
@@ -108,8 +106,39 @@ jobs:
         run: npm run test:v4.1.46-funnel-analytics
       - name: Verify v4.1.47 SEO and Local SEO structure
         run: npm run test:v4.1.47-seo-local
+      - name: Verify v4.1.47 Local SEO service-area patch
+        run: npm run test:v4.1.47-area-patch
+      - name: Verify v4.1.47.2 distance delivery pricing
+        run: npm run test:v4.1.47.2-delivery-distance
+      - name: Verify v4.1.48 content and local demand
+        run: npm run test:v4.1.48-content-local-demand
+      - name: Verify v4.1.49 performance and CI contract
+        run: npm run test:v4.1.49-performance-ci
       - name: Build clean Pages artifact
         run: npm run build
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  browser:
+    name: Browser QA aggregate gate
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: requirements-ci.txt
+      - name: Rebuild browser-test artifact
+        run: |
+          npm run stamp
+          npm run build
       - name: Validate browser test sources
         run: |
           python -m py_compile scripts/e2e_smoke.py
@@ -117,34 +146,66 @@ jobs:
           python -m py_compile scripts/test-public-inner-heroes.py
           python -m py_compile scripts/analytics_visual_qa.py
           python -m py_compile scripts/growth_visual_qa.py
+          python -m py_compile scripts/content_v4148_visual_qa.py
+      - name: Cache Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('requirements-ci.txt') }}
       - name: Install Playwright browser tests
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
           python -m playwright install --with-deps chromium
-      - name: Run analytics visual QA
+      - name: Analytics visual QA
+        id: analytics_visual
+        continue-on-error: true
         run: npm run test:analytics-visual
-      - name: Run growth/public visual QA
+      - name: Growth/public visual QA
+        id: growth_visual
+        continue-on-error: true
         run: npm run test:growth-visual
-      - name: Run desktop and mobile browser tests
+      - name: v4.1.48 content visual QA
+        id: content_visual
+        continue-on-error: true
+        run: npm run test:v4.1.48-content-visual
+      - name: Desktop and mobile booking smoke
+        id: e2e
+        continue-on-error: true
         run: npm run test:e2e
-      - name: Run public booking resilience QA
+      - name: Public booking resilience QA
+        id: public_booking
+        continue-on-error: true
         run: npm run test:public-booking
-      - name: Run internal public hero visual QA
+      - name: Internal public hero visual QA
+        id: inner_heroes
+        continue-on-error: true
         run: npm run test:public-inner-heroes
-      - name: Run Smart Guide fit QA
+      - name: Smart Guide fit QA
+        id: smart_guide
+        continue-on-error: true
         run: npm run test:smart-guide-fit
-      - name: Run mobile client card QA
+      - name: Mobile client card QA
+        id: client_card
+        continue-on-error: true
         run: npm run test:client-card-mobile
-      - name: Run installed-PWA visual QA
+      - name: Installed-PWA visual QA
+        id: pwa
+        continue-on-error: true
         run: npm run test:pwa
-      - name: Run Liquid Glass primary UX QA
+      - name: Liquid Glass primary UX QA
+        id: glass
+        continue-on-error: true
         run: npm run test:glass-primary
-      - name: Run desktop density visual QA
+      - name: Desktop density visual QA
+        id: density
+        continue-on-error: true
         run: npm run test:desktop-density
-      - name: Run final desktop visual audit
+      - name: Final desktop visual audit
+        id: desktop_final
+        continue-on-error: true
         run: npm run test:desktop-final
-      - name: Upload browser evidence on failure
-        if: failure()
+      - name: Upload browser evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vacleaner-browser-test-results
@@ -155,10 +216,47 @@ jobs:
             final-desktop-test-results
           if-no-files-found: ignore
           retention-days: 14
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+      - name: Browser QA aggregate gate
+        if: always()
+        env:
+          ANALYTICS_VISUAL: ${{ steps.analytics_visual.outcome }}
+          GROWTH_VISUAL: ${{ steps.growth_visual.outcome }}
+          CONTENT_VISUAL: ${{ steps.content_visual.outcome }}
+          E2E: ${{ steps.e2e.outcome }}
+          PUBLIC_BOOKING: ${{ steps.public_booking.outcome }}
+          INNER_HEROES: ${{ steps.inner_heroes.outcome }}
+          SMART_GUIDE: ${{ steps.smart_guide.outcome }}
+          CLIENT_CARD: ${{ steps.client_card.outcome }}
+          PWA: ${{ steps.pwa.outcome }}
+          GLASS: ${{ steps.glass.outcome }}
+          DENSITY: ${{ steps.density.outcome }}
+          DESKTOP_FINAL: ${{ steps.desktop_final.outcome }}
+        run: |
+          failed=0
+          for pair in \
+            "analytics_visual=$ANALYTICS_VISUAL" \
+            "growth_visual=$GROWTH_VISUAL" \
+            "content_visual=$CONTENT_VISUAL" \
+            "e2e=$E2E" \
+            "public_booking=$PUBLIC_BOOKING" \
+            "inner_heroes=$INNER_HEROES" \
+            "smart_guide=$SMART_GUIDE" \
+            "client_card=$CLIENT_CARD" \
+            "pwa=$PWA" \
+            "glass=$GLASS" \
+            "density=$DENSITY" \
+            "desktop_final=$DESKTOP_FINAL"; do
+            name="${pair%%=*}"; status="${pair#*=}"
+            printf '%-24s %s\n' "$name" "$status"
+            if [ "$status" != "success" ]; then failed=1; fi
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "One or more browser suites failed. See every suite above; no later QA was skipped."
+            exit 1
+          fi
+
   deploy:
+    name: Deploy GitHub Pages
     permissions:
       contents: read
       pages: write
@@ -167,7 +265,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: [validate, browser]
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

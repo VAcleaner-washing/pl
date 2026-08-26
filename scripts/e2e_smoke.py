@@ -371,7 +371,8 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(page.locator(".vx-summary-prepayment").count() == 1, "One prepayment summary row")
         checks.check(page.locator(".vx-summary-deposit").count() == 1, "One deposit summary row")
         checks.check("Сплачуєте після підтвердження. Входить у вартість." in page.locator(".vx-summary-prepayment").inner_text(), "Prepayment copy is clear")
-        checks.check("Сплачуєте при отриманні. Після розрахунку повертаємо залишок." in page.locator(".vx-summary-deposit").inner_text(), "Deposit copy is clear")
+        deposit_copy = normalized_text(page.locator(".vx-summary-deposit").inner_text())
+        checks.check("Сплачуєте при отриманні" in deposit_copy and ("остаточного розрахунку" in deposit_copy or "фінального розрахунку" in deposit_copy or "Після розрахунку" in deposit_copy) and ("залиш" in deposit_copy.lower()), "Deposit copy explains final settlement")
         summary_before = page.locator(".booking-summary").bounding_box()
         page.locator(".vx-date-trigger").first.click()
         page.wait_for_selector(".vx-calendar-layer.is-open")
@@ -379,7 +380,12 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         stable = summary_before is not None and summary_during is not None and abs(summary_before["x"] - summary_during["x"]) < 1 and abs(summary_before["width"] - summary_during["width"]) < 1
         checks.check(stable, "Calendar does not shift booking summary")
         page.locator(".vx-calendar-close").click()
-        page.locator(".booking-products button").first.click()
+        smart_task = page.locator('[data-vx-task="sofa"]')
+        checks.check(smart_task.count() == 1 and smart_task.is_visible(), "Generic booking starts with visible Smart Entry tasks")
+        smart_task.click()
+        product_choice = page.locator('.booking-products button:visible').first
+        expect(product_choice).to_be_visible()
+        product_choice.click()
         dates = page.locator('.booking-date-grid input[type="date"]')
         page.wait_for_timeout(120)
         checks.check(dates.nth(0).input_value() == "" and dates.nth(1).input_value() == "", "Selecting equipment does not auto-select dates")

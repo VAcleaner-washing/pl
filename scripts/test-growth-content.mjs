@@ -51,7 +51,7 @@ for(const rel of [
 ]){
   const html=read(rel),count=wordCount(html);
   assert.ok(count>=600,`${rel} is still thin (${count} words; expected >=600)`);
-  assert.ok(html.includes('2026-08-23'),`${rel} dateModified was not refreshed`);
+  assert.ok(html.includes('2026-08-26'),`${rel} dateModified must reflect the v4.1.48 internal-link refresh`);
 }
 
 const stain=read('blog/yak-vyvesty-plyamu-z-dyvana/index.html');
