@@ -688,9 +688,20 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
 
         page.goto(f"{base}/", wait_until="networkidle")
         hero_box = page.locator(".v21-hero-copy").bounding_box()
+        primary_cta_box = page.locator(".v21-actions .v21-primary").bounding_box()
         viewport_height = page.viewport_size["height"] if page.viewport_size else 844
-        hero_limit = min(700, viewport_height * 0.85)
-        checks.check(hero_box is not None and hero_box["height"] <= hero_limit, "Mobile home hero copy is compact")
+        # v4.1.47 added a visible local-intent line above the creative kicker.
+        # Keep a hard compactness budget, but reserve the extra line instead of
+        # failing a healthy hero against the pre-local-SEO 700px threshold.
+        hero_limit = min(760, viewport_height * 0.90)
+        checks.check(
+            hero_box is not None and hero_box["height"] <= hero_limit,
+            "Mobile home hero copy stays within local-intent compact budget",
+        )
+        checks.check(
+            primary_cta_box is not None and primary_cta_box["y"] + primary_cta_box["height"] <= viewport_height,
+            "Mobile home primary CTA stays in the first viewport",
+        )
         checks.screenshot(page, "home-mobile.png")
     finally:
         context.close()
