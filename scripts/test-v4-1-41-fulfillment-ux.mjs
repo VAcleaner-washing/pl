@@ -7,7 +7,7 @@ const rel=JSON.parse(read('release.json'));
 const pkg=JSON.parse(read('package.json'));
 let n=0,failed=0;
 function ok(name,cond){n++;if(cond)console.log(`OK   ${name}`);else{failed++;console.error(`FAIL ${name}`)}}
-ok('release is v4.1.41',pkg.version==='4.1.41'&&rel.version==='4.1.41'&&String(rel.build)==='4141');
+ok('release keeps v4.1.41+ fulfillment contract',pkg.version===rel.version&&Number(rel.build)>=4141);
 ok('fulfillment field has dedicated hook',js.includes('class=\"field fulfillment-field\"'));
 ok('pickup initially hides delivery block',js.includes('delivery-address-field\" ${v.fulfillment===\'delivery\'?\'\':\'hidden\'}'));
 ok('fulfillment sync hides and disables delivery address',js.includes('const syncFulfillmentUi=()=>')&&js.includes('addressInput.disabled=!delivery')&&js.includes('deliveryAddressField.hidden=!delivery'));

@@ -5,13 +5,13 @@ const glass=fs.readFileSync('assets/admin-glass-test.css','utf8');
 const must=(source,token,label)=>{if(!source.includes(token))throw new Error(`${label}: missing ${token}`)};
 for(const [token,label] of [
   ["function navigationUrl(value)",'navigator URL helper'],
-  ["https://maps.apple.com/?daddr=",'Apple Maps deep link'],
   ["https://www.google.com/maps/dir/?api=1&destination=",'Google Maps directions link'],
   ["routeLink(b.fulfillment_address)",'booking-card route link'],
   ["routeLink(b.fulfillment_address,'delivery-route-link detail-route-link')",'detail route link'],
   ["id=\"bookingDeliveryRoute\"",'edit-form route control'],
   ["syncDeliveryRoute",'live edit-form route sync'],
 ]) must(js,token,label);
+if(js.includes('maps.apple.com'))throw new Error('Admin navigation must use Google Maps only');
 for(const [token,label] of [
   ['.balance{font-size:16px;font-weight:500','calmer final settlement row'],
   ['.balance strong{font-weight:620}','settlement amount hierarchy'],
