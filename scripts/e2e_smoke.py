@@ -543,6 +543,14 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check("Обрати техніку" in cta.inner_text(), "Mobile CTA starts on equipment")
         eligible_product = page.locator('.booking-products button[data-product-code="puzzi_jimmy"]')
         checks.check(eligible_product.count() == 1, "Mobile Stories regression uses a real 1000+ UAH Puzzi bundle")
+        # Generic mobile booking uses Smart Entry too: reveal the mattress recommendations
+        # before interacting with the Puzzi + Jimmy bundle. Hidden catalogue DOM is not clickable.
+        if not eligible_product.is_visible():
+            mattress_task = page.locator('[data-vx-task="mattress"]:visible')
+            checks.check(mattress_task.count() == 1, "Mobile Smart Entry exposes mattress task before bundle selection")
+            mattress_task.click()
+            page.wait_for_timeout(80)
+        expect(eligible_product).to_be_visible()
         eligible_product.click()
         page.wait_for_timeout(60)
         checks.check("Обрати дату" in cta.inner_text(), "Mobile CTA advances equipment → date")

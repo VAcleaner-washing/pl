@@ -146,7 +146,7 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
         let body={{}};
         const text=String(url);
         if(text.includes('vacleaner-settings'))body={{slots:window.__config.slots,depositRules:window.__config.depositRules,catalog:window.__config.catalog}};
-        else if(text.includes('vacleaner-admin-bookings-v3')||text.includes('vacleaner-admin-data-v1')){{
+        else if(text.includes('vacleaner-admin-bookings-v4')||text.includes('vacleaner-admin-bookings-v3')||text.includes('vacleaner-admin-data-v1')){{
           if(payload.action==='list')body={{bookings:window.__bookings}};
           else if(payload.action==='calendar')body={{days:Array.from({{length:14}},(_,i)=>({{date:new Date(Date.now()+i*86400000).toISOString().slice(0,10),resources:{{puzzi:{{label:'Puzzi',capacity:2,morning:2,evening:1}},sc2:{{label:'SC 2',capacity:2,morning:2,evening:2}},jimmy:{{label:'Jimmy',capacity:2,morning:1,evening:2}},abir:{{label:'ABIR',capacity:2,morning:2,evening:2}}}}}}))}};
           else if(payload.action==='clients')body={{customers:[{{phone:'+380951111111',name:'Анна Коваленко',telegram:'@anna',address:'Полтава, вул. Соборності, 10',document_type:'ID-картка',document_number:'000123456',document_verified_at:new Date().toISOString()}}]}};
