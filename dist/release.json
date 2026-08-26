@@ -1,6 +1,6 @@
 {
-  "version": "4.1.40",
-  "build": "4140",
+  "version": "4.1.41",
+  "build": "4141",
   "releasedAt": "2026-08-26",
-  "label": "VAcleaner v4.1.40 — ADDRESS RESILIENCE + CACHE BUST"
+  "label": "VAcleaner v4.1.41 — FULFILLMENT UX + CI STABILITY"
 }

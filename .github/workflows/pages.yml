@@ -94,6 +94,8 @@ jobs:
         run: npm run test:v4.1.37-booking-address-overflow
       - name: Verify v4.1.39 admin visual polish
         run: npm run test:v4.1.39-admin-visual-polish
+      - name: Verify v4.1.41 fulfillment UX and CI stability
+        run: npm run test:v4.1.41-fulfillment-ux
       - name: Build clean Pages artifact
         run: npm run build
       - name: Validate browser test sources
