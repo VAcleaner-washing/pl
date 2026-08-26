@@ -47,8 +47,7 @@ const config=JSON.parse(read('config/vacleaner.json'));
 {
   const rel='assets/address-autocomplete.js';
   let js=read(rel);
-  js=js.replace("async function search(ctx){\n  const q=String(ctx.input.value||'').trim();",
-`function addressVariants(raw){
+  const variantsBlock=`function addressVariants(raw){
   const q=String(raw||'').trim().replace(/\\s+/g,' ');
   const clean=q.replace(/^(?:м\\.?\\s*)?полтава\\s*[,;-]?\\s*/i,'').replace(/^(?:вул\\.?|вулиця|ул\\.?|улица)\\s+/i,'').trim();
   const m=clean.match(/^(.*?)[,\\s]+(\\d+[\\p{L}\\p{N}/-]*)$/u);
@@ -56,9 +55,9 @@ const config=JSON.parse(read('config/vacleaner.json'));
   if(m){variants.push(m[1]+', '+m[2]);variants.push(m[1]+' '+m[2]+', Полтава');variants.push(m[1]+', Полтава')}
   else variants.push(clean+', Полтава');
   return [...new Set(variants.map(v=>v.trim()).filter(v=>v.length>=3))].slice(0,4);
-}
-async function search(ctx){
-  const q=String(ctx.input.value||'').trim();`);
+}\n`;
+  while(js.includes(variantsBlock+variantsBlock))js=js.replace(variantsBlock+variantsBlock,variantsBlock);
+  if(!js.includes(variantsBlock))js=js.replace("async function search(ctx){\n  const q=String(ctx.input.value||'').trim();",`${variantsBlock}async function search(ctx){\n  const q=String(ctx.input.value||'').trim();`);
   const old=`    const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({q}),signal:ctx.abort.signal});
     if(!res.ok)throw new Error('address_lookup_failed');
     const data=await res.json();
@@ -218,7 +217,7 @@ function replaceBody(rel,body){
   let end=-1;
   for(const marker of markers){const at=html.indexOf(marker,h2);if(at>=0&&(end<0||at<end))end=at;}
   if(end<0)throw new Error(`Article body end not found: ${rel}`);
-  html=html.slice(0,h2)+body+html.slice(end);
+  html=html.slice(0,h2).trimEnd()+'\n'+body.trim()+'\n'+html.slice(end).trimStart();
   write(rel,html);
 }
 for(const [slug,body] of Object.entries(bodies)) replaceBody(`blog/${slug}/index.html`,body);

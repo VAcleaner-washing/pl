@@ -186,7 +186,8 @@ for(const [route,[from,to]] of Object.entries(h1Replacements)){
   }
   const imgFrom='src:"/assets/cleaning-process-poster.webp",alt:"VAcleaner доставляє готовий комплект для прибирання",fetchPriority:"high"';
   const imgTo='src:"/assets/cleaning-process-poster.webp",alt:"VAcleaner доставляє готовий комплект для прибирання",fetchPriority:"high",width:1086,height:1448,decoding:"async"';
-  if(js.includes(imgFrom))js=js.replace(imgFrom,imgTo);
+  const imgPattern=new RegExp(imgFrom.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?:,width:1086,height:1448,decoding:"async")*','g');
+  js=js.replace(imgPattern,imgTo);
   write(chunk,js);
   let html2=read('index.html');
   html2=html2.replace(/<img([^>]+src="\/assets\/cleaning-process-poster\.webp"[^>]*)>/i,(full,attrs)=>{

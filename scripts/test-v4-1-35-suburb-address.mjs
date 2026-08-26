@@ -12,7 +12,7 @@ const booking=read('_next/static/chunks/146ntlcv_t6~w-v4041.js');
 ok('release keeps v4.1.35+ suburb feature',Number(release.build)>=4135);
 ok('search covers Poltava and nearby settlements',edge.includes('ADDRESS_SEARCH_RADIUS_KM')&&edge.includes('SERVICE_BBOX')&&edge.includes('inSearchArea'));
 ok('settlement is kept in suggestion',edge.includes('settlementOf')&&edge.includes('areaType')&&edge.includes('distanceKm'));
-ok('UI explains nearby settlement lookup',runtime.includes('Полтаву та населені пункти поруч'));
+ok('UI explains full-address lookup and delivery calculation',runtime.includes('Введіть вулицю й номер будинку')&&runtime.includes('порахуємо доставку'));
 ok('access details are separate',runtime.includes('Під’їзд / орієнтир')&&runtime.includes('зі сторони двору'));
 ok('general booking comment stays',booking.includes('Коментар ')&&booking.includes('Що плануєте чистити або яку хімію підібрати'));
 ok('navigator keeps normalized suburb address',admin.includes("parts.length>=3")&&admin.includes("?address:`Полтава, ${address}`"));
