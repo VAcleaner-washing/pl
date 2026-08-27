@@ -136,6 +136,8 @@ jobs:
         run: npm run test:v4.1.61-mobile-density
       - name: Verify v4.1.62 Puzzi mobile density contract
         run: npm run test:v4.1.62-puzzi-density
+      - name: Verify v4.1.63 stability and editorial readability
+        run: npm run test:v4.1.63-stability-readability
       - name: Build clean Pages artifact
         run: npm run build
       - name: Upload Pages artifact

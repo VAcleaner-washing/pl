@@ -20,7 +20,10 @@ def check(cond,label):
  else: failed.append(label); print('FAIL:',label)
 
 def overflow(page):
- return page.evaluate("""()=>({sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,bad:[...document.querySelectorAll('body *')].filter(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return s.position!=='fixed'&&!el.classList.contains('final-cta-orbit')&&r.width>1&&(r.right>innerWidth+2||r.left<-2)}).slice(0,8).map(el=>String(el.className||el.tagName))})""")
+ return page.evaluate("""()=>{
+ const insideIntentionalScroller=el=>{for(let p=el.parentElement;p&&p!==document.body;p=p.parentElement){const x=getComputedStyle(p).overflowX;if((x==='auto'||x==='scroll')&&p.scrollWidth>p.clientWidth+2)return true}return false};
+ return {sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,bad:[...document.querySelectorAll('body *')].filter(el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el);return s.position!=='fixed'&&!el.classList.contains('final-cta-orbit')&&!insideIntentionalScroller(el)&&r.width>1&&(r.right>innerWidth+2||r.left<-2)}).slice(0,8).map(el=>String(el.className||el.tagName))}
+}""")
 
 with sync_playwright() as p:
  opts={'headless':True}

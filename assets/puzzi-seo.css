@@ -261,3 +261,15 @@
   .puzzi-final>div{margin-top:24px}
   .puzzi-final small{margin-top:16px}
 }
+
+/* v4.1.63 — equipment-page functional microcopy readability. */
+.puzzi-price small{font-size:11px}
+.puzzi-price span{font-size:12px}
+.puzzi-facts p{font-size:12px;line-height:1.4;color:#8a8c87}
+.puzzi-zone-grid a{font-size:12px}
+.puzzi-kit-intro>a{font-size:12px}
+.puzzi-term-grid small{font-size:11px}
+.puzzi-final small{font-size:12px;line-height:1.5;color:#858078}
+.puzzi-micro{font-size:12px;line-height:1.5;color:#77736c}
+.puzzi-cleaning-steps p,.puzzi-term-grid p,.puzzi-steps p{font-size:13px;line-height:1.62;color:#6a645d}
+.puzzi-cleaning-note,.puzzi-weekend-note{font-size:13px;line-height:1.58;color:#625c55}

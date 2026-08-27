@@ -25,7 +25,7 @@ for(const slug of newlyGenerated){
   const file=`blog/${slug}/index.html`,route=`/blog/${slug}/`;
   ok(`${slug} exists`,exists(file));
   if(!exists(file))continue;
-  const html=read(file),articleHtml=html.match(/<article class=\"v4-article content-article\">([\s\S]*?)<\/article>/)?.[1]||'',text=strip(articleHtml),nodes=schemaNodes(html);
+  const html=read(file),articleHtml=html.match(/<article class=\"v4-article content-article\"[^>]*>([\s\S]*?)<\/article>/)?.[1]||'',text=strip(articleHtml),nodes=schemaNodes(html);
   ok(`${slug} owns SEO map entry`,Boolean(seo[route]));
   ok(`${slug} is indexable in sitemap`,sitemap.includes(`https://vacleaner.pp.ua${route}`));
   ok(`${slug} has canonical`,html.includes(`href="https://vacleaner.pp.ua${route}" rel="canonical"`)||html.includes(`rel="canonical" href="https://vacleaner.pp.ua${route}"`));
@@ -34,7 +34,7 @@ for(const slug of newlyGenerated){
   ok(`${slug} has breadcrumb schema`,nodes.some(node=>hasType(node,'BreadcrumbList')));
   ok(`${slug} has LocalBusiness`,nodes.some(node=>hasType(node,'LocalBusiness')));
   ok(`${slug} starts with quick answer`,html.includes('class="content-quick-answer"'));
-  ok(`${slug} has useful depth`,(articleHtml.match(/<h2>/g)||[]).length>=6&&text.split(/\s+/).length>=450);
+  ok(`${slug} has useful depth`,((articleHtml.match(/<h2(?:\s[^>]*)?>/g)||[]).length+(articleHtml.match(/<h3(?:\s[^>]*)?>/g)||[]).length)>=8&&text.split(/\s+/).length>=450);
   ok(`${slug} has contextual next-step links`,html.includes('class="seo-route-links content-article-links"'));
   ok(`${slug} has one booking/picker CTA`,/class="button button-gold" href="\/(?:bronuvannia|pidbir)/.test(html));
 }

@@ -98,7 +98,23 @@ def main():
         assert page.evaluate('window.__cardChildMutations')==0
         assert page.url==before, f'Unavailable flow navigated away: {before} -> {page.url}'
         assert not errors, f'Page errors: {errors}'
-        print(f'Public booking resilience PASS: mutation plateau {first}->{second}; nearest suggestion never mutates React-owned availability card; unavailable 409 stays on page.')
+
+        # Regression: generic delivery-copy normalization must never overwrite React booking totals.
+        total_page=browser.new_page(viewport={'width':390,'height':844})
+        total_page.set_content('''<!doctype html><html><body><form class="booking-form"><div class="booking-mobile-summary"><div><span>Разом · 1 доба</span><strong>1 250 грн</strong><small class="vx-mobile-delivery">Доставка: 250 грн</small></div></div><div class="booking-summary"><div class="booking-summary-total"><span>Разом</span><strong>1 250 грн</strong></div><p>Доставка: 250 грн</p></div></form></body></html>''',wait_until='domcontentloaded')
+        total_page.add_script_tag(path=str(ROOT/'assets/vacleaner-core.js'))
+        total_page.add_script_tag(path=str(ROOT/'assets/public-booking-slots.js'))
+        total_page.add_script_tag(path=str(ROOT/'assets/public-experience.js'))
+        total_page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
+        total_page.wait_for_timeout(260)
+        mobile_total=total_page.locator('.booking-mobile-summary strong').inner_text().strip()
+        desktop_total=total_page.locator('.booking-summary-total strong').inner_text().strip()
+        assert mobile_total=='1 250 грн', f'Delivery normalizer overwrote mobile booking total: {mobile_total!r}'
+        assert desktop_total=='1 250 грн', f'Delivery normalizer overwrote desktop booking total: {desktop_total!r}'
+        assert '250 грн' in total_page.locator('.vx-mobile-delivery').inner_text(), 'Delivery note was lost while protecting booking total'
+        total_page.close()
+
+        print(f'Public booking resilience PASS: mutation plateau {first}->{second}; nearest suggestion never mutates React-owned availability card; booking total survives delivery-copy normalization.')
         browser.close()
 
 if __name__=='__main__': main()

@@ -1235,3 +1235,40 @@ html.vq-standalone-page .vq-progress__meta{
 @media(max-width:620px){
   .home-v21{padding-bottom:0}
 }
+
+/* v4.1.63 — readability pass for functional microcopy. Decorative kickers stay compact. */
+.booking-conditions-steps article small{font-size:12px;line-height:1.48;color:#6c645b}
+.booking-conditions-more summary{font-size:12px;line-height:1.4}
+.booking-promo-hint{font-size:12px;line-height:1.45}
+.booking-chemistry>small,.booking-story-toggle small,.booking-gift-options small,.booking-gift-fixed span,.booking-gift-select>span{font-size:12px;line-height:1.48}
+.vx-summary-finance-row small{font-size:12px;line-height:1.45}
+.vx-booking-deposit small{font-size:11px;line-height:1.4}
+.vx-mobile-deposit{font-size:11px;line-height:1.3}
+.booking-mobile-summary>div>span{font-size:12px;line-height:1.3}
+.vx-payment-flow b{font-size:11px}.vx-payment-flow small{font-size:11px;line-height:1.3}
+.puzzi-micro{font-size:12px;line-height:1.5;color:#68655f}
+.puzzi-cleaning-note,.puzzi-weekend-note{font-size:13px;line-height:1.58;color:#625c55}
+.puzzi-cleaning-steps p,.puzzi-term-grid p,.puzzi-steps p{font-size:13px;line-height:1.62}
+.puzzi-process-link{font-size:12px}
+.package-card.featured .package-purpose{color:#302820}
+.package-card.featured .package-price span{color:#4c4136}
+.package-card.featured .vx-home-reset-gift{color:#2d241c;background:rgba(255,255,255,.28);border-color:rgba(37,29,20,.2)}
+.footer-bottom{color:#747874}
+
+/* v4.1.63 — public readability sweep: functional copy must not collapse into decorative microtype. */
+.final-cta>small{font-size:12px;line-height:1.5;color:#787872}
+.footer-links a,.footer-contact a{font-size:12px}
+.footer-bottom{font-size:11px;line-height:1.5;color:#747874}
+.faq-page-aside small{font-size:12px;line-height:1.45}
+.home-v21 .v21-action-note{font-size:12px;line-height:1.5}
+.home-v21 .v21-trust-strip p{font-size:12px}
+.home-v21 .v21-day-grid p{font-size:12px;line-height:1.5}
+.home-v21 .v21-package-grid>article>span{font-size:11px}
+.home-v21 .v21-package-grid>article>b{font-size:12px;line-height:1.5}
+.home-v21 .v21-package-grid a{font-size:12px}
+.booking-conditions-more p{font-size:12px;line-height:1.55}
+.booking-chemistry-copy span{font-size:13px;line-height:1.5}
+@media(max-width:620px){
+  .home-v21 .v21-action-note,.home-v21 .v21-trust-strip p{font-size:12px}
+}
+.booking-chemistry>label small,.booking-extras span small{font-size:12px;line-height:1.48}

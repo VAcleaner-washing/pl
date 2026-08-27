@@ -300,7 +300,12 @@
     if(Number.isFinite(fee)&&fee>=0&&fee<=100000)deliveryFee=Math.round(fee);
   }
   function deliveryContext(node){
-    let el=node.parentElement;
+    const origin=node?.parentElement;
+    // Booking totals, deposits and delivery rows are rendered from the live estimate.
+    // Never rewrite a bare money node there: a parent may also contain the word
+    // “Доставка”, which previously turned the whole booking total into the fee.
+    if(origin?.closest?.('.booking-summary,.booking-mobile-summary,.booking-choice-row'))return false;
+    let el=origin;
     for(let depth=0;el&&depth<2;depth+=1,el=el.parentElement){
       const text=String(el.textContent||'').toLowerCase();
       if(/самовивіз/.test(text)&&!/достав/.test(text))return false;
@@ -733,10 +738,10 @@
   const loadBookingHardening=()=>{
     if(!document.querySelector('.booking-form'))return;
     if(!document.querySelector('link[href*="booking-hardening-v4144.css"]')){
-      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/booking-hardening-v4144.css?v=4162';document.head.appendChild(link);
+      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/booking-hardening-v4144.css?v=4163';document.head.appendChild(link);
     }
     if(!document.querySelector('script[src*="booking-hardening-v4144.js"]')){
-      const script=document.createElement('script');script.src='/assets/booking-hardening-v4144.js?v=4162';script.defer=true;document.head.appendChild(script);
+      const script=document.createElement('script');script.src='/assets/booking-hardening-v4144.js?v=4163';script.defer=true;document.head.appendChild(script);
     }
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBookingHardening,{once:true});else loadBookingHardening();
