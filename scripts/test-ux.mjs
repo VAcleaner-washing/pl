@@ -32,7 +32,7 @@ const checks=[
  ['booking has one mobile CTA layer',publicCss.includes('main:has(.booking-form) .mobile-booking{display:none}')&&publicCss.includes('.booking-mobile-summary{z-index:60!important')],
  ['public mobile CTA is a global non-overlapping grid',publicCss.includes('grid-template-columns:minmax(0,1.75fr) minmax(0,1fr)')&&publicCss.includes('.mobile-booking a:last-child{border-left:1px solid rgba(255,255,255,.12)}')&&!publicFixes.includes('  .mobile-booking{')],
  ['mobile header stays one row',publicCss.includes('grid-template-columns:minmax(0,1fr) 44px!important')&&publicCss.includes('.header-cta{display:none!important}')],
- ['mobile heroes are compact',publicCss.includes('.v21-hero-copy{min-height:520px!important')&&publicCss.includes('.inner-hero{min-height:auto!important')&&publicCss.includes('.booking-hero{padding:104px 18px 38px!important')],
+ ['mobile heroes are compact',publicCss.includes('.v21-hero-copy{min-height:470px!important')&&publicCss.includes('.inner-hero{min-height:auto!important')&&publicCss.includes('.booking-hero{padding:104px 18px 38px!important')],
  ['public mobile tap targets',publicCss.includes('.editorial-footer a,.package-link,.contact-card a,.faq-list-large summary,.v21-choice-help>a{min-height:44px')&&publicCss.includes('.booking-consent input{width:22px!important;height:22px!important')],
 ];
 const failed=checks.filter(([,ok])=>!ok);
