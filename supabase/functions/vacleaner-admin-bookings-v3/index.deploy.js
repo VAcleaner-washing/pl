@@ -849,9 +849,11 @@ Deno.serve(async (request)=>{
             if (!phone || !channel) return json({
                 error: "invalid_referral_contact"
             }, 400);
+            if (body.confirmed !== true) return json({
+                error: "confirmation_required"
+            }, 409);
             const now = new Date().toISOString(), rewardId = String(body.rewardId || "");
             const customerPatch = {
-                preferred_contact: channel,
                 updated_at: now
             };
             if (!validBookingId(rewardId)) {
@@ -1067,7 +1069,7 @@ Deno.serve(async (request)=>{
                     referral: enteredReferral
                 }, 409);
             }
-            const autoPromo = action === "create" ? enteredReferral || await resolvePhonePromo(supabase, {
+            const phonePromo = action === "create" ? await resolvePhonePromo(supabase, {
                 phone: customerPhone,
                 productCode,
                 startDate: period.startDate,
@@ -1077,6 +1079,7 @@ Deno.serve(async (request)=>{
                 rawBase,
                 includeBlocked: false
             }) : null;
+            const autoPromo = action === "create" ? enteredReferral || phonePromo : null;
             const rewardCandidate = action === "create" && !enteredReferral ? await availableReferralReward(supabase, customerPhone) : null;
             const promoPricingExtras = autoPromo ? {
                 ...currentExtras,

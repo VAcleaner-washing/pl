@@ -48,7 +48,9 @@ export async function validateFriendReferral(db: any, codeValue: unknown, referr
   if (row.active !== true) return { ...base, valid: false, reason: "referral_inactive" };
   if (!referredPhone) return { ...base, valid: false, reason: "phone_required" };
   if (!referrerPhone || referrerPhone === referredPhone) return { ...base, valid: false, reason: "self_referral" };
-  if (Number(completedOrders || 0) > 0) return { ...base, valid: false, reason: "referral_first_rental_only" };
+  const { count: priorBookings, error: priorBookingError } = await db.from("vacleaner_bookings").select("id", { count: "exact", head: true }).eq("customer_phone", referredPhone).in("status", ["pending", "waiting_payment", "confirmed", "issued", "completed"]);
+  if (priorBookingError) throw priorBookingError;
+  if (Number(priorBookings || 0) > 0 || Number(completedOrders || 0) > 0) return { ...base, valid: false, reason: "referral_first_rental_only" };
   const { count, error: useError } = await db.from("vacleaner_referral_uses").select("id", { count: "exact", head: true }).eq("referred_phone", referredPhone).in("status", ["pending", "completed"]);
   if (useError) throw useError;
   if ((count || 0) > 0) return { ...base, valid: false, reason: "referral_already_used" };
@@ -98,7 +100,7 @@ export async function completeReferralForBooking(db: any, booking: any) {
   const { error: completeError } = await db.from("vacleaner_referral_uses").update({ status: "completed", completed_at: completedAt, cancelled_at: null }).eq("id", use.id).eq("status", "pending");
   if (completeError) throw completeError;
   const expiresAt = new Date(new Date(completedAt).getTime() + REFERRAL_REWARD_DAYS * 86400000).toISOString();
-  const rewardRow = { referrer_phone: use.referrer_phone, referred_phone: use.referred_phone, source_booking_id: booking.id, amount: REFERRAL_REWARD_AMOUNT, status: "active", activated_at: completedAt, expires_at: expiresAt, updated_at: completedAt };
+  const rewardRow = { referrer_phone: use.referrer_phone, referred_phone: use.referred_phone, source_booking_id: booking.id, amount: REFERRAL_REWARD_AMOUNT, status: "active", activated_at: completedAt, expires_at: expiresAt, used_booking_id: null, used_at: null, reminded_at: null, updated_at: completedAt };
   const { data: reward, error: rewardError } = await db.from("vacleaner_referral_rewards").upsert(rewardRow, { onConflict: "source_booking_id", ignoreDuplicates: false }).select("id,amount,status,activated_at,expires_at,referrer_phone,referred_phone").single();
   if (rewardError) throw rewardError;
   return { code, reward };

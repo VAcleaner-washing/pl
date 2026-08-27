@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+import path from 'node:path';
+const read=p=>fs.readFileSync(p,'utf8');let passed=0;const failed=[];const ok=(name,cond)=>{if(cond){passed++;console.log('PASS:',name)}else{failed.push(name);console.error('FAIL:',name)}};
+const rel=JSON.parse(read('release.json')),pkg=JSON.parse(read('package.json'));
+ok('release is v4.2.2',rel.version==='4.2.2'&&Number(rel.build)===4202&&pkg.version==='4.2.2');
+const quiz=read('assets/public-quiz.js'),core=read('assets/vacleaner-core.js'),config=JSON.parse(read('config/vacleaner.json'));
+ok('Smart Guide price comes from canonical catalog',quiz.includes('const CORE=window.VACLEANER_CORE')&&quiz.includes('price:Math.max(0,Number(item.weekday)||0)')&&!/PRODUCT_INFO=\{[\s\S]*?price:\d+/.test(quiz));
+ok('Smart Guide extras price comes from canonical catalog',quiz.includes('price:Math.max(0,Number(item.price)||0)')&&!/EXTRA_INFO=\{[\s\S]*?price:\d+/.test(quiz));
+ok('pidbir loads generated core before quiz',read('pidbir/index.html').indexOf('/assets/vacleaner-core.js')<read('pidbir/index.html').indexOf('/assets/public-quiz.js'));
+ok('home lazy loader loads core before quiz',read('assets/home-smart-guide-v4149.js').includes("loadAsset('/assets/vacleaner-core.js','core'"));
+const ref=read('supabase/functions/vacleaner-admin-bookings-v3/referral.ts'),status=read('supabase/functions/vacleaner-status-correction-v1/index.ts'),admin=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts'),adminJs=read('assets/admin-v250.js');
+ok('referral first-rental rule blocks prior active bookings',ref.includes('priorBookings')&&ref.includes('["pending", "waiting_payment", "confirmed", "issued", "completed"]'));
+ok('completed referral rollback blocks already-used reward',status.includes('referral_reward_already_used')&&status.includes('rollbackCompletedReferral'));
+ok('completed referral rollback returns use to pending and cancels unused reward',status.includes('status: "pending", completed_at: null')&&status.includes('status: "cancelled", used_booking_id: null'));
+ok('re-completion resets reward usage/reminder state',ref.includes('used_booking_id: null, used_at: null, reminded_at: null'));
+ok('referral send is explicit two-step',adminJs.includes('bindReferralSendButton')&&adminJs.includes('Позначити надісланим')&&admin.includes('body.confirmed !== true'));
+ok('referral send does not overwrite preferred contact',!admin.includes('const customerPatch: Record<string, any> = { preferred_contact: channel'));
+ok('v4.1.28 phone-promo assertion remains compatible',admin.includes('action === "create" ? await resolvePhonePromo'));
+ok('Smart Guide removes unnecessary technical jargon',!quiz.includes('кислотостійк')&&!quiz.includes('лугостійк')&&!quiz.includes('UV-світло й нагрівання до 60 °C')&&quiz.includes('1–2 проходи без подачі води'));
+const htmlFiles=[];const walk=d=>fs.readdirSync(d,{withFileTypes:true}).forEach(e=>{const p=path.join(d,e.name);if(['admin','dist','.git'].includes(e.name))return;e.isDirectory()?walk(p):e.name.endsWith('.html')&&htmlFiles.push(p)});walk('.');let missing=[];for(const file of htmlFiles){const html=read(file);for(const m of html.matchAll(/<img\b[^>]*\bsrc=["'](\/assets\/[^"']+)["'][^>]*>/gi)){const tag=m[0];if(!/\bwidth=["']\d+["']/i.test(tag)||!/\bheight=["']\d+["']/i.test(tag))missing.push(`${file}:${m[1]}`)}}
+ok('public local images reserve layout space',missing.length===0);
+console.log(JSON.stringify({passed,failed,status:failed.length?'failed':'passed'},null,2));process.exit(failed.length?1:0);

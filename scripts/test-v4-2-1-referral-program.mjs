@@ -5,7 +5,7 @@ const root=process.cwd();let passed=0;const failed=[];
 const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const ok=(label,cond)=>{if(cond){passed++;console.log('PASS:',label)}else{failed.push(label);console.error('FAIL:',label)}};
 const rel=JSON.parse(read('release.json')),pkg=JSON.parse(read('package.json'));
-ok('release is v4.2.1',rel.version==='4.2.1'&&Number(rel.build)===4201&&pkg.version==='4.2.1');
+ok('release includes v4.2.1 referral program',Number(rel.build)>=4201&&pkg.version===rel.version);
 const migration=read('supabase/migrations/20260827170000_vacleaner_referral_program_v421.sql');
 ok('migration stores optional Instagram and preferred channel',migration.includes('add column if not exists instagram text')&&migration.includes('add column if not exists customer_instagram text')&&migration.includes("preferred_contact in ('phone','telegram','instagram')"));
 ok('migration creates permanent referral codes',migration.includes('create table if not exists public.vacleaner_referral_codes')&&migration.includes('owner_phone text primary key')&&migration.includes('code text not null unique'));
@@ -17,7 +17,7 @@ ok('referral tables deny direct browser roles',migration.includes('enable row le
 const bookingRef=read('supabase/functions/vacleaner-booking-v5/referral.ts'),adminRef=read('supabase/functions/vacleaner-admin-bookings-v3/referral.ts');
 ok('public/admin referral helper stays identical',bookingRef===adminRef);
 ok('self referral is rejected',bookingRef.includes('referrerPhone === referredPhone')&&bookingRef.includes('reason: "self_referral"'));
-ok('friend code is first-rental only',bookingRef.includes('referral_first_rental_only')&&bookingRef.includes('completedOrders'));
+ok('friend code is first-rental only',bookingRef.includes('referral_first_rental_only')&&bookingRef.includes('priorBookings')&&bookingRef.includes('["pending", "waiting_payment", "confirmed", "issued", "completed"]'));
 ok('one active/completed friend use per phone',bookingRef.includes('.in("status", ["pending", "completed"])')&&bookingRef.includes('referral_already_used'));
 ok('reward lifetime is 150 days',bookingRef.includes('REFERRAL_REWARD_DAYS = 150')&&bookingRef.includes('REFERRAL_REWARD_DAYS * 86400000'));
 ok('completed referred rental creates referrer reward',bookingRef.includes('completeReferralForBooking')&&bookingRef.includes('source_booking_id: booking.id')&&bookingRef.includes('amount: REFERRAL_REWARD_AMOUNT'));
@@ -30,7 +30,7 @@ ok('public booking claims reward only after booking creation',booking.includes('
 const admin=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts');
 ok('admin has referral summary and expiring-bonus endpoints',admin.includes('action === "referral_summary"')&&admin.includes('action === "referrals_expiring"'));
 ok('expiry reminder queue is 30 days and hides already reminded rewards',admin.includes('30 * 86400000')&&admin.includes('.is("reminded_at", null)'));
-ok('reminder send marks reward without overwriting initial referral share timestamp',admin.includes('if (!validBookingId(rewardId))')&&admin.includes('customerPatch.referral_sent_at')&&admin.includes('reminded_at: now'));
+ok('reminder send requires explicit confirmation and never overwrites preferred contact',admin.includes('body.confirmed !== true')&&admin.includes('customerPatch.referral_sent_at')&&admin.includes('reminded_at: now')&&!admin.includes('const customerPatch: Record<string, any> = { preferred_contact: channel'));
 ok('manual admin create validates friend referral',admin.includes('action === "create" && cleanText(body.referralCode, 32)')&&admin.includes('validateFriendReferral'));
 ok('cancelled and declined rentals release referral claims',admin.includes('["cancelled", "declined"].includes(nextStatus)')&&admin.includes('releaseReferralForCancelledBooking'));
 ok('completed state activates referral reward',admin.includes('nextStatus === "completed"')&&admin.includes('completeReferralForBooking(supabase, data)'));
@@ -39,7 +39,7 @@ ok('manual booking includes Telegram, Instagram, preferred channel and friend co
 ok('manual booking submits referral/contact fields',adminJs.includes("customerTelegram:fd.get('customerTelegram')")&&adminJs.includes("customerInstagram:fd.get('customerInstagram')")&&adminJs.includes("referralCode:b?'':fd.get('referralCode')"));
 ok('client lookup previews earned referral reward',adminJs.includes('customer-referral-reward')&&adminJs.includes('autoReferralReward'));
 ok('completed booking exposes referral share action',adminJs.includes('data-action="referral"')&&adminJs.includes('openReferralShare'));
-ok('admin supports Telegram and Instagram referral sharing',adminJs.includes('Instagram · надіслати')&&adminJs.includes('Telegram · надіслати')&&adminJs.includes('navigator.clipboard.writeText'));
+ok('admin supports Telegram and Instagram referral sharing with two-step confirmation',adminJs.includes('Instagram · надіслати')&&adminJs.includes('Telegram · надіслати')&&adminJs.includes('navigator.clipboard.writeText')&&adminJs.includes('bindReferralSendButton')&&adminJs.includes('Позначити надісланим'));
 ok('admin shows expiring bonus reminder queue',adminJs.includes('Бонуси скоро спливають')&&adminJs.includes('referralReminderText'));
 ok('public booking renders optional Telegram field even when React form has none',publicSlots.includes("className='vx-telegram-contact'")&&publicSlots.includes('data-vac-contact="telegram"'));
 ok('public booking sends both social contacts and preferred channel to API',publicSlots.includes('__VAC_BOOKING_CONTACT__')&&publicSlots.includes('customerTelegram')&&publicSlots.includes('customerInstagram')&&publicSlots.includes('preferredContact'));

@@ -2,6 +2,8 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync(new URL('../assets/public-quiz.js',import.meta.url),'utf8');
+const config=JSON.parse(fs.readFileSync(new URL('../config/vacleaner.json',import.meta.url),'utf8'));
+const window={VACLEANER_CORE:{catalog:config.catalog}};
 const cut=source.indexOf('  function escapeHtml');
 if(cut<0)throw new Error('Smart Guide logic boundary not found');
 const harness=`${source.slice(0,cut)}
@@ -14,7 +16,7 @@ const harness=`${source.slice(0,cut)}
     result
   };
 })()`;
-const quiz=vm.runInNewContext(harness,{location:{pathname:'/pidbir/'},URLSearchParams,Intl,Math,JSON,Set});
+const quiz=vm.runInNewContext(harness,{location:{pathname:'/pidbir/'},URLSearchParams,Intl,Math,JSON,Set,window});
 let passed=0;
 const check=(ok,label)=>{if(!ok)throw new Error(label);passed+=1};
 check(!source.includes("if(q.id==='textileProblems'){render();return;}"),'textile multi-select never rerenders and resets the scroll position');
@@ -23,7 +25,7 @@ check(source.includes("body.querySelectorAll('.vq-option').forEach(option=>{"),'
 check(!source.includes('pH 3,5')&&!source.includes('Кислотний плямовивідник')&&!source.includes('Кислотний засіб'),'STAIN OX copy never mislabels the oxidizing spotter as an acid/pH 3.5 product');
 check(source.includes('Кава, чай, вино, ягоди або натуральний сік'),'Smart Guide distinguishes natural fruit juice from generic/synthetic colored drinks');
 check(source.includes('натуральні фруктові соки'),'STAIN OX descriptions explicitly target natural fruit juices');
-check(source.includes('Легко опрацюйте м’якою щіткою без агресивного втирання')&&!source.includes('акуратно протріть забруднення'),'SPOT FIX instructions use one non-contradictory gentle-brush workflow');
+check(source.includes('Легко опрацюйте м’якою щіткою без агресивного втирання')&&source.includes('1–2 проходи без подачі води'),'SPOT FIX instructions use one gentle-brush workflow and finish with moisture extraction');
 
 quiz.setState({zones:['textile'],textileProblems:['common_stain','odor'],textileOdor:'urine'});
 quiz.setAnswer('zones','textile','multi');

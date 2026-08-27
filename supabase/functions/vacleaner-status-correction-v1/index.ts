@@ -13,6 +13,26 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 const validBookingId = (value: unknown) => /^[0-9a-f-]{36}$/i.test(String(value ?? ""));
 const cleanText = (value: unknown, max: number) => typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : "";
 
+async function referralRollbackState(db: any, bookingId: string) {
+  const { data: use, error: useError } = await db.from("vacleaner_referral_uses").select("id,status").eq("booking_id", bookingId).maybeSingle();
+  if (useError) throw useError;
+  if (!use || use.status !== "completed") return { use: null, reward: null };
+  const { data: reward, error: rewardError } = await db.from("vacleaner_referral_rewards").select("id,status,used_booking_id").eq("source_booking_id", bookingId).maybeSingle();
+  if (rewardError) throw rewardError;
+  if (reward && (reward.status === "used" || reward.used_booking_id)) throw new Error("referral_reward_already_used");
+  return { use, reward: reward || null };
+}
+async function rollbackCompletedReferral(db: any, state: { use: any; reward: any; }) {
+  if (!state.use) return;
+  const now = new Date().toISOString();
+  const { error: useError } = await db.from("vacleaner_referral_uses").update({ status: "pending", completed_at: null, cancelled_at: null }).eq("id", state.use.id).eq("status", "completed");
+  if (useError) throw useError;
+  if (state.reward) {
+    const { error: rewardError } = await db.from("vacleaner_referral_rewards").update({ status: "cancelled", used_booking_id: null, used_at: null, reminded_at: null, updated_at: now }).eq("id", state.reward.id).neq("status", "used").is("used_booking_id", null);
+    if (rewardError) throw rewardError;
+  }
+}
+
 Deno.serve(async (request: Request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
@@ -47,6 +67,8 @@ Deno.serve(async (request: Request) => {
     if (nextStatus === "confirmed" && current.prepayment_paid !== true) return json({ error: "prepayment_required" }, 409);
     if (nextStatus === "issued" && (current.prepayment_paid !== true || current.deposit_paid !== true)) return json({ error: "issue_payment_required" }, 409);
     if (["pending", "waiting_payment"].includes(nextStatus) && current.deposit_paid === true) return json({ error: "deposit_already_received" }, 409);
+
+    const referralRollback = currentStatus === "completed" && nextStatus === "issued" ? await referralRollbackState(supabase, bookingId) : { use: null, reward: null };
 
     const resources = (current.vacleaner_booking_resources || []).map((row: any) => ({ resource_code: String(row.resource_code || ""), quantity: Number(row.quantity || 0) })).filter((row: any) => row.resource_code && row.quantity > 0);
     if (!resources.length) return json({ error: "inventory_missing" }, 409);
@@ -90,12 +112,14 @@ Deno.serve(async (request: Request) => {
     if (reason) patch.admin_note = [String(current.admin_note || "").trim(), `Корекція статусу: ${reason}`].filter(Boolean).join("\n").slice(0, 800);
     const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single();
     if (updateError || !data) throw updateError || new Error("update_failed");
+    if (currentStatus === "completed" && nextStatus === "issued") await rollbackCompletedReferral(supabase, referralRollback);
 
     await supabase.from("vacleaner_booking_audit").update({ actor_id: userData.user.id, source: `edge:correct_status:${currentStatus}_to_${nextStatus}` })
       .eq("booking_id", bookingId).is("actor_id", null).gte("created_at", startedAt);
     return json({ booking: data });
   } catch (error) {
     console.error("vacleaner_status_correction", error);
+    if (error instanceof Error && error.message === "referral_reward_already_used") return json({ error: "referral_reward_already_used" }, 409);
     return json({ error: "server_error" }, 500);
   }
 });

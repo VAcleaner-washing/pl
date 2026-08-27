@@ -529,8 +529,9 @@ Deno.serve(async (request: Request) => {
     if (action === "referral_mark_sent") {
       const phone = normalizePhone(body.phone), channel = ["telegram", "instagram"].includes(String(body.channel || "")) ? String(body.channel) : "";
       if (!phone || !channel) return json({ error: "invalid_referral_contact" }, 400);
+      if (body.confirmed !== true) return json({ error: "confirmation_required" }, 409);
       const now = new Date().toISOString(), rewardId = String(body.rewardId || "");
-      const customerPatch: Record<string, any> = { preferred_contact: channel, updated_at: now };
+      const customerPatch: Record<string, any> = { updated_at: now };
       if (!validBookingId(rewardId)) { customerPatch.referral_sent_at = now; customerPatch.referral_sent_channel = channel; }
       const { error: customerError } = await supabase.from("vacleaner_customers").update(customerPatch).eq("phone", phone);
       if (customerError) throw customerError;
@@ -609,7 +610,8 @@ Deno.serve(async (request: Request) => {
         enteredReferral = await validateFriendReferral(supabase, body.referralCode, customerPhone, completedCount || 0);
         if (!enteredReferral?.valid) return json({ error: enteredReferral?.reason || "invalid_referral", referral: enteredReferral }, 409);
       }
-      const autoPromo = action === "create" ? (enteredReferral || await resolvePhonePromo(supabase, { phone: customerPhone, productCode, startDate: period.startDate, returnDate: period.returnDate, pickupWindow: period.pickupWindow, returnWindow: period.returnWindow, rawBase, includeBlocked: false })) : null;
+      const phonePromo = action === "create" ? await resolvePhonePromo(supabase, { phone: customerPhone, productCode, startDate: period.startDate, returnDate: period.returnDate, pickupWindow: period.pickupWindow, returnWindow: period.returnWindow, rawBase, includeBlocked: false }) : null;
+      const autoPromo = action === "create" ? (enteredReferral || phonePromo) : null;
       const rewardCandidate = action === "create" && !enteredReferral ? await availableReferralReward(supabase, customerPhone) : null;
       const promoPricingExtras = autoPromo ? { ...currentExtras, promo: promoExtraFromCandidate(autoPromo, true) } : currentExtras;
       const pricingBody = rewardCandidate ? { ...body, referralRewardAmount: Number(rewardCandidate.amount || 150) } : body;

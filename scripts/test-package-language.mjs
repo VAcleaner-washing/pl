@@ -104,7 +104,7 @@ if(!packageHtml.includes('>Глибоке очищення диванів і м�
 if(!packageHtml.includes('Jimmy допомагає прибрати сухий пил, пилових кліщів і пов’язані з ними алергени; Puzzi промиває м’які меблі та матраци'))failures.push('general-cleaning package does not explain the role of each machine');
 if(!packageHtml.includes('Пилові кліщі й пов’язані алергени')||!packageHtml.includes('UV-світло й нагрівання до 60 °C'))failures.push('Jimmy positioning does not explain the client problem and the treatment method');
 if(!packageHtml.includes('Пилові кліщі й пов’язані алергени')||!packageHtml.includes('Вібраційна щітка, UV-світло й нагрівання до 60 °C'))failures.push('package cards do not make Jimmy benefits visible');
-if(!publicQuiz.includes('Пил, шерсть, пилові кліщі чи алергени')||!publicQuiz.includes('UV-світло й нагрівання до 60 °C'))failures.push('quiz does not trigger Jimmy for dust-mite and allergen concerns');
+if(!publicQuiz.includes('Пил, шерсть, пилові кліщі чи алергени')||!publicQuiz.includes('Додамо Jimmy для сухого очищення перед промиванням Puzzi'))failures.push('quiz does not explain Jimmy in client-readable language');
 for(const [file,content] of [
   ['home server HTML',fs.readFileSync('index.html','utf8')],
   ['home hydrated chunk',fs.readFileSync('_next/static/chunks/01pb0x0z72e41.js','utf8')],
@@ -136,12 +136,12 @@ if(!puzziLanding.includes('8 запечатаних порцій')||!puzziLandin
 if(publicExperience.includes('function syncPublicCopy'))failures.push('runtime static-copy patch must not return');
 if(!publicQuiz.includes("const SPOT_FIX_USE='Не розбавляйте."))failures.push('VA SPOT FIX instruction does not say to use it undiluted');
 if(!publicQuiz.includes('Легко опрацюйте м’якою щіткою без агресивного втирання')||!publicQuiz.includes('промокніть чистою білою серветкою від країв до центру'))failures.push('VA SPOT FIX instruction is missing the gentle brush + blot workflow');
-if(!publicQuiz.includes('Завершіть ретельним промиванням водою та відбором вологи Puzzi'))failures.push('VA SPOT FIX instruction is missing the final rinse/extraction step');
+if(!publicQuiz.includes('промийте ділянку чистою водою Puzzi')||!publicQuiz.includes('1–2 проходи без подачі води'))failures.push('VA SPOT FIX instruction is missing the final rinse/extraction step');
 if(!publicQuiz.includes("const STAIN_OX_USE='Не розбавляйте."))failures.push('VA STAIN OX instruction does not say to use it undiluted');
 if(!publicQuiz.includes('Якщо на тканину перейшов колір матеріалу — засіб не використовуйте'))failures.push('VA STAIN OX instruction is missing the dye-transfer stop rule');
-if(!publicQuiz.includes('залиште діяти до 15 хвилин')||!publicQuiz.includes('не допускаючи висихання'))failures.push('VA STAIN OX dwell time or no-dry instruction is missing');
+if(!publicQuiz.includes('залиште діяти до 15 хвилин')||!(publicQuiz.includes('не допускаючи висихання')||publicQuiz.includes('не давайте висохнути')))failures.push('VA STAIN OX dwell time or no-dry instruction is missing');
 if(publicQuiz.includes('pH 3,5')||publicQuiz.includes('Кислотний плямовивідник')||publicQuiz.includes('Кислотний засіб'))failures.push('VA STAIN OX must be described as oxidizing, not as an acid/pH 3.5 spotter');
-if(!publicQuiz.includes('Окиснювальний плямовивідник')||!publicQuiz.includes('натуральні фруктові соки'))failures.push('VA STAIN OX oxidizing/natural-dye positioning is missing');
+if(!publicQuiz.includes('натуральні фруктові соки')||!publicQuiz.includes('залишається кольоровий слід'))failures.push('VA STAIN OX plain-language natural-dye positioning is missing');
 
 if(failures.length){
   console.error(failures.map(item=>`FAIL: ${item}`).join('\n'));

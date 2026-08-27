@@ -39,7 +39,7 @@ for(const file of files.filter(f=>f.endsWith('.html'))){
   catch(error){errors.push(`inline JS syntax: ${rel}#${inlineIndex}: ${error.message}`);}
  }
  for(const m of s.matchAll(/\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|admin-v250|public-fixes|mobile-home-fix|site-v400)\.(?:js|css)\?v=([^"']+)/g))if(m[1]!==build)errors.push(`asset version ${m[1]} in ${rel}`);
- const hasCore=/vacleaner-core\.js/.test(s), needsCore=rel==='bronuvannia/index.html'||rel.startsWith('admin/');
+ const hasCore=/vacleaner-core\.js/.test(s), needsCore=rel==='bronuvannia/index.html'||rel==='pidbir/index.html'||rel.startsWith('admin/');
  if(hasCore!==needsCore)errors.push(`shared core route mismatch: ${rel}`);
  if(rel!=='bronuvannia/index.html'&&/public-catalog\.js/.test(s))errors.push(`catalog runtime on ${rel}`);
 }

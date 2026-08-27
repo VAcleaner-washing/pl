@@ -3,45 +3,44 @@
 
   const path=location.pathname.replace(/\/+$/,'')||'/';
   const QUIZ_PROMO='PIDBIR5';
-  const PRODUCT_INFO={
-    puzzi:{label:'Kärcher Puzzi 8/1',price:700,desc:'Глибоке промивання диванів, крісел, матраців і текстилю.'},
-    puzzi_jimmy:{label:'Глибоке очищення диванів і матраців',price:1050,desc:'Puzzi + Jimmy · сухий етап проти пилу, пилових кліщів і пов’язаних алергенів перед глибоким промиванням матраців та м’яких меблів.'},
-    puzzi_abir:{label:'Дивани + вікна',price:1500,desc:'Puzzi + робот для вікон · м’які меблі, матраци, скло та дзеркала.'},
-    sc2:{label:'Kärcher SC 2 Deluxe',price:500,desc:'Кухня, ванна, плитка, шви, стики та тверді поверхні.'},
-    abir:{label:'Робот для вікон',price:800,desc:'Скло, дзеркала та гладкі поверхні без роботи на висоті.'},
-    combo:{label:'Дивани + кухня та ванна',price:1000,desc:'Puzzi + SC 2 · дивани й матраци, кухня, ванна, плитка та шви.'},
-    general:{label:'Генеральне прибирання',price:1300,desc:'Puzzi + SC 2 + Jimmy · текстиль, матраци, кухня, ванна та тверді поверхні.'},
-    ideal_windows:{label:'Ідеальні вікна',price:1200,desc:'SC 2 + робот для вікон · скло, рами, кути, стики та дзеркала.'},
-    elite:{label:'HOME RESET',price:2300,desc:'Повний комплект для дому: текстиль, кухня, ванна, сухе очищення та вікна.'}
+  const CORE=window.VACLEANER_CORE;
+  if(!CORE?.catalog){console.error('VAcleaner catalog is missing');return;}
+  const CATALOG_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-settings';
+  let activeCatalog=CORE.catalog;
+  const PRODUCT_COPY={
+    puzzi:{label:'Kärcher Puzzi 8/1',desc:'Глибоке промивання диванів, крісел, матраців і текстилю.'},
+    puzzi_jimmy:{label:'Глибоке очищення диванів і матраців',desc:'Puzzi + Jimmy · спочатку прибираємо сухий пил і шерсть, потім глибоко промиваємо матрац або м’які меблі.'},
+    puzzi_abir:{label:'Дивани + вікна',desc:'Puzzi + робот для вікон · м’які меблі, матраци, скло та дзеркала.'},
+    sc2:{label:'Kärcher SC 2 Deluxe',desc:'Кухня, ванна, плитка, шви, стики та тверді поверхні.'},
+    abir:{label:'Робот для вікон',desc:'Скло, дзеркала та гладкі поверхні без роботи на висоті.'},
+    combo:{label:'Дивани + кухня та ванна',desc:'Puzzi + SC 2 · дивани й матраци, кухня, ванна, плитка та шви.'},
+    general:{label:'Генеральне прибирання',desc:'Puzzi + SC 2 + Jimmy · текстиль, матраци, кухня, ванна та тверді поверхні.'},
+    ideal_windows:{label:'Ідеальні вікна',desc:'SC 2 + робот для вікон · скло, рами, кути, стики та дзеркала.'},
+    elite:{label:'HOME RESET',desc:'Повний комплект для дому: текстиль, кухня, ванна, сухе очищення та вікна.'}
   };
-  const EXTRA_INFO={
-    neutralix:{label:'Neutralix · 250 мл',price:200},
-    odour_zero:{label:'Odour Zero Spring · 250 мл',price:250},
-    spot_lifter:{label:'VA SPOT FIX · 50 мл',price:100},
-    stain_exit:{label:'VA STAIN OX · 30 мл',price:100},
-    shower_care:{label:'Shower Care · 250 мл',price:250},
-    scalex_pro:{label:'Scalex Pro · 250 мл',price:250},
-    eco_clean:{label:'Eco Clean · 250 мл',price:250},
-    soft_degreaser:{label:'Soft Degreaser · 250 мл',price:250},
-    grill_force:{label:'Grill Force · 250 мл',price:250},
-    glass_perfect:{label:'Glass Perfect Care · 250 мл',price:150},
-    premium_nozzles:{label:'Насадки «Преміум» до SC 2',price:200}
+  const EXTRA_LABELS={
+    neutralix:'Neutralix · 250 мл',odour_zero:'Odour Zero Spring · 250 мл',spot_lifter:'VA SPOT FIX · 50 мл',stain_exit:'VA STAIN OX · 30 мл',
+    shower_care:'Shower Care · 250 мл',scalex_pro:'Scalex Pro · 250 мл',eco_clean:'Eco Clean · 250 мл',soft_degreaser:'Soft Degreaser · 250 мл',
+    grill_force:'Grill Force · 250 мл',glass_perfect:'Glass Perfect Care · 250 мл',premium_nozzles:'Насадки «Преміум» до SC 2'
   };
+  function productInfo(code){const item=activeCatalog?.products?.[code]||CORE.catalog?.products?.[code];if(!item)return null;const copy=PRODUCT_COPY[code]||{};return{label:copy.label||item.shortLabel||item.label||code,price:Math.max(0,Number(item.weekday)||0),desc:copy.desc||item.description||''}}
+  function extraInfo(code){const item=activeCatalog?.extras?.[code]||CORE.catalog?.extras?.[code];if(!item)return null;return{label:EXTRA_LABELS[code]||item.label||code,price:Math.max(0,Number(item.price)||0)}}
+  function refreshCatalog(){return fetch(CATALOG_API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{if(data?.catalog?.products&&data?.catalog?.extras)activeCatalog=data.catalog;return activeCatalog}).catch(()=>activeCatalog)}
   const EXTRA_EXPLANATION={
     neutralix:{why:'Базове промивання прибирає бруд, але стійкий запах може залишитися глибоко у волокнах.',result:'Призначений для нейтралізації стійкого запаху в текстилі, а не лише для його маскування.'},
     odour_zero:{why:'Звичайне очищення не завжди забирає запах затхлості, диму, їжі чи тварин із поверхні та повітря.',result:'Нейтралізує залишковий запах і робить результат прибирання відчутно свіжішим.'},
     spot_lifter:{why:'Хімія для Puzzi розрахована на загальне очищення, а локальній жирній або невідомій плямі потрібна попередня точкова обробка.',result:'Послаблює пляму перед промиванням і підвищує шанс прибрати її без багаторазових проходів.'},
-    stain_exit:{why:'Кава, чай, вино, ягоди та натуральні фруктові соки можуть залишити стійкий органічний пігментний слід після звичайного очищення.',result:'Окиснювальний плямовивідник працює з такими локальними органічними плямами та залишковим пігментом.'},
+    stain_exit:{why:'Після звичайного очищення від кави, чаю, вина, ягід або натурального соку інколи залишається кольоровий слід.',result:'Допомагає прибрати саме цей залишковий слід після основного очищення.'},
     shower_care:{why:'Пара розм’якшує бруд, але сама не розчиняє весь мильний і вапняний наліт.',result:'Допомагає прибрати матовість і розводи зі скла, сантехніки та душової зони.'},
-    scalex_pro:{why:'Щільний водний камінь та іржа потребують сильнішої кислотної дії, ніж дає пара або засіб для регулярного догляду.',result:'Розчиняє застарілі мінеральні відкладення на підтверджених кислотостійких поверхнях.'},
+    scalex_pro:{why:'Застарілий водний камінь та іржа часто не знімаються парою або засобом для щоденного прибирання.',result:'Для сильного нальоту на склі, кераміці, хромі або нержавійці.'},
     eco_clean:{why:'Для регулярного бруду сильна хімія не потрібна, особливо на камені та інших чутливіших поверхнях.',result:'Дає контрольоване щоденне очищення без зайвої агресії до покриття.'},
     soft_degreaser:{why:'Пара допомагає розм’якшити жир, але не завжди повністю прибирає жирну плівку.',result:'Розчиняє свіжий і регулярний жир, щоб поверхню було легше дочистити.'},
-    grill_force:{why:'Пригорілий жир і нагар значно стійкіші за звичайний кухонний бруд.',result:'Розчиняє щільний нагар на сталі, емалі та інших підтверджених лугостійких поверхнях.'},
-    glass_perfect:{why:'Засіб для робота вже входить у комплект. Glass Perfect Care потрібен лише як додатковий фінішний догляд.',result:'Допомагає швидше висушити скло, додати блиск і залишити ефект антипилу.'},
+    grill_force:{why:'Пригорілий жир і нагар значно стійкіші за звичайний кухонний бруд.',result:'Для духовки, гриля та решіток зі сталі або емалі.'},
+    glass_perfect:{why:'Засіб для робота вже входить у комплект. Glass Perfect Care потрібен лише як додатковий фініш після миття.',result:'Допомагає прибрати дрібні сліди й залишити скло більш блискучим.'},
     premium_nozzles:{why:'Стандартних насадок достатньо для площин, але ними складніше дістатися у вузькі шви, кути та стики.',result:'Дає точнішу подачу пари й полегшує роботу у важкодоступних місцях.'}
   };
-  const SPOT_FIX_USE='Не розбавляйте. Нанесіть невелику кількість засобу на пляму. Легко опрацюйте м’якою щіткою без агресивного втирання, потім промокніть чистою білою серветкою від країв до центру. Завершіть ретельним промиванням водою та відбором вологи Puzzi.';
-  const STAIN_OX_USE='Не розбавляйте. Спочатку перевірте сумісність на непомітній ділянці: нанесіть трохи засобу й промокніть білою бавовняною тканиною. Якщо на тканину перейшов колір матеріалу — засіб не використовуйте. Нанесіть безпосередньо на пляму, залиште діяти до 15 хвилин, не допускаючи висихання, після чого ретельно промийте холодною водою та відберіть вологу Puzzi.';
+  const SPOT_FIX_USE='Не розбавляйте. Нанесіть невелику кількість засобу на пляму. Легко опрацюйте м’якою щіткою без агресивного втирання, потім промокніть чистою білою серветкою від країв до центру. Далі промийте ділянку чистою водою Puzzi й зробіть 1–2 проходи без подачі води, щоб максимально забрати вологу.';
+  const STAIN_OX_USE='Не розбавляйте. Спочатку перевірте засіб на непомітній ділянці: нанесіть трохи й промокніть білою тканиною. Якщо на тканину перейшов колір матеріалу — засіб не використовуйте. Нанесіть лише на пляму, залиште діяти до 15 хвилин і не давайте висохнути. Потім промийте холодною водою Puzzi й зробіть 1–2 проходи без подачі води, щоб забрати вологу.';
   const PRODUCT_TITLES={
     puzzi:['Kärcher Puzzi','Kärcher Puzzi 8/1'],
     puzzi_jimmy:['Puzzi + Jimmy','Глибоке очищення','Глибоке очищення текстилю','Глибоке очищення диванів і матраців'],
@@ -92,7 +91,7 @@
       ]
     }];
     if(hasTextile())list.push({id:'textileProblems',title:'Що є на текстилі?',note:'Позначте все, що бачите — так підберемо і техніку, і потрібні засоби.',type:'multi',options:[
-      ['common_stain','Їжа, жир, косметика або невідома пляма','Підберемо універсальний плямовивідник'],['color_stain','Кава, чай, вино, ягоди або натуральний сік','Для стійких органічних плям і залишкового пігменту'],['odor','Неприємний запах','Сеча, домашні тварини або інші стійкі запахи'],['dry_debris','Пил, шерсть, пилові кліщі чи алергени','Додамо Jimmy: вібраційна щітка, UV-світло й нагрівання до 60 °C'],['none','Нічого з цього','Потрібне лише загальне очищення']
+      ['common_stain','Їжа, жир, косметика або невідома пляма','Підберемо універсальний плямовивідник'],['color_stain','Кава, чай, вино, ягоди або натуральний сік','Якщо після звичайного очищення лишається кольоровий слід'],['odor','Неприємний запах','Сеча, домашні тварини або інші стійкі запахи'],['dry_debris','Пил, шерсть, пилові кліщі чи алергени','Додамо Jimmy для сухого очищення перед промиванням Puzzi'],['none','Нічого з цього','Потрібне лише загальне очищення']
     ]});
     if(hasTextile()&&state.textileProblems.includes('odor'))list.push({id:'textileOdor',title:'Який саме запах?',note:'Так збережемо чинний точний підбір Neutralix або Odour Zero.',type:'single',options:[
       ['urine','Сеча','Дитина або тварина'],['pet','Домашні тварини','Запах у текстилі або оббивці'],['musty','Затхлість / вогкість',''],['smoke','Тютюн / дим',''],['food','Їжа / кухня',''],['unknown','Не можу визначити','']
@@ -100,8 +99,8 @@
     if(hasKitchen())list.push({id:'kitchenProblems',title:'Що найбільше потрібно прибрати на кухні?',note:'Можна вибрати кілька типів забруднення.',type:'multi',options:[
       ['daily','Повсякденний бруд','Фасади, стільниця, легкі сліди'],['fresh_grease','Свіжий / регулярний жир','Без сильного нагару'],['carbon','Пригорілий жир / нагар','Духовка, гриль'],['light_scale','Легкий водний наліт','Мийка, змішувач, скло'],['heavy_scale_rust','Сильний наліт або іржа','Водний камінь, застарілі відкладення'],['odor','Запахи на кухні','Їжа, сміття, загальний запах'],['corners','Стики / важкодоступні місця','Потрібна точкова робота парою']
     ]});
-    if(hasKitchen()&&state.kitchenProblems.includes('carbon'))list.push({id:'kitchenGrillSurface',title:'На якій поверхні нагар?',note:'Grill Force сильний лужний засіб — тут важливий матеріал.',type:'single',options:[
-      ['safe','Сталь / емаль / звичайна духовка','Підходить для лугостійких поверхонь'],['sensitive','Алюміній / мідь / тефлон / фарбована чи лакована','Grill Force не рекомендуємо'],['unknown','Не знаю матеріал','Не будемо додавати агресивний засіб автоматично']
+    if(hasKitchen()&&state.kitchenProblems.includes('carbon'))list.push({id:'kitchenGrillSurface',title:'На якій поверхні нагар?',note:'Для сильного засобу важливо знати матеріал поверхні.',type:'single',options:[
+      ['safe','Сталь / емаль / звичайна духовка','Grill Force можна розглядати'],['sensitive','Алюміній / мідь / тефлон / фарбована чи лакована','Grill Force не рекомендуємо'],['unknown','Не знаю матеріал','Не будемо додавати агресивний засіб автоматично']
     ]});
     if(hasKitchen()&&state.kitchenProblems.some(x=>['light_scale','heavy_scale_rust'].includes(x)))list.push({id:'kitchenScaleSurface',title:'На якій поверхні водний наліт?',note:'Кислотні засоби не підходять для всіх матеріалів.',type:'single',options:[
       ['acid_safe','Скло / кераміка / хром / нержавійка',''],['aluminum','Алюміній',''],['stone','Мармур / травертин / натуральний камінь',''],['painted','Пофарбована поверхня',''],['unknown','Не знаю','']
@@ -162,7 +161,7 @@
     sanitizeState();
   }
 
-  function extra(code,reason){return{code,...EXTRA_INFO[code],...EXTRA_EXPLANATION[code],reason}}
+  function extra(code,reason){const info=extraInfo(code);return info?{code,...info,...EXTRA_EXPLANATION[code],reason}:null}
   function result(){
     const zones=selectedZones(),text=hasTextile(),hard=hasKitchen()||hasBath(),windows=hasWindows();
     const needJimmy=state.textileProblems.includes('dry_debris');
@@ -177,7 +176,7 @@
     else if(hard)product='sc2';
     else if(windows)product=state.windowsMode==='glass'?'abir':'ideal_windows';
 
-    const extras=[];const add=(code,reason)=>{if(!extras.some(x=>x.code===code))extras.push(extra(code,reason));};
+    const extras=[];const add=(code,reason)=>{const item=extra(code,reason);if(item&&!extras.some(x=>x.code===code))extras.push(item);};
     if(state.textileProblems.includes('odor')){
       if(['musty','smoke','food'].includes(state.textileOdor))add('odour_zero','Для загального стійкого запаху рекомендуємо Odour Zero.');
       else add('neutralix',state.textileOdor==='urine'?'Для запаху сечі в текстилі пріоритетно рекомендуємо Neutralix.':'Для локального стійкого запаху в текстилі рекомендуємо Neutralix.');
@@ -190,39 +189,39 @@
     if(state.kitchenProblems.includes('daily'))add('eco_clean','Для регулярного кухонного бруду достатньо м’якого універсального Eco Clean.');
     if(state.kitchenProblems.includes('fresh_grease'))add('soft_degreaser','Для свіжого й регулярного жиру потрібен Soft Degreaser, без зайвої агресії.');
     if(state.kitchenProblems.includes('carbon')){
-      if(state.kitchenGrillSurface==='safe')add('grill_force','Пригорілий жир і нагар на лугостійкій поверхні — задача Grill Force.');
+      if(state.kitchenGrillSurface==='safe')add('grill_force','Пригорілий жир і нагар на сталі або емалі — задача Grill Force.');
       else warnings.push('Grill Force не додаємо автоматично: він не підходить для алюмінію, міді, тефлону та фарбованих/лакованих поверхонь. Якщо матеріал невідомий — спочатку уточніть його.');
     }
     if(state.kitchenProblems.includes('light_scale')){
-      if(state.kitchenScaleSurface==='stone')warnings.push('На натуральному камені не використовуємо кислотні засоби. Для регулярного очищення підійде Eco Clean, але сильний мінеральний наліт краще погодити з менеджером.');
-      else if(state.kitchenScaleSurface==='painted'||state.kitchenScaleSurface==='unknown')warnings.push('Засіб від нальоту не додаємо автоматично, доки не відомо, що поверхня стійка до нього.');
+      if(state.kitchenScaleSurface==='stone')warnings.push('На натуральному камені не використовуємо сильні засоби від нальоту. Для регулярного очищення підійде Eco Clean, а сильний наліт краще погодити з менеджером.');
+      else if(state.kitchenScaleSurface==='painted'||state.kitchenScaleSurface==='unknown')warnings.push('Засіб від нальоту не додаємо автоматично, доки не зрозуміло, з якого матеріалу поверхня.');
       else add('shower_care','Легкий водний/вапняний наліт — Shower Care працює м’якше й підходить також для алюмінію.');
     }
     if(state.kitchenProblems.includes('heavy_scale_rust')){
-      if(state.kitchenScaleSurface==='acid_safe')add('scalex_pro','Сильний наліт або іржа на кислотостійкій поверхні — задача Scalex Pro.');
+      if(state.kitchenScaleSurface==='acid_safe')add('scalex_pro','Сильний наліт або іржа на склі, кераміці, хромі чи нержавійці — задача Scalex Pro.');
       else if(state.kitchenScaleSurface==='stone')warnings.push('Scalex Pro не можна на натуральний камінь. Для сильного нальоту тут потрібне окреме безпечне рішення.');
-      else warnings.push('Scalex Pro не додаємо автоматично: сильний кислотний засіб потребує підтвердження матеріалу поверхні.');
+      else warnings.push('Scalex Pro не додаємо автоматично, поки не зрозуміло, з якого матеріалу поверхня.');
     }
     if(state.kitchenProblems.includes('corners'))add('premium_nozzles','Стики та важкодоступні місця зручніше пройти точковими насадками до SC 2.');
 
     if(state.bathProblems.includes('daily'))add('eco_clean','Для регулярного прибирання без сильного нальоту достатньо Eco Clean.');
     if(state.bathProblems.includes('light_scale')){
       if(state.bathSurface==='stone')warnings.push('Shower Care і Scalex Pro не використовуємо на мармурі, травертині та доломіті. Для регулярного очищення можна Eco Clean.');
-      else if(state.bathSurface==='painted'||state.bathSurface==='unknown')warnings.push('Не додаємо кислотний засіб від нальоту автоматично, поки не підтверджений матеріал поверхні.');
+      else if(state.bathSurface==='painted'||state.bathSurface==='unknown')warnings.push('Засіб від нальоту не додаємо автоматично, поки не зрозуміло, з якого матеріалу поверхня.');
       else add('shower_care','Мильний і вапняний наліт у душовій — основна задача Shower Care.');
     }
     if(state.bathProblems.some(x=>['heavy_scale','rust'].includes(x))){
-      if(state.bathSurface==='acid_safe')add('scalex_pro','Сильний водний камінь або іржа на кислотостійкій поверхні — Scalex Pro.');
+      if(state.bathSurface==='acid_safe')add('scalex_pro','Сильний водний камінь або іржа на склі, кераміці, хромі чи нержавійці — Scalex Pro.');
       else if(state.bathSurface==='aluminum')warnings.push('Scalex Pro не використовуємо на алюмінії. Для легкого нальоту підійде Shower Care; сильний або іржу краще погодити окремо.');
       else if(state.bathSurface==='stone')warnings.push('Scalex Pro та Shower Care не використовуємо на натуральному камені. Для сильного нальоту потрібне окреме безпечне рішення.');
-      else warnings.push('Сильний кислотний засіб від нальоту не додаємо автоматично без підтвердження матеріалу.');
+      else warnings.push('Сильний засіб від нальоту не додаємо автоматично без уточнення матеріалу поверхні.');
     }
     if(state.bathProblems.includes('grout'))add('premium_nozzles','Для швів, кутів і стиків зручніше використовувати точкові насадки до SC 2.');
-    if(windows)add('glass_perfect','Необов’язковий фінішний догляд для блиску й ефекту антипилу; базовий засіб для робота вже входить у комплект.');
+    if(windows)add('glass_perfect','Необов’язковий фініш після миття для блиску та меншої кількості дрібних слідів; базовий засіб для робота вже входить у комплект.');
 
-    if((state.bathSurface==='stone'||state.kitchenScaleSurface==='stone')&&!extras.some(x=>x.code==='eco_clean'))add('eco_clean','Натуральний камінь не дружить із кислотними засобами; Eco Clean підходить для регулярного догляду за каменем і мармуром.');
+    if((state.bathSurface==='stone'||state.kitchenScaleSurface==='stone')&&!extras.some(x=>x.code==='eco_clean'))add('eco_clean','Для натурального каменю обираємо м’якший засіб: Eco Clean підходить для регулярного догляду за каменем і мармуром.');
 
-    return {product,productInfo:PRODUCT_INFO[product],extras,warnings,includesPuzzi:['puzzi','puzzi_jimmy','puzzi_abir','combo','general','elite'].includes(product)};
+    return {product,productInfo:productInfo(product),extras,warnings,includesPuzzi:['puzzi','puzzi_jimmy','puzzi_abir','combo','general','elite'].includes(product)};
   }
 
   function escapeHtml(value){return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
@@ -284,7 +283,7 @@
     next.hidden=q.type==='single';
     next.disabled=!canContinue(q);
     body.scrollTop=0;
-    body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><div class="vq-question__main"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;const icon=q.id==='zones'?zoneIcon(value):'';return `<button type="button" class="vq-option ${icon?'has-icon ':''}${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}">${icon?`<span class="vq-option__icon">${icon}</span>`:''}<span class="vq-option__copy"><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span><span class="vq-option__check" aria-hidden="true">${q.type==='multi'?(active?'✓':''):'→'}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>${q.id==='zones'?'<aside class="vq-zones-media"><img src="/assets/quiz-cleaning-guide-v4058.webp" alt="Чистий інтер’єр і техніка VAcleaner"><span>Професійна чистота у вас вдома</span></aside>':''}</div>`;
+    body.innerHTML=`<div class="vq-question vq-question--${escapeHtml(q.id)}"><div class="vq-question__main"><p class="vq-eyebrow">Підбір рішення · ~30 секунд</p><h2>${escapeHtml(q.title)}</h2><p class="vq-question__note">${escapeHtml(q.note)}</p><div class="vq-options ${q.type==='multi'?'is-multi':''}">${q.options.map(([value,label,desc])=>{const active=q.type==='multi'?(Array.isArray(current)&&current.includes(value)):current===value;const icon=q.id==='zones'?zoneIcon(value):'';return `<button type="button" class="vq-option ${icon?'has-icon ':''}${active?'is-selected':''}" data-value="${escapeHtml(value)}" aria-pressed="${active?'true':'false'}">${icon?`<span class="vq-option__icon">${icon}</span>`:''}<span class="vq-option__copy"><strong>${escapeHtml(label)}</strong>${desc?`<small>${escapeHtml(desc)}</small>`:''}</span><span class="vq-option__check" aria-hidden="true">${q.type==='multi'?(active?'✓':''):'→'}</span></button>`}).join('')}</div>${q.type==='multi'?'<p class="vq-multi-hint">Можна вибрати кілька варіантів.</p>':''}</div>${q.id==='zones'?'<aside class="vq-zones-media"><img src="/assets/quiz-cleaning-guide-v4058.webp" width="1254" height="1254" alt="Чистий інтер’єр і техніка VAcleaner"><span>Професійна чистота у вас вдома</span></aside>':''}</div>`;
     body.querySelectorAll('.vq-option').forEach(button=>button.addEventListener('click',()=>{
       setAnswer(q.id,button.dataset.value,q.type);
       if(q.type==='single'){setTimeout(()=>{stepIndex+=1;render()},80)}else{
@@ -323,7 +322,7 @@
   function injectTeaser(){
     if(path!=='/'||document.querySelector('[data-vq-guide]'))return;
     const target=document.querySelector('.v21-choose');if(!target)return;
-    const section=document.createElement('section');section.className='vq-guide';section.dataset.vqGuide='1';section.innerHTML=`<div class="vq-guide__media"><img src="/assets/quiz-cleaning-guide-v4058.webp" alt="Домашнє прибирання з технікою VAcleaner" loading="lazy"><span>Підбір за 30 секунд</span></div><div class="vq-guide__copy"><p>VAcleaner · smart guide</p><h2>Не знаєте, що саме потрібно для прибирання?</h2><p>Відповідайте на кілька коротких запитань: що хочете почистити, які є плями чи запахи та з якого матеріалу поверхня. За відповідями ми підберемо техніку й лише ті засоби, які справді потрібні.</p><div class="vq-guide__chips"><span>Обираєте з готових варіантів</span><span>Отримуєте пояснення до кожного засобу</span><span>Зайву або небезпечну хімію не радимо</span></div><button type="button" class="vq-guide__button">Підібрати рішення →</button><small>Зазвичай 3–4 короткі кроки · без реєстрації</small></div>`;
+    const section=document.createElement('section');section.className='vq-guide';section.dataset.vqGuide='1';section.innerHTML=`<div class="vq-guide__media"><img src="/assets/quiz-cleaning-guide-v4058.webp" width="1254" height="1254" alt="Домашнє прибирання з технікою VAcleaner" loading="lazy"><span>Підбір за 30 секунд</span></div><div class="vq-guide__copy"><p>VAcleaner · smart guide</p><h2>Не знаєте, що саме потрібно для прибирання?</h2><p>Відповідайте на кілька коротких запитань: що хочете почистити, які є плями чи запахи та з якого матеріалу поверхня. За відповідями ми підберемо техніку й лише ті засоби, які справді потрібні.</p><div class="vq-guide__chips"><span>Обираєте з готових варіантів</span><span>Отримуєте пояснення до кожного засобу</span><span>Зайву або небезпечну хімію не радимо</span></div><button type="button" class="vq-guide__button">Підібрати рішення →</button><small>Зазвичай 3–4 короткі кроки · без реєстрації</small></div>`;
     target.insertAdjacentElement('beforebegin',section);
     section.querySelector('.vq-guide__button').addEventListener('click',openQuiz);
     document.querySelectorAll('a[href="#choose"]').forEach(a=>{a.href='/pidbir/'});
@@ -421,13 +420,14 @@
   function ensurePresetBanner(product,extras,promo,source='quiz'){
     const form=document.querySelector('.booking-form');if(!form)return null;
     let banner=form.querySelector('.vq-preset-banner');if(!banner){banner=document.createElement('div');banner.className='vq-preset-banner';const products=form.querySelector('#booking-products');products?.insertAdjacentElement('beforebegin',banner)}
-    const p=PRODUCT_INFO[product];if(!p)return banner;
-    const extraNames=extras.map(x=>EXTRA_INFO[x]?.label).filter(Boolean);
+    const p=productInfo(product);if(!p)return banner;
+    const extraNames=extras.map(x=>extraInfo(x)?.label).filter(Boolean);
     banner.innerHTML=`<span>${source==='quiz'?'Підібрано у Smart Guide':'Додано із картки засобу'}</span><strong>${escapeHtml(p.label)}</strong><small>${extraNames.length?'Додатково: '+escapeHtml(extraNames.join(' · ')):'Без обов’язкових додаткових засобів'}</small>${promo===QUIZ_PROMO?'<em>Бонус за підбір · −5% на оренду · застосовується автоматично</em>':''}`;
     return banner;
   }
 
   function bootPublicQuiz(){
+    refreshCatalog().then(()=>{if(modal?.classList.contains('is-open')&&stepIndex>=questions().length)render({preserveScroll:true})});
     injectTeaser();
     injectSolutionsEntry();
     removeBookingEscape();
