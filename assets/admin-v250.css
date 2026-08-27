@@ -5501,8 +5501,13 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .campaign-workspace .campaign-summary>span:nth-child(4){border-top:1px solid var(--line)}
   .campaign-workspace .campaign-summary>span:first-child,
   .campaign-workspace .campaign-summary>span:nth-child(3){padding-left:2px}
-  .campaign-workspace .campaign-summary small{font-size:11px;white-space:nowrap}
-  .campaign-workspace .campaign-summary b{font-size:18px}
+  .campaign-workspace .campaign-summary small{font-size:11px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+  .campaign-workspace .campaign-summary b{font-size:18px;white-space:nowrap}
+}
+
+/* v4.2.3 — Linux/Chromium font metrics: keep the 1024px KPI block collision-free without shrinking copy. */
+@media (min-width:901px) and (max-width:1180px){
+  .campaign-workspace .campaign-summary>span{min-height:48px;align-content:center}
 }
 
 /* v4.1.13 — subtle pointer hover illumination across the admin UI. */

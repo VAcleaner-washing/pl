@@ -8,12 +8,24 @@
     path==='/dostavka'
   );
   if(!needsRuntime)return;
-  const load=(src,key)=>{
-    if(document.querySelector(`script[data-vx-module="${key}"]`))return;
+  const load=(src,key,ready)=>new Promise((resolve,reject)=>{
+    if(ready?.())return resolve();
+    const existing=document.querySelector(`script[data-vx-module=\"${key}\"],script[src^=\"${src}\"]`);
+    if(existing){
+      if(ready?.())return resolve();
+      existing.addEventListener('load',resolve,{once:true});
+      existing.addEventListener('error',reject,{once:true});
+      return;
+    }
     const script=document.createElement('script');
     script.src=`${src}?v=${encodeURIComponent(build)}`;
-    script.defer=true;script.dataset.vxModule=key;document.head.appendChild(script);
-  };
-  load('/assets/public-experience-runtime.js','experience-runtime');
-  if(document.querySelector('.booking-form'))load('/assets/public-booking-route-loader.js','booking-route');
+    script.async=false;script.dataset.vxModule=key;
+    script.addEventListener('load',resolve,{once:true});
+    script.addEventListener('error',reject,{once:true});
+    document.head.appendChild(script);
+  });
+  load('/assets/vacleaner-core.js','core',()=>Boolean(window.VACLEANER_CORE?.catalog))
+    .then(()=>load('/assets/public-experience-runtime.js','experience-runtime'))
+    .then(()=>{if(document.querySelector('.booking-form'))return load('/assets/public-booking-route-loader.js','booking-route')})
+    .catch(error=>console.error('VAcleaner public runtime failed to load',error));
 })();
