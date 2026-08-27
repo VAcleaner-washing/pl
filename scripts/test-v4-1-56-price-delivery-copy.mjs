@@ -33,7 +33,7 @@ const slots=read('assets/public-booking-slots.js');
 const address=read('assets/address-autocomplete.js');
 ok('booking card leads with Poltava 250 only',booking.includes('до вас і назад · Полтава 250 грн')&&!booking.includes('до вас і назад · Полтава 250 грн · передмістя 350 грн'));
 ok('hydrated booking card matches static copy',bookingChunk.includes('до вас і назад · Полтава 250 грн')&&!bookingChunk.includes('до вас і назад · Полтава 250 грн · передмістя 350 грн'));
-ok('booking address hint separates local villages and other suburb',slots.includes('Розсошенці, Щербані та Горбанівка — теж ${formatMoney(deliveryPricing.local)}')&&slots.includes('Інше передмістя — від ${formatMoney(deliveryPricing.baseOutside)}'));
+ok('booking address hint separates local villages and other suburb',slots.includes('Розсошенці, Щербані та Горбанівка — теж ${formatMoney(deliveryPricing.local)}')&&slots.includes('Інші адреси — від ${formatMoney(firstOutside)}'));
 ok('distance result is client-facing, not formula-heavy',slots.includes('Доставка за цією адресою — ${formatMoney(quote.amount)}. Сума вже врахована у бронюванні.')&&!slots.includes('Базові ${deliveryPricing.includedKm} км'));
 ok('address search errors no longer repeat both tariffs',!address.includes('Полтава — 250 грн, передмістя — 350 грн')&&address.includes('Введіть адресу вручну — менеджер перевірить її до передоплати.'));
 

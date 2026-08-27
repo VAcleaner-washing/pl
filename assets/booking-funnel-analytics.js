@@ -69,17 +69,16 @@ function fulfillment(){const b=document.querySelector('#booking-extras .booking-
 function normalizeSettlement(v){return clean(v,80).toLocaleLowerCase('uk-UA').replace(/^[смт.\s]+/u,'').replace(/[’`]/g,"'").trim()}
 function deliveryQuote(){
   const mode=fulfillment();if(mode!=='delivery')return{delivery_zone:mode||'',delivery_amount:0,delivery_quote_required:false};
-  const pricing=window.VACLEANER_CORE?.deliveryPricing||{local:250,baseOutside:350,includedKm:10,perKm:15,maxOutsideKm:30,localSettlements:['Полтава','Розсошенці','Щербані','Горбанівка']};
+  const raw=window.VACLEANER_CORE?.deliveryPricing||{},zones=(Array.isArray(raw.zones)&&raw.zones.length?raw.zones:[{maxKm:15,amount:350},{maxKm:20,amount:500},{maxKm:30,amount:700},{maxKm:40,amount:900}]).map(x=>({maxKm:Number(x.maxKm),amount:Number(x.amount)})).sort((a,b)=>a.maxKm-b.maxKm);
   const input=document.querySelector('.booking-delivery-address input[type="text"]:not([data-vac-address-detail])');const address=clean(input?.value,220);
-  if(!address)return{delivery_zone:'pending',delivery_amount:Number(pricing.local)||250,delivery_quote_required:false};
+  if(!address)return{delivery_zone:'pending',delivery_amount:Number(raw.local)||250,delivery_quote_required:false};
   const meta=window.__VAC_DELIVERY_META__?.()||{};const settlement=clean(meta.settlement||address.split(',')[0],80),norm=normalizeSettlement(settlement);
-  const local=(pricing.localSettlements||[]).some(x=>normalizeSettlement(x)===norm);
-  if(local)return{delivery_zone:'local',delivery_amount:Number(pricing.local)||250,delivery_quote_required:false,delivery_distance_km:0};
-  const distance=Number(meta.pricingDistanceKm),base=Number(pricing.baseOutside??pricing.suburb)||350,included=Number(pricing.includedKm)||10,perKm=Number(pricing.perKm)||15,max=Number(pricing.maxOutsideKm)||30;
+  const local=(raw.localSettlements||['Полтава','Розсошенці','Щербані','Горбанівка']).some(item=>normalizeSettlement(item)===norm);
+  if(local)return{delivery_zone:'local',delivery_amount:Number(raw.local)||250,delivery_quote_required:false,delivery_distance_km:0};
+  const distance=Number(meta.routeKm),tier=Number.isFinite(distance)?zones.find(row=>distance<=row.maxKm):null,max=Number(raw.maxRouteKm)||Number(zones.at(-1)?.maxKm)||40;
   if(meta.verified===true&&Number.isFinite(distance)&&distance>=0){
-    if(distance>max)return{delivery_zone:'agreement',delivery_amount:0,delivery_quote_required:true,delivery_distance_km:distance};
-    const extra=Math.max(0,Math.ceil((distance-included)-1e-9));
-    return{delivery_zone:extra>0?'distance':'nearby',delivery_amount:base+extra*perKm,delivery_quote_required:false,delivery_distance_km:distance,delivery_extra_km:extra};
+    if(!tier||distance>max)return{delivery_zone:'agreement',delivery_amount:0,delivery_quote_required:true,delivery_distance_km:distance};
+    return{delivery_zone:'route_zone',delivery_amount:tier.amount,delivery_quote_required:false,delivery_distance_km:distance,delivery_zone_max_km:tier.maxKm};
   }
   return{delivery_zone:'agreement',delivery_amount:0,delivery_quote_required:true,delivery_distance_km:Number.isFinite(distance)?distance:undefined};
 }

@@ -5,7 +5,7 @@ ok('release keeps v4.1.50 baseline',Number(rel.build)>=4150);
 ok('Smart Entry hover keeps dark readable state',hard.includes('background:#162126;color:#fff')&&hard.includes('background:#efe3cf;color:#11181b'));
 ok('booking hardening uses current cache key',booking.includes(`/assets/booking-hardening-v4144.css?v=${rel.build}`)&&booking.includes(`/assets/booking-hardening-v4144.js?v=${rel.build}`)&&exp.includes(`booking-hardening-v4144.css?v=${rel.build}`));
 ok('delivery has no ambiguous pre-address from-label',!slots.includes("/ від ${formatMoney")&&!slots.includes("від ${formatMoney(deliveryPricing.local)}")&&slots.includes('fallbackTariffs'));
-ok('delivery hint promises address-based pricing',slots.includes('точну суму порахуємо за адресою'));
+ok('delivery hint promises route-based pricing',slots.includes('точну суму порахуємо за маршрутом'));
 ok('address client retries normalized variants',addr.includes('function addressVariants')&&addr.includes('for(const candidate of addressVariants(q))'));
 ok('address backend retries Photon variants',addrFn.includes('function searchVariants')&&addrFn.includes('for (const candidate of searchVariants(q))'));
 ok('Poltava street fallback can keep typed house number',addrFn.includes('approximateCoordinates: true')&&addrFn.includes('точний номер введено'));

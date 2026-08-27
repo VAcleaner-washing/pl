@@ -90,32 +90,60 @@ function normalizeDeliveryPricing(value) {
         return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : fallback;
     };
     const local = amount(source?.local ?? source?.amount ?? source, defaultDeliveryFee);
-    const baseOutside = amount(source?.baseOutside ?? source?.suburb, Number(defaultDeliveryPricing.baseOutside ?? defaultDeliveryPricing.suburb ?? 350));
-    const includedKm = amount(source?.includedKm, Number(defaultDeliveryPricing.includedKm || 10), 1, 100);
-    const perKm = amount(source?.perKm, Number(defaultDeliveryPricing.perKm || 15), 1, 1000);
-    const maxOutsideKm = amount(source?.maxOutsideKm ?? source?.serviceRadiusKm, Number(defaultDeliveryPricing.maxOutsideKm || 30), includedKm, 200);
+    const defaultsZones = Array.isArray(defaultDeliveryPricing.zones) && defaultDeliveryPricing.zones.length ? defaultDeliveryPricing.zones : [
+        {
+            maxKm: 15,
+            amount: 350
+        },
+        {
+            maxKm: 20,
+            amount: 500
+        },
+        {
+            maxKm: 30,
+            amount: 700
+        },
+        {
+            maxKm: 40,
+            amount: 900
+        }
+    ];
+    const rawZones = Array.isArray(source?.zones) && source.zones.length ? source.zones : defaultsZones;
+    const zones = rawZones.map((row)=>({
+            maxKm: amount(row?.maxKm, 0, 1, 200),
+            amount: amount(row?.amount, 0, 1, 100000)
+        })).filter((row)=>row.maxKm > 0 && row.amount > 0).sort((a, b)=>a.maxKm - b.maxKm);
+    const validZones = zones.length ? zones : defaultsZones.map((x)=>({
+            ...x
+        }));
+    const maxRouteKm = amount(source?.maxRouteKm, Number(validZones[validZones.length - 1].maxKm) || 40, Number(validZones[validZones.length - 1].maxKm) || 1, 200);
+    const fuelSource = source?.fuel && typeof source.fuel === 'object' ? source.fuel : {};
     return {
         local,
-        suburb: baseOutside,
-        baseOutside,
-        includedKm,
-        perKm,
-        maxOutsideKm,
-        localSettlements: [
-            ...defaultDeliveryPricing.localSettlements || [
-                "Полтава",
-                "Розсошенці",
-                "Щербані",
-                "Горбанівка"
-            ]
+        zones: validZones,
+        maxRouteKm,
+        distanceBasis: 'route_one_way',
+        localSettlements: Array.isArray(defaultDeliveryPricing.localSettlements) ? [
+            ...defaultDeliveryPricing.localSettlements
+        ] : [
+            "Полтава",
+            "Розсошенці",
+            "Щербані",
+            "Горбанівка"
         ],
-        outsideZone: String(defaultDeliveryPricing.outsideZone || "agreement")
+        outsideZone: 'agreement',
+        fuel: {
+            petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 80) || 80,
+            lpgPerL: Number(fuelSource.lpgPerL ?? defaultDeliveryPricing.fuel?.lpgPerL ?? 45) || 45,
+            consumptionL100: Number(fuelSource.consumptionL100 ?? defaultDeliveryPricing.fuel?.consumptionL100 ?? 7) || 7,
+            tripMultiplier: 4
+        }
     };
 }
 function normalizeSettlement(value) {
     return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
 }
-function deliveryQuote(fulfillment, address, verified, distanceValue, pricing) {
+function deliveryQuote(fulfillment, address, verified, routeDistanceValue, pricing) {
     if (fulfillment !== "delivery") return {
         amount: 0,
         zone: "pickup",
@@ -143,9 +171,10 @@ function deliveryQuote(fulfillment, address, verified, distanceValue, pricing) {
         distanceKm: 0,
         extraKm: 0
     };
-    const distanceKm = Number(distanceValue);
+    const distanceKm = Number(routeDistanceValue);
     if (verified && Number.isFinite(distanceKm) && distanceKm >= 0) {
-        if (distanceKm > pricing.maxOutsideKm) return {
+        const tier = (pricing.zones || []).find((row)=>distanceKm <= Number(row.maxKm));
+        if (!tier || distanceKm > pricing.maxRouteKm) return {
             amount: 0,
             zone: "agreement",
             quoteRequired: true,
@@ -153,14 +182,14 @@ function deliveryQuote(fulfillment, address, verified, distanceValue, pricing) {
             distanceKm,
             extraKm: 0
         };
-        const extraKm = Math.max(0, Math.ceil(distanceKm - pricing.includedKm - 1e-9));
         return {
-            amount: pricing.baseOutside + extraKm * pricing.perKm,
-            zone: extraKm > 0 ? "distance" : "nearby",
+            amount: Number(tier.amount) || 0,
+            zone: "route_zone",
             quoteRequired: false,
             settlement,
             distanceKm,
-            extraKm
+            extraKm: 0,
+            maxKm: Number(tier.maxKm) || 0
         };
     }
     return {
@@ -930,7 +959,7 @@ Deno.serve(async (request)=>{
             const calculatedDeposit = calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow, depositRules, catalog);
             const depositAmount = depositSnapshotLocked ? Math.max(0, Number(existing?.deposit_amount || calculatedDeposit) || 0) : calculatedDeposit;
             const requestedDeliveryOverride = body.deliveryAmountOverride === undefined || body.deliveryAmountOverride === null || body.deliveryAmountOverride === "" ? null : cleanInt(body.deliveryAmountOverride, 100000);
-            const autoDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, body.deliveryDistanceKm, deliveryPricing);
+            const autoDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, body.deliveryRouteKm ?? body.deliveryDistanceKm, deliveryPricing);
             const preserveExistingDelivery = Boolean(existing?.fulfillment === "delivery" && Number(existing.delivery_amount) > 0 && requestedDeliveryOverride === null);
             const deliveryAmount = fulfillment === "delivery" ? requestedDeliveryOverride !== null ? requestedDeliveryOverride : preserveExistingDelivery ? Math.max(0, Number(existing.delivery_amount) || 0) : autoDelivery.amount : 0, prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
             const requestedProcessing = body.processing && typeof body.processing === "object" ? body.processing : null;

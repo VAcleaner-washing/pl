@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.57",
+  "version": "4.1.58",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -79,6 +79,7 @@
     "test:v4.1.54-local-zone-correction": "node scripts/test-v4-1-54-local-zone-correction.mjs",
     "test:v4.1.55-clear-advice": "node scripts/test-v4-1-55-clear-advice.mjs",
     "test:v4.1.56-price-delivery-copy": "node scripts/test-v4-1-56-price-delivery-copy.mjs",
-    "test:v4.1.57-analytics-truth": "node scripts/test-v4-1-57-analytics-truth-stability.mjs"
+    "test:v4.1.57-analytics-truth": "node scripts/test-v4-1-57-analytics-truth-stability.mjs",
+    "test:v4.1.58-delivery-zones": "node scripts/test-v4-1-58-delivery-zones-fuel.mjs"
   }
 }

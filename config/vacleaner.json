@@ -368,17 +368,43 @@
   },
   "deliveryPricing": {
     "local": 250,
-    "suburb": 350,
-    "baseOutside": 350,
-    "includedKm": 10,
-    "perKm": 15,
-    "maxOutsideKm": 30,
+    "zones": [
+      {
+        "maxKm": 15,
+        "amount": 350
+      },
+      {
+        "maxKm": 20,
+        "amount": 500
+      },
+      {
+        "maxKm": 30,
+        "amount": 700
+      },
+      {
+        "maxKm": 40,
+        "amount": 900
+      }
+    ],
+    "maxRouteKm": 40,
+    "distanceBasis": "route_one_way",
     "localSettlements": [
       "Полтава",
       "Розсошенці",
       "Щербані",
       "Горбанівка"
     ],
-    "outsideZone": "agreement"
+    "outsideZone": "agreement",
+    "fuel": {
+      "petrolPerL": 80,
+      "lpgPerL": 45,
+      "consumptionL100": 7,
+      "tripMultiplier": 4
+    },
+    "suburb": 350,
+    "baseOutside": 350,
+    "includedKm": 15,
+    "perKm": 15,
+    "maxOutsideKm": 40
   }
 }

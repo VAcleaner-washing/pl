@@ -4,7 +4,7 @@ import path from 'node:path';
 const root=process.cwd();
 const adminPath=path.join(root,'assets','admin-v250.js');
 let admin=fs.readFileSync(adminPath,'utf8');
-const hasTieredDelivery=admin.includes('function getDeliveryPricing()')&&(admin.includes('deliverySuburb')||admin.includes('deliveryBaseOutside')||admin.includes('baseOutside'));
+const hasTieredDelivery=admin.includes('function getDeliveryPricing()')&&(admin.includes('deliveryZone15')||admin.includes('DEFAULT_DELIVERY_ZONES')||admin.includes('deliverySuburb')||admin.includes('deliveryBaseOutside')||admin.includes('baseOutside'));
 if(!hasTieredDelivery){
 const once=(from,to,label)=>{
   if(!admin.includes(from)){

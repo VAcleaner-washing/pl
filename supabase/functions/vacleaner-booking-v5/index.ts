@@ -87,35 +87,31 @@ function normalizeDepositRules(value: any) {
 }
 function normalizeDeliveryPricing(value: unknown) {
   const source: any = value && typeof value === "object" ? value : { local: value };
-  const amount = (raw: unknown, fallback: number, min = 0, max = 100000) => {
-    const n = Number(raw); return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : fallback;
-  };
+  const amount = (raw: unknown, fallback: number, min = 0, max = 100000) => { const n=Number(raw); return Number.isFinite(n)&&n>=min&&n<=max?Math.round(n):fallback; };
   const local = amount(source?.local ?? source?.amount ?? source, defaultDeliveryFee);
-  const baseOutside = amount(source?.baseOutside ?? source?.suburb, Number(defaultDeliveryPricing.baseOutside ?? defaultDeliveryPricing.suburb ?? 350));
-  const includedKm = amount(source?.includedKm, Number(defaultDeliveryPricing.includedKm || 10), 1, 100);
-  const perKm = amount(source?.perKm, Number(defaultDeliveryPricing.perKm || 15), 1, 1000);
-  const maxOutsideKm = amount(source?.maxOutsideKm ?? source?.serviceRadiusKm, Number(defaultDeliveryPricing.maxOutsideKm || 30), includedKm, 200);
-  return {
-    local, suburb: baseOutside, baseOutside, includedKm, perKm, maxOutsideKm,
-    localSettlements: Array.isArray(defaultDeliveryPricing.localSettlements) ? [...defaultDeliveryPricing.localSettlements] : ["Полтава","Розсошенці","Щербані","Горбанівка"],
-    outsideZone: String(defaultDeliveryPricing.outsideZone || "agreement"),
-  };
+  const defaultsZones = Array.isArray(defaultDeliveryPricing.zones)&&defaultDeliveryPricing.zones.length?defaultDeliveryPricing.zones:[{maxKm:15,amount:350},{maxKm:20,amount:500},{maxKm:30,amount:700},{maxKm:40,amount:900}];
+  const rawZones=Array.isArray(source?.zones)&&source.zones.length?source.zones:defaultsZones;
+  const zones=rawZones.map((row:any)=>({maxKm:amount(row?.maxKm,0,1,200),amount:amount(row?.amount,0,1,100000)})).filter((row:any)=>row.maxKm>0&&row.amount>0).sort((a:any,b:any)=>a.maxKm-b.maxKm);
+  const validZones=zones.length?zones:defaultsZones.map((x:any)=>({...x}));
+  const maxRouteKm=amount(source?.maxRouteKm,Number(validZones[validZones.length-1].maxKm)||40,Number(validZones[validZones.length-1].maxKm)||1,200);
+  const fuelSource=source?.fuel&&typeof source.fuel==='object'?source.fuel:{};
+  return {local,zones:validZones,maxRouteKm,distanceBasis:'route_one_way',localSettlements:Array.isArray(defaultDeliveryPricing.localSettlements)?[...defaultDeliveryPricing.localSettlements]:["Полтава","Розсошенці","Щербані","Горбанівка"],outsideZone:'agreement',fuel:{petrolPerL:Number(fuelSource.petrolPerL??defaultDeliveryPricing.fuel?.petrolPerL??80)||80,lpgPerL:Number(fuelSource.lpgPerL??defaultDeliveryPricing.fuel?.lpgPerL??45)||45,consumptionL100:Number(fuelSource.consumptionL100??defaultDeliveryPricing.fuel?.consumptionL100??7)||7,tripMultiplier:4}};
 }
 function normalizeSettlement(value: unknown) {
   return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
 }
-function deliveryQuote(fulfillment: string, address: string, verified: boolean, distanceKmValue: unknown, pricing: any) {
+function deliveryQuote(fulfillment: string, address: string, verified: boolean, routeDistanceValue: unknown, pricing: any) {
   if (fulfillment !== "delivery") return { amount: 0, zone: "pickup", quoteRequired: false, pending: false, settlement: "", distanceKm: null, extraKm: 0 };
   const base = String(address || "").split(" · ")[0].trim();
   if (!base) return { amount: pricing.local, zone: "pending", quoteRequired: false, pending: true, settlement: "", distanceKm: null, extraKm: 0 };
   const settlement = base.split(",")[0].trim(), normalized = normalizeSettlement(settlement);
   const local = (pricing.localSettlements || []).some((item: string) => normalizeSettlement(item) === normalized);
   if (local) return { amount: pricing.local, zone: "local", quoteRequired: false, pending: false, settlement, distanceKm: 0, extraKm: 0 };
-  const distanceKm = Number(distanceKmValue);
+  const distanceKm = Number(routeDistanceValue);
   if (verified && Number.isFinite(distanceKm) && distanceKm >= 0) {
-    if (distanceKm > pricing.maxOutsideKm) return { amount: 0, zone: "agreement", quoteRequired: true, pending: false, settlement, distanceKm, extraKm: 0 };
-    const extraKm = Math.max(0, Math.ceil((distanceKm - pricing.includedKm) - 1e-9));
-    return { amount: pricing.baseOutside + extraKm * pricing.perKm, zone: extraKm > 0 ? "distance" : "nearby", quoteRequired: false, pending: false, settlement, distanceKm, extraKm };
+    const tier=(pricing.zones||[]).find((row:any)=>distanceKm<=Number(row.maxKm));
+    if (!tier || distanceKm > pricing.maxRouteKm) return { amount: 0, zone: "agreement", quoteRequired: true, pending: false, settlement, distanceKm, extraKm: 0 };
+    return { amount: Number(tier.amount)||0, zone: "route_zone", quoteRequired: false, pending: false, settlement, distanceKm, extraKm: 0, maxKm:Number(tier.maxKm)||0 };
   }
   return { amount: 0, zone: "agreement", quoteRequired: true, pending: false, settlement, distanceKm: Number.isFinite(distanceKm) ? distanceKm : null, extraKm: 0 };
 }
@@ -353,7 +349,7 @@ Deno.serve(async (req: Request) => {
     const promoApplied = Boolean(promo?.valid && promoDiscount > loyaltyDiscount), discount = promoApplied ? promoDiscount : loyaltyDiscount, discountSource = promoApplied ? "promo" : loyalty.percent ? "loyalty" : "none";
     const fulfillmentForEstimate = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "";
     const estimateAddress = fulfillmentForEstimate === "delivery" ? cleanText(body.deliveryAddress, 180) : "";
-    const delivery = deliveryQuote(fulfillmentForEstimate, estimateAddress, body.deliveryAddressVerified === true, body.deliveryDistanceKm, deliveryPricing);
+    const delivery = deliveryQuote(fulfillmentForEstimate, estimateAddress, body.deliveryAddressVerified === true, body.deliveryRouteKm ?? body.deliveryDistanceKm, deliveryPricing);
     const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = delivery.amount, totalAmount = baseAmount + selected.amount + deliveryAmount;
     const securityDeposit = depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow, rules, catalog);
     const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, deliveryZone: delivery.zone, deliveryDistanceKm: delivery.distanceKm, deliveryExtraKm: delivery.extraKm, deliveryQuoteRequired: delivery.quoteRequired, deliveryQuotePending: delivery.pending, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite" };
@@ -376,7 +372,7 @@ Deno.serve(async (req: Request) => {
         if (authoritative) { finalDistanceKm = authoritative.distanceKm; finalRouteKm = authoritative.routeKm; finalDistanceSource = authoritative.source || "server"; }
       }
     }
-    const finalDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, finalDistanceKm, deliveryPricing);
+    const finalDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, finalRouteKm ?? finalDistanceKm, deliveryPricing);
     const finalDeliveryAmount = finalDelivery.amount;
     const finalTotalAmount = baseAmount + selected.amount + finalDeliveryAmount;
     const chemistry = hasPuzzi ? [

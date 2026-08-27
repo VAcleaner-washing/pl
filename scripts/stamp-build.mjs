@@ -10,7 +10,6 @@ execFileSync(process.execPath,[path.join(root,'scripts','sync-static-copy.mjs')]
 execFileSync(process.execPath,[path.join(root,'scripts','harden-public-metadata.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','generate-config.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','apply-delivery-settings.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-delivery-distance-v41472.mjs')],{stdio:'inherit'});
 const release=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
 const version=String(release.version), build=String(release.build||version.replace(/\D/g,''));
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
@@ -36,6 +35,14 @@ for(const file of walk(root).filter(f=>f.endsWith('.html')||f.endsWith('.txt')))
   }
   fs.writeFileSync(file,s);
 }
+// Keep dynamic booking hardening loader on the same release version as stamped HTML.
+const publicExperience=path.join(root,'assets','public-experience.js');
+if(fs.existsSync(publicExperience)){
+  let experience=fs.readFileSync(publicExperience,'utf8');
+  experience=experience.replace(/(booking-hardening-v4144\.(?:js|css))\?v=\d+/g,`$1?v=${build}`);
+  fs.writeFileSync(publicExperience,experience);
+}
+
 const adminSw=path.join(root,'admin','sw.js');
 let sw=fs.readFileSync(adminSw,'utf8').replace(/vacleaner-manager-\d+/g,`vacleaner-manager-${build}`).replace(/\?v=\d+/g,`?v=${build}`);
 fs.writeFileSync(adminSw,sw);

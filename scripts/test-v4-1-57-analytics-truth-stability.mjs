@@ -65,9 +65,10 @@ for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-
 for(const legacy of ['apply-content-v4148.mjs','apply-seo-v4147.mjs','apply-performance-v4149.mjs','apply-v4150-full-qa.mjs','apply-v4152-manual-address-fallback.mjs','apply-v4153-address-provider-repair.mjs','apply-v4155-clear-advice.mjs','apply-v4156-price-rhythm-delivery-copy.mjs']){
   check(`stamp no longer replays historical patch: ${legacy}`,!stamp.includes(`'scripts','${legacy}'`));
 }
-for(const deterministic of ['sync-static-copy.mjs','harden-public-metadata.mjs','generate-config.mjs','apply-delivery-settings.mjs','apply-delivery-distance-v41472.mjs']){
+for(const deterministic of ['sync-static-copy.mjs','harden-public-metadata.mjs','generate-config.mjs','apply-delivery-settings.mjs']){
   check(`stamp keeps deterministic normalizer: ${deterministic}`,stamp.includes(`'scripts','${deterministic}'`));
 }
+check('stamp retires historical per-km delivery patch',!stamp.includes("'scripts','apply-delivery-distance-v41472.mjs'")&&fs.existsSync(path.join(root,'scripts','apply-delivery-distance-v41472.mjs')));
 
 // Static-copy normalization must no longer roll final SEO descriptions backwards before later patches repair them.
 const finalDescriptions={

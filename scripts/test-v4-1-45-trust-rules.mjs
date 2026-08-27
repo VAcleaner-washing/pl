@@ -4,13 +4,13 @@ const cfg=JSON.parse(read('config/vacleaner.json')),pkg=JSON.parse(read('package
 const address=read('assets/address-autocomplete.js'),publicSlots=read('assets/public-booking-slots.js'),admin=read('assets/admin-v250.js'),bookingEdge=read('supabase/functions/vacleaner-booking-v5/index.ts'),adminEdge=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts'),correction=read('supabase/functions/vacleaner-status-correction-v1/index.ts'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),terms=read('umovy/index.html'),delivery=read('dostavka/index.html'),faq=read('faq/index.html'),trust=read('assets/booking-trust-v4145.js'),workflow=read('.github/workflows/pages.yml');
 let n=0,failed=0;const ok=(name,c)=>{n++;if(c)console.log('OK  ',name);else{failed++;console.error('FAIL',name)}};
 ok('release keeps v4.1.45+ trust rules',pkg.version===rel.version&&Number(rel.build)>=4145);
-ok('delivery config keeps 250 base and 350 outside base',cfg.deliveryPricing?.local===250&&cfg.deliveryPricing?.baseOutside===350);
+ok('delivery config keeps 250 base and 350 outside base',cfg.deliveryPricing?.local===250&&cfg.deliveryPricing?.zones?.[0]?.amount===350);
 ok('250 zone settlements',['Полтава','Розсошенці','Щербані','Горбанівка'].every(x=>cfg.deliveryPricing.localSettlements.includes(x)));
 ok('address helper exposes verification meta',address.includes('__VAC_DELIVERY_META__')&&address.includes('__VAC_ADMIN_DELIVERY_META__')&&address.includes('vacAddressSettlement'));
 ok('public payload sends verified address',chunk.includes('deliveryAddressVerified:(globalThis.__VAC_DELIVERY_META__?.().verified===true)'));
 ok('public backend has agreement fallback',bookingEdge.includes('zone: "agreement"')&&bookingEdge.includes('deliveryQuoteRequired'));
-ok('public summary leads with Poltava and separates suburb pricing',publicSlots.includes('const fallbackTariffs=`Полтава ${formatMoney(deliveryPricing.local)}`')&&publicSlots.includes('Інше передмістя — від ${formatMoney(deliveryPricing.baseOutside)}')&&publicSlots.includes('Менеджер підтвердить суму до передоплати.'));
-ok('admin has distance delivery tariffs',admin.includes('deliveryLocal')&&admin.includes('deliveryBaseOutside')&&admin.includes('deliveryPerKm')&&admin.includes('deliveryAmountOverride'));
+ok('public summary leads with Poltava and separates suburb pricing',publicSlots.includes('const fallbackTariffs=`Полтава ${formatMoney(deliveryPricing.local)}`')&&publicSlots.includes('Інші адреси — від ${formatMoney(firstOutside)}')&&publicSlots.includes('Менеджер підтвердить суму до передоплати.'));
+ok('admin has distance delivery tariffs',admin.includes('deliveryLocal')&&admin.includes('deliveryZone15')&&admin.includes('deliveryZone40')&&admin.includes('deliveryAmountOverride'));
 ok('cancel backend stores 72h policy',adminEdge.includes('hoursBefore >= 72')&&adminEdge.includes('prepayment_retained'));
 ok('cancel finance respects retained prepayment',admin.includes('retainedPrepayment')&&admin.includes('менше 3 діб'));
 ok('status correction clears cancellation metadata',correction.includes('cancellation: _cancellation'));

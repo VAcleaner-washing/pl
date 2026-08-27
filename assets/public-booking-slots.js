@@ -5,16 +5,23 @@ const CORE_SLOTS=window.VACLEANER_CORE?.slots||{morningStart:'08:00',morningEnd:
 let slots={...CORE_SLOTS};
 let depositRules={oneUnit:{day:1000,weekend:2000},twoUnits:{day:1500,weekend:3000},general:{day:2000,weekend:3000},elite:{day:3000,weekend:4000}};
 const CORE_DELIVERY_PRICING=window.VACLEANER_CORE?.deliveryPricing||{};
-let deliveryPricing={
-  local:Number(CORE_DELIVERY_PRICING.local??window.VACLEANER_CORE?.deliveryFee)||250,
-  suburb:Number(CORE_DELIVERY_PRICING.suburb)||350,
-  baseOutside:Number(CORE_DELIVERY_PRICING.baseOutside??CORE_DELIVERY_PRICING.suburb)||350,
-  includedKm:Number(CORE_DELIVERY_PRICING.includedKm)||10,
-  perKm:Number(CORE_DELIVERY_PRICING.perKm)||15,
-  maxOutsideKm:Number(CORE_DELIVERY_PRICING.maxOutsideKm)||30,
-  localSettlements:Array.isArray(CORE_DELIVERY_PRICING.localSettlements)?[...CORE_DELIVERY_PRICING.localSettlements]:['Полтава'],
-  outsideZone:String(CORE_DELIVERY_PRICING.outsideZone||'agreement')
-};
+const DEFAULT_DELIVERY_ZONES=[{maxKm:15,amount:350},{maxKm:20,amount:500},{maxKm:30,amount:700},{maxKm:40,amount:900}];
+function normalizeDeliveryPricing(raw={}){
+  const src=raw&&typeof raw==='object'?raw:{};
+  const zones=(Array.isArray(src.zones)&&src.zones.length?src.zones:DEFAULT_DELIVERY_ZONES).map(row=>({maxKm:Math.max(1,Number(row?.maxKm)||0),amount:Math.max(0,Math.round(Number(row?.amount)||0))})).filter(row=>row.maxKm>0&&row.amount>0).sort((a,b)=>a.maxKm-b.maxKm);
+  const validZones=zones.length?zones:DEFAULT_DELIVERY_ZONES.map(x=>({...x}));
+  const fuelSrc=src.fuel&&typeof src.fuel==='object'?src.fuel:{};
+  return{
+    local:Math.max(0,Math.round(Number(src.local??window.VACLEANER_CORE?.deliveryFee)||250)),
+    zones:validZones,
+    maxRouteKm:Math.max(validZones[validZones.length-1].maxKm,Number(src.maxRouteKm)||validZones[validZones.length-1].maxKm),
+    distanceBasis:'route_one_way',
+    localSettlements:Array.isArray(src.localSettlements)?[...src.localSettlements]:['Полтава','Розсошенці','Щербані','Горбанівка'],
+    outsideZone:String(src.outsideZone||'agreement'),
+    fuel:{petrolPerL:Number(fuelSrc.petrolPerL)||80,lpgPerL:Number(fuelSrc.lpgPerL)||45,consumptionL100:Number(fuelSrc.consumptionL100)||7,tripMultiplier:Number(fuelSrc.tripMultiplier)||4}
+  };
+}
+let deliveryPricing=normalizeDeliveryPricing(CORE_DELIVERY_PRICING);
 const label=(kind)=>kind==='morning'?`Ранок · ${slots.morningStart}–${slots.morningEnd}`:`Вечір · ${slots.eveningStart}–${slots.eveningEnd}`;
 function validSlots(value){
   const keys=['morningStart','morningEnd','eveningStart','eveningEnd'];
@@ -92,12 +99,11 @@ function currentDeliveryQuote(){
   const normalized=normalizeSettlement(settlement);
   const local=(deliveryPricing.localSettlements||[]).some(item=>normalizeSettlement(item)===normalized);
   if(local)return {amount:deliveryPricing.local,zone:'local',pending:false,quoteRequired:false,settlement,distanceKm:0};
-  const distance=Number(meta.pricingDistanceKm);
+  const distance=Number(meta.routeKm);
   if(meta.verified===true&&Number.isFinite(distance)&&distance>=0){
-    if(distance>deliveryPricing.maxOutsideKm)return {amount:0,zone:'agreement',pending:false,quoteRequired:true,settlement,distanceKm:distance};
-    const extraKm=Math.max(0,Math.ceil((distance-deliveryPricing.includedKm)-1e-9));
-    const amount=deliveryPricing.baseOutside+extraKm*deliveryPricing.perKm;
-    return {amount,zone:extraKm>0?'distance':'nearby',pending:false,quoteRequired:false,settlement,distanceKm:distance,extraKm};
+    const tier=(deliveryPricing.zones||[]).find(row=>distance<=Number(row.maxKm));
+    if(!tier||distance>deliveryPricing.maxRouteKm)return {amount:0,zone:'agreement',pending:false,quoteRequired:true,settlement,distanceKm:distance};
+    return {amount:Number(tier.amount)||0,zone:'route_zone',pending:false,quoteRequired:false,settlement,distanceKm:distance,maxKm:Number(tier.maxKm)||0};
   }
   return {amount:0,zone:'manual',pending:false,quoteRequired:true,settlement,distanceKm:Number.isFinite(distance)?distance:null};
 }
@@ -105,19 +111,19 @@ function renderDeliveryFee(){
   const row=document.querySelector('.booking-choice-row');if(!row)return;
   const delivery=[...row.querySelectorAll('button')].find(btn=>/Доставка/.test(btn.textContent||''));
   const quote=currentDeliveryQuote();
-  const fallbackTariffs=`Полтава ${formatMoney(deliveryPricing.local)}`;
+  const fallbackTariffs=`Полтава ${formatMoney(deliveryPricing.local)}`;const firstOutside=Number(deliveryPricing.zones?.[0]?.amount)||350;
   const manualQuote=quote.quoteRequired&&quote.zone==='manual';
   const label=manualQuote||quote.pending?fallbackTariffs:quote.quoteRequired?'тариф підтвердить менеджер':formatMoney(quote.amount);
   if(delivery){setTextIfChanged(delivery.querySelector('strong'),'Доставка');const span=delivery.querySelector('span');setTextIfChanged(span,`до вас і назад · ${label}`)}
   const address=document.querySelector('.booking-delivery-address > small,.booking-delivery-address .booking-field-hint');
   if(address){
     const text=manualQuote
-      ?`Не вдалося точно визначити адресу. Полтава, Розсошенці, Щербані та Горбанівка — ${formatMoney(deliveryPricing.local)}. Інше передмістя — від ${formatMoney(deliveryPricing.baseOutside)}. Менеджер підтвердить суму до передоплати.`
+      ?`Не вдалося точно визначити адресу. Полтава, Розсошенці, Щербані та Горбанівка — ${formatMoney(deliveryPricing.local)}. Інші адреси — від ${formatMoney(firstOutside)}. Менеджер підтвердить суму до передоплати.`
       :quote.quoteRequired
         ?'Адреса поза стандартною зоною доставки. Вартість менеджер погодить до передоплати.'
       :quote.pending
-        ?`Полтава — ${formatMoney(deliveryPricing.local)}. Розсошенці, Щербані та Горбанівка — теж ${formatMoney(deliveryPricing.local)}. Інше передмістя — від ${formatMoney(deliveryPricing.baseOutside)}; точну суму порахуємо за адресою.`
-        :quote.zone==='distance'
+        ?`Полтава — ${formatMoney(deliveryPricing.local)}. Розсошенці, Щербані та Горбанівка — теж ${formatMoney(deliveryPricing.local)}. Інші адреси — від ${formatMoney(firstOutside)}; точну суму порахуємо за маршрутом.`
+        :quote.zone==='route_zone'
           ?`Доставка за цією адресою — ${formatMoney(quote.amount)}. Сума вже врахована у бронюванні.`
           :`${formatMoney(quote.amount)} включає доставку техніки до вас і її повернення назад.`;
     setTextIfChanged(address,text);
@@ -336,7 +342,7 @@ function refreshBindings(){
 }
 fetch(API,{cache:'no-store'})
   .then(r=>r.ok?r.json():Promise.reject(new Error('settings_failed')))
-  .then(d=>{const remoteSlots=validSlots(d?.slots);if(remoteSlots)slots=remoteSlots;if(d?.depositRules)depositRules={...depositRules,...d.depositRules};if(d?.deliveryPricing&&typeof d.deliveryPricing==='object')deliveryPricing={...deliveryPricing,...d.deliveryPricing,localSettlements:Array.isArray(d.deliveryPricing.localSettlements)?[...d.deliveryPricing.localSettlements]:deliveryPricing.localSettlements};else if(Number.isFinite(Number(d?.deliveryFee))&&Number(d.deliveryFee)>=0)deliveryPricing.local=Math.round(Number(d.deliveryFee));refreshBindings()})
+  .then(d=>{const remoteSlots=validSlots(d?.slots);if(remoteSlots)slots=remoteSlots;if(d?.depositRules)depositRules={...depositRules,...d.depositRules};if(d?.deliveryPricing&&typeof d.deliveryPricing==='object')deliveryPricing=normalizeDeliveryPricing(d.deliveryPricing);else if(Number.isFinite(Number(d?.deliveryFee))&&Number(d.deliveryFee)>=0)deliveryPricing.local=Math.round(Number(d.deliveryFee));refreshBindings()})
   .catch(()=>refreshBindings());
 const depositObserver=new MutationObserver(()=>requestAnimationFrame(()=>{renderDeposit();renderDeliveryFee()}));
 document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','value']});document.addEventListener('change',()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},true);document.addEventListener('input',event=>{if(event.target?.closest?.('.booking-delivery-address'))requestAnimationFrame(renderDeliveryFee)},true);document.addEventListener('vacleaner:address-selected',event=>{if(event.detail?.mode==='public')requestAnimationFrame(renderDeliveryFee)});document.addEventListener('click',()=>setTimeout(()=>{renderDeposit();renderPickupLocationNote();renderDeliveryFee();renderPrefilledProduct()},0),true)});

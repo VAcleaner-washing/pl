@@ -67,15 +67,26 @@ function normCatalog(v: any) {
 function normDeliveryPricing(v: unknown) {
   const source: any = v && typeof v === "object" ? v : { local: v };
   const local = num(source?.local ?? source?.amount ?? source);
-  const baseOutside = num(source?.baseOutside ?? source?.suburb ?? defaultDeliveryPricing.baseOutside ?? defaultDeliveryPricing.suburb);
-  const includedKm = num(source?.includedKm ?? defaultDeliveryPricing.includedKm ?? 10);
-  const perKm = num(source?.perKm ?? defaultDeliveryPricing.perKm ?? 15);
-  const maxOutsideKm = num(source?.maxOutsideKm ?? source?.serviceRadiusKm ?? defaultDeliveryPricing.maxOutsideKm ?? 30);
-  if (local === null || baseOutside === null || includedKm === null || perKm === null || maxOutsideKm === null || includedKm < 1 || perKm < 1 || maxOutsideKm < includedKm) return null;
+  if (local === null) return null;
+  const defaultZones = Array.isArray(defaultDeliveryPricing.zones) && defaultDeliveryPricing.zones.length ? defaultDeliveryPricing.zones : [{maxKm:15,amount:350},{maxKm:20,amount:500},{maxKm:30,amount:700},{maxKm:40,amount:900}];
+  const rawZones = Array.isArray(source?.zones) && source.zones.length ? source.zones : defaultZones;
+  const zones = rawZones.map((row:any)=>({maxKm:num(row?.maxKm),amount:num(row?.amount)})).filter((row:any)=>row.maxKm!==null&&row.amount!==null&&row.maxKm>0&&row.amount>0).sort((a:any,b:any)=>a.maxKm-b.maxKm);
+  if (!zones.length) return null;
+  for (let i=1;i<zones.length;i++) if (zones[i].maxKm<=zones[i-1].maxKm) return null;
+  const maxRouteKm = num(source?.maxRouteKm ?? zones[zones.length-1].maxKm);
+  if (maxRouteKm === null || maxRouteKm < zones[zones.length-1].maxKm) return null;
+  const fuelSource = source?.fuel && typeof source.fuel === "object" ? source.fuel : {};
+  const fuel = {
+    petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 80),
+    lpgPerL: Number(fuelSource.lpgPerL ?? defaultDeliveryPricing.fuel?.lpgPerL ?? 45),
+    consumptionL100: Number(fuelSource.consumptionL100 ?? defaultDeliveryPricing.fuel?.consumptionL100 ?? 7),
+    tripMultiplier: 4,
+  };
+  if (![fuel.petrolPerL,fuel.lpgPerL,fuel.consumptionL100].every(x=>Number.isFinite(x)&&x>0&&x<=1000)) return null;
   return {
-    local, suburb: baseOutside, baseOutside, includedKm, perKm, maxOutsideKm,
+    local, zones, maxRouteKm, distanceBasis: "route_one_way",
     localSettlements: Array.isArray(defaultDeliveryPricing.localSettlements) ? [...defaultDeliveryPricing.localSettlements] : ["Полтава","Розсошенці","Щербані","Горбанівка"],
-    outsideZone: String(defaultDeliveryPricing.outsideZone || "agreement"),
+    outsideZone: "agreement", fuel,
   };
 }
 function normDeliveryFee(v: unknown) {

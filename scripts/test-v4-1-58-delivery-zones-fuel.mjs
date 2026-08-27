@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const read=f=>fs.readFileSync(f,'utf8'),cfg=JSON.parse(read('config/vacleaner.json')),rel=JSON.parse(read('release.json')),pkg=JSON.parse(read('package.json'));let n=0,fail=0;const ok=(name,c)=>{n++;if(c)console.log('OK  ',name);else{fail++;console.error('FAIL',name)}};
+const p=cfg.deliveryPricing,z=p.zones||[],admin=read('assets/admin-v250.js'),slots=read('assets/public-booking-slots.js'),analytics=read('assets/booking-funnel-analytics.js'),settings=read('supabase/functions/vacleaner-settings/index.ts'),booking=read('supabase/functions/vacleaner-booking-v5/index.ts'),adminEdge=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts'),gateway=read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
+ok('release coherent',rel.version==='4.1.58'&&rel.build===4158&&pkg.version===rel.version);
+ok('agreed tariffs',[250,350,500,700,900].join(',')===[p.local,...z.map(x=>x.amount)].join(','));
+ok('agreed route bands',z.map(x=>x.maxKm).join(',')==='15,20,30,40'&&p.maxRouteKm===40);
+ok('Dykanka 31 km resolves to 900',z.find(x=>31<=x.maxKm)?.amount===900);
+ok('over 40 requires manager',p.outsideZone==='agreement');
+ok('fuel defaults editable',p.fuel.petrolPerL===80&&p.fuel.lpgPerL===45&&p.fuel.consumptionL100===7&&p.fuel.tripMultiplier===4);
+ok('public uses route km',slots.includes('const distance=Number(meta.routeKm)')&&!slots.includes('Math.ceil((distance-deliveryPricing.includedKm)'));
+ok('analytics uses same route-zone model',analytics.includes('const distance=Number(meta.routeKm)')&&analytics.includes("delivery_zone:'route_zone'"));
+ok('admin has five tariffs and fuel settings',admin.includes('deliveryLocal')&&[15,20,30,40].every(k=>admin.includes('deliveryZone'+k))&&admin.includes('fuelPetrol')&&admin.includes('fuelLpg')&&admin.includes('fuelConsumption'));
+ok('admin displays four-leg economics',admin.includes('tripMultiplier=4')&&admin.includes('відвезти → назад → забрати → назад'));
+ok('settings persists fuel',settings.includes('consumptionL100')&&settings.includes('tripMultiplier: 4'));
+ok('server uses route distance',booking.includes('body.deliveryRouteKm ?? body.deliveryDistanceKm')&&booking.includes('finalRouteKm ?? finalDistanceKm')&&adminEdge.includes('body.deliveryRouteKm ?? body.deliveryDistanceKm'));
+ok('gateway has no duplicated tariffs',!gateway.includes('LOCAL_FEE')&&!gateway.includes('PER_KM')&&!gateway.includes('MAX_OUTSIDE_KM'));
+if(fail)process.exit(1);console.log(`v4.1.58 delivery zones & fuel: ${n}/${n} OK`);
