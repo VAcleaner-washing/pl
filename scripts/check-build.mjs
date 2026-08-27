@@ -146,6 +146,7 @@ execFileSync(process.execPath,[path.join(root,'scripts','test-analytics-decision
 execFileSync(process.execPath,[path.join(root,'scripts','test-growth-content.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-financial-control.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-package-language.mjs')],{stdio:'pipe'});
+execFileSync(process.execPath,[path.join(root,'scripts','test-v4-1-60-home-package-rhythm.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-retention.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','test-smart-guide-logic.mjs')],{stdio:'pipe'});
 execFileSync(process.execPath,[path.join(root,'scripts','check-backend-inventory.mjs')],{stdio:'pipe'});
