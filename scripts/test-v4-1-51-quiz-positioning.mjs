@@ -10,7 +10,7 @@ const workflow=read('.github/workflows/pages.yml');
 let passed=0;
 const ok=(name,condition)=>{if(!condition){console.error(`FAIL ${name}`);process.exitCode=1}else{passed++;console.log(`OK   ${name}`)}};
 
-ok('release is v4.1.51',pkg.version==='4.1.51'&&release.version==='4.1.51'&&Number(release.build)===4151);
+ok('release keeps v4.1.51 positioning',pkg.version===release.version&&Number(release.build)>=4151);
 ok('booking frames the first action as a task choice',hardening.includes('<small>Оберіть задачу</small>')&&hardening.includes('<h3>Що плануєте почистити?</h3>'));
 ok('task choice promises filtering instead of personalized selection',hardening.includes('Один клік — покажемо відповідну техніку та комплекти.'));
 ok('quiz has a separate precision promise',hardening.includes('Не впевнені, який комплект потрібен?')&&hardening.includes('Врахуємо тип забруднення, плями, запах і кількість зон.')&&hardening.includes('Пройти точний підбір за 30 секунд →'));

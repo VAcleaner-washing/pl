@@ -15,7 +15,7 @@ for(const file of routes){
   const local=nodes.find(x=>x['@type']==='LocalBusiness');
   if(local){
     const area=Array.isArray(local.areaServed)?local.areaServed:[];
-    ok(`${file} keeps explicit 250 UAH settlements`,['Полтава','Розсошенці','Щербані','Горбанівка'].every(name=>area.some(x=>x?.name===name)));
+    ok(`${file} keeps the full service area in Local SEO`,['Полтава','Розсошенці','Щербані','Горбанівка'].every(name=>area.some(x=>x?.name===name)));
     ok(`${file} widens Local SEO entity to Poltava district`,area.some(x=>x?.['@type']==='AdministrativeArea'&&x?.name==='Полтавський район, Полтавська область'));
   }
   for(const service of nodes.filter(x=>x['@type']==='Service')){
@@ -24,7 +24,7 @@ for(const file of routes){
   }
 }
 const delivery=read('dostavka/index.html'), faq=read('faq/index.html');
-ok('delivery page states 250 tier',delivery.includes('Полтава, Розсошенці, Щербані та Горбанівка — 250 грн'));
+ok('delivery page states the four-settlement 250 tier',delivery.includes('Полтава, Розсошенці, Щербані та Горбанівка — 250 грн'));
 ok('delivery page keeps distance tariff after local tier',delivery.includes('до 10 км')&&delivery.includes('+15 грн'));
 ok('FAQ states distance pricing outside Poltava',faq.includes('до 10 км')&&faq.includes('+15 грн'));
 ok('outside-zone pricing remains agreement based',delivery.includes('Понад 30 км')&&delivery.includes('погодж')&&faq.includes('Понад 30 км')&&faq.includes('погодж'));

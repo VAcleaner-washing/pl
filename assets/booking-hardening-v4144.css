@@ -7,3 +7,13 @@
 .booking-promo-field.vx-promo-collapsed,.booking-promo-field[data-vx-promo-collapsed]{display:block}.vx-promo-toggle{width:max-content;padding:0;border:0;background:none;color:#cbd0d2;font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(214,164,95,.35);text-underline-offset:4px}.vx-promo-body{margin-top:10px}.booking-promo-field:not(.is-open) .vx-promo-body{display:none!important}
 .vx-draft-restored{margin:8px 0 0;padding:9px 12px;border:1px solid rgba(77,195,139,.22);border-radius:12px;background:rgba(77,195,139,.07);color:#93dcb8;font-size:12px;text-align:center;animation:vxDraftIn .2s ease-out}@keyframes vxDraftIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 @media(max-width:620px){#booking-products .vx-smart-entry{margin:12px 0 14px;padding:15px;border-radius:18px}.vx-smart-entry__head h3{font-size:20px}.vx-smart-entry__head p{font-size:13px}.vx-smart-entry__grid{grid-template-columns:1fr;gap:8px;margin-top:14px}.vx-smart-entry__grid button{min-height:52px;padding:12px 13px}.vx-smart-taskbar{margin:10px 0 10px}.vx-smart-entry__guide{align-items:flex-start;flex-direction:column;gap:10px;margin-top:15px;padding-top:14px}.vx-smart-entry__guide>a{font-size:12px}.booking-promo-field{grid-column:1/-1}}
+
+/* v4.1.55 readable light booking guide */
+#booking-products .vx-smart-entry{color:#17191b}
+#booking-products .vx-smart-entry__head h3{color:#17191b}
+#booking-products .vx-smart-entry__head p{color:#625b52}
+#booking-products .vx-smart-entry__guide{border-top-color:rgba(68,52,34,.18)}
+#booking-products .vx-smart-entry__guide strong{color:#17191b}
+#booking-products .vx-smart-entry__guide small{color:#625b52}
+#booking-products .vx-smart-entry__guide>a{color:#885313}
+#booking-products .vx-smart-entry__guide>a:hover{color:#6f410d}

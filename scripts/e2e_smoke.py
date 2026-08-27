@@ -573,7 +573,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.wait_for_timeout(80)
         checks.check(page.locator("#booking-extras.is-vx-active").count() == 1, "Mobile CTA opens fulfillment step")
 
-        delivery = page.locator('#booking-extras .booking-choice-row button', has_text='Доставка по Полтаві')
+        delivery = page.locator('#booking-extras .booking-choice-row button', has_text='Доставка')
         delivery.click()
         page.wait_for_timeout(50)
         checks.check("Обрати дату" not in cta.inner_text(), "Delivery choice never regresses CTA to date during estimate refresh")

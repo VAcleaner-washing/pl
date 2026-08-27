@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd();
-const expected=['Що почистити','Комплекти','Як це працює','Відгуки','Підбір'];
+const expected=['Що почистити','Комплекти','Як це працює','Відгуки','Підбір за 30 сек'];
 let pass=0,fail=[];
 const ok=(c,m)=>{if(c){pass++;console.log('PASS:',m)}else{fail.push(m);console.log('FAIL:',m)}};
 const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.name==='admin'||e.name==='_not-found'?[]:e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
@@ -26,7 +26,7 @@ ok(/if\(document\.getElementById\('_R_'\)\)return/.test(site),'site-v400 does no
 const home=fs.readFileSync(path.join(root,'_next/static/chunks/01pb0x0z72e41.js'),'utf8');
 const hStart=home.indexOf('className:"site-header"'),hEnd=home.indexOf('className:`mobile-menu',hStart);
 const headerSlice=home.slice(hStart,hEnd>hStart?hEnd:hStart+5000);
-ok(headerSlice.includes('children:"Відгуки"')&&headerSlice.includes('children:"Підбір"'),'home React desktop header uses current labels');
+ok(headerSlice.includes('children:"Відгуки"')&&headerSlice.includes('children:"Підбір за 30 сек"'),'home React desktop header uses current labels');
 ok(!headerSlice.includes('children:"Процес"')&&!headerSlice.includes('children:"FAQ"'),'home React desktop header contains no legacy labels');
 console.log(JSON.stringify({passed:pass,failed:fail,status:fail.length?'failed':'passed'},null,2));
 process.exit(fail.length?1:0);

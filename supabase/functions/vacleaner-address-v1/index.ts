@@ -155,13 +155,17 @@ async function photonSearch(query: string, signal: AbortSignal) {
   url.searchParams.set("q", `${query}, Полтавська область`);
   url.searchParams.set("bbox", SERVICE_BBOX);
   url.searchParams.set("countrycode", "UA");
-  url.searchParams.set("lang", "uk");
+  // Photon currently accepts only its documented language values. Passing
+  // `lang=uk` makes the whole request fail with HTTP 400, even though the OSM
+  // result itself contains the Ukrainian street name. Let Photon use the
+  // native/default OSM names; forcing a fallback language can transliterate
+  // Ukrainian settlements (for example, Rozsoshentsi instead of Розсошенці).
   url.searchParams.set("limit", "16");
   url.searchParams.set("lat", String(CENTER.lat));
   url.searchParams.set("lon", String(CENTER.lon));
   url.searchParams.set("zoom", "10");
   url.searchParams.set("location_bias_scale", "0.15");
-  const response = await fetch(url, { signal, headers: { "Accept": "application/json", "Accept-Language": "uk,en;q=0.7" } });
+  const response = await fetch(url, { signal, headers: { "Accept": "application/json" } });
   if (!response.ok) throw new Error("photon_failed");
   const payload = await response.json();
   return Array.isArray(payload?.features) ? payload.features : [];

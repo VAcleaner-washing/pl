@@ -118,6 +118,14 @@ jobs:
         run: npm run test:v4.1.50-full-qa
       - name: Verify v4.1.51 task choice and quiz positioning
         run: npm run test:v4.1.51-quiz-positioning
+      - name: Verify v4.1.52 manual address delivery fallback
+        run: npm run test:v4.1.52-manual-address-fallback
+      - name: Verify v4.1.53 address provider repair
+        run: npm run test:v4.1.53-address-provider-repair
+      - name: Verify v4.1.54 local delivery zone correction
+        run: npm run test:v4.1.54-local-zone-correction
+      - name: Verify v4.1.55 clear advice and readable quiz guide
+        run: npm run test:v4.1.55-clear-advice
       - name: Build clean Pages artifact
         run: npm run build
       - name: Upload Pages artifact

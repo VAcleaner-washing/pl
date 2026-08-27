@@ -55,6 +55,6 @@ for(const rel of [
 }
 
 const stain=read('blog/yak-vyvesty-plyamu-z-dyvana/index.html');
-assert.ok(/натуральн(?:ого|их) фруктов/i.test(stain)&&stain.includes('окиснюваль'),'stain guide must preserve corrected STAIN OX positioning');
+assert.ok(stain.includes('VA STAIN OX')&&stain.includes('червоного вина')&&stain.includes('ягід'),'stain guide must preserve corrected STAIN OX positioning in plain language');
 
 console.log('Growth content, honest proof, booking chemistry clarity and new equipment SEO pages passed.');

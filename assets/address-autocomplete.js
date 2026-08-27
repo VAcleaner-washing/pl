@@ -167,13 +167,13 @@ async function search(ctx){
       if(items.length)break;
       if(data.providerUnavailable)break;
     }
-    if(data?.providerUnavailable){closeList(ctx);setStatus(ctx,'manual','Пошук адрес тимчасово недоступний. Введіть адресу повністю — менеджер перевірить її до передоплати.',false);return}
-    if(!items.length){closeList(ctx);setStatus(ctx,'manual','Не знайшли точний збіг. Перевірте назву вулиці й номер або введіть адресу повністю.',false);return}
+    if(data?.providerUnavailable){closeList(ctx);setStatus(ctx,'manual','Пошук адрес тимчасово недоступний. Полтава — 250 грн, передмістя — 350 грн. Менеджер підтвердить тариф до передоплати.',false);return}
+    if(!items.length){closeList(ctx);setStatus(ctx,'manual','Точного збігу немає. Полтава — 250 грн, передмістя — 350 грн. Менеджер підтвердить тариф до передоплати.',false);return}
     renderList(ctx,items);
     setStatus(ctx,'hint','Оберіть адресу зі списку — так маршрут відкриється точно.');
   }catch(err){
     if(err?.name==='AbortError')return;
-    closeList(ctx);setStatus(ctx,'manual','Введіть адресу вручну.',false);
+    closeList(ctx);setStatus(ctx,'manual','Введіть адресу вручну. Полтава — 250 грн, передмістя — 350 грн. Менеджер підтвердить тариф до передоплати.',false);
   }
 }
 function validate(ctx,show=true){
@@ -185,7 +185,7 @@ function validate(ctx,show=true){
     return false;
   }
   ctx.input.setCustomValidity('');
-  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'manual','Адреса введена вручну.',false);
+  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'manual','Адреса введена вручну. Полтава — 250 грн, передмістя — 350 грн. Менеджер підтвердить тариф до передоплати.',false);
   return true;
 }
 function bindSubmit(ctx){
