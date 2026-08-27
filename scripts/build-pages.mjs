@@ -10,6 +10,9 @@ const excludedDeployPaths=new Set([
   'admin/manifest-classic.webmanifest',
   'admin/manifest-glass-test.webmanifest',
   '_next/static/nys-VNhc_I42iOGWHuZpG',
+  // v4.2.0 compatibility regression sources: production pages use modular assets instead.
+  'assets/public-experience.css',
+  'assets/public-experience.js',
 ]);
 function copy(src,dst,depth=0,relative=''){
  for(const entry of fs.readdirSync(src,{withFileTypes:true})){

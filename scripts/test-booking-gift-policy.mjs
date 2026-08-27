@@ -6,6 +6,7 @@ const chunk=fs.readFileSync(path.join(root,'_next/static/chunks/146ntlcv_t6~w-v4
 const backend=fs.readFileSync(path.join(root,'supabase/functions/vacleaner-booking-v5/index.ts'),'utf8');
 const storyBackend=fs.readFileSync(path.join(root,'supabase/functions/vacleaner-story-bonus-v1/index.ts'),'utf8');
 const admin=fs.readFileSync(path.join(root,'assets/admin-v250.js'),'utf8');
+const publicSlots=fs.readFileSync(path.join(root,'assets/public-booking-slots.js'),'utf8');
 const css=fs.readFileSync(path.join(root,'assets/public-experience.css'),'utf8');
 const e2e=fs.readFileSync(path.join(root,'scripts/e2e_smoke.py'),'utf8');
 const checks=[];
@@ -27,8 +28,8 @@ ok('Finance only applies 2 free packets when chemistry story gift selected',admi
 ok('Gift UI has mobile responsive contract',css.includes('.booking-gift-options')&&css.includes('@media(max-width:620px){.booking-gift'));
 ok('Story 50 ml diffuser has no scent selector and companion stores no scent',!chunk.includes('Аромат дифузора')&&storyBackend.includes('story_mention_bonus_diffuser_50')&&storyBackend.includes('scent: null')); 
 ok('HOME RESET scent choice links directly to VA HOME Entry collection',chunk.includes('booking-home-reset-scents-link')&&chunk.includes('https://vahome.com.ua/catalog?collection=entry'));
-ok('Public booking no longer collects or submits Telegram username',!chunk.includes('placeholder:"@username"')&&!chunk.includes('customerTelegram:')); 
-ok('Admin customer UX no longer asks for, displays, or searches Telegram username',!admin.includes('name="customerTelegram"')&&!admin.includes('Telegram не вказаний')&&!admin.includes('${v.telegram}')); 
+ok('Public React booking stays compact while optional Telegram is supplied by contact companion',!chunk.includes('customerTelegram:')&&publicSlots.includes('vx-telegram-contact')&&publicSlots.includes('customerTelegram')); 
+ok('Admin customer UX supports optional Telegram for post-rental communication',admin.includes('name="customerTelegram"')&&admin.includes('preferredContact')&&admin.includes('Telegram · надіслати')); 
 ok('E2E availability fixture mirrors Puzzi-or-1000 Stories eligibility',e2e.includes('story_gift_eligible = has_puzzi or base_amount >= 1000')&&e2e.includes('"storyGiftEligible": story_gift_eligible'));
 ok('E2E Stories flow uses stable identity for an eligible 1000+ Puzzi bundle',e2e.includes('button[data-product-code=\"puzzi_jimmy\"]')&&!e2e.includes('has_text=\"Глибоке очищення текстилю\"')&&chunk.includes('\"data-product-code\":n.code')&&e2e.includes('Stories reward is visible for an eligible 1000+ UAH rental')&&!e2e.includes("story = page.locator('#booking-extras .booking-chemistry input[type=\"checkbox\"]')"));
 for(const [name,pass] of checks)console.log(`${pass?'PASS':'FAIL'}: ${name}`);

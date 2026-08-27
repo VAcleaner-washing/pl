@@ -3,6 +3,7 @@ const html=fs.readFileSync('bronuvannia/index.html','utf8');
 const js=fs.readFileSync('assets/booking-hardening-v4144.js','utf8');
 const css=fs.readFileSync('assets/booking-hardening-v4144.css','utf8');
 const experience=fs.readFileSync('assets/public-experience.js','utf8');
+const bookingRouteLoader=fs.readFileSync('assets/public-booking-route-loader.js','utf8');
 const release=JSON.parse(fs.readFileSync('release.json','utf8'));
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 must(/\/assets\/booking-hardening-v4144\.js\?v=\d+/.test(html),'booking hardening JS not wired');
@@ -17,7 +18,11 @@ must(js.includes("primary:'puzzi'"),'Puzzi must remain primary for sofa');
 must(js.includes('пилові кліщі та пов’язані алергени'),'Jimmy dust-mite wording missing');
 must(js.includes("total.textContent='Вартість бронювання'"),'exact booking total label missing');
 must(js.includes("toggle.textContent='Є промокод?'"),'promo disclosure missing');
-must(experience.includes('v4.1.44 booking hardening route loader')&&experience.includes(`booking-hardening-v4144.js?v=${release.build}`),'SPA route loader missing');
+must(
+  (experience.includes('v4.1.44 booking hardening route loader')&&experience.includes(`booking-hardening-v4144.js?v=${release.build}`)) ||
+  (bookingRouteLoader.includes("ensureAsset('css','booking-hardening-v4144.css')")&&bookingRouteLoader.includes("ensureAsset('js','booking-hardening-v4144.js')")),
+  'SPA route loader missing'
+);
 must(css.includes('.vx-smart-entry__grid'),'smart entry styles missing');
 must(css.includes('.vx-draft-restored'),'draft restored state missing');
 console.log('v4.1.44 booking hardening + smart entry: OK');

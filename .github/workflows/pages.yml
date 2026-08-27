@@ -138,6 +138,18 @@ jobs:
         run: npm run test:v4.1.62-puzzi-density
       - name: Verify v4.1.63 stability and editorial readability
         run: npm run test:v4.1.63-stability-readability
+      - name: Freeze green v4.1.63 admin, booking core and backend functions
+        run: npm run test:v4.2.0-admin-function-freeze
+      - name: Verify v4.2.0 modular public architecture
+        run: npm run test:v4.2.0-public-architecture
+      - name: Verify v4.2.1 referral business rules and integration
+        run: npm run test:v4.2.1-referral
+      - name: Re-run admin functional contracts before architecture build
+        run: |
+          npm run test:admin-labels
+          npm run test:client-promo-regression
+          npm run test:calendar-live
+          npm run test:booking-gifts
       - name: Build clean Pages artifact
         run: npm run build
       - name: Upload Pages artifact
@@ -173,6 +185,8 @@ jobs:
           python -m py_compile scripts/content_v4148_visual_qa.py
           python -m py_compile scripts/home_mobile_density_qa.py
           python -m py_compile scripts/equipment_mobile_density_qa.py
+          python -m py_compile scripts/v4200_visual_parity_qa.py
+          python -m py_compile scripts/referral_admin_mobile_qa.py
       - name: Cache Playwright browser
         uses: actions/cache@v4
         with:
@@ -182,6 +196,10 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
           python -m playwright install --with-deps chromium
+      - name: v4.2.0 visual parity QA
+        id: v4200_parity
+        continue-on-error: true
+        run: npm run test:v4.2.0-visual-parity
       - name: Analytics visual QA
         id: analytics_visual
         continue-on-error: true
@@ -214,10 +232,30 @@ jobs:
         id: client_card
         continue-on-error: true
         run: npm run test:client-card-mobile
+      - name: Referral admin mobile QA
+        id: referral_mobile
+        continue-on-error: true
+        run: npm run test:referral-admin-mobile
       - name: Installed-PWA visual QA
         id: pwa
         continue-on-error: true
         run: npm run test:pwa
+      - name: Campaign and SMS admin UX QA
+        id: campaign_sms
+        continue-on-error: true
+        run: npm run test:campaign-sms-ux
+      - name: Client completed-stats admin regression
+        id: client_stats
+        continue-on-error: true
+        run: npm run test:client-stats-browser
+      - name: Calendar admin viewport QA
+        id: calendar_focused
+        continue-on-error: true
+        run: npm run test:calendar-focused
+      - name: Admin keyboard and bottom-nav stability QA
+        id: keyboard_nav
+        continue-on-error: true
+        run: npm run test:keyboard-nav-focus
       - name: Liquid Glass primary UX QA
         id: glass
         continue-on-error: true
@@ -255,6 +293,7 @@ jobs:
       - name: Browser QA aggregate gate
         if: always()
         env:
+          V4200_PARITY: ${{ steps.v4200_parity.outcome }}
           ANALYTICS_VISUAL: ${{ steps.analytics_visual.outcome }}
           GROWTH_VISUAL: ${{ steps.growth_visual.outcome }}
           CONTENT_VISUAL: ${{ steps.content_visual.outcome }}
@@ -263,7 +302,12 @@ jobs:
           INNER_HEROES: ${{ steps.inner_heroes.outcome }}
           SMART_GUIDE: ${{ steps.smart_guide.outcome }}
           CLIENT_CARD: ${{ steps.client_card.outcome }}
+          REFERRAL_MOBILE: ${{ steps.referral_mobile.outcome }}
           PWA: ${{ steps.pwa.outcome }}
+          CAMPAIGN_SMS: ${{ steps.campaign_sms.outcome }}
+          CLIENT_STATS: ${{ steps.client_stats.outcome }}
+          CALENDAR_FOCUSED: ${{ steps.calendar_focused.outcome }}
+          KEYBOARD_NAV: ${{ steps.keyboard_nav.outcome }}
           GLASS: ${{ steps.glass.outcome }}
           DENSITY: ${{ steps.density.outcome }}
           DESKTOP_FINAL: ${{ steps.desktop_final.outcome }}
@@ -272,6 +316,7 @@ jobs:
         run: |
           failed=0
           for pair in \
+            "v4200_parity=$V4200_PARITY" \
             "analytics_visual=$ANALYTICS_VISUAL" \
             "growth_visual=$GROWTH_VISUAL" \
             "content_visual=$CONTENT_VISUAL" \
@@ -280,7 +325,12 @@ jobs:
             "inner_heroes=$INNER_HEROES" \
             "smart_guide=$SMART_GUIDE" \
             "client_card=$CLIENT_CARD" \
+            "referral_mobile=$REFERRAL_MOBILE" \
             "pwa=$PWA" \
+            "campaign_sms=$CAMPAIGN_SMS" \
+            "client_stats=$CLIENT_STATS" \
+            "calendar_focused=$CALENDAR_FOCUSED" \
+            "keyboard_nav=$KEYBOARD_NAV" \
             "glass=$GLASS" \
             "density=$DENSITY" \
             "desktop_final=$DESKTOP_FINAL" \

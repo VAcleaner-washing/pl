@@ -15,9 +15,19 @@ const version=String(release.version), build=String(release.build||version.repla
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 for(const file of walk(root).filter(f=>f.endsWith('.html'))){
   let s=fs.readFileSync(file,'utf8');
-  s=s.replace(/(\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|public-quiz|admin-v250|admin-glass-test|address-autocomplete|public-fixes|mobile-home-fix|site-v400|puzzi-seo|booking-trust-v4145|booking-funnel-analytics|seo-v4147|home-smart-guide-v4149|booking-entry-v4149|booking-hardening-v4144)\.(?:js|css))\?v=[^"']+/g,`$1?v=${build}`);
+  s=s.replace(/(\/assets\/(?:vacleaner-core|public-runtime-loader|public-experience-runtime|public-booking-route-loader|public-shared|public-booking|public-guide|public-home|public-catalog|public-booking-slots|public-resilience|public-quiz|site-attribution|admin-v250|admin-glass-test|address-autocomplete|public-fixes|mobile-home-fix|site-v400|puzzi-seo|booking-trust-v4145|booking-funnel-analytics|seo-v4147|home-smart-guide-v4149|booking-entry-v4149|booking-hardening-v4144)\.(?:js|css))\?v=[^"']+/g,`$1?v=${build}`);
   const rel=path.relative(root,file).replaceAll('\\','/');
-  if(!rel.startsWith('admin/')&&!s.includes('/assets/booking-funnel-analytics.js'))s=s.replace('</body>',`<script defer src="/assets/booking-funnel-analytics.js?v=${build}"></script></body>`);
+  if(!rel.startsWith('admin/')){
+    // v4.2.0 production uses route-aware modular runtime; legacy monoliths remain source-only for regression tests.
+    s=s.replace(/<link[^>]+href=["']\/assets\/public-experience\.css(?:\?v=[^"']+)?["'][^>]*>/g,'');
+    s=s.replace(/<script[^>]+src=["']\/assets\/public-experience\.js(?:\?v=[^"']+)?["'][^>]*><\/script>/g,'');
+    s=s.replace(/<script[^>]+src=["']\/assets\/site-attribution\.js\?v=[^"']+["'][^>]*><\/script>/g,'');
+    s=s.replace(/<script[^>]+src=["']\/assets\/booking-funnel-analytics\.js\?v=[^"']+["'][^>]*><\/script>/g,'');
+    if(s.includes('</body>')){
+      const analytics=`<script defer src="/assets/site-attribution.js?v=${build}"></script>${rel==='bronuvannia/index.html'?`<script defer src="/assets/booking-funnel-analytics.js?v=${build}"></script>`:''}`;
+      s=s.replace('</body>',`${analytics}</body>`);
+    }
+  }
   fs.writeFileSync(file,s);
 }
 // Patched Next chunks keep historical filenames in this static export. Version every HTML/RSC
@@ -35,13 +45,7 @@ for(const file of walk(root).filter(f=>f.endsWith('.html')||f.endsWith('.txt')))
   }
   fs.writeFileSync(file,s);
 }
-// Keep dynamic booking hardening loader on the same release version as stamped HTML.
-const publicExperience=path.join(root,'assets','public-experience.js');
-if(fs.existsSync(publicExperience)){
-  let experience=fs.readFileSync(publicExperience,'utf8');
-  experience=experience.replace(/(booking-hardening-v4144\.(?:js|css))\?v=\d+/g,`$1?v=${build}`);
-  fs.writeFileSync(publicExperience,experience);
-}
+// v4.2.0 route loaders inherit the stamped build from their own cache-busted URL; no hard-coded child asset versions remain.
 
 const adminSw=path.join(root,'admin','sw.js');
 let sw=fs.readFileSync(adminSw,'utf8').replace(/vacleaner-manager-\d+/g,`vacleaner-manager-${build}`).replace(/\?v=\d+/g,`?v=${build}`);

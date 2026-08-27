@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
+import { availableReferralReward, claimReferralReward, registerReferralUse, validateFriendReferral } from "./referral.ts";
 import webpush from "npm:web-push@3.6.7";
 import { DEFAULT_CATALOG, DEFAULT_DELIVERY_FEE, DEFAULT_DELIVERY_PRICING, DEFAULT_DEPOSIT_RULES, DEFAULT_SLOTS, rentalDays, isWeekendDeposit, rentalBase, paidDayMoments, slotIndex } from "./config.deploy.js";
 const ADMIN_PRODUCT_LABELS = {
@@ -317,6 +318,8 @@ function promoDiscountAmount(campaign, rawBase) {
 async function validatePromo(db, args) {
     const code = normalizePromoCode(args.code);
     if (!code) return null;
+    const friendReferral = await validateFriendReferral(db, code, args.phone, args.completed);
+    if (friendReferral) return friendReferral;
     const { data: promoCode, error: codeError } = await db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit").ilike("code", code).maybeSingle();
     if (codeError) throw codeError;
     if (!promoCode || !promoCode.active) return {
@@ -682,11 +685,18 @@ Deno.serve(async (req)=>{
             completed,
             lastCompleted
         });
+        const referralReward = phone ? await availableReferralReward(db, phone) : null;
         const loyaltyDiscount = Math.round(rawBase * loyalty.percent / 100), promoDiscount = promo?.valid ? promoDiscountAmount({
             discount_type: promo.discountType,
             discount_value: promo.discountValue
         }, rawBase) : 0;
-        const promoApplied = Boolean(promo?.valid && promoDiscount > loyaltyDiscount), discount = promoApplied ? promoDiscount : loyaltyDiscount, discountSource = promoApplied ? "promo" : loyalty.percent ? "loyalty" : "none";
+        const referralCandidateDiscount = referralReward ? Math.min(Math.max(0, rawBase - loyaltyDiscount), Number(referralReward.amount || 150)) : 0;
+        const loyaltyReferralBundle = loyaltyDiscount + referralCandidateDiscount;
+        const promoApplied = Boolean(promo?.valid && promoDiscount > 0 && (promoDiscount > loyaltyReferralBundle || referralCandidateDiscount > 0 && promoDiscount === loyaltyReferralBundle));
+        const primaryDiscount = promoApplied ? promoDiscount : loyaltyDiscount;
+        const referralRewardDiscount = !promoApplied ? referralCandidateDiscount : 0;
+        const discount = primaryDiscount + referralRewardDiscount;
+        const discountSource = promoApplied ? "promo" : referralRewardDiscount && loyaltyDiscount ? "loyalty_referral" : referralRewardDiscount ? "referral_reward" : loyalty.percent ? "loyalty" : "none";
         const fulfillmentForEstimate = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "";
         const estimateAddress = fulfillmentForEstimate === "delivery" ? cleanText(body.deliveryAddress, 180) : "";
         const delivery = deliveryQuote(fulfillmentForEstimate, estimateAddress, body.deliveryAddressVerified === true, body.deliveryRouteKm ?? body.deliveryDistanceKm, deliveryPricing);
@@ -707,11 +717,18 @@ Deno.serve(async (req)=>{
             prepaymentAmount: 200,
             loyaltyDiscountAmount: loyaltyDiscount,
             promoDiscountAmount: promoDiscount,
+            referralRewardDiscountAmount: referralRewardDiscount,
             discountAmount: discount,
             discountSource,
             promo: promo ? {
                 ...promo,
                 applied: promoApplied
+            } : null,
+            referralReward: referralRewardDiscount && referralReward ? {
+                id: referralReward.id,
+                amount: referralRewardDiscount,
+                expiresAt: referralReward.expires_at,
+                applied: true
             } : null,
             depositAmount: securityDeposit,
             loyalty: {
@@ -806,7 +823,10 @@ Deno.serve(async (req)=>{
                 }
             ] : []
         ];
-        const discountPercent = discountSource === "promo" && promo?.discountType === "percent" ? Number(promo.discountValue || 0) : discountSource === "loyalty" ? loyalty.percent : 0;
+        const discountPercent = discountSource === "promo" && promo?.discountType === "percent" ? Number(promo.discountValue || 0) : [
+            "loyalty",
+            "loyalty_referral"
+        ].includes(discountSource) ? loyalty.percent : 0;
         const extras = {
             items: [
                 ...selected.items,
@@ -850,16 +870,32 @@ Deno.serve(async (req)=>{
             discount: {
                 source: discountSource,
                 percent: discountPercent,
-                amount: discount
+                amount: discount,
+                loyalty_amount: promoApplied ? 0 : loyaltyDiscount,
+                referral_reward_amount: referralRewardDiscount,
+                primary_amount: primaryDiscount
             },
             promo: promo?.valid ? {
                 code: promo.code,
-                campaign_id: promo.campaignId,
+                campaign_id: promo.campaignId || null,
                 campaign_name: promo.campaignName,
                 campaign_type: promo.campaignType,
                 discount_type: promo.discountType,
                 discount_value: promo.discountValue,
+                kind: promo.kind || "campaign",
+                referrer_phone: promo.referrerPhone || null,
                 applied: promoApplied
+            } : null,
+            referral_friend: promoApplied && promo?.kind === "referral_friend" ? {
+                code: promo.code,
+                referrer_phone: promo.referrerPhone,
+                discount_amount: promoDiscount
+            } : null,
+            referral_reward: referralRewardDiscount && referralReward ? {
+                id: referralReward.id,
+                amount: referralRewardDiscount,
+                expires_at: referralReward.expires_at,
+                applied: true
             } : null,
             base_before_discount: rawBase
         };
@@ -881,6 +917,12 @@ Deno.serve(async (req)=>{
             customer_name: customerName,
             customer_phone: phone,
             customer_telegram: cleanText(body.customerTelegram, 80) || null,
+            customer_instagram: cleanText(body.customerInstagram, 80).replace(/^@/, "") || null,
+            preferred_contact: [
+                "phone",
+                "telegram",
+                "instagram"
+            ].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : null,
             customer_comment: cleanText(body.customerComment, 800) || null,
             extras,
             base_amount: baseAmount,
@@ -907,12 +949,19 @@ Deno.serve(async (req)=>{
             throw resourceError;
         }
         const now = new Date().toISOString();
-        const telegram = cleanText(body.customerTelegram, 80);
+        const telegram = cleanText(body.customerTelegram, 80), instagram = cleanText(body.customerInstagram, 80).replace(/^@/, "");
+        const preferredContact = [
+            "phone",
+            "telegram",
+            "instagram"
+        ].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : "phone";
         const profilePatch = {
             name: customerName,
+            preferred_contact: preferredContact,
             updated_at: now
         };
         if (telegram) profilePatch.telegram = telegram;
+        if (instagram) profilePatch.instagram = instagram;
         if (fulfillment === "delivery" && address) profilePatch.address = address;
         const { data: existingCustomer, error: customerReadError } = await db.from("vacleaner_customers").select("phone").eq("phone", phone).maybeSingle();
         if (customerReadError) {
@@ -923,6 +972,8 @@ Deno.serve(async (req)=>{
             phone,
             ...profilePatch,
             telegram: telegram || null,
+            instagram: instagram || null,
+            preferred_contact: preferredContact,
             address: fulfillment === "delivery" ? address || null : null,
             created_at: now
         });
@@ -930,6 +981,38 @@ Deno.serve(async (req)=>{
         if (customerError) {
             await db.from("vacleaner_bookings").delete().eq("id", booking.id);
             throw customerError;
+        }
+        if (promoApplied && promo?.kind === "referral_friend") {
+            try {
+                await registerReferralUse(db, {
+                    code: promo.code,
+                    referrerPhone: promo.referrerPhone,
+                    referredPhone: phone,
+                    bookingId: booking.id
+                });
+            } catch (referralError) {
+                await db.from("vacleaner_booking_resources").delete().eq("booking_id", booking.id);
+                await db.from("vacleaner_bookings").delete().eq("id", booking.id);
+                return json({
+                    error: referralError instanceof Error ? referralError.message : "referral_unavailable",
+                    promo: {
+                        ...promo,
+                        valid: false,
+                        reason: "referral_already_used"
+                    }
+                }, 409);
+            }
+        }
+        if (referralRewardDiscount && referralReward?.id) {
+            try {
+                await claimReferralReward(db, referralReward.id, booking.id);
+            } catch  {
+                await db.from("vacleaner_booking_resources").delete().eq("booking_id", booking.id);
+                await db.from("vacleaner_bookings").delete().eq("id", booking.id);
+                return json({
+                    error: "referral_reward_unavailable"
+                }, 409);
+            }
         }
         if (promoApplied && promo?.promoCodeId && promo?.campaignId) {
             const { error: promoError } = await db.rpc("vacleaner_redeem_promo", {

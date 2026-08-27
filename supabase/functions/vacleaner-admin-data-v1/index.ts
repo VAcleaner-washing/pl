@@ -55,7 +55,7 @@ Deno.serve(async request=>{
       const {data,error}=await db.from("vacleaner_expenses").update({archived_at:now,archived_by:userData.user.id,updated_at:now,updated_by:userData.user.id}).eq("id",expenseId).is("archived_at",null).select("id").maybeSingle();if(error)throw error;if(!data)return json({error:"expense_not_found"},404);return json({ok:true});
     }
     if(action==="clients"){
-      const {data,error}=await db.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000);
+      const {data,error}=await db.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000);
       if(error)throw error;return json({customers:data??[]});
     }
     if(action==="health"){
@@ -135,9 +135,9 @@ Deno.serve(async request=>{
       const {data:existing,error:existingError}=await db.from("vacleaner_customers").select("*").eq("phone",originalPhone).maybeSingle();if(existingError)throw existingError;
       if(customerPhone!==originalPhone){const {data:conflict,error}=await db.from("vacleaner_customers").select("phone").eq("phone",customerPhone).maybeSingle();if(error)throw error;if(conflict)return json({error:"customer_phone_exists"},409)}
       const now=new Date().toISOString(),documentNumber=cleanText(body.documentNumber,80),requestedType=cleanText(body.documentType,40),documentType=documentNumber&&["Паспорт","ID-картка","Водійське посвідчення"].includes(requestedType)?requestedType:documentNumber?"Паспорт":null,verified=Boolean(documentNumber&&body.identityVerified===true);
-      const row:Record<string,unknown>={phone:customerPhone,name:customerName,telegram:cleanText(body.customerTelegram,80)||null,address:cleanText(body.customerAddress,220)||null,document_type:documentType,document_number:documentNumber||null,document_verified_at:verified?(existing?.document_verified_at||now):null,document_updated_at:documentNumber!==String(existing?.document_number||"")?now:(existing?.document_updated_at||(documentNumber?now:null)),updated_at:now};
+      const row:Record<string,unknown>={phone:customerPhone,name:customerName,telegram:cleanText(body.customerTelegram,80)||null,instagram:cleanText(body.customerInstagram,80).replace(/^@/,"")||null,preferred_contact:["phone","telegram","instagram"].includes(String(body.preferredContact||""))?String(body.preferredContact):(existing?.preferred_contact||"phone"),address:cleanText(body.customerAddress,220)||null,document_type:documentType,document_number:documentNumber||null,document_verified_at:verified?(existing?.document_verified_at||now):null,document_updated_at:documentNumber!==String(existing?.document_number||"")?now:(existing?.document_updated_at||(documentNumber?now:null)),updated_at:now};
       if(existing){const {error}=await db.from("vacleaner_customers").update(row).eq("phone",originalPhone);if(error)throw error}else{const {error}=await db.from("vacleaner_customers").upsert({...row,created_at:now},{onConflict:"phone"});if(error)throw error}
-      const {error:bookingError}=await db.from("vacleaner_bookings").update({customer_name:customerName,customer_phone:customerPhone,customer_telegram:row.telegram,updated_at:now}).eq("customer_phone",originalPhone);if(bookingError)throw bookingError;
+      const {error:bookingError}=await db.from("vacleaner_bookings").update({customer_name:customerName,customer_phone:customerPhone,customer_telegram:row.telegram,customer_instagram:row.instagram,preferred_contact:row.preferred_contact,updated_at:now}).eq("customer_phone",originalPhone);if(bookingError)throw bookingError;
       return json({customer:{...row}});
     }
     return json({error:"invalid_action"},400);

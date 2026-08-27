@@ -14,6 +14,7 @@ import {
 } from "./config.ts";
 import { productUsesPuzzi, settlementConfirmation, settlementFromBooking } from "./settlement.mjs";
 import { discountInfo } from "./pricing.mjs";
+import { availableReferralReward, claimReferralReward, completeReferralForBooking, ensureReferralCode, expireReferralRewards, registerReferralUse, releaseClaimedReferralReward, releaseReferralForCancelledBooking, validateFriendReferral } from "./referral.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -343,6 +344,8 @@ async function upsertCustomer(supabase: ReturnType<typeof createClient>, body: R
     phone,
     name: cleanText(body.customerName ?? fallback.customer_name, 120),
     telegram: cleanText(body.customerTelegram ?? fallback.customer_telegram, 80) || null,
+    instagram: cleanText(body.customerInstagram ?? fallback.customer_instagram, 80).replace(/^@/, "") || null,
+    preferred_contact: ["phone", "telegram", "instagram"].includes(String(body.preferredContact ?? fallback.preferred_contact ?? "")) ? String(body.preferredContact ?? fallback.preferred_contact) : "phone",
     updated_at: new Date().toISOString(),
   };
   const address = cleanText(body.customerAddress ?? body.deliveryAddress, 220); if (address) customer.address = address;
@@ -355,6 +358,28 @@ async function upsertCustomer(supabase: ReturnType<typeof createClient>, body: R
   }
   const { error } = await supabase.from("vacleaner_customers").upsert(customer, { onConflict: "phone" });
   if (error) throw error;
+}
+
+async function referralSummaryForPhone(supabase: ReturnType<typeof createClient>, phoneValue: unknown) {
+  const phone = normalizePhone(phoneValue); if (!phone) return null;
+  await expireReferralRewards(supabase);
+  const [{ count: completed, error: completedError }, { data: profile, error: profileError }, { data: rewards, error: rewardsError }, { data: uses, error: usesError }] = await Promise.all([
+    supabase.from("vacleaner_bookings").select("id", { count: "exact", head: true }).eq("customer_phone", phone).eq("status", "completed"),
+    supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel").eq("phone", phone).maybeSingle(),
+    supabase.from("vacleaner_referral_rewards").select("id,amount,status,activated_at,expires_at,used_at,used_booking_id,reminded_at,referred_phone").eq("referrer_phone", phone).order("expires_at", { ascending: true }).limit(200),
+    supabase.from("vacleaner_referral_uses").select("id,status,created_at,completed_at,referred_phone,booking_id,friend_discount_amount").eq("referrer_phone", phone).order("created_at", { ascending: false }).limit(200),
+  ]);
+  if (completedError || profileError || rewardsError || usesError) throw completedError || profileError || rewardsError || usesError;
+  const code = Number(completed || 0) > 0 ? await ensureReferralCode(supabase, phone) : null;
+  const activeRewards = (rewards || []).filter((row: any) => row.status === "active" && new Date(row.expires_at).getTime() > Date.now());
+  return {
+    phone, code: code?.code || null, completedOrders: Number(completed || 0),
+    profile: profile || null,
+    referrals: uses || [], completedReferrals: (uses || []).filter((row: any) => row.status === "completed").length,
+    rewards: rewards || [], activeRewards, activeRewardCount: activeRewards.length,
+    activeRewardAmount: activeRewards.reduce((sum: number, row: any) => sum + Number(row.amount || 0), 0),
+    nextExpiry: activeRewards[0]?.expires_at || null,
+  };
 }
 
 Deno.serve(async (request: Request) => {
@@ -411,7 +436,7 @@ Deno.serve(async (request: Request) => {
 
     if (action === "clients") {
       const { data, error } = await supabase.from("vacleaner_customers")
-        .select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at")
+        .select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at")
         .order("updated_at", { ascending: false }).limit(1000);
       if (error) throw error;
       return json({ customers: data || [] });
@@ -434,6 +459,8 @@ Deno.serve(async (request: Request) => {
         phone: customerPhone,
         name: customerName,
         telegram: cleanText(body.customerTelegram, 80) || null,
+        instagram: cleanText(body.customerInstagram, 80).replace(/^@/, "") || null,
+        preferred_contact: ["phone", "telegram", "instagram"].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : (existing?.preferred_contact || "phone"),
         address: cleanText(body.customerAddress, 220) || null,
         document_type: documentType,
         document_number: documentNumber || null,
@@ -446,17 +473,17 @@ Deno.serve(async (request: Request) => {
       } else {
         const { error } = await supabase.from("vacleaner_customers").upsert({ ...row, created_at: now }, { onConflict: "phone" }); if (error) throw error;
       }
-      const bookingPatch = { customer_name: customerName, customer_phone: customerPhone, customer_telegram: row.telegram, updated_at: now };
+      const bookingPatch = { customer_name: customerName, customer_phone: customerPhone, customer_telegram: row.telegram, customer_instagram: row.instagram, preferred_contact: row.preferred_contact, updated_at: now };
       const { error: bookingsError } = await supabase.from("vacleaner_bookings").update(bookingPatch).eq("customer_phone", originalPhone);
       if (bookingsError) throw bookingsError;
-      return json({ customer: { phone: customerPhone, name: customerName, telegram: row.telegram, address: row.address, document_type: row.document_type, document_number: row.document_number, document_verified_at: row.document_verified_at, updated_at: now } });
+      return json({ customer: { phone: customerPhone, name: customerName, telegram: row.telegram, instagram: row.instagram, preferred_contact: row.preferred_contact, address: row.address, document_type: row.document_type, document_number: row.document_number, document_verified_at: row.document_verified_at, updated_at: now } });
     }
 
     if (action === "lookup_customer") {
       const phone = normalizePhone(body.phone); if (!phone) return json({ customer: null });
       const [{ data: profile }, { data: orders, error }] = await Promise.all([
-        supabase.from("vacleaner_customers").select("phone,name,telegram,address,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
-        supabase.from("vacleaner_bookings").select("id,customer_name,customer_telegram,fulfillment,fulfillment_address,product_label,start_date,return_date,status,hold_expires_at,total_amount,created_at").eq("customer_phone", phone).order("created_at", { ascending: false }).limit(100),
+        supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
+        supabase.from("vacleaner_bookings").select("id,customer_name,customer_telegram,customer_instagram,preferred_contact,fulfillment,fulfillment_address,product_label,start_date,return_date,status,hold_expires_at,total_amount,created_at").eq("customer_phone", phone).order("created_at", { ascending: false }).limit(100),
       ]);
       if (error) throw error;
       let promoRawBase = 0;
@@ -469,13 +496,49 @@ Deno.serve(async (request: Request) => {
       const completed = (orders || []).filter((row: any) => row.status === "completed"), latest = orders?.[0], latestDelivery = (orders || []).find((row: any) => row.fulfillment === "delivery" && row.fulfillment_address);
       const completedOrders = completed.length, loyalty = completedOrders >= 6 ? { level: "VIP", percent: 10 } : completedOrders >= 3 ? { level: "Regular", percent: 5 } : { level: "Start", percent: 0 };
       const hasDocument = Boolean(profile?.document_number), isRepeatCustomer = completedOrders > 0;
+      const referral = await referralSummaryForPhone(supabase, phone);
       return json({ customer: {
-        phone, name: profile?.name || latest?.customer_name || "", telegram: profile?.telegram || latest?.customer_telegram || "", address: profile?.address || latestDelivery?.fulfillment_address || "",
+        phone, name: profile?.name || latest?.customer_name || "", telegram: profile?.telegram || latest?.customer_telegram || "", instagram: profile?.instagram || latest?.customer_instagram || "", preferredContact: profile?.preferred_contact || latest?.preferred_contact || "phone", address: profile?.address || latestDelivery?.fulfillment_address || "",
         documentType: profile?.document_type || "", documentNumber: profile?.document_number || "", documentVerifiedAt: profile?.document_verified_at || null,
         documentPhotoName: profile?.document_photo_name || "", documentPhotoMime: profile?.document_photo_mime || "", documentPhotoUploadedAt: profile?.document_photo_uploaded_at || null, hasDocumentPhoto: Boolean(profile?.document_photo_path),
         hasDocument, isRepeatCustomer, documentsRequired: !hasDocument && !isRepeatCustomer, completedOrders, totalOrders: (orders || []).filter((row: any) => !["cancelled", "declined"].includes(row.status)).length,
-        totalSpent: completed.reduce((sum: number, row: any) => sum + Number(row.total_amount || 0), 0), lastDate: latest?.start_date || "", lastProduct: latest?.product_label || "", loyalty, promo,
+        totalSpent: completed.reduce((sum: number, row: any) => sum + Number(row.total_amount || 0), 0), lastDate: latest?.start_date || "", lastProduct: latest?.product_label || "", loyalty, promo, referral,
       }});
+    }
+
+    if (action === "referral_summary") {
+      const summary = await referralSummaryForPhone(supabase, body.phone);
+      return json({ referral: summary });
+    }
+
+    if (action === "referrals_expiring") {
+      await expireReferralRewards(supabase);
+      const now = new Date(), until = new Date(now.getTime() + 30 * 86400000).toISOString();
+      const { data: rewards, error: rewardError } = await supabase.from("vacleaner_referral_rewards").select("id,referrer_phone,referred_phone,amount,activated_at,expires_at,reminded_at").eq("status", "active").is("reminded_at", null).gt("expires_at", now.toISOString()).lte("expires_at", until).order("expires_at", { ascending: true }).limit(200);
+      if (rewardError) throw rewardError;
+      const phones = [...new Set((rewards || []).map((row: any) => normalizePhone(row.referrer_phone)).filter(Boolean))];
+      let customerMap = new Map<string, any>();
+      if (phones.length) {
+        const { data: customers, error: customerError } = await supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact").in("phone", phones);
+        if (customerError) throw customerError;
+        customerMap = new Map((customers || []).map((row: any) => [normalizePhone(row.phone), row]));
+      }
+      return json({ rewards: (rewards || []).map((row: any) => ({ ...row, customer: customerMap.get(normalizePhone(row.referrer_phone)) || null })) });
+    }
+
+    if (action === "referral_mark_sent") {
+      const phone = normalizePhone(body.phone), channel = ["telegram", "instagram"].includes(String(body.channel || "")) ? String(body.channel) : "";
+      if (!phone || !channel) return json({ error: "invalid_referral_contact" }, 400);
+      const now = new Date().toISOString(), rewardId = String(body.rewardId || "");
+      const customerPatch: Record<string, any> = { preferred_contact: channel, updated_at: now };
+      if (!validBookingId(rewardId)) { customerPatch.referral_sent_at = now; customerPatch.referral_sent_channel = channel; }
+      const { error: customerError } = await supabase.from("vacleaner_customers").update(customerPatch).eq("phone", phone);
+      if (customerError) throw customerError;
+      if (validBookingId(rewardId)) { /* UUID validator is sufficient for reward ids too */
+        const { error: rewardError } = await supabase.from("vacleaner_referral_rewards").update({ reminded_at: now, updated_at: now }).eq("id", rewardId).eq("referrer_phone", phone).eq("status", "active");
+        if (rewardError) throw rewardError;
+      }
+      return json({ ok: true, sentAt: now, channel });
     }
 
     if (action === "detach_promo") {
@@ -539,9 +602,18 @@ Deno.serve(async (request: Request) => {
       const rawBase = rentalBase(product, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow), existing = action === "edit" ? (await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single()).data : null;
       if (action === "edit" && !existing) return json({ error: "invalid_booking" }, 404);
       const currentExtras = existing?.extras && typeof existing.extras === "object" ? existing.extras : {};
-      const autoPromo = action === "create" ? await resolvePhonePromo(supabase, { phone: customerPhone, productCode, startDate: period.startDate, returnDate: period.returnDate, pickupWindow: period.pickupWindow, returnWindow: period.returnWindow, rawBase, includeBlocked: false }) : null;
+      let enteredReferral: any = null;
+      if (action === "create" && cleanText(body.referralCode, 32)) {
+        const { count: completedCount, error: completedError } = await supabase.from("vacleaner_bookings").select("id", { count: "exact", head: true }).eq("customer_phone", customerPhone).eq("status", "completed");
+        if (completedError) throw completedError;
+        enteredReferral = await validateFriendReferral(supabase, body.referralCode, customerPhone, completedCount || 0);
+        if (!enteredReferral?.valid) return json({ error: enteredReferral?.reason || "invalid_referral", referral: enteredReferral }, 409);
+      }
+      const autoPromo = action === "create" ? (enteredReferral || await resolvePhonePromo(supabase, { phone: customerPhone, productCode, startDate: period.startDate, returnDate: period.returnDate, pickupWindow: period.pickupWindow, returnWindow: period.returnWindow, rawBase, includeBlocked: false })) : null;
+      const rewardCandidate = action === "create" && !enteredReferral ? await availableReferralReward(supabase, customerPhone) : null;
       const promoPricingExtras = autoPromo ? { ...currentExtras, promo: promoExtraFromCandidate(autoPromo, true) } : currentExtras;
-      const discount = discountInfo(body, rawBase, promoPricingExtras), promoApplied = Boolean(autoPromo && discount.source === "promo"), selected = normalizeSelectedExtras(body.selectedExtras, productCode, catalog);
+      const pricingBody = rewardCandidate ? { ...body, referralRewardAmount: Number(rewardCandidate.amount || 150) } : body;
+      const discount = discountInfo(pricingBody, rawBase, promoPricingExtras), promoApplied = Boolean(autoPromo && discount.primarySource === "promo"), selected = normalizeSelectedExtras(body.selectedExtras, productCode, catalog);
       const depositSnapshotLocked = Boolean(existing && (currentExtras?.processing?.confirmation_sent === true || ["waiting_payment", "confirmed", "issued", "completed"].includes(String(existing.status || ""))));
       const calculatedDeposit = calculateDeposit(productCode, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow, depositRules, catalog);
       const depositAmount = depositSnapshotLocked ? Math.max(0, Number(existing?.deposit_amount || calculatedDeposit) || 0) : calculatedDeposit;
@@ -556,16 +628,18 @@ Deno.serve(async (request: Request) => {
       const selectedItems = selected.items;
       const selectedAmount = selected.amount;
       const extras = { ...currentExtras, pickup_time: period.pickupTime, return_time: period.returnTime, slot_config: slots, ...(processing ? { processing } : {}),
-        discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, reason: discount.source === "manual" ? discount.manualReason : "" },
+        discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, primary_source: discount.primarySource, loyalty_amount: discount.loyaltyAmount, referral_reward_amount: discount.referralRewardAmount, reason: discount.primarySource === "manual" ? discount.manualReason : "" },
         manual_discount: discount.manualType === "none" ? null : { type: discount.manualType, value: discount.manualValue, amount: discount.manualAmount, reason: discount.manualReason },
         loyalty: { level: String(body.loyaltyLevel || currentExtras?.loyalty?.level || (discount.loyaltyPercent === 10 ? "VIP" : discount.loyaltyPercent === 5 ? "Regular" : "Start")), percent: discount.loyaltyPercent, completed_orders: cleanInt(body.completedOrders ?? currentExtras?.loyalty?.completed_orders, 10000) },
-        promo: promoApplied ? promoExtraFromCandidate(autoPromo, true) : (currentExtras?.promo || null),
+        promo: promoApplied ? { ...promoExtraFromCandidate(autoPromo, true), kind: autoPromo?.kind || "campaign", referrer_phone: autoPromo?.referrerPhone || null } : (currentExtras?.promo || null),
+        referral_friend: enteredReferral?.valid ? { code: enteredReferral.code, referrer_phone: enteredReferral.referrerPhone, discount_amount: 100 } : (currentExtras?.referral_friend || null),
+        referral_reward: discount.referralRewardAmount > 0 && rewardCandidate ? { id: rewardCandidate.id, amount: discount.referralRewardAmount, expires_at: rewardCandidate.expires_at, applied: true } : (currentExtras?.referral_reward || null),
         delivery: fulfillment === "delivery" ? { zone: requestedDeliveryOverride !== null ? "manual" : preserveExistingDelivery ? (currentExtras?.delivery?.zone || "snapshot") : autoDelivery.zone, quote_required: requestedDeliveryOverride !== null ? false : preserveExistingDelivery ? Boolean(currentExtras?.delivery?.quote_required) : autoDelivery.quoteRequired, verified: body.deliveryAddressVerified === true, settlement: autoDelivery.settlement, amount: deliveryAmount, pricing_distance_km: autoDelivery.distanceKm, extra_km: autoDelivery.extraKm, route_km: Number.isFinite(Number(body.deliveryRouteKm)) ? Number(body.deliveryRouteKm) : null, distance_source: cleanText(body.deliveryDistanceSource, 24) || null } : { zone: "pickup", quote_required: false, amount: 0 },
         base_before_discount: rawBase, selected_items: selectedItems, selected_items_amount: selectedAmount };
       const common: Record<string, any> = {
         product_code: productCode, product_label: product.label || productCode, start_date: period.startDate, return_date: period.returnDate,
         start_at: `${period.startDate}T${period.pickupTime}:00.000Z`, end_at: `${period.returnDate}T${period.returnTime}:00.000Z`, pickup_window: period.pickupWindow, return_window: period.returnWindow, rental_days: period.days,
-        fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: customerPhone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_comment: cleanText(body.customerComment, 800) || null,
+        fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: customerPhone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_instagram: cleanText(body.customerInstagram, 80).replace(/^@/, "") || null, preferred_contact: ["phone", "telegram", "instagram"].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : "phone", customer_comment: cleanText(body.customerComment, 800) || null,
         source: cleanText(body.source, 30) || "instagram", extras, base_amount: discount.baseAmount, extras_amount: selectedAmount, delivery_amount: deliveryAmount, total_amount: discount.baseAmount + selectedAmount + deliveryAmount,
         prepayment_amount: 200, prepayment_paid: prepaymentPaid, deposit_amount: depositAmount, admin_note: cleanAdminNote(body.adminNote, 800) || null, updated_at: new Date().toISOString(),
       };
@@ -590,6 +664,17 @@ Deno.serve(async (request: Request) => {
         const { data, error } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single(); if (error || !data) throw error || new Error("update_failed"); saved = data;
       }
       await upsertCustomer(supabase, body, saved);
+      if (action === "create" && enteredReferral?.valid) {
+        try { await registerReferralUse(supabase, { code: enteredReferral.code, referrerPhone: enteredReferral.referrerPhone, referredPhone: customerPhone, bookingId: saved.id }); }
+        catch (referralError) {
+          await supabase.from("vacleaner_booking_resources").delete().eq("booking_id", saved.id); await supabase.from("vacleaner_bookings").delete().eq("id", saved.id);
+          return json({ error: referralError instanceof Error ? referralError.message : "referral_unavailable" }, 409);
+        }
+      }
+      if (action === "create" && discount.referralRewardAmount > 0 && rewardCandidate?.id) {
+        try { await claimReferralReward(supabase, rewardCandidate.id, saved.id); }
+        catch { await supabase.from("vacleaner_booking_resources").delete().eq("booking_id", saved.id); await supabase.from("vacleaner_bookings").delete().eq("id", saved.id); return json({ error: "referral_reward_unavailable" }, 409); }
+      }
       if (action === "create" && promoApplied && autoPromo?.promoCodeId && autoPromo?.campaignId) {
         const { error: promoError } = await supabase.rpc("vacleaner_redeem_promo", { p_promo_code_id: autoPromo.promoCodeId, p_campaign_id: autoPromo.campaignId, p_booking_id: saved.id, p_customer_phone: customerPhone, p_discount_amount: discount.amount, p_base_before_discount: rawBase });
         if (promoError) {
@@ -638,6 +723,8 @@ Deno.serve(async (request: Request) => {
       if (nextStatus === "completed") patch.completed_at = current.completed_at || now;
       const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single(); if (updateError) throw updateError;
       await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt);
+      if (["cancelled", "declined"].includes(nextStatus)) await releaseReferralForCancelledBooking(supabase, bookingId);
+      if (nextStatus === "completed") await completeReferralForBooking(supabase, data);
       if (nextStatus === "issued" || nextStatus === "completed") await notifyPeerAdmin(request, supabaseUrl, bookingId, nextStatus, body);
       return json({ booking: safeBooking(data) });
     }
@@ -653,8 +740,11 @@ Deno.serve(async (request: Request) => {
         const { opened: _opened, ...rest } = item || {};
         return { ...rest, payment_mode: "upfront" };
       }) : [];
-      const discount = discountInfo(body, rawBase, currentExtras), discountedExtras = { ...currentExtras, selected_items: selectedItems,
-        discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, reason: discount.source === "manual" ? discount.manualReason : "" },
+      const discount = discountInfo(body, rawBase, currentExtras);
+      if (currentExtras?.referral_reward?.id && discount.referralRewardAmount <= 0) await releaseClaimedReferralReward(supabase, bookingId);
+      const discountedExtras = { ...currentExtras, selected_items: selectedItems,
+        referral_reward: discount.referralRewardAmount > 0 ? currentExtras?.referral_reward : null,
+        discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, primary_source: discount.primarySource, loyalty_amount: discount.loyaltyAmount, referral_reward_amount: discount.referralRewardAmount, reason: discount.primarySource === "manual" ? discount.manualReason : "" },
         manual_discount: discount.manualType === "none" ? null : { type: discount.manualType, value: discount.manualValue, amount: discount.manualAmount, reason: discount.manualReason },
         base_before_discount: rawBase };
       const calculationInput = { ...current, base_amount: discount.baseAmount, deposit_amount: depositAmount, deposit_paid: depositPaid, extras: { ...discountedExtras, chemistry: { used_packets: usedPackets, story_mention: storyMention } } };
@@ -674,6 +764,7 @@ Deno.serve(async (request: Request) => {
       const extras = { ...currentExtras, settlement: { ...(currentExtras.settlement || {}), model: "prepayment_plus_deposit", prepayment_amount: finance.prepaymentAmount, deposit_amount: finance.depositPaid ? finance.securityDeposit : 0, received_amount: finance.receivedAmount, expenses_amount: finance.totalAmount, refund_amount: finance.refundAmount, due_amount: finance.dueAmount, refund_paid: finance.refundAmount > 0 ? confirmation.refundPaid : false, due_paid: finance.dueAmount > 0 ? confirmation.duePaid : false, completed: true, completed_at: now, calculated_at: now } };
       const { data, error } = await supabase.from("vacleaner_bookings").update({ extras, extras_amount: finance.totalExtras, total_amount: finance.totalAmount, deposit_returned: true, deposit_returned_at: now, return_payment_amount: finance.dueAmount, return_payment_paid: finance.dueAmount > 0 ? confirmation.duePaid : false, return_payment_paid_at: finance.dueAmount > 0 && confirmation.duePaid ? now : null, status: "completed", completed_at: current.completed_at || now, hold_expires_at: null, updated_at: now }).eq("id", bookingId).select("*").single(); if (error) throw error;
       await tagAudit(supabase, bookingId, userData.user.id, "edge:save_deposit_return", actionStartedAt);
+      await completeReferralForBooking(supabase, data);
       if (current.status !== "completed") await notifyPeerAdmin(request, supabaseUrl, bookingId, "completed", body);
       return json({ booking: data, finance });
     }

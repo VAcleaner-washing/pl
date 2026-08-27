@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.63",
+  "version": "4.2.1",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -85,6 +85,13 @@
     "test:home-mobile-density": "python scripts/home_mobile_density_qa.py --root dist --artifacts home-density-test-results",
     "test:v4.1.62-puzzi-density": "node scripts/test-v4-1-62-puzzi-mobile-density.mjs",
     "test:equipment-mobile-density": "python scripts/equipment_mobile_density_qa.py --root dist --artifacts equipment-density-test-results",
-    "test:v4.1.63-stability-readability": "node scripts/test-v4-1-63-stability-readability.mjs"
+    "test:v4.1.63-stability-readability": "node scripts/test-v4-1-63-stability-readability.mjs",
+    "test:v4.2.0-admin-function-freeze": "node scripts/test-v4-2-0-admin-function-freeze.mjs",
+    "test:calendar-focused": "python scripts/calendar_focused_qa.py",
+    "test:keyboard-nav-focus": "python scripts/keyboard_nav_focus_qa.py",
+    "test:v4.2.0-public-architecture": "node scripts/test-v4-2-0-public-architecture.mjs",
+    "test:v4.2.0-visual-parity": "python scripts/v4200_visual_parity_qa.py",
+    "test:v4.2.1-referral": "node scripts/test-v4-2-1-referral-program.mjs",
+    "test:referral-admin-mobile": "python scripts/referral_admin_mobile_qa.py"
   }
 }

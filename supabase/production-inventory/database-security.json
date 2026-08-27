@@ -1,42 +1,55 @@
 {
-  "capturedAt": "2026-08-07T13:49:33Z",
+  "capturedAt": "2026-08-27T15:45:00Z",
   "postgresVersion": "17.6",
   "tables": [
+    "vacleaner_address_cache",
     "vacleaner_admin_users",
     "vacleaner_booking_audit",
     "vacleaner_booking_resources",
     "vacleaner_bookings",
     "vacleaner_campaigns",
     "vacleaner_customers",
+    "vacleaner_expenses",
     "vacleaner_inventory",
     "vacleaner_promo_codes",
     "vacleaner_promo_redemptions",
     "vacleaner_push_config",
     "vacleaner_push_subscriptions",
-    "vacleaner_settings"
+    "vacleaner_referral_codes",
+    "vacleaner_referral_rewards",
+    "vacleaner_referral_uses",
+    "vacleaner_settings",
+    "vacleaner_sms_dispatch_recipients",
+    "vacleaner_sms_dispatches"
   ],
   "rlsEnabledOnAllTables": true,
   "directGrants": {
-    "anon": 0,
-    "authenticated": 0,
-    "serviceRoleOnly": true
+    "anonPrivilegeRows": 7,
+    "authenticatedPrivilegeRows": 7,
+    "tables": [
+      "vacleaner_address_cache"
+    ],
+    "safety": "Address cache retains default Supabase table grants, but RLS is enabled with no allow policy, so direct anon/authenticated access remains denied. All referral tables explicitly revoke anon/authenticated grants."
   },
   "allowlist": {
     "activeTable": "admin_users",
     "legacyMirror": "vacleaner_admin_users",
-    "sameUserIdsAtCapture": true,
-    "decision": "Keep both; do not destructively drop production access tables in the shared Supabase project."
+    "decision": "Keep both; shared Supabase project."
   },
   "productionFunctions": [
-    "vacleaner_apply_reservation(uuid,date,date,text,text,timestamptz,timestamptz,integer,jsonb,text,timestamptz)",
-    "vacleaner_confirm_booking(uuid)",
+    "vacleaner_admin_attach_booking_promo(p_booking_id uuid, p_promo_code_id uuid, p_campaign_id uuid, p_customer_phone text, p_discount_amount integer, p_base_before_discount integer, p_extras jsonb, p_base_amount integer, p_total_amount integer)",
+    "vacleaner_admin_detach_booking_promo(p_booking_id uuid, p_extras jsonb, p_base_amount integer, p_total_amount integer)",
+    "vacleaner_apply_reservation(p_booking_id uuid, p_start_date date, p_return_date date, p_pickup_window text, p_return_window text, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_rental_days integer, p_resources jsonb, p_target_status text, p_hold_expires_at timestamp with time zone)",
+    "vacleaner_confirm_booking(p_booking_id uuid)",
     "vacleaner_log_booking_change()",
     "vacleaner_operational_health()",
     "vacleaner_preserve_best_promo_discount()",
-    "vacleaner_redeem_promo(uuid,uuid,uuid,text,integer,integer)",
-    "vacleaner_slot_index(date,text)"
+    "vacleaner_redeem_promo(p_promo_code_id uuid, p_campaign_id uuid, p_booking_id uuid, p_customer_phone text, p_discount_amount integer, p_base_before_discount integer)",
+    "vacleaner_slot_index(p_date date, p_window text)"
   ],
   "securityDefinerFunctions": [
+    "vacleaner_admin_attach_booking_promo",
+    "vacleaner_admin_detach_booking_promo",
     "vacleaner_apply_reservation",
     "vacleaner_confirm_booking",
     "vacleaner_log_booking_change",
@@ -51,17 +64,20 @@
     "vacleaner_booking_audit_trigger",
     "vacleaner_preserve_best_promo_discount_trg"
   ],
-  "unrelatedSharedProjectWarningsNotChanged": [
-    "public.is_admin() is SECURITY DEFINER and executable by authenticated",
-    "public.claim_customer_orders() is SECURITY DEFINER and executable by authenticated",
-    "pg_net extension is installed in public schema"
-  ],
-  "explicitRestrictivePolicies": 12,
-  "policyModel": "One explicit ALL deny policy for anon/authenticated on every vacleaner_* table; service_role access only.",
-  "catalogVerification": {
-    "carpDetaLabel": "Плямовивідник Carp-Deta 30 мл",
-    "carpDetaPrice": 100,
-    "verifiedAt": "2026-08-06T19:41:47Z"
+  "clientDenyPolicies": {
+    "total": 18,
+    "restrictive": 12,
+    "model": "Every current vacleaner_* table is RLS-enabled. Referral tables use explicit restrictive ALL-deny policies; address cache has no browser allow policy and therefore defaults to deny."
+  },
+  "referralVerification": {
+    "codes": 294,
+    "uses": 0,
+    "rewards": 0,
+    "friendDiscount": 100,
+    "earnedReward": 150,
+    "rewardLifetimeDays": 150,
+    "expiryReminderDays": 30,
+    "verifiedAt": "2026-08-27T15:45:00Z"
   },
   "retentionVerification": {
     "sleepingDays": 180,
@@ -72,14 +88,6 @@
     ],
     "redemptionAuthority": "vacleaner_redeem_promo",
     "editGuard": "vacleaner_preserve_best_promo_discount_trg",
-    "loyaltyPromoRule": "Apply only the larger rental-base discount; if equal, loyalty wins and promo is not consumed."
-  },
-  "performanceAdvisor": {
-    "vacleanerWarnings": 0,
-    "informationalUnusedIndexes": [
-      "vacleaner_push_subscriptions_user_idx",
-      "vacleaner_customers_updated_idx"
-    ],
-    "decision": "Keep both indexes; they support expected operational queries and dataset growth."
+    "loyaltyPromoRule": "Ordinary promo/manual does not stack with loyalty or earned referral. Earned referral may stack with permanent loyalty. Compare complete benefit; on an exact tie with an earned referral, preserve the referral for a future rental."
   }
 }

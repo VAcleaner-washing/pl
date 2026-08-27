@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
+import { availableReferralReward, claimReferralReward, registerReferralUse, validateFriendReferral } from "./referral.ts";
 import webpush from "npm:web-push@3.6.7";
 import {
   DEFAULT_CATALOG,
@@ -174,6 +175,8 @@ function promoDiscountAmount(campaign: any, rawBase: number) {
 async function validatePromo(db: any, args: { code: string; phone: string; productCode: string; startDate: string; returnDate: string; pickupWindow: string; returnWindow: string; completed: number; lastCompleted: string | null }) {
   const code = normalizePromoCode(args.code);
   if (!code) return null;
+  const friendReferral = await validateFriendReferral(db, code, args.phone, args.completed);
+  if (friendReferral) return friendReferral;
   const { data: promoCode, error: codeError } = await db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit").ilike("code", code).maybeSingle();
   if (codeError) throw codeError;
   if (!promoCode || !promoCode.active) return { valid: false, code, reason: "invalid_code" };
@@ -345,14 +348,23 @@ Deno.serve(async (req: Request) => {
     const storyDiffuserScent = normalizeGiftScent(body.storyDiffuserScent);
     const homeResetDiffuserScent = normalizeGiftScent(body.homeResetDiffuserScent);
     const promo = await validatePromo(db, { code: String(body.promoCode || ""), phone, productCode, startDate, returnDate, pickupWindow, returnWindow, completed, lastCompleted });
+    const referralReward = phone ? await availableReferralReward(db, phone) : null;
     const loyaltyDiscount = Math.round(rawBase * loyalty.percent / 100), promoDiscount = promo?.valid ? promoDiscountAmount({ discount_type: promo.discountType, discount_value: promo.discountValue }, rawBase) : 0;
-    const promoApplied = Boolean(promo?.valid && promoDiscount > loyaltyDiscount), discount = promoApplied ? promoDiscount : loyaltyDiscount, discountSource = promoApplied ? "promo" : loyalty.percent ? "loyalty" : "none";
+    const referralCandidateDiscount = referralReward ? Math.min(Math.max(0, rawBase - loyaltyDiscount), Number(referralReward.amount || 150)) : 0;
+    const loyaltyReferralBundle = loyaltyDiscount + referralCandidateDiscount;
+    // A normal promo cannot stack with an earned referral reward. Compare the complete
+    // benefit and preserve the earned reward on ties instead of consuming it needlessly.
+    const promoApplied = Boolean(promo?.valid && promoDiscount > 0 && (promoDiscount > loyaltyReferralBundle || (referralCandidateDiscount > 0 && promoDiscount === loyaltyReferralBundle)));
+    const primaryDiscount = promoApplied ? promoDiscount : loyaltyDiscount;
+    const referralRewardDiscount = !promoApplied ? referralCandidateDiscount : 0;
+    const discount = primaryDiscount + referralRewardDiscount;
+    const discountSource = promoApplied ? "promo" : referralRewardDiscount && loyaltyDiscount ? "loyalty_referral" : referralRewardDiscount ? "referral_reward" : loyalty.percent ? "loyalty" : "none";
     const fulfillmentForEstimate = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "";
     const estimateAddress = fulfillmentForEstimate === "delivery" ? cleanText(body.deliveryAddress, 180) : "";
     const delivery = deliveryQuote(fulfillmentForEstimate, estimateAddress, body.deliveryAddressVerified === true, body.deliveryRouteKm ?? body.deliveryDistanceKm, deliveryPricing);
     const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = delivery.amount, totalAmount = baseAmount + selected.amount + deliveryAmount;
     const securityDeposit = depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow, rules, catalog);
-    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, deliveryZone: delivery.zone, deliveryDistanceKm: delivery.distanceKm, deliveryExtraKm: delivery.extraKm, deliveryQuoteRequired: delivery.quoteRequired, deliveryQuotePending: delivery.pending, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite" };
+    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, deliveryZone: delivery.zone, deliveryDistanceKm: delivery.distanceKm, deliveryExtraKm: delivery.extraKm, deliveryQuoteRequired: delivery.quoteRequired, deliveryQuotePending: delivery.pending, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, referralRewardDiscountAmount: referralRewardDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, referralReward: referralRewardDiscount && referralReward ? { id: referralReward.id, amount: referralRewardDiscount, expiresAt: referralReward.expires_at, applied: true } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite" };
     if (body.action === "availability" || body.action === "promo_lookup") return json({ ...av, estimate });
     if (body.action !== "create") return json({ error: "invalid_action" }, 400);
     if (storyMention && hasPuzzi && productCode !== "elite" && !storyGiftChoice) return json({ error: "gift_choice_required", estimate }, 400);
@@ -383,14 +395,14 @@ Deno.serve(async (req: Request) => {
       ...(storyMention && storyGiftChoice === "diffuser50" ? [{ code: "story_mention_bonus_diffuser_50", label: `Сторіс-бонус · аромадифузор VA HOME 50 мл · ${storyDiffuserScent.label}`, quantity: 1, unitPrice: 0, amount: 0 }] : []),
       ...(productCode === "elite" ? [{ code: "home_reset_diffuser_gift", label: `HOME RESET · аромадифузор VA HOME Entry · ${homeResetDiffuserScent.label}`, quantity: 1, unitPrice: 0, amount: 0 }] : []),
     ];
-    const discountPercent = discountSource === "promo" && promo?.discountType === "percent" ? Number(promo.discountValue || 0) : discountSource === "loyalty" ? loyalty.percent : 0;
-    const extras = { items: [...selected.items, ...chemistry, ...giftItems], delivery: { zone: finalDelivery.zone, quote_required: finalDelivery.quoteRequired, verified: body.deliveryAddressVerified === true, settlement: finalDelivery.settlement, amount: finalDeliveryAmount, pricing_distance_km: finalDelivery.distanceKm, extra_km: finalDelivery.extraKm, route_km: finalRouteKm, distance_source: finalDistanceSource || null }, selected_items: selected.items.map(item => ({ code: item.code, label: item.label, price: item.unitPrice * item.quantity, payment_mode: "upfront" })), selected_items_amount: selected.amount, gifts: { story: storyMention ? { mention: true, eligible: true, choice: storyGiftChoice, scent: storyGiftChoice === "diffuser50" ? storyDiffuserScent : null } : null, home_reset: productCode === "elite" ? { included: true, scent: homeResetDiffuserScent } : null }, loyalty: { ...loyalty, completed_orders: completed }, discount: { source: discountSource, percent: discountPercent, amount: discount }, promo: promo?.valid ? { code: promo.code, campaign_id: promo.campaignId, campaign_name: promo.campaignName, campaign_type: promo.campaignType, discount_type: promo.discountType, discount_value: promo.discountValue, applied: promoApplied } : null, base_before_discount: rawBase };
+    const discountPercent = discountSource === "promo" && promo?.discountType === "percent" ? Number(promo.discountValue || 0) : ["loyalty", "loyalty_referral"].includes(discountSource) ? loyalty.percent : 0;
+    const extras = { items: [...selected.items, ...chemistry, ...giftItems], delivery: { zone: finalDelivery.zone, quote_required: finalDelivery.quoteRequired, verified: body.deliveryAddressVerified === true, settlement: finalDelivery.settlement, amount: finalDeliveryAmount, pricing_distance_km: finalDelivery.distanceKm, extra_km: finalDelivery.extraKm, route_km: finalRouteKm, distance_source: finalDistanceSource || null }, selected_items: selected.items.map(item => ({ code: item.code, label: item.label, price: item.unitPrice * item.quantity, payment_mode: "upfront" })), selected_items_amount: selected.amount, gifts: { story: storyMention ? { mention: true, eligible: true, choice: storyGiftChoice, scent: storyGiftChoice === "diffuser50" ? storyDiffuserScent : null } : null, home_reset: productCode === "elite" ? { included: true, scent: homeResetDiffuserScent } : null }, loyalty: { ...loyalty, completed_orders: completed }, discount: { source: discountSource, percent: discountPercent, amount: discount, loyalty_amount: promoApplied ? 0 : loyaltyDiscount, referral_reward_amount: referralRewardDiscount, primary_amount: primaryDiscount }, promo: promo?.valid ? { code: promo.code, campaign_id: promo.campaignId || null, campaign_name: promo.campaignName, campaign_type: promo.campaignType, discount_type: promo.discountType, discount_value: promo.discountValue, kind: promo.kind || "campaign", referrer_phone: promo.referrerPhone || null, applied: promoApplied } : null, referral_friend: promoApplied && promo?.kind === "referral_friend" ? { code: promo.code, referrer_phone: promo.referrerPhone, discount_amount: promoDiscount } : null, referral_reward: referralRewardDiscount && referralReward ? { id: referralReward.id, amount: referralRewardDiscount, expires_at: referralReward.expires_at, applied: true } : null, base_before_discount: rawBase };
     const suffix = crypto.randomUUID().replaceAll("-", "").slice(0, 5).toUpperCase(), bookingCode = `VAC-${startDate.replaceAll("-", "").slice(2)}-${suffix}`;
     const pickupTime = pickupWindow === "morning" ? slots.morningStart : slots.eveningStart, returnTime = returnWindow === "morning" ? slots.morningEnd : slots.eveningEnd;
     const { data: booking, error } = await db.from("vacleaner_bookings").insert({
       booking_code: bookingCode, product_code: productCode, product_label: product.label || productCode, start_date: startDate, return_date: returnDate,
       start_at: `${startDate}T${pickupTime}:00.000Z`, end_at: `${returnDate}T${returnTime}:00.000Z`, pickup_window: pickupWindow, return_window: returnWindow, rental_days: days,
-      fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: phone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_comment: cleanText(body.customerComment, 800) || null,
+      fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: phone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_instagram: cleanText(body.customerInstagram, 80).replace(/^@/, "") || null, preferred_contact: ["phone", "telegram", "instagram"].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : null, customer_comment: cleanText(body.customerComment, 800) || null,
       extras, base_amount: baseAmount, extras_amount: selected.amount, delivery_amount: finalDeliveryAmount, total_amount: finalTotalAmount, prepayment_amount: 200, prepayment_paid: false,
       deposit_amount: securityDeposit, deposit_paid: false, deposit_returned: false, status: "pending", source: "vacleaner_website",
     }).select("*").single();
@@ -402,9 +414,11 @@ Deno.serve(async (req: Request) => {
     // Keep the clients registry complete for public bookings without overwriting verified documents
     // or a previously saved delivery address with null values.
     const now = new Date().toISOString();
-    const telegram = cleanText(body.customerTelegram, 80);
-    const profilePatch: Record<string, unknown> = { name: customerName, updated_at: now };
+    const telegram = cleanText(body.customerTelegram, 80), instagram = cleanText(body.customerInstagram, 80).replace(/^@/, "");
+    const preferredContact = ["phone", "telegram", "instagram"].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : "phone";
+    const profilePatch: Record<string, unknown> = { name: customerName, preferred_contact: preferredContact, updated_at: now };
     if (telegram) profilePatch.telegram = telegram;
+    if (instagram) profilePatch.instagram = instagram;
     if (fulfillment === "delivery" && address) profilePatch.address = address;
     const { data: existingCustomer, error: customerReadError } = await db.from("vacleaner_customers").select("phone").eq("phone", phone).maybeSingle();
     if (customerReadError) {
@@ -413,11 +427,29 @@ Deno.serve(async (req: Request) => {
     }
     const customerWrite = existingCustomer
       ? db.from("vacleaner_customers").update(profilePatch).eq("phone", phone)
-      : db.from("vacleaner_customers").insert({ phone, ...profilePatch, telegram: telegram || null, address: fulfillment === "delivery" ? (address || null) : null, created_at: now });
+      : db.from("vacleaner_customers").insert({ phone, ...profilePatch, telegram: telegram || null, instagram: instagram || null, preferred_contact: preferredContact, address: fulfillment === "delivery" ? (address || null) : null, created_at: now });
     const { error: customerError } = await customerWrite;
     if (customerError) {
       await db.from("vacleaner_bookings").delete().eq("id", booking.id);
       throw customerError;
+    }
+    if (promoApplied && promo?.kind === "referral_friend") {
+      try {
+        await registerReferralUse(db, { code: promo.code, referrerPhone: promo.referrerPhone, referredPhone: phone, bookingId: booking.id });
+      } catch (referralError) {
+        await db.from("vacleaner_booking_resources").delete().eq("booking_id", booking.id);
+        await db.from("vacleaner_bookings").delete().eq("id", booking.id);
+        return json({ error: referralError instanceof Error ? referralError.message : "referral_unavailable", promo: { ...promo, valid: false, reason: "referral_already_used" } }, 409);
+      }
+    }
+    if (referralRewardDiscount && referralReward?.id) {
+      try {
+        await claimReferralReward(db, referralReward.id, booking.id);
+      } catch {
+        await db.from("vacleaner_booking_resources").delete().eq("booking_id", booking.id);
+        await db.from("vacleaner_bookings").delete().eq("id", booking.id);
+        return json({ error: "referral_reward_unavailable" }, 409);
+      }
     }
     if (promoApplied && promo?.promoCodeId && promo?.campaignId) {
       const { error: promoError } = await db.rpc("vacleaner_redeem_promo", { p_promo_code_id: promo.promoCodeId, p_campaign_id: promo.campaignId, p_booking_id: booking.id, p_customer_phone: phone, p_discount_amount: discount, p_base_before_discount: rawBase });

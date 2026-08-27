@@ -303,6 +303,34 @@ async function checkLoyalty(input){
   }
 }
 
+function renderContactChannels(){
+  const grid=document.querySelector('#booking-contact .booking-contact-grid');
+  if(!grid)return;
+  let labels=[...grid.querySelectorAll(':scope > label')];
+  let telegramLabel=labels.find(label=>/^Telegram/i.test(String(label.textContent||'').trim()));
+  if(!telegramLabel){
+    telegramLabel=document.createElement('label');telegramLabel.className='vx-telegram-contact';telegramLabel.innerHTML='Telegram <small>необов’язково</small><input data-vac-contact="telegram" maxlength="80" placeholder="@username або номер" type="text" autocomplete="off">';
+    (labels[1]||labels[0])?.insertAdjacentElement('afterend',telegramLabel);
+    labels=[...grid.querySelectorAll(':scope > label')];
+  }else{const input=telegramLabel.querySelector('input');if(input)input.dataset.vacContact='telegram'}
+  if(!grid.querySelector('.vx-instagram-contact')){
+    const label=document.createElement('label');label.className='vx-instagram-contact';label.innerHTML='Instagram <small>необов’язково</small><input data-vac-contact="instagram" maxlength="80" placeholder="@username" type="text" autocomplete="off">';
+    telegramLabel.insertAdjacentElement('afterend',label);
+  }
+  if(!grid.querySelector('.vx-preferred-contact')){
+    const label=document.createElement('label');label.className='vx-preferred-contact';label.innerHTML='Зручний канал зв’язку <small>необов’язково</small><select data-vac-contact="preferred"><option value="phone">Телефон</option><option value="telegram">Telegram</option><option value="instagram">Instagram</option></select>';
+    grid.querySelector('.vx-instagram-contact')?.insertAdjacentElement('afterend',label);
+  }
+  window.__VAC_BOOKING_CONTACT__=()=>{
+    const telegram=String(grid.querySelector('[data-vac-contact="telegram"]')?.value||'').trim();
+    const instagram=String(grid.querySelector('[data-vac-contact="instagram"]')?.value||'').trim().replace(/^@/,'');
+    let preferred=String(grid.querySelector('[data-vac-contact="preferred"]')?.value||'phone');
+    if(preferred==='telegram'&&!telegram)preferred=instagram?'instagram':'phone';
+    if(preferred==='instagram'&&!instagram)preferred=telegram?'telegram':'phone';
+    return{telegram,instagram,preferredContact:preferred};
+  };
+}
+
 function renderLoyaltyHint(){
   const heading=document.querySelector('#booking-contact .booking-step-heading');
   if(!heading||heading.parentElement.querySelector('.vx-loyalty-hint'))return;
@@ -329,6 +357,7 @@ let refreshAttempts=0;
 function refreshBindings(){
   apply();
   renderLoyaltyHint();
+  renderContactChannels();
   bindLoyalty();
   renderDeposit();
   renderPickupLocationNote();
@@ -359,6 +388,12 @@ document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObser
       if(String(url).startsWith(BOOKING_API)&&typeof init?.body==='string'){
         const body=JSON.parse(init.body),action=String(body?.action||'');
         if(['availability','promo_lookup','create'].includes(action)){
+          if(action==='create'){
+            const contact=window.__VAC_BOOKING_CONTACT__?.()||{};
+            if(contact.telegram)body.customerTelegram=contact.telegram;
+            if(contact.instagram)body.customerInstagram=contact.instagram;
+            body.preferredContact=contact.preferredContact||'phone';
+          }
           const mode=document.querySelector('#booking-extras .booking-choice-row button.is-selected,#booking-extras .booking-choice-row button[aria-pressed="true"]')?.textContent||'';
           if(/Доставка/.test(mode)){
             const meta=window.__VAC_DELIVERY_META__?.()||{};

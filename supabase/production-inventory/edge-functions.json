@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-10T23:06:00Z",
+  "capturedAt": "2026-08-27T15:45:00Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -8,12 +8,17 @@
     "push": "vacleaner-push",
     "adminData": "vacleaner-admin-data-v1",
     "campaignLifecycle": "vacleaner-campaigns-v1",
-    "reminders": "vacleaner-reminders-v1"
+    "reminders": "vacleaner-reminders-v1",
+    "bookingPromo": "vacleaner-booking-promo-v1",
+    "address": "vacleaner-address-v1"
   },
   "dependencyGraph": {
     "vacleaner-booking-v5": [],
     "vacleaner-admin-bookings-v3": [
       "vacleaner-push"
+    ],
+    "vacleaner-admin-bookings-v4": [
+      "vacleaner-admin-bookings-v3"
     ],
     "vacleaner-admin-bookings-v2": [
       "vacleaner-admin-bookings"
@@ -22,107 +27,131 @@
   "functions": [
     {
       "slug": "vacleaner-booking",
-      "version": 6,
+      "version": 8,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "66c6d9c806248d8b95b51231e40e693378e5d3630d908e101ef6e6d190005fdf",
+      "sha256": "93b2950368ee3b64a66feb4625152c937dec919060ee44bb851c938409552563",
       "role": "legacy public base"
     },
     {
       "slug": "vacleaner-admin-bookings",
-      "version": 3,
+      "version": 5,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "fbc91e93c650f1a5ae9d8b2f6d45f37e1bc01e68a565367ecff871c37ef0557f",
+      "sha256": "fa15354e5bd0ef3a190359dfd49928cbbc9b0642a3b7024ef8dba2657b128e7b",
       "role": "legacy admin base"
     },
     {
       "slug": "vacleaner-push",
-      "version": 3,
-      "verifyJwt": true,
-      "status": "ACTIVE",
-      "sha256": "e2ace4d7f36370ac97dc190f6d28adeb876ce7a3104becb01429a3a6235611f1",
-      "role": "active push service; stable device/admin identity + peer-only booking event delivery"
-    },
-    {
-      "slug": "vacleaner-admin-bookings-v2",
       "version": 7,
       "verifyJwt": true,
       "status": "ACTIVE",
-      "sha256": "c8a7c7e1ebeb95c092e62a2856cd5ed5829050b657a7cb057f0496a90b3b871a",
-      "role": "legacy admin dependency retained pending production-usage proof"
+      "sha256": "c2d77e4826e6eb2ce69cd6af62b2b706747faa3a0addfd981e0f8718c1b1eaf0",
+      "role": "active push service"
+    },
+    {
+      "slug": "vacleaner-admin-bookings-v2",
+      "version": 9,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "ecb88a489af223bcfe43695b5dd6ba217a032452c2fdf088c360095cc3e08edd",
+      "role": "legacy admin dependency retained"
     },
     {
       "slug": "vacleaner-settings",
-      "version": 5,
+      "version": 19,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "2326cd5a06905ebcebf372f5fdacda5236288c708cc6e3cd37456d45b0f188ac",
+      "sha256": "612daa2f9dd01c8b2cb660bbabc400dc863b97f68c919fe9fffd7d9552b3e146",
       "role": "active shared settings"
     },
     {
       "slug": "vacleaner-booking-v2",
-      "version": 1,
+      "version": 3,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "78935f4246f2b0dd91d4b1008b17b7cba9f8b8f9b17db393da88eaabd8fc020e",
+      "sha256": "ca956ec1d97c9ea7976c01bf2cf4ec132fc6c9d31cbe0041541340d5b7f7dece",
       "role": "legacy"
     },
     {
       "slug": "vacleaner-booking-v3",
-      "version": 1,
+      "version": 3,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "965a36ba27f4b28718945b19bde7f671923f6fc1d22348c581825cc55e3cd1ca",
+      "sha256": "fe2e948b1967cc97519616e63f4c2431d849d0a4cd7fb3e90dfe58441623de39",
       "role": "legacy"
     },
     {
       "slug": "vacleaner-booking-v4",
-      "version": 1,
-      "verifyJwt": false,
-      "status": "ACTIVE",
-      "sha256": "455cb4a2d311f04cad965d88c6e62d58bba62b82b42321fa92aca79ba24d9621",
-      "role": "legacy public function; retained pending production-usage proof"
-    },
-    {
-      "slug": "vacleaner-admin-bookings-v3",
-      "version": 16,
-      "verifyJwt": true,
-      "status": "ACTIVE",
-      "sha256": "b0dfde21c596b565daa81f50d628bdad2077575c62ef5a555f502531891f2d13",
-      "role": "active authoritative admin business entrypoint; peer-admin push on create, issue and return"
-    },
-    {
-      "slug": "vacleaner-booking-v5",
-      "version": 9,
-      "verifyJwt": false,
-      "status": "ACTIVE",
-      "sha256": "802a1e2716060230b115196c511f6bb543ef40d7423033a57a8008552c5130a3",
-      "role": "active public entrypoint; v9 safe restore, availability/create + loyalty/promo + client sync + legacy push suppressed by PWA"
-    },
-    {
-      "slug": "vacleaner-admin-data-v1",
-      "version": 5,
-      "verifyJwt": true,
-      "status": "ACTIVE",
-      "sha256": "35eeb6f90557eea742f91fb75ae063657ad3f61107c361d36e00120d2bb9f3fb",
-      "role": "active non-financial admin clients + production health + retention campaign management + customer document metadata"
-    },
-    {
-      "slug": "vacleaner-campaigns-v1",
-      "version": 1,
-      "verifyJwt": true,
-      "status": "ACTIVE",
-      "sha256": "d27c1145f030c55e380b08ca8a64ed70c75520712c8ae3d631cb68d27878f88c",
-      "role": "active authenticated campaign archive/delete lifecycle service"
-    },
-    {
-      "slug": "vacleaner-reminders-v1",
       "version": 3,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "069eb697b1276d013aa2039759acaeb339c73c6966c2a08c320b1dbaff4f49c8",
-      "role": "active custom-auth server reminder runner for premium new-booking, pickup and return push notifications"
+      "sha256": "33ef1d6ee46644748ffc1842456b20b2fde4c7d33ac3f86ca887a799c553af4a",
+      "role": "legacy public function retained"
+    },
+    {
+      "slug": "vacleaner-admin-bookings-v3",
+      "version": 30,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "ee0b230fe1613f7e5c5225505eb3752b180a64fc041ec75bd4f021bd15282faa",
+      "role": "active authoritative admin business entrypoint; v4.2.1 referral lifecycle and loyalty stacking"
+    },
+    {
+      "slug": "vacleaner-booking-v5",
+      "version": 24,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "3da10c7dce305a435875c6cfd0bb34238feb273f2f2d665bb19c37b81bae0770",
+      "role": "active public entrypoint; v4.2.1 referral validation, friend discount and earned reward pricing"
+    },
+    {
+      "slug": "vacleaner-admin-data-v1",
+      "version": 15,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "1fec02bfc952b1186096fdc072df56b541413be4bdbb5ba3ce3042bd8f0dc54d",
+      "role": "active admin clients, analytics and referral summary data"
+    },
+    {
+      "slug": "vacleaner-campaigns-v1",
+      "version": 18,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "07dd4bd133382b5d53fa53c1dbf201fecb644b7bf521aaf63dbcf2d60a199420",
+      "role": "active authenticated campaign lifecycle service"
+    },
+    {
+      "slug": "vacleaner-reminders-v1",
+      "version": 8,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "0a9e9d53d124d92e48125b603b2e8851a9b1f2705b611b794316e967df4ac90a",
+      "role": "active custom-auth server reminder runner"
+    },
+    {
+      "slug": "vacleaner-booking-promo-v1",
+      "version": 2,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "8dd59926d307bacd6702edd857c98d12a66abaa5175174a8c410e6f4998476d6",
+      "role": "active authenticated booking promo editor"
+    },
+    {
+      "slug": "vacleaner-address-v1",
+      "version": 10,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "443dfa5f0b41623670f0d54374a45da1446befc3f68f56b57ada423b87d1fe15",
+      "role": "active public address provider with server-side cache"
+    },
+    {
+      "slug": "vacleaner-admin-bookings-v4",
+      "version": 2,
+      "verifyJwt": true,
+      "status": "ACTIVE",
+      "sha256": "99224644a3b9383c1ba90114a966e94dd420f0366db8f9b8829bc324a2e2a999",
+      "role": "authenticated compatibility proxy to v3"
     }
   ]
 }

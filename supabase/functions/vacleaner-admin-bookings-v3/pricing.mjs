@@ -47,16 +47,27 @@ export function discountInfo(body={},rawBase=0,existingExtras={}){
   const manual=manualRequest(body,existingExtras);
   const manualAmount=manual.type==='fixed'?Math.min(base,Math.round(manual.value)):manual.type==='percent'?Math.min(base,Math.round(base*Math.min(100,manual.value)/100)):0;
 
-  let source=loyaltyAmount>0?'loyalty':'none',type=loyaltyAmount>0?'percent':'none',percent=loyaltyPercent,amount=loyaltyAmount;
-  if(promoAmount>amount){source='promo';type=promoType;percent=promoType==='percent'?promoValue:0;amount=promoAmount}
-  if(manualAmount>amount){source='manual';type=manual.type;percent=manual.type==='percent'?manual.value:0;amount=manualAmount}
+  const storedReward=Math.max(0,Math.round(Number(existingExtras?.referral_reward?.amount||0)));
+  const requestedReward=own(body,'referralRewardAmount')?Math.max(0,Math.round(Number(body.referralRewardAmount)||0)):storedReward;
+  const loyaltyReferralAmount=Math.min(150,requestedReward,Math.max(0,base-loyaltyAmount));
+  const loyaltyBundleAmount=loyaltyAmount+loyaltyReferralAmount;
+
+  // Compare complete benefits, not just the primary discount. A promo/manual discount
+  // must beat loyalty + the earned referral reward before it can displace that reward.
+  // On an exact tie we preserve the referral reward for a future rental.
+  let source=loyaltyAmount>0?'loyalty':'none',type=loyaltyAmount>0?'percent':'none',percent=loyaltyPercent,primaryAmount=loyaltyAmount,referralRewardAmount=loyaltyReferralAmount,amount=loyaltyBundleAmount;
+  if(promoAmount>0&&(promoAmount>amount||(referralRewardAmount>0&&promoAmount===amount))){source='promo';type=promoType;percent=promoType==='percent'?promoValue:0;primaryAmount=promoAmount;referralRewardAmount=0;amount=promoAmount}
+  if(manualAmount>0&&(manualAmount>amount||(referralRewardAmount>0&&manualAmount===amount))){source='manual';type=manual.type;percent=manual.type==='percent'?manual.value:0;primaryAmount=manualAmount;referralRewardAmount=0;amount=manualAmount}
+  const finalSource=referralRewardAmount?(loyaltyAmount>0?'loyalty_referral':'referral_reward'):source;
 
   return{
     type,
     percent,
     amount,
+    primaryAmount,
     baseAmount:Math.max(0,base-amount),
-    source,
+    source:finalSource,
+    primarySource:source,
     loyaltyPercent,
     manualType:manual.type,
     manualValue:manual.value,
@@ -65,5 +76,6 @@ export function discountInfo(body={},rawBase=0,existingExtras={}){
     manualApplied:source==='manual',
     promoAmount,
     loyaltyAmount,
+    referralRewardAmount,
   };
 }
