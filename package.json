@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.1.61",
+  "version": "4.1.62",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -82,6 +82,8 @@
     "test:v4.1.57-analytics-truth": "node scripts/test-v4-1-57-analytics-truth-stability.mjs",
     "test:v4.1.58-delivery-zones": "node scripts/test-v4-1-58-delivery-zones-fuel.mjs",
     "test:v4.1.61-mobile-density": "node scripts/test-v4-1-61-mobile-home-density.mjs",
-    "test:home-mobile-density": "python scripts/home_mobile_density_qa.py --root dist --artifacts home-density-test-results"
+    "test:home-mobile-density": "python scripts/home_mobile_density_qa.py --root dist --artifacts home-density-test-results",
+    "test:v4.1.62-puzzi-density": "node scripts/test-v4-1-62-puzzi-mobile-density.mjs",
+    "test:equipment-mobile-density": "python scripts/equipment_mobile_density_qa.py --root dist --artifacts equipment-density-test-results"
   }
 }

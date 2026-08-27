@@ -134,6 +134,8 @@ jobs:
         run: npm run test:v4.1.58-delivery-zones
       - name: Verify v4.1.61 mobile homepage density contract
         run: npm run test:v4.1.61-mobile-density
+      - name: Verify v4.1.62 Puzzi mobile density contract
+        run: npm run test:v4.1.62-puzzi-density
       - name: Build clean Pages artifact
         run: npm run build
       - name: Upload Pages artifact
@@ -168,6 +170,7 @@ jobs:
           python -m py_compile scripts/growth_visual_qa.py
           python -m py_compile scripts/content_v4148_visual_qa.py
           python -m py_compile scripts/home_mobile_density_qa.py
+          python -m py_compile scripts/equipment_mobile_density_qa.py
       - name: Cache Playwright browser
         uses: actions/cache@v4
         with:
@@ -229,6 +232,10 @@ jobs:
         id: home_density
         continue-on-error: true
         run: npm run test:home-mobile-density
+      - name: Equipment mobile density QA
+        id: equipment_density
+        continue-on-error: true
+        run: npm run test:equipment-mobile-density
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -240,6 +247,7 @@ jobs:
             density-test-results
             final-desktop-test-results
             home-density-test-results
+            equipment-density-test-results
           if-no-files-found: ignore
           retention-days: 14
       - name: Browser QA aggregate gate
@@ -258,6 +266,7 @@ jobs:
           DENSITY: ${{ steps.density.outcome }}
           DESKTOP_FINAL: ${{ steps.desktop_final.outcome }}
           HOME_DENSITY: ${{ steps.home_density.outcome }}
+          EQUIPMENT_DENSITY: ${{ steps.equipment_density.outcome }}
         run: |
           failed=0
           for pair in \
@@ -273,7 +282,8 @@ jobs:
             "glass=$GLASS" \
             "density=$DENSITY" \
             "desktop_final=$DESKTOP_FINAL" \
-            "home_density=$HOME_DENSITY"; do
+            "home_density=$HOME_DENSITY" \
+            "equipment_density=$EQUIPMENT_DENSITY"; do
             name="${pair%%=*}"; status="${pair#*=}"
             printf '%-24s %s\n' "$name" "$status"
             if [ "$status" != "success" ]; then failed=1; fi

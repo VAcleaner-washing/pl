@@ -194,3 +194,70 @@
 .puzzi-kit>*{min-width:0}
 /* v4.1.07 — keep the shared product hero glow decorative, not outside mobile geometry. */
 @media(max-width:620px){.puzzi-glow{width:min(360px,90vw);height:min(360px,90vw)}}
+
+/* v4.1.62 — mobile density pass for the long-form Puzzi landing page. */
+@media(max-width:620px){
+  .puzzi-hero{padding:92px 18px 34px}
+  .puzzi-breadcrumb{margin-bottom:18px}
+  .puzzi-lead{margin-top:20px;line-height:1.58}
+  .puzzi-price{margin-top:24px}
+  .puzzi-micro{margin-top:10px}
+  .puzzi-hero .hero-actions{margin-top:22px}
+  .puzzi-hero-visual{min-height:340px}
+  .puzzi-facts article{min-height:86px;padding:14px 15px}
+  .puzzi-facts strong{margin-top:4px;font-size:18px}
+  .puzzi-facts p{margin-top:1px}
+
+  .puzzi-light,.puzzi-cleaning-process,.puzzi-terms,.puzzi-proof,.puzzi-how{padding:58px 18px 64px}
+  .puzzi-heading{margin-bottom:26px;gap:18px}
+  .puzzi-heading h2,.puzzi-kit h2,.puzzi-how h2,.puzzi-faq h2{font-size:clamp(38px,11.5vw,49px)}
+  .puzzi-heading>p{line-height:1.6}
+
+  .puzzi-zone-grid{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(278px,82vw);gap:10px;border:0;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain;scrollbar-width:none;padding:0 1px 4px}
+  .puzzi-zone-grid::-webkit-scrollbar{display:none}
+  .puzzi-zone-grid article{min-height:218px;padding:22px;border:1px solid #15171922;scroll-snap-align:start}
+  .puzzi-zone-grid article:nth-child(-n+2){border-bottom:1px solid #15171922}
+  .puzzi-zone-grid h3{margin:24px 0 10px;font-size:22px}
+  .puzzi-zone-grid p{line-height:1.58}
+  .puzzi-zone-grid a{padding-top:14px}
+
+  .puzzi-kit,.puzzi-faq{padding:60px 18px;gap:34px}
+  .puzzi-kit-intro>p:not(.eyebrow){margin:18px 0;line-height:1.6}
+  .puzzi-kit-list article{padding:22px 0;grid-template-columns:30px 1fr;gap:10px}
+  .puzzi-kit-list h3{font-size:21px}
+  .puzzi-kit-list p{line-height:1.58}
+
+  .puzzi-cleaning-steps{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(286px,84vw);gap:10px;border:0;background:transparent;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain;scrollbar-width:none;padding:0 1px 4px}
+  .puzzi-cleaning-steps::-webkit-scrollbar{display:none}
+  .puzzi-cleaning-steps article,.puzzi-cleaning-steps article:nth-child(2n),.puzzi-cleaning-steps article:last-child{min-height:218px;padding:22px;border:1px solid #17191b24;background:#f5f0e8;scroll-snap-align:start}
+  .puzzi-cleaning-steps h3{margin:24px 0 10px;font-size:21px}
+  .puzzi-cleaning-steps p{line-height:1.58}
+  .puzzi-cleaning-note{margin-top:12px;padding:15px 16px;line-height:1.5}
+
+  .puzzi-term-grid{gap:9px}
+  .puzzi-term-grid article{min-height:184px;padding:22px}
+  .puzzi-term-grid h3{margin:24px 0 10px;font-size:25px}
+  .puzzi-term-grid p{line-height:1.58}
+  .puzzi-weekend-note{margin-top:12px;padding:15px 16px;line-height:1.5}
+
+  .puzzi-steps{margin-top:32px}
+  .puzzi-steps article,.puzzi-steps article:nth-child(3){min-height:182px;padding:22px}
+  .puzzi-steps h3{margin:24px 0 9px;font-size:20px}
+  .puzzi-steps p{line-height:1.58}
+  .puzzi-process-link{margin-top:22px}
+
+  .puzzi-proof-grid{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(286px,84vw);gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain;scrollbar-width:none;padding:0 1px 4px}
+  .puzzi-proof-grid::-webkit-scrollbar{display:none}
+  .puzzi-proof-grid a{height:330px;scroll-snap-align:start}
+  .puzzi-proof>.button{margin-top:22px}
+
+  .puzzi-faq>div:first-child>p:not(.eyebrow){margin:18px 0;line-height:1.58}
+  .puzzi-faq-list summary{padding:18px 0;grid-template-columns:30px 1fr 20px;gap:9px;font-size:14px}
+  .puzzi-faq-list details p{margin:-2px 20px 18px 30px;line-height:1.6}
+
+  .puzzi-final{min-height:480px;padding:64px 18px 82px}
+  .puzzi-final h2{font-size:clamp(44px,13vw,60px)}
+  .puzzi-final>p:not(.eyebrow){margin-top:18px;line-height:1.58}
+  .puzzi-final>div{margin-top:24px}
+  .puzzi-final small{margin-top:16px}
+}
