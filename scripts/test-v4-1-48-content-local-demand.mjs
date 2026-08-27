@@ -63,7 +63,7 @@ for(const file of ['blog/skilky-sokhne-dyvan-pislia-chyshchennia/index.html','bl
 }
 ok('content cluster CSS exists',read('assets/seo-v4147.css').includes('CONTENT_V4148_START')&&read('assets/seo-v4147.css').includes('.content-related-grid'));
 ok('no suburb doorway content pages were created',!fs.readdirSync(path.join(root,'blog')).some(name=>/(rozsosh|shcherb|horban|teres|suprun)/i.test(name)));
-ok('content generator is wired into stamp',read('scripts/stamp-build.mjs').includes("apply-content-v4148.mjs"));
+ok('content cluster is preserved in canonical static baseline without replaying the historical generator',!read('scripts/stamp-build.mjs').includes("apply-content-v4148.mjs")&&fs.existsSync(path.join(root,'scripts','apply-content-v4148.mjs'))&&fs.existsSync(path.join(root,'blog','yak-pochystyty-dyvan-vdoma','index.html')));
 
 if(failed)process.exit(1);
 console.log(`v4.1.48 Content & Local Demand: ${n}/${n} OK`);
