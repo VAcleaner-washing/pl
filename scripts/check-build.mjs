@@ -62,6 +62,9 @@ if(!siteRuntime.includes("'/tekhnika/karcher-puzzi-8-1/'")||!siteRuntime.include
 for(const token of ['Позначка означає: відгук пов’язаний із фактичним бронюванням VAcleaner.','contextualPickerBridges','mobileStickyCta'])if(!siteRuntime.includes(token))errors.push(`public UX bridge missing: ${token}`);
 if(siteRuntime.includes('v4-booking-picker-hint'))errors.push('duplicate booking picker hint must not be injected; public-quiz already owns this entry point');
 if(siteRuntime.includes("if(path==='/'){"))errors.push('duplicate home picker bridge must not be injected; the home Smart Guide already owns this flow');
+const homeSmartGuide=fs.readFileSync(path.join(root,'assets','home-smart-guide-v4149.js'),'utf8');
+if(homeSmartGuide.includes("section.className='vq-guide'")||homeSmartGuide.includes("insertAdjacentElement('beforebegin'"))errors.push('home Smart Guide must not inject a second full picker section above task solutions');
+if(!homeSmartGuide.includes('a.v21-secondary[href=\"/pidbir/\"]')||!homeSmartGuide.includes('data-vx-lazy-quiz'))errors.push('home Smart Guide must enhance the existing picker CTA without duplicating content');
 const homePickerChunk=fs.readFileSync(path.join(root,'_next','static','chunks','01pb0x0z72e41.js'),'utf8');
 for(const token of ['Не знаєте, що підійде?','Опишіть задачу одним повідомленням — без бронювання й зобов’язань.','Запитати менеджера'])if(!homePickerChunk.includes(token))errors.push(`home non-duplicate helper parity missing: ${token}`);
 for(const token of ['Кілька задач одразу?','Підібрати за 30 сек'])if(homePickerChunk.includes(token))errors.push(`duplicate home picker copy leaked into hydrated chunk: ${token}`);
