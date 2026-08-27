@@ -19,3 +19,9 @@
 .home-v21 .v21-package-grid>article>b{font-size:12px;line-height:1.5}
 .home-v21 .v21-package-grid a{font-size:12px}
 @media (max-width:620px){.home-v21 .v21-action-note,.home-v21 .v21-trust-strip p{font-size:12px}}
+
+/* v4.2.5 — restore Smart Guide value inside the existing choice helper, without a second full-height section. */
+.home-v21 .v21-choice-help>.v21-choice-guide{color:#17191b;background:#d5b079;border:1px solid #c39a62;justify-content:center;white-space:nowrap;padding-inline:16px}
+.home-v21 .v21-choice-help>.v21-choice-guide:hover{background:#e0c08f}
+@media (min-width:621px){.home-v21 .v21-choice-help{grid-template-columns:minmax(0,1fr) auto auto;align-items:center}.home-v21 .v21-choice-help>.v21-choice-guide{min-height:44px}}
+@media (max-width:620px){.home-v21 .v21-choice-help>.v21-choice-guide{order:2}.home-v21 .v21-choice-help>a[target="_blank"]{order:3}.home-v21 .v21-choice-help>div{order:1}}

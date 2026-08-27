@@ -1,0 +1,26 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+const root=process.cwd();
+const read=p=>fs.readFileSync(path.join(root,p),'utf8');
+let passed=0;const failed=[];
+function ok(name,cond){if(cond){passed++;console.log('PASS:',name)}else{failed.push(name);console.log('FAIL:',name)}}
+const sitemap=read('sitemap.xml');
+const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);
+ok('v4.1.63 route baseline keeps 29 sitemap URLs',urls.length===29);
+for(const route of ['https://vacleaner.pp.ua/','https://vacleaner.pp.ua/bronuvannia/','https://vacleaner.pp.ua/pidbir/','https://vacleaner.pp.ua/komplekty/','https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/']) ok(`baseline route retained: ${route}`,urls.includes(route));
+const config=fs.readFileSync(path.join(root,'config/vacleaner.json'));
+ok('canonical v4.1.63 business config remains byte-identical',crypto.createHash('sha256').update(config).digest('hex')==='b012feec312f8334316d7d3a42dd46f0056ba1924919ad7fa6d1b2c875779649');
+const packages=read('assets/public-experience-runtime.js');
+for(const title of ['Kärcher Puzzi 8/1','Глибоке очищення диванів і матраців','Дивани + вікна','Kärcher SC 2','Робот для вікон','Дивани + кухня та ванна','Генеральне прибирання','Ідеальні вікна','HOME RESET']) ok(`canonical package label retained: ${title}`,packages.includes(title));
+const booking=read('bronuvannia/index.html');
+for(const token of ['id=\"booking-products\"','id=\"booking-dates\"','id=\"booking-extras\"','id=\"booking-contact\"']) ok(`booking wizard retains ${token}`,booking.includes(token));
+const smart=read('assets/home-smart-guide-v4149.js');
+ok('Smart Guide value restored without old full-height duplicate',smart.includes('dataset.vxChoiceGuide')&&smart.includes('Підібрати за 30 сек →')&&!smart.includes("section.className='vq-guide'"));
+const blog=read('blog/yak-pochystyty-dyvan-vdoma/index.html');
+ok('blog readability avoids technical UV/60C explanation',!blog.includes('UV і гаряче повітря до 60 °C')&&!blog.includes('пилових кліщів і пов’язані з ними алергени'));
+const admin=read('assets/admin-v250.js');
+ok('30-day referral reminder queue retained',admin.includes('Бонуси скоро спливають')&&admin.includes("action:'referrals_expiring'")&&admin.includes('referralReminderText'));
+ok('referral reminder stays manual-confirmed',admin.includes('Позначити надісланим')&&admin.includes("action:'referral_mark_sent"));
+console.log(JSON.stringify({passed,failed,status:failed.length?'failed':'passed'}));
+if(failed.length)process.exit(1);

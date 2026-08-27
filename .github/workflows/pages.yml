@@ -146,6 +146,8 @@ jobs:
         run: npm run test:v4.2.1-referral
       - name: Verify v4.2.2 referral hardening and catalog source of truth
         run: npm run test:v4.2.2-hardening
+      - name: Verify v4.2.5 compatibility with frozen v4.1.63 baseline
+        run: npm run test:v4.2.5-baseline-compatibility
       - name: Re-run admin functional contracts before architecture build
         run: |
           npm run test:admin-labels

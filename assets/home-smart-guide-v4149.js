@@ -29,9 +29,24 @@
       loadQuiz().then(open=>open()).catch(()=>{location.href='/pidbir/'}).finally(()=>link.removeAttribute('aria-busy'));
     });
   }
+  function integrateChoiceGuide(){
+    const help=document.querySelector('.v21-choice-help');if(!help)return null;
+    const copy=help.querySelector('div');
+    if(copy){
+      const strong=copy.querySelector('strong');if(strong)strong.textContent='Не знаєте, що підійде?';
+      const span=copy.querySelector('span');if(span)span.textContent='Підбір за 30 сек підкаже техніку й засоби. Або запитайте менеджера.';
+    }
+    let guide=help.querySelector('[data-vx-choice-guide]');
+    if(!guide){
+      guide=document.createElement('a');guide.href='/pidbir/';guide.dataset.vxChoiceGuide='1';guide.className='v21-choice-guide';guide.textContent='Підібрати за 30 сек →';
+      const manager=help.querySelector('a[href*="t.me"],a[target="_blank"]');
+      manager?help.insertBefore(guide,manager):help.appendChild(guide);
+    }
+    bind(guide);return guide;
+  }
   function enhance(){
     const primary=document.querySelector('a.v21-secondary[href="/pidbir/"]')||document.querySelector('a[href="/pidbir/"]');
-    bind(primary);
+    bind(primary);integrateChoiceGuide();
     document.querySelectorAll('a[href="#choose"]').forEach(a=>{a.href='/pidbir/'});
     const note=document.querySelector('.v21-action-note');if(note)note.textContent='Не знаєте, що обрати? Пройдіть короткий підбір — сайт сам запропонує техніку й засоби під вашу задачу.';
     return primary;
@@ -41,6 +56,6 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
   window.addEventListener('load',()=>{boot();setTimeout(()=>observer?.disconnect(),2600)},{once:true});
   const root=document.querySelector('.home-v21')||document.body;
-  observer=new MutationObserver(()=>{if(document.querySelector('a.v21-secondary[data-vx-lazy-quiz-bound="1"]'))return;clearTimeout(repairTimer);repairTimer=setTimeout(enhance,50)});
+  observer=new MutationObserver(()=>{if(document.querySelector('a.v21-secondary[data-vx-lazy-quiz-bound="1"]')&&document.querySelector('[data-vx-choice-guide][data-vx-lazy-quiz-bound="1"]'))return;clearTimeout(repairTimer);repairTimer=setTimeout(enhance,50)});
   observer.observe(root,{childList:true,subtree:true});
 })();

@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.4",
+  "version": "4.2.5",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -93,6 +93,7 @@
     "test:v4.2.0-visual-parity": "python scripts/v4200_visual_parity_qa.py",
     "test:v4.2.1-referral": "node scripts/test-v4-2-1-referral-program.mjs",
     "test:referral-admin-mobile": "python scripts/referral_admin_mobile_qa.py",
-    "test:v4.2.2-hardening": "node scripts/test-v4-2-2-hardening.mjs"
+    "test:v4.2.2-hardening": "node scripts/test-v4-2-2-hardening.mjs",
+    "test:v4.2.5-baseline-compatibility": "node scripts/test-v4-2-5-baseline-compatibility.mjs"
   }
 }
