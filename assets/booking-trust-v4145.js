@@ -11,11 +11,12 @@ function enhance(){
     const p2=document.createElement('p');p2.dataset.vxHandoffPolicy='1';p2.textContent=handoff;more.appendChild(p2);
     const p3=document.createElement('p');p3.dataset.vxMalfunctionPolicy='1';p3.textContent=malfunction;more.appendChild(p3);
   }
-  const consent=contact.querySelector('.booking-consent');
-  if(consent&&!contact.querySelector('.vx-booking-trust')){
-    const box=document.createElement('aside');box.className='vx-booking-trust';box.setAttribute('aria-label','Ключові умови бронювання');
-    box.innerHTML='<span><b>200 грн</b><small>тільки після підтвердження</small></span><span><b>Залоговий платіж</b><small>при отриманні · не є ціною оренди</small></span><span><b>Стан техніки</b><small>фіксуємо при видачі</small></span><span><b>Підтримка</b><small>під час оренди</small></span>';
-    consent.insertAdjacentElement('beforebegin',box);
+  const conditions=contact.querySelector('.booking-conditions');
+  const details=conditions?.querySelector('.booking-conditions-more');
+  if(conditions&&details&&!conditions.querySelector('.vx-booking-service-note')){
+    const note=document.createElement('div');note.className='vx-booking-service-note';note.setAttribute('aria-label','Додатково під час оренди');
+    note.innerHTML='<span>Стан техніки фіксуємо при видачі</span><i aria-hidden="true"></i><span>Підтримка протягом оренди</span>';
+    details.insertAdjacentElement('beforebegin',note);
   }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',enhance,{once:true});else enhance();

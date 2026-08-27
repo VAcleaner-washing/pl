@@ -733,10 +733,10 @@
   const loadBookingHardening=()=>{
     if(!document.querySelector('.booking-form'))return;
     if(!document.querySelector('link[href*="booking-hardening-v4144.css"]')){
-      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/booking-hardening-v4144.css?v=4158';document.head.appendChild(link);
+      const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/booking-hardening-v4144.css?v=4159';document.head.appendChild(link);
     }
     if(!document.querySelector('script[src*="booking-hardening-v4144.js"]')){
-      const script=document.createElement('script');script.src='/assets/booking-hardening-v4144.js?v=4158';script.defer=true;document.head.appendChild(script);
+      const script=document.createElement('script');script.src='/assets/booking-hardening-v4144.js?v=4159';script.defer=true;document.head.appendChild(script);
     }
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBookingHardening,{once:true});else loadBookingHardening();
@@ -749,7 +749,7 @@
   const loadBookingTrust=()=>{
     if(!document.querySelector('.booking-form'))return;
     if(!document.querySelector('link[href*="booking-trust-v4145.css"]')){const link=document.createElement('link');link.rel='stylesheet';link.href='/assets/booking-trust-v4145.css?v=4145';document.head.appendChild(link)}
-    if(!document.querySelector('script[src*="booking-trust-v4145.js"]')){const script=document.createElement('script');script.src='/assets/booking-trust-v4145.js?v=4145';script.defer=true;document.head.appendChild(script)}
+    if(!document.querySelector('script[src*="booking-trust-v4145.js"]')){const script=document.createElement('script');script.src='/assets/booking-trust-v4145.js?v=4159';script.defer=true;document.head.appendChild(script)}
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadBookingTrust,{once:true});else loadBookingTrust();
   new MutationObserver(()=>requestAnimationFrame(loadBookingTrust)).observe(document.documentElement,{childList:true,subtree:true});

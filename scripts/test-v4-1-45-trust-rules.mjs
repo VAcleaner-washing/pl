@@ -14,7 +14,7 @@ ok('admin has distance delivery tariffs',admin.includes('deliveryLocal')&&admin.
 ok('cancel backend stores 72h policy',adminEdge.includes('hoursBefore >= 72')&&adminEdge.includes('prepayment_retained'));
 ok('cancel finance respects retained prepayment',admin.includes('retainedPrepayment')&&admin.includes('менше 3 діб'));
 ok('status correction clears cancellation metadata',correction.includes('cancellation: _cancellation'));
-ok('trust block exists',trust.includes('200 грн')&&trust.includes('Стан техніки')&&trust.includes('Підтримка'));
+ok('booking conditions avoid duplicate trust grid and keep compact service reassurance',!trust.includes('vx-booking-trust')&&trust.includes('vx-booking-service-note')&&trust.includes('Стан техніки фіксуємо при видачі')&&trust.includes('Підтримка протягом оренди'));
 ok('terms publish cancellation rule',terms.includes('Скасування за 3 доби або раніше')&&terms.includes('передоплата не повертається'));
 ok('delivery page publishes local zone and other suburb tariffs',delivery.includes('Розсошенці')&&/інше передмістя/i.test(delivery)&&delivery.includes('350 грн'));
 ok('FAQ publishes cancellation and delivery',faq.includes('3 доби')&&faq.includes('350 грн'));
