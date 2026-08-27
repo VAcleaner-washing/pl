@@ -16,12 +16,12 @@ async function personalPromoCode(campaignId:string,phone:string){const bytes=new
 async function returnEligibleCustomers(db:any,dormantDays:number,minCompletedOrders:number){
   const cutoff=new Date(Date.now()-Math.max(1,dormantDays)*86400000).toISOString().slice(0,10);
   const [{data:completed,error:completedError},{data:active,error:activeError}]=await Promise.all([
-    db.from("vacleaner_bookings").select("customer_phone,customer_name,return_date").eq("status","completed").order("return_date",{ascending:false}).limit(5000),
-    db.from("vacleaner_bookings").select("customer_phone").in("status",["waiting_payment","confirmed","issued"]).limit(5000),
+    db.from("vacleaner_bookings").select("customer_phone,customer_name,return_date,completed_at").eq("status","completed").order("return_date",{ascending:false}).limit(5000),
+    db.from("vacleaner_bookings").select("customer_phone").in("status",["pending","waiting_payment","confirmed","issued"]).limit(5000),
   ]);
   if(completedError||activeError)throw completedError||activeError;
   const activePhones=new Set((active||[]).map((r:any)=>normalizePhone(r.customer_phone)).filter(Boolean)),stats=new Map<string,{phone:string,name:string,count:number,last:string}>();
-  for(const row of completed||[]){const phone=normalizePhone((row as any).customer_phone);if(!phone)continue;const rentalDate=String((row as any).return_date||"");const cur=stats.get(phone)||{phone,name:cleanText((row as any).customer_name,120),count:0,last:rentalDate};cur.count+=1;if(rentalDate>cur.last){cur.last=rentalDate;cur.name=cleanText((row as any).customer_name,120)||cur.name}stats.set(phone,cur)}
+  for(const row of completed||[]){const phone=normalizePhone((row as any).customer_phone);if(!phone)continue;const rentalDate=String((row as any).completed_at||(row as any).return_date||"").slice(0,10);const cur=stats.get(phone)||{phone,name:cleanText((row as any).customer_name,120),count:0,last:rentalDate};cur.count+=1;if(rentalDate>cur.last){cur.last=rentalDate;cur.name=cleanText((row as any).customer_name,120)||cur.name}stats.set(phone,cur)}
   return [...stats.values()].filter(row=>!activePhones.has(row.phone)&&row.count>=Math.max(1,minCompletedOrders)&&row.last&&row.last<=cutoff);
 }
 

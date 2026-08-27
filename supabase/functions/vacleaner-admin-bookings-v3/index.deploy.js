@@ -384,7 +384,7 @@ async function resolvePhonePromo(supabase, args) {
     const historyPromise = Array.isArray(args.history) ? Promise.resolve({
         data: args.history,
         error: null
-    }) : supabase.from("vacleaner_bookings").select("id,status,hold_expires_at,start_date,return_date,created_at").eq("customer_phone", phone).order("created_at", {
+    }) : supabase.from("vacleaner_bookings").select("id,status,hold_expires_at,start_date,return_date,completed_at,created_at").eq("customer_phone", phone).order("created_at", {
         ascending: false
     }).limit(200);
     const [{ data: campaigns, error: campaignError }, { data: redemptions, error: redemptionError }, historyResult] = await Promise.all([
@@ -396,11 +396,12 @@ async function resolvePhonePromo(supabase, args) {
     const history = Array.isArray(historyResult.data) ? historyResult.data : [];
     const completed = history.filter((row)=>String(row.status) === "completed");
     const lastCompleted = completed.reduce((latest, row)=>{
-        const value = String(row.return_date || row.start_date || "").slice(0, 10);
+        const value = String(row.completed_at || row.return_date || row.start_date || "").slice(0, 10);
         return value > latest ? value : latest;
     }, "");
     const excludeBookingId = String(args.excludeBookingId || "");
     const hasActiveBooking = history.some((row)=>String(row.id || "") !== excludeBookingId && [
+            "pending",
             "waiting_payment",
             "confirmed",
             "issued"

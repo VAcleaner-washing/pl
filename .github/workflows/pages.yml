@@ -128,6 +128,8 @@ jobs:
         run: npm run test:v4.1.55-clear-advice
       - name: Verify v4.1.56 package price alignment and delivery copy
         run: npm run test:v4.1.56-price-delivery-copy
+      - name: Verify v4.1.57 analytics truth and source-of-truth stability
+        run: npm run test:v4.1.57-analytics-truth
       - name: Build clean Pages artifact
         run: npm run build
       - name: Upload Pages artifact

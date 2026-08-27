@@ -2,19 +2,15 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd();
+// v4.1.57: the latest checked-in static export is now the canonical public baseline.
+// Historical one-off patch scripts remain in /scripts for audit/regression tests,
+// but are no longer replayed on every release. Only deterministic normalizers and
+// config-driven generators run here, preventing old patches from rewriting newer copy.
 execFileSync(process.execPath,[path.join(root,'scripts','sync-static-copy.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-content-v4148.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-seo-v4147.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','harden-public-metadata.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','generate-config.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','apply-delivery-settings.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','apply-delivery-distance-v41472.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-performance-v4149.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-v4150-full-qa.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-v4152-manual-address-fallback.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-v4153-address-provider-repair.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-v4155-clear-advice.mjs')],{stdio:'inherit'});
-execFileSync(process.execPath,[path.join(root,'scripts','apply-v4156-price-rhythm-delivery-copy.mjs')],{stdio:'inherit'});
 const release=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
 const version=String(release.version), build=String(release.build||version.replace(/\D/g,''));
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);

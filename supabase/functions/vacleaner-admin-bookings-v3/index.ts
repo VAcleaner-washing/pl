@@ -272,7 +272,7 @@ async function resolvePhonePromo(supabase: ReturnType<typeof createClient>, args
   if (!campaignIds.length) return null;
   const historyPromise = Array.isArray(args.history)
     ? Promise.resolve({ data: args.history, error: null })
-    : supabase.from("vacleaner_bookings").select("id,status,hold_expires_at,start_date,return_date,created_at")
+    : supabase.from("vacleaner_bookings").select("id,status,hold_expires_at,start_date,return_date,completed_at,created_at")
       .eq("customer_phone", phone).order("created_at", { ascending: false }).limit(200);
   const [{ data: campaigns, error: campaignError }, { data: redemptions, error: redemptionError }, historyResult] = await Promise.all([
     supabase.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,dormant_days,allowed_product_codes,allowed_weekdays,min_completed_orders,starts_at,ends_at,usage_limit_total,usage_limit_per_customer").in("id", campaignIds),
@@ -283,11 +283,11 @@ async function resolvePhonePromo(supabase: ReturnType<typeof createClient>, args
   const history = Array.isArray(historyResult.data) ? historyResult.data : [];
   const completed = history.filter((row: any) => String(row.status) === "completed");
   const lastCompleted = completed.reduce((latest: string, row: any) => {
-    const value = String(row.return_date || row.start_date || "").slice(0, 10);
+    const value = String(row.completed_at || row.return_date || row.start_date || "").slice(0, 10);
     return value > latest ? value : latest;
   }, "");
   const excludeBookingId = String(args.excludeBookingId || "");
-  const hasActiveBooking = history.some((row: any) => String(row.id || "") !== excludeBookingId && ["waiting_payment", "confirmed", "issued"].includes(String(row.status)));
+  const hasActiveBooking = history.some((row: any) => String(row.id || "") !== excludeBookingId && ["pending", "waiting_payment", "confirmed", "issued"].includes(String(row.status)));
   const now = Date.now(), productCode = String(args.productCode || ""), rawBase = Math.max(0, Number(args.rawBase || 0));
   const hasRentalContext = Boolean(productCode && dateValue(args.startDate) && dateValue(args.returnDate));
   const pickupWindow = args.pickupWindow === "evening" ? "evening" : "morning", returnWindow = args.returnWindow === "evening" ? "evening" : "morning";

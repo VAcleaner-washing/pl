@@ -17,7 +17,7 @@ const checks=[
   [admin.includes('loadClientPromoInfo(client.phone)'), 'client card loads promo independently of SMS history'],
   [admin.includes("Promise.allSettled([invokeCampaign({action:'sms_status'}),invokeCampaign({action:'sms_dispatches'})])"), 'SMS campaign bootstrap survives one secondary endpoint failure'],
   [admin.includes("const invokeCampaign=(body,retry=true)=>withUiTimeout"), 'campaign timeout is scoped to campaign API instead of core admin requests'],
-  [backend.includes('["waiting_payment", "confirmed", "issued"].includes(String(row.status))'), 'RETURN active-booking rule matches the public promo validator'],
+  [backend.includes('["pending", "waiting_payment", "confirmed", "issued"].includes(String(row.status))'), 'RETURN active-booking rule matches the public promo validator'],
   [admin.includes('smsAudienceRetry'), 'SMS audience failure has an explicit retry path'],
   [admin.includes("document.addEventListener('pointerdown',event=>{if(!event.target.closest('.campaign-more'))closeCampaignMenus()})"), 'campaign overflow menu closes on outside tap'],
   [admin.includes("if(event.key==='Escape')closeCampaignMenus()"), 'campaign overflow menu closes on Escape'],

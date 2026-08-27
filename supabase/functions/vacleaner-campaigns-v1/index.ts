@@ -18,15 +18,15 @@ type AudienceRow={phone:string;name:string;completedOrders:number;lastCompleted:
 async function buildAudience(db:any,segment:string,forcedPhones:string[]=[]){
   const [{data:customers,error:ce},{data:completed,error:co},{data:active,error:ae},{data:recentSms,error:se}]=await Promise.all([
     db.from("vacleaner_customers").select("phone,name,marketing_sms_consent,marketing_sms_consent_at,marketing_sms_consent_source,marketing_sms_opted_out_at").limit(5000),
-    db.from("vacleaner_bookings").select("customer_phone,customer_name,return_date").eq("status","completed").order("return_date",{ascending:false}).limit(10000),
-    db.from("vacleaner_bookings").select("customer_phone").in("status",["waiting_payment","confirmed","issued"]).limit(5000),
+    db.from("vacleaner_bookings").select("customer_phone,customer_name,return_date,completed_at").eq("status","completed").order("return_date",{ascending:false}).limit(10000),
+    db.from("vacleaner_bookings").select("customer_phone").in("status",["pending","waiting_payment","confirmed","issued"]).limit(5000),
     db.from("vacleaner_sms_dispatch_recipients").select("customer_phone,status,created_at").in("status",["submitted","sent","delivered","not_delivered"]).gte("created_at",new Date(Date.now()-SMS_COOLDOWN_DAYS*86400000).toISOString()).order("created_at",{ascending:false}).limit(10000),
   ]);if(ce||co||ae||se)throw ce||co||ae||se;
   const profiles=new Map<string,any>();for(const row of customers||[]){const phone=normalizePhone(row.phone);if(phone)profiles.set(phone,row)}
   const activePhones=new Set((active||[]).map((r:any)=>normalizePhone(r.customer_phone)).filter(Boolean));
   const recentMap=new Map<string,string>();for(const row of recentSms||[]){const phone=normalizePhone(row.customer_phone);if(phone&&!recentMap.has(phone))recentMap.set(phone,String(row.created_at||""))}
   const stats=new Map<string,{phone:string;name:string;count:number;last:string}>();
-  for(const row of completed||[]){const phone=normalizePhone(row.customer_phone);if(!phone)continue;const date=String(row.return_date||""),cur=stats.get(phone)||{phone,name:cleanText(row.customer_name,120),count:0,last:date};cur.count+=1;if(date>cur.last){cur.last=date;cur.name=cleanText(row.customer_name,120)||cur.name}stats.set(phone,cur)}
+  for(const row of completed||[]){const phone=normalizePhone(row.customer_phone);if(!phone)continue;const date=String(row.completed_at||row.return_date||"").slice(0,10),cur=stats.get(phone)||{phone,name:cleanText(row.customer_name,120),count:0,last:date};cur.count+=1;if(date>cur.last){cur.last=date;cur.name=cleanText(row.customer_name,120)||cur.name}stats.set(phone,cur)}
   for(const rawPhone of forcedPhones||[]){const phone=normalizePhone(rawPhone);if(!phone||stats.has(phone))continue;const profile=profiles.get(phone);if(profile)stats.set(phone,{phone,name:String(profile.name||phone),count:0,last:""})}
   const now=Date.now(),rows:AudienceRow[]=[];
   for(const item of stats.values()){

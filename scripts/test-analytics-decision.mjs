@@ -23,24 +23,34 @@ const context={
   console,
 };
 vm.createContext(context);
-for(const name of ['recordedChemistryRevenue','revenueBreakdown','analyticsSourceKey','analyticsSourceLabel','sourcePerformance','weekdayDemand','analyticsNiceStep','analyticsAxisScale','analyticsAxisLabel','analyticsFunnel'])vm.runInContext(functionSource(name),context);
+for(const name of ['recordedChemistryRevenue','revenueBreakdown','analyticsSourceKey','analyticsSourceLabel','sourcePerformance','startDateInBounds','weekdayDemand','analyticsNiceStep','analyticsAxisScale','analyticsAxisLabel','analyticsFunnel'])vm.runInContext(functionSource(name),context);
 
 const monday={status:'completed',source:'vacleaner_website',start_date:'2026-08-10',total_amount:1200,base_amount:800,delivery_amount:200,extras_amount:200,rawBase:900,extras:{chemistry:{amount:100}}};
 const saturday={status:'completed',source:'phone',start_date:'2026-08-08',total_amount:700,base_amount:700,delivery_amount:0,extras_amount:0,rawBase:700,extras:{}};
 const cancelled={status:'cancelled',source:'instagram',start_date:'2026-08-09',total_amount:0};
 
-assert.deepEqual({...context.revenueBreakdown([monday,saturday])},{rental:1500,delivery:200,chemistry:100,extras:100,discount:100,total:1900},'revenue components must reconcile to recorded total and keep discounts separate');
+assert.deepEqual({...context.revenueBreakdown([monday,saturday])},{rental:1500,delivery:200,chemistry:100,extras:100,discount:100,adjustment:0,total:1900},'revenue components must reconcile to recorded total and keep discounts separate');
 const sourceRows=JSON.parse(JSON.stringify(context.sourcePerformance([monday,saturday,cancelled]))).map(row=>({key:row.key,created:row.created,completed:row.completed,cancelled:row.cancelled}));
 assert.deepEqual(sourceRows,[
   {key:'website',created:1,completed:1,cancelled:0},
   {key:'phone',created:1,completed:1,cancelled:0},
   {key:'instagram',created:1,completed:0,cancelled:1},
 ],'source cohort must count created bookings and their current outcome');
-const demand=context.weekdayDemand([monday,saturday]);
+assert.equal(context.sourcePerformance([monday,cancelled]).find(row=>row.key==='website').completionRate,100,'source performance must expose completion rate');
+const demand=context.weekdayDemand([monday,saturday],{start:new Date('2026-08-01T00:00:00'),end:new Date('2026-09-01T00:00:00')});
 assert.equal(demand.rows[0].count,1,'Monday issue demand missing');
 assert.equal(demand.rows[5].count,1,'Saturday issue demand missing');
 assert.equal(demand.weekday,1,'weekday summary mismatch');
 assert.equal(demand.weekend,1,'weekend summary mismatch');
+assert.equal(demand.committed,2,'committed demand must count confirmed/issued/completed starts');
+assert.equal(demand.potential,0,'completed-only fixture must not invent potential demand');
+
+const mismatch={status:'completed',source:'website',start_date:'2026-08-12',total_amount:1000,base_amount:700,delivery_amount:200,extras_amount:0,rawBase:700,extras:{}};
+assert.equal(context.revenueBreakdown([mismatch]).adjustment,100,'unreconciled revenue must remain visible as adjustment instead of being silently added to rental');
+const potential={status:'pending',source:'instagram',start_date:'2026-08-10',total_amount:700};
+const demandWithPotential=context.weekdayDemand([monday,potential],{start:new Date('2026-08-01T00:00:00'),end:new Date('2026-09-01T00:00:00')});
+assert.equal(demandWithPotential.committed,1,'pending booking must not count as committed demand');
+assert.equal(demandWithPotential.potential,1,'pending booking must be exposed as potential demand');
 
 
 const funnelBookings=[
@@ -55,7 +65,9 @@ const funnel=JSON.parse(JSON.stringify(context.analyticsFunnel(funnelBookings)))
 assert.deepEqual(funnel.stages.map(row=>row.label),['Заявка','Передоплата','Підтверджено','Видано','Завершено'],'funnel stages must describe cumulative workflow');
 assert.deepEqual(funnel.stages.map(row=>row.count),[6,3,3,2,1],'funnel must count reached stages cumulatively, not current status buckets');
 assert.equal(funnel.cancelled,1,'cancelled applications must remain visible outside cumulative stages');
-assert.equal(funnel.conversion,17,'funnel completion conversion must use created cohort denominator');
+assert.equal(funnel.conversion,50,'funnel completion conversion must use resolved bookings only, so active work does not depress it');
+assert.equal(funnel.inWork,4,'funnel must expose active bookings separately');
+assert.equal(funnel.lost,1,'funnel must expose cancelled/declined as lost');
 
 const revenueAxis=JSON.parse(JSON.stringify(context.analyticsAxisScale(2900,true)));
 assert.deepEqual(revenueAxis.ticks,[0,1000,2000,3000],'revenue axis must use readable full-money ticks for a 2 900 грн peak');
