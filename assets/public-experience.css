@@ -1147,3 +1147,15 @@ html.vq-standalone-page .vq-progress__meta{
 @media(max-width:620px){.vx-process-smart-guide{margin-top:22px;padding:17px}.vx-process-smart-guide>.button{width:100%}}
 /* v4.1.49: Smart Guide trigger is a progressive-enhancement link; full quiz JS is lazy-loaded on interaction. */
 .vq-guide__button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+
+/* v4.1.56 home package price baseline + delivery-copy cleanup */
+@media(min-width:901px){
+  .home-v21 .v21-package-grid>article>h3{min-height:clamp(150px,10.5vw,172px)}
+  .home-v21 .v21-package-grid>article>p{min-height:90px}
+  .home-v21 .v21-package-grid>article>strong{margin-top:0}
+  .home-v21 .v21-package-grid>article>.vx-home-reset-gift{margin:18px 0 14px}
+  .home-v21 .v21-package-grid>article>a[href*="bronuvannia"]{margin-top:auto}
+}
+@media(min-width:1280px){
+  .home-v21 .v21-package-grid>article>p{min-height:70px}
+}

@@ -14,6 +14,7 @@ execFileSync(process.execPath,[path.join(root,'scripts','apply-v4150-full-qa.mjs
 execFileSync(process.execPath,[path.join(root,'scripts','apply-v4152-manual-address-fallback.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','apply-v4153-address-provider-repair.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','apply-v4155-clear-advice.mjs')],{stdio:'inherit'});
+execFileSync(process.execPath,[path.join(root,'scripts','apply-v4156-price-rhythm-delivery-copy.mjs')],{stdio:'inherit'});
 const release=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
 const version=String(release.version), build=String(release.build||version.replace(/\D/g,''));
 const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);

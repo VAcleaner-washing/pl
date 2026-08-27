@@ -126,6 +126,8 @@ jobs:
         run: npm run test:v4.1.54-local-zone-correction
       - name: Verify v4.1.55 clear advice and readable quiz guide
         run: npm run test:v4.1.55-clear-advice
+      - name: Verify v4.1.56 package price alignment and delivery copy
+        run: npm run test:v4.1.56-price-delivery-copy
       - name: Build clean Pages artifact
         run: npm run build
       - name: Upload Pages artifact

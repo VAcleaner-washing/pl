@@ -29,7 +29,7 @@ ok('admin production gateway enforces distance tariff',adminGateway.includes('BA
 ok('admin backend prices distance',adminEdge.includes('Math.ceil((distanceKm - pricing.includedKm) - 1e-9)')&&adminEdge.includes('pricing_distance_km'));
 ok('settings persists distance fields',settings.includes('baseOutside')&&settings.includes('includedKm')&&settings.includes('perKm')&&settings.includes('maxOutsideKm'));
 ok('analytics records distance zone',analytics.includes("delivery_zone:extra>0?'distance':'nearby'")&&analytics.includes('delivery_distance_km'));
-ok('delivery public copy no longer calls 30 km suburb',delivery.includes('до 10 км')&&delivery.includes('+15 грн')&&!delivery.includes('передмістя до 30 км'));
-ok('FAQ distance rule',faq.includes('до 10 км')&&faq.includes('+15 грн')&&faq.includes('Понад 30 км'));
-ok('terms distance rule',terms.includes('до 10 км')&&terms.includes('+15 грн')&&terms.includes('Понад 30 км'));
+ok('delivery public copy keeps simple suburb tariff while engine remains distance-based',delivery.includes('Інше передмістя — від 350 грн')&&!delivery.includes('до 10 км')&&!delivery.includes('+15 грн'));
+ok('FAQ keeps simple suburb tariff',faq.includes('Інше передмістя — від 350 грн')&&!faq.includes('до 10 км')&&!faq.includes('+15 грн'));
+ok('terms keep simple suburb tariff',terms.includes('Інше передмістя — від 350 грн')&&!terms.includes('до 10 км')&&!terms.includes('+15 грн'));
 if(failed)process.exit(1);console.log(`v4.1.47.2 delivery distance: ${n}/${n} OK`);

@@ -105,20 +105,20 @@ function renderDeliveryFee(){
   const row=document.querySelector('.booking-choice-row');if(!row)return;
   const delivery=[...row.querySelectorAll('button')].find(btn=>/Доставка/.test(btn.textContent||''));
   const quote=currentDeliveryQuote();
-  const fallbackTariffs=`Полтава ${formatMoney(deliveryPricing.local)} · передмістя ${formatMoney(deliveryPricing.baseOutside)}`;
+  const fallbackTariffs=`Полтава ${formatMoney(deliveryPricing.local)}`;
   const manualQuote=quote.quoteRequired&&quote.zone==='manual';
   const label=manualQuote||quote.pending?fallbackTariffs:quote.quoteRequired?'тариф підтвердить менеджер':formatMoney(quote.amount);
   if(delivery){setTextIfChanged(delivery.querySelector('strong'),'Доставка');const span=delivery.querySelector('span');setTextIfChanged(span,`до вас і назад · ${label}`)}
   const address=document.querySelector('.booking-delivery-address > small,.booking-delivery-address .booking-field-hint');
   if(address){
     const text=manualQuote
-      ?`Адресу не вдалося розпізнати автоматично. Полтава — ${formatMoney(deliveryPricing.local)}, передмістя — ${formatMoney(deliveryPricing.baseOutside)}. Менеджер підтвердить тариф до передоплати.`
+      ?`Не вдалося точно визначити адресу. Полтава, Розсошенці, Щербані та Горбанівка — ${formatMoney(deliveryPricing.local)}. Інше передмістя — від ${formatMoney(deliveryPricing.baseOutside)}. Менеджер підтвердить суму до передоплати.`
       :quote.quoteRequired
         ?'Адреса поза стандартною зоною доставки. Вартість менеджер погодить до передоплати.'
       :quote.pending
-        ?`Полтава — ${formatMoney(deliveryPricing.local)}, передмістя — ${formatMoney(deliveryPricing.baseOutside)}. Введіть вулицю й номер будинку — точну суму порахуємо автоматично.`
+        ?`Полтава — ${formatMoney(deliveryPricing.local)}. Розсошенці, Щербані та Горбанівка — теж ${formatMoney(deliveryPricing.local)}. Інше передмістя — від ${formatMoney(deliveryPricing.baseOutside)}; точну суму порахуємо за адресою.`
         :quote.zone==='distance'
-          ?`${formatMoney(quote.amount)} · ${quote.distanceKm.toFixed(1).replace('.',',')} км за межами Полтави. Базові ${deliveryPricing.includedKm} км — ${formatMoney(deliveryPricing.baseOutside)}, далі +${deliveryPricing.perKm} грн/км.`
+          ?`Доставка за цією адресою — ${formatMoney(quote.amount)}. Сума вже врахована у бронюванні.`
           :`${formatMoney(quote.amount)} включає доставку техніки до вас і її повернення назад.`;
     setTextIfChanged(address,text);
   }
@@ -127,10 +127,10 @@ function renderDeliveryFee(){
     const deliveryRow=[...summary.querySelectorAll(':scope > div')].find(el=>/Доставка/.test(el.querySelector('span')?.textContent||''));
     if(deliveryRow){
       const strong=deliveryRow.querySelector('strong');
-      if(strong)setTextIfChanged(strong,manualQuote?`${formatMoney(deliveryPricing.local)} або ${formatMoney(deliveryPricing.baseOutside)}`:quote.quoteRequired?'за погодженням':quote.pending?`${formatMoney(deliveryPricing.local)} або ${formatMoney(deliveryPricing.baseOutside)}`:formatMoney(quote.amount));
+      if(strong)setTextIfChanged(strong,manualQuote?'після підтвердження':quote.quoteRequired?'за погодженням':quote.pending?formatMoney(deliveryPricing.local):formatMoney(quote.amount));
     }
     let note=summary.querySelector('.vx-summary-delivery-note');
-    if(quote.quoteRequired){if(!note){note=document.createElement('p');note.className='vx-summary-delivery-note';summary.querySelector('.booking-summary-total')?.insertAdjacentElement('afterend',note)}setTextIfChanged(note,manualQuote?`Адресу не розпізнано автоматично. Менеджер підтвердить тариф: Полтава — ${formatMoney(deliveryPricing.local)} або передмістя — ${formatMoney(deliveryPricing.baseOutside)}.`:'Вартість бронювання зараз показана без доставки. Тариф підтвердить менеджер до передоплати.');note.hidden=false}else if(note)note.hidden=true;
+    if(quote.quoteRequired){if(!note){note=document.createElement('p');note.className='vx-summary-delivery-note';summary.querySelector('.booking-summary-total')?.insertAdjacentElement('afterend',note)}setTextIfChanged(note,manualQuote?'Адресу не розпізнано автоматично. Менеджер підтвердить вартість доставки до передоплати.':'Вартість бронювання зараз показана без доставки. Тариф підтвердить менеджер до передоплати.');note.hidden=false}else if(note)note.hidden=true;
   }
   const mobile=document.querySelector('.booking-mobile-summary');
   if(mobile){
@@ -139,7 +139,7 @@ function renderDeliveryFee(){
     const selected=row.querySelector('button.is-selected');
     const isDelivery=Boolean(selected&&/Доставка/.test(selected.textContent||''));
     note.hidden=!isDelivery;
-    if(isDelivery)setTextIfChanged(note,manualQuote?`Доставка: ${formatMoney(deliveryPricing.local)} або ${formatMoney(deliveryPricing.baseOutside)} · підтвердить менеджер`:quote.quoteRequired?'Доставка — після підтвердження адреси':quote.pending?`Доставка: ${formatMoney(deliveryPricing.local)} або ${formatMoney(deliveryPricing.baseOutside)}`:`Доставка: ${formatMoney(quote.amount)}${quote.distanceKm>deliveryPricing.includedKm?` · ${quote.distanceKm.toFixed(1).replace('.',',')} км`:''}`);
+    if(isDelivery)setTextIfChanged(note,manualQuote?'Доставка — суму підтвердить менеджер':quote.quoteRequired?'Доставка — після підтвердження адреси':quote.pending?`Доставка по Полтаві: ${formatMoney(deliveryPricing.local)}`:`Доставка: ${formatMoney(quote.amount)}`);
   }
 }
 

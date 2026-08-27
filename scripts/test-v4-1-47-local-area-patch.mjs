@@ -25,9 +25,9 @@ for(const file of routes){
 }
 const delivery=read('dostavka/index.html'), faq=read('faq/index.html');
 ok('delivery page states the four-settlement 250 tier',delivery.includes('Полтава, Розсошенці, Щербані та Горбанівка — 250 грн'));
-ok('delivery page keeps distance tariff after local tier',delivery.includes('до 10 км')&&delivery.includes('+15 грн'));
-ok('FAQ states distance pricing outside Poltava',faq.includes('до 10 км')&&faq.includes('+15 грн'));
-ok('outside-zone pricing remains agreement based',delivery.includes('Понад 30 км')&&delivery.includes('погодж')&&faq.includes('Понад 30 км')&&faq.includes('погодж'));
+ok('delivery page separates other suburb pricing after local tier',delivery.includes('Інше передмістя — від 350 грн')&&delivery.includes('до передоплати'));
+ok('FAQ separates other suburb pricing',faq.includes('Інше передмістя — від 350 грн')&&faq.includes('до передоплати'));
+ok('outside-zone pricing remains confirmation based',delivery.includes('суму підтвердимо до передоплати')&&faq.includes('суму підтвердимо до передоплати'));
 ok('no suburb doorway pages were introduced',!fs.existsSync('orenda-puzzi-rozsoshentsi')&&!fs.existsSync('orenda-puzzi-shcherbani')&&!fs.existsSync('orenda-puzzi-horbanivka'));
 if(failed)process.exit(1);
 console.log(`v4.1.47.1 local area patch: ${n}/${n} OK`);

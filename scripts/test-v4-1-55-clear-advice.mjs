@@ -22,7 +22,8 @@ const banned=[
   'нейтралізатор','екстракцією','температуростійк','зчеплен'
 ];
 
-ok('release is coherent',release.version==='4.1.55'&&release.build===4155&&pkg.version===release.version);
+const versionAtLeast=(value,min)=>value.split('.').map(Number).reduce((n,x,i)=>n+(x||0)*[1e6,1e3,1][i],0)>=min.split('.').map(Number).reduce((n,x,i)=>n+(x||0)*[1e6,1e3,1][i],0);
+ok('release is coherent',versionAtLeast(release.version,'4.1.55')&&Number(release.build)>=4155&&pkg.version===release.version);
 ok('all public advice articles are covered',articleFiles.length===8);
 for(const term of banned)ok(`advice avoids jargon: ${term}`,!articles.toLowerCase().includes(term.toLowerCase()));
 ok('SPOT FIX names Puzzi in plain language',articles.includes('промийте це місце чистою водою за допомогою Kärcher Puzzi'));

@@ -19,7 +19,7 @@ const photonTimeoutMs=Number(photonTimeout);
 ok('public loads address helper',pub.includes(`/assets/address-autocomplete.js?v=${build}`)&&pub.includes(`/assets/address-autocomplete.css?v=${build}`));
 ok('admin loads address helper',admin.includes(`/assets/address-autocomplete.js?v=${build}`)&&admin.includes(`/assets/address-autocomplete.css?v=${build}`));
 ok('autocomplete endpoint is Supabase proxy',/^https:\/\/[^/]+\.supabase\.co\/functions\/v1\/vacleaner-address-v1$/.test(endpoint));
-ok('manual fallback keeps booking possible',runtime.includes('Адреса введена вручну')&&runtime.includes("setStatus(ctx,'manual','Введіть адресу вручну. Полтава — 250 грн, передмістя — 350 грн."));
+ok('manual fallback keeps booking possible',runtime.includes('Адреса введена вручну')&&runtime.includes('Менеджер перевірить її й підтвердить вартість доставки до передоплати.'));
 ok('house number validation exists',runtime.includes('Вкажіть вулицю і номер будинку')&&runtime.includes('hasHouseNumber'));
 ok('delivery details are separate',runtime.includes('Під’їзд / орієнтир')&&runtime.includes('DETAILS_SEPARATOR'));
 ok('public create submits composed address',bookingChunk.includes('globalThis.__VAC_DELIVERY_ADDRESS__?.(S)'));

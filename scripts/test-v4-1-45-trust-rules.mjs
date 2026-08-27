@@ -9,7 +9,7 @@ ok('250 zone settlements',['Полтава','Розсошенці','Щербан
 ok('address helper exposes verification meta',address.includes('__VAC_DELIVERY_META__')&&address.includes('__VAC_ADMIN_DELIVERY_META__')&&address.includes('vacAddressSettlement'));
 ok('public payload sends verified address',chunk.includes('deliveryAddressVerified:(globalThis.__VAC_DELIVERY_META__?.().verified===true)'));
 ok('public backend has agreement fallback',bookingEdge.includes('zone: "agreement"')&&bookingEdge.includes('deliveryQuoteRequired'));
-ok('public summary has tiered copy',publicSlots.includes('Полтава ${formatMoney(deliveryPricing.local)} · передмістя ${formatMoney(deliveryPricing.baseOutside)}')&&publicSlots.includes('тариф підтвердить менеджер'));
+ok('public summary leads with Poltava and separates suburb pricing',publicSlots.includes('const fallbackTariffs=`Полтава ${formatMoney(deliveryPricing.local)}`')&&publicSlots.includes('Інше передмістя — від ${formatMoney(deliveryPricing.baseOutside)}')&&publicSlots.includes('Менеджер підтвердить суму до передоплати.'));
 ok('admin has distance delivery tariffs',admin.includes('deliveryLocal')&&admin.includes('deliveryBaseOutside')&&admin.includes('deliveryPerKm')&&admin.includes('deliveryAmountOverride'));
 ok('cancel backend stores 72h policy',adminEdge.includes('hoursBefore >= 72')&&adminEdge.includes('prepayment_retained'));
 ok('cancel finance respects retained prepayment',admin.includes('retainedPrepayment')&&admin.includes('менше 3 діб'));
