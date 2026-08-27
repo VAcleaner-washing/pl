@@ -19,7 +19,8 @@ ok('core upholstery process includes 5–10 minute dwell',read(articleFiles[0]).
 ok('core process explicitly collects moisture before adding more solution',read(articleFiles[0]).includes('Спочатку зберіть вологу — без нової подачі')&&read(articleFiles[1]).includes('спочатку заберіть вологу'));
 ok('SPOT FIX uses white-towel blotting',read('blog/yak-vyvesty-plyamu-z-dyvana/index.html').includes('білою серветкою від краю до центру'));
 ok('STAIN OX has clear dwell and Puzzi rinse',read('blog/yak-vyvesty-plyamu-z-dyvana/index.html').includes('10–15 хвилин')&&read('blog/yak-vyvesty-plyamu-z-dyvana/index.html').includes('промийте чистою водою')&&read('blog/yak-vyvesty-plyamu-z-dyvana/index.html').includes('Puzzi'));
-ok('Jimmy is described as more than a normal vacuum',read('blog/yak-pochystyty-matrats-vdoma/index.html').includes('частинки шкіри')&&read('blog/yak-pochystyty-matrats-vdoma/index.html').includes('пилових кліщів')&&read('blog/yak-pochystyty-matrats-vdoma/index.html').includes('до 60 °C'));
+const mattressArticle=read('blog/yak-pochystyty-matrats-vdoma/index.html');
+ok('Jimmy keeps a distinct dry-preparation role without technical overclaim',mattressArticle.includes('глибшу суху підготовку матраца')&&mattressArticle.includes('рухома щітка')&&mattressArticle.includes('пилосос одразу їх збирає')&&!mattressArticle.includes('до 60 °C'));
 ok('window robot article requires power and safety rope',read('blog/yak-pomyty-vikna-robotom/index.html').includes('Живлення і страхувальний трос — обов’язкові'));
 ok('browser E2E checks Smart Entry hover contrast',read('scripts/e2e_smoke.py').includes('Smart Entry hover contrast stays readable'));
 console.log(`v4.1.50 full QA: ${pass}/${pass+fail.length} OK`);if(fail.length){console.error(JSON.stringify({fail},null,2));process.exit(1)}
