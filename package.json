@@ -97,6 +97,7 @@
     "test:v4.2.5-baseline-compatibility": "node scripts/test-v4-2-5-baseline-compatibility.mjs",
     "test:v4.2.7-backend-route-cleanup": "node scripts/test-v4-2-7-backend-route-cleanup.mjs",
     "test:v4.2.8-recovery": "node scripts/test-v4-2-8-admin-recovery.mjs",
-    "test:v4.2.9-referral-analytics": "node scripts/test-v4-2-9-referral-analytics.mjs"
+    "test:v4.2.9-referral-analytics": "node scripts/test-v4-2-9-referral-analytics.mjs",
+    "test:v4.2.10-referral-phone": "node scripts/test-v4-2-10-referral-phone-telegram.mjs"
   }
 }
