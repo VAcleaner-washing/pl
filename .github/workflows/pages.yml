@@ -156,6 +156,12 @@ jobs:
         run: npm run test:v4.2.8-recovery
       - name: Verify v4.2.9 referral client hub and conversion analytics
         run: npm run test:v4.2.9-referral-analytics
+      - name: Verify v4.2.10 Telegram phone fallback
+        run: npm run test:v4.2.10-referral-phone
+      - name: Verify v4.2.11 admin cache bust
+        run: npm run test:v4.2.11-cache-bust
+      - name: Verify v4.2.12 referral client UX polish
+        run: npm run test:v4.2.12-referral-ux
       - name: Re-run admin functional contracts before architecture build
         run: |
           npm run test:admin-labels

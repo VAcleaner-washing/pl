@@ -23,6 +23,6 @@ ok('referral modal exposes copy code and text',admin.includes('copyReferralCode'
 ok('referral modal explains missing contact',admin.includes('Немає контакту для відправки')&&admin.includes('Додати контакт'));
 ok('referral modal shows referral and reward histories',admin.includes('Хто скористався кодом')&&admin.includes('Бонуси клієнта'));
 ok('send confirmation is explicit',admin.includes("btn.textContent='Так, надіслано'"));
-ok('referral analytics responsive styling exists',css.includes('.referral-analytics-panel')&&css.includes('.referral-share-stats-4'));
+ok('referral analytics responsive styling exists',css.includes('.referral-analytics-panel')&&css.includes('.referral-summary-line'));
 ok('production security inventory includes referral messages',inventory.tables.includes('vacleaner_referral_messages')&&inventory.clientDenyPolicies?.total===19&&inventory.clientDenyPolicies?.restrictive===13);
 console.log(`\n${pass}/${pass+fail} checks passed`);if(fail)process.exit(1);
