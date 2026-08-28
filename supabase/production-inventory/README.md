@@ -4,22 +4,22 @@ This folder records the production dependencies verified for the current VAclean
 
 ## Runtime graph
 
-- Public site calls `vacleaner-booking-v5`.
-- `vacleaner-booking-v5` is the active direct public availability/create entrypoint. It applies current catalog, slots, deposit, loyalty and promo rules and persists booking resources itself.
-- Admin PWA calls `vacleaner-admin-bookings-v3` for authoritative booking/finance actions.
-- `vacleaner-admin-data-v1` handles non-financial client data, production health and retention-campaign management.
+- Public booking calls `vacleaner-booking-v5` directly.
+- Admin PWA calls `vacleaner-admin-bookings-v4` directly. v4 contains the booking/finance implementation itself; it does **not** proxy `vacleaner-admin-bookings-v3`.
+- `vacleaner-admin-data-v1` handles non-financial client data, analytics, referral summary data and retention support.
+- `vacleaner-campaigns-v1` may call `vacleaner-sms-v2` only for actual SMS delivery. This is an intentional service boundary, not an admin compatibility proxy.
 - Notifications use `vacleaner-push`; admin create/issue/return actions notify only the other identified manager device.
 - Public/admin shared configuration uses `vacleaner-settings`.
-- Legacy VAcleaner Edge Functions remain deployed until production-usage evidence proves they are safe to remove.
+- Legacy booking/admin Edge Functions remain deployed only as rollback assets. Active frontend code must not reference them.
 
-The manifest stores the exact active production versions and deployment hashes. Release 4.0.26 deploys `vacleaner-push` v3 and `vacleaner-admin-bookings-v3` v16 for peer-only manager push notifications.
+## Authentication resilience
+
+Active manager-facing VAcleaner functions use custom authentication inside the function: bearer token -> `auth.getUser(token)` -> admin allowlist (`admin_users` or the retained `vacleaner_admin_users` mirror). Supabase gateway JWT verification is disabled for these active manager functions to avoid false 401 responses during gateway/JWT refresh incidents. This does **not** make the admin API public: missing/invalid tokens still return 401 and non-admin users return 403.
 
 ## Database access model
 
-All twelve `vacleaner_*` tables have RLS enabled. `anon` and `authenticated` have no direct table grants. Every VAcleaner table has an explicit client-deny policy; Edge Functions validate their own request contract and use `service_role` for database work.
+All VAcleaner tables use RLS. Browser access is denied by default except the deliberately public address-cache surface recorded in `database-security.json`. Edge Functions validate their own request contracts and use `service_role` for database work only after the relevant authentication checks.
 
-Release 3.0.30 adds isolated VAcleaner retention tables: `vacleaner_campaigns`, `vacleaner_promo_codes`, and `vacleaner_promo_redemptions`. Promo redemption is serialized by `vacleaner_redeem_promo`; ordinary booking edits are protected by `vacleaner_preserve_best_promo_discount_trg` so a better already-applied promo cannot disappear silently. Explicit manual manager discount remains an intentional override.
+## Legacy policy
 
-## Admin allowlist
-
-The active Edge Functions read `public.admin_users`. `public.vacleaner_admin_users` is retained as a legacy mirror. It is intentionally not dropped because this Supabase project is shared; VA HOME objects are outside this VAcleaner release and are not modified.
+`vacleaner-admin-bookings`, `-v2` and `-v3` plus old public booking versions are rollback-only. They are tracked in the inventory but excluded from `frontendEntrypoints` and the active dependency graph. A release test fails if an active frontend route points back to a legacy admin function or if an active admin function proxies another admin function.

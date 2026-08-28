@@ -9,26 +9,21 @@ if(!fs.existsSync(dbFile))errors.push('production database security inventory is
 if(!errors.length){
   const inventory=JSON.parse(fs.readFileSync(file,'utf8'));
   const bySlug=new Map(inventory.functions.map(item=>[item.slug,item]));
-  const required=['vacleaner-booking-v5','vacleaner-booking-v4','vacleaner-admin-bookings-v3','vacleaner-admin-bookings-v2','vacleaner-admin-bookings','vacleaner-settings','vacleaner-push','vacleaner-admin-data-v1','vacleaner-campaigns-v1','vacleaner-reminders-v1'];
-  for(const slug of required){const row=bySlug.get(slug);if(!row||row.status!=='ACTIVE'||!/^[a-f0-9]{64}$/.test(row.sha256||''))errors.push(`invalid production function inventory: ${slug}`)}
   const expectedVersions={
-    'vacleaner-booking-v5':24,
-    'vacleaner-admin-bookings-v3':30,
-    'vacleaner-admin-data-v1':15,
-    'vacleaner-campaigns-v1':18,
-    'vacleaner-reminders-v1':8,
-    'vacleaner-push':7,
-    'vacleaner-settings':19,
-    'vacleaner-address-v1':10,
-    'vacleaner-booking-promo-v1':2,
-    'vacleaner-admin-bookings-v4':2,
+    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':3,'vacleaner-settings':19,'vacleaner-push':8,
+    'vacleaner-admin-data-v1':16,'vacleaner-campaigns-v1':19,'vacleaner-reminders-v1':8,'vacleaner-booking-promo-v1':3,
+    'vacleaner-address-v1':10,'vacleaner-sms-v2':5,'vacleaner-sms-audit-v1':2,'vacleaner-status-correction-v1':7,
+    'vacleaner-customer-documents-v1':5,'vacleaner-extend-rental-v1':5,
   };
-  for(const [slug,version] of Object.entries(expectedVersions)){
-    const row=bySlug.get(slug);
-    if(!row||row.status!=='ACTIVE'||row.version!==version)errors.push(`production ${slug} must be ACTIVE v${version}`);
-  }
-  if(bySlug.get('vacleaner-booking-v5')?.verifyJwt!==false)errors.push('public booking v5 must remain public (verifyJwt=false)');
-  for(const slug of ['vacleaner-admin-bookings-v3','vacleaner-admin-data-v1','vacleaner-campaigns-v1','vacleaner-push','vacleaner-booking-promo-v1','vacleaner-admin-bookings-v4'])if(bySlug.get(slug)?.verifyJwt!==true)errors.push(`${slug} must remain authenticated`);
+  for(const [slug,version] of Object.entries(expectedVersions)){const row=bySlug.get(slug);if(!row||row.status!=='ACTIVE'||row.version!==version||!/^[a-f0-9]{64}$/.test(row.sha256||''))errors.push(`production ${slug} inventory mismatch`)}
+  if(inventory.frontendEntrypoints?.adminBookings!=='vacleaner-admin-bookings-v4')errors.push('admin frontend entrypoint must be vacleaner-admin-bookings-v4');
+  if(inventory.frontendEntrypoints?.publicBooking!=='vacleaner-booking-v5')errors.push('public booking entrypoint must be vacleaner-booking-v5');
+  const adminFunctions=['vacleaner-admin-bookings-v4','vacleaner-admin-data-v1','vacleaner-campaigns-v1','vacleaner-sms-v2','vacleaner-sms-audit-v1','vacleaner-booking-promo-v1','vacleaner-status-correction-v1','vacleaner-customer-documents-v1','vacleaner-extend-rental-v1','vacleaner-push'];
+  for(const slug of adminFunctions)if(bySlug.get(slug)?.verifyJwt!==false)errors.push(`${slug} must use internal auth with gateway verifyJwt=false`);
+  for(const slug of adminFunctions){const p=path.join(root,'supabase','functions',slug,'index.ts');const code=fs.readFileSync(p,'utf8');if(!code.includes('auth.getUser(')||!(code.includes('admin_users')||code.includes('vacleaner_admin_users')))errors.push(`${slug} internal admin authentication missing`)}
+  const v4=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v4','index.ts'),'utf8');
+  if(v4.includes('/functions/v1/vacleaner-admin-bookings-v3'))errors.push('active v4 must not proxy v3');
+  if((inventory.dependencyGraph?.['vacleaner-admin-bookings-v4']||[]).some(x=>String(x).startsWith('vacleaner-admin-bookings')))errors.push('active admin route must not depend on another admin-bookings function');
   for(const [caller,deps] of Object.entries(inventory.dependencyGraph||{}))for(const dep of deps)if(!bySlug.has(dep))errors.push(`untracked dependency ${caller} -> ${dep}`);
 
   const db=JSON.parse(fs.readFileSync(dbFile,'utf8'));
@@ -38,10 +33,8 @@ if(!errors.length){
   if(db.rlsEnabledOnAllTables!==true)errors.push('RLS is not recorded as enabled on every VAcleaner table');
   if(Number(db.directGrants?.anonPrivilegeRows)!==7||Number(db.directGrants?.authenticatedPrivilegeRows)!==7||JSON.stringify(db.directGrants?.tables)!==JSON.stringify(['vacleaner_address_cache']))errors.push('database direct-grant inventory drifted; only RLS-default-denied address cache may retain browser grants');
   if(Number(db.clientDenyPolicies?.total)!==18||Number(db.clientDenyPolicies?.restrictive)!==12)errors.push('database client-deny policy inventory drifted');
-  const fn=new Set(db.productionFunctions||[]);
-  for(const token of ['vacleaner_apply_reservation','vacleaner_operational_health','vacleaner_redeem_promo','vacleaner_preserve_best_promo_discount','vacleaner_slot_index'])if(![...fn].some(name=>name.startsWith(token+'(')))errors.push(`production database function missing from inventory: ${token}`);
-  const triggers=new Set(db.bookingTriggers||[]);
-  for(const trigger of ['vacleaner_booking_audit_trigger','vacleaner_preserve_best_promo_discount_trg'])if(!triggers.has(trigger))errors.push(`production booking trigger missing from inventory: ${trigger}`);
+  const fn=new Set(db.productionFunctions||[]);for(const token of ['vacleaner_apply_reservation','vacleaner_operational_health','vacleaner_redeem_promo','vacleaner_preserve_best_promo_discount','vacleaner_slot_index'])if(![...fn].some(name=>name.startsWith(token+'(')))errors.push(`production database function missing from inventory: ${token}`);
+  const triggers=new Set(db.bookingTriggers||[]);for(const trigger of ['vacleaner_booking_audit_trigger','vacleaner_preserve_best_promo_discount_trg'])if(!triggers.has(trigger))errors.push(`production booking trigger missing from inventory: ${trigger}`);
   if(db.retentionVerification?.sleepingDays!==180)errors.push('retention inventory does not record the 180-day sleeping threshold');
   if(db.referralVerification?.friendDiscount!==100||db.referralVerification?.earnedReward!==150||db.referralVerification?.rewardLifetimeDays!==150||db.referralVerification?.expiryReminderDays!==30)errors.push('referral production inventory does not match v4.2.1 business rules');
 }
