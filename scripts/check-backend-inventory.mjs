@@ -10,7 +10,7 @@ if(!errors.length){
   const inventory=JSON.parse(fs.readFileSync(file,'utf8'));
   const bySlug=new Map(inventory.functions.map(item=>[item.slug,item]));
   const expectedVersions={
-    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':3,'vacleaner-settings':19,'vacleaner-push':8,
+    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':4,'vacleaner-settings':19,'vacleaner-push':8,
     'vacleaner-admin-data-v1':16,'vacleaner-campaigns-v1':19,'vacleaner-reminders-v1':8,'vacleaner-booking-promo-v1':3,
     'vacleaner-address-v1':10,'vacleaner-sms-v2':5,'vacleaner-sms-audit-v1':2,'vacleaner-status-correction-v1':7,
     'vacleaner-customer-documents-v1':5,'vacleaner-extend-rental-v1':5,
@@ -27,12 +27,12 @@ if(!errors.length){
   for(const [caller,deps] of Object.entries(inventory.dependencyGraph||{}))for(const dep of deps)if(!bySlug.has(dep))errors.push(`untracked dependency ${caller} -> ${dep}`);
 
   const db=JSON.parse(fs.readFileSync(dbFile,'utf8'));
-  const expectedTables=['vacleaner_address_cache','vacleaner_admin_users','vacleaner_booking_audit','vacleaner_booking_resources','vacleaner_bookings','vacleaner_campaigns','vacleaner_customers','vacleaner_expenses','vacleaner_inventory','vacleaner_promo_codes','vacleaner_promo_redemptions','vacleaner_push_config','vacleaner_push_subscriptions','vacleaner_referral_codes','vacleaner_referral_rewards','vacleaner_referral_uses','vacleaner_settings','vacleaner_sms_dispatch_recipients','vacleaner_sms_dispatches'];
+  const expectedTables=['vacleaner_address_cache','vacleaner_admin_users','vacleaner_booking_audit','vacleaner_booking_resources','vacleaner_bookings','vacleaner_campaigns','vacleaner_customers','vacleaner_expenses','vacleaner_inventory','vacleaner_promo_codes','vacleaner_promo_redemptions','vacleaner_push_config','vacleaner_push_subscriptions','vacleaner_referral_codes','vacleaner_referral_messages','vacleaner_referral_rewards','vacleaner_referral_uses','vacleaner_settings','vacleaner_sms_dispatch_recipients','vacleaner_sms_dispatches'];
   const actualTables=[...(db.tables||[])].sort();
   if(JSON.stringify(actualTables)!==JSON.stringify([...expectedTables].sort()))errors.push('database table inventory does not match current authoritative vacleaner_* tables');
   if(db.rlsEnabledOnAllTables!==true)errors.push('RLS is not recorded as enabled on every VAcleaner table');
   if(Number(db.directGrants?.anonPrivilegeRows)!==7||Number(db.directGrants?.authenticatedPrivilegeRows)!==7||JSON.stringify(db.directGrants?.tables)!==JSON.stringify(['vacleaner_address_cache']))errors.push('database direct-grant inventory drifted; only RLS-default-denied address cache may retain browser grants');
-  if(Number(db.clientDenyPolicies?.total)!==18||Number(db.clientDenyPolicies?.restrictive)!==12)errors.push('database client-deny policy inventory drifted');
+  if(Number(db.clientDenyPolicies?.total)!==19||Number(db.clientDenyPolicies?.restrictive)!==13)errors.push('database client-deny policy inventory drifted');
   const fn=new Set(db.productionFunctions||[]);for(const token of ['vacleaner_apply_reservation','vacleaner_operational_health','vacleaner_redeem_promo','vacleaner_preserve_best_promo_discount','vacleaner_slot_index'])if(![...fn].some(name=>name.startsWith(token+'(')))errors.push(`production database function missing from inventory: ${token}`);
   const triggers=new Set(db.bookingTriggers||[]);for(const trigger of ['vacleaner_booking_audit_trigger','vacleaner_preserve_best_promo_discount_trg'])if(!triggers.has(trigger))errors.push(`production booking trigger missing from inventory: ${trigger}`);
   if(db.retentionVerification?.sleepingDays!==180)errors.push('retention inventory does not record the 180-day sleeping threshold');

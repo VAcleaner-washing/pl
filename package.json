@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.8",
+  "version": "4.2.9",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -96,6 +96,7 @@
     "test:v4.2.2-hardening": "node scripts/test-v4-2-2-hardening.mjs",
     "test:v4.2.5-baseline-compatibility": "node scripts/test-v4-2-5-baseline-compatibility.mjs",
     "test:v4.2.7-backend-route-cleanup": "node scripts/test-v4-2-7-backend-route-cleanup.mjs",
-    "test:v4.2.8-recovery": "node scripts/test-v4-2-8-admin-recovery.mjs"
+    "test:v4.2.8-recovery": "node scripts/test-v4-2-8-admin-recovery.mjs",
+    "test:v4.2.9-referral-analytics": "node scripts/test-v4-2-9-referral-analytics.mjs"
   }
 }

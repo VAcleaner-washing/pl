@@ -152,6 +152,10 @@ jobs:
         run: |
           npm run test:v4.2.7-backend-route-cleanup
           npm run check:backend
+      - name: Verify v4.2.8 admin self-recovery
+        run: npm run test:v4.2.8-recovery
+      - name: Verify v4.2.9 referral client hub and conversion analytics
+        run: npm run test:v4.2.9-referral-analytics
       - name: Re-run admin functional contracts before architecture build
         run: |
           npm run test:admin-labels

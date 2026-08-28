@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-27T15:45:00Z",
+  "capturedAt": "2026-08-28T15:59:00Z",
   "postgresVersion": "17.6",
   "tables": [
     "vacleaner_address_cache",
@@ -16,6 +16,7 @@
     "vacleaner_push_config",
     "vacleaner_push_subscriptions",
     "vacleaner_referral_codes",
+    "vacleaner_referral_messages",
     "vacleaner_referral_rewards",
     "vacleaner_referral_uses",
     "vacleaner_settings",
@@ -65,9 +66,9 @@
     "vacleaner_preserve_best_promo_discount_trg"
   ],
   "clientDenyPolicies": {
-    "total": 18,
-    "restrictive": 12,
-    "model": "Every current vacleaner_* table is RLS-enabled. Referral tables use explicit restrictive ALL-deny policies; address cache has no browser allow policy and therefore defaults to deny."
+    "total": 19,
+    "restrictive": 13,
+    "model": "Every current vacleaner_* table is RLS-enabled. Referral tables, including referral message analytics, use explicit restrictive ALL-deny policies; address cache has no browser allow policy and therefore defaults to deny."
   },
   "referralVerification": {
     "codes": 294,
@@ -77,7 +78,8 @@
     "earnedReward": 150,
     "rewardLifetimeDays": 150,
     "expiryReminderDays": 30,
-    "verifiedAt": "2026-08-27T15:45:00Z"
+    "verifiedAt": "2026-08-28T15:59:00Z",
+    "messages": 0
   },
   "retentionVerification": {
     "sleepingDays": 180,

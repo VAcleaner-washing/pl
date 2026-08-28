@@ -363,22 +363,39 @@ async function upsertCustomer(supabase: ReturnType<typeof createClient>, body: R
 async function referralSummaryForPhone(supabase: ReturnType<typeof createClient>, phoneValue: unknown) {
   const phone = normalizePhone(phoneValue); if (!phone) return null;
   await expireReferralRewards(supabase);
-  const [{ count: completed, error: completedError }, { data: profile, error: profileError }, { data: rewards, error: rewardsError }, { data: uses, error: usesError }] = await Promise.all([
+  const [{ count: completed, error: completedError }, { data: profile, error: profileError }, { data: rewards, error: rewardsError }, { data: uses, error: usesError }, { data: messages, error: messagesError }] = await Promise.all([
     supabase.from("vacleaner_bookings").select("id", { count: "exact", head: true }).eq("customer_phone", phone).eq("status", "completed"),
     supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel").eq("phone", phone).maybeSingle(),
-    supabase.from("vacleaner_referral_rewards").select("id,amount,status,activated_at,expires_at,used_at,used_booking_id,reminded_at,referred_phone").eq("referrer_phone", phone).order("expires_at", { ascending: true }).limit(200),
-    supabase.from("vacleaner_referral_uses").select("id,status,created_at,completed_at,referred_phone,booking_id,friend_discount_amount").eq("referrer_phone", phone).order("created_at", { ascending: false }).limit(200),
+    supabase.from("vacleaner_referral_rewards").select("id,amount,status,activated_at,expires_at,used_at,used_booking_id,reminded_at,referred_phone,source_booking_id").eq("referrer_phone", phone).order("activated_at", { ascending: false }).limit(200),
+    supabase.from("vacleaner_referral_uses").select("id,referral_code,status,created_at,completed_at,cancelled_at,referred_phone,booking_id,friend_discount_amount").eq("referrer_phone", phone).order("created_at", { ascending: false }).limit(200),
+    supabase.from("vacleaner_referral_messages").select("id,kind,channel,reward_id,sent_at").eq("customer_phone", phone).order("sent_at", { ascending: false }).limit(200),
   ]);
-  if (completedError || profileError || rewardsError || usesError) throw completedError || profileError || rewardsError || usesError;
+  if (completedError || profileError || rewardsError || usesError || messagesError) throw completedError || profileError || rewardsError || usesError || messagesError;
+  const referredPhones = [...new Set([...(uses || []).map((row: any) => normalizePhone(row.referred_phone)), ...(rewards || []).map((row: any) => normalizePhone(row.referred_phone))].filter(Boolean))];
+  const bookingIds = [...new Set([...(uses || []).map((row: any) => String(row.booking_id || "")), ...(rewards || []).flatMap((row: any) => [String(row.source_booking_id || ""), String(row.used_booking_id || "")])].filter(validBookingId))];
+  let referredMap = new Map<string, any>(), bookingMap = new Map<string, any>();
+  const [referredResult, bookingResult] = await Promise.all([
+    referredPhones.length ? supabase.from("vacleaner_customers").select("phone,name,instagram,telegram").in("phone", referredPhones) : Promise.resolve({ data: [], error: null }),
+    bookingIds.length ? supabase.from("vacleaner_bookings").select("id,booking_code,status,total_amount,created_at,start_date,return_date,completed_at,customer_name,customer_phone,source").in("id", bookingIds) : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (referredResult.error || bookingResult.error) throw referredResult.error || bookingResult.error;
+  referredMap = new Map((referredResult.data || []).map((row: any) => [normalizePhone(row.phone), row]));
+  bookingMap = new Map((bookingResult.data || []).map((row: any) => [String(row.id), row]));
+  const enrichedUses = (uses || []).map((row: any) => ({ ...row, referred: referredMap.get(normalizePhone(row.referred_phone)) || null, booking: bookingMap.get(String(row.booking_id || "")) || null }));
+  const enrichedRewards = (rewards || []).map((row: any) => ({ ...row, referred: referredMap.get(normalizePhone(row.referred_phone)) || null, sourceBooking: bookingMap.get(String(row.source_booking_id || "")) || null, usedBooking: bookingMap.get(String(row.used_booking_id || "")) || null }));
   const code = Number(completed || 0) > 0 ? await ensureReferralCode(supabase, phone) : null;
-  const activeRewards = (rewards || []).filter((row: any) => row.status === "active" && new Date(row.expires_at).getTime() > Date.now());
+  const activeRewards = enrichedRewards.filter((row: any) => row.status === "active" && new Date(row.expires_at).getTime() > Date.now());
+  const inviteMessages = (messages || []).filter((row: any) => row.kind === "program_invite");
+  const earnedRewardAmount = enrichedRewards.filter((row: any) => row.status !== "cancelled").reduce((sum: number, row: any) => sum + Number(row.amount || 0), 0);
   return {
     phone, code: code?.code || null, completedOrders: Number(completed || 0),
     profile: profile || null,
-    referrals: uses || [], completedReferrals: (uses || []).filter((row: any) => row.status === "completed").length,
-    rewards: rewards || [], activeRewards, activeRewardCount: activeRewards.length,
+    messages: messages || [], inviteCount: inviteMessages.length, lastInvite: inviteMessages[0] || null,
+    referrals: enrichedUses, completedReferrals: enrichedUses.filter((row: any) => row.status === "completed").length,
+    rewards: enrichedRewards, activeRewards, activeRewardCount: activeRewards.length,
     activeRewardAmount: activeRewards.reduce((sum: number, row: any) => sum + Number(row.amount || 0), 0),
-    nextExpiry: activeRewards[0]?.expires_at || null,
+    earnedRewardAmount,
+    nextExpiry: activeRewards.slice().sort((a: any, b: any) => String(a.expires_at).localeCompare(String(b.expires_at)))[0]?.expires_at || null,
   };
 }
 
@@ -511,6 +528,24 @@ Deno.serve(async (request: Request) => {
       return json({ referral: summary });
     }
 
+    if (action === "referral_analytics") {
+      await expireReferralRewards(supabase);
+      const [{ data: messages, error: messagesError }, { data: uses, error: usesError }, { data: rewards, error: rewardsError }] = await Promise.all([
+        supabase.from("vacleaner_referral_messages").select("id,customer_phone,kind,channel,reward_id,sent_at").order("sent_at", { ascending: false }).limit(5000),
+        supabase.from("vacleaner_referral_uses").select("id,referral_code,referrer_phone,referred_phone,booking_id,friend_discount_amount,status,created_at,completed_at,cancelled_at").order("created_at", { ascending: false }).limit(5000),
+        supabase.from("vacleaner_referral_rewards").select("id,referrer_phone,referred_phone,source_booking_id,amount,status,activated_at,expires_at,used_booking_id,used_at,reminded_at").order("activated_at", { ascending: false }).limit(5000),
+      ]);
+      if (messagesError || usesError || rewardsError) throw messagesError || usesError || rewardsError;
+      const phones = [...new Set([...(messages || []).map((row: any) => normalizePhone(row.customer_phone)), ...(uses || []).flatMap((row: any) => [normalizePhone(row.referrer_phone), normalizePhone(row.referred_phone)]), ...(rewards || []).flatMap((row: any) => [normalizePhone(row.referrer_phone), normalizePhone(row.referred_phone)])].filter(Boolean))];
+      const bookingIds = [...new Set([...(uses || []).map((row: any) => String(row.booking_id || "")), ...(rewards || []).flatMap((row: any) => [String(row.source_booking_id || ""), String(row.used_booking_id || "")])].filter(validBookingId))];
+      const [customerResult, bookingResult] = await Promise.all([
+        phones.length ? supabase.from("vacleaner_customers").select("phone,name,instagram,telegram,preferred_contact").in("phone", phones) : Promise.resolve({ data: [], error: null }),
+        bookingIds.length ? supabase.from("vacleaner_bookings").select("id,booking_code,status,total_amount,created_at,start_date,return_date,completed_at,customer_name,customer_phone,source").in("id", bookingIds) : Promise.resolve({ data: [], error: null }),
+      ]);
+      if (customerResult.error || bookingResult.error) throw customerResult.error || bookingResult.error;
+      return json({ messages: messages || [], uses: uses || [], rewards: rewards || [], customers: customerResult.data || [], bookings: bookingResult.data || [] });
+    }
+
     if (action === "referrals_expiring") {
       await expireReferralRewards(supabase);
       const now = new Date(), until = new Date(now.getTime() + 30 * 86400000).toISOString();
@@ -530,16 +565,18 @@ Deno.serve(async (request: Request) => {
       const phone = normalizePhone(body.phone), channel = ["telegram", "instagram"].includes(String(body.channel || "")) ? String(body.channel) : "";
       if (!phone || !channel) return json({ error: "invalid_referral_contact" }, 400);
       if (body.confirmed !== true) return json({ error: "confirmation_required" }, 409);
-      const now = new Date().toISOString(), rewardId = String(body.rewardId || "");
+      const now = new Date().toISOString(), rewardId = String(body.rewardId || ""), isReminder = validBookingId(rewardId);
       const customerPatch: Record<string, any> = { updated_at: now };
-      if (!validBookingId(rewardId)) { customerPatch.referral_sent_at = now; customerPatch.referral_sent_channel = channel; }
+      if (!isReminder) { customerPatch.referral_sent_at = now; customerPatch.referral_sent_channel = channel; }
       const { error: customerError } = await supabase.from("vacleaner_customers").update(customerPatch).eq("phone", phone);
       if (customerError) throw customerError;
-      if (validBookingId(rewardId)) { /* UUID validator is sufficient for reward ids too */
+      if (isReminder) {
         const { error: rewardError } = await supabase.from("vacleaner_referral_rewards").update({ reminded_at: now, updated_at: now }).eq("id", rewardId).eq("referrer_phone", phone).eq("status", "active");
         if (rewardError) throw rewardError;
       }
-      return json({ ok: true, sentAt: now, channel });
+      const { error: messageError } = await supabase.from("vacleaner_referral_messages").insert({ customer_phone: phone, kind: isReminder ? "reward_reminder" : "program_invite", channel, reward_id: isReminder ? rewardId : null, sent_at: now });
+      if (messageError) throw messageError;
+      return json({ ok: true, sentAt: now, channel, kind: isReminder ? "reward_reminder" : "program_invite" });
     }
 
     if (action === "detach_promo") {

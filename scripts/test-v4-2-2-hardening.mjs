@@ -17,7 +17,7 @@ ok('referral first-rental rule blocks prior active bookings',ref.includes('prior
 ok('completed referral rollback blocks already-used reward',status.includes('referral_reward_already_used')&&status.includes('rollbackCompletedReferral'));
 ok('completed referral rollback returns use to pending and cancels unused reward',status.includes('status: "pending", completed_at: null')&&status.includes('status: "cancelled", used_booking_id: null'));
 ok('re-completion resets reward usage/reminder state',ref.includes('used_booking_id: null, used_at: null, reminded_at: null'));
-ok('referral send is explicit two-step',adminJs.includes('bindReferralSendButton')&&adminJs.includes('Позначити надісланим')&&admin.includes('body.confirmed !== true'));
+ok('referral send is explicit two-step',adminJs.includes('bindReferralSendButton')&&adminJs.includes('Так, надіслано')&&admin.includes('body.confirmed !== true'));
 ok('referral send does not overwrite preferred contact',!admin.includes('const customerPatch: Record<string, any> = { preferred_contact: channel'));
 ok('v4.1.28 phone-promo assertion remains compatible',admin.includes('action === "create" ? await resolvePhonePromo'));
 ok('Smart Guide removes unnecessary technical jargon',!quiz.includes('кислотостійк')&&!quiz.includes('лугостійк')&&!quiz.includes('UV-світло й нагрівання до 60 °C')&&quiz.includes('1–2 проходи без подачі води'));
