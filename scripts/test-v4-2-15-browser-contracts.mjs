@@ -6,8 +6,9 @@ const css=fs.readFileSync('assets/admin-v250.css','utf8');
 const e2e=fs.readFileSync('scripts/e2e_smoke.py','utf8');
 const pwa=fs.readFileSync('scripts/pwa_visual_qa.py','utf8');
 const desktop=fs.readFileSync('scripts/final_desktop_visual_qa.py','utf8');
+const atLeast=(actual,target)=>{const a=String(actual).split('.').map(Number),b=String(target).split('.').map(Number);for(let i=0;i<Math.max(a.length,b.length);i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true};
 const checks=[
- ['release coherent',pkg.version===rel.version&&rel.version==='4.2.15'&&Number(rel.build)===4215],
+ ['release coherent',pkg.version===rel.version&&atLeast(rel.version,'4.2.15')&&Number(rel.build)>=4215],
  ['settings uses existing push device helper',js.includes('${h(pushDeviceName())}')&&!js.includes('getPushDeviceName()')],
  ['production health keeps stable browser selector',js.includes('health-card operational-health-card')],
  ['delivery settings own full desktop width',css.includes('.delivery-settings-card{grid-column:1/-1}')],
