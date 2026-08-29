@@ -370,6 +370,7 @@ async function upsertCustomer(supabase: ReturnType<typeof createClient>, body: R
     updated_at: new Date().toISOString(),
   };
   const address = cleanText(body.customerAddress ?? body.deliveryAddress, 220); if (address) customer.address = address;
+  if (body.customerAddressDetail !== undefined || body.deliveryAddressDetail !== undefined) customer.address_detail = cleanText(body.customerAddressDetail ?? body.deliveryAddressDetail, 180) || null;
   const documentNumber = cleanText(body.documentNumber, 80), documentType = cleanText(body.documentType, 40);
   if (documentNumber) {
     customer.document_number = documentNumber;
@@ -474,7 +475,7 @@ Deno.serve(async (request: Request) => {
 
     if (action === "clients") {
       const { data, error } = await supabase.from("vacleaner_customers")
-        .select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at")
+        .select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,address_detail,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at")
         .order("updated_at", { ascending: false }).limit(1000);
       if (error) throw error;
       return json({ customers: data || [] });
@@ -500,6 +501,7 @@ Deno.serve(async (request: Request) => {
         instagram: cleanText(body.customerInstagram, 80).replace(/^@/, "") || null,
         preferred_contact: ["phone", "telegram", "instagram"].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : (existing?.preferred_contact || "phone"),
         address: cleanText(body.customerAddress, 220) || null,
+        address_detail: cleanText(body.customerAddressDetail, 180) || null,
         document_type: documentType,
         document_number: documentNumber || null,
         document_verified_at: verified ? (existing?.document_verified_at || now) : null,
@@ -514,14 +516,14 @@ Deno.serve(async (request: Request) => {
       const bookingPatch = { customer_name: customerName, customer_phone: customerPhone, customer_telegram: row.telegram, customer_instagram: row.instagram, preferred_contact: row.preferred_contact, updated_at: now };
       const { error: bookingsError } = await supabase.from("vacleaner_bookings").update(bookingPatch).eq("customer_phone", originalPhone);
       if (bookingsError) throw bookingsError;
-      return json({ customer: { phone: customerPhone, name: customerName, telegram: row.telegram, instagram: row.instagram, preferred_contact: row.preferred_contact, address: row.address, document_type: row.document_type, document_number: row.document_number, document_verified_at: row.document_verified_at, updated_at: now } });
+      return json({ customer: { phone: customerPhone, name: customerName, telegram: row.telegram, instagram: row.instagram, preferred_contact: row.preferred_contact, address: row.address, address_detail: row.address_detail, document_type: row.document_type, document_number: row.document_number, document_verified_at: row.document_verified_at, updated_at: now } });
     }
 
     if (action === "lookup_customer") {
       const phone = normalizePhone(body.phone); if (!phone) return json({ customer: null });
       const [{ data: profile }, { data: orders, error }] = await Promise.all([
-        supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
-        supabase.from("vacleaner_bookings").select("id,customer_name,customer_telegram,customer_instagram,preferred_contact,fulfillment,fulfillment_address,product_label,start_date,return_date,status,hold_expires_at,total_amount,created_at").eq("customer_phone", phone).order("created_at", { ascending: false }).limit(100),
+        supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,address_detail,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
+        supabase.from("vacleaner_bookings").select("id,customer_name,customer_telegram,customer_instagram,preferred_contact,fulfillment,fulfillment_address,fulfillment_address_detail,product_label,start_date,return_date,status,hold_expires_at,total_amount,created_at").eq("customer_phone", phone).order("created_at", { ascending: false }).limit(100),
       ]);
       if (error) throw error;
       let promoRawBase = 0;
@@ -536,7 +538,7 @@ Deno.serve(async (request: Request) => {
       const hasDocument = Boolean(profile?.document_number), isRepeatCustomer = completedOrders > 0;
       const referral = await referralSummaryForPhone(supabase, phone);
       return json({ customer: {
-        phone, name: profile?.name || latest?.customer_name || "", telegram: profile?.telegram || latest?.customer_telegram || "", instagram: profile?.instagram || latest?.customer_instagram || "", preferredContact: profile?.preferred_contact || latest?.preferred_contact || "phone", address: profile?.address || latestDelivery?.fulfillment_address || "",
+        phone, name: profile?.name || latest?.customer_name || "", telegram: profile?.telegram || latest?.customer_telegram || "", instagram: profile?.instagram || latest?.customer_instagram || "", preferredContact: profile?.preferred_contact || latest?.preferred_contact || "phone", address: profile?.address || latestDelivery?.fulfillment_address || "", addressDetail: profile?.address_detail || latestDelivery?.fulfillment_address_detail || "",
         documentType: profile?.document_type || "", documentNumber: profile?.document_number || "", documentVerifiedAt: profile?.document_verified_at || null,
         documentPhotoName: profile?.document_photo_name || "", documentPhotoMime: profile?.document_photo_mime || "", documentPhotoUploadedAt: profile?.document_photo_uploaded_at || null, hasDocumentPhoto: Boolean(profile?.document_photo_path),
         hasDocument, isRepeatCustomer, documentsRequired: !hasDocument && !isRepeatCustomer, completedOrders, totalOrders: (orders || []).filter((row: any) => !["cancelled", "declined"].includes(row.status)).length,
@@ -656,7 +658,7 @@ Deno.serve(async (request: Request) => {
       if (action === "edit" && !validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const av = await availability(supabase, product, period, bookingId); if (!av.available) return json({ error: "inventory_conflict", availability: av }, 409);
       const customerName = cleanText(body.customerName, 120), customerPhone = normalizePhone(body.customerPhone), fulfillment = body.fulfillment === "delivery" ? "delivery" : "pickup";
-      const address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 220) : "Полтава, вул. Європейська, 146Е";
+      const address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 220) : "Полтава, вул. Європейська, 146Е", addressDetail = fulfillment === "delivery" ? cleanText(body.deliveryAddressDetail, 180) : "";
       if (customerName.length < 2 || !customerPhone || (fulfillment === "delivery" && address.length < 8)) return json({ error: "invalid_customer_data" }, 400);
       const rawBase = rentalBase(product, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow), existing = action === "edit" ? (await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single()).data : null;
       if (action === "edit" && !existing) return json({ error: "invalid_booking" }, 404);
@@ -699,7 +701,7 @@ Deno.serve(async (request: Request) => {
       const common: Record<string, any> = {
         product_code: productCode, product_label: product.label || productCode, start_date: period.startDate, return_date: period.returnDate,
         start_at: `${period.startDate}T${period.pickupTime}:00.000Z`, end_at: `${period.returnDate}T${period.returnTime}:00.000Z`, pickup_window: period.pickupWindow, return_window: period.returnWindow, rental_days: period.days,
-        fulfillment, fulfillment_address: address, customer_name: customerName, customer_phone: customerPhone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_instagram: cleanText(body.customerInstagram, 80).replace(/^@/, "") || null, preferred_contact: ["phone", "telegram", "instagram"].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : "phone", customer_comment: cleanText(body.customerComment, 800) || null,
+        fulfillment, fulfillment_address: address, fulfillment_address_detail: addressDetail || null, customer_name: customerName, customer_phone: customerPhone, customer_telegram: cleanText(body.customerTelegram, 80) || null, customer_instagram: cleanText(body.customerInstagram, 80).replace(/^@/, "") || null, preferred_contact: ["phone", "telegram", "instagram"].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : "phone", customer_comment: cleanText(body.customerComment, 800) || null,
         source: cleanText(body.source, 30) || "instagram", extras, base_amount: discount.baseAmount, extras_amount: selectedAmount, delivery_amount: deliveryAmount, total_amount: discount.baseAmount + selectedAmount + deliveryAmount,
         prepayment_amount: 200, prepayment_paid: prepaymentPaid, deposit_amount: depositAmount, admin_note: cleanAdminNote(body.adminNote, 800) || null, updated_at: new Date().toISOString(),
       };

@@ -763,7 +763,7 @@ Deno.serve(async (req)=>{
             ...av,
             estimate
         }, 409);
-        const customerName = cleanText(body.customerName, 80), fulfillment = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "", address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 180) : fulfillment === "pickup" ? "Полтава, вул. Європейська, 146Е" : "";
+        const customerName = cleanText(body.customerName, 80), fulfillment = body.fulfillment === "delivery" ? "delivery" : body.fulfillment === "pickup" ? "pickup" : "", address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 180) : fulfillment === "pickup" ? "Полтава, вул. Європейська, 146Е" : "", addressDetail = fulfillment === "delivery" ? cleanText(body.deliveryAddressDetail, 180) : "";
         if (customerName.length < 2 || !phone || !fulfillment || body.privacyAccepted !== true || fulfillment === "delivery" && address.length < 8) return json({
             error: "invalid_customer_data"
         }, 400);
@@ -914,6 +914,7 @@ Deno.serve(async (req)=>{
             rental_days: days,
             fulfillment,
             fulfillment_address: address,
+            fulfillment_address_detail: addressDetail || null,
             customer_name: customerName,
             customer_phone: phone,
             customer_telegram: cleanText(body.customerTelegram, 80) || null,
@@ -962,7 +963,10 @@ Deno.serve(async (req)=>{
         };
         if (telegram) profilePatch.telegram = telegram;
         if (instagram) profilePatch.instagram = instagram;
-        if (fulfillment === "delivery" && address) profilePatch.address = address;
+        if (fulfillment === "delivery" && address) {
+            profilePatch.address = address;
+            profilePatch.address_detail = addressDetail || null;
+        }
         const { data: existingCustomer, error: customerReadError } = await db.from("vacleaner_customers").select("phone").eq("phone", phone).maybeSingle();
         if (customerReadError) {
             await db.from("vacleaner_bookings").delete().eq("id", booking.id);
@@ -975,6 +979,7 @@ Deno.serve(async (req)=>{
             instagram: instagram || null,
             preferred_contact: preferredContact,
             address: fulfillment === "delivery" ? address || null : null,
+            address_detail: fulfillment === "delivery" ? addressDetail || null : null,
             created_at: now
         });
         const { error: customerError } = await customerWrite;

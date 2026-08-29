@@ -24,7 +24,7 @@ has(admin,'Середній повний пробіг','delivery analytics must 
 has(admin,'км в один бік × 4','delivery analytics must expose the one-way source and multiplier');
 
 has(admin,'name="customerAddressDetail"','client card must keep entrance/orienting notes separate');
-has(admin,"customerAddress:[form.customerAddress.value,form.customerAddressDetail.value]",'client save must preserve both address parts');
+has(admin,"customerAddress:String(form.customerAddress.value||'').trim(),customerAddressDetail:String(form.customerAddressDetail.value||'').trim()",'client save must preserve both address parts separately');
 has(admin,"telegram:profile?.telegram||b.customer_telegram||''",'client list must retain saved contact channels');
 has(admin,'if(refreshed)requestAnimationFrame(()=>openClientCard(refreshed))','successful client save must reopen verified server state');
 

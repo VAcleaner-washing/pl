@@ -95,12 +95,12 @@ has(campaigns,'sentAt:issuedAt','pending bonus must expose when the SMS was issu
 has(admin,'Клієнт підтвердив SMS','booking UX must require an explicit manager confirmation');
 has(admin,'data-activate-pending-promo','booking UX must not auto-activate an SMS merely because it was sent');
 
-// Address truth: route address stays clean; entrance/access details belong to the comment.
+// Address truth: route address, courier detail and customer comment are separate values.
 has(admin,'function deliveryAddressParts','delivery address must have a route-safe parser');
-has(admin,'function mergeDeliveryComment','legacy entrance notes must be preserved as booking comments');
-has(admin,"customerAddress:[deliveryParts.address,deliveryParts.note].filter(Boolean).join(' · ')",'customer profile must preserve the route-safe address and its separate access detail');
+has(admin,'customerAddressDetail:deliveryParts.detail','customer profile must preserve access detail in its own field');
 has(admin,"deliveryAddress:deliveryParts.address",'booking delivery address must store route-safe address only');
-has(admin,'customerComment=mergeDeliveryComment(fd.get(\'customerComment\'),deliveryParts.note)','entrance/orientation detail must move into the booking comment at save time');
+has(admin,'deliveryAddressDetail:deliveryParts.detail','booking must snapshot entrance/orientation detail separately');
+has(admin,"customerComment:fd.get('customerComment')",'general customer comment must stay independent');
 
 // RETURN state machine: SMS issuance is pending, activation is explicit, only active codes can auto-apply.
 has(campaigns,'.eq("customer_phone",phone).eq("active",false)','pending RETURN lookup must only read inactive issued codes');
@@ -113,8 +113,8 @@ has(admin,'Зберігаємо в картці клієнта','booking address
 has(admin,"addressInput.disabled=false",'pickup must keep the customer address editable');
 has(admin,'deliveryPricingField.hidden=!delivery','only delivery pricing is contextual to fulfillment');
 has(admin,"detail=chunks.join(' · ').trim()",'address parser must preserve the site-style entrance/orientation detail');
-has(admin,"note:[legacyNote,detail].filter(Boolean).join(' · ')",'legacy entrance and site-style detail must move to comments, never Google Maps address');
-has(admin,"savedDeliveryValue=[savedDelivery.address,savedDelivery.note].filter(Boolean).join(' · ')",'repeat client must preserve route-safe address plus separate access detail for the address helper');
-has(admin,"__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDeliveryValue)",'repeat client must restore legacy access detail through the separate address-detail control, not the map address');
+has(admin,"note:[legacyNote,detail].filter(Boolean).join(' · ')",'legacy parser must keep entrance outside Google Maps address');
+has(admin,'savedDeliveryDetail=customer.addressDetail||savedDelivery.note','repeat client must prefer the canonical separate access detail with legacy fallback');
+has(admin,'__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDeliveryAddress,savedDeliveryDetail)','repeat client must restore access detail through the separate control, not the map address');
 has(admin,'Для Google Maps використовуємо тільки адресу будинку','admin address copy must keep map address and access note conceptually separate');
 has(fs.readFileSync('assets/address-autocomplete.js','utf8'),"if(mode==='public'||mode==='admin'){",'public and admin booking must share the separate entrance/orientation field contract');

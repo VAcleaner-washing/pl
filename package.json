@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.26",
+  "version": "4.2.27",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -110,6 +110,7 @@
     "test:v4.2.24-finance-delivery-return": "node scripts/test-v4-2-24-finance-delivery-return.mjs",
     "test:v4.2.25-admin-qa-repair": "node scripts/test-v4-2-25-admin-qa-repair.mjs",
     "test:v4.2.26-booking-grid": "node scripts/test-v4-2-26-booking-grid.mjs",
+    "test:v4.2.27-address-separation": "node scripts/test-v4-2-27-address-separation.mjs",
     "qa:static": "node scripts/qa-full.mjs static",
     "qa:browser": "node scripts/qa-full.mjs browser",
     "qa:full": "node scripts/qa-full.mjs full",

@@ -554,6 +554,7 @@ async function upsertCustomer(supabase, body, fallback = {}) {
     };
     const address = cleanText(body.customerAddress ?? body.deliveryAddress, 220);
     if (address) customer.address = address;
+    if (body.customerAddressDetail !== undefined || body.deliveryAddressDetail !== undefined) customer.address_detail = cleanText(body.customerAddressDetail ?? body.deliveryAddressDetail, 180) || null;
     const documentNumber = cleanText(body.documentNumber, 80), documentType = cleanText(body.documentType, 40);
     if (documentNumber) {
         customer.document_number = documentNumber;
@@ -751,7 +752,7 @@ Deno.serve(async (request)=>{
             });
         }
         if (action === "clients") {
-            const { data, error } = await supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at", {
+            const { data, error } = await supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,address_detail,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at", {
                 ascending: false
             }).limit(1000);
             if (error) throw error;
@@ -791,6 +792,7 @@ Deno.serve(async (request)=>{
                     "instagram"
                 ].includes(String(body.preferredContact || "")) ? String(body.preferredContact) : existing?.preferred_contact || "phone",
                 address: cleanText(body.customerAddress, 220) || null,
+                address_detail: cleanText(body.customerAddressDetail, 180) || null,
                 document_type: documentType,
                 document_number: documentNumber || null,
                 document_verified_at: verified ? existing?.document_verified_at || now : null,
@@ -827,6 +829,7 @@ Deno.serve(async (request)=>{
                     instagram: row.instagram,
                     preferred_contact: row.preferred_contact,
                     address: row.address,
+                    address_detail: row.address_detail,
                     document_type: row.document_type,
                     document_number: row.document_number,
                     document_verified_at: row.document_verified_at,
@@ -840,8 +843,8 @@ Deno.serve(async (request)=>{
                 customer: null
             });
             const [{ data: profile }, { data: orders, error }] = await Promise.all([
-                supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
-                supabase.from("vacleaner_bookings").select("id,customer_name,customer_telegram,customer_instagram,preferred_contact,fulfillment,fulfillment_address,product_label,start_date,return_date,status,hold_expires_at,total_amount,created_at").eq("customer_phone", phone).order("created_at", {
+                supabase.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,address_detail,document_type,document_number,document_verified_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,updated_at").eq("phone", phone).maybeSingle(),
+                supabase.from("vacleaner_bookings").select("id,customer_name,customer_telegram,customer_instagram,preferred_contact,fulfillment,fulfillment_address,fulfillment_address_detail,product_label,start_date,return_date,status,hold_expires_at,total_amount,created_at").eq("customer_phone", phone).order("created_at", {
                     ascending: false
                 }).limit(100)
             ]);
@@ -887,6 +890,7 @@ Deno.serve(async (request)=>{
                     instagram: profile?.instagram || latest?.customer_instagram || "",
                     preferredContact: profile?.preferred_contact || latest?.preferred_contact || "phone",
                     address: profile?.address || latestDelivery?.fulfillment_address || "",
+                    addressDetail: profile?.address_detail || latestDelivery?.fulfillment_address_detail || "",
                     documentType: profile?.document_type || "",
                     documentNumber: profile?.document_number || "",
                     documentVerifiedAt: profile?.document_verified_at || null,
@@ -1213,7 +1217,7 @@ Deno.serve(async (request)=>{
                 availability: av
             }, 409);
             const customerName = cleanText(body.customerName, 120), customerPhone = normalizePhone(body.customerPhone), fulfillment = body.fulfillment === "delivery" ? "delivery" : "pickup";
-            const address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 220) : "Полтава, вул. Європейська, 146Е";
+            const address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 220) : "Полтава, вул. Європейська, 146Е", addressDetail = fulfillment === "delivery" ? cleanText(body.deliveryAddressDetail, 180) : "";
             if (customerName.length < 2 || !customerPhone || fulfillment === "delivery" && address.length < 8) return json({
                 error: "invalid_customer_data"
             }, 400);
@@ -1359,6 +1363,7 @@ Deno.serve(async (request)=>{
                 rental_days: period.days,
                 fulfillment,
                 fulfillment_address: address,
+                fulfillment_address_detail: addressDetail || null,
                 customer_name: customerName,
                 customer_phone: customerPhone,
                 customer_telegram: cleanText(body.customerTelegram, 80) || null,

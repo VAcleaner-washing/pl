@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.26  
-**Baseline build:** 4226  
+**Baseline version:** 4.2.27  
+**Baseline build:** 4227  
 **Останнє оновлення:** 2026-08-29  
 **Власник логіки:** VAcleaner  
 
@@ -252,6 +252,7 @@ Customer profile зберігає актуальні:
 - Telegram;
 - preferred channel;
 - чисту адресу будинку;
+- окремо під’їзд / поверх / домофон / орієнтир у `address_detail`;
 - документ;
 - marketing consent;
 - referral send metadata.
@@ -825,7 +826,7 @@ Public booking має:
 
 Під’їзд/орієнтир не повинен погіршувати Google/OpenStreetMap routing або address match.
 
-Для storage/display може використовуватися composed string із separator ` · `, але parser зобов’язаний вміти відокремити base address від details.
+Canonical storage завжди розділене: `fulfillment_address` містить тільки адресу будинку, а `fulfillment_address_detail` — під’їзд / поверх / домофон / орієнтир. Composed string із separator ` · ` дозволений лише як legacy input для міграційного parser, але не для нового запису.
 
 ## PUBADDR-002 — autocomplete
 
@@ -1632,14 +1633,16 @@ Return workflow повинен фіксувати:
 
 Приклад:
 
-`Юрія Тимошенка 8, 7 під’їзд` →
+`Юрія Тимошенка 8` + `7 під’їзд` →
 
 - route address: `Юрія Тимошенка 8`;
-- booking comment: `7 під’їзд`.
+- delivery detail: `7 під’їзд`.
 
 ## ADDR-004 — під’їзд / орієнтир
 
-Під’їзд, поверх, код домофона, орієнтир, уточнення двору — це **додаткова інформація/коментар**, а не Google Maps address.
+Під’їзд, поверх, код домофона, орієнтир, уточнення двору — це **окреме поле доставки**, а не Google Maps address і не `customer_comment`.
+
+`vacleaner_customers.address_detail` зберігає актуальне значення профілю, а `vacleaner_bookings.fulfillment_address_detail` — незмінний snapshot конкретного бронювання. Старі склеєні адреси розкладаються data migration; placeholder `Історична доставка · адреса не збережена` не перетворюється на вигадану адресу.
 
 ## ADDR-005 — delivery validation
 
@@ -2700,3 +2703,32 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 - `scripts/test-v4-2-26-booking-grid.mjs`;
 - повний static/build regression перед передачею ZIP.
+
+# 35. Change record — v4.2.27
+
+### ADDED
+
+- `vacleaner_customers.address_detail` — актуальний під’їзд / поверх / домофон / орієнтир клієнта.
+- `vacleaner_bookings.fulfillment_address_detail` — snapshot уточнення адреси конкретного бронювання.
+- Data migration для безпечного розділення старих склеєних адрес клієнтів і бронювань.
+
+### CHANGED
+
+- Canonical address storage більше не використовує composed string `адреса · під’їзд`; route address і courier detail мають окремі колонки та окремі API fields.
+
+### FIXED
+
+- **ADDR-010** — сайт, admin booking і картка клієнта більше не склеюють два поля перед збереженням.
+- **ADDR-011** — під’їзд не копіюється в `customer_comment`; коментар клієнта зберігає тільки побажання клієнта.
+- **ADDR-012** — повторний клієнт отримує два окремі редаговані значення з профілю або останньої доставки.
+- **ADDR-013** — legacy-адреси на кшталт `Юрія Тимошенка 8, 7 під’їзд` і `18/12 під’їзд 3` розділяються без пошкодження номера будинку; історичний placeholder залишається без вигаданого маршруту.
+
+### PRESERVED
+
+- Google Maps, autocomplete і delivery quote отримують лише `fulfillment_address`.
+- Крок «Видача та оплата» не дублює два input; він показує summary і route action.
+
+### TESTS
+
+- `scripts/test-v4-2-27-address-separation.mjs`;
+- static/build regression та browser/PWA gates перед production merge.

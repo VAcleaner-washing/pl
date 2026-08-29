@@ -398,7 +398,9 @@ document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObser
           if(/Доставка/.test(mode)){
             const meta=window.__VAC_DELIVERY_META__?.()||{};
             body.fulfillment='delivery';
-            body.deliveryAddress=window.__VAC_DELIVERY_ADDRESS__?.(body.deliveryAddress)||body.deliveryAddress;
+            const addressParts=window.__VAC_DELIVERY_ADDRESS_PARTS__?.(body.deliveryAddress)||{address:body.deliveryAddress,detail:''};
+            body.deliveryAddress=addressParts.address||body.deliveryAddress;
+            body.deliveryAddressDetail=addressParts.detail||'';
             body.deliveryAddressVerified=meta.verified===true;
             if(Number.isFinite(Number(meta.pricingDistanceKm)))body.deliveryDistanceKm=Number(meta.pricingDistanceKm);
             if(Number.isFinite(Number(meta.routeKm)))body.deliveryRouteKm=Number(meta.routeKm);

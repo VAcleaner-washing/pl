@@ -25,6 +25,13 @@ function compose(ctx,fallback=''){
   const details=String(ctx.details?.value||'').trim().replace(/\s+/g,' ');
   return base+(details?`${DETAILS_SEPARATOR}${details}`:'');
 }
+function addressParts(ctx,fallback=''){
+  if(!ctx){const parsed=splitStored(fallback);return{address:parsed.base,detail:parsed.details}}
+  return{
+    address:String(ctx.input?.value||fallback||'').trim(),
+    detail:String(ctx.details?.value||'').trim().replace(/\s+/g,' '),
+  };
+}
 function clearMeta(input){
   if(!input)return;
   delete input.dataset.vacAddressSelected;
@@ -295,14 +302,16 @@ async function resolveRouteForAddress(value){
 function installGlobals(){
   window.__VAC_DELIVERY_ADDRESS__=(fallback='')=>compose(activePublic,fallback);
   window.__VAC_ADMIN_DELIVERY_ADDRESS__=(fallback='')=>compose(activeAdmin,fallback);
+  window.__VAC_DELIVERY_ADDRESS_PARTS__=(fallback='')=>addressParts(activePublic,fallback);
+  window.__VAC_ADMIN_DELIVERY_ADDRESS_PARTS__=(fallback='')=>addressParts(activeAdmin,fallback);
   window.__VAC_DELIVERY_META__=()=>addressMeta(activePublic);
   window.__VAC_ADMIN_DELIVERY_META__=()=>addressMeta(activeAdmin);
   window.__VAC_ROUTE_FOR_ADDRESS__=resolveRouteForAddress;
-  window.__VAC_SET_ADMIN_DELIVERY_ADDRESS__=(value='')=>{
+  window.__VAC_SET_ADMIN_DELIVERY_ADDRESS__=(value='',detail='')=>{
     if(!activeAdmin)return false;
     const parsed=splitStored(value);
     activeAdmin.setting=true;setInputValue(activeAdmin.input,parsed.base);activeAdmin.setting=false;
-    if(activeAdmin.details)activeAdmin.details.value=parsed.details;activeAdmin.selected='';clearMeta(activeAdmin.input);
+    if(activeAdmin.details)activeAdmin.details.value=String(detail||parsed.details||'').trim();activeAdmin.selected='';clearMeta(activeAdmin.input);
     setStatus(activeAdmin,'hint','Збережена адреса. За потреби оберіть її зі списку ще раз.');
     return true;
   };
