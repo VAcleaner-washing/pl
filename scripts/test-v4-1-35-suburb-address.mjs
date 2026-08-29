@@ -16,6 +16,6 @@ ok('UI explains full-address lookup and delivery calculation',runtime.includes('
 ok('access details are separate',runtime.includes('Під’їзд / орієнтир')&&runtime.includes('зі сторони двору'));
 ok('general booking comment stays',booking.includes('Коментар ')&&booking.includes('Що плануєте чистити або яку хімію підібрати'));
 ok('navigator keeps normalized suburb address',admin.includes("parts.length>=3")&&admin.includes("?address:`Полтава, ${address}`"));
-ok('navigator still strips access details',admin.includes("full.split(' · ')[0].trim()"));
+ok('navigator still strips access details',admin.includes("const chunks=full.split(' · '),clean=String(chunks.shift()||'').trim()")&&admin.includes('navigationDestination(value)'));
 if(checks.some(([,pass])=>!pass))process.exit(1);
 console.log(`v4.1.35 suburb address regression: ${checks.length}/${checks.length} OK`);

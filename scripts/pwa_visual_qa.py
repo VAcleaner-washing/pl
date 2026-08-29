@@ -70,6 +70,7 @@ def booking(idx: int, status: str, product: str = "puzzi", label: str = "Kärche
 HISTORICAL_COMPLETED = booking(6, "completed", "sc2", "Kärcher SC 2 Deluxe")
 HISTORICAL_COMPLETED.update({
     "booking_code": "HIST-PWA-001",
+    "delivery_route_km": 6.4,
     "completed_at": f"{iso(-1)}T18:00:00.000Z",
     "source": "historical_import",
     "extras": {
@@ -141,19 +142,24 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
       window.Notification={{permission:'default',requestPermission:async()=>'default'}};
       window.__bookings={json.dumps(BOOKINGS, ensure_ascii=False)};
       window.__config={json.dumps(config, ensure_ascii=False)};
+      window.__bonusActivated=false;window.__lastCreatePayload=null;
       window.fetch=async(url,options={{}})=>{{
         let payload={{}};try{{payload=options.body?JSON.parse(options.body):{{}}}}catch{{}}
         let body={{}};
         const text=String(url);
-        if(text.includes('vacleaner-settings'))body={{slots:window.__config.slots,depositRules:window.__config.depositRules,catalog:window.__config.catalog}};
+        if(text.includes('vacleaner-settings'))body={{slots:window.__config.slots,depositRules:window.__config.depositRules,catalog:window.__config.catalog,deliveryPricing:window.__config.deliveryPricing,equipmentBaselines:{{puzzi:{{qty:2,unitCost:26000,total:52000}},sc2:{{qty:2,unitCost:6500,total:13000}},jimmy:{{qty:2,unitCost:4500,total:9000}},abir:{{qty:2,unitCost:4500,total:9000}}}}}};
         else if(text.includes('vacleaner-admin-bookings-v4')||text.includes('vacleaner-admin-bookings-v3')||text.includes('vacleaner-admin-data-v1')){{
           if(payload.action==='list')body={{bookings:window.__bookings}};
           else if(payload.action==='calendar')body={{days:Array.from({{length:14}},(_,i)=>({{date:new Date(Date.now()+i*86400000).toISOString().slice(0,10),resources:{{puzzi:{{label:'Puzzi',capacity:2,morning:2,evening:1}},sc2:{{label:'SC 2',capacity:2,morning:2,evening:2}},jimmy:{{label:'Jimmy',capacity:2,morning:1,evening:2}},abir:{{label:'ABIR',capacity:2,morning:2,evening:2}}}}}}))}};
-          else if(payload.action==='clients')body={{customers:[{{phone:'+380951111111',name:'Анна Коваленко',telegram:'@anna',address:'Полтава, вул. Соборності, 10',document_type:'ID-картка',document_number:'000123456',document_verified_at:new Date().toISOString()}}]}};
+          else if(payload.action==='clients')body={{customers:[{{phone:'+380951111111',name:'Анна Коваленко',telegram:'@anna',instagram:'anna.home',preferred_contact:'instagram',referral_code:'VA4827',address:'Полтава, вул. Соборності, 10',document_type:'ID-картка',document_number:'000123456',document_verified_at:new Date().toISOString()}}]}};
           else if(payload.action==='health')body={{checkedAt:new Date().toISOString(),reservation:{{healthy:true,transactionLock:true,halfOpenSlots:true,capacityHardBlock:true,pendingDoesNotReserve:true}},push:{{healthy:true,configReady:true,activeSubscriptions:3,lastSuccessAt:new Date().toISOString(),lastFailureAt:null}}}};
           else if(payload.action==='campaigns')body={{campaigns:[{{id:'10000000-0000-4000-8000-000000000001',name:'RETURN · 180+ днів',campaign_type:'return',status:'active',discount_type:'percent',discount_value:10,dormant_days:180,assignedCodes:209,activatedCount:4,audienceSize:209,smsRecipientCount:12,smsUsedCount:3,conversionBasis:'sms',conversionBase:12,conversionUses:3,usedCount:3,completedUses:2,conversion:25,revenue:1600,discountGiven:240,codes:[{{code:'VA-ABC1234',customer_phone:'+380951111111'}}]}}]}};
           else if(payload.action==='save_customer')body={{customer:{{phone:payload.customerPhone,name:payload.customerName,address:payload.customerAddress}}}};
-          else if(payload.action==='lookup_customer')body={{customer:{{phone:'+380951111111',name:'Анна Коваленко',address:'Полтава, вул. Соборності, 10',documentType:'ID-картка',documentNumber:'000123456',documentVerifiedAt:new Date().toISOString(),hasDocument:true,isRepeatCustomer:true,completedOrders:4,totalOrders:5,totalSpent:4200,lastDate:'{iso(-20)}',lastProduct:'Kärcher Puzzi 8/1',loyalty:{{level:'Regular',percent:5}}}}}};
+          else if(payload.action==='lookup_customer'){{
+            if(String(payload.phone||'').replace(/\D/g,'')==='380661301450')body={{customer:{{phone:'+380661301450',name:'КЛИМЕНКО КАТЕРИНА',address:'Юрія Тимошенка 8, 7 під’їзд',documentType:'Паспорт',documentNumber:'',documentVerifiedAt:null,hasDocument:false,isRepeatCustomer:true,completedOrders:2,totalOrders:2,totalSpent:1400,lastDate:'2025-06-17',lastProduct:'Kärcher Puzzi 8/1',loyalty:{{level:'Start',percent:0}},promo:window.__bonusActivated?{{campaignId:'632bcfb7-0a37-49de-b5ce-bcb4d4063edf',campaignName:'RETURN · 180+ днів',campaignType:'return',discountType:'percent',discountValue:10,eligible:true,code:'VA-3F985E8',expiresAt:new Date(Date.now()+21*86400000).toISOString()}}:null}}}};
+            else body={{customer:{{phone:'+380951111111',name:'Анна Коваленко',address:'Полтава, вул. Соборності, 10',documentType:'ID-картка',documentNumber:'000123456',documentVerifiedAt:new Date().toISOString(),hasDocument:true,isRepeatCustomer:true,completedOrders:4,totalOrders:5,totalSpent:4200,lastDate:'{iso(-20)}',lastProduct:'Kärcher Puzzi 8/1',loyalty:{{level:'Regular',percent:5}}}}}};
+          }}
+          else if(payload.action==='create'){{window.__lastCreatePayload=payload;body={{booking:{{id:'90000000-0000-4000-8000-000000000001',booking_code:'VAC-PWA-CREATED',status:'pending'}},promo:window.__bonusActivated?{{applied:true,campaignName:'RETURN · 180+ днів',discountType:'percent',discountValue:10}}:null}};}}
           else if(payload.action==='audit_log')body={{entries:[{{id:1,booking_id:window.__bookings[0].id,booking_code:window.__bookings[0].booking_code,event_type:'updated',changed_fields:['status'],old_values:{{status:'pending'}},new_values:{{status:'confirmed'}},actor_id:'a',source:'edge:update',created_at:new Date().toISOString()}}]}};
           else body={{booking:window.__bookings.find(x=>x.id===payload.bookingId)||window.__bookings[0],finance:{{refundAmount:350,dueAmount:0,totalAmount:850,receivedAmount:1200}}}};
         }} else if(text.includes('vacleaner-campaigns-v1')){{
@@ -164,6 +170,8 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
           else if(payload.action==='set_customer_sms_consent')body={{ok:true,consent:payload.enabled?'explicit':'opted_out'}};
           else if(payload.action==='sms_sync')body={{ok:true,sent:2,delivered:2,notDelivered:0,totalCost:0,currency:'UAH'}};
           else if(payload.action==='sms_send')body={{ok:true,dispatchId:'20000000-0000-4000-8000-000000000001',campaignId:12345,sent:(payload.phones||[]).length,exceptions:0,parts:1}};
+          else if(payload.action==='pending_bonus'&&String(payload.phone||'').replace(/\D/g,'')==='380661301450')body={{pendingPromo:window.__bonusActivated?null:{{campaignId:'632bcfb7-0a37-49de-b5ce-bcb4d4063edf',campaignName:'RETURN · 180+ днів',campaignType:'return',discountType:'percent',discountValue:10,promoCode:'VA-3F985E8',sentAt:'2026-08-16T07:06:06.402815Z'}}}};
+          else if(payload.action==='activate_bonus'&&String(payload.phone||'').replace(/\D/g,'')==='380661301450'){{window.__bonusActivated=true;body={{ok:true,expiresAt:new Date(Date.now()+21*86400000).toISOString()}};}}
           else body={{ok:true}};
         }} else if(text.includes('vacleaner-sms-audit-v1')){{
           if(payload.action==='dispatch_recipients')body={{dispatch:{{id:payload.dispatchId,audience_count:3,status:'sent',created_at:'2026-08-16T07:06:06.000Z',sent_at:'2026-08-16T07:06:06.000Z'}},recipients:[{{id:'r1',customer_name:'Тетяна Куцевол',customer_phone:'+380507352687',status:'delivered',promo_code:'VA-5AC12CB',promo_link:'vacleaner.pp.ua/b#5AC12CB',sendpulse_campaign_id:123456,created_at:'2026-08-16T07:06:06.000Z'}},{{id:'r2',customer_name:'Олена Мельник',customer_phone:'+380672222222',status:'sent',promo_code:'VA-ABC1234',promo_link:'vacleaner.pp.ua/b#ABC1234',sendpulse_campaign_id:123457,created_at:'2026-08-16T07:06:06.000Z'}},{{id:'r3',customer_name:'Анна Коваленко',customer_phone:'+380951111111',status:'not_delivered',promo_code:null,promo_link:null,sendpulse_campaign_id:123458,created_at:'2026-08-16T07:06:06.000Z'}}]}};
@@ -204,11 +212,15 @@ class QA:
 def render_page(browser: Browser, width: int, height: int, authenticated: bool = True, standalone: bool = False) -> Page:
     page = browser.new_page(viewport={"width": width, "height": height}, is_mobile=width <= 900)
     page.evaluate("document.head.innerHTML='<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">'")
-    page.evaluate("html => { document.body.innerHTML = html; }", INITIAL_ADMIN_ROOTS)
+    page.evaluate("html => { document.body.innerHTML = html; document.documentElement.classList.add('glass-test'); }", INITIAL_ADMIN_ROOTS)
     page.evaluate(init_script(authenticated, standalone))
     page.add_style_tag(content=(ROOT / "assets/admin-v250.css").read_text(encoding="utf-8"))
+    page.add_style_tag(content=(ROOT / "assets/admin-glass-test.css").read_text(encoding="utf-8"))
+    page.add_style_tag(content=(ROOT / "assets/address-autocomplete.css").read_text(encoding="utf-8"))
     page.add_script_tag(content=(ROOT / "assets/vacleaner-core.js").read_text(encoding="utf-8"))
     page.add_script_tag(content=(ROOT / "assets/admin-v250.js").read_text(encoding="utf-8"))
+    page.add_script_tag(content=(ROOT / "assets/admin-glass-test.js").read_text(encoding="utf-8"))
+    page.add_script_tag(content=(ROOT / "assets/address-autocomplete.js").read_text(encoding="utf-8"))
     page.wait_for_selector(".app" if authenticated else ".auth-card")
     if authenticated: page.wait_for_selector(".upcoming-scope" if width <= 900 else ".booking-list")
     page.wait_for_timeout(150)
@@ -276,7 +288,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(main_head is not None and topbar is not None and main_head["y"] >= topbar["y"] + topbar["height"] + 8, f"{label}: content starts below status bar and topbar")
         expected_pwa_pad=max(8,min(12,safe_bottom-22))
         qa.check(page.locator('html').evaluate("el=>el.classList.contains('pwa-standalone')"), f"{label}: installed mode is detected independently from Safari")
-        qa.check(sidebar is not None and abs(sidebar["y"] + sidebar["height"] - height) <= 1, f"{label}: bottom navigation is physically pinned to viewport bottom")
+        expected_nav_gap=safe_bottom+8
+        qa.check(sidebar is not None and abs((height-(sidebar["y"]+sidebar["height"]))-expected_nav_gap) <= 1.5, f"{label}: floating bottom navigation clears the Home Indicator by safe-area + 8px")
         # v3.0.55: the real-device correction is the admin PWA status-bar viewport
         # contract. Keep normal native safe-area geometry here; do not emulate the
         # failed v3.0.54 CSS clamp.
@@ -332,11 +345,11 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(not page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: no legacy booking-search collapse state is created")
         qa.check(page.locator('.booking-toolbar').bounding_box()['y'] <= page.locator('.main').bounding_box()['y'] + 2, f"{label}: booking filters remain sticky below the stable search shell")
         nav_after=page.locator('.mobile-nav').bounding_box()
-        qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs(nav_after['y']+nav_after['height']-height)<=1, f"{label}: bottom navigation does not walk during content scroll")
+        qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs((height-(nav_after['y']+nav_after['height']))-expected_nav_gap)<=1.5, f"{label}: floating bottom navigation does not walk during content scroll")
         page.locator('#globalSearch').evaluate('el=>el.blur()')
         page.evaluate("()=>window.dispatchEvent(new Event('resize'))");page.wait_for_timeout(50)
         nav_refresh=page.locator('.mobile-nav').bounding_box()
-        qa.check(nav_refresh is not None and abs(nav_refresh['y']+nav_refresh['height']-height)<=1 and not page.locator('html').evaluate("el=>el.classList.contains('keyboard-open')"), f"{label}: data/viewport refresh cannot lift bottom navigation without a keyboard")
+        qa.check(nav_refresh is not None and abs((height-(nav_refresh['y']+nav_refresh['height']))-expected_nav_gap)<=1.5 and not page.locator('html').evaluate("el=>el.classList.contains('keyboard-open')"), f"{label}: data/viewport refresh preserves the floating bottom-navigation safe-area gap")
         page.locator('.main').evaluate('el=>el.scrollTop=0')
 
         # Status filters become the sticky control row after the KPI/hero block scrolls away.
@@ -363,11 +376,21 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             if view=='settings':
                 cards=page.locator('.settings-grid>*:visible').evaluate_all('els=>els.map(el=>el.getBoundingClientRect())')
                 qa.check(bool(cards) and all(r['left']>=11 and r['right']<=width-11 for r in cards), f"{label}: settings cards use full mobile width")
+                ordered=sorted(cards,key=lambda r:r['top'])
+                qa.check(all(ordered[i]['bottom']<=ordered[i+1]['top']+1 for i in range(len(ordered)-1)), f"{label}: settings cards never overlap each other")
                 slot_rows=page.locator('.slot-editor-row:visible').evaluate_all('els=>els.map(el=>({r:el.getBoundingClientRect(),children:[...el.querySelectorAll(".premium-control")].map(x=>x.getBoundingClientRect())}))')
                 qa.check(all(all(c['left']>=row['r']['left']-1 and c['right']<=row['r']['right']+1 for c in row['children']) for row in slot_rows), f"{label}: time-slot controls stay inside settings cards")
                 page.wait_for_timeout(30)
                 qa.check(page.locator('.operational-health-card').count()==1, f"{label}: settings exposes production health")
                 qa.check(page.locator('.health-state.ok').count()>=2, f"{label}: push and double-booking health are verified at runtime")
+                if width <= 430:
+                    main_box=page.locator('.main').bounding_box(); nav_box=page.locator('.mobile-nav:visible').bounding_box()
+                    qa.check(main_box is not None and nav_box is not None and main_box['y']+main_box['height']<=nav_box['y']+1, f"{label}: standalone PWA content ends above bottom navigation")
+                    page.locator('.main').evaluate('el=>el.scrollTop=el.scrollHeight')
+                    page.wait_for_timeout(30)
+                    last_box=page.locator('.settings-grid>*:visible').last.bounding_box()
+                    qa.check(last_box is not None and nav_box is not None and last_box['y']+min(last_box['height'],48)<=nav_box['y']+1, f"{label}: final settings card remains reachable above PWA nav")
+                    if width==390: qa.shot(page,'390-settings-v4222.png')
             if view=='upcoming':
                 qa.check(page.locator('.upcoming-row [data-client-card]').count()==0, f"{label}: upcoming customer identity is not a CRM navigation target")
                 qa.check(page.locator('.upcoming-row .upcoming-client-info a[href^="tel:"]').count()>=1, f"{label}: upcoming phone remains a direct call action")
@@ -409,7 +432,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.booking-funnel-panel').count()==1 and 'Фінальний % рахуємо тільки серед закритих заявок' in page.locator('.booking-funnel-panel').inner_text() and page.locator('.analytics-funnel-resolution').count()==1 and all(x in page.locator('.analytics-funnel-resolution').inner_text() for x in ['Завершено','В роботі','Втрачено']), f"{label}: status funnel separates completed, active and lost bookings without penalizing active work")
                 for panel in ['.revenue-structure-panel','.source-performance-panel','.weekday-demand-panel','.booking-funnel-panel']:
                     qa.check(page.locator(panel).evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: {panel} stays inside the analytics viewport")
-                qa.check(page.locator('.topbar:visible').count()==0, f"{label}: analytics removes the unused mobile search bar")
+                qa.check(page.locator('.topbar:visible #globalSearch').count()==1 and 'всій адмінці' in page.locator('#globalSearch').get_attribute('placeholder'), f"{label}: analytics keeps the global admin search available")
                 qa.check(page.locator('.analytics-kpis .kpi').count()==4, f"{label}: analytics uses a compact four-KPI decision strip")
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='VA SPOT FIX').count()==1, f"{label}: VA SPOT FIX is present in chemistry pricing")
@@ -456,15 +479,22 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['h']>=48 and fg['dep']['h']>=48 and not (fg['due']['r']>fg['dep']['l'] and fg['dep']['r']>fg['due']['l'] and fg['due']['b']>fg['dep']['t'] and fg['dep']['b']>fg['due']['t']), f"{label}: issued preliminary settlement and deposit never overlap")
         page.locator('[data-filter="all"]').click();page.wait_for_timeout(30)
 
-        # Client search is contextual and the card can be edited.
+        # Global search stays global from every tab and client results open the full CRM card.
         open_mobile_view(page,'clients')
         page.locator('#globalSearch').fill('Анна')
-        page.wait_for_timeout(40)
-        qa.check(page.locator('#pageTitle').inner_text().strip()=='Клієнти', f"{label}: searching clients never jumps to bookings")
-        qa.check(page.locator('.client-row').count()>=1, f"{label}: client search filters inside clients view")
-        qa.check(page.locator('.campaign-panel').count()==0, f"{label}: clients view is free of campaign management")
-        stats=page.locator('.client-mobile-stats:visible').first
-        qa.check(stats.count()==1 and 'оренд' in stats.inner_text() and 'грн' in stats.inner_text(), f"{label}: client card shows rental count and total spend in PWA")
+        page.wait_for_timeout(60)
+        qa.check(page.locator('#pageTitle').inner_text().strip()=='Пошук', f"{label}: client query opens the global search hub")
+        qa.check(page.locator('.global-search-card').count()==4 and page.locator('[data-search-client]').count()>=1, f"{label}: global search exposes client matches without jumping to bookings")
+        qa.check(page.locator('.campaign-panel').count()==0, f"{label}: global search does not render campaign management UI")
+        client_result=page.locator('[data-search-client]').first
+        client_result.click();page.wait_for_timeout(60)
+        stats=page.locator('.client-editor-summary:visible').first
+        qa.check(page.locator('#clientEditor').count()==1 and stats.count()==1 and 'ОРЕНД' in stats.inner_text() and 'грн' in stats.inner_text(), f"{label}: global client result opens rental count and total spend")
+        page.locator('#clientEditor .close').click();page.wait_for_timeout(30)
+        page.locator('#clearSearch').click();page.wait_for_timeout(30)
+        page.locator('#globalSearch').fill('VA4827');page.wait_for_timeout(60)
+        qa.check(page.locator('[data-search-client]').count()==1 and 'VA4827' in page.locator('[data-search-client]').first.inner_text(), f"{label}: global search resolves the current referral code")
+        page.locator('#clearSearch').click();page.wait_for_timeout(30)
         open_mobile_view(page,'campaigns');page.wait_for_timeout(60)
         qa.check(page.locator('.campaign-panel').count()==1, f"{label}: campaigns render in their dedicated view")
         qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible in campaigns view")
@@ -522,9 +552,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         if page.locator('[data-client-open]').count():
             page.locator('[data-client-open]').first.locator('.client-name').click();page.wait_for_selector('#clientEditor')
             qa.check(no_overflow(page), f"{label}: client editor has no horizontal overflow")
-            client_title=page.locator('#clientEditor>header h2').bounding_box();client_footer=page.locator('#clientEditor>footer').bounding_box();client_save=page.locator('#clientEditor>footer .btn').last.bounding_box()
+            client_title=page.locator('#clientEditor>header h2').bounding_box()
             qa.check(client_title is not None and client_title['y']>=safe_top+8, f"{label}: client editor header clears Dynamic Island safe area")
-            qa.check(client_footer is not None and abs(client_footer['y']+client_footer['height']-height)<=1 and client_save is not None and client_save['y']+client_save['height']<=height-safe_bottom+1, f"{label}: client editor footer clears Home Indicator")
+            qa.check(page.locator('#clientEditor>footer:visible').count()==0, f"{label}: unchanged client card does not waste phone height on a save footer")
+            customer_name=page.locator('#clientEditor input[name=customerName]')
+            original_name=customer_name.input_value(); customer_name.fill(original_name+' '); page.wait_for_timeout(30)
+            client_footer=page.locator('#clientEditor>footer:visible').bounding_box();client_save=page.locator('#clientEditor>footer .client-save:visible').bounding_box()
+            qa.check(client_footer is not None and abs(client_footer['y']+client_footer['height']-height)<=1 and client_save is not None and client_save['y']+client_save['height']<=height-safe_bottom+1, f"{label}: dirty client card reveals a save footer that clears the Home Indicator")
             qa.check(page.locator('#clientEditor input[name=customerName]').count()==1 and page.locator('#clientEditor input[name=customerPhone]').count()==1, f"{label}: client card exposes core contact fields")
             qa.check(page.locator('#clientEditor [data-document-upload]').count()==1 and page.locator('#clientEditor .client-rental-history').count()==1, f"{label}: client card contains private document controls and rental history")
             client_scroll=page.locator('#clientEditor .client-editor-scroll').evaluate("el=>({overflowX:getComputedStyle(el).overflowX,scrollbarWidth:getComputedStyle(el).scrollbarWidth,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth})")
@@ -579,8 +613,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.wait_for_timeout(160)
         page.evaluate("document.documentElement.classList.add('keyboard-open');document.documentElement.style.setProperty('--keyboard-viewport-height','560px');document.documentElement.style.setProperty('--keyboard-viewport-top','0px')")
         page.wait_for_timeout(40)
-        keyboard_nav_state=page.locator('.mobile-nav').evaluate("el=>({display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility,opacity:getComputedStyle(el).opacity,position:getComputedStyle(el).position,bottom:getComputedStyle(el).bottom})")
-        qa.check(page.locator('.mobile-nav:visible').count()==1 and keyboard_nav_state['display']!='none' and keyboard_nav_state['visibility']=='visible' and keyboard_nav_state['position']=='fixed' and keyboard_nav_state['bottom']=='0px', f"{label}: keyboard does not mutate or recreate fixed bottom nav (VA HOME contract)")
+        keyboard_nav_state=page.locator('.mobile-nav').evaluate("el=>({display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility,opacity:parseFloat(getComputedStyle(el).opacity),pointer:getComputedStyle(el).pointerEvents,position:getComputedStyle(el).position,bottom:getComputedStyle(el).bottom,transform:getComputedStyle(el).transform})")
+        qa.check(page.locator('.mobile-nav').count()==1 and keyboard_nav_state['display']!='none' and keyboard_nav_state['visibility']=='visible' and keyboard_nav_state['position']=='fixed' and keyboard_nav_state['opacity']<=0.05 and keyboard_nav_state['pointer']=='none' and keyboard_nav_state['transform']!='none', f"{label}: keyboard hides the existing floating nav without recreating or reflowing it")
         modal_during_keyboard=page.locator('.modal-card').bounding_box()
         qa.check(modal_during_keyboard is not None and abs(modal_during_keyboard['height']-height)<=1, f"{label}: keyboard visualViewport variables never shrink the modal to a half-screen shell")
         keyboard_footer=page.locator('#bookingForm>footer').bounding_box()
@@ -588,9 +622,43 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.locator('#bookingForm input[name="customerPhone"]').evaluate('el=>el.blur()')
         page.wait_for_timeout(180)
         qa.check(not page.locator('html').evaluate("el=>el.classList.contains('keyboard-open')"), f"{label}: focusout clears stale keyboard state after keyboard or picker closes")
-        qa.check(page.locator('.mobile-nav:visible').count()==1 and abs(page.locator('.mobile-nav').bounding_box()['y']+page.locator('.mobile-nav').bounding_box()['height']-height)<=1, f"{label}: bottom nav remains at exact viewport bottom after keyboard closes")
+        restored_nav=page.locator('.mobile-nav').bounding_box()
+        qa.check(page.locator('.mobile-nav:visible').count()==1 and restored_nav is not None and abs((height-(restored_nav['y']+restored_nav['height']))-expected_nav_gap)<=1.5, f"{label}: floating bottom nav returns to the exact safe-area position after keyboard closes")
         if label=='mobile-390': qa.shot(page,'mobile-390-booking-step2.png')
         page.locator("#bookingForm .close").click()
+
+        # Regression v4.2.22: repeat customer lookup must reveal delivery address and delivered RETURN SMS bonus.
+        if label=='mobile-390':
+            page.locator("#mobileNewBooking:visible").click(); page.wait_for_selector("#bookingForm")
+            page.locator('#bookingForm input[name="startDate"]').evaluate("el=>{el.value='2026-09-01';el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}")
+            page.wait_for_timeout(100)
+            page.locator('.mobile-booking-next').click(); page.wait_for_timeout(60)
+            phone=page.locator('#bookingForm input[name="customerPhone"]')
+            phone.fill('0661301450'); phone.evaluate("el=>el.dispatchEvent(new Event('input',{bubbles:true}))")
+            page.wait_for_timeout(750)
+            qa.check(page.locator('#bookingForm input[name="customerName"]').input_value()=='КЛИМЕНКО КАТЕРИНА', 'mobile-390: 0661301450 resolves the repeat customer profile')
+            qa.check('SMS-БОНУС RETURN' in page.locator('#customerLookup').inner_text().upper() and page.locator('#customerLookup').inner_text().find('−10%')>=0, 'mobile-390: delivered RETURN SMS bonus is surfaced by phone lookup')
+            promo_toggle=page.locator('#customerLookup input[data-activate-pending-promo]')
+            qa.check(promo_toggle.count()==1 and promo_toggle.get_attribute('type')=='checkbox' and not promo_toggle.is_checked(), 'mobile-390: pending RETURN bonus requires one explicit manager confirmation checkbox')
+            qa.check(page.locator('#bookingForm select[name="fulfillment"]').input_value()=='pickup', 'mobile-390: saved customer address never silently switches fulfillment to delivery')
+            delivery_state=page.locator('#bookingForm .delivery-address-field').evaluate("el=>({hidden:el.hidden,disabled:el.querySelector('input[name=deliveryAddress]').disabled,required:el.querySelector('input[name=deliveryAddress]').required,value:el.querySelector('input[name=deliveryAddress]').value,detail:el.querySelector('[data-vac-address-detail]')?.value||''})")
+            qa.check(not delivery_state['hidden'] and not delivery_state['disabled'] and not delivery_state['required'] and delivery_state['value']=='Юрія Тимошенка 8' and delivery_state['detail']=='7 під’їзд', 'mobile-390: repeat customer restores editable route address plus separate entrance/comment while pickup remains selected')
+            promo_toggle.evaluate('el=>el.click()'); page.wait_for_timeout(500)
+            qa.check(page.locator('#customerLookup').inner_text().find('Бонус активований')>=0 and page.locator('#customerLookup').inner_text().find('−10%')>=0, 'mobile-390: manager confirmation activates RETURN bonus for 21 days and makes it available')
+            page.locator('.mobile-booking-next').click(); page.wait_for_timeout(40)
+            page.locator('.mobile-booking-next').click(); page.wait_for_timeout(80)
+            qa.check(page.locator('#bookingForm').get_attribute('data-mobile-step')=='4', 'mobile-390: repeat-customer booking reaches fulfillment/payment step')
+            fulfillment=page.locator('#bookingForm select[name="fulfillment"]'); fulfillment.select_option('delivery'); page.wait_for_timeout(80)
+            qa.check(page.locator('#bookingForm .delivery-pricing-field:visible').count()==1 and 'Юрія Тимошенка 8' in page.locator('#bookingDeliveryAddressSummary').inner_text(), 'mobile-390: explicit delivery selection shows pricing against the clean customer address without duplicating the address input')
+            qa.check(page.locator('#bookingForm .delivery-address-field:visible').count()==0, 'mobile-390: step 4 does not duplicate the address editor from the Client step')
+            qa.check(page.locator('#bookingForm').get_attribute('novalidate') is not None, 'mobile-390: booking submit uses explicit app validation instead of silent native hidden-field blocking')
+            if not page.locator('#bookingForm input[name="deliveryAmountOverride"]').input_value().strip():
+                page.locator('#bookingForm input[name="deliveryAmountOverride"]').fill('250')
+            qa.shot(page,'mobile-390-booking-return-delivery-v4222.png')
+            page.locator('#bookingForm .booking-submit:visible').click(); page.wait_for_timeout(550)
+            created=page.evaluate('window.__lastCreatePayload')
+            qa.check(bool(created) and created.get('action')=='create' and created.get('fulfillment')=='delivery' and created.get('deliveryAddress')=='Юрія Тимошенка 8' and '7 під’їзд' in str(created.get('customerComment') or ''), 'mobile-390: Add booking sends clean route address and keeps entrance/orientation in the booking comment')
+            qa.check(page.locator('#bookingForm').count()==0, 'mobile-390: successful Add booking closes the form instead of appearing to do nothing')
 
         # Existing booking edit must have one real internal scroll owner; footer stays fixed.
         edit_target=BOOKINGS[2]
@@ -963,12 +1031,13 @@ def mobile_browser_suite(browser: Browser, qa: QA, width: int = 390) -> None:
         root_scroll=page.evaluate("()=>({y:window.scrollY,html:document.documentElement.scrollTop,body:document.body.scrollTop})")
         qa.check(root_scroll['y']==0 and root_scroll['html']==0 and root_scroll['body']==0, 'Mobile Safari tab: root cannot scroll into blank space')
         nav=page.locator('.mobile-nav').bounding_box()
-        qa.check(nav is not None and abs(nav['y']+nav['height']-height)<=1, 'Mobile Safari tab: bottom navigation stays at the visible viewport bottom')
+        expected_nav_gap=8
+        qa.check(nav is not None and abs((height-(nav['y']+nav['height']))-expected_nav_gap)<=1.5, 'Mobile Safari tab: floating navigation keeps its 8px browser-mode gap')
         main=page.locator('.main')
         main.evaluate("el=>el.scrollTop=Math.min(420,Math.max(0,el.scrollHeight-el.clientHeight))");page.wait_for_timeout(40)
         qa.check(page.evaluate('window.scrollY')==0, 'Mobile Safari tab: scrolling admin content never transfers to the page root')
         nav_after=page.locator('.mobile-nav').bounding_box()
-        qa.check(nav_after is not None and abs(nav_after['y']+nav_after['height']-height)<=1, 'Mobile Safari tab: bottom navigation remains pinned after content scroll')
+        qa.check(nav_after is not None and abs((height-(nav_after['y']+nav_after['height']))-expected_nav_gap)<=1.5, 'Mobile Safari tab: floating navigation keeps the same gap after content scroll')
         qa.shot(page,'mobile-browser-shell.png')
     finally:
         page.close()

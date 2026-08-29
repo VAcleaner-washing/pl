@@ -24,8 +24,8 @@ ok('house number validation exists',runtime.includes('Вкажіть вулиц�
 ok('delivery details are separate',runtime.includes('Під’їзд / орієнтир')&&runtime.includes('DETAILS_SEPARATOR'));
 ok('public create submits composed address',bookingChunk.includes('globalThis.__VAC_DELIVERY_ADDRESS__?.(S)'));
 ok('admin create/edit submits composed address',adminJs.includes('window.__VAC_ADMIN_DELIVERY_ADDRESS__?.(fd.get(\'deliveryAddress\'))'));
-ok('navigator ignores apartment details',adminJs.includes("full.split(' · ')[0].trim()"));
-ok('admin customer lookup restores split details',adminJs.includes('__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(customer.address)'));
+ok('navigator ignores entrance/orientation details',adminJs.includes("const chunks=full.split(' · '),clean=String(chunks.shift()||'').trim()")&&adminJs.includes('navigationDestination(value)'));
+ok('admin customer lookup restores clean address and moves legacy access detail to comment',adminJs.includes('__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDelivery.address)')&&adminJs.includes('form.customerComment.value=savedDelivery.note'));
 ok('edge function scopes lookup to Poltava search area',edge.includes('SERVICE_BBOX')&&edge.includes('ADDRESS_SEARCH_RADIUS_KM')&&edge.includes('countrycode'));
 ok('edge function uses OSM Photon with bounded timeout',edge.includes('photon.komoot.io')&&edge.includes('photonSearch(candidate, controller.signal)')&&Number.isFinite(photonTimeoutMs)&&photonTimeoutMs>=1000&&photonTimeoutMs<=10000);
 ok('combobox is keyboard accessible',runtime.includes("e.key==='ArrowDown'")&&runtime.includes('aria-autocomplete'));

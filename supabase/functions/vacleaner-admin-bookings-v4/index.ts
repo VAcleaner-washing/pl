@@ -97,6 +97,27 @@ function normalizeDeliveryPricing(value: unknown) {
   const fuelSource=source?.fuel&&typeof source.fuel==='object'?source.fuel:{};
   return {local,zones:validZones,maxRouteKm,distanceBasis:'route_one_way',localSettlements:Array.isArray(defaultDeliveryPricing.localSettlements)?[...defaultDeliveryPricing.localSettlements]:["Полтава","Розсошенці","Щербані","Горбанівка"],outsideZone:'agreement',fuel:{petrolPerL:Number(fuelSource.petrolPerL??defaultDeliveryPricing.fuel?.petrolPerL??80)||80,lpgPerL:Number(fuelSource.lpgPerL??defaultDeliveryPricing.fuel?.lpgPerL??45)||45,consumptionL100:Number(fuelSource.consumptionL100??defaultDeliveryPricing.fuel?.consumptionL100??7)||7,tripMultiplier:4}};
 }
+function equipmentRevenueAllocationSnapshot(booking: any, catalog: any, now = new Date().toISOString()) {
+  const current = booking?.extras?.equipment_revenue_allocation;
+  if (current && typeof current === "object" && current.amounts && typeof current.amounts === "object") return current;
+  const revenue = Math.max(0, Math.round(Number(booking?.base_amount) || 0));
+  const product = catalog?.products?.[String(booking?.product_code || "")];
+  const resources = product?.resources && typeof product.resources === "object" ? product.resources : {};
+  const args: [string, string, string, string] = [String(booking?.start_date || ""), String(booking?.return_date || ""), String(booking?.pickup_window || "morning"), String(booking?.return_window || "evening")];
+  const price = (code: string) => { const item = catalog?.products?.[code]; const value = Number(item ? rentalBase(item, ...args) : 0); return Number.isFinite(value) && value > 0 ? value : 0; };
+  const puzzi = Math.max(1, price("puzzi") || Number(catalog?.products?.puzzi?.weekday) || 700);
+  const sc2 = Math.max(1, price("sc2") || Number(catalog?.products?.sc2?.weekday) || 500);
+  const abir = Math.max(1, price("abir") || Number(catalog?.products?.abir?.weekday) || 800);
+  const puzziJimmy = price("puzzi_jimmy");
+  const jimmy = Math.max(1, puzziJimmy > puzzi ? puzziJimmy - puzzi : (Number(catalog?.products?.puzzi_jimmy?.weekday) || 1050) - (Number(catalog?.products?.puzzi?.weekday) || 700) || 350);
+  const weights: Record<string, number> = { puzzi, sc2, jimmy, abir };
+  const parts = Object.entries(resources).filter(([key, qty]) => Object.prototype.hasOwnProperty.call(weights, key) && Number(qty) > 0).map(([key, qty]) => ({ key, weight: Math.max(1, Number(weights[key]) || 1) * Math.max(1, Number(qty) || 1) }));
+  if (!revenue || !parts.length) return null;
+  const totalWeight = parts.reduce((sum, row) => sum + row.weight, 0), amounts: Record<string, number> = {}; let used = 0;
+  parts.forEach((row, index) => { const amount = index === parts.length - 1 ? revenue - used : Math.round(revenue * row.weight / totalWeight); amounts[row.key] = Math.max(0, amount); used += amount; });
+  return { model: "proportional_standalone_tariffs_v1", rental_amount: revenue, amounts, calculated_at: now };
+}
+
 function normalizeSettlement(value: unknown) {
   return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
 }
@@ -759,7 +780,7 @@ Deno.serve(async (request: Request) => {
       else patch.hold_expires_at = null;
       if (nextStatus === "confirmed") { patch.prepayment_paid = true; patch.prepayment_amount = 200; patch.prepayment_paid_at = current.prepayment_paid_at || now; patch.confirmed_at = current.confirmed_at || now; }
       if (nextStatus === "issued") patch.issued_at = current.issued_at || now;
-      if (nextStatus === "completed") patch.completed_at = current.completed_at || now;
+      if (nextStatus === "completed") { patch.completed_at = current.completed_at || now; const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {}; const allocation = equipmentRevenueAllocationSnapshot(current, catalog, now); if (allocation) patch.extras = { ...currentExtras, equipment_revenue_allocation: allocation }; }
       const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single(); if (updateError) throw updateError;
       await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt);
       if (["cancelled", "declined"].includes(nextStatus)) await releaseReferralForCancelledBooking(supabase, bookingId);
@@ -800,7 +821,8 @@ Deno.serve(async (request: Request) => {
       if (!["confirmed", "issued", "completed"].includes(String(current.status || ""))) return json({ error: "invalid_transition" }, 409);
       const finance = settlementFromBooking(current, catalog, defaultCatalog), confirmation = settlementConfirmation(body, finance); if (!confirmation.ok) return json({ error: confirmation.error, finance }, 409);
       const now = new Date().toISOString(), currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
-      const extras = { ...currentExtras, settlement: { ...(currentExtras.settlement || {}), model: "prepayment_plus_deposit", prepayment_amount: finance.prepaymentAmount, deposit_amount: finance.depositPaid ? finance.securityDeposit : 0, received_amount: finance.receivedAmount, expenses_amount: finance.totalAmount, refund_amount: finance.refundAmount, due_amount: finance.dueAmount, refund_paid: finance.refundAmount > 0 ? confirmation.refundPaid : false, due_paid: finance.dueAmount > 0 ? confirmation.duePaid : false, completed: true, completed_at: now, calculated_at: now } };
+      const allocation = equipmentRevenueAllocationSnapshot(current, catalog, now);
+      const extras = { ...currentExtras, ...(allocation ? { equipment_revenue_allocation: allocation } : {}), settlement: { ...(currentExtras.settlement || {}), model: "prepayment_plus_deposit", prepayment_amount: finance.prepaymentAmount, deposit_amount: finance.depositPaid ? finance.securityDeposit : 0, received_amount: finance.receivedAmount, expenses_amount: finance.totalAmount, refund_amount: finance.refundAmount, due_amount: finance.dueAmount, refund_paid: finance.refundAmount > 0 ? confirmation.refundPaid : false, due_paid: finance.dueAmount > 0 ? confirmation.duePaid : false, completed: true, completed_at: now, calculated_at: now } };
       const { data, error } = await supabase.from("vacleaner_bookings").update({ extras, extras_amount: finance.totalExtras, total_amount: finance.totalAmount, deposit_returned: true, deposit_returned_at: now, return_payment_amount: finance.dueAmount, return_payment_paid: finance.dueAmount > 0 ? confirmation.duePaid : false, return_payment_paid_at: finance.dueAmount > 0 && confirmation.duePaid ? now : null, status: "completed", completed_at: current.completed_at || now, hold_expires_at: null, updated_at: now }).eq("id", bookingId).select("*").single(); if (error) throw error;
       await tagAudit(supabase, bookingId, userData.user.id, "edge:save_deposit_return", actionStartedAt);
       await completeReferralForBooking(supabase, data);

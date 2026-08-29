@@ -54,8 +54,7 @@ def run(page,w,h):
  page.locator('[data-campaign-codes]').first.click();page.wait_for_selector('.campaign-codes-modal')
  ck(pwa.no_overflow(page),f'{w}: campaign codes modal has no horizontal overflow')
  ck(fs(page,'.campaign-code-list span')>=(11.5 if w<=700 else 12),f'{w}: campaign code owner text is readable')
- if w>=901:
-  card=page.locator('.modal-card').bounding_box();ck(card and card['height']<420,f'{w}: one-code modal fits content instead of creating a huge empty panel')
+ card=page.locator('.modal-card').bounding_box();ck(card and card['height']<(440 if w<=900 else 420),f'{w}: one-code modal fits content instead of creating a huge empty panel')
  if w in (390,1650):
   page.evaluate("()=>{const box=document.querySelector('.campaign-code-list'),row=box?.querySelector('div');if(row)while(box.querySelectorAll(':scope>div').length<60)box.append(row.cloneNode(true));}")
   box=page.locator('.campaign-code-list');ck(box.evaluate('e=>e.scrollHeight>e.clientHeight'),f'{w}: large promo-code list scrolls inside its own workspace')

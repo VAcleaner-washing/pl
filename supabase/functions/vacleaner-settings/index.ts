@@ -18,12 +18,15 @@ const defaultDeliveryFee = Number(DEFAULT_DELIVERY_FEE) || 250;
 const defaultDeliveryPricing: any = structuredClone(DEFAULT_DELIVERY_PRICING);
 const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultCatalog: any = structuredClone(DEFAULT_CATALOG);
+const defaultEquipmentBaselines: any = { puzzi: { qty: 2, unitCost: 0 }, sc2: { qty: 2, unitCost: 0 }, jimmy: { qty: 2, unitCost: 0 }, abir: { qty: 2, unitCost: 0 } };
+const defaultCityCars = [{ id: "vadym", label: "Твоє авто", consumptionL100: 11 }, { id: "anna", label: "Авто дружини", consumptionL100: 10 }];
 
 const validTime = (v: unknown) => typeof v === "string" && /^\d{2}:\d{2}$/.test(v);
 const num = (v: unknown) => {
   const n = Number(v);
   return Number.isFinite(n) && n >= 0 && n <= 100000 ? Math.round(n) : null;
 };
+const cleanLabel = (v: unknown, max = 140) => String(v ?? "").replace(/[<>]/g, "").trim().slice(0, max);
 function normSlots(v: any) {
   if (!v || typeof v !== "object") return defaultSlots;
   const s = {
@@ -64,6 +67,17 @@ function normCatalog(v: any) {
   if (pp !== null) out.puzziPacketPrice = pp;
   return out;
 }
+function normEquipmentBaselines(v: any) {
+  const source = v && typeof v === "object" ? v : {};
+  const out: any = structuredClone(defaultEquipmentBaselines);
+  for (const key of Object.keys(out)) {
+    const qty = num(source?.[key]?.qty ?? out[key].qty);
+    const unitCost = num(source?.[key]?.unitCost ?? source?.[key]?.unit_price ?? out[key].unitCost);
+    if (qty === null || unitCost === null || qty > 100) return null;
+    out[key] = { qty, unitCost, total: qty * unitCost };
+  }
+  return out;
+}
 function normDeliveryPricing(v: unknown) {
   const source: any = v && typeof v === "object" ? v : { local: v };
   const local = num(source?.local ?? source?.amount ?? source);
@@ -76,15 +90,22 @@ function normDeliveryPricing(v: unknown) {
   const maxRouteKm = num(source?.maxRouteKm ?? zones[zones.length-1].maxKm);
   if (maxRouteKm === null || maxRouteKm < zones[zones.length-1].maxKm) return null;
   const fuelSource = source?.fuel && typeof source.fuel === "object" ? source.fuel : {};
+  const rawCars = Array.isArray(fuelSource.cityCars) && fuelSource.cityCars.length ? fuelSource.cityCars : defaultCityCars;
+  const cityCars = rawCars.slice(0, 4).map((car: any, index: number) => ({
+    id: cleanLabel(car?.id, 40) || defaultCityCars[index]?.id || `car_${index + 1}`,
+    label: cleanLabel(car?.label, 80) || defaultCityCars[index]?.label || `Авто ${index + 1}`,
+    consumptionL100: Number(car?.consumptionL100 ?? defaultCityCars[index]?.consumptionL100 ?? 10),
+  }));
   const fuel = {
     petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 80),
     lpgPerL: Number(fuelSource.lpgPerL ?? defaultDeliveryPricing.fuel?.lpgPerL ?? 45),
     consumptionL100: Number(fuelSource.consumptionL100 ?? defaultDeliveryPricing.fuel?.consumptionL100 ?? 7),
-    tripMultiplier: 4,
+    tripMultiplier: 4, cityCars,
   };
-  if (![fuel.petrolPerL,fuel.lpgPerL,fuel.consumptionL100].every(x=>Number.isFinite(x)&&x>0&&x<=1000)) return null;
+  if (![fuel.petrolPerL,fuel.lpgPerL,fuel.consumptionL100,...cityCars.map((car:any)=>car.consumptionL100)].every(x=>Number.isFinite(x)&&x>0&&x<=1000)) return null;
   return {
     local, zones, maxRouteKm, distanceBasis: "route_one_way",
+    originLabel: cleanLabel(source?.originLabel, 140) || "Європейська, 146Е",
     localSettlements: Array.isArray(defaultDeliveryPricing.localSettlements) ? [...defaultDeliveryPricing.localSettlements] : ["Полтава","Розсошенці","Щербані","Горбанівка"],
     outsideZone: "agreement", fuel,
   };
@@ -100,14 +121,16 @@ Deno.serve(async (req) => {
   const db = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
 
   if (req.method === "GET") {
-    const { data } = await db.from("vacleaner_settings").select("key,value").in("key", ["booking_slots", "catalog", "deposit_rules", "delivery_fee"]);
+    const { data } = await db.from("vacleaner_settings").select("key,value").in("key", ["booking_slots", "catalog", "deposit_rules", "delivery_fee", "equipment_baselines"]);
     const map = Object.fromEntries((data ?? []).map((x: any) => [x.key, x.value]));
+    const normalizedDelivery = normDeliveryPricing(map.delivery_fee) ?? normDeliveryPricing(defaultDeliveryPricing) ?? defaultDeliveryPricing;
     return json({
       slots: normSlots(map.booking_slots) ?? defaultSlots,
       catalog: normCatalog(map.catalog) ?? defaultCatalog,
       depositRules: normDepositRules(map.deposit_rules) ?? defaultDepositRules,
-      deliveryPricing: normDeliveryPricing(map.delivery_fee) ?? defaultDeliveryPricing,
-      deliveryFee: (normDeliveryPricing(map.delivery_fee) ?? defaultDeliveryPricing).local ?? defaultDeliveryFee,
+      deliveryPricing: normalizedDelivery,
+      deliveryFee: normalizedDelivery.local ?? defaultDeliveryFee,
+      equipmentBaselines: map.equipment_baselines ? normEquipmentBaselines(map.equipment_baselines) : null,
       version: VACLEANER_RELEASE_VERSION,
     });
   }
@@ -147,6 +170,12 @@ Deno.serve(async (req) => {
     rows.push({ key: "delivery_fee", value: deliveryPricing, updated_at: new Date().toISOString() });
     response.deliveryPricing = deliveryPricing;
     response.deliveryFee = deliveryPricing.local;
+  }
+  if (body.equipmentBaselines !== undefined) {
+    const equipmentBaselines = normEquipmentBaselines(body.equipmentBaselines);
+    if (!equipmentBaselines) return json({ error: "invalid_equipment_baselines" }, 400);
+    rows.push({ key: "equipment_baselines", value: equipmentBaselines, updated_at: new Date().toISOString() });
+    response.equipmentBaselines = equipmentBaselines;
   }
   if (!rows.length) return json({ error: "nothing_to_save" }, 400);
   const { error } = await db.from("vacleaner_settings").upsert(rows);

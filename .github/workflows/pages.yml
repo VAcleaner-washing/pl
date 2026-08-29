@@ -1,6 +1,10 @@
 name: Deploy VAcleaner Pages
 on:
   push:
+    branches:
+      - main
+      - 'qa/**'
+  pull_request:
     branches: [main]
   workflow_dispatch:
 permissions:
@@ -8,7 +12,7 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -162,6 +166,19 @@ jobs:
         run: npm run test:v4.2.11-cache-bust
       - name: Verify v4.2.12 referral client UX polish
         run: npm run test:v4.2.12-referral-ux
+      - name: Verify v4.2.13 admin typography hierarchy
+        run: npm run test:v4.2.13-admin-typography
+
+      - name: Verify v4.2.14 admin ops UX
+        run: npm run test:v4.2.14-admin-ops-ux
+
+      - name: Verify v4.2.15 browser contracts
+        run: npm run test:v4.2.15-browser-contracts
+      - name: Verify v4.2.16 finance truth UX
+        run: npm run test:v4.2.16-finance-truth
+      - name: Verify v4.2.22 admin truth and UX contracts
+        run: npm run test:v4.2.22-admin-truth-ux
+
       - name: Re-run admin functional contracts before architecture build
         run: |
           npm run test:admin-labels
@@ -365,6 +382,7 @@ jobs:
 
   deploy:
     name: Deploy GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       pages: write

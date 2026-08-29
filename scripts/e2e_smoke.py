@@ -764,7 +764,9 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
         checks.check(no_horizontal_overflow(page), "Return settlement has no horizontal overflow")
         page.locator("#financeForm header [data-close]").click()
         page.locator("#globalSearch").fill("VAC-TEST-001")
-        checks.check(page.locator(".booking-card").count() == 1, "Global search filters bookings")
+        page.wait_for_timeout(40)
+        checks.check(page.locator("#pageTitle").inner_text().strip() == "Пошук" and page.locator('[data-search-booking]').count() == 1, "Global search returns the matching booking")
+        checks.check("VAC-TEST-001" in page.locator('[data-search-booking]').first.inner_text(), "Global search booking result keeps the booking code")
         page.locator("#clearSearch").click()
         checks.check(page.locator(".booking-card").count() >= 4, "Search clear restores bookings")
     finally:
@@ -851,10 +853,10 @@ def main() -> int:
     with static_server(root) as base, sync_playwright() as playwright:
         executable = os.environ.get("PLAYWRIGHT_CHROMIUM_EXECUTABLE")
         launch_options = {"headless": True, "args": ["--no-sandbox"]}
+        # Playwright-managed Chromium is the reproducible default. A system Chromium
+        # may carry enterprise URL-blocking policies and produced false local failures.
         if executable:
             launch_options["executable_path"] = executable
-        elif Path("/usr/bin/chromium").exists():
-            launch_options["executable_path"] = "/usr/bin/chromium"
         browser = playwright.chromium.launch(**launch_options)
         try:
             public_tests(browser, base, api_handler, checks, root)

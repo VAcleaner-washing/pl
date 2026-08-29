@@ -211,10 +211,13 @@ function attach(input,mode){
   input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
   const list=document.createElement('div');list.className='vac-address-list';list.setAttribute('role','listbox');list.hidden=true;wrap.appendChild(list);
   const status=document.createElement('div');status.className='vac-address-status hint';wrap.insertAdjacentElement('afterend',status);
-  const detailBox=document.createElement('div');detailBox.className='vac-address-details';
-  detailBox.innerHTML='<span>Під’їзд / орієнтир <small>необов’язково</small></span><input type="text" data-vac-address-detail="1" maxlength="120" autocomplete="off" placeholder="Наприклад: 2 під’їзд, зі сторони двору" aria-label="Під’їзд або орієнтир для доставки"><small class="vac-address-delivery-note">Доставка техніки — до під’їзду.</small>';
-  status.insertAdjacentElement('afterend',detailBox);
-  const details=detailBox.querySelector('input');details.value=original.details;
+  let detailBox=null,details=null;
+  if(mode==='public'){
+    detailBox=document.createElement('div');detailBox.className='vac-address-details';
+    detailBox.innerHTML='<span>Під’їзд / орієнтир <small>необов’язково</small></span><input type="text" data-vac-address-detail="1" maxlength="120" autocomplete="off" placeholder="Наприклад: 2 під’їзд, зі сторони двору" aria-label="Під’їзд або орієнтир для доставки"><small class="vac-address-delivery-note">Доставка техніки — до під’їзду.</small>';
+    status.insertAdjacentElement('afterend',detailBox);
+    details=detailBox.querySelector('input');details.value=original.details;
+  }
   const ctx={input,mode,wrap,list,status,detailBox,details,items:[],active:-1,selected:'',timer:0,abort:null,setting:false};
   attached.set(input,ctx);if(mode==='admin')activeAdmin=ctx;else activePublic=ctx;
   setStatus(ctx,'hint','Введіть вулицю й номер будинку — знайдемо адресу та порахуємо доставку.');
@@ -248,7 +251,7 @@ function installGlobals(){
     if(!activeAdmin)return false;
     const parsed=splitStored(value);
     activeAdmin.setting=true;setInputValue(activeAdmin.input,parsed.base);activeAdmin.setting=false;
-    activeAdmin.details.value=parsed.details;activeAdmin.selected='';clearMeta(activeAdmin.input);
+    if(activeAdmin.details)activeAdmin.details.value='';activeAdmin.selected='';clearMeta(activeAdmin.input);
     setStatus(activeAdmin,'hint','Збережена адреса. За потреби оберіть її зі списку ще раз.');
     return true;
   };

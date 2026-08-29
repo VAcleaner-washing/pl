@@ -23,7 +23,12 @@ with sync_playwright() as p:
             page.evaluate("document.activeElement && document.activeElement.blur();document.documentElement.classList.remove('keyboard-open');document.documentElement.style.removeProperty('--keyboard-viewport-height');document.documentElement.style.removeProperty('--keyboard-viewport-top')")
             page.wait_for_timeout(100)
             after=snap('after')
-            ok=(before['position']=='fixed' and during['position']=='fixed' and after['position']=='fixed' and before['cssBottom']=='0px' and during['cssBottom']=='0px' and after['cssBottom']=='0px' and during['display']!='none' and during['visibility']=='visible' and abs(after['bottom']-height)<=1 and abs(before['bottom']-height)<=1)
+            before_inset=max(0,height-before['bottom']); after_inset=max(0,height-after['bottom'])
+            ok=(before['position']=='fixed' and during['position']=='fixed' and after['position']=='fixed'
+                and 0<=before_inset<=12 and 0<=after_inset<=12
+                and abs(after_inset-before_inset)<=1
+                and during['display']!='none' and during['visibility']=='visible'
+                and during['opacity']=='0' and during['top']>=height)
             results.append({'width':width,'height':height,'ok':ok,'before':before,'during':during,'after':after})
             page.close()
     finally:

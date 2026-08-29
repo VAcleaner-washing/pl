@@ -55,8 +55,13 @@ Deno.serve(async request=>{
       const {data,error}=await db.from("vacleaner_expenses").update({archived_at:now,archived_by:userData.user.id,updated_at:now,updated_by:userData.user.id}).eq("id",expenseId).is("archived_at",null).select("id").maybeSingle();if(error)throw error;if(!data)return json({error:"expense_not_found"},404);return json({ok:true});
     }
     if(action==="clients"){
-      const {data,error}=await db.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000);
-      if(error)throw error;return json({customers:data??[]});
+      const [{data:customers,error:customerError},{data:referralCodes,error:referralError}]=await Promise.all([
+        db.from("vacleaner_customers").select("phone,name,telegram,instagram,preferred_contact,referral_sent_at,referral_sent_channel,address,document_type,document_number,document_verified_at,document_updated_at,document_photo_path,document_photo_name,document_photo_mime,document_photo_uploaded_at,created_at,updated_at").order("updated_at",{ascending:false}).limit(1000),
+        db.from("vacleaner_referral_codes").select("owner_phone,code,active").eq("active",true).limit(2000),
+      ]);
+      if(customerError||referralError)throw customerError||referralError;
+      const referralByPhone=new Map((referralCodes??[]).map((row:any)=>[normalizePhone(row.owner_phone),String(row.code||"")]));
+      return json({customers:(customers??[]).map((row:any)=>({...row,referral_code:referralByPhone.get(normalizePhone(row.phone))||""}))});
     }
     if(action==="health"){
       const [reservationResult,pushConfigResult,pushSubscriptionsResult]=await Promise.all([

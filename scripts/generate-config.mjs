@@ -33,7 +33,7 @@ const sharedWithDelivery=shared.replace(
   'export const DEFAULT_SLOTS=structuredClone(VACLEANER_CONFIG.slots);',
   'export const DEFAULT_SLOTS=structuredClone(VACLEANER_CONFIG.slots);\nexport const DEFAULT_DELIVERY_FEE=Number(VACLEANER_CONFIG.deliveryFee);\nexport const DEFAULT_DELIVERY_PRICING=structuredClone(VACLEANER_CONFIG.deliveryPricing);',
 );
-for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3']){
+for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3','vacleaner-admin-bookings-v4']){
  const dir=path.join(root,'supabase','functions',name);fs.mkdirSync(dir,{recursive:true});
  fs.writeFileSync(path.join(dir,'config.ts'),sharedWithDelivery);
  // Some deployment workflows use the JavaScript fallback beside index.deploy.js.
@@ -46,7 +46,7 @@ for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-
 }
 // Keep JavaScript deployment fallbacks aligned with the reviewed TypeScript
 // sources. Older hand-built fallbacks were a second, stale source of truth.
-for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3']){
+for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3','vacleaner-admin-bookings-v4']){
   const dir=path.join(root,'supabase','functions',name);
   const source=fs.readFileSync(path.join(dir,'index.ts'),'utf8');
   const deploy=stripTypeScriptTypes(source,{mode:'transform'})

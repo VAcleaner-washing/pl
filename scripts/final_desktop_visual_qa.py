@@ -81,10 +81,11 @@ def view_suite(page:Page,qa:QA,width:int):
 
 def search_state(page:Page,qa:QA,width:int):
     page.locator('.nav button[data-view="bookings"]').click();page.locator('#globalSearch').fill('НЕІСНУЮЧИЙ-КЛІЄНТ-999');page.wait_for_timeout(50)
-    qa.check(page.locator('.empty-action').count()==1,f'{width}: search empty state renders once')
-    qa.check(pwa.no_overflow(page),f'{width}: search empty state has no overflow')
-    btn=page.locator('.empty-action .btn').bounding_box();qa.check(btn is not None and btn['height']>=44,f'{width}: empty-state action remains 44px+')
+    qa.check(page.locator('#pageTitle').inner_text().strip()=='Пошук' and page.locator('.global-search-card').count()==4,f'{width}: global search hub renders all four result groups')
+    qa.check(page.locator('.global-search-card .ops-empty').count()==4,f'{width}: global search empty state is explicit in every group')
+    qa.check(pwa.no_overflow(page),f'{width}: global search empty state has no overflow')
     page.locator('#clearSearch').click();page.wait_for_timeout(30)
+    qa.check(page.locator('.booking-card').count()>=1,f'{width}: clearing global search restores the current admin view')
 
 def detail_suite(page:Page,qa:QA,width:int):
     page.locator('.nav button[data-view="bookings"]').click();page.wait_for_timeout(30)
@@ -119,19 +120,21 @@ def modal_suite(page:Page,qa:QA,width:int):
     qa.check(date_state['opacity']<=0.01 and date_state['pointer']=='auto' and date_state['hit'],f'{width}: desktop date field click reaches only the native input')
     qa.check(date_state['displayText'] and not date_state['interactiveDisplay'],f'{width}: desktop date has one noninteractive display layer without duplicate native text')
     modal_check(page,qa,width,'new-booking','#bookingForm')
-    # v4.1.41: production parity — switching an edit form back to pickup must fully hide
-    # and disable delivery-address helper controls, while keeping fulfillment compact.
+    # v4.2.22: customer address belongs to the client profile and stays editable for every booking.
+    # Switching to pickup hides only delivery pricing; address + entrance/orientation helper remain available.
     delivery_id=pwa.BOOKINGS[1]['id']
     page.locator(f'.booking-card[data-id="{delivery_id}"] [data-action="edit"]').click();page.wait_for_selector('#bookingForm');page.wait_for_timeout(90)
     fulfillment=page.locator('#bookingForm .fulfillment-field')
     fulfillment_select=fulfillment.locator('select[name="fulfillment"]')
     address=page.locator('#bookingForm .delivery-address-field')
+    pricing=page.locator('#bookingForm .delivery-pricing-field')
     if fulfillment_select.count() and address.count():
-        qa.check(fulfillment_select.input_value()=='delivery' and address.is_visible(),f'{width}: delivery booking shows delivery address controls')
+        qa.check(fulfillment_select.input_value()=='delivery' and address.is_visible() and pricing.is_visible(),f'{width}: delivery booking shows customer address and delivery pricing')
         fulfillment_select.select_option('pickup');page.wait_for_timeout(30)
-        qa.check(not address.is_visible(),f'{width}: pickup hides address, entrance and address-helper UI completely')
+        qa.check(address.is_visible(),f'{width}: pickup keeps customer address editable')
         address_input=address.locator('input[name="deliveryAddress"]')
-        qa.check(not address_input.count() or address_input.is_disabled(),f'{width}: pickup disables hidden delivery address so it is not submitted accidentally')
+        qa.check(address_input.count() and not address_input.is_disabled(),f'{width}: pickup keeps customer address enabled for the client profile')
+        qa.check(not pricing.is_visible(),f'{width}: pickup hides only delivery pricing')
     page.locator('#bookingForm .close').click();page.wait_for_timeout(30)
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[0]["id"]}"] [data-action="process"]').click();modal_check(page,qa,width,'process','#processForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[2]["id"]}"] [data-action="issue"]').click();modal_check(page,qa,width,'issue','#issueForm')

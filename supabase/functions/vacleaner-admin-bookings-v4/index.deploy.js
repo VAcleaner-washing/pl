@@ -141,6 +141,53 @@ function normalizeDeliveryPricing(value) {
         }
     };
 }
+function equipmentRevenueAllocationSnapshot(booking, catalog, now = new Date().toISOString()) {
+    const current = booking?.extras?.equipment_revenue_allocation;
+    if (current && typeof current === "object" && current.amounts && typeof current.amounts === "object") return current;
+    const revenue = Math.max(0, Math.round(Number(booking?.base_amount) || 0));
+    const product = catalog?.products?.[String(booking?.product_code || "")];
+    const resources = product?.resources && typeof product.resources === "object" ? product.resources : {};
+    const args = [
+        String(booking?.start_date || ""),
+        String(booking?.return_date || ""),
+        String(booking?.pickup_window || "morning"),
+        String(booking?.return_window || "evening")
+    ];
+    const price = (code)=>{
+        const item = catalog?.products?.[code];
+        const value = Number(item ? rentalBase(item, ...args) : 0);
+        return Number.isFinite(value) && value > 0 ? value : 0;
+    };
+    const puzzi = Math.max(1, price("puzzi") || Number(catalog?.products?.puzzi?.weekday) || 700);
+    const sc2 = Math.max(1, price("sc2") || Number(catalog?.products?.sc2?.weekday) || 500);
+    const abir = Math.max(1, price("abir") || Number(catalog?.products?.abir?.weekday) || 800);
+    const puzziJimmy = price("puzzi_jimmy");
+    const jimmy = Math.max(1, puzziJimmy > puzzi ? puzziJimmy - puzzi : (Number(catalog?.products?.puzzi_jimmy?.weekday) || 1050) - (Number(catalog?.products?.puzzi?.weekday) || 700) || 350);
+    const weights = {
+        puzzi,
+        sc2,
+        jimmy,
+        abir
+    };
+    const parts = Object.entries(resources).filter(([key, qty])=>Object.prototype.hasOwnProperty.call(weights, key) && Number(qty) > 0).map(([key, qty])=>({
+            key,
+            weight: Math.max(1, Number(weights[key]) || 1) * Math.max(1, Number(qty) || 1)
+        }));
+    if (!revenue || !parts.length) return null;
+    const totalWeight = parts.reduce((sum, row)=>sum + row.weight, 0), amounts = {};
+    let used = 0;
+    parts.forEach((row, index)=>{
+        const amount = index === parts.length - 1 ? revenue - used : Math.round(revenue * row.weight / totalWeight);
+        amounts[row.key] = Math.max(0, amount);
+        used += amount;
+    });
+    return {
+        model: "proportional_standalone_tariffs_v1",
+        rental_amount: revenue,
+        amounts,
+        calculated_at: now
+    };
+}
 function normalizeSettlement(value) {
     return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
 }
@@ -1531,7 +1578,15 @@ Deno.serve(async (request)=>{
                 patch.confirmed_at = current.confirmed_at || now;
             }
             if (nextStatus === "issued") patch.issued_at = current.issued_at || now;
-            if (nextStatus === "completed") patch.completed_at = current.completed_at || now;
+            if (nextStatus === "completed") {
+                patch.completed_at = current.completed_at || now;
+                const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+                const allocation = equipmentRevenueAllocationSnapshot(current, catalog, now);
+                if (allocation) patch.extras = {
+                    ...currentExtras,
+                    equipment_revenue_allocation: allocation
+                };
+            }
             const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single();
             if (updateError) throw updateError;
             await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt);
@@ -1672,8 +1727,12 @@ Deno.serve(async (request)=>{
                 finance
             }, 409);
             const now = new Date().toISOString(), currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+            const allocation = equipmentRevenueAllocationSnapshot(current, catalog, now);
             const extras = {
                 ...currentExtras,
+                ...allocation ? {
+                    equipment_revenue_allocation: allocation
+                } : {},
                 settlement: {
                     ...currentExtras.settlement || {},
                     model: "prepayment_plus_deposit",
