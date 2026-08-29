@@ -6061,3 +6061,5 @@ button,.btn,.new-btn,.chip{font-weight:520}
 .search-result-row small{color:var(--muted,#9ca3af)}
 .search-result-row strong{white-space:nowrap}
 @media(max-width:900px){.client-next-action-card,.ops-mini-row,.search-result-row,.delivery-profit-card div,.booking-margin-rows>div{grid-template-columns:1fr;display:grid}.booking-margin-head,.ops-card-head,.global-search-head,.delivery-economics-subhead{display:grid}.search-result-row strong{white-space:normal}.finances-insights,.global-search-layout{grid-template-columns:1fr}}
+/* v4.2.14 browser QA hardening: delivery economics owns the full settings width on desktop. */
+.delivery-settings-card{grid-column:1/-1}

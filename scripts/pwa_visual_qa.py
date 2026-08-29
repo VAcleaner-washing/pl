@@ -409,7 +409,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.booking-funnel-panel').count()==1 and 'Фінальний % рахуємо тільки серед закритих заявок' in page.locator('.booking-funnel-panel').inner_text() and page.locator('.analytics-funnel-resolution').count()==1 and all(x in page.locator('.analytics-funnel-resolution').inner_text() for x in ['Завершено','В роботі','Втрачено']), f"{label}: status funnel separates completed, active and lost bookings without penalizing active work")
                 for panel in ['.revenue-structure-panel','.source-performance-panel','.weekday-demand-panel','.booking-funnel-panel']:
                     qa.check(page.locator(panel).evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: {panel} stays inside the analytics viewport")
-                qa.check(page.locator('.topbar:visible').count()==0, f"{label}: analytics removes the unused mobile search bar")
+                qa.check(page.locator('.topbar:visible #globalSearch').count()==1 and 'всій адмінці' in page.locator('#globalSearch').get_attribute('placeholder'), f"{label}: analytics keeps the global admin search available")
                 qa.check(page.locator('.analytics-kpis .kpi').count()==4, f"{label}: analytics uses a compact four-KPI decision strip")
             if view=='chemistry':
                 qa.check(page.locator('.chem-product-row').filter(has_text='VA SPOT FIX').count()==1, f"{label}: VA SPOT FIX is present in chemistry pricing")
@@ -456,15 +456,19 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['h']>=48 and fg['dep']['h']>=48 and not (fg['due']['r']>fg['dep']['l'] and fg['dep']['r']>fg['due']['l'] and fg['due']['b']>fg['dep']['t'] and fg['dep']['b']>fg['due']['t']), f"{label}: issued preliminary settlement and deposit never overlap")
         page.locator('[data-filter="all"]').click();page.wait_for_timeout(30)
 
-        # Client search is contextual and the card can be edited.
+        # Global search stays global from every tab and client results open the full CRM card.
         open_mobile_view(page,'clients')
         page.locator('#globalSearch').fill('Анна')
-        page.wait_for_timeout(40)
-        qa.check(page.locator('#pageTitle').inner_text().strip()=='Клієнти', f"{label}: searching clients never jumps to bookings")
-        qa.check(page.locator('.client-row').count()>=1, f"{label}: client search filters inside clients view")
-        qa.check(page.locator('.campaign-panel').count()==0, f"{label}: clients view is free of campaign management")
-        stats=page.locator('.client-mobile-stats:visible').first
-        qa.check(stats.count()==1 and 'оренд' in stats.inner_text() and 'грн' in stats.inner_text(), f"{label}: client card shows rental count and total spend in PWA")
+        page.wait_for_timeout(60)
+        qa.check(page.locator('#pageTitle').inner_text().strip()=='Пошук', f"{label}: client query opens the global search hub")
+        qa.check(page.locator('.global-search-card').count()==4 and page.locator('[data-search-client]').count()>=1, f"{label}: global search exposes client matches without jumping to bookings")
+        qa.check(page.locator('.campaign-panel').count()==0, f"{label}: global search does not render campaign management UI")
+        client_result=page.locator('[data-search-client]').first
+        client_result.click();page.wait_for_timeout(60)
+        stats=page.locator('.client-editor-summary:visible').first
+        qa.check(page.locator('#clientEditor').count()==1 and stats.count()==1 and 'ОРЕНД' in stats.inner_text() and 'грн' in stats.inner_text(), f"{label}: global client result opens rental count and total spend")
+        page.locator('#clientEditor .close').click();page.wait_for_timeout(30)
+        page.locator('#clearSearch').click();page.wait_for_timeout(30)
         open_mobile_view(page,'campaigns');page.wait_for_timeout(60)
         qa.check(page.locator('.campaign-panel').count()==1, f"{label}: campaigns render in their dedicated view")
         qa.check('RETURN' in page.locator('.campaign-panel').inner_text(), f"{label}: RETURN campaign is visible in campaigns view")

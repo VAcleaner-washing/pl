@@ -81,10 +81,11 @@ def view_suite(page:Page,qa:QA,width:int):
 
 def search_state(page:Page,qa:QA,width:int):
     page.locator('.nav button[data-view="bookings"]').click();page.locator('#globalSearch').fill('НЕІСНУЮЧИЙ-КЛІЄНТ-999');page.wait_for_timeout(50)
-    qa.check(page.locator('.empty-action').count()==1,f'{width}: search empty state renders once')
-    qa.check(pwa.no_overflow(page),f'{width}: search empty state has no overflow')
-    btn=page.locator('.empty-action .btn').bounding_box();qa.check(btn is not None and btn['height']>=44,f'{width}: empty-state action remains 44px+')
+    qa.check(page.locator('#pageTitle').inner_text().strip()=='Пошук' and page.locator('.global-search-card').count()==4,f'{width}: global search hub renders all four result groups')
+    qa.check(page.locator('.global-search-card .ops-empty').count()==4,f'{width}: global search empty state is explicit in every group')
+    qa.check(pwa.no_overflow(page),f'{width}: global search empty state has no overflow')
     page.locator('#clearSearch').click();page.wait_for_timeout(30)
+    qa.check(page.locator('.booking-card').count()>=1,f'{width}: clearing global search restores the current admin view')
 
 def detail_suite(page:Page,qa:QA,width:int):
     page.locator('.nav button[data-view="bookings"]').click();page.wait_for_timeout(30)

@@ -167,6 +167,9 @@ jobs:
 
       - name: Verify v4.2.14 admin ops UX
         run: npm run test:v4.2.14-admin-ops-ux
+
+      - name: Verify v4.2.15 browser contracts
+        run: npm run test:v4.2.15-browser-contracts
       - name: Re-run admin functional contracts before architecture build
         run: |
           npm run test:admin-labels
