@@ -2166,7 +2166,7 @@ Standalone PWA content має резервувати safe bottom space.
 
 ## PWA-002 — keyboard
 
-При відкритій клавіатурі mobile nav не повинна накладатися на inputs/CTA.
+При відкритій клавіатурі mobile nav не повинна накладатися на inputs/CTA. Використовується той самий fixed nav node: він стає прозорим, неактивним і зсувається за робочу область; `display:none` / DOM recreation / layout reflow не використовуються. Після закриття клавіатури nav повертається на той самий safe-area inset.
 
 Root shell не має панитися/скролитися у порожній простір через Safari keyboard behavior.
 
@@ -2612,6 +2612,13 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - **UI-008** — блоки «Окупність техніки» і «Доставка по факту» переведені з nested tiles у compact rows / separators.
 - **SET-003/004** — Налаштування переведені на 5 task-focused вкладок; активний сценарій показується один, profitability доставки перенесена тільки у Finance, а input-групи стали compact rows/table замість стіни cards.
 - **UI-006** — Finance dashboard більше не розтягує сусідні блоки до однакової висоти й не створює великі порожні площі.
+
+### ADDED / HARDENED
+
+- **QA-004** — перед передачею ZIP запускається локальний `npm run qa:full`; release candidate не видається, якщо summary містить хоча б один failure.
+- **QA-005** — локальний `qa:full` і GitHub Browser/Static gates повинні використовувати той самий перелік regression/browser suites; browser QA завжди завершує всі suites і лише потім агрегує failures.
+- **PWA-004** — keyboard mode зберігає один і той самий fixed bottom-nav node: `opacity:0 + pointer-events:none + offscreen transform`, без `display:none`, `visibility:hidden` або DOM recreation.
+- **ADDR-008** — крок «Видача та оплата» не друкує адресу вдруге; він показує тариф і route action, які використовують єдину адресу з кроку «Клієнт».
 
 ### FIXED
 

@@ -8,6 +8,7 @@ const address=read('assets/address-autocomplete.js');
 const booking=read('bronuvannia/index.html');
 const chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js');
 const workflow=read('.github/workflows/pages.yml');
+const qaRunner=read('scripts/qa-full.mjs');
 let checks=0,failed=0;
 const ok=(name,condition)=>{checks++;if(condition)console.log('OK  ',name);else{failed++;console.error('FAIL',name)}};
 
@@ -20,7 +21,7 @@ ok('address lookup miss keeps manual entry possible without tariff spam',address
 ok('provider failure has the same quiet fallback',address.includes('Пошук адрес тимчасово недоступний. Введіть адресу вручну — менеджер перевірить її до передоплати.'));
 ok('initial booking copy is concise and explicit',booking.includes('<strong>Доставка</strong>')&&booking.includes('до вас і назад · Полтава 250 грн')&&!booking.includes('до вас і назад · Полтава 250 грн · передмістя 350 грн'));
 ok('hydrated booking copy matches initial HTML',chunk.includes('children:"Доставка"')&&chunk.includes('до вас і назад · Полтава 250 грн')&&!chunk.includes('до вас і назад · Полтава 250 грн · передмістя 350 грн'));
-ok('CI runs this regression',workflow.includes('test:v4.1.52-manual-address-fallback'));
+ok('CI runs this regression',(workflow.includes('test:v4.1.52-manual-address-fallback')||qaRunner.includes('test:v4.1.52-manual-address-fallback')));
 
 console.log(`v4.1.52 manual address fallback: ${checks-failed}/${checks} OK`);
 if(failed)process.exit(1);

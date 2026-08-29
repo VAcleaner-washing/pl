@@ -68,7 +68,7 @@ has(css,'.sidebar{display:none}','desktop sidebar is hidden on mobile');
 has(css,'.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0','dedicated mobile navigation is pinned directly to the viewport');
 has(adminHtml,'<div id="adminMount"></div><nav class="mobile-nav"','mobile nav exists in initial HTML as a body-level sibling, like VA HOME');
 lacks(admin,'<nav class="mobile-nav"','runtime never recreates the static mobile nav');
-has(css,'html.keyboard-open .mobile-nav{opacity:0;visibility:hidden;pointer-events:none','keyboard keeps the dedicated nav node but removes it from the visual working area while typing');
+has(css,'html.keyboard-open .mobile-nav{opacity:0;visibility:visible;pointer-events:none','keyboard keeps the dedicated nav node but removes it from the visual working area while typing');
 has(css,'html.keyboard-open .main{bottom:0;scroll-padding-bottom:24px}','keyboard gives the focused form the full visual viewport after nav is hidden');
 lacks(css,'html.pwa-standalone .mobile-nav{position:relative','standalone grid override is absent');
 lacks(css,'.app{position:fixed}\n  .topbar,.main{position:absolute}','stale v3.0.36 fixed-ancestor override is absent');

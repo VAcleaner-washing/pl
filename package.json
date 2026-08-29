@@ -107,6 +107,10 @@
     "test:v4.2.16-finance-truth": "node scripts/test-v4-2-16-finance-truth.mjs",
     "test:v4.2.22-admin-truth-ux": "node scripts/test-v4-2-22-admin-truth-ux.mjs",
     "test:v4.2.23-system-spec-pwa-guard": "node scripts/test-v4-2-23-system-spec-pwa-guard.mjs",
-    "test:v4.2.24-finance-delivery-return": "node scripts/test-v4-2-24-finance-delivery-return.mjs"
+    "test:v4.2.24-finance-delivery-return": "node scripts/test-v4-2-24-finance-delivery-return.mjs",
+    "qa:static": "node scripts/qa-full.mjs static",
+    "qa:browser": "node scripts/qa-full.mjs browser",
+    "qa:full": "node scripts/qa-full.mjs full",
+    "test:pwa-v424-focus": "python scripts/pwa_v424_focus_qa.py"
   }
 }

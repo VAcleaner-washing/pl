@@ -156,17 +156,18 @@ execFileSync(process.execPath,[path.join(root,'scripts','check-backend-inventory
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','e2e_smoke.py')],{stdio:'pipe'})}catch{errors.push('Playwright Python source does not compile')}
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','public_booking_resilience_qa.py')],{stdio:'pipe'})}catch{errors.push('public booking resilience source does not compile')}
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','pages.yml'),'utf8');
+const qaRunner=fs.readFileSync(path.join(root,'scripts','qa-full.mjs'),'utf8');
 const playwrightInstall=workflow.indexOf('python -m playwright install --with-deps chromium');
-const playwrightRun=workflow.indexOf('npm run test:e2e');
-const publicBookingRun=workflow.indexOf('npm run test:public-booking');
+const canonicalStatic=workflow.includes('npm run qa:static');
+const canonicalBrowser=workflow.includes('npm run qa:browser');
 const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
 const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&workflow.includes('needs: validate')&&workflow.includes('needs: [validate, browser]');
-const hasAggregateGate=workflow.includes('continue-on-error: true')&&workflow.includes('Browser QA aggregate gate');
-if(playwrightInstall<0||playwrightRun<0||publicBookingRun<0||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by split static/browser QA with an aggregate browser failure gate');
-if(!workflow.includes('python -m py_compile scripts/e2e_smoke.py'))errors.push('GitHub workflow does not validate browser test source');
-if(!workflow.includes('python -m py_compile scripts/public_booking_resilience_qa.py'))errors.push('GitHub workflow does not validate public booking resilience test source');
-if(!workflow.includes('npm run test:retention'))errors.push('GitHub workflow does not gate retention rules');
-if(!workflow.includes('npm run test:public-booking'))errors.push('GitHub workflow does not gate public booking resilience');
+const hasAggregateGate=qaRunner.includes('for(const s of browserSuites) npm(s)')&&qaRunner.includes('qa-release-summary.json')&&qaRunner.includes('FULL QA NOT GREEN');
+if(playwrightInstall<0||!canonicalStatic||!canonicalBrowser||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by canonical split static/browser QA with aggregate failure handling');
+if(!qaRunner.includes('test:e2e'))errors.push('Canonical browser QA does not include E2E smoke');
+if(!qaRunner.includes('test:public-booking'))errors.push('Canonical browser QA does not include public booking resilience');
+if(!qaRunner.includes('test:retention'))errors.push('Canonical static QA does not gate retention rules');
+if(!qaRunner.includes('test:pwa-v424-focus')||!qaRunner.includes('test:pwa'))errors.push('Canonical browser QA must include both focused v4.2.24 PWA regression and full PWA suite');
 const ciRequirements=fs.readFileSync(path.join(root,'requirements-ci.txt'),'utf8');
 if(!/^playwright==\d+\.\d+\.\d+$/m.test(ciRequirements))errors.push('Playwright CI dependency is not pinned');
 for(const token of ["reg.scope===ROOT_SCOPE","reg.update()","reg.unregister()"])if(!publicResilience.includes(token))errors.push(`public legacy-SW retirement missing: ${token}`);
@@ -179,7 +180,7 @@ for(const token of ['.auth-card .field input{font-size:16px}','html.keyboard-ope
 if(adminCss.includes('--pwa-viewport-height')||adminCss.includes('--pwa-viewport-top'))errors.push('legacy app-shell visualViewport CSS variables remain');
 if(adminCss.includes('.app{position:fixed;inset:0;width:100%;height:100dvh'))errors.push('mobile app shell is over-constrained by 100dvh');
 if(!adminCss.includes('.sidebar{display:none}')||!adminCss.includes('.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0')||adminCss.includes('html.pwa-standalone .mobile-nav{position:relative'))errors.push('mobile bottom navigation must be a dedicated root-fixed element, separate from the desktop sidebar');
-if(!adminCss.includes('html.keyboard-open .mobile-nav{opacity:0;visibility:hidden;pointer-events:none')||!adminCss.includes('html.keyboard-open .main{bottom:0;scroll-padding-bottom:24px}'))errors.push('keyboard-safe mobile contract missing: existing bottom nav must be hidden out of the working viewport while main gets the freed space');
+if(!adminCss.includes('html.keyboard-open .mobile-nav{opacity:0;visibility:visible;pointer-events:none')||!adminCss.includes('html.keyboard-open .main{bottom:0;scroll-padding-bottom:24px}'))errors.push('keyboard-safe mobile contract missing: existing bottom nav must be hidden out of the working viewport while main gets the freed space');
 if(!adminCss.includes('.mobile-nav svg{width:19px;height:19px')||!adminCss.includes('fill:none;stroke:currentColor'))errors.push('mobile bottom-nav icons must inherit currentColor and never render as black fills');
 if(!adminCss.includes('.mobile-more-menu{position:fixed')||adminRuntime.includes('mobile-more-backdrop'))errors.push('mobile More menu must use the compact VA HOME-style popover, not a fullscreen backdrop sheet');
 if(adminCss.includes('html{width:100%;height:100%;overflow:hidden;scrollbar-gutter:auto;overscroll-behavior:none}'))errors.push('mobile dashboard html root must not be overflow-locked');

@@ -5,6 +5,7 @@ const admin=read('assets/admin-v250.js');
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const guard=read('scripts/check-system-spec.mjs');
 const workflow=read('.github/workflows/pages.yml');
+const qaRunner=read('scripts/qa-full.mjs');
 let passed=0;const fail=[];
 const ok=(name,cond)=>{if(cond){passed++;console.log('PASS:',name)}else{fail.push(name);console.error('FAIL:',name)}};
 ok('admin and public both expose separate address detail control',addr.includes("if(mode==='public'||mode==='admin')")&&addr.includes('data-vac-address-detail="1"'));
@@ -17,6 +18,6 @@ ok('VA HOME isolation is explicit',spec.includes('AI-RULE-010 — ізоляці
 ok('source of truth update is mandatory',spec.includes('AI-RULE-011 — Source of Truth оновлюється з кожною зміною'));
 ok('System Spec Guard enforces AI contracts',guard.includes('AI-RULE-010 — ізоляція VA HOME у спільному Supabase')&&guard.includes('AI-RULE-011 — Source of Truth оновлюється з кожною зміною'));
 ok('workflow preserves full history for behavioral diff guard',workflow.includes('fetch-depth: 0'));
-ok('workflow has explicit System Spec / AI guard step',workflow.includes('Verify VAcleaner System Spec / AI operating contract'));
+ok('workflow executes canonical static runner containing System Spec Guard',workflow.includes('npm run qa:static')&&qaRunner.includes("'check'"));
 if(fail.length){console.error(`v4.2.23 regression contracts failed: ${fail.length}`);process.exit(1)}
 console.log(`v4.2.23 SYSTEM SPEC & PWA GUARD: ${passed}/${passed} PASS`);

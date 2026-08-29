@@ -682,8 +682,12 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             page.locator('.mobile-booking-next').click(); page.wait_for_timeout(80)
             qa.check(page.locator('#bookingForm').get_attribute('data-mobile-step')=='4', 'mobile-390: repeat-customer booking reaches fulfillment/payment step')
             fulfillment=page.locator('#bookingForm select[name="fulfillment"]'); fulfillment.select_option('delivery'); page.wait_for_timeout(80)
-            qa.check(page.locator('#bookingForm .delivery-pricing-field:visible').count()==1 and 'Юрія Тимошенка 8' in page.locator('#bookingDeliveryAddressSummary').inner_text(), 'mobile-390: explicit delivery selection shows pricing against the clean customer address without duplicating the address input')
-            qa.check(page.locator('#bookingForm .delivery-address-field:visible').count()==0, 'mobile-390: step 4 does not duplicate the address editor from the Client step')
+            delivery_summary=page.locator('#bookingDeliveryAddressSummary').inner_text()
+            route_href=page.locator('#bookingDeliveryRoute').get_attribute('href') or ''
+            route_aria=page.locator('#bookingDeliveryRoute').get_attribute('aria-label') or ''
+            tariff_value=page.locator('#bookingForm input[name="deliveryAmountOverride"]').input_value().strip()
+            qa.check(page.locator('#bookingForm .delivery-pricing-field:visible').count()==1 and delivery_summary=='Адреса береться з кроку «Клієнт»' and tariff_value=='250' and 'Юрія Тимошенка 8' in route_aria and ('maps' in route_href.lower() or 'google' in route_href.lower()), 'mobile-390: explicit delivery selection prices the one customer address without printing a duplicate address block')
+            qa.check(page.locator('#bookingForm .delivery-address-field:visible').count()==0 and page.locator('#bookingForm [name="deliveryAddress"]:visible').count()==0, 'mobile-390: step 4 has no second address editor; route and tariff reuse the Client-step address')
             qa.check(page.locator('#bookingForm').get_attribute('novalidate') is not None, 'mobile-390: booking submit uses explicit app validation instead of silent native hidden-field blocking')
             if not page.locator('#bookingForm input[name="deliveryAmountOverride"]').input_value().strip():
                 page.locator('#bookingForm input[name="deliveryAmountOverride"]').fill('250')
@@ -1107,6 +1111,9 @@ def main() -> int:
             options["executable_path"] = executable
         elif Path("/usr/bin/chromium").exists():
             options["executable_path"] = "/usr/bin/chromium"
+            # Debian system Chromium can deadlock its headless GPU process in long visual suites.
+            # GitHub uses the Playwright-managed browser, so this is only a local-runtime stability guard.
+            options["args"] = ["--no-sandbox", "--disable-gpu"]
         browser = p.chromium.launch(**options)
         try:
             mobile_suite(browser, qa, 320, "mobile-320")

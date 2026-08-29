@@ -10,6 +10,7 @@ const admin=read('supabase/functions/vacleaner-admin-bookings-v3/config.ts');
 const settings=read('supabase/functions/vacleaner-settings/config.ts');
 const delivery=read('dostavka/index.html');
 const workflow=read('.github/workflows/pages.yml');
+const qaRunner=read('scripts/qa-full.mjs');
 const expected=['Полтава','Розсошенці','Щербані','Горбанівка'];
 let checks=0,failed=0;
 const ok=(name,condition)=>{checks++;if(condition)console.log('OK  ',name);else{failed++;console.error('FAIL',name)}};
@@ -21,7 +22,7 @@ ok('public booking backend has the corrected local zone',expected.every(name=>bo
 ok('admin backend has the corrected local zone',expected.every(name=>admin.includes(name)));
 ok('settings backend has the corrected local zone',expected.every(name=>settings.includes(name)));
 ok('public copy distinguishes the local zone from other suburbs',delivery.includes('Полтава, Розсошенці, Щербані та Горбанівка — 250 грн')&&delivery.includes('Інше передмістя'));
-ok('CI runs this correction regression',workflow.includes('test:v4.1.54-local-zone-correction'));
+ok('CI runs this correction regression',(workflow.includes('test:v4.1.54-local-zone-correction')||qaRunner.includes('test:v4.1.54-local-zone-correction')));
 
 console.log(`v4.1.54 local zone correction: ${checks-failed}/${checks} OK`);
 if(failed)process.exit(1);

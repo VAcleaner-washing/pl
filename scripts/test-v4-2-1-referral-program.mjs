@@ -60,6 +60,7 @@ ok('referral reward never reduces base below zero',d.referralRewardAmount===100&
 const css=read('assets/admin-v250.css');
 ok('referral admin UI has dedicated mobile containment',css.includes('/* v4.2.1 · referral program */')&&css.includes('@media(max-width:900px)')&&css.includes('.referral-share-modal>footer'));
 const workflow=read('.github/workflows/pages.yml');
-ok('CI runs static referral regression test',workflow.includes('test:v4.2.1-referral'));
+const qaRunner=read('scripts/qa-full.mjs');
+ok('CI runs static referral regression test',(workflow.includes('test:v4.2.1-referral')||qaRunner.includes('test:v4.2.1-referral')));
 console.log(JSON.stringify({passed,failed,status:failed.length?'failed':'passed'},null,2));
 process.exit(failed.length?1:0);

@@ -1493,7 +1493,7 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   html.pwa-browser #adminMount,html.pwa-browser .app{height:100%;min-height:0;max-height:100%;overflow:hidden}
 
   /* v4.2.24 — keyboard-safe VAcleaner PWA: keep the existing nav node, but move it out of the visual viewport while typing. */
-  html.keyboard-open .mobile-nav{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(calc(100% + var(--pwa-safe-bottom) + 18px));transition:none}
+  html.keyboard-open .mobile-nav{opacity:0;visibility:visible;pointer-events:none;transform:translateY(calc(100% + var(--pwa-safe-bottom) + 18px));transition:none}
   html.keyboard-open .main{bottom:0;scroll-padding-bottom:24px}
   html.keyboard-open .toast{bottom:10px}
 

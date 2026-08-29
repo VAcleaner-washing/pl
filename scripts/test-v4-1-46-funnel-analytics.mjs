@@ -6,6 +6,7 @@ const js=read('assets/booking-funnel-analytics.js');
 const booking=read('_next/static/chunks/146ntlcv_t6~w-v4041.js');
 const stamp=read('scripts/stamp-build.mjs');
 const workflow=read('.github/workflows/pages.yml');
+const qaRunner=read('scripts/qa-full.mjs');
 const privacy=read('polityka-konfidenciynosti/index.html');
 let n=0,failed=0;
 function ok(name,cond){n++;if(cond)console.log(`OK   ${name}`);else{failed++;console.error(`FAIL ${name}`)}}
@@ -27,6 +28,6 @@ ok('availability failures and sold-out dates are distinguishable',js.includes("b
 ok('RETURN and quiz attribution are explicit',js.includes("from==='return_sms'")&&js.includes("from==='quiz'")&&js.includes("promo_context:'return'")&&js.includes("promo_context:'quiz'"));
 ok('stamp injects analytics on public HTML and versions asset',stamp.includes('booking-funnel-analytics')&&stamp.includes("!rel.startsWith('admin/')")&&stamp.includes('/assets/booking-funnel-analytics.js?v=${build}'));
 ok('privacy documents anonymous funnel attribution',privacy.includes('UTM-мітки')&&privacy.includes('Ім’я, номер телефону, повна адреса та текст коментаря не передаються'));
-ok('CI runs funnel analytics regression',workflow.includes('test:v4.1.46-funnel-analytics'));
+ok('CI runs funnel analytics regression',(workflow.includes('test:v4.1.46-funnel-analytics')||qaRunner.includes('test:v4.1.46-funnel-analytics')));
 if(failed)process.exit(1);
 console.log(`v4.1.46 funnel analytics: ${n}/${n} OK`);

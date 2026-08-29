@@ -4,6 +4,7 @@ const css=read('assets/admin-v250.css');
 const addressJs=read('assets/address-autocomplete.js');
 const addressCss=read('assets/address-autocomplete.css');
 const workflow=read('.github/workflows/pages.yml');
+const qaRunner=read('scripts/qa-full.mjs');
 const pkg=JSON.parse(read('package.json'));
 const rel=JSON.parse(read('release.json'));
 let n=0, failed=0;
@@ -16,6 +17,6 @@ ok('provider outage is a quiet manual fallback',addressJs.includes('Пошук �
 ok('manual address status does not force OSM attribution',addressJs.includes('showAttribution=true')&&addressJs.includes("showAttribution?'<a href=\"https://www.openstreetmap.org/copyright\""));
 ok('manual helper has muted styling',addressCss.includes('.vac-address-status.manual{color:#7f8b8e}')&&addressCss.includes('.delivery-address-field .vac-address-status.manual'));
 ok('catalog action stays on one line',css.includes('.catalog-toolbar .btn{white-space:nowrap}'));
-ok('workflow runs v4.1.39 visual regression',workflow.includes('test:v4.1.39-admin-visual-polish'));
+ok('workflow runs v4.1.39 visual regression',(workflow.includes('test:v4.1.39-admin-visual-polish')||qaRunner.includes('test:v4.1.39-admin-visual-polish')));
 if(failed)process.exit(1);
 console.log(`v4.1.39 admin visual polish: ${n}/${n} OK`);

@@ -41,7 +41,8 @@ ok('booking guide has explicit readable supporting color',css.includes('#booking
 ok('booking guide link has dark gold contrast',css.includes('#booking-products .vx-smart-entry__guide>a{color:#885313}'));
 
 const workflow=read('.github/workflows/pages.yml');
-ok('CI runs clear-advice regression',workflow.includes('test:v4.1.55-clear-advice'));
+const qaRunner=read('scripts/qa-full.mjs');
+ok('CI runs clear-advice regression',(workflow.includes('test:v4.1.55-clear-advice')||qaRunner.includes('test:v4.1.55-clear-advice')));
 
 if(failed){console.error(`v4.1.55 clear advice: ${checks-failed}/${checks} OK`);process.exit(1)}
 console.log(`v4.1.55 clear advice: ${checks}/${checks} OK`);

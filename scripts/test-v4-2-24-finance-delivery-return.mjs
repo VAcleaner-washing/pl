@@ -67,7 +67,7 @@ has(admin,'syncEquipmentTotals','equipment total must recalculate while typing, 
 has(admin,'data-equipment-fleet-total','equipment settings must show a live whole-fleet start value');
 has(css,'.equipment-baseline-summary{display:grid','equipment settings must summarize fleet quantity and total before the rows');
 has(admin,'settingsSaveErrorMessage','raw settings backend errors must be mapped for managers');
-has(css,'html.keyboard-open .mobile-nav{opacity:0;visibility:hidden;pointer-events:none','PWA keyboard must move bottom navigation out of the working area');
+has(css,'html.keyboard-open .mobile-nav{opacity:0;visibility:visible;pointer-events:none','PWA keyboard must move bottom navigation out of the working area');
 has(spec,'SET-005 — equipment baseline persistence','system spec must lock equipment baseline persistence and keyboard behavior');
 
 console.log('v4.2.24 FINANCE / DELIVERY / RETURN / SETTINGS UX contracts: PASS');

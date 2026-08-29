@@ -2,6 +2,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const cfg=JSON.parse(read('config/vacleaner.json')),pkg=JSON.parse(read('package.json')),rel=JSON.parse(read('release.json'));
 const address=read('assets/address-autocomplete.js'),publicSlots=read('assets/public-booking-slots.js'),admin=read('assets/admin-v250.js'),bookingEdge=read('supabase/functions/vacleaner-booking-v5/index.ts'),adminEdge=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts'),correction=read('supabase/functions/vacleaner-status-correction-v1/index.ts'),chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js'),terms=read('umovy/index.html'),delivery=read('dostavka/index.html'),faq=read('faq/index.html'),trust=read('assets/booking-trust-v4145.js'),workflow=read('.github/workflows/pages.yml');
+const qaRunner=read('scripts/qa-full.mjs');
 let n=0,failed=0;const ok=(name,c)=>{n++;if(c)console.log('OK  ',name);else{failed++;console.error('FAIL',name)}};
 ok('release keeps v4.1.45+ trust rules',pkg.version===rel.version&&Number(rel.build)>=4145);
 ok('delivery config keeps 250 base and 350 outside base',cfg.deliveryPricing?.local===250&&cfg.deliveryPricing?.zones?.[0]?.amount===350);
@@ -18,5 +19,5 @@ ok('booking conditions avoid duplicate trust grid and keep compact service reass
 ok('terms publish cancellation rule',terms.includes('Скасування за 3 доби або раніше')&&terms.includes('передоплата не повертається'));
 ok('delivery page publishes local zone and other suburb tariffs',delivery.includes('Розсошенці')&&/інше передмістя/i.test(delivery)&&delivery.includes('350 грн'));
 ok('FAQ publishes cancellation and delivery',faq.includes('3 доби')&&faq.includes('350 грн'));
-ok('workflow runs v4.1.45 regression',workflow.includes('test:v4.1.45-trust-rules'));
+ok('workflow runs v4.1.45 regression',(workflow.includes('test:v4.1.45-trust-rules')||qaRunner.includes('test:v4.1.45-trust-rules')));
 if(failed)process.exit(1);console.log(`v4.1.45 trust & rules: ${n}/${n}`);
