@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-28T15:59:00Z",
+  "capturedAt": "2026-08-29T15:08:00Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -84,11 +84,11 @@
     },
     {
       "slug": "vacleaner-admin-data-v1",
-      "version": 16,
+      "version": 17,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "1fec02bfc952b1186096fdc072df56b541413be4bdbb5ba3ce3042bd8f0dc54d",
-      "role": "active admin clients, analytics and referral data; custom auth + admin allowlist",
+      "sha256": "297fee836697fdd249ab0103ca1b10babc3e2090bdee3e5ff3346eced4461222",
+      "role": "active admin clients, analytics, referral data and delivery-route backfill; custom auth + admin allowlist",
       "runtime": "active"
     },
     {

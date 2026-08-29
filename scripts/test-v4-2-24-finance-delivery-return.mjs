@@ -31,6 +31,9 @@ has(addr,"ctx.input.dataset.vacAddressPricingDistanceKm='0'",'local pricing dist
 has(addr,"ctx.input.dataset.vacAddressRouteKm=String(routeKm)",'local route km must be stored separately for fuel analytics');
 has(addr,'window.__VAC_ROUTE_FOR_ADDRESS__=resolveRouteForAddress','admin finance must be able to resolve exact historical routes');
 has(addr,"item?.houseNumber&&!item?.approximateCoordinates",'historical backfill must refuse approximate street-only coordinates');
+has(addr,'function normalizeHistoricalRouteAddress','historical backfill must normalize legacy entrance/comment noise before geocoding');
+has(addr,"replace(/^с\\.?\\s*/iu,'')",'historical village prefix must be normalized without changing the settlement name');
+has(addr,'function historicalRouteVariants','historical route resolver must retry normalized Poltava/settlement variants');
 has(admin,'id="recalcDeliveryRoutes"','finance UI must expose controlled route backfill when distances are missing');
 has(admin,"action:'save_delivery_route'",'route backfill must persist through authenticated admin API');
 has(dataFn,'if(action==="save_delivery_route")','admin data backend must persist route snapshot');

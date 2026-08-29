@@ -2600,6 +2600,9 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 - **DEL-011** — точна локальна адреса тепер зберігає реальний one-way route від бази навіть при фіксованому локальному тарифі 250 грн.
 - **DEL-012** — у фінансах є керований backfill останніх доставок без distance; зберігаються тільки точні house-level маршрути.
+- **DEL-013** — legacy delivery address перед backfill очищається від під’їзду/орієнтира/коментаря та повторно шукається через кілька нормалізованих варіантів; приблизні street-only координати як і раніше не записуються.
+- **DEL-014** — production `vacleaner-admin-data-v1` підтримує authenticated `save_delivery_route`; backfill не вважається успішним, доки route snapshot реально не записаний у booking extras.
+- **DEL-015** — після вибору локальної адреси UI завжди явно підтверджує модель доставки «до під’їзду» і можливість додати орієнтир; розрахунок route distance для аналітики не може прибирати це пояснення.
 - **RET-001/004 coherence** — production `vacleaner-campaigns-v1` синхронізовано з source, щоб pending RETURN був видимий менеджеру до ручної активації.
 
 ### CHANGED
@@ -2626,7 +2629,7 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 ### TESTS
 
-- `scripts/test-v4-2-24-finance-delivery-return.mjs` — RETURN/delivery/finance/settings tab contracts;
+- `scripts/test-v4-2-24-finance-delivery-return.mjs` — RETURN/delivery/finance/settings tab contracts, legacy-route normalization і backfill persistence;
 - `scripts/pwa_visual_qa.py` — усі 5 settings tabs на mobile/PWA;
 - `scripts/final_desktop_visual_qa.py` — усі 5 settings tabs на desktop;
 - `npm run check`;
