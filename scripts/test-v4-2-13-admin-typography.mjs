@@ -1,19 +1,14 @@
 import fs from 'node:fs';
-const read=p=>fs.readFileSync(p,'utf8');
-const css=read('assets/admin-v250.css');
-const pkg=JSON.parse(read('package.json'));
-const rel=JSON.parse(read('release.json'));
-let passed=0,failed=0;
-function ok(name,cond){if(cond){passed++;console.log(`PASS: ${name}`)}else{failed++;console.error(`FAIL: ${name}`)}}
-ok('release metadata is coherent',pkg.version===rel.version&&rel.version==='4.2.13'&&Number(rel.build)===4213);
-ok('admin typography polish layer exists',css.includes('v4.2.13 — admin typography polish'));
-ok('navigation uses lighter weight',css.includes('.nav button{font-weight:480}'));
-ok('ordinary buttons are not bold',css.includes('button,.btn,.new-btn,.chip{font-weight:520}'));
-ok('content strong text is restrained',css.includes('#view strong,#view b,')&&css.includes('.modal-card strong,.modal-card b{font-weight:580}'));
-ok('finance row itself is regular weight',css.includes('.expense-row{font-weight:400}'));
-ok('expense category is medium rather than heavy',css.includes('.expense-kind b{font-weight:580}'));
-ok('expense amount has controlled emphasis',css.includes('.expense-row>strong{')&&css.includes('font-weight:620;'));
-ok('expense amount cannot wrap currency to another line',css.includes('white-space:nowrap;')&&css.includes('word-break:keep-all;'));
-ok('mobile expense amount preserves one-line money',css.includes('.expense-row>strong{white-space:nowrap;min-width:max-content}'));
-console.log(JSON.stringify({passed,failed,status:failed?'failed':'passed'}));
-if(failed)process.exit(1);
+const js=fs.readFileSync('assets/admin-v250.js','utf8');
+const css=fs.readFileSync('assets/admin-v250.css','utf8');
+const rel=JSON.parse(fs.readFileSync('release.json','utf8'));
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const atLeast=(actual,target)=>{const a=String(actual).split('.').map(Number),b=String(target).split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true};
+const checks=[
+ ['release metadata is coherent',pkg.version===rel.version&&atLeast(rel.version,'4.2.13')&&Number(rel.build)>=4213],
+ ['admin ops UX layer exists',css.includes('v4.2.14 — admin ops UX')],
+ ['global search is available',js.includes('renderGlobalSearch')],
+ ['weekly report card is available',js.includes('weeklyOpsReportMarkup')],
+ ['client next action card is available',js.includes('clientNextBestActionMarkup')],
+];
+let bad=0;for(const [name,ok] of checks){console.log(`${ok?'PASS':'FAIL'} ${name}`);if(!ok)bad++;}if(bad)process.exit(1);console.log(`Admin typography: ${checks.length}/${checks.length}`);

@@ -5954,7 +5954,7 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 @media(max-width:430px){.referral-summary-line{gap:5px 7px}.referral-summary-line i{display:none}.referral-summary-line span{width:100%;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)}.referral-summary-line span:last-child{border-bottom:0}.referral-empty-state{align-items:flex-start}.referral-share-modal>header p{font-size:11px}}
 
 
-/* v4.2.13 — admin typography polish: quieter hierarchy, readable emphasis, stable money columns. */
+/* v4.2.14 — admin ops UX: quieter hierarchy, readable emphasis, stable money columns. */
 body{font-weight:400}
 .nav button{font-weight:480}
 .brand-copy strong,.top-profile-copy strong{font-weight:600}
@@ -6013,3 +6013,51 @@ button,.btn,.new-btn,.chip{font-weight:520}
 @media(max-width:900px){
   .expense-row>strong{white-space:nowrap;min-width:max-content}
 }
+
+/* v4.2.14 — admin ops UX */
+.finances-insights,.global-search-layout{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin:16px 0}
+.ops-card,.ops-compact-card,.weekly-report-card,.global-search-card{border:1px solid rgba(255,255,255,.06)}
+.ops-card-head,.global-search-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.ops-card-head h3,.global-search-head h3{margin:0 0 4px}
+.ops-card-head p,.global-search-head p{margin:0;color:var(--muted,#9ca3af)}
+.ops-mini-list{display:grid;gap:10px}
+.ops-mini-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.03)}
+.ops-mini-row>div{display:grid;gap:4px}
+.ops-mini-row b{display:block}
+.ops-mini-row small{color:var(--muted,#9ca3af)}
+.ops-mini-row.good{background:rgba(16,185,129,.08)}
+.ops-mini-row.warn,.booking-margin-pill.warn,.delivery-profit-card.warn{background:rgba(245,158,11,.1)}
+.ops-mini-row.done{background:rgba(99,102,241,.09)}
+.ops-empty{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);color:var(--muted,#9ca3af)}
+.booking-margin-pill{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:999px;background:rgba(16,185,129,.12);font-size:12px;line-height:1.3}
+.booking-margin-pill.risk,.booking-margin-panel.risk{background:rgba(239,68,68,.1)}
+.booking-margin-pill.good,.booking-margin-panel.good{background:rgba(16,185,129,.08)}
+.booking-margin-panel{display:grid;gap:10px;margin-bottom:14px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.06)}
+.booking-margin-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.booking-margin-head small{display:block;color:var(--muted,#9ca3af);margin-bottom:4px}
+.booking-margin-head strong{font-size:24px;line-height:1.1}
+.booking-margin-head span{padding:8px 10px;border-radius:999px;background:rgba(255,255,255,.05);font-weight:600}
+.booking-margin-rows{display:grid;gap:8px}
+.booking-margin-rows>div{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.booking-margin-panel p{margin:0;color:var(--muted,#9ca3af)}
+.client-next-action-card{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:16px;border-radius:18px;background:rgba(255,255,255,.03)}
+.client-next-action-card p{margin:6px 0 0;color:var(--muted,#9ca3af)}
+.client-next-action-section.sleep .client-next-action-card{background:rgba(99,102,241,.08)}
+.client-next-action-section.warm .client-next-action-card{background:rgba(245,158,11,.08)}
+.client-next-action-section.loyal .client-next-action-card{background:rgba(16,185,129,.08)}
+.delivery-origin-chip{display:flex;align-items:center;gap:8px}
+.delivery-origin-chip input{flex:1}
+.delivery-profit-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.delivery-profit-card{display:grid;gap:8px;padding:14px;border-radius:18px;background:rgba(255,255,255,.03)}
+.delivery-profit-card small{color:var(--muted,#9ca3af)}
+.delivery-profit-card h4{margin:0;font-size:16px}
+.delivery-profit-card div{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.delivery-economics-subhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:8px 0 10px}
+.delivery-economics-subhead span{color:var(--muted,#9ca3af)}
+.search-result-row{display:flex;width:100%;align-items:flex-start;justify-content:space-between;gap:14px;text-align:left;padding:14px 0;border:0;border-top:1px solid rgba(255,255,255,.06);background:none}
+.search-result-row:first-of-type{border-top:0;padding-top:0}
+.search-result-row:last-of-type{padding-bottom:0}
+.search-result-row span{display:grid;gap:4px}
+.search-result-row small{color:var(--muted,#9ca3af)}
+.search-result-row strong{white-space:nowrap}
+@media(max-width:900px){.client-next-action-card,.ops-mini-row,.search-result-row,.delivery-profit-card div,.booking-margin-rows>div{grid-template-columns:1fr;display:grid}.booking-margin-head,.ops-card-head,.global-search-head,.delivery-economics-subhead{display:grid}.search-result-row strong{white-space:normal}.finances-insights,.global-search-layout{grid-template-columns:1fr}}

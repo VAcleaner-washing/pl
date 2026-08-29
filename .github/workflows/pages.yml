@@ -164,6 +164,9 @@ jobs:
         run: npm run test:v4.2.12-referral-ux
       - name: Verify v4.2.13 admin typography hierarchy
         run: npm run test:v4.2.13-admin-typography
+
+      - name: Verify v4.2.14 admin ops UX
+        run: npm run test:v4.2.14-admin-ops-ux
       - name: Re-run admin functional contracts before architecture build
         run: |
           npm run test:admin-labels
