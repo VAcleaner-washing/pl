@@ -28,7 +28,7 @@ has(admin,"customerAddress:String(form.customerAddress.value||'').trim(),custome
 has(admin,"telegram:profile?.telegram||b.customer_telegram||''",'client list must retain saved contact channels');
 has(admin,'if(refreshed)requestAnimationFrame(()=>openClientCard(refreshed))','successful client save must reopen verified server state');
 
-has(admin,'<details class="referral-message-details" open>','referral message text must be visible by default');
+has(admin,'class="referral-message-card"','referral message text must be visible by default');
 has(admin,'overheadRentalCount:summary.completed.length','booking margin must expose its completed-rental divisor');
 has(css,'v4.2.25 — QA repair','release-specific visual repair contract must ship');
 has(css,'.campaign-workspace .campaign-summary b{white-space:nowrap','campaign revenue must remain aligned');

@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.27",
+  "version": "4.2.28",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -114,6 +114,8 @@
     "qa:static": "node scripts/qa-full.mjs static",
     "qa:browser": "node scripts/qa-full.mjs browser",
     "qa:full": "node scripts/qa-full.mjs full",
-    "test:pwa-v424-focus": "python scripts/pwa_v424_focus_qa.py"
+    "test:pwa-v424-focus": "python scripts/pwa_v424_focus_qa.py",
+    "test:v4.2.28-referral-modal": "node scripts/test-v4-2-28-referral-modal.mjs",
+    "test:referral-modal-visual": "python scripts/referral_modal_visual_qa.py"
   }
 }

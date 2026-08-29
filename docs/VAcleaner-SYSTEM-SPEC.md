@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.27  
-**Baseline build:** 4227  
+**Baseline version:** 4.2.28  
+**Baseline build:** 4228  
 **Останнє оновлення:** 2026-08-29  
 **Власник логіки:** VAcleaner  
 
@@ -1832,6 +1832,22 @@ Telegram:
 
 `Приведи друга` — важлива робоча дія картки клієнта; її не можна ховати внизу або робити недоступною.
 
+## REF-009 — referral modal communication UX
+
+Referral modal використовує **актуальні контактні дані CRM**, а не випадковий старий snapshot бронювання. Порожнє або застаріле поле з іншого джерела не може затерти непорожній Instagram / Telegram / preferred channel актуального профілю.
+
+Якщо preferred channel = Instagram і Instagram збережений:
+
+- `Надіслати в Instagram` є першим і primary CTA;
+- Telegram лишається доступним як додатковий канал, якщо він доступний через username або номер телефону;
+- UI явно підписує основний канал.
+
+Готовий referral-текст показується **одразу у відкритій картці**, без `details`/accordion. Кнопка копіювання знаходиться поруч із текстом.
+
+Desktop modal не може залишати порожню праву колонку через невідповідність ширини `.modal-card` і внутрішньої referral-form: контейнер діалогу має відповідати реальній ширині контенту.
+
+Двоетапне підтвердження фактичної відправки та referral analytics не змінюються.
+
 ---
 
 # 12. CLIENT CARD — CRM HUB
@@ -2411,7 +2427,7 @@ Customer PII не повинна потрапляти у release ZIP як histor
 | Booking core | BOOK / SLOT / ADDR | `test-v4-2-22-admin-truth-ux`, booking e2e, public_booking |
 | Client card | CLIENT / NAV | client-card-mobile, glass, desktop-final |
 | RETURN | RET | v4.1.30 return activation, client-promo-regression, v4.2.22 contracts |
-| Referral | REF | v4.2.1, v4.2.9, v4.2.10, referral-admin-mobile |
+| Referral | REF | v4.2.1, v4.2.9, v4.2.10, v4.2.28, referral-admin-mobile |
 | Delivery | DEL | delivery-settings, v4.1.47.2, v4.1.58, v4.2.22 |
 | Finance | FIN / FINTRUTH | financial-control, finance truth, v4.2.22 |
 | PWA | PWA | pwa-static, pwa visual, glass 320/390/430 |
@@ -2732,3 +2748,36 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 - `scripts/test-v4-2-27-address-separation.mjs`;
 - static/build regression та browser/PWA gates перед production merge.
+# 36. Change record — v4.2.28
+
+### ADDED
+
+- **REF-009** — окремий contract для актуального CRM-каналу, видимого referral-тексту та геометрії referral modal.
+- `scripts/test-v4-2-28-referral-modal.mjs` для захисту contact priority, primary CTA, always-visible message і dialog width.
+
+### CHANGED
+
+- Referral modal тепер бере Instagram / Telegram / preferred channel з актуального customer profile з безпечним fallback, не дозволяючи порожньому snapshot затерти непорожній контакт.
+- Якщо основний канал клієнта — Instagram, Instagram стає першим primary CTA; Telegram лишається другим доступним каналом.
+- Готовий текст повідомлення перенесений вище історії та завжди показується відкритим разом із кнопкою `Скопіювати текст`.
+- Desktop dialog піджато до реальної ширини referral-контенту; порожня права зона прибрана.
+
+### FIXED
+
+- **REF-005/009** — клієнт із збереженим Instagram і preferred contact `instagram` більше не отримує Telegram як єдиний/основний CTA через порожнє поле в іншому snapshot.
+- **REF-008/009** — текст повідомлення більше не виглядає як порожній або прихований нижній блок.
+- **UI-004/006** — referral modal більше не має широкої мертвої колонки праворуч від фактичного контенту.
+
+### PRESERVED
+
+- Друг отримує −100 грн, власник коду −150 грн після завершення оренди друга, reward lifetime 150 днів.
+- Telegram fallback за номером телефону, двоетапне `Так, надіслано` та referral analytics не змінені.
+- Public booking, доставка, фінанси, RETURN, Supabase schema/functions і VA HOME objects не змінюються.
+
+### TESTS
+
+- `scripts/test-v4-2-28-referral-modal.mjs`;
+- `scripts/referral_admin_mobile_qa.py`;
+- `scripts/referral_modal_visual_qa.py`;
+- повний static/build/browser/PWA/responsive QA перед production merge.
+
