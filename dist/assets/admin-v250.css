@@ -6063,3 +6063,52 @@ button,.btn,.new-btn,.chip{font-weight:520}
 @media(max-width:900px){.client-next-action-card,.ops-mini-row,.search-result-row,.delivery-profit-card div,.booking-margin-rows>div{grid-template-columns:1fr;display:grid}.booking-margin-head,.ops-card-head,.global-search-head,.delivery-economics-subhead{display:grid}.search-result-row strong{white-space:normal}.finances-insights,.global-search-layout{grid-template-columns:1fr}}
 /* v4.2.14 browser QA hardening: delivery economics owns the full settings width on desktop. */
 .delivery-settings-card{grid-column:1/-1}
+/* v4.2.16 — finance truth UX */
+.ops-mini-row.risk{background:rgba(239,68,68,.09)}
+.ops-mini-row.nodata{background:rgba(255,255,255,.025)}
+.ops-footnote{margin:12px 0 0;color:var(--muted,#9ca3af);font-size:12px;line-height:1.45}
+
+
+/* v4218 search + client card polish */
+.global-search-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;margin:16px 0}
+.global-search-card{padding:18px 18px 16px}
+.global-search-head{align-items:flex-start}
+.global-search-head span{padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.04);color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.search-result-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:14px;padding:14px 0;border:0;border-top:1px solid rgba(255,255,255,.06);background:none;cursor:pointer;transition:opacity .16s ease,transform .16s ease}
+.search-result-row:hover{opacity:1;transform:translateX(2px)}
+.search-result-row span{display:grid;gap:4px;min-width:0}
+.search-result-row b,.search-result-row small{display:block;overflow:hidden;text-overflow:ellipsis}
+.search-result-row small{color:var(--muted,#9ca3af);line-height:1.4}
+.search-result-row strong{white-space:nowrap;color:var(--gold-2)}
+.client-card-form>header p{max-width:760px}
+.client-header-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.client-header-actions .btn,.client-header-actions a{min-height:44px;padding:0 16px;text-decoration:none}
+.client-editor-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.client-card-grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);grid-template-areas:'contact document' 'history referral' 'history next' 'history promo' 'history sms';gap:12px;align-items:start}
+.client-contact-section{grid-area:contact}
+.client-document-section{grid-area:document}
+.client-history-section{grid-area:history}
+.client-referral-section{grid-area:referral}
+.client-next-action-section{grid-area:next}
+.client-promo-section{grid-area:promo}
+.client-sms-section{grid-area:sms}
+.client-rental-history article{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.client-rental-history article>div:last-child{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+.client-rental-open{min-height:36px;padding:0 12px;font-size:11.5px}
+.client-next-action-card{align-items:center}
+.client-promo-section,.client-referral-section,.client-sms-section,.client-next-action-section{align-self:start}
+@media(max-width:1220px){.client-card-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:'contact document' 'referral next' 'promo sms' 'history history'}.modal-card:has(.client-card-form){width:min(1180px,calc(100vw - 28px))}}
+@media(max-width:900px){.global-search-layout{grid-template-columns:1fr}.client-header-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.client-header-actions .btn,.client-header-actions a{width:100%;justify-content:center}.client-editor-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.client-card-grid{grid-template-columns:1fr;grid-template-areas:'contact' 'document' 'referral' 'next' 'promo' 'sms' 'history'}.client-rental-history article>div:last-child{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;justify-items:start}.client-rental-history article>div:last-child b{justify-self:end}.client-rental-open{grid-column:1/-1;width:100%;min-height:42px}}
+@media(max-width:520px){.client-header-actions{grid-template-columns:1fr}.client-editor-summary{grid-template-columns:1fr}}
+
+
+/* v4.2.19 settings polish */
+.fuel-layout{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1fr) minmax(0,1.2fr);gap:12px;margin-top:12px}
+.settings-mini-card{padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.025);display:grid;gap:12px;align-self:start}
+.settings-mini-head{display:grid;gap:4px}.settings-mini-head strong{font-size:15px}.settings-mini-head span{color:var(--muted);font-size:12px;line-height:1.45}.settings-mini-card .deposit-rule-field{margin:0}.settings-mini-card .deposit-rule-field.wide{grid-column:1/-1}.settings-mini-card .delivery-pricing-grid{margin:0}.settings-mini-card .fuel-settings-grid{grid-template-columns:1fr}.settings-mini-card .deposit-rule-field>div{min-height:48px}
+.notifications-card{display:grid;gap:16px}.notifications-card .settings-head{margin-bottom:0}.notification-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.notification-actions .btn{width:100%;min-height:48px}
+.push-device-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.9fr);gap:14px;padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.025)}.push-device-card-copy{display:grid;gap:4px;align-content:start}.push-device-card-copy b{font-size:14px}.push-device-card-copy p{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.push-device-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}.push-device-actions input{width:100%;min-width:0;height:46px;padding:0 14px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:#0b1115;color:var(--text);font:inherit;outline:none}.push-device-actions input:focus{border-color:rgba(212,163,94,.52);box-shadow:0 0 0 3px rgba(212,163,94,.08)}.push-device-actions .btn{min-height:46px;padding-inline:18px}
+.push-devices-shell{display:grid;gap:10px}.push-devices-head{margin-top:2px}.push-devices{margin-top:0}
+.nav button[data-view="finances"]+button[data-view="finances"]{display:none!important}
+@media(max-width:1100px){.fuel-layout{grid-template-columns:1fr}.push-device-card{grid-template-columns:1fr}.push-device-actions{grid-template-columns:1fr}.notification-actions{grid-template-columns:1fr}}
+@media(max-width:760px){.settings-mini-card{padding:14px}.push-device-card{padding:14px}.notifications-card{gap:14px}}
