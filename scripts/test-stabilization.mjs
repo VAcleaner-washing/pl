@@ -104,8 +104,7 @@ has(pwaQa,'unavailable equipment shows the nearest compatible free window','publ
 has(bookingEdge,'nextAvailable','public backend returns a nearest-compatible alternative');
 has(publicSlots,'vx-nearest-availability','public UI renders nearest-compatible availability');
 has(admin,'function isHistoricalPhone(value)','historical clients without real phones cannot crash the clients view');
-has(admin,'function renderGlobalSearch(query)','global search is explicit and does not hijack a single legacy view');
-has(admin,"search.placeholder=state.view==='clients'?'Пошук по всій адмінці",'client view advertises the new global search scope');
+has(admin,"!['bookings','clients'].includes(state.view)",'client search stays in the clients view');
 has(admin,'const dateFullNumeric=v=>','client list has a full numeric date formatter');
 has(admin,'function openClientCard(client)','client rows open a full customer card');
 has(admin,'data-client-open','every client row is clickable');

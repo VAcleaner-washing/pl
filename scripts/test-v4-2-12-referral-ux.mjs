@@ -4,7 +4,7 @@ const css=fs.readFileSync('assets/admin-v250.css','utf8');
 const rel=JSON.parse(fs.readFileSync('release.json','utf8'));
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const checks=[
- ['release coherent',pkg.version===rel.version&&Number(rel.build)>=4212&&(()=>{const a=String(rel.version).split('.').map(Number),b='4.2.12'.split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true})()],
+ ['release coherent',pkg.version===rel.version&&rel.version==='4.2.12'&&rel.build===4212],
  ['single-channel UI avoids redundant chooser',admin.includes("sendChannels.length===1?'Надіслати повідомлення'")],
  ['Telegram CTA is human and transport-neutral',admin.includes('Надіслати в ${row.label}')&&!admin.includes("label:telegram?'Telegram':'Telegram · за номером'")],
  ['compact KPI summary replaces four zero cards',admin.includes('referral-summary-line')&&!admin.includes('referral-share-stats referral-share-stats-4')],

@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.21",
+  "version": "4.2.12",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-build.mjs",
@@ -100,10 +100,6 @@
     "test:v4.2.9-referral-analytics": "node scripts/test-v4-2-9-referral-analytics.mjs",
     "test:v4.2.10-referral-phone": "node scripts/test-v4-2-10-referral-phone-telegram.mjs",
     "test:v4.2.11-cache-bust": "node scripts/test-v4-2-11-cache-bust.mjs",
-    "test:v4.2.12-referral-ux": "node scripts/test-v4-2-12-referral-ux.mjs",
-    "test:v4.2.13-admin-typography": "node scripts/test-v4-2-13-admin-typography.mjs",
-    "test:v4.2.14-admin-ops-ux": "node scripts/test-v4-2-14-admin-ops-ux.mjs",
-    "test:v4.2.15-browser-contracts": "node scripts/test-v4-2-15-browser-contracts.mjs",
-    "test:v4.2.16-finance-truth": "node scripts/test-v4-2-16-finance-truth.mjs"
+    "test:v4.2.12-referral-ux": "node scripts/test-v4-2-12-referral-ux.mjs"
   }
 }
