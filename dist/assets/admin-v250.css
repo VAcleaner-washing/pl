@@ -6111,3 +6111,18 @@ button,.btn,.new-btn,.chip{font-weight:520}
 .push-devices-shell{display:grid;gap:10px}.push-devices-head{margin-top:2px}.push-devices{margin-top:0}
 @media(max-width:1100px){.fuel-layout{grid-template-columns:1fr}.push-device-card{grid-template-columns:1fr}.push-device-actions{grid-template-columns:1fr}.notification-actions{grid-template-columns:1fr}}
 @media(max-width:760px){.settings-mini-card{padding:14px}.push-device-card{padding:14px}.notifications-card{gap:14px}}
+
+
+/* v4.2.21 — client desktop geometry: keep commands out of header and restore 3-column CRM layout. */
+@media (min-width:901px){
+  .client-card-form>header{min-height:0}
+  .client-header-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0}
+  .client-header-actions .btn,.client-header-actions a{width:100%;min-width:0;min-height:40px;padding:0 11px;justify-content:center;white-space:nowrap;font-size:11.5px}
+}
+@media (min-width:1221px){
+  .client-card-grid{grid-template-columns:minmax(280px,.95fr) minmax(340px,1.12fr) minmax(280px,.93fr);grid-template-areas:'contact document history' 'referral next history' 'promo sms history';align-items:start}
+  .client-history-section{align-self:start}
+}
+@media (min-width:901px) and (max-width:1220px){
+  .client-header-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
