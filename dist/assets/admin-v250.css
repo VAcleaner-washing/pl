@@ -6339,6 +6339,28 @@ button,.btn,.new-btn,.chip{font-weight:520}
 .delivery-route-missing p{max-width:760px;margin:0;color:var(--muted);font-size:10.8px;line-height:1.45}
 .delivery-route-missing .delivery-route-backfill{flex:0 0 auto;min-width:170px}
 .delivery-map-card .delivery-fact-summary{margin-top:0}
+
+/* v4.2.25 — QA repair: search, client save, audit, fuel truth and booking geometry. */
+.campaign-workspace .campaign-summary b{white-space:nowrap;line-height:1.15}
+.campaign-workspace .campaign-summary>span{align-content:center;min-width:0}
+.delivery-fact-summary em{color:var(--muted);font-size:9.5px;font-style:normal;line-height:1.35}
+.booking-margin-rows>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 14px;align-items:center}
+.booking-margin-rows>div>strong{white-space:nowrap;text-align:right}
+.booking-margin-rows>div>small{grid-column:1/-1;color:var(--muted);font-size:10.5px;line-height:1.4}
+.audit-empty,.audit-error{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:16px;border:1px dashed rgba(255,255,255,.1);border-radius:13px;background:rgba(255,255,255,.015)}
+.audit-empty{display:grid;justify-content:start}.audit-empty b,.audit-error b{font-size:12.5px}.audit-empty span,.audit-error span{color:var(--muted);font-size:11px;line-height:1.4}
+.audit-error>div{display:grid;gap:4px}.audit-entry{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:center;padding:12px 13px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:#0a1115}
+.audit-entry>i{width:8px;height:8px;border-radius:50%;background:var(--gold-2);box-shadow:0 0 0 5px rgba(214,164,95,.08)}
+.audit-entry>div{display:grid;gap:3px;min-width:0}.audit-entry strong{font-size:12px}.audit-entry span,.audit-entry time{color:var(--muted);font-size:10.5px}.audit-entry time{white-space:nowrap}
+.client-contact-section .fields{align-items:start}.client-contact-section .field small{color:var(--muted);font-size:9.5px;font-weight:500}
+.referral-message-details[open] summary{border-bottom:1px solid var(--line);background:rgba(214,164,95,.035)}
+.referral-message-details[open] summary small{color:var(--gold-2)}
+.referral-action-panel{align-items:start}.referral-primary-actions{align-self:center}
+.booking-form .customer-fields>.referral-code-field{grid-column:2;grid-row:3}
+.booking-form .customer-fields>.delivery-address-field{grid-row:4}
+.booking-form .customer-fields>.passport-data-group{grid-row:5;align-self:start}
+.booking-form .customer-fields>.customer-lookup{grid-row:6;align-self:start}
+@media(max-width:900px){.audit-entry{grid-template-columns:auto minmax(0,1fr)}.audit-entry time{grid-column:2}.audit-error{display:grid}.booking-margin-rows>div{grid-template-columns:1fr}.booking-margin-rows>div>strong{text-align:left}.booking-margin-rows>div>small{grid-column:1}.campaign-workspace .campaign-summary b{white-space:normal}.booking-form .customer-fields>.referral-code-field,.booking-form .customer-fields>.delivery-address-field,.booking-form .customer-fields>.passport-data-group,.booking-form .customer-fields>.customer-lookup{grid-column:auto;grid-row:auto}}
 .delivery-map-card .ops-footnote{margin-bottom:0}
 
 @media(max-width:900px){

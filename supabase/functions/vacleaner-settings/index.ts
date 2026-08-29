@@ -94,6 +94,7 @@ function normDeliveryPricing(v: unknown) {
   const cityCars = rawCars.slice(0, 4).map((car: any, index: number) => ({
     id: cleanLabel(car?.id, 40) || defaultCityCars[index]?.id || `car_${index + 1}`,
     label: cleanLabel(car?.label, 80) || defaultCityCars[index]?.label || `Авто ${index + 1}`,
+    fuelType: car?.fuelType === "lpg" || car?.id === "anna" ? "lpg" : "petrol",
     consumptionL100: Number(car?.consumptionL100 ?? defaultCityCars[index]?.consumptionL100 ?? 10),
   }));
   const fuel = {

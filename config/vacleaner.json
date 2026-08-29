@@ -399,7 +399,21 @@
       "petrolPerL": 80,
       "lpgPerL": 45,
       "consumptionL100": 7,
-      "tripMultiplier": 4
+      "tripMultiplier": 4,
+      "cityCars": [
+        {
+          "id": "vadym",
+          "label": "Твоє авто",
+          "fuelType": "petrol",
+          "consumptionL100": 11
+        },
+        {
+          "id": "anna",
+          "label": "Авто дружини",
+          "fuelType": "lpg",
+          "consumptionL100": 10
+        }
+      ]
     },
     "suburb": 350,
     "baseOutside": 350,

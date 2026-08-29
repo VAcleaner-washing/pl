@@ -21,7 +21,7 @@ has(admin,"b.status==='completed'&&b.fulfillment==='delivery'&&credible(b)",'his
 has(admin,"row?.isLocal?Number(car?.consumptionL100)||0:Number(fuel.consumptionL100)||0",'city car consumption and route/suburb consumption must be applied to the right delivery type');
 has(admin,'Середня між двома авто','delivery analytics must expose the average between the two cars');
 has(admin,"if(!routeKm)return[]",'booking fuel estimate must refuse missing route distance');
-has(admin,'Відстань не зафіксована','missing route distance must be explicit');
+has(admin,'Маршрут для цієї адреси ще не збережений','missing route distance must be explicit and actionable');
 
 // Equipment payback: rental-only revenue + actual resource allocation, never whole booking total.
 has(admin,'function bookingRentalRevenue','payback needs a rental-only revenue source');
@@ -98,7 +98,7 @@ has(admin,'data-activate-pending-promo','booking UX must not auto-activate an SM
 // Address truth: route address stays clean; entrance/access details belong to the comment.
 has(admin,'function deliveryAddressParts','delivery address must have a route-safe parser');
 has(admin,'function mergeDeliveryComment','legacy entrance notes must be preserved as booking comments');
-has(admin,"customerAddress:deliveryParts.address",'customer profile address must store route-safe address only');
+has(admin,"customerAddress:[deliveryParts.address,deliveryParts.note].filter(Boolean).join(' · ')",'customer profile must preserve the route-safe address and its separate access detail');
 has(admin,"deliveryAddress:deliveryParts.address",'booking delivery address must store route-safe address only');
 has(admin,'customerComment=mergeDeliveryComment(fd.get(\'customerComment\'),deliveryParts.note)','entrance/orientation detail must move into the booking comment at save time');
 
@@ -118,4 +118,3 @@ has(admin,"savedDeliveryValue=[savedDelivery.address,savedDelivery.note].filter(
 has(admin,"__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDeliveryValue)",'repeat client must restore legacy access detail through the separate address-detail control, not the map address');
 has(admin,'Для Google Maps використовуємо тільки адресу будинку','admin address copy must keep map address and access note conceptually separate');
 has(fs.readFileSync('assets/address-autocomplete.js','utf8'),"if(mode==='public'||mode==='admin'){",'public and admin booking must share the separate entrance/orientation field contract');
-
