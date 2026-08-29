@@ -212,7 +212,7 @@ function attach(input,mode){
   const list=document.createElement('div');list.className='vac-address-list';list.setAttribute('role','listbox');list.hidden=true;wrap.appendChild(list);
   const status=document.createElement('div');status.className='vac-address-status hint';wrap.insertAdjacentElement('afterend',status);
   let detailBox=null,details=null;
-  if(mode==='public'){
+  if(mode==='public'||mode==='admin'){
     detailBox=document.createElement('div');detailBox.className='vac-address-details';
     detailBox.innerHTML='<span>Під’їзд / орієнтир <small>необов’язково</small></span><input type="text" data-vac-address-detail="1" maxlength="120" autocomplete="off" placeholder="Наприклад: 2 під’їзд, зі сторони двору" aria-label="Під’їзд або орієнтир для доставки"><small class="vac-address-delivery-note">Доставка техніки — до під’їзду.</small>';
     status.insertAdjacentElement('afterend',detailBox);
@@ -251,7 +251,7 @@ function installGlobals(){
     if(!activeAdmin)return false;
     const parsed=splitStored(value);
     activeAdmin.setting=true;setInputValue(activeAdmin.input,parsed.base);activeAdmin.setting=false;
-    if(activeAdmin.details)activeAdmin.details.value='';activeAdmin.selected='';clearMeta(activeAdmin.input);
+    if(activeAdmin.details)activeAdmin.details.value=parsed.details;activeAdmin.selected='';clearMeta(activeAdmin.input);
     setStatus(activeAdmin,'hint','Збережена адреса. За потреби оберіть її зі списку ще раз.');
     return true;
   };

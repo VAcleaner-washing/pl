@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd(),dist=path.join(root,'dist');
 fs.rmSync(dist,{recursive:true,force:true});
-const excludedTop=new Set(['.git','.github','.venv','.pw-browsers','config','scripts','supabase','dist','test-results','pwa-test-results','glass-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__','QA-EVIDENCE-v2.9.11.0']);
+const excludedTop=new Set(['.git','.github','docs','.venv','.pw-browsers','config','scripts','supabase','dist','test-results','pwa-test-results','glass-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__','QA-EVIDENCE-v2.9.11.0']);
 const excludedRoot=new Set(['package.json','requirements-ci.txt','manifest.webmanifest','favicon-16-preview.png','favicon-16x16.png','favicon-32x32.png','favicon-64x64.png']);
 const excludedDeployPaths=new Set([
   'admin/bronuvannia-classic',

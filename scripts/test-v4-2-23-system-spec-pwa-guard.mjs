@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const addr=read('assets/address-autocomplete.js');
+const admin=read('assets/admin-v250.js');
+const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
+const guard=read('scripts/check-system-spec.mjs');
+const workflow=read('.github/workflows/pages.yml');
+let passed=0;const fail=[];
+const ok=(name,cond)=>{if(cond){passed++;console.log('PASS:',name)}else{fail.push(name);console.error('FAIL:',name)}};
+ok('admin and public both expose separate address detail control',addr.includes("if(mode==='public'||mode==='admin')")&&addr.includes('data-vac-address-detail="1"'));
+ok('admin address setter restores separated detail',addr.includes('if(activeAdmin.details)activeAdmin.details.value=parsed.details'));
+ok('repeat client restore sends clean address plus detail into admin address controller',admin.includes("savedDeliveryValue=[savedDelivery.address,savedDelivery.note].filter(Boolean).join(' · ')")&&admin.includes('__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDeliveryValue)'));
+ok('repeat client entrance is not silently copied into general customer comment',!admin.includes("if(savedDelivery.note&&form.customerComment&&!String(form.customerComment.value||'').trim())form.customerComment.value=savedDelivery.note"));
+ok('AI operating role is normative',spec.includes('AI-ROLE-001 — роль виконавця')&&spec.includes('Senior Product/UX Designer')&&spec.includes('Technical SEO/Performance Specialist'));
+ok('AI operating rules cover production, QA branch and full regression',spec.includes('AI-RULE-001 — тільки актуальна production-база')&&spec.includes('AI-RULE-004 — усі зміни тільки в `qa/vX.X.X-*`')&&spec.includes('AI-RULE-007 — повний regression QA після кожного fix'));
+ok('VA HOME isolation is explicit',spec.includes('AI-RULE-010 — ізоляція VA HOME у спільному Supabase'));
+ok('source of truth update is mandatory',spec.includes('AI-RULE-011 — Source of Truth оновлюється з кожною зміною'));
+ok('System Spec Guard enforces AI contracts',guard.includes('AI-RULE-010 — ізоляція VA HOME у спільному Supabase')&&guard.includes('AI-RULE-011 — Source of Truth оновлюється з кожною зміною'));
+ok('workflow preserves full history for behavioral diff guard',workflow.includes('fetch-depth: 0'));
+ok('workflow has explicit System Spec / AI guard step',workflow.includes('Verify VAcleaner System Spec / AI operating contract'));
+if(fail.length){console.error(`v4.2.23 regression contracts failed: ${fail.length}`);process.exit(1)}
+console.log(`v4.2.23 SYSTEM SPEC & PWA GUARD: ${passed}/${passed} PASS`);

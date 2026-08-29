@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -33,6 +35,8 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Stamp one build version
         run: npm run stamp
+      - name: Verify VAcleaner System Spec / AI operating contract
+        run: node scripts/check-system-spec.mjs
       - name: Validate static and backend release
         run: npm run check
       - name: Prevent stale copy and hydration mismatches
@@ -178,6 +182,8 @@ jobs:
         run: npm run test:v4.2.16-finance-truth
       - name: Verify v4.2.22 admin truth and UX contracts
         run: npm run test:v4.2.22-admin-truth-ux
+      - name: Verify v4.2.23 System Spec and PWA regression guard
+        run: npm run test:v4.2.23-system-spec-pwa-guard
 
       - name: Re-run admin functional contracts before architecture build
         run: |

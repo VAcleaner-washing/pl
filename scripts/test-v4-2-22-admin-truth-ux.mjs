@@ -114,8 +114,8 @@ has(admin,"addressInput.disabled=false",'pickup must keep the customer address e
 has(admin,'deliveryPricingField.hidden=!delivery','only delivery pricing is contextual to fulfillment');
 has(admin,"detail=chunks.join(' · ').trim()",'address parser must preserve the site-style entrance/orientation detail');
 has(admin,"note:[legacyNote,detail].filter(Boolean).join(' · ')",'legacy entrance and site-style detail must move to comments, never Google Maps address');
-has(admin,"__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDelivery.address)",'repeat client must prefill only the clean route-safe address');
-has(admin,"form.customerComment.value=savedDelivery.note",'legacy entrance detail from a repeat client must prefill the booking comment, not the map address');
+has(admin,"savedDeliveryValue=[savedDelivery.address,savedDelivery.note].filter(Boolean).join(' · ')",'repeat client must preserve route-safe address plus separate access detail for the address helper');
+has(admin,"__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDeliveryValue)",'repeat client must restore legacy access detail through the separate address-detail control, not the map address');
 has(admin,'Для Google Maps використовуємо тільки адресу будинку','admin address copy must keep map address and access note conceptually separate');
-has(fs.readFileSync('assets/address-autocomplete.js','utf8'),"if(mode==='public'){",'admin address helper must not inject a second entrance/orientation field');
+has(fs.readFileSync('assets/address-autocomplete.js','utf8'),"if(mode==='public'||mode==='admin'){",'public and admin booking must share the separate entrance/orientation field contract');
 
