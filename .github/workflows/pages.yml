@@ -184,6 +184,8 @@ jobs:
         run: npm run test:v4.2.22-admin-truth-ux
       - name: Verify v4.2.23 System Spec and PWA regression guard
         run: npm run test:v4.2.23-system-spec-pwa-guard
+      - name: Verify v4.2.24 finance, delivery and RETURN coherence
+        run: npm run test:v4.2.24-finance-delivery-return
 
       - name: Re-run admin functional contracts before architecture build
         run: |

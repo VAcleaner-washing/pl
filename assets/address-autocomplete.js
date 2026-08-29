@@ -86,11 +86,23 @@ function localDeliverySettlement(value){
 }
 async function hydrateDistanceQuote(ctx,item){
   if(!ctx?.input||!item?.houseNumber)return;
-  if(localDeliverySettlement(item.settlement)){
+  const local=localDeliverySettlement(item.settlement);
+  if(local){
     ctx.input.dataset.vacAddressPricingDistanceKm='0';
-    ctx.input.dataset.vacAddressRouteKm='0';
     ctx.input.dataset.vacAddressDistanceSource='local';
-    setStatus(ctx,'ok','Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир.');
+    setStatus(ctx,'loading','Адресу знайдено. Рахуємо маршрут від бази для аналітики доставки…');
+    try{
+      const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({action:'quote',lat:item.lat,lon:item.lon})});
+      if(!res.ok)throw new Error('distance_quote_failed');
+      const data=await res.json(),routeKm=Number(data.routeKm);
+      if(Number.isFinite(routeKm)&&routeKm>0)ctx.input.dataset.vacAddressRouteKm=String(routeKm);else delete ctx.input.dataset.vacAddressRouteKm;
+      ctx.input.dataset.vacAddressDistanceSource=String(data.distanceSource||'city');
+      setStatus(ctx,'ok',Number.isFinite(routeKm)&&routeKm>0?`Адресу знайдено. Локальний тариф; маршрут від бази ${routeKm.toFixed(1).replace('.',',')} км.`:'Адресу знайдено. Локальний тариф; відстань для аналітики не отримано.');
+    }catch{
+      delete ctx.input.dataset.vacAddressRouteKm;
+      ctx.input.dataset.vacAddressDistanceSource='local_route_unavailable';
+      setStatus(ctx,'ok','Адресу знайдено. Локальний тариф; маршрут для аналітики поки не отримано.');
+    }
     document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
     return;
   }
@@ -242,11 +254,33 @@ function scan(){
   if(publicReady)document.querySelectorAll('.booking-delivery-address input[type="text"]:not([data-vac-address-detail])').forEach(input=>attach(input,'public'));
   document.querySelectorAll('.delivery-address-field input[name="deliveryAddress"]').forEach(input=>attach(input,'admin'));
 }
+async function resolveRouteForAddress(value){
+  const raw=splitStored(value).base.trim();
+  if(!raw||!hasHouseNumber(raw))return null;
+  try{
+    let suggestions=[];
+    for(const candidate of addressVariants(raw)){
+      const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({q:candidate})});
+      if(!res.ok)continue;
+      const data=await res.json();
+      suggestions=Array.isArray(data.suggestions)?data.suggestions:[];
+      if(suggestions.some(item=>item?.houseNumber&&!item?.approximateCoordinates))break;
+    }
+    const item=suggestions.find(item=>item?.houseNumber&&!item?.approximateCoordinates);
+    if(!item)return null;
+    const quoteRes=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({action:'quote',lat:item.lat,lon:item.lon})});
+    if(!quoteRes.ok)return null;
+    const quote=await quoteRes.json(),routeKm=Number(quote.routeKm),pricingDistanceKm=Number(quote.pricingDistanceKm);
+    if(!Number.isFinite(routeKm)||routeKm<=0)return null;
+    return{routeKm,pricingDistanceKm:Number.isFinite(pricingDistanceKm)?pricingDistanceKm:null,distanceSource:String(quote.distanceSource||''),address:String(item.address||raw)};
+  }catch{return null}
+}
 function installGlobals(){
   window.__VAC_DELIVERY_ADDRESS__=(fallback='')=>compose(activePublic,fallback);
   window.__VAC_ADMIN_DELIVERY_ADDRESS__=(fallback='')=>compose(activeAdmin,fallback);
   window.__VAC_DELIVERY_META__=()=>addressMeta(activePublic);
   window.__VAC_ADMIN_DELIVERY_META__=()=>addressMeta(activeAdmin);
+  window.__VAC_ROUTE_FOR_ADDRESS__=resolveRouteForAddress;
   window.__VAC_SET_ADMIN_DELIVERY_ADDRESS__=(value='')=>{
     if(!activeAdmin)return false;
     const parsed=splitStored(value);

@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.23",
+  "version": "4.2.24",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -106,6 +106,7 @@
     "test:v4.2.15-browser-contracts": "node scripts/test-v4-2-15-browser-contracts.mjs",
     "test:v4.2.16-finance-truth": "node scripts/test-v4-2-16-finance-truth.mjs",
     "test:v4.2.22-admin-truth-ux": "node scripts/test-v4-2-22-admin-truth-ux.mjs",
-    "test:v4.2.23-system-spec-pwa-guard": "node scripts/test-v4-2-23-system-spec-pwa-guard.mjs"
+    "test:v4.2.23-system-spec-pwa-guard": "node scripts/test-v4-2-23-system-spec-pwa-guard.mjs",
+    "test:v4.2.24-finance-delivery-return": "node scripts/test-v4-2-24-finance-delivery-return.mjs"
   }
 }

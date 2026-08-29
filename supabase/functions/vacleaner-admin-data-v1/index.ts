@@ -43,6 +43,14 @@ Deno.serve(async request=>{
       if(bookingError||expenseError)throw bookingError||expenseError;
       return json({bookings:(bookings??[]).map((row:any)=>safeBooking(row)),expenses:(expenses??[]).map((row:any)=>safeExpense(row))});
     }
+    if(action==="save_delivery_route"){
+      const bookingId=String(body.bookingId??""),routeKm=Number(body.routeKm),pricingDistanceKm=body.pricingDistanceKm===null||body.pricingDistanceKm===undefined?null:Number(body.pricingDistanceKm),distanceSource=cleanText(body.distanceSource,32)||"admin_backfill";
+      if(!validUuid(bookingId)||!Number.isFinite(routeKm)||routeKm<=0||routeKm>500||(pricingDistanceKm!==null&&(!Number.isFinite(pricingDistanceKm)||pricingDistanceKm<0||pricingDistanceKm>500)))return json({error:"invalid_delivery_route"},400);
+      const {data:current,error:readError}=await db.from("vacleaner_bookings").select("id,fulfillment,extras").eq("id",bookingId).maybeSingle();if(readError)throw readError;if(!current||current.fulfillment!=="delivery")return json({error:"invalid_delivery_booking"},404);
+      const extras=current.extras&&typeof current.extras==="object"?current.extras:{},delivery=extras.delivery&&typeof extras.delivery==="object"?extras.delivery:{};
+      const nextDelivery={...delivery,route_km:Math.round(routeKm*10)/10,pricing_distance_km:pricingDistanceKm===null?(delivery.pricing_distance_km??null):Math.round(pricingDistanceKm*10)/10,distance_source:distanceSource,route_backfilled_at:new Date().toISOString()};
+      const {data,error}=await db.from("vacleaner_bookings").update({extras:{...extras,delivery:nextDelivery},updated_at:new Date().toISOString()}).eq("id",bookingId).select("id,extras").maybeSingle();if(error)throw error;if(!data)return json({error:"invalid_delivery_booking"},404);return json({ok:true,bookingId,delivery:nextDelivery});
+    }
     if(action==="save_expense"){
       const expenseId=String(body.expenseId??""),spentOn=String(body.spentOn??""),category=String(body.category??""),amount=Math.round(Number(body.amount)||0);
       if((expenseId&&!validUuid(expenseId))||!validIsoDate(spentOn)||spentOn>new Date().toISOString().slice(0,10)||!EXPENSE_CATEGORIES.has(category)||amount<1||amount>10000000)return json({error:"invalid_expense"},400);

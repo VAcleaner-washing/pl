@@ -68,8 +68,8 @@ has(css,'.sidebar{display:none}','desktop sidebar is hidden on mobile');
 has(css,'.mobile-nav{\n    position:fixed;z-index:100;right:0;bottom:0;left:0','dedicated mobile navigation is pinned directly to the viewport');
 has(adminHtml,'<div id="adminMount"></div><nav class="mobile-nav"','mobile nav exists in initial HTML as a body-level sibling, like VA HOME');
 lacks(admin,'<nav class="mobile-nav"','runtime never recreates the static mobile nav');
-lacks(css,'html.keyboard-open .mobile-nav{','keyboard state never mutates dedicated bottom nav; matches proven VA HOME contract');
-lacks(css,'html.keyboard-open .main{','keyboard state never reflows the main shell around bottom nav');
+has(css,'html.keyboard-open .mobile-nav{opacity:0;visibility:hidden;pointer-events:none','keyboard keeps the dedicated nav node but removes it from the visual working area while typing');
+has(css,'html.keyboard-open .main{bottom:0;scroll-padding-bottom:24px}','keyboard gives the focused form the full visual viewport after nav is hidden');
 lacks(css,'html.pwa-standalone .mobile-nav{position:relative','standalone grid override is absent');
 lacks(css,'.app{position:fixed}\n  .topbar,.main{position:absolute}','stale v3.0.36 fixed-ancestor override is absent');
 has(css,'.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))','main is an independent root-fixed scroll region like VA HOME');
@@ -131,7 +131,8 @@ has(bookingEdge,'db.from("vacleaner_customers").select("phone")','public booking
 has(bookingEdge,'db.from("vacleaner_customers").insert','new public clients are persisted');
 has(bookingEdge,'db.from("vacleaner_customers").update(profilePatch)','repeat public clients update only safe profile fields');
 
-has(pwaQa,'settings cards use full mobile width','mobile settings full-width is gated');
+has(pwaQa,'settings uses five task-focused tabs','mobile settings tab architecture is gated');
+has(pwaQa,'workspace uses mobile width without clipping','every active settings workspace is geometry-gated');
 has(e2e,'Selecting equipment does not auto-select dates','hidden auto-dates are forbidden');
 has(e2e,'ThreadingHTTPServer((\"127.0.0.1\", 0)','browser E2E uses an isolated local HTTP origin instead of blocked synthetic DNS');
 has(admin,'https://t.me/+${phone}','Telegram opens the customer chat by phone without a long draft payload');

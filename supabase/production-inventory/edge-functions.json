@@ -66,10 +66,10 @@
     },
     {
       "slug": "vacleaner-settings",
-      "version": 19,
+      "version": 20,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "612daa2f9dd01c8b2cb660bbabc400dc863b97f68c919fe9fffd7d9552b3e146",
+      "sha256": "5e7d5f3af46c8ca6a4e6dcd950e2099fcaa42bf7478cb6436de758c33a29a145",
       "role": "active shared settings",
       "runtime": "active"
     },
@@ -93,10 +93,10 @@
     },
     {
       "slug": "vacleaner-campaigns-v1",
-      "version": 19,
+      "version": 20,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "07dd4bd133382b5d53fa53c1dbf201fecb644b7bf521aaf63dbcf2d60a199420",
+      "sha256": "7c6ddb9a85e08bfd4a6ab5e08294997145fd1a6650f75ee5c8c0fff75ba8971f",
       "role": "active campaign lifecycle; custom auth + admin allowlist",
       "runtime": "active"
     },

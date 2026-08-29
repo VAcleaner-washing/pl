@@ -147,7 +147,7 @@ def init_script(authenticated: bool = True, standalone: bool = False) -> str:
         let payload={{}};try{{payload=options.body?JSON.parse(options.body):{{}}}}catch{{}}
         let body={{}};
         const text=String(url);
-        if(text.includes('vacleaner-settings'))body={{slots:window.__config.slots,depositRules:window.__config.depositRules,catalog:window.__config.catalog,deliveryPricing:window.__config.deliveryPricing,equipmentBaselines:{{puzzi:{{qty:2,unitCost:26000,total:52000}},sc2:{{qty:2,unitCost:6500,total:13000}},jimmy:{{qty:2,unitCost:4500,total:9000}},abir:{{qty:2,unitCost:4500,total:9000}}}}}};
+        if(text.includes('vacleaner-settings'))body={{slots:window.__config.slots,depositRules:window.__config.depositRules,catalog:window.__config.catalog,deliveryPricing:window.__config.deliveryPricing,equipmentBaselines:{{puzzi:{{qty:2,unitCost:24000,total:48000}},sc2:{{qty:2,unitCost:6500,total:13000}},jimmy:{{qty:2,unitCost:4500,total:9000}},abir:{{qty:2,unitCost:4500,total:9000}}}}}};
         else if(text.includes('vacleaner-admin-bookings-v4')||text.includes('vacleaner-admin-bookings-v3')||text.includes('vacleaner-admin-data-v1')){{
           if(payload.action==='list')body={{bookings:window.__bookings}};
           else if(payload.action==='calendar')body={{days:Array.from({{length:14}},(_,i)=>({{date:new Date(Date.now()+i*86400000).toISOString().slice(0,10),resources:{{puzzi:{{label:'Puzzi',capacity:2,morning:2,evening:1}},sc2:{{label:'SC 2',capacity:2,morning:2,evening:2}},jimmy:{{label:'Jimmy',capacity:2,morning:1,evening:2}},abir:{{label:'ABIR',capacity:2,morning:2,evening:2}}}}}}))}};
@@ -374,23 +374,56 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             qa.check(page.locator('.main').evaluate('el=>el.scrollLeft')==0, f"{label}: {view} cannot drift horizontally")
             qa.check(page.locator('.main').evaluate('el=>el.scrollTop')==0, f"{label}: {view} opens at top")
             if view=='settings':
-                cards=page.locator('.settings-grid>*:visible').evaluate_all('els=>els.map(el=>el.getBoundingClientRect())')
-                qa.check(bool(cards) and all(r['left']>=11 and r['right']<=width-11 for r in cards), f"{label}: settings cards use full mobile width")
-                ordered=sorted(cards,key=lambda r:r['top'])
-                qa.check(all(ordered[i]['bottom']<=ordered[i+1]['top']+1 for i in range(len(ordered)-1)), f"{label}: settings cards never overlap each other")
-                slot_rows=page.locator('.slot-editor-row:visible').evaluate_all('els=>els.map(el=>({r:el.getBoundingClientRect(),children:[...el.querySelectorAll(".premium-control")].map(x=>x.getBoundingClientRect())}))')
-                qa.check(all(all(c['left']>=row['r']['left']-1 and c['right']<=row['r']['right']+1 for c in row['children']) for row in slot_rows), f"{label}: time-slot controls stay inside settings cards")
-                page.wait_for_timeout(30)
-                qa.check(page.locator('.operational-health-card').count()==1, f"{label}: settings exposes production health")
-                qa.check(page.locator('.health-state.ok').count()>=2, f"{label}: push and double-booking health are verified at runtime")
+                qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==5, f"{label}: settings uses five task-focused tabs")
+                qa.check(page.locator('.settings-tabs').evaluate('el=>el.scrollWidth>=el.clientWidth'), f"{label}: settings tab rail remains usable at narrow widths")
+                for tab in ['rental','delivery','equipment','notifications','system']:
+                    page.locator(f'[data-settings-tab="{tab}"]').click();page.wait_for_timeout(25)
+                    qa.check(page.locator('.settings-panel:visible').count()==1 and page.locator(f'[data-settings-panel="{tab}"]:visible').count()==1, f"{label}: settings {tab} shows one focused workspace")
+                    panel=page.locator(f'[data-settings-panel="{tab}"]:visible')
+                    box=panel.bounding_box()
+                    qa.check(box is not None and box['x']>=11 and box['x']+box['width']<=width-11, f"{label}: settings {tab} workspace uses mobile width without clipping")
+                    qa.check(panel.evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: settings {tab} has no internal horizontal overflow")
+                    if tab=='rental':
+                        qa.check(page.locator('#slotsForm:visible').count()==1 and page.locator('#depositRulesForm:visible').count()==1, f"{label}: rental settings keeps slots and deposits together")
+                        slot_rows=page.locator('.slot-editor-row:visible').evaluate_all('els=>els.map(el=>{const r=el.getBoundingClientRect();return{r:{left:r.left,right:r.right},children:[...el.querySelectorAll(".premium-control")].map(x=>{const c=x.getBoundingClientRect();return{left:c.left,right:c.right}})}})')
+                        qa.check(all(all(c['left']>=row['r']['left']-1 and c['right']<=row['r']['right']+1 for c in row['children']) for row in slot_rows), f"{label}: time-slot controls stay inside rental workspace")
+                    if tab=='delivery':
+                        qa.check(page.locator('#deliveryFeeForm:visible').count()==1 and page.locator('.delivery-economics:visible').count()==0, f"{label}: delivery settings contains inputs, not profitability analytics")
+                    if tab=='equipment':
+                        qa.check(page.locator('#equipmentBaselineForm:visible .equipment-baseline-row').count()==4, f"{label}: equipment baselines are a compact four-row table")
+                        fleet_total_node=page.locator('[data-equipment-fleet-total]:visible')
+                        displayed_fleet=int(''.join(ch for ch in fleet_total_node.inner_text() if ch.isdigit()) or '0') if fleet_total_node.count()==1 else -1
+                        row_sum=0
+                        for key in ['puzzi','sc2','jimmy','abir']:
+                            qty=int(page.locator(f'#equipmentBaselineForm input[name="{key}Qty"]').input_value() or '0')
+                            unit=int(page.locator(f'#equipmentBaselineForm input[name="{key}UnitCost"]').input_value() or '0')
+                            row_sum+=qty*unit
+                        qa.check(fleet_total_node.count()==1 and displayed_fleet==row_sum and row_sum>0, f"{label}: equipment settings show the whole-fleet start value from current global inputs")
+                        if width==390:
+                            abir=page.locator('#equipmentBaselineForm input[name="abirUnitCost"]')
+                            original_abir=int(abir.input_value() or '0')
+                            original_fleet=displayed_fleet
+                            abir.fill(str(original_abir+500));page.wait_for_timeout(15)
+                            row_total=int(''.join(ch for ch in page.locator('[data-equipment-baseline="abir"] [data-equipment-total]').inner_text() if ch.isdigit()) or '0')
+                            updated_fleet=int(''.join(ch for ch in page.locator('[data-equipment-fleet-total]').inner_text() if ch.isdigit()) or '0')
+                            abir_qty=int(page.locator('#equipmentBaselineForm input[name="abirQty"]').input_value() or '0')
+                            qa.check(row_total==abir_qty*(original_abir+500), f"{label}: equipment row total updates live while typing")
+                            qa.check(updated_fleet==original_fleet+abir_qty*500, f"{label}: fleet total updates live while typing")
+                            abir.fill(str(original_abir));page.wait_for_timeout(10)
+                    if tab=='notifications':
+                        qa.check(page.locator('#notificationToggle:visible').count()==1 and page.locator('#pushDevicesList:visible').count()==1, f"{label}: push actions and production devices stay together")
+                    if tab=='system':
+                        qa.check(page.locator('.operational-health-card:visible').count()==1, f"{label}: system tab exposes production health")
+                        qa.check(page.locator('.health-state.ok:visible').count()>=2, f"{label}: push and double-booking health are verified at runtime")
+                page.locator('[data-settings-tab="rental"]').click();page.wait_for_timeout(20)
                 if width <= 430:
                     main_box=page.locator('.main').bounding_box(); nav_box=page.locator('.mobile-nav:visible').bounding_box()
-                    qa.check(main_box is not None and nav_box is not None and main_box['y']+main_box['height']<=nav_box['y']+1, f"{label}: standalone PWA content ends above bottom navigation")
+                    qa.check(main_box is not None and nav_box is not None and main_box['y']+main_box['height']<=nav_box['y']+1, f"{label}: standalone PWA settings content ends above bottom navigation")
                     page.locator('.main').evaluate('el=>el.scrollTop=el.scrollHeight')
                     page.wait_for_timeout(30)
-                    last_box=page.locator('.settings-grid>*:visible').last.bounding_box()
-                    qa.check(last_box is not None and nav_box is not None and last_box['y']+min(last_box['height'],48)<=nav_box['y']+1, f"{label}: final settings card remains reachable above PWA nav")
-                    if width==390: qa.shot(page,'390-settings-v4222.png')
+                    last_box=page.locator('.settings-panel:visible').bounding_box()
+                    qa.check(last_box is not None and nav_box is not None and last_box['y']+min(last_box['height'],48)<=nav_box['y']+1, f"{label}: active settings workspace remains reachable above PWA nav")
+                    if width==390: qa.shot(page,'390-settings-v4224.png')
             if view=='upcoming':
                 qa.check(page.locator('.upcoming-row [data-client-card]').count()==0, f"{label}: upcoming customer identity is not a CRM navigation target")
                 qa.check(page.locator('.upcoming-row .upcoming-client-info a[href^="tel:"]').count()>=1, f"{label}: upcoming phone remains a direct call action")

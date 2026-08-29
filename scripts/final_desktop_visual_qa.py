@@ -61,12 +61,20 @@ def view_suite(page:Page,qa:QA,width:int):
             page_title=page.locator('#pageTitle').inner_text().strip(); sub_title=page.locator('.analytics-toolbar h2').inner_text().strip()
             qa.check(page_title!=sub_title and sub_title=='Показники',f'{width}: analytics hierarchy has no duplicated heading')
         if view=='settings':
-            main=page.locator('.main').bounding_box(); deposit=page.locator('#depositRulesForm').bounding_box(); grid=page.locator('.settings-grid')
-            qa.check(grid.evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: settings grid stays inside main column')
-            qa.check(page.locator('#depositRulesForm').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: deposit settings card has no internal horizontal overflow')
-            if width==1024:
-                cols=grid.evaluate("el=>getComputedStyle(el).gridTemplateColumns")
-                qa.check(' ' not in cols.strip(),f'{width}: settings use one-column tablet-desktop layout')
+            qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==5,f'{width}: settings exposes five task-focused tabs')
+            qa.check(page.locator('.settings-shell').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: settings shell stays inside main column')
+            for tab in ['rental','delivery','equipment','notifications','system']:
+                page.locator(f'[data-settings-tab="{tab}"]').click();page.wait_for_timeout(20)
+                panel=page.locator(f'[data-settings-panel="{tab}"]:visible')
+                qa.check(page.locator('.settings-panel:visible').count()==1 and panel.count()==1,f'{width}: settings {tab} owns one visible workspace')
+                qa.check(panel.evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: settings {tab} workspace has no horizontal overflow')
+                if tab=='rental':
+                    qa.check(page.locator('#depositRulesForm:visible').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: deposit table fits rental workspace')
+                if tab=='delivery':
+                    qa.check(page.locator('.delivery-economics:visible').count()==0,f'{width}: delivery profitability is not mixed into settings')
+                if tab=='system':
+                    qa.check(page.locator('.operational-health-card:visible').count()==1,f'{width}: production health lives in system tab')
+            page.locator('[data-settings-tab="rental"]').click();page.wait_for_timeout(20)
         if view=='clients':
             qa.check(page.locator('.clients-table').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: clients stay readable without horizontal table scrolling')
         if view=='campaigns':

@@ -10,8 +10,8 @@ if(!errors.length){
   const inventory=JSON.parse(fs.readFileSync(file,'utf8'));
   const bySlug=new Map(inventory.functions.map(item=>[item.slug,item]));
   const expectedVersions={
-    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':4,'vacleaner-settings':19,'vacleaner-push':8,
-    'vacleaner-admin-data-v1':16,'vacleaner-campaigns-v1':19,'vacleaner-reminders-v1':8,'vacleaner-booking-promo-v1':3,
+    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':4,'vacleaner-settings':20,'vacleaner-push':8,
+    'vacleaner-admin-data-v1':16,'vacleaner-campaigns-v1':20,'vacleaner-reminders-v1':8,'vacleaner-booking-promo-v1':3,
     'vacleaner-address-v1':10,'vacleaner-sms-v2':5,'vacleaner-sms-audit-v1':2,'vacleaner-status-correction-v1':7,
     'vacleaner-customer-documents-v1':5,'vacleaner-extend-rental-v1':5,
   };
