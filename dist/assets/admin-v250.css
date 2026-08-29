@@ -6358,8 +6358,8 @@ button,.btn,.new-btn,.chip{font-weight:520}
 .referral-action-panel{align-items:start}.referral-primary-actions{align-self:center}
 .booking-form .customer-fields>.referral-code-field{grid-column:2;grid-row:3}
 .booking-form .customer-fields>.delivery-address-field{grid-row:4}
-.booking-form .customer-fields>.passport-data-group{grid-row:5;align-self:start}
-.booking-form .customer-fields>.customer-lookup{grid-row:6;align-self:start}
+.booking-form .customer-fields>.passport-data-group{grid-column:1/-1;grid-row:5;align-self:start}
+.booking-form .customer-fields>.customer-lookup{grid-column:1/-1;grid-row:6;align-self:start}
 @media(max-width:900px){.audit-entry{grid-template-columns:auto minmax(0,1fr)}.audit-entry time{grid-column:2}.audit-error{display:grid}.booking-margin-rows>div{grid-template-columns:1fr}.booking-margin-rows>div>strong{text-align:left}.booking-margin-rows>div>small{grid-column:1}.campaign-workspace .campaign-summary b{white-space:normal}.booking-form .customer-fields>.referral-code-field,.booking-form .customer-fields>.delivery-address-field,.booking-form .customer-fields>.passport-data-group,.booking-form .customer-fields>.customer-lookup{grid-column:auto;grid-row:auto}}
 .delivery-map-card .ops-footnote{margin-bottom:0}
 

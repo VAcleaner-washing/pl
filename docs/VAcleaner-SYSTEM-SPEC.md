@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.25  
-**Baseline build:** 4225  
+**Baseline version:** 4.2.26  
+**Baseline build:** 4226  
 **Останнє оновлення:** 2026-08-29  
 **Власник логіки:** VAcleaner  
 
@@ -2677,3 +2677,26 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 - `scripts/test-v4-2-25-admin-qa-repair.mjs`;
 - static, build, browser, desktop and PWA QA gates before release ZIP.
+
+# 34. Change record — v4.2.26
+
+### ADDED
+
+- Окремий regression-контракт для desktop-grid кроку «Клієнт» у формі бронювання.
+
+### CHANGED
+
+- Паспортний блок і картка повторного клієнта завжди займають повну ширину двоколонкової форми.
+
+### FIXED
+
+- **UI-010** — прибрана «шахматна дошка», коли паспорт відображався праворуч, а картка повторного клієнта нижче ліворуч із великими порожніми зонами.
+
+### PRESERVED
+
+- На мобільному форма лишається одноколонковою; порядок полів і бізнес-логіка бронювання не змінені.
+
+### TESTS
+
+- `scripts/test-v4-2-26-booking-grid.mjs`;
+- повний static/build regression перед передачею ZIP.
