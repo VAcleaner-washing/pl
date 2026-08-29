@@ -5952,3 +5952,64 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
 .referral-history-section:empty,.referral-history-list:empty{display:none}
 @media(max-width:900px){.referral-share-modal{width:min(680px,calc(100vw - 18px));max-height:calc(100dvh - 18px)}.referral-summary-line{padding:2px 0}.referral-primary-actions .btn.primary{min-width:0}.referral-action-panel>div:first-child>span{max-width:none}}
 @media(max-width:430px){.referral-summary-line{gap:5px 7px}.referral-summary-line i{display:none}.referral-summary-line span{width:100%;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)}.referral-summary-line span:last-child{border-bottom:0}.referral-empty-state{align-items:flex-start}.referral-share-modal>header p{font-size:11px}}
+
+
+/* v4.2.13 — admin typography polish: quieter hierarchy, readable emphasis, stable money columns. */
+body{font-weight:400}
+.nav button{font-weight:480}
+.brand-copy strong,.top-profile-copy strong{font-weight:600}
+.page-head h1{font-weight:620}
+button,.btn,.new-btn,.chip{font-weight:520}
+.btn.primary,.btn.green,.new-btn{font-weight:600}
+.status{font-weight:600}
+
+/* Keep content readable without making every value look like a headline. */
+#view strong,#view b,
+.modal-card strong,.modal-card b{font-weight:580}
+#view .card h2,#view .card h3,
+.modal-card h2,.modal-card h3{font-weight:620}
+.booking-head h2,.booking-identity h2,.upcoming-title h3{font-weight:620}
+.booking-head small,.booking-identity small,
+.booking-row-body small,.booking-note span,
+.meta small,.group-label,.clients-head,
+.customer-found-head span,.client-section-head small,
+.campaign-row>div:first-child>span{font-weight:540}
+.meta strong,.finance-mini strong,.booking-row-body strong,
+.client-row strong,.client-editor-summary strong,
+.product-stats b{font-weight:560}
+.section-title h3,.field>span,.window-choice b,.upcoming-day>header b,
+.upcoming-time span,.detail-top-meta span{font-weight:560}
+.upcoming-day>header span,.upcoming-time strong,.detail-hero .period{font-weight:620}
+.hero-status,.formula{font-weight:600}
+.balance{font-weight:620}
+
+/* Finance: amounts stay important, but row labels no longer look uniformly bold. */
+.finance-toolbar h2,.finance-card-head h3,.finance-method h3,.finance-ledger-head h3{font-weight:620}
+.finance-kpis .kpi strong,.finance-card-head>strong{font-weight:620}
+.finance-category-bars b,.finance-method>div strong,.finance-method>div.total,
+.analytics-profit-rows>div strong,.finance-investment-note strong{font-weight:560}
+.expense-row{font-weight:400}
+.expense-date{font-weight:500}
+.expense-kind b{font-weight:580}
+.expense-kind small{font-weight:400}
+.expense-row>strong{
+  font-weight:620;
+  white-space:nowrap;
+  word-break:keep-all;
+  font-variant-numeric:tabular-nums;
+}
+.finance-form .modal-summary .live .balance span{font-weight:600}
+.expense-money input{font-weight:620}
+
+/* Operational areas: reserve heavier weight for the actual decision/value. */
+.settings-head h2,.settings-subhead h3,.financial-rules-card h2,
+.analytics-panel h2,.analytics-panel h3,.chem-card h2,.equipment-body h3{font-weight:620}
+.client-section-head>span,.document-photo-head>span,
+.document-photo-picker>span,.document-private-badge{font-weight:560}
+.discount-choice button,.discount-fixed-row input,.discount-fixed-row i,.discount-fixed-row em{font-weight:560}
+.analytics-metric-switch button{font-weight:560}
+.campaign-code-list code{font-weight:600}
+
+@media(max-width:900px){
+  .expense-row>strong{white-space:nowrap;min-width:max-content}
+}
