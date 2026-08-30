@@ -753,6 +753,9 @@ Deno.serve(async (request: Request) => {
     if (action === "update") {
       const bookingId = String(body.bookingId || ""), nextStatus = String(body.status || ""); if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const { data: current, error } = await supabase.from("vacleaner_bookings").select("*,vacleaner_booking_resources(resource_code,quantity)").eq("id", bookingId).single(); if (error || !current) return json({ error: "invalid_booking" }, 404);
+      // Idempotent retry guard: a stale admin modal/tab may repeat an already successful issue request.
+      // Returning the current booking is safer than surfacing a raw invalid_transition for a completed same-state action.
+      if (nextStatus === "issued" && String(current.status || "") === "issued") return json({ booking: safeBooking(current), alreadyApplied: true });
       if (nextStatus === "confirmed" || nextStatus === "waiting_payment") {
         const reservationAllowed = nextStatus === "confirmed" ? ["pending", "waiting_payment", "confirmed"] : ["pending", "waiting_payment"];
         if (!reservationAllowed.includes(String(current.status || ""))) return json({ error: "invalid_transition" }, 409);

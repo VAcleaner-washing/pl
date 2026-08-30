@@ -42,7 +42,7 @@ ok(!runtime.includes("visualViewport?.addEventListener('scroll'"),'visual viewpo
 ok(runtime.includes('focused=document.activeElement instanceof HTMLElement'),'keyboard viewport mode requires an actually focused editable control');
 ok(runtime.includes(`navigator.serviceWorker.register('/admin/sw.js?v=${build}'`),'service-worker registration matches build');
 ok(runtime.includes("requestAnimationFrame(()=>openDetail(b))"),'deep-link opens booking after render');
-ok(runtime.includes('function modal(html){'),'modal shell helper exists');
+ok(runtime.includes('function modal(html,options={}){'),'modal shell helper exists with optional return context');
 ok(runtime.includes("$('.mobile-more-close')||$('.modal-close')"),'Escape closes mobile More sheet cleanly');
 ok(runtime.includes('data-mobile-logout'),'mobile More contains the logout action');
 ok(runtime.includes("/auth/v1/logout?scope=local"),'PWA logout is isolated to the current device session');

@@ -13,11 +13,12 @@ const workflow=fs.readFileSync('.github/workflows/pages.yml','utf8');
 const has=(source,needle,label)=>assert.ok(source.includes(needle),label);
 const lacks=(source,needle,label)=>assert.ok(!source.includes(needle),label);
 
-// Delivery: no invented fallback distance, last 15 real completed deliveries, two-car economics.
+// Delivery: no invented fallback distance, up to 30 actual completed deliveries, honest denominators, two-car economics.
 lacks(admin,'meta.routeKm||8','delivery cannot silently fall back to 8 km');
 lacks(admin,"Math.max(0,Number(zone?.maxKm||0)-7)",'settings cannot manufacture a city distance from zone max');
-has(admin,'recentDeliverySample(15','delivery analytics must use the last 15 completed deliveries');
-has(admin,"b.status==='completed'&&b.fulfillment==='delivery'&&credible(b)",'historical delivery rows with neither real price nor route must not become fake zero-cost deliveries');
+has(admin,'recentDeliverySample(limit=30','delivery analytics must default to the last 30 completed deliveries');
+has(admin,"b.status==='completed'&&b.fulfillment==='delivery'",'all actual completed delivery rows must remain eligible for the delivery sample');
+has(admin,'priceKnown:paid>0','historical unknown delivery prices must remain explicitly unknown instead of becoming fake zero-price observations');
 has(admin,"row?.isLocal?Number(car?.consumptionL100)||0:Number(fuel.consumptionL100)||0",'city car consumption and route/suburb consumption must be applied to the right delivery type');
 has(admin,'Середня між двома авто','delivery analytics must expose the average between the two cars');
 has(admin,"if(!routeKm)return[]",'booking fuel estimate must refuse missing route distance');
@@ -112,8 +113,9 @@ has(admin,'class="field delivery-address-field wide"','every booking must expose
 has(admin,'Зберігаємо в картці клієнта','booking address copy must explain customer-profile persistence');
 has(admin,"addressInput.disabled=false",'pickup must keep the customer address editable');
 has(admin,'deliveryPricingField.hidden=!delivery','only delivery pricing is contextual to fulfillment');
-has(admin,"detail=chunks.join(' · ').trim()",'address parser must preserve the site-style entrance/orientation detail');
-has(admin,"note:[legacyNote,detail].filter(Boolean).join(' · ')",'legacy parser must keep entrance outside Google Maps address');
+has(admin,'const keywordEntrance=','address parser must recognize word-first entrance/orientation detail variants');
+has(admin,'numberEntrance=','address parser must recognize numeric-first legacy entrance variants');
+has(admin,"note=full.slice(index)",'legacy parser must keep entrance outside Google Maps address');
 has(admin,'savedDeliveryDetail=customer.addressDetail||savedDelivery.note','repeat client must prefer the canonical separate access detail with legacy fallback');
 has(admin,'__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDeliveryAddress,savedDeliveryDetail)','repeat client must restore access detail through the separate control, not the map address');
 has(admin,'Для Google Maps використовуємо тільки адресу будинку','admin address copy must keep map address and access note conceptually separate');

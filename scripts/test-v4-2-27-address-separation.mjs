@@ -18,7 +18,7 @@ assert.ok(admin.includes('deliveryAddressDetail:deliveryParts.detail'), 'admin b
 assert.ok(admin.includes("customerComment:fd.get('customerComment')"), 'customer comment must remain independent');
 assert.ok(!admin.includes('customerAddress:[deliveryParts.address,deliveryParts.note]'), 'admin must not compose canonical customer address');
 assert.ok(!admin.includes('customerComment=mergeDeliveryComment'), 'entrance must not be merged into customer comment');
-assert.ok(admin.includes("value=\"${h(client.addressDetail||'')}\""), 'client card must read the separate profile detail');
+assert.ok(admin.includes('cardAddressDetail=client.addressDetail||storedAddress.note')&&admin.includes('value=\"${h(cardAddressDetail)}\"'), 'client card must read the separate profile detail with legacy fallback');
 
 for(const source of [publicApi,adminApi]){
   assert.ok(source.includes('fulfillment_address_detail'), 'booking API must persist booking address detail');

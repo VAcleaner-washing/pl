@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.28  
-**Baseline build:** 4228  
+**Baseline version:** 4.2.29  
+**Baseline build:** 4229  
 **Останнє оновлення:** 2026-08-29  
 **Власник логіки:** VAcleaner  
 
@@ -1482,6 +1482,19 @@ Gold fill використовується насамперед для primary C
 
 Закриття detail не повинно змушувати менеджера повторно шукати клієнта.
 
+## NAV-004 — дочірня картка повертає в батьківський контекст
+
+Якщо менеджер із booking detail або client card відкриває іншу картку / modal через робочу кнопку, новий шар отримує `return context`.
+
+Користувацьке закриття через `×`, backdrop, `Escape` або явну кнопку `← Назад` повертає саме до попередньої картки/деталі, а не в корінь розділу. Успішна програмна дія (save/confirm/create), яка свідомо завершує flow, може закрити ланцюжок без автоматичного повернення.
+
+Canonical приклади:
+
+- `Бронювання → Картка клієнта → ×/Назад → Бронювання`;
+- `Картка клієнта → Приведи друга → ×/Назад → Картка клієнта`;
+- `Картка клієнта → Нова оренда → ×/Назад → Картка клієнта`;
+- `Картка клієнта → Остання оренда → ← До картки клієнта`.
+
 ---
 
 # 4. GLOBAL SEARCH
@@ -1581,6 +1594,8 @@ Gold fill використовується насамперед для primary C
 
 Видача повинна фіксувати фактично отриманий депозит та платежі, а не тільки теоретичну суму.
 
+Повторний submit зі старої вкладки/модалки після вже успішної видачі не є бізнес-помилкою: UI перед записом звіряє актуальний статус, а backend трактує повторний `issued → issued` як idempotent retry. Сирий `invalid_transition` користувачу не показується.
+
 ## BOOK-006 — повернення
 
 Return workflow повинен фіксувати:
@@ -1643,6 +1658,10 @@ Return workflow повинен фіксувати:
 Під’їзд, поверх, код домофона, орієнтир, уточнення двору — це **окреме поле доставки**, а не Google Maps address і не `customer_comment`.
 
 `vacleaner_customers.address_detail` зберігає актуальне значення профілю, а `vacleaner_bookings.fulfillment_address_detail` — незмінний snapshot конкретного бронювання. Старі склеєні адреси розкладаються data migration; placeholder `Історична доставка · адреса не збережена` не перетворюється на вигадану адресу.
+
+## ADDR-014 — legacy backfill є production-міграцією, а не лише файлом у ZIP
+
+Колонки `address_detail` / `fulfillment_address_detail` та backfill старих адрес вважаються виконаними тільки після фактичного застосування migration у production Supabase і перевірки даних. Parser/backfill повинен розуміти щонайменше `·`, ` - `, `–`, `—`, кому/крапку, `3 під’їзд`, `під’їзд 3`, `6й під’їзд`, `2п`, `подъезд 1`, поверх/домофон/квартиру/орієнтир. Номер будинку/корпусу не можна помилково переносити в detail.
 
 ## ADDR-005 — delivery validation
 
@@ -1836,7 +1855,7 @@ Telegram:
 
 Referral modal використовує **актуальні контактні дані CRM**, а не випадковий старий snapshot бронювання. Порожнє або застаріле поле з іншого джерела не може затерти непорожній Instagram / Telegram / preferred channel актуального профілю.
 
-Якщо preferred channel = Instagram і Instagram збережений:
+Якщо preferred channel = Instagram, він лишається primary навіть коли username ще не збережений: у такому випадку CTA відкриває Instagram Direct/inbox без вигаданого username. Сам факт відсутності handle не дозволяє автоматично понизити preferred channel до Telegram.
 
 - `Надіслати в Instagram` є першим і primary CTA;
 - Telegram лишається доступним як додатковий канал, якщо він доступний через username або номер телефону;
@@ -1978,14 +1997,18 @@ Static code green при старому backend не вважається releas
 - виробляти 8 км з max zone;
 - іншу умовну відстань.
 
-## DEL-005 — останні 15 доставок
+## DEL-005 — останні 30 доставок з чесними знаменниками
 
-`Карта прибутковості доставки` використовує **останні 15 завершених реальних доставок**, а не умовний маршрут.
+`Карта прибутковості доставки` використовує **до 30 останніх завершених реальних доставок** (`fulfillment = delivery`), включно з історичними доставками, навіть якщо старий запис не має окремо збереженої ціни доставки або route distance.
 
-UI повинен чітко пояснювати sample:
+Метрики мають різні чесні знаменники:
 
-- `Останні 15 завершених доставок`;
-- `X із N мають відстань`.
+- sample count — усі фактичні завершені доставки у вибірці;
+- average delivery price — тільки записи, де фактична ціна доставки відома;
+- route/mileage/fuel — тільки записи з реальною route distance;
+- `залишається після пального` — тільки записи, де одночасно відомі і ціна доставки, і маршрут.
+
+Невідомі історичні значення не перетворюються на `0 грн` або `0 км`. UI прямо показує `X із N` для ціни, маршруту та matched sample, щоб менеджер розумів, по скількох доставках порахована кожна цифра.
 
 ## DEL-006 — два авто
 
@@ -2223,6 +2246,10 @@ Mobile navigation існує у початковому admin HTML і не пов
 - regular → secondary/meta;
 - medium → основна робоча інформація;
 - semibold/bold → заголовки, важливі суми, CTA.
+- у фінансових summary-рядках назви (`Передоплата`, `Залоговий платіж`, `Повернено клієнту`, `Доплату отримано`) залишаються regular/medium; жирність належить сумі, а не всьому рядку.
+- secondary/meta, status chips, field labels, table headers, weekday labels, campaign metadata та service labels не використовують 750–900 weight; цільовий діапазон — 400–600.
+- робочі назви карток/секцій тримаються приблизно 600–650; великі page headings можуть бути до 680.
+- 700+ допускається тільки для декоративного символу/іконки або свідомого одиничного бренд-акценту, але не для читабельного службового тексту.
 
 Не робити весь екран bold.
 
@@ -2783,3 +2810,45 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/pwa_visual_qa.py` — create payload перевіряє ADDR-011: clean route address + separate address detail + untouched customer comment;
 - повний static/build/browser/PWA/responsive QA перед production merge.
 
+
+
+# 37. Change record — v4.2.29
+
+### ADDED
+
+- **NAV-004** — parent/child navigation contract для booking detail, client card, referral modal і new-booking modal.
+- **ADDR-014** — production migration/backfill gate для фізичного розділення старих address/detail.
+- Регресійний тест v4.2.29 на navigation context, legacy address parser, referral preferred Instagram та delivery sample denominators.
+
+### CHANGED
+
+- **DEL-005** — delivery profitability sample збільшено з 15 до 30 останніх фактичних завершених доставок; різні метрики мають окремі прозорі знаменники.
+- **REF-009** — preferred Instagram не демотується до Telegram лише через відсутній username; Instagram primary CTA відкриває Direct/inbox.
+- Referral modal використовує двоколонкову desktop-композицію: action/status + готовий текст одночасно в першому екрані, history нижче.
+- Client card нормалізує legacy combined address при показі й передає окремий address detail у наступні flow.
+
+### FIXED
+
+- **UI-001/008** — фінансові рядки в booking detail більше не роблять назви типу `Повернено клієнту` жирними; label regular/medium, сума має окремий акцент.
+- **UI-001** — проведений повний typography audit адмінки: bookings, calendar, upcoming, equipment, clients, campaigns, finances, analytics, chemistry, settings, client/referral/finance modals. Службовий текст понад 700 weight заборонений browser regression-ом.
+- Старі формати адрес на кшталт `Полтава, Полтавська 3 · 3 підʼїзд`, `Полтавська 3 - 3 під'їзд`, `2п`, `подъезд 1`, `6й підʼїзд` розкладаються на route-safe address + detail. Додатковий pass 2 добирає випадки, де після під’їзду вже був окремий `кв/поверх` detail; production gate = 0 address-рядків із залишеним маркером під’їзду.
+- Referral для клієнта з `preferred_contact = instagram` більше не показує Telegram як primary тільки тому, що Instagram username порожній.
+- `Доставка по факту` більше не створює враження, що 9 доставок = весь sample: показує до 30 фактичних доставок і окремо coverage по ціні/маршруту.
+- Користувацьке закриття дочірньої modal/card повертає в попередню картку/бронювання.
+- **BOOK-005** — stale/double issue submit більше не показує `invalid_transition`: перед записом UI оновлює статус, а повторний `issued → issued` на backend є idempotent success.
+
+### PRESERVED
+
+- Невідомі historical delivery fee / route distance не вигадуються.
+- Route calculation отримує тільки чисту адресу будинку; entrance/detail не входить у Maps route.
+- Referral reward −100/−150, 150 днів, двоетапне підтвердження send та analytics не змінюються.
+- VA HOME objects у спільному Supabase project не змінюються.
+
+### TESTS
+
+- `scripts/test-v4-2-29-admin-context-data.mjs`;
+- `scripts/referral_modal_visual_qa.py`;
+- `scripts/admin_typography_qa.py`;
+- `scripts/admin_context_navigation_qa.py`;
+- `scripts/pwa_visual_qa.py`;
+- full static/build/browser/PWA/responsive QA перед production merge.

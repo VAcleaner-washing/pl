@@ -12,8 +12,8 @@ HTML=f'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" 
 <div class="referral-send-status pending"><i>!</i><div><b>Ще не надсилали</b><span>Надішліть персональний код клієнту. Текст повідомлення скопіюється автоматично.</span></div></div>
 <div class="referral-share-card referral-code-card"><div><span>Персональний код</span><strong>VA-AEBC060</strong><small>Безстроковий · можна передавати кільком друзям</small></div><button class="btn referral-copy-code">Скопіювати</button></div>
 <div class="referral-summary-line"><span><b>0</b> рекомендацій</span><i>·</i><span><b>0 грн</b> зароблено</span><i>·</i><span><b>0 грн</b> доступно</span></div>
-<section class="referral-action-panel"><div><small>Надіслати програму</small><strong>Основний канал — Instagram</strong><span>Основний канал виділено. Текст скопіюється автоматично; після фактичної відправки підтвердьте її в адмінці.</span></div><div class="referral-primary-actions"><button class="btn primary" data-channel="instagram">Надіслати в Instagram</button><button class="btn" data-channel="telegram">Надіслати в Telegram</button></div></section>
-<section class="referral-message-card"><div class="referral-message-head"><div><small>Готовий текст</small><strong>Повідомлення клієнту</strong></div><button class="btn referral-copy-text">Скопіювати текст</button></div><div class="referral-message-preview">{MESSAGE}</div></section>
+<div class="referral-main-grid"><div class="referral-main-left"><section class="referral-action-panel"><div><small>Надіслати програму</small><strong>Основний канал — Instagram</strong><span>Основний канал виділено. Текст скопіюється автоматично; після фактичної відправки підтвердьте її в адмінці.</span></div><div class="referral-primary-actions"><button class="btn primary" data-channel="instagram">Надіслати в Instagram</button><button class="btn" data-channel="telegram">Надіслати в Telegram</button></div></section></div>
+<section class="referral-message-card"><div class="referral-message-head"><div><small>Готовий текст</small><strong>Повідомлення клієнту</strong></div><button class="btn referral-copy-text">Скопіювати текст</button></div><div class="referral-message-preview">{MESSAGE}</div></section></div>
 <section class="referral-empty-state"><i>↗</i><div><strong>Поки що рекомендацій немає</strong><span>Коли друг використає код, тут з’явиться його бронювання, статус і бонус клієнта.</span></div></section>
 </div><footer><button class="btn">Контакти клієнта</button><button class="btn primary">Готово</button></footer>
 </div></div></div></body></html>'''
@@ -32,13 +32,15 @@ with sync_playwright() as p:
           const insta=document.querySelector('[data-channel="instagram"]');
           const tg=document.querySelector('[data-channel="telegram"]');
           const empty=document.querySelector('.referral-empty-state');
-          const cr=card.getBoundingClientRect(), fr=form.getBoundingClientRect(), mr=message.getBoundingClientRect(), er=empty.getBoundingClientRect();
+          const scroll=document.querySelector('.referral-share-scroll');
+          const cr=card.getBoundingClientRect(), fr=form.getBoundingClientRect(), mr=message.getBoundingClientRect(), er=empty.getBoundingClientRect(), sr=scroll.getBoundingClientRect();
           return {
             sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,
             cardW:cr.width,formW:fr.width,deadRight:Math.max(0,cr.right-fr.right),
             messageVisible:mr.width>100&&mr.height>0&&getComputedStyle(message).display!=='none',
             previewChars:preview.innerText.trim().length,
             messageBeforeHistory:mr.top<er.top,
+            messageInInitialScrollViewport:mr.top>=sr.top-1 && mr.top<sr.bottom-24,
             instaPrimary:insta.classList.contains('primary'),
             instaVisible:insta.getBoundingClientRect().width>0,
             tgVisible:tg.getBoundingClientRect().width>0,
@@ -46,10 +48,10 @@ with sync_playwright() as p:
           };
         }''')
         assert result['sw'] <= result['cw']+1 and result['bodyOverflow'] <= 1, (width,result)
-        assert result['messageVisible'] and result['previewChars'] > 120 and result['messageBeforeHistory'], (width,result)
+        assert result['messageVisible'] and result['previewChars'] > 120 and result['messageBeforeHistory'] and result['messageInInitialScrollViewport'], (width,result)
         assert result['instaPrimary'] and result['instaVisible'] and result['tgVisible'], (width,result)
         if width>900:
-            assert result['cardW'] <= 862 and abs(result['cardW']-result['formW']) <= 2 and result['deadRight'] <= 2, (width,result)
+            assert result['cardW'] <= 982 and abs(result['cardW']-result['formW']) <= 2 and result['deadRight'] <= 2, (width,result)
         passed += 1
         page.close()
     browser.close()

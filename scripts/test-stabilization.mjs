@@ -107,7 +107,7 @@ has(admin,'function isHistoricalPhone(value)','historical clients without real p
 has(admin,'function renderGlobalSearch(query)','global search is explicit and does not hijack a single legacy view');
 has(admin,"search.placeholder=state.view==='clients'?'Пошук по всій адмінці",'client view advertises the new global search scope');
 has(admin,'const dateFullNumeric=v=>','client list has a full numeric date formatter');
-has(admin,'function openClientCard(client)','client rows open a full customer card');
+has(admin,'function openClientCard(client','client rows open a full customer card, with optional return context');
 has(admin,'data-client-open','every client row is clickable');
 has(admin,'documentUploadHtml','new booking and customer card expose private document photo upload');
 has(adminEdge,'if (action === "clients")','admin API exposes customer profiles');

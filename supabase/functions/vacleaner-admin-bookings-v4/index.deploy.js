@@ -1495,6 +1495,10 @@ Deno.serve(async (request)=>{
             if (error || !current) return json({
                 error: "invalid_booking"
             }, 404);
+            if (nextStatus === "issued" && String(current.status || "") === "issued") return json({
+                booking: safeBooking(current),
+                alreadyApplied: true
+            });
             if (nextStatus === "confirmed" || nextStatus === "waiting_payment") {
                 const reservationAllowed = nextStatus === "confirmed" ? [
                     "pending",

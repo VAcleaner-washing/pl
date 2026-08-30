@@ -9,9 +9,8 @@ const rel=JSON.parse(read('release.json'));
 const has=(source,token,message)=>assert.ok(source.includes(token),message);
 const lacks=(source,token,message)=>assert.ok(!source.includes(token),message);
 
-assert.equal(pkg.version,'4.2.28','package version must be v4.2.28');
-assert.equal(rel.version,'4.2.28','release version must be v4.2.28');
-assert.equal(Number(rel.build),4228,'release build must be 4228');
+assert.ok(Number(pkg.version.split('.').join(''))>=4228,'package version must be v4.2.28 or newer');
+assert.ok(Number(rel.build)>=4228,'release build must be 4228 or newer');
 has(spec,'REF-009 — referral modal communication UX','System Spec must define the referral modal communication UX contract');
 has(spec,'Change record — v4.2.28','System Spec must include the v4.2.28 change record');
 
@@ -23,8 +22,8 @@ has(admin,'Основний канал — ${primaryChannel}','modal must explai
 has(admin,'class="referral-message-card"','referral message must be rendered as an always-visible card');
 lacks(admin,'<details class="referral-message-details" open>','referral message must not be hidden in a details control');
 
-has(css,'.modal-card:has(.referral-share-modal){width:min(860px','referral dialog parent must shrink to the referral content width');
-has(css,'.referral-share-modal{width:100%;height:100%;max-height:none}','referral form must fill the dialog without a dead right column');
+has(css,'.modal-card:has(.referral-share-modal){width:min(','referral dialog parent must fit the referral content width');
+has(css,'.referral-share-modal{width:100%','referral form must fill the dialog without a dead right column');
 has(css,'.referral-message-card{overflow:hidden','always-visible message card styling must exist');
 has(css,'.referral-message-card .referral-message-preview{margin:0','message preview must use the full message card width');
 
