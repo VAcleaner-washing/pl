@@ -1177,9 +1177,16 @@ html.glass-test .expense-equipment-field[hidden]{display:none!important}
   html.glass-test .delivery-sample-summary,
   html.glass-test .delivery-fact-summary{grid-template-columns:1fr}
 }
-/* Standalone PWA: content ends above the floating navigation instead of hiding behind it. */
+/* v4.2.34 — iOS-style edge-to-edge PWA shell.
+   Initial content starts below the fixed search, but after scrolling it passes behind
+   the Liquid Glass topbar. Bottom content continues behind the floating navigation. */
 @media(max-width:900px){
-  html.glass-test.pwa-standalone .main{bottom:calc(var(--mobile-nav-shell) + 8px);padding-bottom:24px}
+  html.glass-test.pwa-standalone .app:not(.no-global-search) .main{
+    top:0;
+    bottom:0;
+    padding-top:calc(var(--mobile-topbar) + var(--pwa-safe-top) + 18px);
+    padding-bottom:calc(108px + var(--pwa-safe-bottom));
+  }
   html.glass-test.pwa-standalone .settings-grid{padding-bottom:18px}
   html.glass-test.keyboard-open .mobile-nav{opacity:0;pointer-events:none;transform:translateY(calc(100% + var(--pwa-safe-bottom) + 18px))}
 }

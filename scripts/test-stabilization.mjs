@@ -175,7 +175,7 @@ has(pwaQa,'booking-detail photography never overlaps rental dates','detail hero 
 has(pwaQa,'search clears when manager changes tabs','global search leakage across tabs is runtime-gated');
 has(pwaQa,'tapping the date field reaches the native calendar input','admin mobile calendar tap target is runtime-gated');
 has(pwaQa,'summary starts after the data card and never overlaps it','issue/return summary overlap is runtime-gated');
-has(pwaQa,'status filters pin directly below the hero/topbar after scroll','booking status filters have sticky runtime coverage');
+has(pwaQa,'status filters pin directly below the fixed search shell after scroll','booking status filters have sticky runtime coverage');
 has(pwaQa,"redundant 'Крок 1 з 4' strip is not rendered between blocks",'booking step label cannot return as an interstitial strip');
 has(admin,'id=\"saveProcess\"','processing modal has a separate save action');
 has(admin,"status:'waiting_payment'",'saving initial processing moves a new request into waiting-for-payment');

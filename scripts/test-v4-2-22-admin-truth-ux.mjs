@@ -66,7 +66,8 @@ lacks(glass,'glass-client-actions','glass compatibility layer must not create a 
 has(glass,'clientActions','glass compatibility marker must declare native action ownership');
 
 // PWA and CI architecture.
-has(glassCss,'.pwa-standalone .main','standalone PWA must reserve content space above bottom nav');
+lacks(glassCss,'bottom:calc(var(--mobile-nav-shell) + 8px)','standalone PWA must not cut content off above the floating bottom nav');
+has(glassCss,'.pwa-standalone .app:not(.no-global-search) .main','standalone PWA must use the edge-to-edge content shell');
 has(glassCss,'.keyboard-open .mobile-nav','mobile nav must get out of the way when keyboard is open');
 has(glassCss,'.client-editor-summary{grid-template-columns:repeat(2,minmax(0,1fr))','mobile client KPI summary must stay compact 2x2');
 has(glassCss,'.client-card-form>footer:has(.client-save:disabled){display:none}','unchanged mobile client card must not waste a full footer on a disabled save action');

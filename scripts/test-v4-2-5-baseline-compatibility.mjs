@@ -24,6 +24,6 @@ const blog=read('blog/yak-pochystyty-dyvan-vdoma/index.html');
 ok('blog readability avoids technical UV/60C explanation',!blog.includes('UV і гаряче повітря до 60 °C')&&!blog.includes('пилових кліщів і пов’язані з ними алергени'));
 const admin=read('assets/admin-v250.js');
 ok('30-day referral reminder queue retained',admin.includes('Бонуси скоро спливають')&&admin.includes("action:'referrals_expiring'")&&admin.includes('referralReminderText'));
-ok('referral reminder stays manual-confirmed',admin.includes('Так, надіслано')&&admin.includes('confirmed:true')&&admin.includes("action:'referral_mark_sent"));
+ok('referral reminder stays manual-confirmed',admin.includes('□ Так, надіслано')&&admin.includes('confirmed:true')&&admin.includes("action:'referral_mark_sent"));
 console.log(JSON.stringify({passed,failed,status:failed.length?'failed':'passed'}));
 if(failed.length)process.exit(1);

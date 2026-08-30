@@ -11,7 +11,7 @@ const checks=[
  ['empty referral history is one intentional state',admin.includes('Поки що рекомендацій немає')&&admin.includes('Коли друг використає код')],
  ['empty history sections are conditional',admin.includes('referrals.length?`<section class="referral-history-section"')&&admin.includes('rewards.length?`<section class="referral-history-section"')],
  ['main action explains automatic copy and confirmation',admin.includes('Текст скопіюється автоматично')&&admin.includes('підтвердьте її в адмінці')],
- ['two-step send confirmation remains',admin.includes("btn.textContent='Так, надіслано'")&&admin.includes('referral_mark_sent')],
+ ['two-step send confirmation remains',admin.includes("btn.textContent='□ Так, надіслано'")&&admin.includes('referral_mark_sent')],
  ['compact modal and empty state styling exist',css.includes('.referral-empty-state')&&css.includes('.referral-summary-line')&&css.includes('v4.2.12 · referral client hub UX polish')],
  ['mobile summary stays readable',css.includes('@media(max-width:430px)')&&css.includes('.referral-summary-line span{width:100%')],
 ];

@@ -7,9 +7,9 @@ const release=JSON.parse(fs.readFileSync(new URL('../release.json',import.meta.u
 const spec=fs.readFileSync(new URL('../docs/VAcleaner-SYSTEM-SPEC.md',import.meta.url),'utf8');
 
 const checks=[
-  ['package version 4.2.33',pkg.version==='4.2.33'],
-  ['release version 4.2.33',release.version==='4.2.33'],
-  ['release build 4233',release.build===4233],
+  ['package version is v4.2.33 or newer',(()=>{const a=pkg.version.split('.').map(Number),b=[4,2,33];for(let i=0;i<3;i++){if(a[i]>b[i])return true;if(a[i]<b[i])return false}return true})()],
+  ['release version matches package',release.version===pkg.version],
+  ['release build is 4233 or newer',Number(release.build)>=4233],
   ['client grid uses independent desktop columns',js.includes('client-card-column client-card-column-contact')&&js.includes('client-card-column client-card-column-document')&&js.includes('client-card-column client-card-column-history')],
   ['referral section remains present',js.includes('client-referral-section')],
   ['next action stays conditional',js.includes("editable?clientNextBestActionMarkup(client,rentals):''")],

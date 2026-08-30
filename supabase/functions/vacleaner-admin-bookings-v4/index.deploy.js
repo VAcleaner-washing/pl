@@ -1021,28 +1021,33 @@ Deno.serve(async (request)=>{
             recentQuery = isReminder ? recentQuery.eq("reward_id", rewardId) : recentQuery.is("reward_id", null);
             const { data: recentMessage, error: recentError } = await recentQuery.maybeSingle();
             if (recentError) throw recentError;
-            if (recentMessage) return json({
-                ok: true,
-                sentAt: recentMessage.sent_at,
-                channel,
-                kind,
-                alreadySent: true
-            });
-            const customerPatch = {
-                updated_at: now
+            const applyConfirmedState = async (sentAt)=>{
+                const customerPatch = {
+                    updated_at: sentAt
+                };
+                if (!isReminder) {
+                    customerPatch.referral_sent_at = sentAt;
+                    customerPatch.referral_sent_channel = channel;
+                }
+                const { error: customerError } = await supabase.from("vacleaner_customers").update(customerPatch).eq("phone", phone);
+                if (customerError) throw customerError;
+                if (isReminder) {
+                    const { error: rewardError } = await supabase.from("vacleaner_referral_rewards").update({
+                        reminded_at: sentAt,
+                        updated_at: sentAt
+                    }).eq("id", rewardId).eq("referrer_phone", phone).eq("status", "active");
+                    if (rewardError) throw rewardError;
+                }
             };
-            if (!isReminder) {
-                customerPatch.referral_sent_at = now;
-                customerPatch.referral_sent_channel = channel;
-            }
-            const { error: customerError } = await supabase.from("vacleaner_customers").update(customerPatch).eq("phone", phone);
-            if (customerError) throw customerError;
-            if (isReminder) {
-                const { error: rewardError } = await supabase.from("vacleaner_referral_rewards").update({
-                    reminded_at: now,
-                    updated_at: now
-                }).eq("id", rewardId).eq("referrer_phone", phone).eq("status", "active");
-                if (rewardError) throw rewardError;
+            if (recentMessage) {
+                await applyConfirmedState(recentMessage.sent_at);
+                return json({
+                    ok: true,
+                    sentAt: recentMessage.sent_at,
+                    channel,
+                    kind,
+                    alreadySent: true
+                });
             }
             const { error: messageError } = await supabase.from("vacleaner_referral_messages").insert({
                 customer_phone: phone,
@@ -1052,6 +1057,7 @@ Deno.serve(async (request)=>{
                 sent_at: now
             });
             if (messageError) throw messageError;
+            await applyConfirmedState(now);
             return json({
                 ok: true,
                 sentAt: now,

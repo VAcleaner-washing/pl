@@ -24,7 +24,7 @@ const required=[
   'DEL-011 — локальний маршрут теж зберігається',
   'FIN-005 — комплекти',
   'CLIENT-001 — дані картки',
-  'PWA-001 — bottom navigation',
+  'PWA-001 — edge-to-edge shell + bottom navigation',
   'UI-008 — finance surfaces',
   'ERR-001 — кнопка не може «нічого не робити»',
   'WEB-001 — роль публічного сайту',

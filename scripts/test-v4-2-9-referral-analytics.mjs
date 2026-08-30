@@ -22,7 +22,7 @@ ok('referral modal has durable sent status',admin.includes('referralSendStatus')
 ok('referral modal exposes copy code and text',admin.includes('copyReferralCode')&&admin.includes('copyReferralText'));
 ok('referral modal explains missing contact',admin.includes('Немає контакту для відправки')&&admin.includes('Додати контакт'));
 ok('referral modal shows referral and reward histories',admin.includes('Хто скористався кодом')&&admin.includes('Бонуси клієнта'));
-ok('send confirmation is explicit',admin.includes("btn.textContent='Так, надіслано'"));
+ok('send confirmation is explicit',admin.includes("btn.textContent='□ Так, надіслано'")&&admin.includes("btn.textContent='✓ Надіслано'"));
 ok('referral analytics responsive styling exists',css.includes('.referral-analytics-panel')&&css.includes('.referral-summary-line'));
 ok('production security inventory includes referral messages',inventory.tables.includes('vacleaner_referral_messages')&&inventory.clientDenyPolicies?.total===19&&inventory.clientDenyPolicies?.restrictive===13);
 console.log(`\n${pass}/${pass+fail} checks passed`);if(fail)process.exit(1);

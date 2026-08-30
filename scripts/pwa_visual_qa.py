@@ -343,7 +343,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(abs(main_top_after-main_top_before)<=0.5, f"{label}: booking scroll never shifts the main shell")
         qa.check(topbar_before is not None and topbar_after is not None and abs(topbar_after['y']-topbar_before['y'])<=0.5 and topbar_after['height']>=44, f"{label}: booking search stays fixed and visible during list scroll")
         qa.check(not page.locator('.app').evaluate("el=>el.classList.contains('mobile-booking-search-collapsed')"), f"{label}: no legacy booking-search collapse state is created")
-        qa.check(page.locator('.booking-toolbar').bounding_box()['y'] <= page.locator('.main').bounding_box()['y'] + 2, f"{label}: booking filters remain sticky below the stable search shell")
+        toolbar_box=page.locator('.booking-toolbar').bounding_box(); topbar_bottom=topbar_after['y']+topbar_after['height'] if topbar_after else None
+        qa.check(toolbar_box is not None and topbar_bottom is not None and abs(toolbar_box['y']-topbar_bottom)<=2, f"{label}: booking filters remain sticky directly below the stable search shell")
         nav_after=page.locator('.mobile-nav').bounding_box()
         qa.check(nav_before is not None and nav_after is not None and abs(nav_before['y']-nav_after['y'])<=0.5 and abs((height-(nav_after['y']+nav_after['height']))-expected_nav_gap)<=1.5, f"{label}: floating bottom navigation does not walk during content scroll")
         page.locator('#globalSearch').evaluate('el=>el.blur()')
@@ -358,7 +359,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.locator('.main').evaluate("el=>el.scrollTop=Math.min(520,Math.max(0,el.scrollHeight-el.clientHeight))")
         page.wait_for_timeout(300)
         toolbar_after=page.locator('.booking-toolbar').bounding_box()
-        qa.check(toolbar_before is not None and toolbar_after is not None and main_box is not None and toolbar_after['y']<=main_box['y']+1.5, f"{label}: status filters pin directly below the hero/topbar after scroll")
+        topbar_box=page.locator('.topbar').bounding_box(); topbar_bottom=topbar_box['y']+topbar_box['height'] if topbar_box else None
+        qa.check(toolbar_before is not None and toolbar_after is not None and topbar_bottom is not None and abs(toolbar_after['y']-topbar_bottom)<=2, f"{label}: status filters pin directly below the fixed search shell after scroll")
         page.locator('.main').evaluate('el=>el.scrollTop=0')
 
         # Explicit tab navigation clears the global search instead of leaking it into the next view.
@@ -417,13 +419,19 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                         qa.check(page.locator('.health-state.ok:visible').count()>=2, f"{label}: push and double-booking health are verified at runtime")
                 page.locator('[data-settings-tab="rental"]').click();page.wait_for_timeout(20)
                 if width <= 430:
-                    main_box=page.locator('.main').bounding_box(); nav_box=page.locator('.mobile-nav:visible').bounding_box()
-                    qa.check(main_box is not None and nav_box is not None and main_box['y']+main_box['height']<=nav_box['y']+1, f"{label}: standalone PWA settings content ends above bottom navigation")
-                    page.locator('.main').evaluate('el=>el.scrollTop=el.scrollHeight')
+                    main=page.locator('.main'); main_box=main.bounding_box(); nav_box=page.locator('.mobile-nav:visible').bounding_box(); search_box=page.locator('.search:visible').bounding_box(); head_box=page.locator('.page-head:visible').bounding_box()
+                    qa.check(main_box is not None and nav_box is not None and main_box['y']<=1 and main_box['y']+main_box['height']>=nav_box['y']+nav_box['height']-1, f"{label}: standalone PWA main spans behind top search and bottom navigation")
+                    qa.check(search_box is not None and head_box is not None and head_box['y']>=search_box['y']+search_box['height']-1, f"{label}: initial page content starts below the fixed search")
+                    start_box=page.locator('[name="morningStart"]').locator('xpath=..').bounding_box(); end_box=page.locator('[name="morningEnd"]').locator('xpath=..').bounding_box()
+                    qa.check(start_box is not None and end_box is not None and abs(start_box['width']-end_box['width'])<=1.5 and min(start_box['width'],end_box['width'])>=100, f"{label}: settings From and To time controls keep equal readable width")
+                    main.evaluate('el=>el.scrollTop=96'); page.wait_for_timeout(30)
+                    scrolled_head=page.locator('.page-head:visible').bounding_box()
+                    qa.check(scrolled_head is not None and search_box is not None and scrolled_head['y']<search_box['y']+search_box['height']-2, f"{label}: scrolled content passes behind the fixed Liquid Glass search")
+                    main.evaluate('el=>el.scrollTop=el.scrollHeight')
                     page.wait_for_timeout(30)
                     last_box=page.locator('.settings-panel:visible').bounding_box()
                     qa.check(last_box is not None and nav_box is not None and last_box['y']+min(last_box['height'],48)<=nav_box['y']+1, f"{label}: active settings workspace remains reachable above PWA nav")
-                    if width==390: qa.shot(page,'390-settings-v4224.png')
+                    if width==390: qa.shot(page,'390-settings-v4234.png')
             if view=='upcoming':
                 qa.check(page.locator('.upcoming-row [data-client-card]').count()==0, f"{label}: upcoming customer identity is not a CRM navigation target")
                 qa.check(page.locator('.upcoming-row .upcoming-client-info a[href^="tel:"]').count()>=1, f"{label}: upcoming phone remains a direct call action")

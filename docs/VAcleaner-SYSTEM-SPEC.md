@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.33  
-**Baseline build:** 4233  
+**Baseline version:** 4.2.34  
+**Baseline build:** 4234  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -1845,7 +1845,9 @@ Telegram:
 
 Перший клік відкриває канал/копіює текст, але **не записує факт відправки**.
 
-Лише після `Так, надіслано` send записується в referral analytics.
+Лише після явного підтвердження `□ Так, надіслано` send записується в referral analytics. Після успішного запису control переходить у явний стан `✓ Надіслано`, а referral status показує канал і час.
+
+Запис повинен бути retry-safe: повтор після network/backend retry не створює дубль журналу, а якщо journal уже існує, customer/reward state доводиться до того самого `sent_at`.
 
 ## REF-008 — видимість у client card
 
@@ -2211,11 +2213,13 @@ Input та button одного ряду мають однакову оптичн
 
 # 18. PWA
 
-## PWA-001 — bottom navigation
+## PWA-001 — edge-to-edge shell + bottom navigation
 
-Bottom nav не повинна перекривати останній контент, footer форми чи CTA.
+Standalone PWA використовує edge-to-edge content shell: основний scroll surface фізично доходить до верхнього і нижнього краю viewport.
 
-Standalone PWA content має резервувати safe bottom space.
+На старті сторінки контент починається **нижче fixed Liquid Glass search** завдяки внутрішньому top padding. Під час скролу цей padding прокручується, тому контент проходить **під пошуком**, а сам пошук лишається fixed — як у нативному iOS 27 shell.
+
+Bottom nav плаває **поверх** content surface. `.main` не може закінчуватися над navigation через `bottom: var(--mobile-nav-shell)` або подібний reserve. Замість цього достатній bottom padding гарантує, що останній робочий контент / footer / CTA можна повністю доскролити вище панелі, хоча фон і проміжний контент продовжуються під нею до фізичного низу екрана.
 
 ## PWA-002 — keyboard
 
@@ -3006,3 +3010,40 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/pwa_visual_qa.py`;
 - full static/build/browser/PWA regression before production merge.
 
+
+
+# 42. Change record — v4.2.34
+
+### ADDED
+
+- **PWA-007** — edge-to-edge standalone shell: контент проходить під fixed Liquid Glass search лише після скролу і продовжується під floating bottom navigation до фізичних країв viewport.
+- `supabase/migrations/20260830164500_vacleaner_referral_phone_check_v4234.sql` — canonical phone validation для referral message journal без двозначного backslash escaping.
+- `scripts/test-v4-2-34-pwa-referral-slots.mjs` — regression для PWA shell, settings time slots і referral confirmation.
+
+### CHANGED
+
+- Standalone `.main` більше не резервує окремий чорний сектор над bottom navigation; safe-area доступність забезпечується scroll padding/content padding, а не обрізанням scroll surface.
+- У referral flow після відкриття Instagram/Telegram confirmation control показує `□ Так, надіслано`; після успішного журналювання — `✓ Надіслано`.
+- `referral_mark_sent` спочатку фіксує durable journal event, потім синхронізує customer/reward state; retry по вже існуючому event повторно доводить state без дубля журналу.
+- Mobile settings time-slot editor використовує дві рівні колонки `З / До` замість пізнього чотириколонкового override, який стискав поле `З` до іконки.
+
+### FIXED
+
+- Чорний сектор під floating PWA navigation, внесений v4.2.22 правилом `pwa-standalone .main { bottom: calc(var(--mobile-nav-shell) + 8px) }`.
+- Відсутність scroll-under-search ефекту у standalone PWA при fixed Liquid Glass top search.
+- Валідні українські телефони `+380XXXXXXXXX` більше не відхиляються `vacleaner_referral_messages_phone_check`; помилка проявлялась як `Сервіс тимчасово недоступний` після `Так, надіслано`.
+- Кривий mobile visual часових слотів у Settings, де перший time control міг схлопнутися до вузької іконки.
+
+### PRESERVED
+
+- Safe-area clearance для Dynamic Island / Home Indicator та keyboard-open behavior.
+- PWA booking-card density v4.2.33 і 320/390/430 viewport contract.
+- Referral reward: друг −100 грн на першу оренду, власник коду −150 грн після завершення; preferred channel та Instagram/Telegram routing.
+- Referral send dedupe, booking idempotency, push dedupe, status flow, delivery/finance logic, VA HOME isolation.
+
+### TESTS
+
+- `scripts/test-v4-2-34-pwa-referral-slots.mjs`;
+- `scripts/test-v4-2-22-admin-truth-ux.mjs` updated from obsolete reserve-above-nav assertion to edge-to-edge contract;
+- referral UX + baseline compatibility regression;
+- full static/build/browser/PWA regression before production merge.
