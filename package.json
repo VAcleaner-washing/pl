@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.32",
+  "version": "4.2.33",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -123,6 +123,7 @@
     "test:v4.2.30-function-hardening": "node scripts/test-v4-2-30-function-hardening.mjs",
     "test:v4.2.31-delivery-road-truth": "node scripts/test-v4-2-31-delivery-road-truth.mjs",
     "test:finance-delivery-visual": "python scripts/finance_delivery_visual_qa.py",
-    "test:v4.2.32-admin-typography": "node scripts/test-v4-2-32-admin-typography.mjs"
+    "test:v4.2.32-admin-typography": "node scripts/test-v4-2-32-admin-typography.mjs",
+    "test:v4.2.33-client-geometry": "node scripts/test-v4-2-33-client-geometry.mjs"
   }
 }

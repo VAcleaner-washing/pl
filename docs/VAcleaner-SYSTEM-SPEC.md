@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.32  
-**Baseline build:** 4232  
+**Baseline version:** 4.2.33  
+**Baseline build:** 4233  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -1929,6 +1929,17 @@ Runtime compatibility/glass layer не має права інжектити ду
 
 При dirty state save action стає доступною.
 
+## CLIENT-007 — desktop geometry
+
+На wide desktop client card лишається візуально центрованою відносно viewport і не може виглядати «зсуненою вліво» через односторонній scrollbar gutter або grid-row, де коротка третя секція резервує порожню висоту.
+
+Починаючи з 1221 px, CRM-контент формують три **незалежні вертикальні колонки** з однаковим gap і спільним центрованим max-width:
+- контакти + referral;
+- документ + next action;
+- історія + бонуси + SMS.
+
+На 1220 px і нижче wrappers стають `display: contents`, щоб зберегти існуючий tablet/mobile порядок і responsive contract.
+
 ---
 
 # 13. CAMPAIGNS / SMS
@@ -2962,3 +2973,36 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/test-v4-2-32-admin-typography.mjs`;
 - `scripts/admin_typography_qa.py`;
 - full static/build/browser/PWA regression before production merge.
+
+# 41. Change record — v4.2.33
+
+### ADDED
+
+- **CLIENT-007** — desktop client card має окремий geometry contract: modal і внутрішній CRM-контент центровані, три wide-screen колонки незалежні по вертикалі.
+- `scripts/test-v4-2-33-client-geometry.mjs`.
+- Browser typography QA додатково перевіряє center offset client modal/grid на wide desktop.
+
+### CHANGED
+
+- На ≥1221 px секції client card згруповані у три незалежні вертикальні колонки: `Контакти + Приведи друга`, `Документ + Що робити далі`, `Історія + Бонуси + SMS`.
+- Прихований scrollbar більше не резервує односторонній gutter у client editor.
+- Mobile booking card ущільнена приблизно на 25–30 px за рахунок вертикальних paddings/flags/actions без зміни бізнес-логіки.
+
+### FIXED
+
+- Client card більше не виглядає зміщеною вліво на wide desktop, коли права history-колонка коротша за контакти/документ.
+- GitHub `test:pwa` viewport-height regression для stacked booking card на 320/390 px.
+
+### PRESERVED
+
+- Typography hierarchy v4.2.32.
+- Client data, referral, document privacy, history, promo/SMS logic.
+- Delivery road-distance, settlement, promo/RETURN, Supabase functions/schema та VA HOME objects.
+
+### TESTS
+
+- `scripts/test-v4-2-33-client-geometry.mjs`;
+- `scripts/admin_typography_qa.py`;
+- `scripts/pwa_visual_qa.py`;
+- full static/build/browser/PWA regression before production merge.
+

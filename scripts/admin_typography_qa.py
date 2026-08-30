@@ -131,6 +131,24 @@ def main():
                         failures.append(f'{width}x{height}: client card horizontal overflow')
                         print(f'FAIL: {width}x{height}: client card horizontal overflow')
                     else: print(f'PASS: {width}x{height}: client card no horizontal overflow')
+                    if width >= 1221:
+                        geometry=page.locator('.modal-card:has(.client-card-form)').evaluate("""el=>{
+                          const r=el.getBoundingClientRect(), grid=el.querySelector('.client-card-grid');
+                          const columns=[...el.querySelectorAll('.client-card-column')].map(node=>getComputedStyle(node).display);
+                          const sr=el.querySelector('.client-editor-scroll').getBoundingClientRect();
+                          const gr=grid.getBoundingClientRect();
+                          return {
+                            centerOffset:Math.abs((r.left+r.right)/2-innerWidth/2),
+                            gridCenterOffset:Math.abs((gr.left+gr.right)/2-(sr.left+sr.right)/2),
+                            columnDisplays:columns
+                          };
+                        }""")
+                        checks+=1
+                        if geometry['centerOffset']>2 or geometry['gridCenterOffset']>2 or any(x!='grid' for x in geometry['columnDisplays']):
+                            failures.append(f'{width}x{height}: client card desktop geometry {geometry}')
+                            print(f"FAIL: {width}x{height}: client card desktop geometry {geometry}")
+                        else:
+                            print(f"PASS: {width}x{height}: client card and three content columns stay centered")
             finally:
                 page.close()
         browser.close()
