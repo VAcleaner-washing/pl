@@ -6489,3 +6489,6 @@ button,.btn,.new-btn,.chip,.nav button,.mobile-nav button{font-weight:540}
 .main h2{font-weight:620}
 .main h3{font-weight:600}
 .main h4{font-weight:580}
+
+/* v4.2.31 delivery finance readability */
+@media(min-width:1201px){.delivery-car-cost{grid-template-columns:minmax(240px,1.35fr) minmax(180px,.8fr) minmax(240px,1fr);gap:18px 24px}.delivery-car-cost>div:not(:first-child){justify-items:start;text-align:left}.delivery-car-cost strong{font-size:14px}.delivery-car-cost span,.delivery-car-cost small{font-size:11px}}

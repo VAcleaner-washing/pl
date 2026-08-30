@@ -20,8 +20,8 @@ has(admin,"car?.fuelType==='lpg'?Number(fuel.lpgPerL)", 'fuel price must be sele
 assert.equal(config.deliveryPricing.fuel.cityCars[0].fuelType,'petrol');
 assert.equal(config.deliveryPricing.fuel.cityCars[1].fuelType,'lpg');
 has(settings,'fuelType: canonical?.fuelType || (car?.fuelType === "lpg" || id === "anna" ? "lpg" : "petrol")','settings backend must preserve canonical car fuel type by stable id');
-has(admin,'Середній повний пробіг','delivery analytics must name the ×4 metric explicitly');
-has(admin,'км в один бік × 4','delivery analytics must expose the one-way source and multiplier');
+has(admin,'Середня відстань до клієнта','delivery analytics must name the one-way metric explicitly');
+has(admin,'повний пробіг ${avgTrip} · відстань × 4','delivery analytics must expose the full-trip multiplier');
 
 has(admin,'name="customerAddressDetail"','client card must keep entrance/orienting notes separate');
 has(admin,"customerAddress:String(form.customerAddress.value||'').trim(),customerAddressDetail:String(form.customerAddressDetail.value||'').trim()",'client save must preserve both address parts separately');

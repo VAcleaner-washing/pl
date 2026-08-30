@@ -53,8 +53,8 @@ has(admin,'sample=recentDeliverySample(30,pricing)','profitability must request 
 has(admin,'pricedCount:priced.length','price denominator must be explicit');
 has(admin,'matchedCount:matched.length','price+route denominator must be explicit');
 has(admin,'ціна відома для ${priceCoverage}','UI must state price coverage');
-has(admin,'по ${row.knownCount} маршрутах','fuel UI must state route denominator');
-has(admin,'по ${row.matchedCount} доставках з ціною + маршрутом','net UI must state matched denominator');
+has(admin,'середнє по ${row.freshCount}','fuel UI must state trusted route denominator');
+has(admin,'по ${row.matchedCount} ${ukCount(row.matchedCount','net UI must state matched denominator');
 
 lacks(admin,"preferred==='instagram'&&!instagram",'preferred Instagram must not be demoted due to missing handle');
 has(admin,"(instagram||preferred==='instagram')?{key:'instagram'",'Instagram CTA must exist when Instagram is preferred even without username');

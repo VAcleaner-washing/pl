@@ -31,7 +31,7 @@ const normAdmin=(rel,b)=>{
 const immutableAdmin={
   'admin/sw.js':'ecf0d734ec92d9d1351d0536d72d7c9b44af29605e39e066aaa1828cd53c5303',
   'assets/admin-glass-test.js':'d9a02ec1a58296d5f173569fef4c287ff4f0dc026b5badc4b7516e023d765311',
-  'assets/admin-glass-test.css':'50ad109a3764a4b7b4f65cc410144446a55fb2f24171cab205c94223530ebb68',
+  'assets/admin-glass-test.css':'5ee1daa8c3e2404b65e660768f4df5cd660da1a0780d24e1ba3cba1fb0585924',
   'admin/manifest.webmanifest':'a1ee1460fd67706a4ce381f7671732bf17a3e371d7f29b3794dc1bdbf1050de4',
   'admin/icon-192.png':'44740c4d4f8690774448cbe89e8d7b7e717eac6057fab37a6eabb2e596c272ab',
   'admin/icon-512.png':'7abb5975add23bd9fc88d56d085a39767c008a8abb1c67673fca1d5540eb475f',
@@ -46,6 +46,8 @@ const glassCss=read('assets/admin-glass-test.css').toString('utf8');
 ck(/\.client-primary-actions\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/.test(glassCss),'approved client primary actions stay compact 2-column');
 ck(/\.client-contact-actions\{grid-template-columns:repeat\(auto-fit,minmax\(92px,1fr\)\)/.test(glassCss),'approved client contact actions stay compact and responsive');
 ck(/@media\s*\(max-width:\s*360px\)[\s\S]*?\.client-primary-actions\{grid-template-columns:minmax\(0,1fr\)\}/.test(glassCss),'320px fallback keeps client actions readable');
+ck(glassCss.includes('finance readability — vehicle costs are structured metrics'),'approved finance vehicle readability baseline is preserved');
+ck(/\.delivery-car-cost\{display:grid;grid-template-columns:minmax\(230px,1\.25fr\)/.test(glassCss),'finance vehicle row keeps stable wide-desktop columns');
 
 for(const rel of adminHtml){
   const s=read(rel).toString('utf8');

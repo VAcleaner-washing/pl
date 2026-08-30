@@ -11,7 +11,7 @@ const checks=[
  ['payback separates extra investment, repairs and upgrades from start cost',js.includes('additionalInvestment')&&js.includes('repairs')&&js.includes('upgrades')&&js.includes('totalCapital:startCost+costs.additionalInvestment+costs.repairs+costs.upgrades')],
  ['delivery never renders dash distance tier',!js.includes("`До ${meta.quote.maxKm||'—'} км`")],
  ['unknown delivery distance does not fabricate fuel profit',js.includes('sample.filter(row=>row.routeKm>0)')&&js.includes('unknownCount:sample.length-known.length')&&!js.includes('meta.routeKm||8')],
- ['city delivery uses both cars and exposes their average',js.includes("consumptionL100:11")&&js.includes("consumptionL100:10")&&js.includes('carRows=cars.map')&&js.includes('Середня собівартість між двома авто')],
+ ['city delivery uses both cars and exposes their average',js.includes("consumptionL100:11")&&js.includes("consumptionL100:10")&&js.includes('carRows=cars.map')&&js.includes('Середнє пальне між Passat CC і Fiesta')],
  ['finance truth styles exist',css.includes('v4.2.16 — finance truth UX')&&css.includes('.ops-footnote')],
 ];
 let bad=0;for(const [name,ok] of checks){console.log(`${ok?'PASS':'FAIL'} ${name}`);if(!ok)bad++;}if(bad)process.exit(1);console.log(`Finance truth: ${checks.length}/${checks.length}`);

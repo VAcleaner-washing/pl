@@ -27,7 +27,7 @@ with sync_playwright() as pw:
         page.locator('.detail [data-client-card]').click();page.wait_for_timeout(80)
         ck('client card opens from booking detail',page.locator('#clientEditor').count()==1)
         ck('client card exposes back-to-booking control','До бронювання' in page.locator('#clientEditor').inner_text())
-        page.locator('#clientEditor .client-footer-close').click();page.wait_for_timeout(100)
+        page.locator('#clientEditor .client-footer-close').click();page.wait_for_selector('.detail',timeout=2500);page.wait_for_timeout(40)
         ck('closing client card returns to same booking detail',page.locator('.detail').count()==1 and booking['booking_code'] in page.locator('.detail').inner_text())
 
         # Detail -> client -> new booking -> close -> client card.

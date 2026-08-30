@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.30  
-**Baseline build:** 4230  
+**Baseline version:** 4.2.31  
+**Baseline build:** 4231  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -2884,3 +2884,45 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/test-v4-2-30-function-hardening.mjs`;
 - `scripts/test-delivery-settings.mjs`;
 - full static/build/browser/PWA regression.
+
+# 39. Change record — v4.2.31
+
+### ADDED
+
+- **DELIVERY-ROAD-001** — `route_km` для собівартості означає дорожню відстань від бази до клієнта в один бік, а не пряму геодезичну відстань.
+- **DELIVERY-ROAD-002** — картка бронювання показує `До клієнта X км`, повний пробіг `X × 4`, окрему оцінку Passat CC / Fiesta та середнє пальне.
+- **DELIVERY-ROAD-003** — Finance показує середню відстань до клієнта як основну метрику; повний пробіг показується окремим поясненням `×4`.
+- **DELIVERY-ROAD-004** — legacy `city/local/estimate/admin_backfill` не беруть участі у паливній собівартості, доки не перераховані по дорожньому маршруту. `manual_map` вважається валідною вручну перевіреною відстанню.
+- **DELIVERY-ROAD-005** — у Finance Passat CC і Fiesta показуються окремими повноширинними рядками: назва/тип пального → `Пальне / доставка` → `Залишається після пального`; число та пояснення не злипаються, службові підписи regular/medium, суми мають стриманий акцент.
+- **DELIVERY-ROAD-006** — технічні назви полів (`completed_at`, `route distance`) не показуються в інтерфейсі; користувацький текст пояснює `відстань до клієнта`, `повний пробіг ×4` і кількість маршрутів людською мовою.
+- **QA-ROUTE-001** — new-booking request UUID має fallback для browser/CI context без `crypto.randomUUID()`, щоб modal не падав до рендеру.
+
+### CHANGED
+
+- `vacleaner-address-v1` використовує OSRM road route і всередині локальної зони Полтави; `road_city` відрізняється від старого `city`, який був прямою відстанню.
+- Delivery vehicle cards у Finance на wide desktop йдуть окремими повноширинними рядками, без стиснення Passat CC / Fiesta в дві вузькі колонки.
+- Технічні `completed_at` та `route distance` прибрані з користувацького тексту адмінки.
+- Старі/відсутні маршрути можна перерахувати кнопкою; неоднозначні історичні адреси не підміняються вигаданими кілометрами.
+
+### FIXED
+
+- Занижена собівартість доставки через Haversine/straight-line `city` distance.
+- `Пальне доставки: Не розраховано` для актуальної доставки з нормальною адресою: detail запускає автоматичне збереження дорожнього маршруту.
+- Browser aggregate fail, де `#bookingForm` не відкривався через unavailable `crypto.randomUUID`.
+- Navigation QA отримав deterministic wait на повернення parent detail після modal RAF.
+
+### PRESERVED
+
+- Формула поїздки = `відстань до клієнта × 4`: відвезти → назад → забрати → назад.
+- Passat CC = А-95, 11 л/100 км місто; Fiesta = LPG, 10 л/100 км місто; траса = 7 л/100 км.
+- Delivery fee, referral, settlement, promo/RETURN, address-detail separation та VA HOME objects не змінюються.
+
+### TESTS
+
+- `scripts/test-v4-2-31-delivery-road-truth.mjs`;
+- `scripts/admin_context_navigation_qa.py`;
+- `scripts/pwa_v424_focus_qa.py`;
+- `scripts/glass_v4_qa.py`;
+- `scripts/desktop_density_qa.py`;
+- full static/build/browser/PWA regression before production merge.
+

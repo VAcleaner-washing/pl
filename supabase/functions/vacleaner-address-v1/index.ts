@@ -103,13 +103,10 @@ function roadGeometryDistanceKm(coords: any[], startIndex = 0) {
 }
 async function pricingDistance(targetLat: number, targetLon: number) {
   const directFromCenter = distanceKm(CENTER.lat, CENTER.lon, targetLat, targetLon);
-  if (directFromCenter <= CITY_BOUNDARY_RADIUS_KM) {
-    return { outsideKm: 0, routeKm: distanceKm(SERVICE_ORIGIN.lat, SERVICE_ORIGIN.lon, targetLat, targetLon), source: "city" };
-  }
-
+  const localCity = directFromCenter <= CITY_BOUNDARY_RADIUS_KM;
   const url = `${OSRM_URL}/${SERVICE_ORIGIN.lon},${SERVICE_ORIGIN.lat};${targetLon},${targetLat}?overview=full&geometries=geojson&steps=false`;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 3800);
+  const timer = setTimeout(() => controller.abort(), 4200);
   try {
     const response = await fetch(url, { signal: controller.signal, headers: { "Accept": "application/json" } });
     if (!response.ok) throw new Error("route_failed");
@@ -118,21 +115,23 @@ async function pricingDistance(targetLat: number, targetLon: number) {
     const coords = Array.isArray(route?.geometry?.coordinates) ? route.geometry.coordinates : [];
     if (coords.length < 2) throw new Error("route_missing");
 
+    const routeKm = Math.max(0, Number(route.distance || 0) / 1000);
+    if (localCity) return { outsideKm: 0, routeKm, source: "road_city" };
+
     let exitIndex = 0;
     for (let i = 0; i < coords.length; i++) {
       const c = coords[i];
       const d = distanceKm(CENTER.lat, CENTER.lon, Number(c[1]), Number(c[0]));
       if (d > CITY_BOUNDARY_RADIUS_KM) { exitIndex = Math.max(0, i - 1); break; }
     }
-    const routeKm = Math.max(0, Number(route.distance || 0) / 1000);
     const outsideKm = Math.max(0, roadGeometryDistanceKm(coords, exitIndex));
     return { outsideKm, routeKm, source: "road" };
   } catch {
-    // Fallback is intentionally conservative: straight-line distance beyond the
-    // city edge is inflated to approximate a road route rather than underprice it.
-    const outsideKm = Math.max(0, directFromCenter - CITY_BOUNDARY_RADIUS_KM) * 1.18;
+    // If OSRM is temporarily unavailable, keep a clearly marked estimate so the
+    // admin can refresh it later; never present straight-line city distance as a road route.
+    const outsideKm = localCity ? 0 : Math.max(0, directFromCenter - CITY_BOUNDARY_RADIUS_KM) * 1.18;
     const routeKm = distanceKm(SERVICE_ORIGIN.lat, SERVICE_ORIGIN.lon, targetLat, targetLon) * 1.18;
-    return { outsideKm, routeKm, source: "estimate" };
+    return { outsideKm, routeKm, source: localCity ? "estimate_city" : "estimate" };
   } finally {
     clearTimeout(timer);
   }
