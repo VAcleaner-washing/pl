@@ -2767,6 +2767,7 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - **REF-005/009** — клієнт із збереженим Instagram і preferred contact `instagram` більше не отримує Telegram як єдиний/основний CTA через порожнє поле в іншому snapshot.
 - **REF-008/009** — текст повідомлення більше не виглядає як порожній або прихований нижній блок.
 - **UI-004/006** — referral modal більше не має широкої мертвої колонки праворуч від фактичного контенту.
+- **QA-004 / ADDR-011** — canonical PWA regression більше не очікує під’їзд у `customerComment`; create payload перевіряється по окремих `deliveryAddressDetail` / `customerAddressDetail`, а route address лишається чистою.
 
 ### PRESERVED
 
@@ -2779,5 +2780,6 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/test-v4-2-28-referral-modal.mjs`;
 - `scripts/referral_admin_mobile_qa.py`;
 - `scripts/referral_modal_visual_qa.py`;
+- `scripts/pwa_visual_qa.py` — create payload перевіряє ADDR-011: clean route address + separate address detail + untouched customer comment;
 - повний static/build/browser/PWA/responsive QA перед production merge.
 

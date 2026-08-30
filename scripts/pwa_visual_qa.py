@@ -675,7 +675,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             qa.check(promo_toggle.count()==1 and promo_toggle.get_attribute('type')=='checkbox' and not promo_toggle.is_checked(), 'mobile-390: pending RETURN bonus requires one explicit manager confirmation checkbox')
             qa.check(page.locator('#bookingForm select[name="fulfillment"]').input_value()=='pickup', 'mobile-390: saved customer address never silently switches fulfillment to delivery')
             delivery_state=page.locator('#bookingForm .delivery-address-field').evaluate("el=>({hidden:el.hidden,disabled:el.querySelector('input[name=deliveryAddress]').disabled,required:el.querySelector('input[name=deliveryAddress]').required,value:el.querySelector('input[name=deliveryAddress]').value,detail:el.querySelector('[data-vac-address-detail]')?.value||''})")
-            qa.check(not delivery_state['hidden'] and not delivery_state['disabled'] and not delivery_state['required'] and delivery_state['value']=='Юрія Тимошенка 8' and delivery_state['detail']=='7 під’їзд', 'mobile-390: repeat customer restores editable route address plus separate entrance/comment while pickup remains selected')
+            qa.check(not delivery_state['hidden'] and not delivery_state['disabled'] and not delivery_state['required'] and delivery_state['value']=='Юрія Тимошенка 8' and delivery_state['detail']=='7 під’їзд', 'mobile-390: repeat customer restores editable route address plus separate address detail while pickup remains selected')
             promo_toggle.evaluate('el=>el.click()'); page.wait_for_timeout(500)
             qa.check(page.locator('#customerLookup').inner_text().find('Бонус активований')>=0 and page.locator('#customerLookup').inner_text().find('−10%')>=0, 'mobile-390: manager confirmation activates RETURN bonus for 21 days and makes it available')
             page.locator('.mobile-booking-next').click(); page.wait_for_timeout(40)
@@ -694,7 +694,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             qa.shot(page,'mobile-390-booking-return-delivery-v4222.png')
             page.locator('#bookingForm .booking-submit:visible').click(); page.wait_for_timeout(550)
             created=page.evaluate('window.__lastCreatePayload')
-            qa.check(bool(created) and created.get('action')=='create' and created.get('fulfillment')=='delivery' and created.get('deliveryAddress')=='Юрія Тимошенка 8' and '7 під’їзд' in str(created.get('customerComment') or ''), 'mobile-390: Add booking sends clean route address and keeps entrance/orientation in the booking comment')
+            qa.check(bool(created) and created.get('action')=='create' and created.get('fulfillment')=='delivery' and created.get('deliveryAddress')=='Юрія Тимошенка 8' and created.get('customerAddress')=='Юрія Тимошенка 8' and created.get('deliveryAddressDetail')=='7 під’їзд' and created.get('customerAddressDetail')=='7 під’їзд' and '7 під’їзд' not in str(created.get('customerComment') or ''), 'mobile-390: Add booking keeps route address and delivery detail separate without polluting customer comment')
             qa.check(page.locator('#bookingForm').count()==0, 'mobile-390: successful Add booking closes the form instead of appearing to do nothing')
 
         # Existing booking edit must have one real internal scroll owner; footer stays fixed.
