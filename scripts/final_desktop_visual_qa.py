@@ -57,6 +57,19 @@ def view_suite(page:Page,qa:QA,width:int):
             stacked=bool(sides) and all(all(row['buttons'][i]['y']+row['buttons'][i]['height']<=row['buttons'][i+1]['y']+1 for i in range(len(row['buttons'])-1)) for row in sides)
             qa.check(aligned,f'{width}: upcoming finance and actions share one aligned right column')
             qa.check(stacked,f'{width}: upcoming desktop actions stack vertically without overlap')
+        if view=='bookings' and width>=1280:
+            issued=page.locator('.booking-card').filter(has=page.locator('.status.issued')).first
+            if issued.count()==0:
+                issued=page.locator('.booking-card').filter(has_text='Видана').first
+            dep=issued.locator('.booking-deposit-state') if issued.count() else page.locator('.booking-deposit-state.paid').first
+            margin=issued.locator('.booking-margin-pill') if issued.count() else page.locator('.booking-margin-pill').first
+            if dep.count():
+                dep_style=dep.evaluate("el=>{const r=el.getBoundingClientRect(),cs=getComputedStyle(el),strong=el.querySelector('strong')?.getBoundingClientRect();return{w:r.width,h:r.height,radius:parseFloat(cs.borderTopLeftRadius),display:cs.display,strongRight:strong?strong.right:null,right:r.right}}")
+                qa.check(dep_style['radius']<=12 and dep_style['h']<=58 and dep_style['display'] in ('grid','inline-grid'),f'{width}: booking deposit uses compact rounded info-block geometry, not a capsule')
+                qa.check(dep_style['strongRight'] is not None and dep_style['right']-dep_style['strongRight']<=12,f'{width}: booking deposit amount aligns cleanly to the right edge')
+            if margin.count():
+                margin_style=margin.evaluate("el=>{const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return{h:r.height,radius:parseFloat(cs.borderTopLeftRadius)}}")
+                qa.check(margin_style['radius']<=12 and margin_style['h']<=42,f'{width}: booking margin badge uses the same restrained rounded-rectangle language')
         if view=='analytics':
             page_title=page.locator('#pageTitle').inner_text().strip(); sub_title=page.locator('.analytics-toolbar h2').inner_text().strip()
             qa.check(page_title!=sub_title and sub_title=='Показники',f'{width}: analytics hierarchy has no duplicated heading')

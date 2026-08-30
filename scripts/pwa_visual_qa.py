@@ -324,8 +324,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         max_booking_card_height=max(booking_card_heights) if booking_card_heights else 0
         print(f"INFO: {label}: booking card heights={booking_card_heights}; max={max_booking_card_height:.1f}px; limit={density_limit}px")
         qa.check(bool(booking_card_heights) and max_booking_card_height<=density_limit, f"{label}: stacked booking card fits within one usable phone viewport")
-        list_height_limit=len(booking_card_heights)*density_limit+420
-        qa.check(page.locator('.main').evaluate('el=>el.scrollHeight')<list_height_limit, f"{label}: active booking list height follows the number of visible cards")
+        list_metrics=page.locator('.booking-list').evaluate("""el=>{const main=el.closest('.main'),lr=el.getBoundingClientRect(),mr=main.getBoundingClientRect(),cs=getComputedStyle(el),ms=getComputedStyle(main);return{height:lr.height,gap:parseFloat(cs.rowGap||cs.gap||0),paddingBottom:parseFloat(ms.paddingBottom||0),trailing:main.scrollHeight-(lr.bottom-mr.top+main.scrollTop)}}""")
+        expected_list_height=sum(booking_card_heights)+max(0,len(booking_card_heights)-1)*list_metrics['gap']
+        qa.check(bool(booking_card_heights) and abs(list_metrics['height']-expected_list_height)<=3, f"{label}: active booking list height follows the number of visible cards")
+        qa.check(abs(list_metrics['trailing']-list_metrics['paddingBottom'])<=4, f"{label}: booking list ends with only the intentional PWA bottom safe-area padding")
         qa.check(page.locator('.booking-card .booking-extra:visible').count()==0 and page.locator('.booking-card .booking-note:visible').count()==0 and page.locator('.booking-mobile-flags:visible').count()>=1, f"{label}: verbose extras and comments collapse to compact mobile indicators")
         page.locator('.booking-card [data-client-card]').first.evaluate('el=>el.click()');page.wait_for_selector('#clientEditor');page.wait_for_timeout(20)
         qa.check(page.locator('#clientEditor .client-rental-history').count()==1, f"{label}: booking client tap opens the full client card")

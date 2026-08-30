@@ -40,14 +40,15 @@ const required=[
   "AI-RULE-001 — тільки актуальна production-база",
   "AI-RULE-002 — перевірка репозиторію перед змінами",
   "AI-RULE-003 — `main` не використовується для тестування",
-  "AI-RULE-004 — усі зміни тільки в `qa/vX.X.X-*`",
+  "AI-RULE-004 — локальний release candidate до production commit",
   "AI-RULE-005 — scope lock бізнес-логіки",
   "AI-RULE-006 — QA кожної частини продукту окремо",
-  "AI-RULE-007 — повний regression QA після кожного fix",
+  "AI-RULE-007 — targeted QA після fix + один повний QA перед commit",
   "AI-RULE-008 — зелений build ≠ готовий реліз",
   "AI-RULE-009 — перевірка Actions, deploy і `release.json`",
   "AI-RULE-010 — ізоляція VA HOME у спільному Supabase",
   "AI-RULE-011 — Source of Truth оновлюється з кожною зміною",
+  "AI-RULE-012 — обов’язковий visual + scenario audit перед commit",
 ];
 for(const token of required) if(!spec.includes(token)) errors.push(`missing spec contract: ${token}`);
 

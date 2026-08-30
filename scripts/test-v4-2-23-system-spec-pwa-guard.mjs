@@ -13,10 +13,10 @@ ok('admin address setter restores separated detail',addr.includes("if(activeAdmi
 ok('repeat client restore sends clean address plus detail into admin address controller',admin.includes('savedDeliveryDetail=customer.addressDetail||savedDelivery.note')&&admin.includes('__VAC_SET_ADMIN_DELIVERY_ADDRESS__?.(savedDeliveryAddress,savedDeliveryDetail)'));
 ok('repeat client entrance is not silently copied into general customer comment',!admin.includes("if(savedDelivery.note&&form.customerComment&&!String(form.customerComment.value||'').trim())form.customerComment.value=savedDelivery.note"));
 ok('AI operating role is normative',spec.includes('AI-ROLE-001 — роль виконавця')&&spec.includes('Senior Product/UX Designer')&&spec.includes('Technical SEO/Performance Specialist'));
-ok('AI operating rules cover production, QA branch and full regression',spec.includes('AI-RULE-001 — тільки актуальна production-база')&&spec.includes('AI-RULE-004 — усі зміни тільки в `qa/vX.X.X-*`')&&spec.includes('AI-RULE-007 — повний regression QA після кожного fix'));
+ok('AI operating rules cover production baseline, local RC and pre-commit QA',spec.includes('AI-RULE-001 — тільки актуальна production-база')&&spec.includes('AI-RULE-004 — локальний release candidate до production commit')&&spec.includes('AI-RULE-007 — targeted QA після fix + один повний QA перед commit')&&spec.includes('AI-RULE-012 — обов’язковий visual + scenario audit перед commit'));
 ok('VA HOME isolation is explicit',spec.includes('AI-RULE-010 — ізоляція VA HOME у спільному Supabase'));
 ok('source of truth update is mandatory',spec.includes('AI-RULE-011 — Source of Truth оновлюється з кожною зміною'));
-ok('System Spec Guard enforces AI contracts',guard.includes('AI-RULE-010 — ізоляція VA HOME у спільному Supabase')&&guard.includes('AI-RULE-011 — Source of Truth оновлюється з кожною зміною'));
+ok('System Spec Guard enforces AI contracts',guard.includes('AI-RULE-010 — ізоляція VA HOME у спільному Supabase')&&guard.includes('AI-RULE-011 — Source of Truth оновлюється з кожною зміною')&&guard.includes('AI-RULE-012 — обов’язковий visual + scenario audit перед commit'));
 ok('workflow preserves full history for behavioral diff guard',workflow.includes('fetch-depth: 0'));
 ok('workflow executes canonical static runner containing System Spec Guard',workflow.includes('npm run qa:static')&&qaRunner.includes("'check'"));
 if(fail.length){console.error(`v4.2.23 regression contracts failed: ${fail.length}`);process.exit(1)}

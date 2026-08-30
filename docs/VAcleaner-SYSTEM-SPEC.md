@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.34  
-**Baseline build:** 4234  
+**Baseline version:** 4.2.35  
+**Baseline build:** 4235  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -35,13 +35,14 @@
 ## REL-001 — main не є тестовою гілкою
 
 - `main` — production-only.
-- Будь-яка зміна починається з актуального успішного production commit.
-- Робоча гілка: `qa/vX.X.X-назва`.
-- Проміжні fix/fix2/final-final у `main` заборонені.
+- Будь-яка зміна починається з актуального успішного production commit / release archive, що точно йому відповідає.
+- Обов’язкова окрема QA-гілка **не використовується**: робота й перевірки виконуються локально в окремому release-candidate каталозі/архіві, не в `main`.
+- У `main` дозволений тільки вже перевірений release commit.
+- Проміжні `fix`, `fix2`, `final-final`, browser-fix або QA-експерименти у `main` заборонені.
 
-## REL-002 — реліз лише після повного QA
+## REL-002 — реліз лише після повного pre-commit QA
 
-До merge у `main` обов’язково:
+До production commit у `main` обов’язково:
 
 - `npm run check`;
 - усі regression tests;
@@ -49,20 +50,29 @@
 - Pages artifact;
 - backend/static contracts;
 - service worker/cache bust;
-- усі browser suites з workflow;
-- responsive QA: 320 / 390 / 430 / 1024 / 1280 / 1440 / 1648 px.
+- усі локально доступні browser/PWA suites з canonical workflow;
+- responsive QA: 320 / 390 / 430 / 1024 / 1280 / 1440 / 1648 px;
+- **visual screenshot audit** мінімум на 320 / 390 / 430 / 768 / 1440 px;
+- перегляд ключових екранів, а не лише генерація скрінів: overflow, overlap, clipping, вирівнювання, типографіка, відступи, safe-area, floating controls, модалки, hidden CTA;
+- контрольні user-flow сценарії для змінених функцій: не лише render, а реальні click/save/confirm/back/retry стани;
+- якщо дія змінює backend — перевірка фактичного persisted state, відсутності duplicate/partial-success і коректного retry;
+- **changed-file audit**: кожен змінений файл має бути очікуваним для поточного scope; випадкові unrelated зміни блокують commit.
 
-Не можна писати `FULL QA GREEN`, якщо частина suites фактично не запускалась або завершилась timeout/blocked.
+Visual audit повинен охоплювати ключові admin/PWA екрани (список і detail бронювань, клієнт, налаштування, фінанси, аналітика, кампанії, критичні модалки), а для shared/public змін — відповідні public home/quiz/booking екрани. Орієнтир — 20–30 контрольних скрінів на реліз; transient `visual-audit/` артефакти не входять у фінальний ZIP.
+
+Не можна писати `FULL QA GREEN`, якщо частина обов’язкових suites фактично не запускалась або завершилась timeout/blocked. Якщо конкретний browser gate недоступний через середовище, це явно фіксується як blocker, а не маскується під green.
 
 ## REL-003 — один production commit
 
-Після FULL GREEN:
+Після локального PRE-COMMIT GREEN:
 
-- squash робочої гілки;
 - один release commit у `main`;
+- без обов’язкової QA-гілки і без проміжних fix-комітів;
 - одна версія;
 - один build;
-- один фінальний ZIP.
+- один фінальний ZIP;
+- GitHub Actions після commit є release verification gate: production deploy/закриття релізу дозволені лише після GREEN;
+- фінальний ZIP має бути тотожним committed release tree або повторно зібраним із точного release commit.
 
 ## REL-004 — coherence версії
 
@@ -117,11 +127,12 @@
 - `main` — production-only.
 - Не пушити у `main` проміжні `fix`, `fix2`, `final-final`, browser fixes або QA-експерименти.
 
-## AI-RULE-004 — усі зміни тільки в `qa/vX.X.X-*`
+## AI-RULE-004 — локальний release candidate до production commit
 
-- Кожна функціональна/UX/SEO/backend правка виконується в окремій QA-гілці `qa/vX.X.X-*`.
-- Після виправлень у цій же гілці повторно проходить повний QA.
-- Merge у `main` дозволений лише після FULL QA GREEN.
+- Кожна функціональна/UX/SEO/backend правка виконується локально в окремому release-candidate каталозі/архіві, що базується на актуальному production baseline.
+- Окрема `qa/vX.X.X-*` гілка не є обов’язковою і не повинна створювати зайву бюрократію.
+- `main` не використовується як місце для експериментів: commit у `main` робиться лише після повного pre-commit gate.
+- Якщо перевірки не GREEN — продовжувати виправлення локально, не створюючи серію проміжних production commits.
 
 ## AI-RULE-005 — scope lock бізнес-логіки
 
@@ -154,11 +165,12 @@
 
 Green одного шару не означає green усього продукту.
 
-## AI-RULE-007 — повний regression QA після кожного fix
+## AI-RULE-007 — targeted QA після fix + один повний QA перед commit
 
-Після кожного виправлення failure або regression повторно запускається **весь повний regression QA**, а не тільки тест, який впав.
-
-Якщо test застарів через погоджену нову архітектуру, його можна оновити тільки після оновлення цього System Spec. Не послаблювати assertion лише заради green.
+- Після кожного окремого fix запускається відповідний targeted regression/visual/user-flow test для зміненої зони.
+- Після завершення всього пакета правок запускається **один повний regression/browser/PWA/responsive QA** перед production commit.
+- Якщо targeted fix зачепив shared CSS, shell, data contract або backend dependency, scope перевірки розширюється на всі залежні екрани/сценарії.
+- Якщо test застарів через погоджену нову архітектуру, його можна оновити тільки після оновлення цього System Spec. Не послаблювати assertion лише заради green.
 
 ## AI-RULE-008 — зелений build ≠ готовий реліз
 
@@ -210,6 +222,20 @@ VAcleaner і VA HOME можуть використовувати спільни�
 5. не дозволяти CI пропустити behavioral diff без оновлення System Spec.
 
 Якщо код і System Spec суперечать один одному — код вважається regression, доки зміна не була окремо погоджена й внесена у Source of Truth.
+
+## AI-RULE-012 — обов’язковий visual + scenario audit перед commit
+
+Перед тим як сказати «можна комітити» або передати release archive:
+
+1. згенерувати контрольні скріншоти ключових екранів мінімум на 320 / 390 / 430 / 768 / 1440 px;
+2. **візуально переглянути** кожен контрольний скрін, а не покладатися лише на pixel/DOM assertions;
+3. порівняти з попереднім стабільним visual baseline там, де зміна не повинна була впливати на екран;
+4. пройти реальні сценарії змінених функцій із success/error/retry/back станами;
+5. для backend mutations перевірити фактичний запис у Supabase і відсутність duplicate/partial state;
+6. перевірити diff/changed-file scope перед commit;
+7. не класти screenshot/test-result/debug артефакти у фінальний ZIP.
+
+Візуальний дефект, який видно на контрольному скріні (криве поле, зміщення, обрізаний текст, чорна зона, overlap, неправильний safe-area, невірна типографіка), вважається release blocker навіть якщо automated assertions GREEN.
 
 ---
 
@@ -2500,9 +2526,10 @@ Customer PII не повинна потрапляти у release ZIP як histor
 2. описати очікувану зміну;
 3. визначити, які існуючі інваріанти не можна змінити;
 4. перевірити source of truth;
-5. додати/оновити regression test **до merge**;
-6. прогнати повний QA;
-7. оновити Change record нижче.
+5. додати/оновити regression test **до production commit**;
+6. після кожного fix прогнати targeted QA, а перед commit — один повний regression/browser/PWA/responsive + visual screenshot audit;
+7. перевірити changed-file scope і, якщо є backend mutation, фактичний persisted state;
+8. оновити Change record нижче.
 
 Якщо зміна навмисно змінює старе правило:
 
@@ -2943,7 +2970,7 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/pwa_v424_focus_qa.py`;
 - `scripts/glass_v4_qa.py`;
 - `scripts/desktop_density_qa.py`;
-- full static/build/browser/PWA regression before production merge.
+- full static/build/browser/PWA regression + pre-commit visual screenshot/scenario audit before the single production commit.
 
 
 
@@ -2976,7 +3003,7 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 - `scripts/test-v4-2-32-admin-typography.mjs`;
 - `scripts/admin_typography_qa.py`;
-- full static/build/browser/PWA regression before production merge.
+- full static/build/browser/PWA regression + pre-commit visual screenshot/scenario audit before the single production commit.
 
 # 41. Change record — v4.2.33
 
@@ -3008,7 +3035,7 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/test-v4-2-33-client-geometry.mjs`;
 - `scripts/admin_typography_qa.py`;
 - `scripts/pwa_visual_qa.py`;
-- full static/build/browser/PWA regression before production merge.
+- full static/build/browser/PWA regression + pre-commit visual screenshot/scenario audit before the single production commit.
 
 
 
@@ -3022,6 +3049,8 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 ### CHANGED
 
+- **REL-001/002/003 + AI-RULE-004/007/012** — окрема QA-гілка більше не є обов’язковою. Робота й перевірки виконуються локально в release candidate; після кожного fix запускається targeted QA, а перед одним production commit — повний regression/browser/PWA/responsive gate, visual screenshot audit, user-flow/backend state і changed-file scope audit.
+- Visual pre-commit audit тепер обов’язково генерує й **переглядає** контрольні скріншоти 320 / 390 / 430 / 768 / 1440; transient visual/test artifacts не входять у release ZIP.
 - Standalone `.main` більше не резервує окремий чорний сектор над bottom navigation; safe-area доступність забезпечується scroll padding/content padding, а не обрізанням scroll surface.
 - У referral flow після відкриття Instagram/Telegram confirmation control показує `□ Так, надіслано`; після успішного журналювання — `✓ Надіслано`.
 - `referral_mark_sent` спочатку фіксує durable journal event, потім синхронізує customer/reward state; retry по вже існуючому event повторно доводить state без дубля журналу.
@@ -3046,4 +3075,35 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/test-v4-2-34-pwa-referral-slots.mjs`;
 - `scripts/test-v4-2-22-admin-truth-ux.mjs` updated from obsolete reserve-above-nav assertion to edge-to-edge contract;
 - referral UX + baseline compatibility regression;
-- full static/build/browser/PWA regression before production merge.
+- full static/build/browser/PWA regression + pre-commit visual screenshot/scenario audit before the single production commit.
+
+# 43. Change record — v4.2.35
+
+### ADDED
+
+- `scripts/test-v4-2-35-finance-pwa.mjs` — static guard for desktop finance badge geometry and the direct PWA list/trailing-space QA contract.
+- Wide-desktop browser assertions in `scripts/final_desktop_visual_qa.py` for compact deposit/margin information-block geometry.
+
+### CHANGED
+
+- Booking finance badges use one restrained rounded-rectangle language on desktop: settlement, deposit and preliminary margin are compact information blocks instead of oversized capsules.
+- `test:pwa` no longer infers list density from the whole `.main.scrollHeight`; it validates the real `.booking-list` height from rendered cards + row gaps and separately verifies that the only trailing space is the intentional PWA safe-area padding.
+
+### FIXED
+
+- Desktop `Залоговий платіж` no longer renders as a large oval/capsule in the booking card. Amount is right-aligned, state remains secondary, and mobile geometry stays unchanged.
+- GitHub Browser QA false-negative on `mobile-320: active booking list height follows the number of visible cards`, caused by font/layout metric drift of a few pixels around an indirect hard-coded whole-page threshold.
+
+### PRESERVED
+
+- v4.2.34 edge-to-edge PWA shell: initial content starts below search, scrolled content passes behind it, bottom content continues behind floating navigation.
+- Referral confirmation/retry-safe journal, time-slot geometry, booking business logic, delivery/finance formulas, VA HOME isolation and all Supabase contracts.
+- Pre-commit rule: targeted QA after each fix, then full static/build/browser/PWA/responsive regression plus reviewed visual screenshots and user-flow/backend checks before the single production commit.
+
+### TESTS
+
+- `scripts/test-v4-2-35-finance-pwa.mjs`;
+- `scripts/pwa_visual_qa.py` direct list/trailing-space geometry;
+- `scripts/final_desktop_visual_qa.py` finance badge geometry on wide desktop;
+- full static/build/browser/PWA regression + reviewed screenshot audit before commit.
+
