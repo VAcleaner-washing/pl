@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.36  
-**Baseline build:** 4236  
+**Baseline version:** 4.2.37  
+**Baseline build:** 4237  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -3147,3 +3147,60 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - reviewed 320/390/430 mobile screenshots for booking finance and referral action state;
 - reviewed desktop global-search hover state and iOS standalone Instagram-launch contract;
 - production DB verification for the migrated booking/customer.
+
+
+# 45. Change record — v4.2.37
+
+### ADDED
+
+- **NAV-005 — exact return context.** Overlay routes preserve the full parent chain, not only the immediately visible entity. Canonical deep route: `Пошук → бронювання → клієнт → нова оренда/referral → назад → клієнт → бронювання → той самий пошук`.
+- **SEARCH-004 — search snapshot.** Global search stores query, source view and `.main` scroll before opening booking/client/expense overlays. Closing the overlay restores the exact query and position instead of dropping the manager into `Бронювання`.
+- Campaign search navigation gets an explicit `← До пошуку «…»` return control because campaign rows are full-page destinations rather than overlays.
+- Mobile Settings tab rail exposes left/right overflow with a subtle fade cue and automatically reveals the active tab.
+- `scripts/test-v4-2-37-admin-ux-polish.mjs` — static guard for deep navigation, search restore, calm hover and safe Instagram launch.
+
+### CHANGED
+
+- Client → booking routes now carry the original client options/parent context, so a booking opened from a client card can return to that card without losing the earlier booking/search parent.
+- Saving a client card refreshes data without replacing the underlying route with a hard-coded Clients view; the same parent context remains available after save.
+- Instagram contact actions in client card and booking processing use the same iOS standalone app-link launcher as referral, preventing VAcleaner from navigating into an empty browser sheet.
+- Desktop hover language is intentionally calm: data rows/cards no longer move by `translateX/translateY`; secondary buttons use a restrained surface/border response; primary gold/green actions keep only a light depth cue.
+
+### FIXED
+
+- Global search `результат → detail → Назад` no longer clears the query or resets the manager to the default bookings list.
+- Deep overlay routes no longer lose their grandparent context after `client → booking/new booking/referral → back`.
+- Client-row chevrons and booking/upcoming cards no longer physically jump on pointer hover.
+- Generic Glass button hover no longer adds a bright halo to every secondary control.
+- Settings on 390px PWA no longer hides the existence of `Сповіщення / Система` with no visual affordance.
+
+### UX CONTRACT
+
+- `hover` may change surface/border/brightness, but must not reflow or translate information cards, list rows, search results or secondary controls.
+- Every `×`, backdrop, `Escape` and explicit `← Назад` in a nested overlay moves back exactly one user-visible context unless a successful save/confirm action intentionally completes the flow.
+- Global search is treated as a working context, not a temporary filter. Opening an overlay from search must be reversible without typing the query again.
+- Installed iPhone PWA must keep VAcleaner as the preserved app surface when opening external Instagram actions.
+
+### PRESERVED
+
+- v4.2.36 address separation, referral sent-state and iOS Instagram referral launch remain intact.
+- v4.2.35 finance badge geometry and direct PWA list-density contract remain intact.
+- v4.2.34 edge-to-edge PWA shell, keyboard safe-area behavior, delivery/finance formulas, status flow, referral reward logic and VA HOME isolation remain unchanged.
+
+### TESTS
+
+- `scripts/test-v4-2-37-admin-ux-polish.mjs`;
+- extended `scripts/admin_context_navigation_qa.py` with exact search restore and deep nested return route;
+- `scripts/v4_2_37_route_smoke_qa.py` — fast real-browser breadcrumb smoke on 390px standalone PWA and 1440px desktop;
+- full static/build/browser/PWA regression;
+- reviewed interaction screenshots on desktop and 320/390/430 PWA before release ZIP.
+
+## 45.6 PWA update prompt must never interrupt an operation
+
+- Availability of a new service-worker build is secondary to the manager's current task.
+- On mobile root views the update prompt sits **above** the floating navigation rather than on top of it.
+- While any admin modal, booking detail layer, or software keyboard is active, the prompt is temporarily non-visible and non-interactive. It may reappear after the active task closes.
+- An update prompt must never cover `Скасувати`, `Назад`, save/confirm actions, the iPhone Home Indicator clearance, or steal a tap from the current workflow.
+- Regression coverage belongs to both the static v4.2.37 contract and real-browser route smoke.
+- A nested client card uses an explicit `←` header control with the parent route in its accessible label. The unchanged mobile client card still does not waste height on a permanent footer.
+

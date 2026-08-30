@@ -1330,3 +1330,43 @@ html.glass-test .settings-actions .btn{font-weight:560}
 html.glass-test .delivery-car-identity b{font-weight:580}
 html.glass-test .delivery-car-metric strong{font-weight:600}
 html.glass-test .delivery-average-line>strong{font-weight:580}
+
+/* v4.2.37 — calm desktop interaction system: signal hover without moving the interface. */
+@media (hover:hover) and (pointer:fine){
+  html.glass-test button:not(:disabled):hover,
+  html.glass-test a.btn:hover,
+  html.glass-test .glass-client-actions a:hover{
+    transform:none;
+    filter:brightness(1.025) saturate(1.01);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.075),0 0 0 1px rgba(239,199,127,.055),0 6px 16px rgba(0,0,0,.09);
+  }
+  html.glass-test .btn.primary:not(:disabled):hover,
+  html.glass-test .new-btn:not(:disabled):hover,
+  html.glass-test .upcoming-row.issue .upcoming-actions .btn:last-child:not(:disabled):hover{
+    filter:brightness(1.035) saturate(1.02);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.20),0 7px 18px rgba(151,91,22,.11);
+  }
+  html.glass-test .btn.green:not(:disabled):hover,
+  html.glass-test .upcoming-row.return .upcoming-actions .btn:last-child:not(:disabled):hover,
+  html.glass-test .glass-client-actions a:first-child:hover{
+    filter:brightness(1.035) saturate(1.02);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 7px 18px rgba(10,102,61,.10);
+  }
+  html.glass-test .btn.danger:not(:disabled):hover{
+    filter:brightness(1.035);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.065),0 6px 16px rgba(0,0,0,.10);
+  }
+  html.glass-test .booking-card:hover,
+  html.glass-test .booking-row:hover,
+  html.glass-test .upcoming-row:hover,
+  html.glass-test .client-row:hover,
+  html.glass-test .expense-row:hover,
+  html.glass-test .analytics-line:hover,
+  html.glass-test .search-result-row:hover{
+    transform:none;
+    filter:none;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.032),0 10px 24px rgba(0,0,0,.11);
+  }
+  html.glass-test .search-result-row:hover{box-shadow:none;background:linear-gradient(90deg,rgba(214,164,95,.04),rgba(255,255,255,.009))}
+  html.glass-test .client-row:hover .client-open-indicator{transform:none}
+}

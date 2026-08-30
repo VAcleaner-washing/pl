@@ -6741,3 +6741,40 @@ html.modal-open{scrollbar-gutter:auto}
   .booking-card .booking-finance>.booking-deposit-state>strong{grid-column:1;grid-row:2;justify-self:start;font-size:10px;line-height:1.05}
   .booking-card .booking-finance>.booking-deposit-state>small{grid-column:2;grid-row:2;justify-self:end;margin:0;font-size:7.6px;line-height:1.05;letter-spacing:.08em}
 }
+
+/* v4.2.37 — UX POLISH: route context, calm hover, and mobile settings affordance. */
+.search-return-control{flex:0 0 auto;max-width:min(420px,46vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:900px){
+  .page-head{align-items:flex-start}
+  .search-return-control{width:100%;max-width:none;justify-content:flex-start;text-align:left}
+  .settings-tabs.has-more-right{-webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 30px),transparent 100%);mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 30px),transparent 100%)}
+  .settings-tabs.has-more-left.has-more-right{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 calc(100% - 30px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 calc(100% - 30px),transparent 100%)}
+  .settings-tabs.has-more-left:not(.has-more-right){-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 100%);mask-image:linear-gradient(90deg,transparent 0,#000 24px,#000 100%)}
+}
+@media (hover:hover) and (pointer:fine){
+  .booking-card:hover,.booking-row:hover,.upcoming-row:hover{transform:none}
+  .client-row:hover .client-open-indicator{transform:none}
+  .slot:not(:disabled):hover{transform:none}
+  .search-result-row:hover{transform:none}
+}
+
+/* v4.2.37 — update availability never blocks active work.
+   On phones it sits above the floating nav; active overlays/keyboard temporarily defer it. */
+.pwa-update-prompt{transition:opacity .16s ease,transform .16s ease,visibility .16s step-start}
+html.modal-open .pwa-update-prompt,
+html.detail-open .pwa-update-prompt,
+html.keyboard-open .pwa-update-prompt{visibility:hidden;opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .12s ease,transform .12s ease,visibility 0s linear .12s}
+@media(max-width:900px){
+  .pwa-update-prompt{bottom:calc(var(--mobile-nav-shell) + 16px)}
+}
+
+/* v4.2.37 — final route/interaction polish. */
+.view-return-control{flex:0 0 auto;max-width:min(420px,46vw);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:900px){.view-return-control{width:100%;max-width:none;justify-content:flex-start;text-align:left}}
+@media (hover:hover) and (pointer:fine){
+  .operation-card:hover,.issue-quick button:hover{transform:none}
+}
+@media(max-width:900px){
+  /* Keep part of the next task tab visible so horizontal Settings navigation is discoverable. */
+  .settings-tab{min-width:108px;padding-inline:10px}
+}

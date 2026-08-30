@@ -26,7 +26,7 @@ has(admin,'повний пробіг ${avgTrip} · відстань × 4','deliv
 has(admin,'name="customerAddressDetail"','client card must keep entrance/orienting notes separate');
 has(admin,"customerAddress:String(form.customerAddress.value||'').trim(),customerAddressDetail:String(form.customerAddressDetail.value||'').trim()",'client save must preserve both address parts separately');
 has(admin,"telegram:profile?.telegram||b.customer_telegram||''",'client list must retain saved contact channels');
-has(admin,'if(refreshed)requestAnimationFrame(()=>openClientCard(refreshed))','successful client save must reopen verified server state');
+has(admin,'if(refreshed)requestAnimationFrame(()=>openClientCard(refreshed,options))','successful client save must reopen verified server state and preserve parent context');
 
 has(admin,'class="referral-message-card"','referral message text must be visible by default');
 has(admin,'overheadRentalCount:summary.completed.length','booking margin must expose its completed-rental divisor');

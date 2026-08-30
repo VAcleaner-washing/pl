@@ -7,7 +7,7 @@ const migration=fs.readFileSync('supabase/migrations/20260830154000_vacleaner_mo
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const rel=JSON.parse(fs.readFileSync('release.json','utf8'));
 const ok=(label,cond)=>assert.ok(cond,label);
-ok('release is 4.2.36 / 4236',pkg.version==='4.2.36'&&rel.version==='4.2.36'&&Number(rel.build)===4236);
+ok('release is v4.2.36 or newer and matches package',(()=>{const a=pkg.version.split('.').map(Number),b=[4,2,36];for(let i=0;i<3;i++){if(a[i]>b[i])return rel.version===pkg.version&&Number(rel.build)>=4236;if(a[i]<b[i])return false}return rel.version===pkg.version&&Number(rel.build)>=4236})());
 ok('legacy entrance-only comments have an explicit classifier',admin.includes('function legacyAccessDetailComment(value)')&&admin.includes('function bookingAccessDetail(b)')&&admin.includes('function bookingCustomerComment(b)'));
 ok('booking detail shows access detail in delivery card',admin.includes('detail-delivery-detail')&&admin.includes('Під’їзд / поверх / домофон / орієнтир')&&admin.includes('accessDetail=bookingAccessDetail(b)'));
 ok('legacy access-only value is filtered out of customer comment UI',admin.includes('customerComment=bookingCustomerComment(b)')&&admin.includes('${customerComment?`<article class="card panel comment"><h3>Коментар клієнта</h3>'));

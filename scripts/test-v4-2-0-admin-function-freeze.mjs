@@ -26,6 +26,9 @@ for(const rel of adminHtml){
 const normAdmin=(rel,b)=>{
   let s=b.toString('utf8');
   if(rel==='admin/sw.js') s=s.replace(/vacleaner-manager-\d+/g,'vacleaner-manager-BUILD').replace(/\?v=\d+/g,'?v=BUILD');
+  // v4.2.37 adds an interaction-only suffix. Freeze the approved pre-v4.2.37
+  // Glass shell byte-for-byte while newer interaction contracts are guarded semantically.
+  if(rel==='assets/admin-glass-test.css') s=s.split('\n/* v4.2.37 — calm desktop interaction system',1)[0];
   return Buffer.from(s);
 };
 const immutableAdmin={

@@ -18,13 +18,14 @@ with sync_playwright() as pw:
     if Path('/usr/bin/chromium').exists(): opts['executable_path']='/usr/bin/chromium'
     browser=pw.chromium.launch(**opts)
     page=fixture.render_page(browser,1440,900,authenticated=True,standalone=False)
+    page.set_default_timeout(6000)
     if page.locator('.pwa-update-later').count(): page.locator('.pwa-update-later').click()
     try:
         # Booking detail -> client card -> close/back -> same booking detail.
         booking=fixture.BOOKINGS[0]
         page.evaluate("id=>document.querySelector(`.booking-card[data-id=\"${id}\"]`)?.click()",booking['id']);page.wait_for_timeout(60)
         ck('booking detail opens',page.locator('.detail').count()==1 and booking['booking_code'] in page.locator('.detail').inner_text())
-        page.locator('.detail [data-client-card]').click();page.wait_for_timeout(80)
+        page.locator('.detail [data-client-card]').click();page.wait_for_selector('#clientEditor',timeout=2500);page.wait_for_timeout(40)
         ck('client card opens from booking detail',page.locator('#clientEditor').count()==1)
         ck('client card exposes back-to-booking control','До бронювання' in page.locator('#clientEditor').inner_text())
         page.locator('#clientEditor .client-footer-close').click();page.wait_for_selector('.detail',timeout=2500);page.wait_for_timeout(40)
@@ -32,9 +33,9 @@ with sync_playwright() as pw:
 
         # Detail -> client -> new booking -> close -> client card.
         page.locator('.detail [data-client-card]').click();page.wait_for_timeout(60)
-        page.locator('#clientCreateBooking').click();page.wait_for_timeout(80)
+        page.locator('#clientCreateBooking').click();page.wait_for_selector('#bookingForm',timeout=2500);page.wait_for_timeout(40)
         ck('new booking opens from client card',page.locator('#bookingForm').count()==1)
-        page.locator('#bookingForm [data-close]').first.click();page.wait_for_timeout(100)
+        page.locator('#bookingForm [data-close]').first.click();page.wait_for_selector('#clientEditor',timeout=2500);page.wait_for_timeout(40)
         ck('closing new booking returns to client card',page.locator('#clientEditor').count()==1)
 
         # Returned client -> referral -> back -> client card.
@@ -49,8 +50,44 @@ with sync_playwright() as pw:
             page.locator('#clientOpenReferral').click();page.wait_for_timeout(100)
             ck('referral modal opens',page.locator('.referral-share-modal').count()==1)
             ck('referral modal exposes parent back control',page.locator('[data-layer-back]').count()==1)
-            if page.locator('[data-layer-back]').count(): page.locator('[data-layer-back]').click();page.wait_for_timeout(100)
+            if page.locator('[data-layer-back]').count(): page.locator('[data-layer-back]').click();page.wait_for_selector('#clientEditor',timeout=2500);page.wait_for_timeout(40)
             ck('referral back returns to client card',page.locator('#clientEditor').count()==1)
+
+
+        # v4.2.37: exact global-search context survives overlay routes and deep nesting.
+        if page.locator('#clientEditor').count(): page.locator('#clientEditor .client-footer-close').click();page.wait_for_timeout(80)
+        if page.locator('.detail').count(): page.locator('.detail .back').click();page.wait_for_timeout(80)
+        query=booking['booking_code']
+        page.locator('#globalSearch').fill(query);page.wait_for_timeout(100)
+        ck('global search renders booking result',page.locator('[data-search-booking]').count()>=1)
+        page.locator('[data-search-booking]').first.click();page.wait_for_selector('.detail',timeout=2500);page.wait_for_timeout(40)
+        ck('search result opens booking detail',page.locator('.detail').count()==1)
+        page.locator('.detail .back').click();page.wait_for_selector('.global-search-layout',timeout=2500);page.wait_for_timeout(40)
+        ck('booking back restores exact global search query',page.locator('#globalSearch').input_value()==query)
+        ck('booking back restores global search results',page.locator('.global-search-layout').count()==1)
+
+        # Search -> detail -> client -> new booking -> client -> detail -> search.
+        page.locator('[data-search-booking]').first.click();page.wait_for_selector('.detail',timeout=2500);page.wait_for_timeout(40)
+        page.locator('.detail [data-client-card]').click();page.wait_for_selector('#clientEditor',timeout=2500);page.wait_for_timeout(40)
+        ck('deep route opens client from search-backed detail',page.locator('#clientEditor').count()==1)
+        if page.locator('#clientCreateBooking').count():
+            page.locator('#clientCreateBooking').click();page.wait_for_selector('#bookingForm',timeout=2500);page.wait_for_timeout(40)
+            ck('deep route opens new booking from client',page.locator('#bookingForm').count()==1)
+            page.locator('#bookingForm [data-close]').first.click();page.wait_for_selector('#clientEditor',timeout=2500);page.wait_for_timeout(40)
+            ck('deep route returns new booking to client',page.locator('#clientEditor').count()==1)
+        page.locator('#clientEditor .client-footer-close').click();page.wait_for_selector('.detail',timeout=2500);page.wait_for_timeout(40)
+        ck('deep client back returns to original booking detail',page.locator('.detail').count()==1 and booking['booking_code'] in page.locator('.detail').inner_text())
+        page.locator('.detail .back').click();page.wait_for_selector('.global-search-layout',timeout=2500);page.wait_for_timeout(40)
+        ck('deep detail back returns to original search',page.locator('#globalSearch').input_value()==query and page.locator('.global-search-layout').count()==1)
+
+        # Client result behaves like an overlay and returns to the same search.
+        phone_query=str(booking.get('customer_phone') or '')[-7:]
+        page.locator('#globalSearch').fill(phone_query);page.wait_for_timeout(100)
+        if page.locator('[data-search-client]').count():
+            page.locator('[data-search-client]').first.click();page.wait_for_selector('#clientEditor',timeout=2500);page.wait_for_timeout(40)
+            ck('client search result opens client card',page.locator('#clientEditor').count()==1)
+            page.locator('#clientEditor .client-footer-close').click();page.wait_for_selector('.global-search-layout',timeout=2500);page.wait_for_timeout(40)
+            ck('client back restores exact global search',page.locator('#globalSearch').input_value()==phone_query and page.locator('.global-search-layout').count()==1)
     finally:
         page.close();browser.close()
 

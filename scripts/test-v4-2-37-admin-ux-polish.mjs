@@ -1,0 +1,37 @@
+import fs from 'node:fs';
+const js=fs.readFileSync('assets/admin-v250.js','utf8');
+const css=fs.readFileSync('assets/admin-v250.css','utf8');
+const glass=fs.readFileSync('assets/admin-glass-test.css','utf8');
+const spec=fs.readFileSync('docs/VAcleaner-SYSTEM-SPEC.md','utf8');
+const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const release=JSON.parse(fs.readFileSync('release.json','utf8'));
+const checks=[];
+const ck=(name,cond)=>{checks.push([name,Boolean(cond)]);console.log(`${cond?'PASS':'FAIL'}: ${name}`)};
+ck('v4.2.37 package version',pkg.version==='4.2.37');
+ck('v4.2.37 release build',release.version==='4.2.37'&&Number(release.build)===4237);
+ck('global search context can be captured',js.includes('function captureGlobalSearchContext()'));
+ck('global search context can be restored',js.includes('function restoreGlobalSearchContext(context)'));
+ck('booking search result keeps returnSearch context',js.includes('openDetail(booking,{returnSearch:context})'));
+ck('client search result returns to exact search',js.includes("backLabel:'До пошуку'"));
+ck('campaign search result exposes a return control',js.includes('state.searchReturnContext=context')&&js.includes('renderSearchReturnControl()'));
+ck('detail keeps full client parent options',js.includes('detailReturnClientOptions')&&js.includes('returnClientOptions:options'));
+ck('nested client next action keeps full parent options',js.includes('bindClientNextAction(client,rentals,canLeave,options)'));
+ck('client save preserves parent route',js.includes('openClientCard(refreshed,options)'));
+ck('nested client header exposes a real Back control without wasting mobile footer height',js.includes('class="close client-header-close"')&&js.includes("options.returnTo?'←':'×'")&&js.includes("options.returnTo?options.backLabel||'Назад':'Закрити'"));
+ck('client Instagram uses safe launcher instead of target blank',js.includes('data-client-instagram')&&js.includes("openInstagramContact(client.instagram)"));
+ck('process Instagram uses safe launcher',js.includes("sendInstagram.onclick=e=>{e.preventDefault();openInstagramContact(contactProfile.instagram)"));
+ck('settings rail exposes overflow cues',js.includes("rail.classList.toggle('has-more-right'")&&css.includes('.settings-tabs.has-more-right'));
+ck('mobile settings rail previews the next tab',css.includes('.settings-tab{min-width:108px;padding-inline:10px}'));
+ck('hover system prevents booking movement',css.includes('.booking-card:hover,.booking-row:hover,.upcoming-row:hover{transform:none}'));
+ck('glass hover system removes transform movement',glass.includes('v4.2.37 — calm desktop interaction system')&&glass.includes('transform:none'));
+
+ck('detail opened from search labels Back as search',js.includes("detailReturnSearch?'← До пошуку':'← До бронювань'"));
+ck('detail child modals preserve the complete parent route',js.includes('returnClientOptions:detailReturnClientOptions,returnSearch:detailReturnSearch')&&js.includes('returnClientOptions:parentDetail.returnClientOptions,returnSearch:parentDetail.returnSearch'));
+ck('client next-action cross-view keeps a visible route back',js.includes('state.viewReturnContext={label:`До картки ${client.name||\'клієнта\'}`')&&js.includes('preserveViewReturn:true'));
+ck('remaining operation cards do not jump on pointer hover',css.includes('.operation-card:hover,.issue-quick button:hover{transform:none}'));
+ck('PWA update prompt sits above mobile navigation',css.includes('.pwa-update-prompt{bottom:calc(var(--mobile-nav-shell) + 16px)}'));
+ck('PWA update prompt defers during active modal/detail/keyboard work',css.includes('html.modal-open .pwa-update-prompt')&&css.includes('html.detail-open .pwa-update-prompt')&&css.includes('html.keyboard-open .pwa-update-prompt')&&css.includes('visibility:hidden;opacity:0;pointer-events:none'));
+ck('system spec includes v4.2.37 UX contract',spec.includes('v4.2.37')&&spec.includes('контекст')&&spec.includes('hover'));
+const failed=checks.filter(([,ok])=>!ok);
+if(failed.length){console.error(`v4.2.37 UX polish failed: ${failed.length}`);process.exit(1)}
+console.log(`v4.2.37 UX polish: ${checks.length}/${checks.length} PASS`);
