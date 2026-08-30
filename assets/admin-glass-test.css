@@ -1305,3 +1305,21 @@ html.glass-test .delivery-route-partial .btn{flex:0 0 auto}
   html.glass-test .delivery-route-partial{display:grid;gap:10px}
   html.glass-test .delivery-route-partial .btn{width:100%}
 }
+
+/* v4.2.32 — final glass-layer typography alignment.
+   This stylesheet loads after admin-v250.css, so it must not reintroduce legacy bold weights. */
+html.glass-test .glass-client-actions a,
+html.glass-test .glass-client-actions button{font-weight:500}
+html.glass-test .client-primary-actions .btn,
+html.glass-test .client-contact-action,
+html.glass-test .client-referral-quick{font-weight:500}
+html.glass-test .client-contact-action small{font-weight:480}
+html.glass-test .client-referral-quick small{font-weight:430}
+html.glass-test .mobile-nav .mobile-new-nav span{font-weight:500}
+html.glass-test .day-labels{font-weight:500}
+html.glass-test .day-row>b{font-weight:540}
+html.glass-test .booking-form .time-chip.active{font-weight:560}
+html.glass-test .settings-actions .btn{font-weight:560}
+html.glass-test .delivery-car-identity b{font-weight:580}
+html.glass-test .delivery-car-metric strong{font-weight:600}
+html.glass-test .delivery-average-line>strong{font-weight:580}

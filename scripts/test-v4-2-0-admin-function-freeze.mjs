@@ -31,7 +31,7 @@ const normAdmin=(rel,b)=>{
 const immutableAdmin={
   'admin/sw.js':'ecf0d734ec92d9d1351d0536d72d7c9b44af29605e39e066aaa1828cd53c5303',
   'assets/admin-glass-test.js':'d9a02ec1a58296d5f173569fef4c287ff4f0dc026b5badc4b7516e023d765311',
-  'assets/admin-glass-test.css':'5ee1daa8c3e2404b65e660768f4df5cd660da1a0780d24e1ba3cba1fb0585924',
+  'assets/admin-glass-test.css':'6baba484ac7fa7975388305e3a2f383ad66a1f071eaa75e1de1172f0d61f0b84',
   'admin/manifest.webmanifest':'a1ee1460fd67706a4ce381f7671732bf17a3e371d7f29b3794dc1bdbf1050de4',
   'admin/icon-192.png':'44740c4d4f8690774448cbe89e8d7b7e717eac6057fab37a6eabb2e596c272ab',
   'admin/icon-512.png':'7abb5975add23bd9fc88d56d085a39767c008a8abb1c67673fca1d5540eb475f',
@@ -40,7 +40,7 @@ const immutableAdmin={
 };
 for(const [rel,expected] of Object.entries(immutableAdmin)){const binary=/\.(?:png|ico)$/i.test(rel);ck(sha(binary?read(rel):normAdmin(rel,read(rel)))===expected,`${rel} remains frozen to approved admin identity/shell baseline`)};
 
-// v4.2.22 intentionally advances only the approved client-card/PWA responsive baseline.
+// v4.2.32 intentionally advances the approved glass CSS baseline for the full admin typography audit.
 // Keep semantic guards so updating the frozen CSS hash cannot silently remove the agreed UX.
 const glassCss=read('assets/admin-glass-test.css').toString('utf8');
 ck(/\.client-primary-actions\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/.test(glassCss),'approved client primary actions stay compact 2-column');

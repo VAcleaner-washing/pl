@@ -60,13 +60,13 @@ lacks(admin,"preferred==='instagram'&&!instagram",'preferred Instagram must not 
 has(admin,"(instagram||preferred==='instagram')?{key:'instagram'",'Instagram CTA must exist when Instagram is preferred even without username');
 has(admin,'class="referral-main-grid"','message and primary action must share the first referral screen');
 has(css,'.referral-main-grid{display:grid','desktop referral layout must be explicit');
-has(css,'.money-row>span,.balance>span,.live>div>span,.modal-summary .live>div>span{font-weight:450}','finance labels must stay regular, not bold');
+has(css,'.money-row>span,.balance>span,.live>div>span,.modal-summary .live>div>span{font-weight:420}','finance labels must stay regular, not bold');
 has(css,'.balance.due>strong,.balance.refund>strong{font-weight:600}','finance amount may keep restrained emphasis');
 has(css,'full admin typography audit: hierarchy without blanket bold','full admin typography audit override must exist');
 has(css,'.badge,.status,.hero-status,.schedule-badge,.booking-deposit-state','status and schedule text must use restrained weights');
 has(css,'.main h2{font-weight:620}','admin section headings must stay restrained');
-has(spec,'Службовий текст понад 700 weight','System Spec must lock the global admin typography ceiling');
-has(spec,'`Повернено клієнту`, `Доплату отримано`) залишаються regular/medium','System Spec must lock calm finance label typography');
+has(spec,'700+ допускається тільки для декоративного символу/іконки','System Spec must lock the global admin typography ceiling');
+has(spec,'`Повернено клієнту`, `Доплату отримано`) залишаються 420–480','System Spec must lock calm finance label typography');
 
 has(admin,'let modalReturnAction=null','modal stack must retain parent return context');
 has(admin,'function closeLayer(returnToParent=false)','closeLayer must distinguish user back from programmatic close');

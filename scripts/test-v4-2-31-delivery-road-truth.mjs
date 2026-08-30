@@ -22,5 +22,5 @@ ok(!admin.includes('лише фактична route distance'),'technical route 
 ok(admin.includes('Залишається після пального'),'vehicle net metric has explicit human label');
 ok(admin.includes('середнє по ${row.freshCount}')&&admin.includes('дорожніх маршрутах'),'vehicle fuel basis is explicit');
 ok(admin.includes('Для ${missing}')&&admin.includes('дорожній маршрут ще не збережено'),'missing route copy is human-readable');
-ok(spec.includes('DELIVERY-ROAD-001')&&spec.includes('Baseline version:** 4.2.31'),'system spec records road-distance contract');
+ok(spec.includes('DELIVERY-ROAD-001')&&/Baseline version:\*\* 4\.2\.(?:3[1-9]|[4-9]\d)/.test(spec),'system spec records road-distance contract');
 console.log(`v4.2.31 delivery road truth: ${n}/${n} PASS`);

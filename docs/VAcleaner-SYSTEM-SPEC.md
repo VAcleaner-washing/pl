@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.31  
-**Baseline build:** 4231  
+**Baseline version:** 4.2.32  
+**Baseline build:** 4232  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -2243,12 +2243,16 @@ Mobile navigation існує у початковому admin HTML і не пов
 
 ## UI-001 — typography hierarchy
 
-- regular → secondary/meta;
-- medium → основна робоча інформація;
-- semibold/bold → заголовки, важливі суми, CTA.
-- у фінансових summary-рядках назви (`Передоплата`, `Залоговий платіж`, `Повернено клієнту`, `Доплату отримано`) залишаються regular/medium; жирність належить сумі, а не всьому рядку.
-- secondary/meta, status chips, field labels, table headers, weekday labels, campaign metadata та service labels не використовують 750–900 weight; цільовий діапазон — 400–600.
-- робочі назви карток/секцій тримаються приблизно 600–650; великі page headings можуть бути до 680.
+- 400–460 → helper/meta/описовий текст;
+- 480–500 → field labels, status chips, secondary controls, table/service labels;
+- 540–600 → робочі значення, суми, selected/primary state;
+- 600–620 → назви секцій і карток;
+- 650–680 → великі page/modal headings.
+- у фінансових summary-рядках назви (`Передоплата`, `Залоговий платіж`, `Повернено клієнту`, `Доплату отримано`) залишаються 420–480; жирність належить сумі, а не всьому рядку.
+- booking status (`Видана`, `Повернена`, `Підтверджена`), deposit chips та helper pills не повинні виглядати як headline; target = 500 або нижче.
+- field labels (`Основний канал`, `Під’їзд / поверх / домофон / орієнтир`, `Телефон`, `Адреса доставки`) target = 500; значення поля не дублює їхню жирність.
+- client loyalty/meta (`Regular · 3 завершених оренд · базова знижка −5%`) має окрему візуальну ієрархію: level та discount помітніші, completed count — medium, але це не суцільний bold-рядок.
+- blanket rule `strong/b = 600+` для всієї адмінки заборонений; default strong/b = 560, вищі weight лише для семантично важливих значень/заголовків.
 - 700+ допускається тільки для декоративного символу/іконки або свідомого одиничного бренд-акценту, але не для читабельного службового тексту.
 
 Не робити весь екран bold.
@@ -2926,3 +2930,35 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/desktop_density_qa.py`;
 - full static/build/browser/PWA regression before production merge.
 
+
+
+# 40. Change record — v4.2.32
+
+### ADDED
+
+- **TYPO-010** — повний semantic typography contract для всієї адмінки: body/helper, labels/status, controls, values, section headings, page/modal headings мають окремі weight bands.
+- **TYPO-011** — client loyalty header має окремі `level / completed rentals / discount` елементи замість одного суцільного meta-рядка.
+- `scripts/test-v4-2-32-admin-typography.mjs` + розширений browser typography audit.
+
+### CHANGED
+
+- Загальний `strong/b` у admin shell знижено до 560; статуси, pills, field labels, secondary buttons і службові metadata — до 480–500.
+- `Regular / VIP`, кількість завершених оренд та базова знижка в картці клієнта отримали окрему ієрархію, щоб важлива loyalty-інформація не губилась серед полів.
+- `Основний канал` і `Під’їзд / поверх / домофон / орієнтир` в client card стали спокійнішими labels із чітким відривом від value/control.
+- Booking settlement/deposit pills розділяють label і суму: текст regular/medium, сума semibold.
+
+### FIXED
+
+- `Видана`, `Попередньо повернути`, `Залоговий платіж … · отримано` та подібні operational labels більше не виглядають як однаково жирні CTA/headings.
+- Прибрано blanket-bold ефект у bookings, calendar, upcoming, equipment, clients, campaigns, finances, analytics, chemistry, settings та client/referral/finance modals.
+
+### PRESERVED
+
+- Ключові суми, KPI, selected/primary actions і заголовки залишаються достатньо акцентними.
+- Бізнес-логіка, delivery road-distance, referral, promo/RETURN, settlement formulas, Supabase schema/functions та VA HOME objects не змінюються.
+
+### TESTS
+
+- `scripts/test-v4-2-32-admin-typography.mjs`;
+- `scripts/admin_typography_qa.py`;
+- full static/build/browser/PWA regression before production merge.
