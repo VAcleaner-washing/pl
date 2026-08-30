@@ -1,7 +1,7 @@
 {
   "mode": "static",
-  "startedAt": "2026-08-30T06:51:56.048Z",
-  "finishedAt": "2026-08-30T06:52:11.139Z",
+  "startedAt": "2026-08-30T09:43:53.117Z",
+  "finishedAt": "2026-08-30T09:44:14.694Z",
   "total": 87,
   "passed": 87,
   "failed": 0,
@@ -10,523 +10,523 @@
       "name": "stamp",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 641
+      "durationMs": 3255
     },
     {
       "name": "check",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 2976
+      "durationMs": 3897
     },
     {
       "name": "test:copy-integrity",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 140
+      "durationMs": 182
     },
     {
       "name": "test:package-language",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 145
+      "durationMs": 167
     },
     {
       "name": "test:delivery-settings",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 134
+      "durationMs": 164
     },
     {
       "name": "test:public-seo",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 143
+      "durationMs": 191
     },
     {
       "name": "test:growth-content",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 153
     },
     {
       "name": "check:backend",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 128
+      "durationMs": 171
     },
     {
       "name": "test:deposit-policy",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 131
+      "durationMs": 155
     },
     {
       "name": "test:stabilization",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 149
+      "durationMs": 162
     },
     {
       "name": "test:css-architecture",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 127
+      "durationMs": 160
     },
     {
       "name": "test:public-visual-contract",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 152
+      "durationMs": 180
     },
     {
       "name": "test:retention",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 135
+      "durationMs": 163
     },
     {
       "name": "test:booking-cta",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 119
+      "durationMs": 183
     },
     {
       "name": "test:process-metadata",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 166
     },
     {
       "name": "test:peer-admin-push",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 139
+      "durationMs": 160
     },
     {
       "name": "test:issue-workflow",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 135
+      "durationMs": 154
     },
     {
       "name": "test:financial-control",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 164
     },
     {
       "name": "test:operational-health",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 134
+      "durationMs": 170
     },
     {
       "name": "test:analytics",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 144
+      "durationMs": 192
     },
     {
       "name": "test:smart-guide-logic",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 156
     },
     {
       "name": "test:booking-date-default",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 131
+      "durationMs": 159
     },
     {
       "name": "test:pwa-static",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 138
+      "durationMs": 183
     },
     {
       "name": "test:sms-campaigns",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 144
+      "durationMs": 186
     },
     {
       "name": "test:auth-refresh",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 173
+      "durationMs": 285
     },
     {
       "name": "test:booking-extras",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 137
+      "durationMs": 164
     },
     {
       "name": "test:density",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 127
+      "durationMs": 162
     },
     {
       "name": "test:v4.1.28-regressions",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 132
+      "durationMs": 165
     },
     {
       "name": "test:v4.1.29-promo-issuance",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 123
+      "durationMs": 163
     },
     {
       "name": "test:v4.1.30-return-activation",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 130
+      "durationMs": 163
     },
     {
       "name": "test:v4.1.31-admin-booking-meta",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 139
+      "durationMs": 160
     },
     {
       "name": "test:v4.1.32-return-detach-ux",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 136
+      "durationMs": 196
     },
     {
       "name": "test:v4.1.33-navigation-typography",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 131
+      "durationMs": 166
     },
     {
       "name": "test:v4.1.34-address-assist",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 131
+      "durationMs": 156
     },
     {
       "name": "test:v4.1.35-suburb-address",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 152
+      "durationMs": 164
     },
     {
       "name": "test:v4.1.36-delivery-entrance",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 133
+      "durationMs": 173
     },
     {
       "name": "test:v4.1.37-booking-address-overflow",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 132
+      "durationMs": 153
     },
     {
       "name": "test:v4.1.39-admin-visual-polish",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 129
+      "durationMs": 178
     },
     {
       "name": "test:v4.1.41-fulfillment-ux",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 133
+      "durationMs": 178
     },
     {
       "name": "test:v4.1.44-booking-hardening",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 161
     },
     {
       "name": "test:v4.1.45-trust-rules",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 136
+      "durationMs": 167
     },
     {
       "name": "test:v4.1.46-funnel-analytics",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 135
+      "durationMs": 163
     },
     {
       "name": "test:v4.1.47-seo-local",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 140
+      "durationMs": 185
     },
     {
       "name": "test:v4.1.47-area-patch",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 129
+      "durationMs": 187
     },
     {
       "name": "test:v4.1.47.2-delivery-distance",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 136
+      "durationMs": 174
     },
     {
       "name": "test:v4.1.48-content-local-demand",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 137
+      "durationMs": 179
     },
     {
       "name": "test:v4.1.49-performance-ci",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 134
+      "durationMs": 166
     },
     {
       "name": "test:v4.1.50-full-qa",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 137
+      "durationMs": 168
     },
     {
       "name": "test:v4.1.51-quiz-positioning",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 130
+      "durationMs": 163
     },
     {
       "name": "test:v4.1.52-manual-address-fallback",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 138
+      "durationMs": 178
     },
     {
       "name": "test:v4.1.53-address-provider-repair",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 124
+      "durationMs": 162
     },
     {
       "name": "test:v4.1.54-local-zone-correction",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 123
+      "durationMs": 156
     },
     {
       "name": "test:v4.1.55-clear-advice",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 163
+      "durationMs": 185
     },
     {
       "name": "test:v4.1.56-price-delivery-copy",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 142
+      "durationMs": 168
     },
     {
       "name": "test:v4.1.57-analytics-truth",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 148
+      "durationMs": 164
     },
     {
       "name": "test:v4.1.58-delivery-zones",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 143
+      "durationMs": 171
     },
     {
       "name": "test:v4.1.61-mobile-density",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 158
     },
     {
       "name": "test:v4.1.62-puzzi-density",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 161
     },
     {
       "name": "test:v4.1.63-stability-readability",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 125
+      "durationMs": 165
     },
     {
       "name": "test:v4.2.0-admin-function-freeze",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 127
+      "durationMs": 217
     },
     {
       "name": "test:v4.2.0-public-architecture",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 162
+      "durationMs": 177
     },
     {
       "name": "test:v4.2.1-referral",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 132
+      "durationMs": 187
     },
     {
       "name": "test:v4.2.2-hardening",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 141
+      "durationMs": 181
     },
     {
       "name": "test:v4.2.5-baseline-compatibility",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 142
+      "durationMs": 162
     },
     {
       "name": "test:v4.2.7-backend-route-cleanup",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 132
+      "durationMs": 160
     },
     {
       "name": "test:v4.2.8-recovery",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 129
+      "durationMs": 158
     },
     {
       "name": "test:v4.2.9-referral-analytics",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 146
+      "durationMs": 160
     },
     {
       "name": "test:v4.2.10-referral-phone",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 130
+      "durationMs": 168
     },
     {
       "name": "test:v4.2.11-cache-bust",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 124
+      "durationMs": 155
     },
     {
       "name": "test:v4.2.12-referral-ux",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 128
+      "durationMs": 173
     },
     {
       "name": "test:v4.2.13-admin-typography",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 134
+      "durationMs": 161
     },
     {
       "name": "test:v4.2.14-admin-ops-ux",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 129
+      "durationMs": 157
     },
     {
       "name": "test:v4.2.15-browser-contracts",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 132
+      "durationMs": 161
     },
     {
       "name": "test:v4.2.16-finance-truth",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 133
+      "durationMs": 170
     },
     {
       "name": "test:v4.2.22-admin-truth-ux",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 131
+      "durationMs": 155
     },
     {
       "name": "test:v4.2.23-system-spec-pwa-guard",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 138
+      "durationMs": 159
     },
     {
       "name": "test:v4.2.24-finance-delivery-return",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 146
+      "durationMs": 162
     },
     {
       "name": "test:v4.2.25-admin-qa-repair",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 130
+      "durationMs": 178
     },
     {
       "name": "test:v4.2.26-booking-grid",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 126
+      "durationMs": 164
     },
     {
       "name": "test:v4.2.27-address-separation",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 132
+      "durationMs": 169
     },
     {
       "name": "test:v4.2.28-referral-modal",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 128
+      "durationMs": 161
     },
     {
       "name": "test:v4.2.29-admin-context-data",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 131
+      "durationMs": 165
     },
     {
       "name": "test:admin-labels",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 122
+      "durationMs": 155
     },
     {
       "name": "test:client-promo-regression",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 141
+      "durationMs": 155
     },
     {
       "name": "test:calendar-live",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 130
+      "durationMs": 157
     },
     {
       "name": "test:booking-gifts",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 134
+      "durationMs": 171
     },
     {
       "name": "build",
       "status": "success",
       "exitCode": 0,
-      "durationMs": 155
+      "durationMs": 197
     }
   ]
 }

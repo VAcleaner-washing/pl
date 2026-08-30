@@ -1,8 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
-import { DEFAULT_CATALOG, DEFAULT_SLOTS, rentalDays, rentalBase } from "https://raw.githubusercontent.com/VAcleaner-washing/pl/70d01a4ccb211b1a8258a93ee8921744637e8ce2/supabase/functions/vacleaner-admin-bookings-v3/config.ts";
-import { discountInfo } from "https://raw.githubusercontent.com/VAcleaner-washing/pl/70d01a4ccb211b1a8258a93ee8921744637e8ce2/supabase/functions/vacleaner-admin-bookings-v3/pricing.mjs";
-import { settlementFromBooking } from "https://raw.githubusercontent.com/VAcleaner-washing/pl/70d01a4ccb211b1a8258a93ee8921744637e8ce2/supabase/functions/vacleaner-admin-bookings-v3/settlement.mjs";
+import { DEFAULT_CATALOG, DEFAULT_SLOTS, rentalDays, rentalBase } from "./config.ts";
+import { discountInfo } from "./pricing.mjs";
+import { settlementFromBooking } from "./settlement.mjs";
 
 const corsHeaders={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS"};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...corsHeaders,"Content-Type":"application/json; charset=utf-8"}});

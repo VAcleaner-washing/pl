@@ -20,7 +20,7 @@ has(admin,'recentDeliverySample(limit=30','delivery analytics must default to th
 has(admin,"b.status==='completed'&&b.fulfillment==='delivery'",'all actual completed delivery rows must remain eligible for the delivery sample');
 has(admin,'priceKnown:paid>0','historical unknown delivery prices must remain explicitly unknown instead of becoming fake zero-price observations');
 has(admin,"row?.isLocal?Number(car?.consumptionL100)||0:Number(fuel.consumptionL100)||0",'city car consumption and route/suburb consumption must be applied to the right delivery type');
-has(admin,'Середня між двома авто','delivery analytics must expose the average between the two cars');
+has(admin,'Середня собівартість між двома авто','delivery analytics must expose the average between the two cars');
 has(admin,"if(!routeKm)return[]",'booking fuel estimate must refuse missing route distance');
 has(admin,'Маршрут для цієї адреси ще не збережений','missing route distance must be explicit and actionable');
 

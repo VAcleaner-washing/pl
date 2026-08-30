@@ -1,7 +1,0 @@
-{
-  "passed": 0,
-  "failed": [
-    "Unhandled browser error: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:42283/bronuvannia/\nCall log:\n  - navigating to \"http://127.0.0.1:42283/bronuvannia/\", waiting until \"networkidle\"\n"
-  ],
-  "status": "failed"
-}

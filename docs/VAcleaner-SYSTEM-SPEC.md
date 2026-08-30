@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.29  
-**Baseline build:** 4229  
-**Останнє оновлення:** 2026-08-29  
+**Baseline version:** 4.2.30  
+**Baseline build:** 4230  
+**Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -2852,3 +2852,35 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/admin_context_navigation_qa.py`;
 - `scripts/pwa_visual_qa.py`;
 - full static/build/browser/PWA/responsive QA перед production merge.
+
+
+# 38. Change record — v4.2.30
+
+### ADDED
+
+- **FUN-001** — public та admin create мають opaque `clientRequestId`; retry/double tap не створює друге бронювання; DB unique index є фінальним guard.
+- **FUN-002** — immediate public push і cron reminder ділять atomic `public:new:<bookingId>` dispatch key.
+- **FUN-003** — peer admin push `new/issued/completed` має `peer:<event>:<bookingId>` dedupe key.
+- **FUN-004** — reminder state містить лише активні бронювання й не росте безмежно.
+- **FUN-005** — rental extension не імпортує pricing/config/settlement із pinned GitHub commit; stamp синхронізує локальні модулі з admin v4.
+- **FUN-006** — referral send confirmation має short-window server idempotency для однакового phone/kind/channel/reward.
+- **FUN-007** — active backend regression перевіряє `vacleaner-admin-bookings-v4`; v1/v2/v3 — тільки explicit legacy/rollback fixtures.
+
+### CHANGED
+
+- `vadym = Passat CC`, `anna = Fiesta`; labels нормалізуються за stable IDs.
+- Canonical default бензину = 83 грн/л, LPG = 45 грн/л.
+
+### FIXED
+
+- Double create/retry, duplicate public push, concurrent reminder/peer push, unbounded reminder state, stale runtime GitHub imports, dead 15-delivery calculator, wrong v3 logger in active v4.
+
+### PRESERVED
+
+- Delivery tariffs, 4-leg fuel model, referral −100/−150, RETURN, settlement, address model та VA HOME objects.
+
+### TESTS
+
+- `scripts/test-v4-2-30-function-hardening.mjs`;
+- `scripts/test-delivery-settings.mjs`;
+- full static/build/browser/PWA regression.

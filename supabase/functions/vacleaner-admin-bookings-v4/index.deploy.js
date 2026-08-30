@@ -134,7 +134,7 @@ function normalizeDeliveryPricing(value) {
         ],
         outsideZone: 'agreement',
         fuel: {
-            petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 80) || 80,
+            petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 83) || 83,
             lpgPerL: Number(fuelSource.lpgPerL ?? defaultDeliveryPricing.fuel?.lpgPerL ?? 45) || 45,
             consumptionL100: Number(fuelSource.consumptionL100 ?? defaultDeliveryPricing.fuel?.consumptionL100 ?? 7) || 7,
             tripMultiplier: 4
@@ -1013,7 +1013,21 @@ Deno.serve(async (request)=>{
             if (body.confirmed !== true) return json({
                 error: "confirmation_required"
             }, 409);
-            const now = new Date().toISOString(), rewardId = String(body.rewardId || ""), isReminder = validBookingId(rewardId);
+            const now = new Date().toISOString(), rewardId = String(body.rewardId || ""), isReminder = validBookingId(rewardId), kind = isReminder ? "reward_reminder" : "program_invite";
+            const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+            let recentQuery = supabase.from("vacleaner_referral_messages").select("id,sent_at").eq("customer_phone", phone).eq("kind", kind).eq("channel", channel).gte("sent_at", cutoff).order("sent_at", {
+                ascending: false
+            }).limit(1);
+            recentQuery = isReminder ? recentQuery.eq("reward_id", rewardId) : recentQuery.is("reward_id", null);
+            const { data: recentMessage, error: recentError } = await recentQuery.maybeSingle();
+            if (recentError) throw recentError;
+            if (recentMessage) return json({
+                ok: true,
+                sentAt: recentMessage.sent_at,
+                channel,
+                kind,
+                alreadySent: true
+            });
             const customerPatch = {
                 updated_at: now
             };
@@ -1032,7 +1046,7 @@ Deno.serve(async (request)=>{
             }
             const { error: messageError } = await supabase.from("vacleaner_referral_messages").insert({
                 customer_phone: phone,
-                kind: isReminder ? "reward_reminder" : "program_invite",
+                kind,
                 channel,
                 reward_id: isReminder ? rewardId : null,
                 sent_at: now
@@ -1042,7 +1056,7 @@ Deno.serve(async (request)=>{
                 ok: true,
                 sentAt: now,
                 channel,
-                kind: isReminder ? "reward_reminder" : "program_invite"
+                kind
             });
         }
         if (action === "detach_promo") {
@@ -1203,6 +1217,16 @@ Deno.serve(async (request)=>{
             });
         }
         if (action === "create" || action === "edit") {
+            const clientRequestId = action === "create" && validBookingId(body.clientRequestId) ? String(body.clientRequestId) : "";
+            if (clientRequestId) {
+                const { data: prior, error: priorError } = await supabase.from("vacleaner_bookings").select("*").eq("client_request_id", clientRequestId).maybeSingle();
+                if (priorError) throw priorError;
+                if (prior) return json({
+                    booking: safeBooking(prior),
+                    promo: prior.extras?.promo || null,
+                    idempotent: true
+                }, 200);
+            }
             const productCode = String(body.productCode || ""), product = catalog.products?.[productCode];
             if (!product) return json({
                 error: "invalid_product"
@@ -1395,6 +1419,7 @@ Deno.serve(async (request)=>{
                     booking_code: `VAC-${period.startDate.replaceAll("-", "").slice(2)}-${suffix}`,
                     deposit_paid: false,
                     deposit_returned: false,
+                    client_request_id: clientRequestId || null,
                     status: "pending",
                     prepayment_paid: false,
                     prepayment_paid_at: null,
@@ -1402,7 +1427,17 @@ Deno.serve(async (request)=>{
                     hold_expires_at: null
                 };
                 const { data, error } = await supabase.from("vacleaner_bookings").insert(insert).select("*").single();
-                if (error || !data) throw error || new Error("insert_failed");
+                if (error || !data) {
+                    if (clientRequestId && String(error?.code || "") === "23505") {
+                        const { data: prior } = await supabase.from("vacleaner_bookings").select("*").eq("client_request_id", clientRequestId).maybeSingle();
+                        if (prior) return json({
+                            booking: safeBooking(prior),
+                            promo: prior.extras?.promo || null,
+                            idempotent: true
+                        }, 200);
+                    }
+                    throw error || new Error("insert_failed");
+                }
                 try {
                     saved = await applyReservation(supabase, data.id, period, product, prepaymentPaid ? "confirmed" : "waiting_payment", holdExpiresAt);
                 } catch (reservationError) {
@@ -1796,7 +1831,7 @@ Deno.serve(async (request)=>{
         ].includes(message)) return json({
             error: message
         }, 400);
-        console.error("vacleaner-admin-bookings-v3", message);
+        console.error("vacleaner-admin-bookings-v4", message);
         return json({
             error: "service_error"
         }, 500);

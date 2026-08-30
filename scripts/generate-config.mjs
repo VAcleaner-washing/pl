@@ -33,7 +33,7 @@ const sharedWithDelivery=shared.replace(
   'export const DEFAULT_SLOTS=structuredClone(VACLEANER_CONFIG.slots);',
   'export const DEFAULT_SLOTS=structuredClone(VACLEANER_CONFIG.slots);\nexport const DEFAULT_DELIVERY_FEE=Number(VACLEANER_CONFIG.deliveryFee);\nexport const DEFAULT_DELIVERY_PRICING=structuredClone(VACLEANER_CONFIG.deliveryPricing);',
 );
-for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3','vacleaner-admin-bookings-v4']){
+for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-bookings-v3','vacleaner-admin-bookings-v4','vacleaner-extend-rental-v1']){
  const dir=path.join(root,'supabase','functions',name);fs.mkdirSync(dir,{recursive:true});
  fs.writeFileSync(path.join(dir,'config.ts'),sharedWithDelivery);
  // Some deployment workflows use the JavaScript fallback beside index.deploy.js.
@@ -43,6 +43,10 @@ for(const name of ['vacleaner-settings','vacleaner-booking-v5','vacleaner-admin-
    .replaceAll(' as const','')
    .replaceAll(':string','')
    .replaceAll(':any',''));
+}
+// Rental extension must use the same reviewed pricing/settlement modules as the active admin backend.
+for(const file of ['pricing.mjs','settlement.mjs']){
+  fs.copyFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v4',file),path.join(root,'supabase','functions','vacleaner-extend-rental-v1',file));
 }
 // Keep JavaScript deployment fallbacks aligned with the reviewed TypeScript
 // sources. Older hand-built fallbacks were a second, stale source of truth.

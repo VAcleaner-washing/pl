@@ -9,7 +9,7 @@ ok('journal is browser-denied by RLS',migration.includes('enable row level secur
 ok('backend exposes referral analytics action',edge.includes('action === "referral_analytics"'));
 ok('analytics returns messages uses rewards',edge.includes('messages: messages || []')&&edge.includes('uses: uses || []')&&edge.includes('rewards: rewards || []'));
 ok('analytics includes booking revenue context',edge.includes('total_amount')&&edge.includes('source_booking_id'));
-ok('confirmed invite writes journal event',edge.includes('vacleaner_referral_messages').valueOf()&&edge.includes('kind: isReminder ? "reward_reminder" : "program_invite"'));
+ok('confirmed invite writes journal event',edge.includes('vacleaner_referral_messages')&&edge.includes('kind = isReminder ? "reward_reminder" : "program_invite"')&&edge.includes('insert({ customer_phone: phone, kind, channel'));
 ok('summary returns invite history',edge.includes('inviteCount: inviteMessages.length')&&edge.includes('lastInvite: inviteMessages[0]'));
 ok('summary enriches referred client and booking',edge.includes('referredMap')&&edge.includes('bookingMap')&&edge.includes('sourceBooking'));
 ok('admin lazy-loads referral analytics',admin.includes("loadReferralAnalytics")&&admin.includes("action:'referral_analytics'"));

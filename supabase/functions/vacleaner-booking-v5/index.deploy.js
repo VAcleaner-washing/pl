@@ -148,7 +148,7 @@ function normalizeDeliveryPricing(value) {
         ],
         outsideZone: 'agreement',
         fuel: {
-            petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 80) || 80,
+            petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 83) || 83,
             lpgPerL: Number(fuelSource.lpgPerL ?? defaultDeliveryPricing.fuel?.lpgPerL ?? 45) || 45,
             consumptionL100: Number(fuelSource.consumptionL100 ?? defaultDeliveryPricing.fuel?.consumptionL100 ?? 7) || 7,
             tripMultiplier: 4
@@ -546,12 +546,31 @@ async function notifyTelegram(booking) {
         })
     });
 }
+async function claimDispatch(db, eventKey, bookingId, eventType) {
+    const { data, error } = await db.rpc("vacleaner_claim_notification_dispatch", {
+        p_event_key: eventKey,
+        p_booking_id: bookingId,
+        p_event_type: eventType,
+        p_lease_seconds: 120
+    });
+    if (error) throw error;
+    return data === true;
+}
+async function finishDispatch(db, eventKey, delivered) {
+    const { error } = await db.rpc("vacleaner_finish_notification_dispatch", {
+        p_event_key: eventKey,
+        p_delivered: delivered
+    });
+    if (error) console.warn("notification_dispatch_finish_failed", eventKey, error.message);
+}
 async function notifyWebPush(db, booking) {
     const [{ data: config }, { data: subs }] = await Promise.all([
         db.from("vacleaner_push_config").select("vapid_public_key,vapid_private_key").eq("singleton", true).maybeSingle(),
         db.from("vacleaner_push_subscriptions").select("id,endpoint,p256dh,auth_key").eq("active", true)
     ]);
     if (!config || !subs?.length) return;
+    const eventKey = `public:new:${booking.id}`;
+    if (!await claimDispatch(db, eventKey, booking.id, "new_booking")) return;
     webpush.setVapidDetails("https://vacleaner.pp.ua", config.vapid_public_key, config.vapid_private_key);
     const payload = JSON.stringify({
         title: "Нове бронювання VAcleaner",
@@ -562,32 +581,38 @@ async function notifyWebPush(db, booking) {
             bookingId: booking.id
         }
     });
-    await Promise.allSettled(subs.map(async (sub)=>{
-        try {
-            await webpush.sendNotification({
-                endpoint: sub.endpoint,
-                keys: {
-                    p256dh: sub.p256dh,
-                    auth: sub.auth_key
-                }
-            }, payload, {
-                TTL: 3600,
-                urgency: "high"
-            });
-            await db.from("vacleaner_push_subscriptions").update({
-                active: true,
-                last_success_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            }).eq("id", sub.id);
-        } catch (error) {
-            const code = Number(error.statusCode || 0);
-            await db.from("vacleaner_push_subscriptions").update({
-                active: code !== 404 && code !== 410,
-                last_failure_at: new Date().toISOString(),
-                updated_at: new Date().toISOString()
-            }).eq("id", sub.id);
-        }
-    }));
+    let delivered = 0;
+    try {
+        await Promise.allSettled(subs.map(async (sub)=>{
+            try {
+                await webpush.sendNotification({
+                    endpoint: sub.endpoint,
+                    keys: {
+                        p256dh: sub.p256dh,
+                        auth: sub.auth_key
+                    }
+                }, payload, {
+                    TTL: 3600,
+                    urgency: "high"
+                });
+                delivered += 1;
+                await db.from("vacleaner_push_subscriptions").update({
+                    active: true,
+                    last_success_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }).eq("id", sub.id);
+            } catch (error) {
+                const code = Number(error.statusCode || 0);
+                await db.from("vacleaner_push_subscriptions").update({
+                    active: code !== 404 && code !== 410,
+                    last_failure_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }).eq("id", sub.id);
+            }
+        }));
+    } finally{
+        await finishDispatch(db, eventKey, delivered > 0);
+    }
 }
 Deno.serve(async (req)=>{
     if (req.method === "OPTIONS") return new Response("ok", {
@@ -610,6 +635,23 @@ Deno.serve(async (req)=>{
         const body = await req.json();
         const ip = requestIp(req);
         const publicAction = String(body.action || "");
+        const phone = normalizePhone(body.customerPhone);
+        const clientRequestId = publicAction === "create" && /^[0-9a-f-]{36}$/i.test(String(body.clientRequestId || "")) ? String(body.clientRequestId) : "";
+        if (clientRequestId) {
+            const { data: prior, error: priorError } = await db.from("vacleaner_bookings").select("id,booking_code,status,customer_phone,total_amount").eq("client_request_id", clientRequestId).maybeSingle();
+            if (priorError) throw priorError;
+            if (prior) {
+                if (normalizePhone(prior.customer_phone) !== phone) return json({
+                    error: "idempotency_conflict"
+                }, 409);
+                return json({
+                    success: true,
+                    bookingCode: prior.booking_code,
+                    status: prior.status,
+                    idempotent: true
+                }, 200);
+            }
+        }
         const actionAllowed = await consumeRateLimit(db, `vacleaner-booking-v5:${publicAction || "unknown"}:ip`, ip, publicAction === "create" ? 5 : publicAction === "loyalty_lookup" ? 20 : 120, publicAction === "create" ? 3600 : 900);
         if (!actionAllowed) return json({
             error: "rate_limited"
@@ -625,7 +667,6 @@ Deno.serve(async (req)=>{
                 row.value
             ]));
         const catalog = mergeCatalog(map.catalog), rules = normalizeDepositRules(map.deposit_rules), slots = normalizeSlots(map.booking_slots), deliveryPricing = normalizeDeliveryPricing(map.delivery_fee);
-        const phone = normalizePhone(body.customerPhone);
         let completed = 0, lastCompleted = null;
         if ((publicAction === "create" || publicAction === "loyalty_lookup") && phone) {
             const phoneAllowed = await consumeRateLimit(db, `vacleaner-booking-v5:${publicAction}:phone`, phone, publicAction === "create" ? 5 : 10, publicAction === "create" ? 3600 : 900);
@@ -936,9 +977,21 @@ Deno.serve(async (req)=>{
             deposit_paid: false,
             deposit_returned: false,
             status: "pending",
-            source: "vacleaner_website"
+            source: "vacleaner_website",
+            client_request_id: clientRequestId || null
         }).select("*").single();
-        if (error || !booking) throw error || new Error("insert_failed");
+        if (error || !booking) {
+            if (clientRequestId && String(error?.code || "") === "23505") {
+                const { data: prior } = await db.from("vacleaner_bookings").select("booking_code,status,customer_phone").eq("client_request_id", clientRequestId).maybeSingle();
+                if (prior && normalizePhone(prior.customer_phone) === phone) return json({
+                    success: true,
+                    bookingCode: prior.booking_code,
+                    status: prior.status,
+                    idempotent: true
+                }, 200);
+            }
+            throw error || new Error("insert_failed");
+        }
         const resources = Object.entries(product.resources || {}).map(([resource_code, quantity])=>({
                 booking_id: booking.id,
                 resource_code,

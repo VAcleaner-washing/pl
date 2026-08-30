@@ -396,20 +396,20 @@
     ],
     "outsideZone": "agreement",
     "fuel": {
-      "petrolPerL": 80,
+      "petrolPerL": 83,
       "lpgPerL": 45,
       "consumptionL100": 7,
       "tripMultiplier": 4,
       "cityCars": [
         {
           "id": "vadym",
-          "label": "Твоє авто",
+          "label": "Passat CC",
           "fuelType": "petrol",
           "consumptionL100": 11
         },
         {
           "id": "anna",
-          "label": "Авто дружини",
+          "label": "Fiesta",
           "fuelType": "lpg",
           "consumptionL100": 10
         }

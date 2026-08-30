@@ -1,13 +1,13 @@
 import fs from 'node:fs';
 const read=f=>fs.readFileSync(f,'utf8'),cfg=JSON.parse(read('config/vacleaner.json'));const checks=[];const ok=(c,l)=>{if(!c)throw new Error(l);checks.push(l)};
-const p=cfg.deliveryPricing,z=p.zones||[],admin=read('assets/admin-v250.js'),slots=read('assets/public-booking-slots.js'),settings=read('supabase/functions/vacleaner-settings/index.ts'),booking=read('supabase/functions/vacleaner-booking-v5/index.ts'),adminEdge=read('supabase/functions/vacleaner-admin-bookings-v3/index.ts'),gateway=read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
+const p=cfg.deliveryPricing,z=p.zones||[],admin=read('assets/admin-v250.js'),slots=read('assets/public-booking-slots.js'),settings=read('supabase/functions/vacleaner-settings/index.ts'),booking=read('supabase/functions/vacleaner-booking-v5/index.ts'),adminEdge=read('supabase/functions/vacleaner-admin-bookings-v4/index.ts'),gateway=read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
 ok(cfg.deliveryFee===250&&p.local===250,'local delivery remains 250');
 ok(JSON.stringify(z)===JSON.stringify([{maxKm:15,amount:350},{maxKm:20,amount:500},{maxKm:30,amount:700},{maxKm:40,amount:900}]),'route zones are 350/500/700/900');
 ok(p.maxRouteKm===40&&p.distanceBasis==='route_one_way','route basis and 40 km agreement threshold');
-ok(p.fuel?.petrolPerL===80&&p.fuel?.lpgPerL===45&&p.fuel?.consumptionL100===7&&p.fuel?.tripMultiplier===4,'fuel economics defaults');
+ok(p.fuel?.petrolPerL===83&&p.fuel?.lpgPerL===45&&p.fuel?.consumptionL100===7&&p.fuel?.tripMultiplier===4,'fuel economics defaults');
 ok(['Полтава','Розсошенці','Щербані','Горбанівка'].every(x=>p.localSettlements.includes(x)),'local settlements preserved');
 ok(admin.includes('deliveryZone15')&&admin.includes('deliveryZone40')&&admin.includes('fuelPetrol')&&admin.includes('fuelLpg')&&admin.includes('fuelConsumption'),'admin exposes tariff and fuel controls');
-ok(admin.includes('deliveryEconomicsMarkup')&&admin.includes('4 відрізки'),'admin explains real four-leg fuel economics');
+ok(!admin.includes('deliveryEconomicsMarkup')&&admin.includes('recentDeliverySample(30'),'single active delivery analytics uses the 30-delivery sample');
 ok(slots.includes('const distance=Number(meta.routeKm)')&&slots.includes("zone:'route_zone'"),'public browser prices by one-way route distance');
 ok(booking.includes('body.deliveryRouteKm ?? body.deliveryDistanceKm')&&booking.includes('pricing.zones'),'public backend uses route-zone pricing');
 ok(booking.includes('finalRouteKm ?? finalDistanceKm'),'authoritative public quote prices by route distance');

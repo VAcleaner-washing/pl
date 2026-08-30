@@ -19,7 +19,7 @@ const defaultDeliveryPricing: any = structuredClone(DEFAULT_DELIVERY_PRICING);
 const defaultDepositRules = structuredClone(DEFAULT_DEPOSIT_RULES);
 const defaultCatalog: any = structuredClone(DEFAULT_CATALOG);
 const defaultEquipmentBaselines: any = { puzzi: { qty: 2, unitCost: 0 }, sc2: { qty: 2, unitCost: 0 }, jimmy: { qty: 2, unitCost: 0 }, abir: { qty: 2, unitCost: 0 } };
-const defaultCityCars = [{ id: "vadym", label: "Твоє авто", consumptionL100: 11 }, { id: "anna", label: "Авто дружини", consumptionL100: 10 }];
+const defaultCityCars = [{ id: "vadym", label: "Passat CC", fuelType: "petrol", consumptionL100: 11 }, { id: "anna", label: "Fiesta", fuelType: "lpg", consumptionL100: 10 }];
 
 const validTime = (v: unknown) => typeof v === "string" && /^\d{2}:\d{2}$/.test(v);
 const num = (v: unknown) => {
@@ -91,14 +91,18 @@ function normDeliveryPricing(v: unknown) {
   if (maxRouteKm === null || maxRouteKm < zones[zones.length-1].maxKm) return null;
   const fuelSource = source?.fuel && typeof source.fuel === "object" ? source.fuel : {};
   const rawCars = Array.isArray(fuelSource.cityCars) && fuelSource.cityCars.length ? fuelSource.cityCars : defaultCityCars;
-  const cityCars = rawCars.slice(0, 4).map((car: any, index: number) => ({
-    id: cleanLabel(car?.id, 40) || defaultCityCars[index]?.id || `car_${index + 1}`,
-    label: cleanLabel(car?.label, 80) || defaultCityCars[index]?.label || `Авто ${index + 1}`,
-    fuelType: car?.fuelType === "lpg" || car?.id === "anna" ? "lpg" : "petrol",
-    consumptionL100: Number(car?.consumptionL100 ?? defaultCityCars[index]?.consumptionL100 ?? 10),
-  }));
+  const cityCars = rawCars.slice(0, 4).map((car: any, index: number) => {
+    const id = cleanLabel(car?.id, 40) || defaultCityCars[index]?.id || `car_${index + 1}`;
+    const canonical = defaultCityCars.find((item: any) => item.id === id);
+    return {
+      id,
+      label: canonical?.label || cleanLabel(car?.label, 80) || `Авто ${index + 1}`,
+      fuelType: canonical?.fuelType || (car?.fuelType === "lpg" || id === "anna" ? "lpg" : "petrol"),
+      consumptionL100: Number(car?.consumptionL100 ?? canonical?.consumptionL100 ?? defaultCityCars[index]?.consumptionL100 ?? 10),
+    };
+  });
   const fuel = {
-    petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 80),
+    petrolPerL: Number(fuelSource.petrolPerL ?? defaultDeliveryPricing.fuel?.petrolPerL ?? 83),
     lpgPerL: Number(fuelSource.lpgPerL ?? defaultDeliveryPricing.fuel?.lpgPerL ?? 45),
     consumptionL100: Number(fuelSource.consumptionL100 ?? defaultDeliveryPricing.fuel?.consumptionL100 ?? 7),
     tripMultiplier: 4, cityCars,

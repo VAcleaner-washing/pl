@@ -13,9 +13,10 @@ const rel=JSON.parse(read('release.json'));
 const has=(source,token,message)=>assert.ok(source.includes(token),message);
 const lacks=(source,token,message)=>assert.ok(!source.includes(token),message);
 
-assert.equal(pkg.version,'4.2.29');
-assert.equal(rel.version,'4.2.29');
-assert.equal(Number(rel.build),4229);
+const atLeast=(actual,target)=>{const a=String(actual).split('.').map(Number),b=String(target).split('.').map(Number);for(let i=0;i<Math.max(a.length,b.length);i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true};
+assert.equal(pkg.version,rel.version);
+assert.ok(atLeast(rel.version,'4.2.29'));
+assert.ok(Number(rel.build)>=4229);
 has(spec,'NAV-004 — дочірня картка повертає в батьківський контекст','System Spec must lock parent navigation');
 has(spec,'ADDR-014 — legacy backfill є production-міграцією','System Spec must lock production address backfill');
 has(spec,'DEL-005 — останні 30 доставок з чесними знаменниками','System Spec must lock 30-delivery sample');

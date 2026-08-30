@@ -19,7 +19,7 @@ has(admin,"fuelType:'lpg'",'wife car must use LPG');
 has(admin,"car?.fuelType==='lpg'?Number(fuel.lpgPerL)", 'fuel price must be selected per car');
 assert.equal(config.deliveryPricing.fuel.cityCars[0].fuelType,'petrol');
 assert.equal(config.deliveryPricing.fuel.cityCars[1].fuelType,'lpg');
-has(settings,'fuelType: car?.fuelType === "lpg"','settings backend must preserve the car fuel type');
+has(settings,'fuelType: canonical?.fuelType || (car?.fuelType === "lpg" || id === "anna" ? "lpg" : "petrol")','settings backend must preserve canonical car fuel type by stable id');
 has(admin,'Середній повний пробіг','delivery analytics must name the ×4 metric explicitly');
 has(admin,'км в один бік × 4','delivery analytics must expose the one-way source and multiplier');
 

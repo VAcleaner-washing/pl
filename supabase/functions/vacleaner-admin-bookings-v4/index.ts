@@ -95,7 +95,7 @@ function normalizeDeliveryPricing(value: unknown) {
   const validZones=zones.length?zones:defaultsZones.map((x:any)=>({...x}));
   const maxRouteKm=amount(source?.maxRouteKm,Number(validZones[validZones.length-1].maxKm)||40,Number(validZones[validZones.length-1].maxKm)||1,200);
   const fuelSource=source?.fuel&&typeof source.fuel==='object'?source.fuel:{};
-  return {local,zones:validZones,maxRouteKm,distanceBasis:'route_one_way',localSettlements:Array.isArray(defaultDeliveryPricing.localSettlements)?[...defaultDeliveryPricing.localSettlements]:["Полтава","Розсошенці","Щербані","Горбанівка"],outsideZone:'agreement',fuel:{petrolPerL:Number(fuelSource.petrolPerL??defaultDeliveryPricing.fuel?.petrolPerL??80)||80,lpgPerL:Number(fuelSource.lpgPerL??defaultDeliveryPricing.fuel?.lpgPerL??45)||45,consumptionL100:Number(fuelSource.consumptionL100??defaultDeliveryPricing.fuel?.consumptionL100??7)||7,tripMultiplier:4}};
+  return {local,zones:validZones,maxRouteKm,distanceBasis:'route_one_way',localSettlements:Array.isArray(defaultDeliveryPricing.localSettlements)?[...defaultDeliveryPricing.localSettlements]:["Полтава","Розсошенці","Щербані","Горбанівка"],outsideZone:'agreement',fuel:{petrolPerL:Number(fuelSource.petrolPerL??defaultDeliveryPricing.fuel?.petrolPerL??83)||83,lpgPerL:Number(fuelSource.lpgPerL??defaultDeliveryPricing.fuel?.lpgPerL??45)||45,consumptionL100:Number(fuelSource.consumptionL100??defaultDeliveryPricing.fuel?.consumptionL100??7)||7,tripMultiplier:4}};
 }
 function equipmentRevenueAllocationSnapshot(booking: any, catalog: any, now = new Date().toISOString()) {
   const current = booking?.extras?.equipment_revenue_allocation;
@@ -588,7 +588,13 @@ Deno.serve(async (request: Request) => {
       const phone = normalizePhone(body.phone), channel = ["telegram", "instagram"].includes(String(body.channel || "")) ? String(body.channel) : "";
       if (!phone || !channel) return json({ error: "invalid_referral_contact" }, 400);
       if (body.confirmed !== true) return json({ error: "confirmation_required" }, 409);
-      const now = new Date().toISOString(), rewardId = String(body.rewardId || ""), isReminder = validBookingId(rewardId);
+      const now = new Date().toISOString(), rewardId = String(body.rewardId || ""), isReminder = validBookingId(rewardId), kind = isReminder ? "reward_reminder" : "program_invite";
+      const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+      let recentQuery = supabase.from("vacleaner_referral_messages").select("id,sent_at").eq("customer_phone", phone).eq("kind", kind).eq("channel", channel).gte("sent_at", cutoff).order("sent_at", { ascending: false }).limit(1);
+      recentQuery = isReminder ? recentQuery.eq("reward_id", rewardId) : recentQuery.is("reward_id", null);
+      const { data: recentMessage, error: recentError } = await recentQuery.maybeSingle();
+      if (recentError) throw recentError;
+      if (recentMessage) return json({ ok: true, sentAt: recentMessage.sent_at, channel, kind, alreadySent: true });
       const customerPatch: Record<string, any> = { updated_at: now };
       if (!isReminder) { customerPatch.referral_sent_at = now; customerPatch.referral_sent_channel = channel; }
       const { error: customerError } = await supabase.from("vacleaner_customers").update(customerPatch).eq("phone", phone);
@@ -597,9 +603,9 @@ Deno.serve(async (request: Request) => {
         const { error: rewardError } = await supabase.from("vacleaner_referral_rewards").update({ reminded_at: now, updated_at: now }).eq("id", rewardId).eq("referrer_phone", phone).eq("status", "active");
         if (rewardError) throw rewardError;
       }
-      const { error: messageError } = await supabase.from("vacleaner_referral_messages").insert({ customer_phone: phone, kind: isReminder ? "reward_reminder" : "program_invite", channel, reward_id: isReminder ? rewardId : null, sent_at: now });
+      const { error: messageError } = await supabase.from("vacleaner_referral_messages").insert({ customer_phone: phone, kind, channel, reward_id: isReminder ? rewardId : null, sent_at: now });
       if (messageError) throw messageError;
-      return json({ ok: true, sentAt: now, channel, kind: isReminder ? "reward_reminder" : "program_invite" });
+      return json({ ok: true, sentAt: now, channel, kind });
     }
 
     if (action === "detach_promo") {
@@ -652,6 +658,12 @@ Deno.serve(async (request: Request) => {
     }
 
     if (action === "create" || action === "edit") {
+      const clientRequestId = action === "create" && validBookingId(body.clientRequestId) ? String(body.clientRequestId) : "";
+      if (clientRequestId) {
+        const { data: prior, error: priorError } = await supabase.from("vacleaner_bookings").select("*").eq("client_request_id", clientRequestId).maybeSingle();
+        if (priorError) throw priorError;
+        if (prior) return json({ booking: safeBooking(prior), promo: prior.extras?.promo || null, idempotent: true }, 200);
+      }
       const productCode = String(body.productCode || ""), product = catalog.products?.[productCode];
       if (!product) return json({ error: "invalid_product" }, 400);
       const period = periodFromBody(body, slots), bookingId = action === "edit" ? String(body.bookingId || "") : "";
@@ -709,9 +721,16 @@ Deno.serve(async (request: Request) => {
       if (action === "create") {
         const suffix = crypto.randomUUID().replaceAll("-", "").slice(0, 5).toUpperCase(), now = new Date();
         const holdExpiresAt = prepaymentPaid ? null : new Date(now.getTime() + 2 * 60 * 60 * 1000).toISOString();
-        const insert = { ...common, booking_code: `VAC-${period.startDate.replaceAll("-", "").slice(2)}-${suffix}`, deposit_paid: false, deposit_returned: false,
+        const insert = { ...common, booking_code: `VAC-${period.startDate.replaceAll("-", "").slice(2)}-${suffix}`, deposit_paid: false, deposit_returned: false, client_request_id: clientRequestId || null,
           status: "pending", prepayment_paid: false, prepayment_paid_at: null, confirmed_at: null, hold_expires_at: null };
-        const { data, error } = await supabase.from("vacleaner_bookings").insert(insert).select("*").single(); if (error || !data) throw error || new Error("insert_failed");
+        const { data, error } = await supabase.from("vacleaner_bookings").insert(insert).select("*").single();
+        if (error || !data) {
+          if (clientRequestId && String((error as any)?.code || "") === "23505") {
+            const { data: prior } = await supabase.from("vacleaner_bookings").select("*").eq("client_request_id", clientRequestId).maybeSingle();
+            if (prior) return json({ booking: safeBooking(prior), promo: prior.extras?.promo || null, idempotent: true }, 200);
+          }
+          throw error || new Error("insert_failed");
+        }
         try {
           saved = await applyReservation(supabase, data.id, period, product, prepaymentPaid ? "confirmed" : "waiting_payment", holdExpiresAt);
         } catch (reservationError) {
@@ -840,7 +859,7 @@ Deno.serve(async (request: Request) => {
     const message = error instanceof Error ? error.message : "service_error";
     if (message === "inventory_conflict") return json({ error: "inventory_conflict" }, 409);
     if (["invalid_dates", "invalid_exact_time", "invalid_rental_period"].includes(message)) return json({ error: message }, 400);
-    console.error("vacleaner-admin-bookings-v3", message);
+    console.error("vacleaner-admin-bookings-v4", message);
     return json({ error: "service_error" }, 500);
   }
 });

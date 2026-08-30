@@ -6,7 +6,7 @@ ok('agreed tariffs',[250,350,500,700,900].join(',')===[p.local,...z.map(x=>x.amo
 ok('agreed route bands',z.map(x=>x.maxKm).join(',')==='15,20,30,40'&&p.maxRouteKm===40);
 ok('Dykanka 31 km resolves to 900',z.find(x=>31<=x.maxKm)?.amount===900);
 ok('over 40 requires manager',p.outsideZone==='agreement');
-ok('fuel defaults editable',p.fuel.petrolPerL===80&&p.fuel.lpgPerL===45&&p.fuel.consumptionL100===7&&p.fuel.tripMultiplier===4);
+ok('fuel defaults editable',p.fuel.petrolPerL===83&&p.fuel.lpgPerL===45&&p.fuel.consumptionL100===7&&p.fuel.tripMultiplier===4);
 ok('public uses route km',slots.includes('const distance=Number(meta.routeKm)')&&!slots.includes('Math.ceil((distance-deliveryPricing.includedKm)'));
 ok('analytics uses same route-zone model',analytics.includes('const distance=Number(meta.routeKm)')&&analytics.includes("delivery_zone:'route_zone'"));
 ok('admin has five tariffs and fuel settings',admin.includes('deliveryLocal')&&[15,20,30,40].every(k=>admin.includes('deliveryZone'+k))&&admin.includes('fuelPetrol')&&admin.includes('fuelLpg')&&admin.includes('fuelConsumption'));

@@ -218,6 +218,11 @@ Deno.serve(async (request: Request) => {
         if (!Number.isFinite(age) || age < -60000 || age > 10 * 60 * 1000) return json({ error: "event_expired" }, 409);
       }
 
+      const eventKey = `peer:${eventType}:${booking.id}`;
+      const { data: claimed, error: claimError } = await supabase.rpc("vacleaner_claim_notification_dispatch", { p_event_key: eventKey, p_booking_id: booking.id, p_event_type: `peer_${eventType}`, p_lease_seconds: 120 });
+      if (claimError) throw claimError;
+      if (claimed !== true) return json({ delivered: 0, recipients: 0, deduplicated: true });
+
       const { data: subscriptions, error: subscriptionsError } = await supabase.from("vacleaner_push_subscriptions")
         .select("id,endpoint,p256dh,auth_key,device_id,admin_alias")
         .eq("user_id", userId).eq("active", true);
@@ -236,13 +241,19 @@ Deno.serve(async (request: Request) => {
         : eventType === "issued"
         ? `${customer}\nПовернення ${shortDate(booking.return_date)} о ${bookingTime(booking, "return")}\nЗмінив: ${actor}`
         : `${customer}\nБронювання завершено\nЗмінив: ${actor}`;
-      const results = await Promise.all(recipients.map((subscription: any) => sendNotification(supabase, subscription, config, {
-        title,
-        body: details,
-        tag: `vacleaner-admin-${booking.id}-${eventType}`,
-        data: { url: "/admin/bronuvannia/", bookingId: booking.id, event: `admin_${eventType}` },
-      })));
-      return json({ delivered: results.filter(Boolean).length, recipients: recipients.length });
+      let delivered = 0;
+      try {
+        const results = await Promise.all(recipients.map((subscription: any) => sendNotification(supabase, subscription, config, {
+          title,
+          body: details,
+          tag: `vacleaner-admin-${booking.id}-${eventType}`,
+          data: { url: "/admin/bronuvannia/", bookingId: booking.id, event: `admin_${eventType}` },
+        })));
+        delivered = results.filter(Boolean).length;
+      } finally {
+        await supabase.rpc("vacleaner_finish_notification_dispatch", { p_event_key: eventKey, p_delivered: recipients.length === 0 || delivered > 0 });
+      }
+      return json({ delivered, recipients: recipients.length });
     }
     return json({ error: "invalid_action" }, 400);
   } catch (error) {

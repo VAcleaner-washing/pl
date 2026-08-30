@@ -382,7 +382,10 @@ document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObser
 (()=>{
   const BOOKING_API='https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5';
   const priorFetch=window.fetch.bind(window);
+  const createIds=new Map();
+  const createFingerprint=body=>JSON.stringify([body.productCode,body.startDate,body.returnDate,body.pickupWindow,body.returnWindow,body.customerPhone,body.fulfillment,body.deliveryAddress,body.promoCode,body.extras,body.storyMention,body.storyGiftChoice]);
   window.fetch=(input,init)=>{
+    let createKey='';
     try{
       const url=typeof input==='string'?input:input?.url||'';
       if(String(url).startsWith(BOOKING_API)&&typeof init?.body==='string'){
@@ -393,6 +396,11 @@ document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObser
             if(contact.telegram)body.customerTelegram=contact.telegram;
             if(contact.instagram)body.customerInstagram=contact.instagram;
             body.preferredContact=contact.preferredContact||'phone';
+            createKey=createFingerprint(body);
+            const prior=createIds.get(createKey),now=Date.now();
+            const requestId=prior&&now-prior.createdAt<10*60*1000?prior.id:crypto.randomUUID();
+            createIds.set(createKey,{id:requestId,createdAt:now});
+            body.clientRequestId=requestId;
           }
           const mode=document.querySelector('#booking-extras .booking-choice-row button.is-selected,#booking-extras .booking-choice-row button[aria-pressed="true"]')?.textContent||'';
           if(/Доставка/.test(mode)){
@@ -412,7 +420,9 @@ document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObser
         }
       }
     }catch{}
-    return priorFetch(input,init);
+    const request=priorFetch(input,init);
+    if(!createKey)return request;
+    return Promise.resolve(request).then(response=>{if(response?.ok)createIds.delete(createKey);return response}).catch(error=>{throw error});
   };
 })();
 

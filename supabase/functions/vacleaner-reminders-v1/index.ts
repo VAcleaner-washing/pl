@@ -43,6 +43,18 @@ async function sendToManagers(db: any, payload: Record<string, unknown>, ttl = 3
   }));
   return { delivered, attempted: subs.length };
 }
+async function sendClaimedToManagers(db: any, eventKey: string, bookingId: string, eventType: string, payload: Record<string, unknown>, ttl = 3600) {
+  const { data: claimed, error: claimError } = await db.rpc("vacleaner_claim_notification_dispatch", { p_event_key: eventKey, p_booking_id: bookingId, p_event_type: eventType, p_lease_seconds: 120 });
+  if (claimError) throw claimError;
+  if (claimed !== true) {
+    const { data: prior } = await db.from("vacleaner_notification_dispatch_claims").select("delivered_at").eq("event_key", eventKey).maybeSingle();
+    return { delivered: 0, attempted: 0, alreadyDelivered: Boolean(prior?.delivered_at) };
+  }
+  let result = { delivered: 0, attempted: 0 };
+  try { result = await sendToManagers(db, payload, ttl); }
+  finally { await db.rpc("vacleaner_finish_notification_dispatch", { p_event_key: eventKey, p_delivered: result.delivered > 0 }); }
+  return { ...result, alreadyDelivered: false };
+}
 Deno.serve(async (request: Request) => {
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   try {
@@ -71,8 +83,8 @@ Deno.serve(async (request: Request) => {
         const created = DateTime.fromISO(String((booking as any).created_at || ""), { zone: "utc" }).setZone(ZONE);
         if (created.isValid && now.diff(created, "minutes").minutes >= 0 && now.diff(created, "minutes").minutes <= 120) {
           const pickupTime = exactTime(booking, "pickup", slots), returnTime = exactTime(booking, "return", slots);
-          const result = await sendToManagers(db, { title: `Нове бронювання · ${adminProductLabel(booking.product_code, booking.product_label)}`, body: `${booking.customer_name || "Клієнт"}\n${shortDate(booking.start_date)} ${pickupTime} → ${shortDate(booking.return_date)} ${returnTime} · ${money(booking.total_amount)} грн\nПотрібне підтвердження`, tag: `new-${booking.id}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "new_booking" } }, 7200);
-          if (result.delivered > 0) { entry.newBooking = (booking as any).created_at || now.toISO(); sent.push({ bookingId: booking.id, type: "new", delivered: result.delivered }); }
+          const result = await sendClaimedToManagers(db, `public:new:${booking.id}`, booking.id, "new_booking", { title: `Нове бронювання · ${adminProductLabel(booking.product_code, booking.product_label)}`, body: `${booking.customer_name || "Клієнт"}\n${shortDate(booking.start_date)} ${pickupTime} → ${shortDate(booking.return_date)} ${returnTime} · ${money(booking.total_amount)} грн\nПотрібне підтвердження`, tag: `new-${booking.id}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "new_booking" } }, 7200);
+          if (result.delivered > 0 || result.alreadyDelivered) { entry.newBooking = (booking as any).created_at || now.toISO(); if (result.delivered > 0) sent.push({ bookingId: booking.id, type: "new", delivered: result.delivered }); }
         }
       }
       if (booking.status === "confirmed") {
@@ -81,17 +93,19 @@ Deno.serve(async (request: Request) => {
           const deposit = Math.max(0, Number(booking.deposit_amount || 0));
           const delivery = booking.fulfillment === "delivery" ? "Доставка" : "Самовивіз";
           const depositText = deposit > 0 ? `Залоговий платіж ${money(deposit)} грн` : "Перевірити залоговий платіж";
-          const result = await sendToManagers(db, { title: `Видача через 1 год · ${adminProductLabel(booking.product_code, booking.product_label)}`, body: `${booking.customer_name || "Клієнт"} · ${shortDate(booking.start_date)} ${pickupTime}\n${delivery} · ${depositText}`, tag: `issue-${booking.id}-${booking.start_date}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "pickup_reminder" } }, 5400);
-          if (result.delivered > 0) { entry.issue = booking.start_date; sent.push({ bookingId: booking.id, type: "issue", delivered: result.delivered }); }
+          const result = await sendClaimedToManagers(db, `reminder:issue:${booking.id}:${booking.start_date}`, booking.id, "pickup_reminder", { title: `Видача через 1 год · ${adminProductLabel(booking.product_code, booking.product_label)}`, body: `${booking.customer_name || "Клієнт"} · ${shortDate(booking.start_date)} ${pickupTime}\n${delivery} · ${depositText}`, tag: `issue-${booking.id}-${booking.start_date}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "pickup_reminder" } }, 5400);
+          if (result.delivered > 0 || result.alreadyDelivered) { entry.issue = booking.start_date; if (result.delivered > 0) sent.push({ bookingId: booking.id, type: "issue", delivered: result.delivered }); }
         }
       }
       if (booking.status === "issued" && booking.return_date === today && now.hour >= 7 && entry.returnDay !== booking.return_date) {
         const returnTime = exactTime(booking, "return", slots);
-        const result = await sendToManagers(db, { title: `Повернення сьогодні · ${adminProductLabel(booking.product_code, booking.product_label)}`, body: `${booking.customer_name || "Клієнт"} · ${shortDate(booking.return_date)} ${returnTime}\nПеревірити хімію та фінальний розрахунок`, tag: `return-${booking.id}-${booking.return_date}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "return_today" } }, 21600);
-        if (result.delivered > 0) { entry.returnDay = booking.return_date; sent.push({ bookingId: booking.id, type: "return", delivered: result.delivered }); }
+        const result = await sendClaimedToManagers(db, `reminder:return:${booking.id}:${booking.return_date}`, booking.id, "return_today", { title: `Повернення сьогодні · ${adminProductLabel(booking.product_code, booking.product_label)}`, body: `${booking.customer_name || "Клієнт"} · ${shortDate(booking.return_date)} ${returnTime}\nПеревірити хімію та фінальний розрахунок`, tag: `return-${booking.id}-${booking.return_date}`, data: { url: `/admin/bronuvannia/?booking=${booking.id}`, bookingId: booking.id, event: "return_today" } }, 21600);
+        if (result.delivered > 0 || result.alreadyDelivered) { entry.returnDay = booking.return_date; if (result.delivered > 0) sent.push({ bookingId: booking.id, type: "return", delivered: result.delivered }); }
       }
       state.bookings[booking.id] = entry;
     }
+    const activeBookingIds = new Set((bookings || []).map((row: any) => String(row.id)));
+    for (const bookingId of Object.keys(state.bookings)) if (!activeBookingIds.has(bookingId)) delete state.bookings[bookingId];
     state.lastRunAt = now.toISO();
     const { error: stateError } = await db.from("vacleaner_settings").upsert({ key: "push_reminder_state", value: state, updated_at: new Date().toISOString() }, { onConflict: "key" });
     if (stateError) throw stateError;
