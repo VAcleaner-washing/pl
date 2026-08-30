@@ -105,6 +105,16 @@ def search_state(page:Page,qa:QA,width:int):
     qa.check(page.locator('#pageTitle').inner_text().strip()=='Пошук' and page.locator('.global-search-card').count()==4,f'{width}: global search hub renders all four result groups')
     qa.check(page.locator('.global-search-card .ops-empty').count()==4,f'{width}: global search empty state is explicit in every group')
     qa.check(pwa.no_overflow(page),f'{width}: global search empty state has no overflow')
+    page.locator('#globalSearch').fill('Анна');page.wait_for_timeout(50)
+    row=page.locator('.search-result-row').first
+    if row.count():
+        row.hover();page.wait_for_timeout(40)
+        hover=row.evaluate("""el=>{const s=getComputedStyle(el);return{boxShadow:s.boxShadow,transform:s.transform,filter:s.filter,backgroundImage:s.backgroundImage}}""")
+        qa.check(hover['boxShadow']=='none' and hover['transform']=='none' and hover['filter']=='none',f'{width}: global search hover stays calm without generic button halo or movement')
+        qa.check('gradient' in hover['backgroundImage'].lower(),f'{width}: global search hover uses a subtle surface tint instead of an outline box')
+        if width==1440: qa.shot(page,'1440-global-search-hover.png')
+    else:
+        qa.check(False,f'{width}: global search exposes a hoverable result row')
     page.locator('#clearSearch').click();page.wait_for_timeout(30)
     qa.check(page.locator('.booking-card').count()>=1,f'{width}: clearing global search restores the current admin view')
 

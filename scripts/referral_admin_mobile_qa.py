@@ -14,7 +14,7 @@ body{{margin:0;background:#070b0e;color:#f4f1eb;font-family:Arial,sans-serif}}#f
 <div class="referral-send-status sent"><i>✓</i><div><b>Надіслано 28.08 · Instagram</b><span>Фіксуємо тільки фактичне надсилання.</span></div></div>
 <div class="referral-share-card referral-code-card"><div><span>Персональний код</span><strong>VA-A1B2C3D</strong><small>Безстроковий · можна передавати кільком друзям</small></div><button class="btn referral-copy-code">Скопіювати</button></div>
 <div class="referral-summary-line"><span><b>3</b> рекомендації</span><i>·</i><span><b>450 грн</b> зароблено</span><i>·</i><span><b>300 грн</b> доступно</span></div>
-<div class="referral-action-panel"><div><small>Надіслати програму</small><strong>Основний канал — Instagram</strong><span>Основний канал виділено. Текст скопіюється автоматично; після фактичної відправки підтвердьте її в адмінці.</span></div><div class="referral-primary-actions"><button class="btn referral-confirmed" disabled aria-pressed="true">✓ Надіслано</button><button class="btn">Надіслати в Telegram</button></div></div>
+<div class="referral-action-panel"><div><small>Надіслати програму</small><strong>Основний канал — Instagram</strong><span>Основний канал виділено. Текст скопіюється автоматично; після фактичної відправки підтвердьте її в адмінці.</span></div><div class="referral-action-status sent" id="referralActionStatus"><i>✓</i><span><b>Надіслано · Instagram · 28.08, 18:31</b><small>Факт відправки збережений у журналі.</small></span></div><div class="referral-primary-actions"><button class="btn referral-confirmed" disabled aria-pressed="true">✓ Надіслано</button><button class="btn">Надіслати в Telegram</button></div></div>
 <section class="referral-history-section"><div class="referral-history-head"><div><small>Рекомендації</small><h3>Хто скористався кодом</h3></div><strong>3</strong></div><div class="referral-history-list"><div class="referral-history-row"><div><strong>Олена Тест</strong><span>Бронювання VA-1234 · 25.08</span></div><div><b>800 грн</b><em class="referral-state completed">Завершено</em></div></div><div class="referral-history-row"><div><strong>Іван Тест</strong><span>Бронювання VA-5678 · 28.08</span></div><div><b>700 грн</b><em class="referral-state pending">Очікує</em></div></div></div></section>
 <section class="referral-history-section"><div class="referral-history-head"><div><small>Бонуси</small><h3>Бонуси клієнта</h3></div><strong>2 активні</strong></div><div class="referral-history-list"><div class="referral-history-row"><div><strong>−150 грн за Олену Тест</strong><span>до 24.01.2027 · 149 дн.</span></div><div><b>150 грн</b><em class="referral-state active">Активний</em></div></div></div></section>
 <section class="referral-message-card"><div class="referral-message-head"><div><small>Готовий текст</small><strong>Повідомлення клієнту</strong></div><button class="btn referral-copy-text">Скопіювати текст</button></div><div class="referral-message-preview">Дякуємо, що обираєте VAcleaner 🤍<br><br>Приведіть друга — бонус отримають обоє.</div></section>
@@ -37,7 +37,8 @@ with sync_playwright() as p:
           const funnel=document.querySelector('.referral-funnel');
           const analytics=document.querySelector('.referral-analytics-panel');
           const confirmed=document.querySelector('.referral-confirmed');
-          return {docOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,bad,buttons,codeWidth:code.getBoundingClientRect().width,alertWidth:alert.getBoundingClientRect().width,funnelWidth:funnel.getBoundingClientRect().width,analyticsWidth:analytics.getBoundingClientRect().width,confirmedText:confirmed?.innerText||'',confirmedOpacity:confirmed?getComputedStyle(confirmed).opacity:'0'};
+          const actionStatus=document.querySelector('#referralActionStatus');
+          return {docOverflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,bad,buttons,codeWidth:code.getBoundingClientRect().width,alertWidth:alert.getBoundingClientRect().width,funnelWidth:funnel.getBoundingClientRect().width,analyticsWidth:analytics.getBoundingClientRect().width,confirmedText:confirmed?.innerText||'',confirmedOpacity:confirmed?getComputedStyle(confirmed).opacity:'0',actionStatusText:actionStatus?.innerText||'',actionStatusWidth:actionStatus?.getBoundingClientRect().width||0};
         }''')
         assert result['docOverflow'] <= 0, (width,result)
         assert not result['bad'], (width,result['bad'][:8])
@@ -47,6 +48,7 @@ with sync_playwright() as p:
         assert result['funnelWidth'] <= width-16, (width,result)
         assert all(x['h'] >= 38 and x['scroll'] <= x['client']+1 for x in result['buttons']), (width,result)
         assert result['confirmedText'].startswith('✓') and float(result['confirmedOpacity']) >= .99, (width,result)
+        assert result['actionStatusWidth'] > 120 and '✓' in result['actionStatusText'] and 'Instagram' in result['actionStatusText'], (width,result)
         passed+=1
         page.close()
     browser.close()

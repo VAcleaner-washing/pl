@@ -111,6 +111,10 @@ BOOKINGS = [
 BOOKINGS[0]["customer_telegram"] = ""
 # Regression fixture: historical releases polluted admin_note with workflow flags.
 BOOKINGS[2]["admin_note"] = "Перевірити комплект перед видачею.\nЗ клієнтом зв’язались\nУмови оренди та сума залогового платежу надіслані\nПередплата 200 грн отримана"
+BOOKINGS[2]["fulfillment"] = "delivery"
+BOOKINGS[2]["delivery_amount"] = 250
+BOOKINGS[2]["fulfillment_address_detail"] = "7 під’їзд"
+BOOKINGS[2]["customer_comment"] = ""
 
 
 def init_script(authenticated: bool = True, standalone: bool = False) -> str:
@@ -520,6 +524,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         fg=issued_geometry
         qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['l']>=fg['p']['l']-1 and fg['dep']['r']<=fg['p']['r']+1, f"{label}: issued preliminary settlement and deposit stay inside finance card")
         qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['h']>=48 and fg['dep']['h']>=48 and not (fg['due']['r']>fg['dep']['l'] and fg['dep']['r']>fg['due']['l'] and fg['due']['b']>fg['dep']['t'] and fg['dep']['b']>fg['due']['t']), f"{label}: issued preliminary settlement and deposit never overlap")
+        dep_readability=issued_finance.locator('.booking-deposit-state').evaluate("""el=>{const r=el.getBoundingClientRect(),label=el.querySelector('span'),amount=el.querySelector('strong'),state=el.querySelector('small'),lr=label?.getBoundingClientRect(),ar=amount?.getBoundingClientRect(),sr=state?.getBoundingClientRect(),ls=label?getComputedStyle(label):null,as=amount?getComputedStyle(amount):null;return{box:{l:r.left,r:r.right},label:lr?{l:lr.left,r:lr.right,h:lr.height}:null,amount:ar?{l:ar.left,r:ar.right,h:ar.height}:null,state:sr?{l:sr.left,r:sr.right,h:sr.height}:null,wordBreak:ls?.wordBreak,overflowWrap:ls?.overflowWrap,amountWhiteSpace:as?.whiteSpace}}""")
+        qa.check(dep_readability['label'] is not None and dep_readability['amount'] is not None and dep_readability['state'] is not None and dep_readability['label']['l']>=dep_readability['box']['l']-1 and dep_readability['label']['r']<=dep_readability['box']['r']+1 and dep_readability['amount']['r']<=dep_readability['box']['r']+1 and dep_readability['state']['r']<=dep_readability['box']['r']+1 and dep_readability['wordBreak']=='normal' and dep_readability['overflowWrap']=='normal' and dep_readability['amountWhiteSpace']=='nowrap', f"{label}: deposit label, amount and state remain readable without character fragmentation")
         page.locator('[data-filter="all"]').click();page.wait_for_timeout(30)
 
         # Global search stays global from every tab and client results open the full CRM card.
@@ -736,7 +742,8 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         detail_text=page.locator('.detail').inner_text();qa.check(target["booking_code"] in detail_text, f"{label}: push deep-link opens exact booking")
         qa.check('З клієнтом зв’язались' not in detail_text and 'Умови оренди та сума залогового платежу надіслані' not in detail_text and 'Передплата 200 грн отримана' not in detail_text, f"{label}: legacy workflow metadata never leaks into the visible comment")
         comment_labels=page.locator('.detail .comment h3').evaluate_all("els=>els.map(el=>(el.textContent||'').trim())")
-        qa.check('Коментар клієнта' in comment_labels and 'Примітка менеджера' in comment_labels and 'Перевірити комплект перед видачею.' in detail_text, f"{label}: client comment and manager note stay separate in booking detail")
+        access_text=page.locator('.detail-delivery-detail').inner_text() if page.locator('.detail-delivery-detail').count() else ''
+        qa.check('7 під’їзд' in access_text and 'Під’їзд / поверх / домофон / орієнтир' in access_text and 'Коментар клієнта' not in comment_labels and 'Примітка менеджера' in comment_labels and 'Перевірити комплект перед видачею.' in detail_text, f"{label}: entrance detail stays with delivery and does not masquerade as client comment")
         qa.check(no_overflow(page), f"{label}: booking detail has no horizontal overflow")
         qa.check(page.locator(".detail-actions").evaluate("el=>getComputedStyle(el).position") != "sticky", f"{label}: detail actions do not cover client content")
         qa.check(page.locator(".detail-top").evaluate("el=>getComputedStyle(el).position") == "sticky", f"{label}: detail back row stays sticky during long booking scroll")

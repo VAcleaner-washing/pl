@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.35",
+  "version": "4.2.36",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -126,6 +126,8 @@
     "test:v4.2.32-admin-typography": "node scripts/test-v4-2-32-admin-typography.mjs",
     "test:v4.2.33-client-geometry": "node scripts/test-v4-2-33-client-geometry.mjs",
     "test:v4.2.34-pwa-referral-slots": "node scripts/test-v4-2-34-pwa-referral-slots.mjs",
-    "test:v4.2.35-finance-pwa": "node scripts/test-v4-2-35-finance-pwa.mjs"
+    "test:v4.2.35-finance-pwa": "node scripts/test-v4-2-35-finance-pwa.mjs",
+    "test:v4.2.36-address-finance-referral": "node scripts/test-v4-2-36-address-finance-referral.mjs",
+    "test:referral-ios-launch": "python scripts/referral_ios_launch_qa.py"
   }
 }

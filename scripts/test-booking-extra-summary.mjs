@@ -7,7 +7,7 @@ ok(admin.includes("spot_lifter:'SPOT FIX 50 мл'")&&admin.includes("stain_exit
 ok(admin.includes('function extrasHeaderInline(b)'),'booking header extras use a dedicated resolver');
 ok(admin.includes('headerExtras=extrasHeaderInline(b)'),'booking card computes extra summary once');
 ok(admin.includes('class="booking-identity-extras"'),'booking card renders selected extras next to booking identity');
-ok(admin.includes("mobileFlags=`${b.customer_comment?'<span>Коментар</span>':''}`"),'mobile no longer replaces extra names with a generic “Додатково” badge');
+ok(admin.includes("mobileFlags=`${customerComment?'<span>Коментар</span>':''}`")&&!admin.includes("mobileFlags=`${getSelectedExtras(b).length?'<span>Додатково</span>':''}"),'mobile no longer replaces extra names with a generic “Додатково” badge');
 ok(admin.includes("extraText=extras.length===1?`${adminExtraLabel(extras[0])}"),'upcoming uses compact extra names too');
 ok(admin.includes('<article class="card panel extras-panel"><h3>Додатково</h3>'),'detail keeps the full extras panel with prices');
 ok(css.includes('/* v4.0.96 — show selected extras where the manager identifies the booking.'),'v4.0.96 extras-at-a-glance CSS layer exists');

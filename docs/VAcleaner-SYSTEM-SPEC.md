@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.35  
-**Baseline build:** 4235  
+**Baseline version:** 4.2.36  
+**Baseline build:** 4236  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -3107,3 +3107,43 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `scripts/final_desktop_visual_qa.py` finance badge geometry on wide desktop;
 - full static/build/browser/PWA regression + reviewed screenshot audit before commit.
 
+
+
+# 44. Change record — v4.2.36
+
+### ADDED
+
+- **ADDR-014** — legacy access-only comments such as `7 під’їзд` are treated as delivery access detail, never as a customer comment. Booking detail renders the access detail inside the delivery card under `Під’їзд / поверх / домофон / орієнтир`.
+- `supabase/migrations/20260830154000_vacleaner_move_entrance_comment_v4236.sql` — conservative one-time backfill for delivery bookings where a pure entrance marker was stored in `customer_comment` and `fulfillment_address_detail` was empty.
+- **REF-UI-006** — referral send state is visible next to the send controls: `○ Ще не надіслано` → `□ Підтвердіть відправку` → `✓ Надіслано · канал · час`.
+- **REF-UI-007** — in installed iOS PWA, Instagram opens through the native `instagram://` app link without navigating VAcleaner into a blank browser sheet. The referral modal stays in the PWA and returns to the `□ Так, надіслано` confirmation state. Web/desktop keeps the regular Instagram URL.
+- **SEARCH-UI-003** — global-search result rows are navigation lines, not glowing cards: desktop hover must not inherit the generic button halo, outline or horizontal movement; only a restrained surface tint is allowed.
+- `scripts/test-v4-2-36-address-finance-referral.mjs`.
+
+### CHANGED
+
+- Mobile booking finance keeps settlement and deposit side by side when there is enough width, but deposit content is now an internal two-column information grid: label + nowrap amount, state on its own row. Words and `1 500 грн` may not split character-by-character.
+- Referral status is duplicated at the action point so it remains visible even when the modal header is sticky and the scroll area is below the top summary.
+- Booking edit/process payloads use the canonical access-detail fallback, preventing a legacy entrance-only comment from being saved back into `customerComment`.
+
+### FIXED
+
+- `7 під’їзд` no longer appears under `Коментар клієнта`; the affected production booking `VAC-260829-4489C` and matching customer profile were migrated to `fulfillment_address_detail` / `address_detail`.
+- Mobile `Залоговий платіж` no longer breaks `Залоговий`, `1 500 грн` or the state into narrow character fragments.
+- Referral modal no longer makes the manager hunt for the send checkmark after scrolling: confirmation/status is shown directly in the send block.
+- Returning from Instagram no longer leaves an empty white browser sheet in front of the installed PWA; VAcleaner remains the preserved app surface.
+- Global search no longer draws a bright rectangular halo/outline around result rows on pointer hover.
+
+### PRESERVED
+
+- Genuine customer comments remain untouched. The migration only moves a strict entrance-only value when booking detail is empty.
+- Referral durable journal/dedupe and reward logic remain unchanged.
+- v4.2.34 edge-to-edge PWA shell, v4.2.35 PWA list QA stability, delivery/finance formulas, status flow and VA HOME isolation remain unchanged.
+
+### TESTS
+
+- `scripts/test-v4-2-36-address-finance-referral.mjs`;
+- full static/build/browser/PWA regression;
+- reviewed 320/390/430 mobile screenshots for booking finance and referral action state;
+- reviewed desktop global-search hover state and iOS standalone Instagram-launch contract;
+- production DB verification for the migrated booking/customer.

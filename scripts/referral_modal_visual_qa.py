@@ -12,7 +12,7 @@ HTML=f'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" 
 <div class="referral-send-status pending"><i>!</i><div><b>Ще не надсилали</b><span>Надішліть персональний код клієнту. Текст повідомлення скопіюється автоматично.</span></div></div>
 <div class="referral-share-card referral-code-card"><div><span>Персональний код</span><strong>VA-AEBC060</strong><small>Безстроковий · можна передавати кільком друзям</small></div><button class="btn referral-copy-code">Скопіювати</button></div>
 <div class="referral-summary-line"><span><b>0</b> рекомендацій</span><i>·</i><span><b>0 грн</b> зароблено</span><i>·</i><span><b>0 грн</b> доступно</span></div>
-<div class="referral-main-grid"><div class="referral-main-left"><section class="referral-action-panel"><div><small>Надіслати програму</small><strong>Основний канал — Instagram</strong><span>Основний канал виділено. Текст скопіюється автоматично; після фактичної відправки підтвердьте її в адмінці.</span></div><div class="referral-primary-actions"><button class="btn primary" data-channel="instagram">Надіслати в Instagram</button><button class="btn" data-channel="telegram">Надіслати в Telegram</button></div></section></div>
+<div class="referral-main-grid"><div class="referral-main-left"><section class="referral-action-panel"><div><small>Надіслати програму</small><strong>Основний канал — Instagram</strong><span>Основний канал виділено. Текст скопіюється автоматично; після фактичної відправки підтвердьте її в адмінці.</span></div><div class="referral-action-status pending" id="referralActionStatus"><i>○</i><span><b>Ще не надіслано</b><small>Після відкриття каналу підтвердьте фактичну відправку.</small></span></div><div class="referral-primary-actions"><button class="btn primary" data-channel="instagram">Надіслати в Instagram</button><button class="btn" data-channel="telegram">Надіслати в Telegram</button></div></section></div>
 <section class="referral-message-card"><div class="referral-message-head"><div><small>Готовий текст</small><strong>Повідомлення клієнту</strong></div><button class="btn referral-copy-text">Скопіювати текст</button></div><div class="referral-message-preview">{MESSAGE}</div></section></div>
 <section class="referral-empty-state"><i>↗</i><div><strong>Поки що рекомендацій немає</strong><span>Коли друг використає код, тут з’явиться його бронювання, статус і бонус клієнта.</span></div></section>
 </div><footer><button class="btn">Контакти клієнта</button><button class="btn primary">Готово</button></footer>
@@ -33,6 +33,8 @@ with sync_playwright() as p:
           const tg=document.querySelector('[data-channel="telegram"]');
           const empty=document.querySelector('.referral-empty-state');
           const scroll=document.querySelector('.referral-share-scroll');
+          const actionStatus=document.querySelector('#referralActionStatus');
+          const asr=actionStatus.getBoundingClientRect();
           const cr=card.getBoundingClientRect(), fr=form.getBoundingClientRect(), mr=message.getBoundingClientRect(), er=empty.getBoundingClientRect(), sr=scroll.getBoundingClientRect();
           return {
             sw:document.documentElement.scrollWidth,cw:document.documentElement.clientWidth,
@@ -44,12 +46,14 @@ with sync_playwright() as p:
             instaPrimary:insta.classList.contains('primary'),
             instaVisible:insta.getBoundingClientRect().width>0,
             tgVisible:tg.getBoundingClientRect().width>0,
-            bodyOverflow:document.body.scrollWidth-document.body.clientWidth
+            bodyOverflow:document.body.scrollWidth-document.body.clientWidth,
+            actionStatusText:actionStatus.innerText.trim(),actionStatusVisible:asr.width>100&&asr.height>30
           };
         }''')
         assert result['sw'] <= result['cw']+1 and result['bodyOverflow'] <= 1, (width,result)
         assert result['messageVisible'] and result['previewChars'] > 120 and result['messageBeforeHistory'] and result['messageInInitialScrollViewport'], (width,result)
         assert result['instaPrimary'] and result['instaVisible'] and result['tgVisible'], (width,result)
+        assert result['actionStatusVisible'] and 'Ще не надіслано' in result['actionStatusText'], (width,result)
         if width>900:
             assert result['cardW'] <= 982 and abs(result['cardW']-result['formW']) <= 2 and result['deadRight'] <= 2, (width,result)
         passed += 1
