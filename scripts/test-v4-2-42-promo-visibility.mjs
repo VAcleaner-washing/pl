@@ -6,7 +6,7 @@ const pkg=JSON.parse(read('package.json'));
 const release=JSON.parse(read('release.json'));
 let pass=0,fail=[];
 const ok=(name,cond)=>{if(cond){pass++;console.log('PASS',name)}else{fail.push(name);console.error('FAIL',name)}};
-ok('release is v4.2.42 build 4242',release.version==='4.2.42'&&String(release.build)==='4242'&&pkg.version==='4.2.42');
+ok('release includes v4.2.42+ promo visibility contract',Number(release.build)>=4242&&pkg.version===release.version);
 ok('promo toggle owns full friendly copy',js.includes('vx-promo-toggle__copy')&&js.includes('Введіть код — перевіримо знижку автоматично')&&js.includes('vx-promo-toggle__action'));
 ok('promo toggle is full width',css.includes('.vx-promo-toggle{width:100%;min-height:60px'));
 ok('promo is a full contact-grid row',css.includes('.booking-promo-field{position:relative;grid-column:1/-1}'));

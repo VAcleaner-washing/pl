@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.42  
-**Baseline build:** 4242  
+**Baseline version:** 4.2.43  
+**Baseline build:** 4243  
 **Останнє оновлення:** 2026-08-31  
 **Власник логіки:** VAcleaner  
 
@@ -3388,3 +3388,35 @@ Customer PII не повинна потрапляти у release ZIP як histor
 ## UI-DELIVERY-CARD-001 — booking card delivery axis
 
 У картці бронювання блок `Видача` читається як фінансово-операційний рядок: `Доставка` / `Самовивіз` зліва, сума доставки справа на тій самій горизонтальній осі. Адреса/маршрут іде окремим рядком нижче. Не склеювати `250 грн · адреса` в один текстовий span. На mobile сума повинна бути візуально вирівняна по правому краю так само послідовно, як ключові суми у фінансовому блоці.
+
+
+# 51. Change record — v4.2.43
+
+### ADDED
+- **CRIT-QA-001 — screenshot-targeted regression.** A screenshot-driven fix is only considered verified when QA checks the exact component and surface shown by the user, not a visually similar component elsewhere. This release explicitly guards `admin booking card → booking-delivery`, `return finance → story gift persistence`, and `public booking contact → promo toggle`.
+- `scripts/test-v4-2-43-critical-booking-fixes.mjs` protects the three exact-surface fixes as one release gate.
+
+### CHANGED
+- **CRIT-BOOK-001 — admin delivery row geometry.** In the mobile booking card, `Доставка` / `Самовивіз` and its amount are separate siblings on one left/right axis; route-safe address is a separate row underneath. `250 грн · адреса` is no longer one text node.
+- **CRIT-BOOK-003 — promo discoverability.** On public booking Contacts, promo entry remains a full-width secondary control with `Є промокод?`, helper copy and `Додати +`; it stays secondary to the booking CTA.
+- Public/admin asset build is `4243`, forcing cache refresh for PWA and browser clients.
+
+### FIXED
+- **CRIT-BOOK-002 — story gift persistence end-to-end.** `storyMention` + `storyGiftChoice` is one contract between Return UI and `vacleaner-admin-bookings-v4`. For eligible Puzzi rentals from 1 000 грн, `diffuser50` persists to `extras.gifts.story.choice` and does not activate chemistry freebies; only `chemistry2` sets `extras.chemistry.story_mention`.
+- Production `vacleaner-admin-bookings-v4` must run a source version that accepts `storyGiftChoice`, persists `extras.gifts.story`, and gives the free-two-portions calculation only to `chemistry2`.
+- The exact admin booking-card delivery amount is right-aligned independently of the address, matching the financial reading axis.
+
+### PRESERVED
+- Delivery pricing, route distance, deposit rules, manual discounts, referral logic, promo validation and booking state transitions are unchanged.
+- Existing completed bookings are not silently rewritten by the release. Historical financial corrections remain an explicit manager action.
+- Address provider remains OpenStreetMap/Photon and route provider remains OSRM.
+
+### TESTS
+- `npm run test:v4.2.43-critical-booking-fixes`;
+- `npm run test:v4.2.42-promo-visibility`;
+- `npm run test:v4.2.40-booking-return-ux`;
+- `npm run test:booking-gifts`;
+- `npm run test:admin-return-gift-persistence`;
+- `npm run qa:static`;
+- canonical Browser/PWA QA remains a release-blocking gate.
+

@@ -10,9 +10,9 @@ if(!errors.length){
   const inventory=JSON.parse(fs.readFileSync(file,'utf8'));
   const bySlug=new Map(inventory.functions.map(item=>[item.slug,item]));
   const expectedVersions={
-    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':4,'vacleaner-settings':20,'vacleaner-push':8,
+    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':8,'vacleaner-settings':20,'vacleaner-push':8,
     'vacleaner-admin-data-v1':17,'vacleaner-campaigns-v1':20,'vacleaner-reminders-v1':8,'vacleaner-booking-promo-v1':3,
-    'vacleaner-address-v1':10,'vacleaner-sms-v2':5,'vacleaner-sms-audit-v1':2,'vacleaner-status-correction-v1':7,
+    'vacleaner-address-v1':13,'vacleaner-sms-v2':5,'vacleaner-sms-audit-v1':2,'vacleaner-status-correction-v1':7,
     'vacleaner-customer-documents-v1':5,'vacleaner-extend-rental-v1':5,
   };
   for(const [slug,version] of Object.entries(expectedVersions)){const row=bySlug.get(slug);if(!row||row.status!=='ACTIVE'||row.version!==version||!/^[a-f0-9]{64}$/.test(row.sha256||''))errors.push(`production ${slug} inventory mismatch`)}

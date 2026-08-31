@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-29T15:08:00Z",
+  "capturedAt": "2026-08-31T17:23:14Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -57,10 +57,10 @@
     },
     {
       "slug": "vacleaner-admin-bookings-v4",
-      "version": 4,
+      "version": 8,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "265a58deb43726efb9e7c55cbd6b28c1e035520107b486895a81a025211ec044",
+      "sha256": "8c57775f1c28a622db76b3da6673a77414dbb1f6e442f3902a3ba64ddf8b4a83",
       "role": "active direct admin booking, referral analytics and finance entrypoint; custom auth + admin allowlist",
       "runtime": "active"
     },
@@ -120,10 +120,10 @@
     },
     {
       "slug": "vacleaner-address-v1",
-      "version": 10,
+      "version": 13,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "443dfa5f0b41623670f0d54374a45da1446befc3f68f56b57ada423b87d1fe15",
+      "sha256": "e67383550a49b74fc9eba80b541024261ffc15d0bb9101848c7a4de2ef7d5bd0",
       "role": "active public address provider with server-side cache",
       "runtime": "active"
     },
