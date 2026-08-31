@@ -13,7 +13,7 @@ const checks=[
   [backend.includes('lastProduct: latest?.product_label || "", loyalty, promo,') && admin.includes("invokeCampaign({action:'pending_bonus',phone})"), 'customer lookup returns the active phone promo while pending bonus stays in the campaign API'],
   [admin.includes("action:'lookup_customer',phone,bookingId:b?.id||'',productCode:form.productCode.value,startDate:form.startDate.value,returnDate:form.returnDate.value,pickupWindow:form.pickupWindow.value,returnWindow:form.returnWindow.value"), 'admin new-booking lookup validates promo against current product/dates'],
   [admin.includes('customer-promo-card'), 'new-booking UX visibly explains the phone promo'],
-  [admin.includes('client-promo-section'), 'client card has a dedicated bonus section'],
+  [admin.includes('client-benefits-section')&&admin.includes('clientPromoInfo'), 'client card keeps promo data in the combined benefits section'],
   [admin.includes('loadClientPromoInfo(client.phone)'), 'client card loads promo independently of SMS history'],
   [admin.includes("Promise.allSettled([invokeCampaign({action:'sms_status'}),invokeCampaign({action:'sms_dispatches'})])"), 'SMS campaign bootstrap survives one secondary endpoint failure'],
   [admin.includes("const invokeCampaign=(body,retry=true)=>withUiTimeout"), 'campaign timeout is scoped to campaign API instead of core admin requests'],

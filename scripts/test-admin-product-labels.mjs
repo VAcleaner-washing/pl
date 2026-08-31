@@ -16,7 +16,7 @@ for(const token of [
   '<h3>${h(adminProductLabel(b.product_code,b.product_label))}</h3>',
   '<h1>${h(adminProductLabel(b.product_code,b.product_label))}</h1>',
   '<strong>${h(adminProductLabel(b.product_code,b.product_label))}</strong></div><div><small>Клієнт</small>',
-  'rentals.map(b=>`<article><div><strong>${h(adminProductLabel(b.product_code,b.product_label||b.product_code||\'Оренда\'))}</strong>',
+  'historyVisible.map(b=>`<article><div><strong>${h(adminProductLabel(b.product_code,b.product_label||b.product_code||\'Оренда\'))}</strong>',
   'adminProductLabel(code,item.label||code)',
   'adminProductLabel(k,x.label)',
   "adminProductLabel('',customer.lastProduct)",

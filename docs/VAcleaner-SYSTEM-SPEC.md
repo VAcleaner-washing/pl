@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.44  
-**Baseline build:** 4244  
+**Baseline version:** 4.2.45  
+**Baseline build:** 4245  
 **Останнє оновлення:** 2026-08-31  
 **Власник логіки:** VAcleaner  
 
@@ -3504,3 +3504,37 @@ Mandatory targeted gates added by this release:
 - full canonical `qa:static` and `qa:browser` before production commit.
 
 The final archive may be handed off only after the aggregate status is recorded with explicit PASS/FAIL counts and screenshot evidence from the stabilization acceptance suite.
+
+
+# 53. Change record — v4.2.45 CLIENT CARD UX
+
+### ADDED
+
+- Read-first client card presentation: the default surface shows identity, loyalty, primary actions, KPI, contacts and recent rental history without presenting the profile as a large edit form.
+- Progressive disclosure for `Бонуси й referral`, `Документ` and `SMS`; these secondary operational blocks are collapsed by default.
+- Rental history shows the latest three records first with an explicit `Показати всі` action for older records.
+- Settlement summary now explains `Отримано разом` as the sum of prepayment plus the factual deposit.
+
+### CHANGED
+
+- Desktop client card core layout is two columns: `Контакти` and `Історія оренд`. Secondary sections span the workspace below. Numeric section labels are removed from the card.
+- Top actions are limited to operationally frequent actions: new rental, active/last rental, the preferred messenger when available, and phone call. Referral is no longer duplicated in the top action row.
+- Contact data is read-only by default; `Редагувати` explicitly reveals the editable fields.
+- Client benefits and referral data are presented as one secondary disclosure surface instead of competing cards; `Переглянути програму` keeps the full referral workspace reachable without duplicating it in the primary action row.
+
+### FIXED
+
+- Removed the information-density problem where contacts, document, referral, next-action, bonuses, SMS and rental history all competed simultaneously in the first viewport.
+- Removed duplicated referral entry points from the client-card primary action layer.
+- Preliminary/final settlement now states the actual received deposit again in the lower confirmation hint: `Отримано … · з них залоговий платіж … · витрати …`.
+
+### PRESERVED
+
+- Client data model, loyalty thresholds, referral economics, promo/RETURN rules, rental history, document storage, SMS consent/history and backend contracts are unchanged.
+- Booking, pricing, delivery, deposit rules, availability capacity and VA HOME data remain unchanged.
+
+### TESTS
+
+- `npm run test:v4.2.45-client-card-ux` verifies the client-card hierarchy, progressive disclosure, history limit, referral de-duplication and settlement deposit explanation.
+- Existing static regression suite remains release-blocking.
+- Client-card desktop/mobile visual QA and the return-finance scenario remain mandatory acceptance surfaces for this release.

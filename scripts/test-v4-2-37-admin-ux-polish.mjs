@@ -14,7 +14,7 @@ ck('booking search result keeps returnSearch context',js.includes('openDetail(bo
 ck('client search result returns to exact search',js.includes("backLabel:'До пошуку'"));
 ck('campaign search result exposes a return control',js.includes('state.searchReturnContext=context')&&js.includes('renderSearchReturnControl()'));
 ck('detail keeps full client parent options',js.includes('detailReturnClientOptions')&&js.includes('returnClientOptions:options'));
-ck('nested client next action keeps full parent options',js.includes('bindClientNextAction(client,rentals,canLeave,options)'));
+ck('client profile removes the permanent nested next-action card',!js.slice(js.indexOf('function openClientCard('),js.indexOf('function localDateIso',js.indexOf('function openClientCard('))).includes('bindClientNextAction('));
 ck('client save preserves parent route',js.includes('openClientCard(refreshed,options)'));
 ck('nested client header exposes a real Back control without wasting mobile footer height',js.includes('class="close client-header-close"')&&js.includes("options.returnTo?'←':'×'")&&js.includes("options.returnTo?options.backLabel||'Назад':'Закрити'"));
 ck('client Instagram uses safe launcher instead of target blank',js.includes('data-client-instagram')&&js.includes("openInstagramContact(client.instagram)"));

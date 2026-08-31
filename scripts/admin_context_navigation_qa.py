@@ -49,9 +49,10 @@ with sync_playwright() as pw:
         page.locator('.booking-card').last.locator('.booking-client-link').click();page.wait_for_timeout(80)
         page.evaluate("""()=>{const previous=window.fetch;window.fetch=async(url,options={})=>{let payload={};try{payload=options.body?JSON.parse(options.body):{}}catch{}if(payload.action==='referral_summary')return{ok:true,status:200,json:async()=>({referral:{code:'VA-TEST123',inviteCount:0,completedReferrals:0,earnedRewardAmount:0,activeRewardAmount:0,lastInvite:null,referrals:[],rewards:[],profile:{name:'Клієнт',preferred_contact:'instagram',instagram:'client.test',telegram:'@client_test'}}})};if(payload.action==='referral_invite_sent')return{ok:true,status:200,json:async()=>({ok:true})};return previous(url,options)}}""")
         ck('returned client card opens',page.locator('#clientEditor').count()==1)
-        ck('referral action exists for completed client',page.locator('#clientOpenReferral').count()==1)
-        if page.locator('#clientOpenReferral').count():
-            page.locator('#clientOpenReferral').click();page.wait_for_timeout(100)
+        ck('referral action exists inside benefits for completed client',page.locator('#clientOpenReferralDetails').count()==1)
+        if page.locator('#clientOpenReferralDetails').count():
+            page.locator('.client-benefits-section>summary').click();page.wait_for_timeout(40)
+            page.locator('#clientOpenReferralDetails').click();page.wait_for_timeout(100)
             ck('referral modal opens',page.locator('.referral-share-modal').count()==1)
             ck('referral modal exposes parent back control',page.locator('[data-layer-back]').count()==1)
             if page.locator('[data-layer-back]').count(): page.locator('[data-layer-back]').click();page.wait_for_selector('#clientEditor',timeout=2500);page.wait_for_timeout(40)
