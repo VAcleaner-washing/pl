@@ -16,3 +16,7 @@ Changes:
 - bottom settlement hint repeats the factual deposit received.
 
 Deploy only after GitHub Actions Static / build and Browser QA aggregate are both GREEN.
+
+CI-FIX note:
+- Browser QA expectations were aligned with the approved read-first client-card UX after GitHub correctly exposed two stale tests.
+- No business logic, pricing, referral economics, Supabase schema, or production UI behavior changed in the CI fix.

@@ -40,8 +40,12 @@ with sync_playwright() as pw:
             if client_link.count():
                 client_link.click();page.wait_for_timeout(100)
                 ck('client card opens',page.locator('#clientEditor').count()==1)
-                referral=page.locator('#clientOpenReferral')
-                ck('client card exposes referral action',referral.count()==1)
+                benefits=page.locator('.client-benefits-section>summary')
+                ck('client card exposes referral section',benefits.count()==1)
+                if benefits.count():
+                    benefits.click();page.wait_for_timeout(80)
+                referral=page.locator('#clientOpenReferralDetails:visible')
+                ck('client card exposes referral action inside benefits',referral.count()==1)
                 if referral.count():
                     referral.click();page.wait_for_timeout(120)
                     send=page.locator('[data-referral-send="instagram"]')

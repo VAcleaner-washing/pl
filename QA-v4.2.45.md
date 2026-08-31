@@ -31,6 +31,15 @@ Client-card UX hierarchy + clarity of received money in preliminary/final settle
 - Bottom settlement hint explicitly states the factual deposit received.
 - Story gift persistence, delivery amount alignment and return-finance geometry remain green from stabilization acceptance.
 
+## CI contract repair after first GitHub Browser run
+
+GitHub run `33449986879` exposed two stale browser expectations after the intentional v4.2.45 client-card redesign. Product code was not reverted.
+
+- `test:referral-ios-launch` still expected the removed top-level `#clientOpenReferral` action. The test now opens `Бонуси й referral` and verifies the real `#clientOpenReferralDetails` action, then checks the iOS Instagram launch flow. Exact result: 10/10 PASS.
+- `test:pwa` still tried to fill `customerName` while the new read-first contact editor was intentionally hidden. The test now verifies read-first mode, clicks `Редагувати`, verifies edit fields become visible, edits the client, and verifies the dirty save footer appears. Exact read → edit → dirty acceptance: PASS.
+- Canonical static gate after the test-contract repair: 103/103 PASS.
+- Product behavior remains the approved v4.2.45 UX; only outdated QA expectations were aligned with the System Spec.
+
 ## Release rule
 
 Production deployment is accepted only after GitHub Actions Static / build gate and Browser QA aggregate gate are both GREEN.
