@@ -237,7 +237,7 @@ function validate(ctx,show=true){
     return false;
   }
   ctx.input.setCustomValidity('');
-  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'manual','Адреса введена вручну — бронювання можна завершити. Менеджер перевірить її до передоплати.',false);
+  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'manual','Адреса введена вручну — бронювання можна завершити. Менеджер перевірить її й підтвердить вартість доставки до передоплати.',false);
   return true;
 }
 function bindSubmit(ctx){

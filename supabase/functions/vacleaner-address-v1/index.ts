@@ -264,7 +264,7 @@ Deno.serve(async (req: Request) => {
       suggestions.unshift({
         label: `${canonicalStreet}, ${parsed.houseNumber}`,
         address: `${settlement}, ${canonicalStreet}, ${parsed.houseNumber}`,
-        meta: `${settlement} · введена адреса · менеджер перевірить`,
+        meta: `${settlement} · точний номер введено · менеджер перевірить`,
         street: canonicalStreet, houseNumber: parsed.houseNumber, settlement,
         areaType: isPoltavaSettlement(settlement) ? "city" : "outside",
         distanceKm: null, lat: null, lon: null, manualAddress: true, approximateCoordinates: true,

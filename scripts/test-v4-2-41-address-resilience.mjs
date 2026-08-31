@@ -42,5 +42,10 @@ const bookingCss=read('assets/public-booking.css');
 ok('delivery summary row gets financial alignment class',bookingSlots.includes("deliveryRow.classList.add('vx-summary-delivery-row')"));
 ok('delivery summary keeps label separate from amount',bookingSlots.includes("setTextIfChanged(label,'Доставка')"));
 ok('delivery amount has explicit right-aligned summary contract',bookingCss.includes('.booking-summary .vx-summary-delivery-row')); 
+
+const textile=read('rishennia/textile/index.html');
+ok('textile solution route cannot be empty in a release archive',textile.trim().length>10000&&textile.includes('<h1'));
+ok('delivery summary alignment adds no new important override',!bookingCss.match(/vx-summary-delivery-row[^}]*!important/));
+
 console.log(`v4.2.41 address resilience: ${checks-failed}/${checks} OK`);
 if(failed)process.exit(1);

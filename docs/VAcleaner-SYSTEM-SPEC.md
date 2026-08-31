@@ -3344,3 +3344,11 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `npm run test:v4.1.54-local-zone-correction`;
 - full `npm run qa:static`, build and canonical Browser/PWA QA remain release gates.
 
+## v4.2.41 CI repair — canonical gate integrity
+
+- `rishennia/textile/index.html` є обов’язковим public route artifact і не може бути порожнім або втрачатися під час release preparation.
+- Manual-address fallback лишається non-blocking: валідна вулиця + номер будинку дозволяють завершити бронювання без вибору autocomplete; менеджер перевіряє адресу й підтверджує тариф до передоплати.
+- Якщо Photon знає вулицю, але не точний будинок, manual suggestion може зберігати введений номер без вигаданих координат; `approximateCoordinates` не використовується як факт маршруту.
+- Public booking CSS не додає новий `!important` debt; delivery summary geometry має працювати через нормальну specificity.
+- Release не є готовим при будь-якому fail у `qa:static` або `qa:browser`; локальний focused PASS не замінює canonical aggregate gate.
+
