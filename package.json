@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.39",
+  "version": "4.2.40",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -133,6 +133,7 @@
     "test:v4.2.37-route-smoke": "python scripts/v4_2_37_route_smoke_qa.py",
     "test:v4.2.38-ci-context-stability": "node scripts/test-v4-2-38-ci-context-stability.mjs",
     "test:admin-control-consistency": "python scripts/admin_control_consistency_qa.py",
-    "test:v4.2.39-admin-control-consistency": "node scripts/test-v4-2-39-admin-control-consistency.mjs"
+    "test:v4.2.39-admin-control-consistency": "node scripts/test-v4-2-39-admin-control-consistency.mjs",
+    "test:v4.2.40-mobile-geometry": "node scripts/test-v4-2-40-mobile-geometry.mjs"
   }
 }

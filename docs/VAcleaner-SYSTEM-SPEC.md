@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.39  
-**Baseline build:** 4239  
-**Останнє оновлення:** 2026-08-30  
+**Baseline version:** 4.2.40  
+**Baseline build:** 4240  
+**Останнє оновлення:** 2026-08-31  
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -3252,3 +3252,30 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `npm run test:admin-control-consistency`;
 - `npm run test:analytics-visual`;
 - full static/build regression and canonical Browser QA remain release gates.
+
+# 48. Change record — v4.2.40
+
+### ADDED
+- **UI-GEO-001 — exact cross-screen geometry contract.** Shared controls are compared by width, x-position, container fill, gap, height and radius across Finance and Analytics, not only labels/height.
+- `scripts/test-v4-2-40-mobile-geometry.mjs` guards the mobile period, client-sheet and booking-finance geometry.
+- `scripts/admin_control_consistency_qa.py` now compares button widths and x-positions between Finance and Analytics on PWA.
+
+### CHANGED
+- On PWA, Finance and Analytics period selectors fill the same 366 px content width at a 390 px viewport and use the same three equal columns.
+- The mobile client card is a true full-viewport sheet; inherited width, margin, transform and scrollbar reservations cannot shift it left/right.
+- Booking finance on mobile uses a vertical information stack: `Залоговий платіж` first, settlement/refund directly below, both with identical full-content width.
+
+### FIXED
+- Finance period buttons no longer render narrower than the visually identical Analytics controls.
+- Client card no longer leaves an asymmetric empty strip on the right side of the iPhone viewport.
+- `Залоговий платіж` is no longer squeezed beside settlement/refund; the label, amount and state remain readable and the refund block sits immediately below it.
+
+### PRESERVED
+- v4.2.39 shared period renderer and 1024/1280 Analytics overflow fix remain intact.
+- v4.2.38 context stability, historical delivery backfill, v4.2.37 route stack, iOS Instagram return flow, booking/referral business logic and VA HOME isolation remain unchanged.
+
+### TESTS
+- `npm run test:v4.2.40-mobile-geometry`;
+- `python scripts/admin_control_consistency_qa.py` with exact mobile width/x-position checks;
+- reviewed side-by-side PWA screenshots for Finance vs Analytics, centered client card, and deposit/settlement stack;
+- full static/build/browser/PWA regression remains the release gate.
