@@ -11,7 +11,7 @@ const release=JSON.parse(read('release.json'));
 let pass=0; const failed=[];
 const ok=(name,cond)=>{if(cond){pass++;console.log('PASS',name)}else{failed.push(name);console.error('FAIL',name)}};
 
-ok('release is v4.2.43 build 4243',pkg.version==='4.2.43'&&release.version==='4.2.43'&&String(release.build)==='4243');
+ok('release includes v4.2.43+ critical booking contract',pkg.version===release.version&&Number(release.build)>=4243);
 
 // Exact surface from the user's screenshot: admin booking card, not public booking summary.
 ok('admin booking card renders delivery title and amount as separate siblings',admin.includes('class="booking-delivery-head"')&&admin.includes('class="booking-delivery-amount"')&&admin.includes('class="booking-delivery-address"'));

@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.43  
-**Baseline build:** 4243  
+**Baseline version:** 4.2.44  
+**Baseline build:** 4244  
 **Останнє оновлення:** 2026-08-31  
 **Власник логіки:** VAcleaner  
 
@@ -3420,3 +3420,87 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `npm run qa:static`;
 - canonical Browser/PWA QA remains a release-blocking gate.
 
+
+
+# 52. Change record — v4.2.44 STABILIZATION / ACCEPTANCE
+
+### ADDED
+
+#### STAB-ACCEPT-001 — acceptance evidence outranks “code changed”
+
+This release is a stabilization release with **no new business features**. The production v4.2.43 behavior is the baseline; only incomplete/incorrect recent UX implementation and its verification process are repaired.
+
+A user-requested item can be marked `VERIFIED` only when the exact requested surface and state have been exercised. Static presence of a class, renderer or backend field is not enough.
+
+For a screenshot-driven UI fix, QA must use the same component/surface and a representative viewport. For persistence behavior the required chain is:
+
+`UI action → payload → backend → persisted state → reload → UI`.
+
+If any link is not verified, the item is `CODE ONLY` or `NOT DONE`, never `VERIFIED`.
+
+#### STAB-ACCEPT-002 — release acceptance scope
+
+Before v4.2.44 can be handed off, acceptance covers the recent high-risk surfaces as one package:
+
+- public booking 1→4, optional messenger disclosure and promo entry;
+- address autocomplete + valid manual street/house fallback;
+- Story reward policy and persistence;
+- preliminary/final return settlement on PWA and desktop;
+- admin booking delivery row and settlement blocks;
+- client-card mobile geometry;
+- booking-card action fill / overflow hierarchy;
+- Finance / Analytics shared period controls;
+- referral modal / client referral actions;
+- production Edge Function parity for touched contracts.
+
+The stabilization release must not change catalog prices, delivery tariffs, deposit rules, promo/RETURN/referral economics, availability capacity or VA HOME objects.
+
+### CHANGED
+
+#### STAB-UX-001 — desktop return-finance is a workspace, not a squeezed mobile grid
+
+On desktop (`>=901px`) the preliminary/final settlement modal uses a purpose-built wide layout. The `Бонус за сторіс` block spans the full left data grid. Gift options are readable cards and may collapse responsively when there is insufficient width; labels must not be compressed into narrow columns or break into unreadable fragments.
+
+The right `Підсумок` panel sizes to its content and may remain sticky while the central modal body scrolls. It must not be stretched to the full height only to create empty dead space. The footer actions remain visible inside the modal viewport.
+
+The modal has one intentional central scroll area. No nested horizontal scroll, clipping or overlap is allowed at 1024 / 1280 / 1440 / 1648 desktop widths.
+
+#### STAB-UX-002 — exact booking card delivery axis remains mandatory
+
+In the admin booking card, `Доставка` / `Самовивіз` stays on the left and the monetary amount stays on the right on the same row. The route-safe address is a second row below. This is verified on the actual booking card, not the public booking summary.
+
+### FIXED
+
+#### STAB-DATA-001 — Story reward parity with production backend
+
+For eligible Puzzi rental >= 1 000 грн:
+
+- `diffuser50` and `chemistry2` are mutually exclusive;
+- the selected choice is submitted as `storyGiftChoice`;
+- production `vacleaner-admin-bookings-v4` persists it under `extras.gifts.story.choice`;
+- only `chemistry2` may set `extras.chemistry.story_mention=true` and grant two free used portions;
+- after save/reload/reopen the same selected reward is rendered.
+
+Historical completed bookings are not silently rewritten; any historical correction remains an explicit manager action.
+
+### PRESERVED
+
+- Catalog prices, delivery tariffs, deposit rules, promo/RETURN/referral economics, inventory capacity, booking statuses and VA HOME objects are unchanged.
+- Historical completed bookings are not silently rewritten.
+
+### TESTS
+
+#### STAB-QA-001 — v4.2.44 release gates
+
+Mandatory targeted gates added by this release:
+
+- `npm run test:v4.2.44-stabilization`;
+- `npm run test:stabilization-acceptance-browser`;
+- existing exact-surface v4.2.43 gift/delivery regression;
+- client-card mobile browser QA;
+- Finance/Analytics control-consistency browser QA;
+- referral modal/browser QA;
+- public booking resilience/browser QA;
+- full canonical `qa:static` and `qa:browser` before production commit.
+
+The final archive may be handed off only after the aggregate status is recorded with explicit PASS/FAIL counts and screenshot evidence from the stabilization acceptance suite.

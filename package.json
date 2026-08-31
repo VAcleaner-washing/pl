@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.43",
+  "version": "4.2.44",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -138,6 +138,8 @@
     "test:v4.2.41-address-resilience": "node scripts/test-v4-2-41-address-resilience.mjs",
     "test:v4.2.42-promo-visibility": "node scripts/test-v4-2-42-promo-visibility.mjs",
     "test:v4.2.43-critical-booking-fixes": "node scripts/test-v4-2-43-critical-booking-fixes.mjs",
-    "test:admin-return-gift-persistence": "python scripts/admin_return_gift_persistence_qa.py"
+    "test:admin-return-gift-persistence": "python scripts/admin_return_gift_persistence_qa.py",
+    "test:v4.2.44-stabilization": "node scripts/test-v4-2-44-stabilization.mjs",
+    "test:stabilization-acceptance-browser": "python scripts/stabilization_acceptance_qa.py"
   }
 }

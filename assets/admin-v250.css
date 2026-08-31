@@ -6934,3 +6934,20 @@ html.keyboard-open .pwa-update-prompt{visibility:hidden;opacity:0;pointer-events
   .booking-card .booking-delivery-amount{font-size:15px}
   .booking-card .booking-delivery-address{margin-top:7px;font-size:12px}
 }
+
+/* v4.2.44 — STABILIZATION / ACCEPTANCE: return-finance modal is a real desktop workspace, not a squeezed mobile grid. */
+.finance-form .fields>.return-story-bonus{grid-column:1/-1;min-width:0}
+.finance-form .return-story-options{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.finance-form .return-story-options>label{min-width:0;min-height:92px;padding:13px}
+.finance-form .return-story-options b{font-size:12.5px;line-height:1.35;overflow-wrap:normal;word-break:normal}
+.finance-form .return-story-options small{font-size:10.5px;line-height:1.45}
+@media(min-width:901px){
+  .modal-card:has(.finance-form){width:min(1180px,calc(100vw - 32px))}
+  .finance-form .modal-layout{grid-template-columns:minmax(0,1.16fr) minmax(360px,.84fr);align-items:start;overflow-y:auto;overflow-x:hidden}
+  .finance-form .modal-section,.finance-form .modal-summary{height:auto;min-height:0;overflow:visible}
+  .finance-form .modal-summary{position:sticky;top:0;align-self:start}
+  .finance-form .modal-section>.note{margin-bottom:0}
+}
+@media(max-width:900px){
+  .finance-form .return-story-options{grid-template-columns:1fr}
+}
