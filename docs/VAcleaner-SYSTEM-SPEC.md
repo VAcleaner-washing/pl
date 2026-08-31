@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.41  
-**Baseline build:** 4241  
+**Baseline version:** 4.2.40  
+**Baseline build:** 4240  
 **Останнє оновлення:** 2026-08-31  
 **Власник логіки:** VAcleaner  
 
@@ -3290,6 +3290,12 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - Delivery route km remains available to admin analytics; only its client-facing disclosure is removed for the fixed local tariff zone.
 - Existing v4.2.39 shared Finance/Analytics period renderer, v4.2.37 navigation stack, referral journal, booking status flow, deposit formulas, delivery pricing and VA HOME isolation remain unchanged.
 
+
+### CI HARDENING — wide desktop period controls
+- On desktop widths >=1321 px Analytics and Finance must not rely on intrinsic text width for the shared period selector. The control rail is a deterministic 500 px, five-equal-column grid in both contexts, aligned to the right.
+- This prevents browser/font-metric differences from changing the container width or relative button x-positions at 1440 px while preserving the full-row layouts on 901–1320 px and the 3-column PWA layout on <=900 px.
+- `test:admin-control-consistency` remains a release-blocking browser gate; a 30/31 Browser QA result is **not** releasable even if static/build is green.
+
 ### TESTS
 - `npm run test:v4.2.40-booking-return-ux`;
 - `npm run test:booking-gifts`;
@@ -3297,39 +3303,3 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `npm run test:v4.2.39-admin-control-consistency`;
 - `npm run test:admin-control-consistency` (94 geometry/style assertions across 390 / 430 / 1024 / 1280 / 1440);
 - full `npm run qa:static`, build and canonical Browser/PWA QA remain release gates.
-
-# 49. Change record — v4.2.41
-
-### ADDED
-
-- **ADMIN-UX-001 — semantic interaction state.** Desktop and mobile navigation expose the current destination through both the visual active state and `aria-current="page"`. Reusable choice chips expose `aria-pressed`; Settings tabs retain `aria-selected`.
-- **ADMIN-UX-002 — reversible mobile More route.** The floating `Ще` action exposes `aria-expanded`. Closing its menu by a second tap, outside tap or dismissal restores keyboard/switch focus to the same `Ще` control; selecting a destination completes the route without jumping focus back to the old control.
-- **ADMIN-UX-003 — one focus language.** Buttons, links, inputs, selects, textareas and custom role-buttons share one high-visibility gold focus ring. Focus must remain visible over dark Glass surfaces without moving or resizing the control.
-- **PWA-UX-012 — iPhone input stability.** Admin inputs, selects and textareas render at a computed 16 px minimum on <=900 px, preventing Safari form-focus zoom and the resulting broken return geometry.
-- **PWA-UX-013 — reduced-motion completeness.** `prefers-reduced-motion: reduce` applies to the complete admin subtree, including generated modal/detail content, pseudo-elements and scroll behavior.
-- `scripts/test-v4-2-41-admin-ux-system.mjs` protects release coherence and these interaction contracts.
-- The v4.2.40 regression now accepts coherent later releases while still requiring build >=4240, so historical behavior guards do not block a legitimate version bump.
-
-### CHANGED
-
-- The active desktop destination now has a restrained gold surface and a small fixed indicator; it does not translate, resize or glow as a card.
-- Mobile primary navigation, the `Ще` menu, filter/period chips and Settings tabs use a consistent active-state hierarchy. Color is never the only programmatic indication.
-- Compact booking-list mode announces whether it is enabled and describes the next action instead of exposing only an ambiguous glyph.
-
-### FIXED
-
-- Screen readers and switch-control users no longer have to infer the current admin destination from CSS class names alone.
-- The mobile `Ще` menu no longer drops keyboard focus into the document after dismissal.
-- iPhone Safari no longer zooms the installed admin when a compact form control receives focus.
-- Reduced-motion preference now also covers desktop admin and dynamically rendered overlays, not only the original mobile navigation subset.
-
-### PRESERVED
-
-- v4.2.40 booking action priority, return Story reward policy, settlement stack and mobile client-card geometry remain unchanged.
-- v4.2.39 Finance/Analytics period geometry, v4.2.37 exact return-context stack, all booking statuses, finance formulas, tariffs, Supabase contracts and VA HOME isolation remain unchanged.
-
-### TESTS
-
-- `npm run test:v4.2.41-admin-ux-system`;
-- `npm run qa:static`;
-- canonical responsive Browser/PWA suites remain mandatory at 320 / 390 / 430 / 768 / 1024 / 1280 / 1440 / 1648 px before production release.
