@@ -158,10 +158,10 @@ function collapsePromo(){
   const field=$('.booking-promo-field');if(!field||field.dataset.vxPromoCollapsed)return;
   field.dataset.vxPromoCollapsed='1';
   const input=$('input',field);if(!input)return;
-  const toggle=document.createElement('button');toggle.type='button';toggle.className='vx-promo-toggle';toggle.textContent='Є промокод?';toggle.setAttribute('aria-label','Відкрити поле промокоду');toggle.setAttribute('aria-expanded',input.value?'true':'false');
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='vx-promo-toggle';toggle.innerHTML='<span class="vx-promo-toggle__icon" aria-hidden="true">%</span><span class="vx-promo-toggle__copy"><b>Є промокод?</b><small>Введіть код — перевіримо знижку автоматично</small></span><span class="vx-promo-toggle__action">Додати <i aria-hidden="true">+</i></span>';toggle.setAttribute('aria-label','Відкрити поле промокоду');toggle.setAttribute('aria-expanded',input.value?'true':'false');
   const wrap=document.createElement('div');wrap.className='vx-promo-body';
   [...field.childNodes].filter(n=>n!==toggle).forEach(n=>wrap.appendChild(n));field.append(toggle,wrap);
-  const sync=()=>{const open=toggle.getAttribute('aria-expanded')==='true'||Boolean(input.value)||Boolean(input.dataset.autoSmsPromo);field.classList.toggle('is-open',open);wrap.hidden=!open;toggle.setAttribute('aria-label',open?'Сховати поле промокоду':'Відкрити поле промокоду')};
+  const sync=()=>{const open=toggle.getAttribute('aria-expanded')==='true'||Boolean(input.value)||Boolean(input.dataset.autoSmsPromo);field.classList.toggle('is-open',open);wrap.hidden=!open;toggle.setAttribute('aria-label',open?'Сховати поле промокоду':'Відкрити поле промокоду');const action=toggle.querySelector('.vx-promo-toggle__action');if(action)action.innerHTML=open?'Сховати <i aria-hidden="true">×</i>':'Додати <i aria-hidden="true">+</i>'};
   toggle.addEventListener('click',()=>{toggle.setAttribute('aria-expanded',toggle.getAttribute('aria-expanded')==='true'?'false':'true');sync();if(!wrap.hidden)input.focus()});input.addEventListener('input',sync);sync();
 }
 function polishSummary(){

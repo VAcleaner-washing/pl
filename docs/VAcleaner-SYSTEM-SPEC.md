@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.41  
-**Baseline build:** 4241  
+**Baseline version:** 4.2.42  
+**Baseline build:** 4242  
 **Останнє оновлення:** 2026-08-31  
 **Власник логіки:** VAcleaner  
 
@@ -3352,3 +3352,39 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - Public booking CSS не додає новий `!important` debt; delivery summary geometry має працювати через нормальну specificity.
 - Release не є готовим при будь-якому fail у `qa:static` або `qa:browser`; локальний focused PASS не замінює canonical aggregate gate.
 
+
+
+# 50. Change record — v4.2.42
+
+### ADDED
+
+- `PUBLIC-BOOK-UX-003` — promo visibility contract for the Contacts step.
+- `scripts/test-v4-2-42-promo-visibility.mjs` protects promo geometry, copy, open state and CSS ownership.
+
+### CHANGED
+
+- `Є промокод?` is now a full-width secondary action instead of a low-contrast text link.
+- The collapsed control shows a clear title, short explanatory copy and explicit `Додати +` action.
+- Promo geometry is owned by `assets/public-booking.css`; the legacy hardening stylesheet no longer owns a conflicting second design.
+- Public asset build is `4242`, forcing cache-bust for returning browsers.
+
+### FIXED
+
+- Fixed the production case where promo behavior existed but its intended visual treatment was effectively invisible/low-contrast.
+- Opening the control keeps the existing promo input, validation, loyalty comparison and auto-prefill behavior unchanged.
+
+### PRESERVED
+
+- Promo remains visually secondary to the primary booking CTA so users without a code are not pushed out of the funnel searching for discounts.
+- Existing campaign/RETURN/referral promo validation and backend pricing are unchanged.
+- Public contact progressive disclosure (phone first, optional messenger) is unchanged.
+
+### TESTS
+
+- `npm run test:v4.2.42-promo-visibility`.
+- `npm run qa:static` must remain fully green before release.
+
+
+## UI-DELIVERY-CARD-001 — booking card delivery axis
+
+У картці бронювання блок `Видача` читається як фінансово-операційний рядок: `Доставка` / `Самовивіз` зліва, сума доставки справа на тій самій горизонтальній осі. Адреса/маршрут іде окремим рядком нижче. Не склеювати `250 грн · адреса` в один текстовий span. На mobile сума повинна бути візуально вирівняна по правому краю так само послідовно, як ключові суми у фінансовому блоці.

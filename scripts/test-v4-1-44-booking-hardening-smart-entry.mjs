@@ -17,7 +17,7 @@ must(js.includes("primary:'puzzi_jimmy'"),'Puzzi + Jimmy must be primary for mat
 must(js.includes("primary:'puzzi'"),'Puzzi must remain primary for sofa');
 must(js.includes('пилові кліщі та пов’язані алергени'),'Jimmy dust-mite wording missing');
 must(js.includes("total.textContent='Вартість бронювання'"),'exact booking total label missing');
-must(js.includes("toggle.textContent='Є промокод?'"),'promo disclosure missing');
+must(js.includes('Є промокод?')&&js.includes('vx-promo-toggle'),'promo disclosure missing');
 must(
   (experience.includes('v4.1.44 booking hardening route loader')&&experience.includes(`booking-hardening-v4144.js?v=${release.build}`)) ||
   (bookingRouteLoader.includes("ensureAsset('css','booking-hardening-v4144.css')")&&bookingRouteLoader.includes("ensureAsset('js','booking-hardening-v4144.js')")),

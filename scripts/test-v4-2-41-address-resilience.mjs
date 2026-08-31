@@ -10,12 +10,13 @@ const address=read('assets/address-autocomplete.js');
 const slots=read('assets/public-booking-slots.js');
 const bookingHardening=read('assets/booking-hardening-v4144.js');
 const bookingHardeningCss=read('assets/booking-hardening-v4144.css');
+const publicBookingCss=read('assets/public-booking.css');
 const chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js');
 const qa=read('scripts/qa-full.mjs');
 let checks=0,failed=0;
 const ok=(name,condition)=>{checks++;if(condition)console.log('OK  ',name);else{failed++;console.error('FAIL',name)}};
 
-ok('release is v4.2.41',release.version==='4.2.41'&&release.build===4241&&pkg.version===release.version);
+ok('release preserves v4.2.41+ contract',Number(release.build)>=4241&&pkg.version===release.version);
 ok('Photon search tries street-type variants for incomplete Poltava input',edge.includes('вулиця ${typedStreet}')&&edge.includes('провулок ${typedStreet}'));
 ok('address search no longer stops on any unrelated house number',edge.includes('exactRelevantHouseFound')&&!edge.includes('features.some((feature) => Boolean(text(feature?.properties?.housenumber))) break'));
 ok('provider suggestions are filtered by typed street relevance',edge.includes('streetMatchScore(parsed.street')&&edge.includes('.filter((item: any) => !parsed.street || item.streetScore > 0)'));
@@ -26,7 +27,7 @@ ok('public quote infers plain street+house as Poltava',slots.includes('function 
 ok('server quote uses the same plain-address Poltava inference',booking.includes('function inferredDeliverySettlement')&&booking.includes('return streetLike ? "Полтава" : first;'));
 ok('deployable booking function contains same settlement inference',deploy.includes('function inferredDeliverySettlement')&&deploy.includes('return streetLike ? "Полтава" : first;'));
 ok('manual delivery is still not required to be provider-verified',booking.includes('(fulfillment === "delivery" && address.length < 8)')&&!booking.includes('deliveryAddressVerified !== true'));
-ok('promo entry is full-width and visibly actionable',bookingHardeningCss.includes('grid-column:1/-1')&&bookingHardeningCss.includes("content:'Додати'")&&bookingHardeningCss.includes('min-height:50px'));
+ok('promo entry is full-width and visibly actionable',publicBookingCss.includes('.booking-promo-field{position:relative;grid-column:1/-1}')&&publicBookingCss.includes('.vx-promo-toggle{width:100%')&&publicBookingCss.includes('vx-promo-toggle__action'));
 ok('promo disclosure has explicit accessible state labels',bookingHardening.includes("aria-label','Відкрити поле промокоду")&&bookingHardening.includes("Сховати поле промокоду"));
 ok('draft restore replays only the checked radio option',bookingHardening.includes("if(el.type==='radio')")&&bookingHardening.includes('if(Boolean(state.checked)&&!el.checked)reactChecked(el,true)'));
 ok('availability carries the selected Story gift',chunk.includes('storyGiftChoice:storyActive?storyChoice:""')&&chunk.includes('storyGiftChoice,z,promoCode'));
