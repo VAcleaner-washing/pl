@@ -6864,24 +6864,6 @@ html.keyboard-open .pwa-update-prompt{visibility:hidden;opacity:0;pointer-events
 }
 
 
-/* v4.2.40 CI hardening — deterministic desktop period geometry across Analytics + Finance.
-   Do not depend on intrinsic text width/browser font metrics at wide desktop sizes. */
-@media(min-width:1321px){
-  .analytics-toolbar-copy{min-width:0;flex:1 1 auto}
-  .analytics-toolbar .admin-period-controls,
-  .analytics-toolbar .analytics-period-controls,
-  .finance-period-row .admin-period-controls,
-  .finance-period-row .analytics-period-controls{width:500px;max-width:100%;flex:0 0 500px;justify-items:stretch}
-  .analytics-toolbar .admin-periods,
-  .analytics-toolbar .analytics-periods,
-  .finance-period-row .admin-periods,
-  .finance-period-row .analytics-periods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:100%;min-width:0;justify-content:stretch}
-  .analytics-toolbar .admin-periods .chip,
-  .analytics-toolbar .analytics-periods .chip,
-  .finance-period-row .admin-periods .chip,
-  .finance-period-row .analytics-periods .chip{width:100%;min-width:0;justify-content:center}
-}
-
 /* v4.2.40 final PWA action hierarchy — frequent actions stay visible; corrective/destructive actions live under “Ще”. */
 .booking-action-more{position:relative;min-width:0;margin:0}
 .booking-action-more>summary{list-style:none;cursor:pointer;user-select:none}
@@ -6920,4 +6902,13 @@ html.keyboard-open .pwa-update-prompt{visibility:hidden;opacity:0;pointer-events
   .finance-period-row .analytics-periods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:100%;min-width:0;justify-content:stretch}
   .finance-period-row .admin-periods .chip,
   .finance-period-row .analytics-periods .chip{width:100%;min-width:0;justify-content:center}
+}
+/* v4.2.41 — wide desktop keeps the shared period selector intrinsic and on one row. */
+@media(min-width:1321px){
+  .analytics-toolbar .admin-period-controls,
+  .analytics-toolbar .analytics-period-controls{flex:0 0 auto}
+  .analytics-toolbar .admin-periods,
+  .analytics-toolbar .analytics-periods,
+  .finance-period-row .admin-periods,
+  .finance-period-row .analytics-periods{flex-wrap:nowrap}
 }
