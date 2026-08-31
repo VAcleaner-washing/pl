@@ -1374,3 +1374,37 @@ html.glass-test .delivery-average-line>strong{font-weight:580}
 
 /* v4.2.39 — shared admin period controls keep identical touch geometry. */
 html.glass-test .admin-periods .chip,html.glass-test .analytics-periods .chip{min-height:44px}
+
+/* v4.2.41 — canonical admin interaction states.
+   Active, focus, touch and reduced-motion feedback share one visual language. */
+html.glass-test .nav button[aria-current="page"]{
+  position:relative;
+  border-color:rgba(226,177,103,.28);
+  background:linear-gradient(90deg,rgba(226,177,103,.13),rgba(226,177,103,.035));
+  color:#f1d09a;
+}
+html.glass-test .nav button[aria-current="page"]::after{
+  content:"";position:absolute;right:9px;width:5px;height:5px;border-radius:50%;
+  background:#e2b167;box-shadow:0 0 0 4px rgba(226,177,103,.08);
+}
+html.glass-test button[aria-pressed="true"],
+html.glass-test .settings-tab[aria-selected="true"]{
+  border-color:rgba(226,177,103,.38);
+}
+html.glass-test :where(button,a,input,select,textarea,[role="button"]):focus-visible{
+  outline:2px solid rgba(247,207,137,.82);outline-offset:2px;
+  box-shadow:0 0 0 4px rgba(226,177,103,.10);
+}
+@media(max-width:900px){
+  html.glass-test .mobile-nav button[aria-current="page"]{color:#f1d09a}
+  html.glass-test .mobile-nav button[aria-current="page"] svg{stroke:#efc47d}
+  html.glass-test .mobile-more-menu button.active{border-color:rgba(226,177,103,.34);background:rgba(226,177,103,.09);color:#f1d09a}
+  html.glass-test :where(input,select,textarea){font-size:16px}
+  html.glass-test :where(.btn,.chip,.icon-btn,.close,button,[role="button"]){-webkit-tap-highlight-color:transparent}
+  html.glass-test :where(.btn,.chip,.icon-btn,.close,button,[role="button"]):active{filter:brightness(.94)}
+}
+@media(prefers-reduced-motion:reduce){
+  html.glass-test *,html.glass-test *::before,html.glass-test *::after{
+    scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;
+  }
+}
