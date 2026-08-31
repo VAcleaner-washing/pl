@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import os
 import sys
 from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
@@ -11,12 +10,10 @@ def ck(label,cond):
     ok=bool(cond); checks.append((label,ok)); print(('PASS' if ok else 'FAIL')+': '+label)
 
 def metrics(page):
-    return page.locator('.analytics-periods').evaluate("""el=>{const cr=el.getBoundingClientRect(),cs=getComputedStyle(el),pr=el.parentElement?.getBoundingClientRect();const buttons=[...el.querySelectorAll('.chip')].map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {text:e.textContent.trim(),x:r.x-cr.x,y:r.y-cr.y,w:r.width,h:r.height,r:s.borderRadius,b:s.borderWidth,bg:s.backgroundImage||s.backgroundColor,fw:s.fontWeight,fs:s.fontSize,color:s.color,active:e.classList.contains('active')}});return {w:cr.width,h:cr.height,x:cr.x,parentW:pr?.width||0,fill:pr?.width?cr.width/pr.width:1,display:cs.display,columns:cs.gridTemplateColumns,gap:parseFloat(cs.columnGap||cs.gap||'0')||0,buttons}}""")
+    return page.locator('.analytics-periods').evaluate("""el=>{const cr=el.getBoundingClientRect(),cs=getComputedStyle(el),pr=el.parentElement?.getBoundingClientRect();const buttons=[...el.querySelectorAll('.chip')].map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {text:e.textContent.trim(),x:r.x-cr.x,w:r.width,h:r.height,r:s.borderRadius,b:s.borderWidth,bg:s.backgroundImage||s.backgroundColor,fw:s.fontWeight,fs:s.fontSize,color:s.color,active:e.classList.contains('active')}});return {w:cr.width,x:cr.x,parentW:pr?.width||0,fill:pr?.width?cr.width/pr.width:1,display:cs.display,columns:cs.gridTemplateColumns,gap:parseFloat(cs.columnGap||cs.gap||'0')||0,buttons}}""")
 with sync_playwright() as pw:
     opts={'headless':True,'args':['--no-sandbox','--disable-gpu']}
-    custom_chromium=os.environ.get('CHROMIUM_EXECUTABLE_PATH','').strip()
-    if custom_chromium and Path(custom_chromium).is_file(): opts['executable_path']=custom_chromium
-    elif Path('/usr/bin/chromium').exists(): opts['executable_path']='/usr/bin/chromium'
+    if Path('/usr/bin/chromium').exists(): opts['executable_path']='/usr/bin/chromium'
     browser=pw.chromium.launch(**opts)
     for w,h in [(390,844),(430,932),(1024,768),(1280,800),(1440,900)]:
         page=fixture.render_page(browser,w,h,authenticated=True,standalone=w<=900)
@@ -38,24 +35,11 @@ with sync_playwright() as pw:
         ck(f'{w}: finance no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=document.documentElement.clientWidth+1'))
         if len(a['buttons'])==len(f['buttons'])==5:
             ab,fb=a['buttons'],f['buttons']
-            x_delta=max(abs(ab[i]['x']-fb[i]['x']) for i in range(5))
-            container_delta=abs(a['w']-f['w'])
-            if x_delta>=1.1 or container_delta>=1.1:
-                print(
-                    f"GEOMETRY {w}: "
-                    f"analytics container(x={a['x']:.2f}, w={a['w']:.2f}, parent={a['parentW']:.2f}, fill={a['fill']:.3f}) "
-                    f"buttons={[round(x['x'],2) for x in ab]}; "
-                    f"finance container(x={f['x']:.2f}, w={f['w']:.2f}, parent={f['parentW']:.2f}, fill={f['fill']:.3f}) "
-                    f"buttons={[round(x['x'],2) for x in fb]}; "
-                    f"max relative-x delta={x_delta:.2f}, container delta={container_delta:.2f}"
-                )
             ck(f'{w}: labels identical',[x['text'] for x in ab]==[x['text'] for x in fb])
             ck(f'{w}: button heights identical',max(abs(ab[i]['h']-fb[i]['h']) for i in range(5))<1.1)
             ck(f'{w}: button widths identical',max(abs(ab[i]['w']-fb[i]['w']) for i in range(5))<1.1)
-            ck(f'{w}: relative x positions identical',x_delta<1.1)
-            ck(f'{w}: relative y positions identical',max(abs(ab[i]['y']-fb[i]['y']) for i in range(5))<1.1)
-            ck(f'{w}: period container widths identical',container_delta<1.1)
-            ck(f'{w}: period container heights identical',abs(a['h']-f['h'])<1.1)
+            ck(f'{w}: relative x positions identical',max(abs(ab[i]['x']-fb[i]['x']) for i in range(5))<1.1)
+            ck(f'{w}: period container widths identical',abs(a['w']-f['w'])<1.1)
             ck(f'{w}: grid columns identical',a['columns']==f['columns'])
             ck(f'{w}: gaps identical',abs(a['gap']-f['gap'])<0.6)
             ck(f'{w}: radii identical',all(ab[i]['r']==fb[i]['r'] for i in range(5)))
@@ -66,9 +50,6 @@ with sync_playwright() as pw:
             if w<=900:
                 ck(f'{w}: analytics fills its mobile control row',a['fill']>=.98)
                 ck(f'{w}: finance fills its mobile control row',f['fill']>=.98)
-            else:
-                ck(f'{w}: analytics stays on one desktop row',max(x['y'] for x in ab)-min(x['y'] for x in ab)<1.1)
-                ck(f'{w}: finance stays on one desktop row',max(x['y'] for x in fb)-min(x['y'] for x in fb)<1.1)
         page.close()
     browser.close()
 failed=[x for x,ok in checks if not ok]

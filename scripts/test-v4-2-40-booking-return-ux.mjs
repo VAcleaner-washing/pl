@@ -14,8 +14,7 @@ const backend=read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const checks=[];
 const ok=(name,cond)=>checks.push([name,!!cond]);
-const atLeast=(value,target)=>{const a=String(value).split('.').map(Number),b=String(target).split('.').map(Number);for(let i=0;i<Math.max(a.length,b.length);i++){if((a[i]||0)!==(b[i]||0))return(a[i]||0)>(b[i]||0)}return true};
-ok('release is v4.2.40 or newer',atLeast(pkg.version,'4.2.40')&&pkg.version===rel.version&&Number(rel.build)>=4240);
+ok('release is v4.2.40',pkg.version==='4.2.40'&&rel.version==='4.2.40'&&Number(rel.build)===4240);
 ok('public local address copy hides internal route km',address.includes("ctx.mode==='public'?publicLocalCopy")&&publicSlots.length>0&&address.includes('Доставка — до під’їзду · ${localFee} грн')&&!address.includes("ctx.mode==='public'?`Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир. Локальний тариф; маршрут від бази"));
 ok('route km remains collected for internal analytics',address.includes("ctx.input.dataset.vacAddressRouteKm=String(routeKm)")&&address.includes('для внутрішньої аналітики'));
 ok('public contact step hides messenger choices behind optional disclosure',publicSlots.includes("document.createElement('details')")&&publicSlots.includes('Зручніше в месенджері?')&&!publicSlots.includes('data-vac-channel="phone" class="active"')&&publicSlots.includes('data-vac-channel="telegram"')&&publicSlots.includes('data-vac-channel="instagram"')&&publicCss.includes('.vx-contact-preference>summary'));
@@ -29,6 +28,7 @@ ok('mobile booking actions prioritize common actions and collapse rare operation
 ok('more disclosure does not open booking detail',admin.includes("closest('button,a,input,summary,details')"));
 ok('mobile finance stacks equal full-width deposit then settlement',css.includes('.booking-card .booking-finance>.booking-deposit-state,\n  .booking-card .booking-finance>em')&&css.includes('grid-row:2;display:grid')&&css.includes('grid-row:3;display:grid')&&css.includes('width:100%;max-width:none'));
 ok('mobile client card defeats later <=1220 width override',css.includes('.modal-card:has(.client-card-form){position:absolute;inset:0;width:auto;max-width:none')&&css.includes('.client-editor-scroll>.client-quick-actions'));
+ok('wide desktop period geometry is deterministic across Analytics and Finance',css.includes('@media(min-width:1321px)')&&css.includes('width:500px;max-width:100%;flex:0 0 500px;justify-items:stretch')&&css.includes('grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:100%;min-width:0;justify-content:stretch'));
 ok('spec records v4.2.40 UX contracts',spec.includes('Change record — v4.2.40')&&spec.includes('PUBLIC-BOOK-UX-001')&&spec.includes('RETURN-GIFT-001')&&spec.includes('CLIENT-GEO-008'));
 for(const [name,pass] of checks) console.log(`${pass?'PASS':'FAIL'}: ${name}`);
 const failed=checks.filter(([,pass])=>!pass);
