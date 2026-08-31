@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.37  
-**Baseline build:** 4237  
+**Baseline version:** 4.2.39  
+**Baseline build:** 4239  
 **Останнє оновлення:** 2026-08-30  
 **Власник логіки:** VAcleaner  
 
@@ -3204,3 +3204,51 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - Regression coverage belongs to both the static v4.2.37 contract and real-browser route smoke.
 - A nested client card uses an explicit `←` header control with the parent route in its accessible label. The unchanged mobile client card still does not waste height on a permanent footer.
 
+
+
+# 46. Change record — v4.2.38
+
+### ADDED
+- Production history now has an auditable source-of-truth note for completed historical deliveries that used the confirmed 250 грн delivery tariff.
+
+### CHANGED
+- `scripts/admin_context_navigation_qa.py` no longer relies on a fixed 70 ms transition delay or positional `.chip:nth(...)` selection. It waits until the booking-detail shell is fully detached before interacting with the bookings list and targets the completed filter by `data-filter`.
+
+### FIXED
+- GitHub Browser QA flake where the hidden/closing `.detail-shell` could still intercept the click on the completed-bookings filter even though the navigation route itself was correct.
+- Historical completed delivery records with missing `delivery_amount` were backfilled in production to the confirmed 250 грн tariff; the latest delivery profitability sample therefore uses 30/30 known prices and 29/30 matched price + road-route records.
+
+### PRESERVED
+- v4.2.37 deep route stack, exact global-search restoration, calm hover system, iOS Instagram return flow, PWA safe-area behavior and all booking/client/referral business rules remain unchanged.
+- Current delivery tariff calculation for new bookings remains unchanged; this release does not replace or bypass the configured 250/350/manual tariff logic.
+
+### TESTS
+- `npm run test:admin-context-navigation` must pass with the detail shell fully detached before list interaction.
+- `npm run test:v4.2.37-route-smoke` remains the canonical fast deep-route regression for PWA 390px and desktop 1440px.
+- `npm run qa:static` and the canonical GitHub Browser QA aggregate remain release gates.
+
+
+# 47. Change record — v4.2.39
+
+### ADDED
+- **UI-CONS-001 — shared admin period selector.** Analytics and Finance use one renderer for `7 днів / 30 днів / Місяць / Рік / Увесь час`, so identical controls cannot drift into different layouts.
+- `scripts/admin_control_consistency_qa.py` compares the period controls across PWA and desktop viewports, including labels, height, radius and overflow.
+- `scripts/test-v4-2-39-admin-control-consistency.mjs` guards the shared renderer and responsive geometry.
+
+### CHANGED
+- On PWA, the five period controls use one 3-column responsive grid in both Analytics and Finance; every visible period control keeps at least a 44 px touch target.
+- On 1024–1320 px desktop, Analytics moves the shared period selector onto a full-width row before it can squeeze or overflow.
+
+### FIXED
+- Finance and Analytics no longer show visibly different `7 днів / 30 днів / ...` button geometry on iPhone.
+- Analytics no longer creates horizontal overflow at 1024/1280 px when the title copy and five period buttons compete for the same toolbar row.
+
+### PRESERVED
+- v4.2.38 context-navigation stability and 250 грн historical-delivery backfill remain unchanged.
+- v4.2.37 deep route restoration, calm hover, iOS Instagram return flow, PWA safe-area behavior and all booking/client/referral business rules remain unchanged.
+
+### TESTS
+- `npm run test:v4.2.39-admin-control-consistency`;
+- `npm run test:admin-control-consistency`;
+- `npm run test:analytics-visual`;
+- full static/build regression and canonical Browser QA remain release gates.

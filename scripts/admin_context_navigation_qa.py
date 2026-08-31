@@ -39,9 +39,13 @@ with sync_playwright() as pw:
         ck('closing new booking returns to client card',page.locator('#clientEditor').count()==1)
 
         # Returned client -> referral -> back -> client card.
-        page.locator('#clientEditor .client-footer-close').click();page.wait_for_timeout(80)
-        if page.locator('.detail').count(): page.locator('.detail .back').click();page.wait_for_timeout(70)
-        page.locator('.chip').nth(5).click();page.wait_for_timeout(60)
+        page.locator('#clientEditor .client-footer-close').click();page.wait_for_selector('.detail',timeout=2500);page.wait_for_timeout(40)
+        if page.locator('.detail').count():
+            page.locator('.detail .back').click()
+            page.wait_for_selector('.detail-shell',state='detached',timeout=2500)
+            page.wait_for_timeout(40)
+        ck('booking detail fully leaves pointer plane before list interaction',page.locator('.detail-shell').count()==0)
+        page.locator('.chip[data-filter="completed"]').click();page.wait_for_timeout(60)
         page.locator('.booking-card').last.locator('.booking-client-link').click();page.wait_for_timeout(80)
         page.evaluate("""()=>{const previous=window.fetch;window.fetch=async(url,options={})=>{let payload={};try{payload=options.body?JSON.parse(options.body):{}}catch{}if(payload.action==='referral_summary')return{ok:true,status:200,json:async()=>({referral:{code:'VA-TEST123',inviteCount:0,completedReferrals:0,earnedRewardAmount:0,activeRewardAmount:0,lastInvite:null,referrals:[],rewards:[],profile:{name:'Клієнт',preferred_contact:'instagram',instagram:'client.test',telegram:'@client_test'}}})};if(payload.action==='referral_invite_sent')return{ok:true,status:200,json:async()=>({ok:true})};return previous(url,options)}}""")
         ck('returned client card opens',page.locator('#clientEditor').count()==1)

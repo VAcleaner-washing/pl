@@ -6778,3 +6778,22 @@ html.keyboard-open .pwa-update-prompt{visibility:hidden;opacity:0;pointer-events
   /* Keep part of the next task tab visible so horizontal Settings navigation is discoverable. */
   .settings-tab{min-width:108px;padding-inline:10px}
 }
+
+
+/* v4.2.39 — ADMIN CONTROL CONSISTENCY: one period selector geometry across Analytics + Finance. */
+.admin-period-controls,.analytics-period-controls{max-width:100%;min-width:0}
+.admin-periods,.analytics-periods{max-width:100%;min-width:0}
+.finance-period-row .admin-period-controls,.finance-period-row .analytics-period-controls{width:100%}
+@media(max-width:900px){
+  .admin-period-controls,.analytics-period-controls{width:100%;justify-items:stretch}
+  .admin-periods,.analytics-periods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;min-width:0;overflow:visible}
+  .admin-periods .chip,.analytics-periods .chip{width:100%;min-width:0;min-height:44px;padding:0 8px;font-size:12px;justify-content:center}
+  .finance-period-row .admin-periods,.finance-period-row .analytics-periods{overflow:visible;flex-wrap:initial}
+}
+@media(min-width:901px) and (max-width:1320px){
+  .analytics-toolbar{flex-wrap:wrap;align-items:flex-start}
+  .analytics-toolbar-copy{flex:1 1 100%;min-width:0}
+  .analytics-toolbar .admin-period-controls,.analytics-toolbar .analytics-period-controls{width:100%;justify-items:stretch}
+  .analytics-toolbar .admin-periods,.analytics-toolbar .analytics-periods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));width:100%}
+  .analytics-toolbar .admin-periods .chip,.analytics-toolbar .analytics-periods .chip{width:100%;min-width:0}
+}

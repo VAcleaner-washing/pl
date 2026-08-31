@@ -1370,3 +1370,7 @@ html.glass-test .delivery-average-line>strong{font-weight:580}
   html.glass-test .search-result-row:hover{box-shadow:none;background:linear-gradient(90deg,rgba(214,164,95,.04),rgba(255,255,255,.009))}
   html.glass-test .client-row:hover .client-open-indicator{transform:none}
 }
+
+
+/* v4.2.39 — shared admin period controls keep identical touch geometry. */
+html.glass-test .admin-periods .chip,html.glass-test .analytics-periods .chip{min-height:44px}
