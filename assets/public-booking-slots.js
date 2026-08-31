@@ -91,11 +91,18 @@ function renderPickupLocationNote(){
 }
 function normalizeSettlement(value){return String(value||'').toLocaleLowerCase('uk-UA').replace(/^[смт.\s]+/u,'').replace(/[’`]/g,"'").trim()}
 function deliveryAddressInput(){return document.querySelector('.booking-delivery-address input[type="text"]:not([data-vac-address-detail])')}
+function inferredDeliverySettlement(address,metaSettlement=''){
+  const explicit=String(metaSettlement||'').trim();if(explicit)return explicit;
+  const base=String(address||'').split(' · ')[0].trim(),parts=base.split(',').map(v=>v.trim()).filter(Boolean),first=parts[0]||'';
+  const local=(deliveryPricing.localSettlements||[]).find(item=>normalizeSettlement(item)===normalizeSettlement(first));if(local)return local;
+  const streetLike=/\d/.test(first)||/\b(?:вул\.?|вулиця|ул\.?|улица|пров\.?|провулок|переулок|просп\.?|проспект|бул\.?|бульвар|шосе|площа|майдан|набережна|узвіз|алея)\b/i.test(first)||parts.length===1||(parts.length===2&&/^\d+[\p{L}\p{N}/-]*$/u.test(parts[1]));
+  return streetLike?'Полтава':first;
+}
 function currentDeliveryQuote(){
   const input=deliveryAddressInput(),address=String(input?.value||'').trim();
   if(!address)return {amount:deliveryPricing.local,zone:'pending',pending:true,quoteRequired:false,distanceKm:null};
   const meta=window.__VAC_DELIVERY_META__?.()||{};
-  const settlement=String(meta.settlement||address.split(',')[0]||'').trim();
+  const settlement=inferredDeliverySettlement(address,meta.settlement);
   const normalized=normalizeSettlement(settlement);
   const local=(deliveryPricing.localSettlements||[]).some(item=>normalizeSettlement(item)===normalized);
   if(local)return {amount:deliveryPricing.local,zone:'local',pending:false,quoteRequired:false,settlement,distanceKm:0};
@@ -132,7 +139,9 @@ function renderDeliveryFee(){
   if(summary){
     const deliveryRow=[...summary.querySelectorAll(':scope > div')].find(el=>/Доставка/.test(el.querySelector('span')?.textContent||''));
     if(deliveryRow){
-      const strong=deliveryRow.querySelector('strong');
+      deliveryRow.classList.add('vx-summary-delivery-row');
+      const label=deliveryRow.querySelector('span'),strong=deliveryRow.querySelector('strong');
+      if(label)setTextIfChanged(label,'Доставка');
       if(strong)setTextIfChanged(strong,manualQuote?'після підтвердження':quote.quoteRequired?'за погодженням':quote.pending?formatMoney(deliveryPricing.local):formatMoney(quote.amount));
     }
     let note=summary.querySelector('.vx-summary-delivery-note');
@@ -421,6 +430,11 @@ document.addEventListener('DOMContentLoaded',()=>{refreshBindings();depositObser
             body.deliveryAddress=addressParts.address||body.deliveryAddress;
             body.deliveryAddressDetail=addressParts.detail||'';
             body.deliveryAddressVerified=meta.verified===true;
+            // A plain street + house is overwhelmingly a Poltava address in this
+            // local booking flow. Prefix it only in the API payload so the current
+            // backend applies the 250 грн local tariff even when OSM/Photon did not
+            // verify the building. Explicit settlement names are never overwritten.
+            if(!body.deliveryAddressVerified&&inferredDeliverySettlement(body.deliveryAddress,meta.settlement)==='Полтава'&&!/^\s*(?:м\.?\s*)?полтава\s*,/i.test(body.deliveryAddress))body.deliveryAddress=`Полтава, ${body.deliveryAddress}`;
             if(Number.isFinite(Number(meta.pricingDistanceKm)))body.deliveryDistanceKm=Number(meta.pricingDistanceKm);
             if(Number.isFinite(Number(meta.routeKm)))body.deliveryRouteKm=Number(meta.routeKm);
             if(Number.isFinite(Number(meta.lat)))body.deliveryLat=Number(meta.lat);

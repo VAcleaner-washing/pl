@@ -14,7 +14,7 @@ const backend=read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const checks=[];
 const ok=(name,cond)=>checks.push([name,!!cond]);
-ok('release is v4.2.40',pkg.version==='4.2.40'&&rel.version==='4.2.40'&&Number(rel.build)===4240);
+ok('release keeps v4.2.40+ booking/return UX',Number(rel.build)>=4240&&pkg.version===rel.version);
 ok('public local address copy hides internal route km',address.includes("ctx.mode==='public'?publicLocalCopy")&&publicSlots.length>0&&address.includes('Доставка — до під’їзду · ${localFee} грн')&&!address.includes("ctx.mode==='public'?`Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир. Локальний тариф; маршрут від бази"));
 ok('route km remains collected for internal analytics',address.includes("ctx.input.dataset.vacAddressRouteKm=String(routeKm)")&&address.includes('для внутрішньої аналітики'));
 ok('public contact step hides messenger choices behind optional disclosure',publicSlots.includes("document.createElement('details')")&&publicSlots.includes('Зручніше в месенджері?')&&!publicSlots.includes('data-vac-channel="phone" class="active"')&&publicSlots.includes('data-vac-channel="telegram"')&&publicSlots.includes('data-vac-channel="instagram"')&&publicCss.includes('.vx-contact-preference>summary'));

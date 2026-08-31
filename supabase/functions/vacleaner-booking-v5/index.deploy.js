@@ -158,6 +158,13 @@ function normalizeDeliveryPricing(value) {
 function normalizeSettlement(value) {
     return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
 }
+function inferredDeliverySettlement(address, pricing) {
+    const base = String(address || "").split(" · ")[0].trim(), parts = base.split(",").map((v)=>v.trim()).filter(Boolean), first = parts[0] || "";
+    const local = (pricing.localSettlements || []).find((item)=>normalizeSettlement(item) === normalizeSettlement(first));
+    if (local) return local;
+    const streetLike = /\d/.test(first) || /\b(?:вул\.?|вулиця|ул\.?|улица|пров\.?|провулок|переулок|просп\.?|проспект|бул\.?|бульвар|шосе|площа|майдан|набережна|узвіз|алея)\b/i.test(first) || parts.length === 1 || parts.length === 2 && /^\d+[\p{L}\p{N}/-]*$/u.test(parts[1]);
+    return streetLike ? "Полтава" : first;
+}
 function deliveryQuote(fulfillment, address, verified, routeDistanceValue, pricing) {
     if (fulfillment !== "delivery") return {
         amount: 0,
@@ -178,7 +185,7 @@ function deliveryQuote(fulfillment, address, verified, routeDistanceValue, prici
         distanceKm: null,
         extraKm: 0
     };
-    const settlement = base.split(",")[0].trim(), normalized = normalizeSettlement(settlement);
+    const settlement = inferredDeliverySettlement(base, pricing), normalized = normalizeSettlement(settlement);
     const local = (pricing.localSettlements || []).some((item)=>normalizeSettlement(item) === normalized);
     if (local) return {
         amount: pricing.local,
@@ -778,7 +785,9 @@ Deno.serve(async (req)=>{
             },
             hasPuzzi,
             storyGiftEligible,
-            homeResetGiftIncluded: productCode === "elite"
+            homeResetGiftIncluded: productCode === "elite",
+            storyGiftChoice: storyMention ? storyGiftChoice : "",
+            storyChemistryFreePortions: storyMention && storyGiftChoice === "chemistry2" ? 2 : 0
         };
         if (body.action === "availability" || body.action === "promo_lookup") return json({
             ...av,

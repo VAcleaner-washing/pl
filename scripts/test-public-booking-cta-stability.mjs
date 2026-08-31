@@ -11,7 +11,7 @@ check(bundle.includes('ef=`${e}|${j}|${g}|${v}|${k}`'),'core signature contains 
 check(bundle.includes('r=eb.current!==ef'),'estimate refresh distinguishes core-period changes');
 check(bundle.includes('r&&(q("checking"),V(null))'),'checking state resets only when the core period changes');
 check(bundle.includes('eb.current=ef'),'successful availability stores the validated core period');
-check(bundle.includes('[e,j,g,v,k,_,S,er,en,P,z,promoCode,es,ef]'),'estimate still refreshes for delivery, extras, stories, phone and promo');
+check(bundle.includes('[e,j,g,v,k,_,S,er,en,P,storyGiftChoice,z,promoCode,es,ef]'),'estimate still refreshes for delivery, extras, Story gift choice, phone and promo');
 check(!bundle.includes('window.setTimeout(async()=>{q("checking"),W("")'),'estimate-only changes cannot unconditionally reset CTA to dates');
 
 // State-machine contract mirrored from the hydrated bundle: only a core-period edit

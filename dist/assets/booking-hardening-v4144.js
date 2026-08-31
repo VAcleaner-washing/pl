@@ -57,7 +57,12 @@ function applyControl(key,state){
   const form=$('.booking-form');if(!form)return false;
   const el=$$('input,select,textarea',form).find(x=>controlKey(x)===key);
   if(!el)return false;
-  if(el.type==='checkbox'||el.type==='radio'){
+  if(el.type==='radio'){
+    // Radio restore is group-based: only replay the saved checked option. Dispatching
+    // `change` for an unchecked radio fires React's onChange handler and can select
+    // the wrong gift (the last radio in DOM). Native group behaviour unchecks peers.
+    if(Boolean(state.checked)&&!el.checked)reactChecked(el,true);
+  }else if(el.type==='checkbox'){
     if(Boolean(el.checked)!==Boolean(state.checked))reactChecked(el,state.checked);
   }else if(state.value!=null&&el.value!==state.value)reactValue(el,state.value);
   return true;
@@ -153,10 +158,10 @@ function collapsePromo(){
   const field=$('.booking-promo-field');if(!field||field.dataset.vxPromoCollapsed)return;
   field.dataset.vxPromoCollapsed='1';
   const input=$('input',field);if(!input)return;
-  const toggle=document.createElement('button');toggle.type='button';toggle.className='vx-promo-toggle';toggle.textContent='Є промокод?';toggle.setAttribute('aria-expanded',input.value?'true':'false');
+  const toggle=document.createElement('button');toggle.type='button';toggle.className='vx-promo-toggle';toggle.textContent='Є промокод?';toggle.setAttribute('aria-label','Відкрити поле промокоду');toggle.setAttribute('aria-expanded',input.value?'true':'false');
   const wrap=document.createElement('div');wrap.className='vx-promo-body';
   [...field.childNodes].filter(n=>n!==toggle).forEach(n=>wrap.appendChild(n));field.append(toggle,wrap);
-  const sync=()=>{const open=toggle.getAttribute('aria-expanded')==='true'||Boolean(input.value)||Boolean(input.dataset.autoSmsPromo);field.classList.toggle('is-open',open);wrap.hidden=!open};
+  const sync=()=>{const open=toggle.getAttribute('aria-expanded')==='true'||Boolean(input.value)||Boolean(input.dataset.autoSmsPromo);field.classList.toggle('is-open',open);wrap.hidden=!open;toggle.setAttribute('aria-label',open?'Сховати поле промокоду':'Відкрити поле промокоду')};
   toggle.addEventListener('click',()=>{toggle.setAttribute('aria-expanded',toggle.getAttribute('aria-expanded')==='true'?'false':'true');sync();if(!wrap.hidden)input.focus()});input.addEventListener('input',sync);sync();
 }
 function polishSummary(){

@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.40  
-**Baseline build:** 4240  
+**Baseline version:** 4.2.41  
+**Baseline build:** 4241  
 **Останнє оновлення:** 2026-08-31  
 **Власник логіки:** VAcleaner  
 
@@ -3303,3 +3303,44 @@ Customer PII не повинна потрапляти у release ZIP як histor
 - `npm run test:v4.2.39-admin-control-consistency`;
 - `npm run test:admin-control-consistency` (94 geometry/style assertions across 390 / 430 / 1024 / 1280 / 1440);
 - full `npm run qa:static`, build and canonical Browser/PWA QA remain release gates.
+
+# 49. Change record — v4.2.41
+
+### ADDED
+- **ADDR-RESILIENCE-001 — autocomplete assists, never blocks conversion.** A valid manual `street + house number` remains submit-able when OpenStreetMap/Photon misses the exact building or the provider is unavailable.
+- **PROMO-UX-002 — visible optional promo entry.** Step 04 uses one full-width `Є промокод? / Додати` disclosure with a >=50 px target instead of a low-contrast text link.
+
+- **BOOKING-UX-024 — financial summary alignment.** У desktop summary рядок `Доставка` є фінансовим рядком: назва завжди зліва, фактична сума/статус завжди справа на одній осі з орендою, передоплатою та залоговим платежем. Суму не можна склеювати з label зліва.
+- **STORY-GIFT-STATE-001 — one selected reward, one source of truth.** For eligible Puzzi rentals from 1 000 грн, `diffuser50` and `chemistry2` are mutually exclusive states across UI, estimate, create payload, draft restore and return finance.
+- `scripts/test-v4-2-41-address-resilience.mjs` protects address fallback, promo visibility and Story gift state.
+
+### CHANGED
+- `vacleaner-address-v1` no longer stops after Photon returns any unrelated numbered building. Suggestions are filtered/ranked against the typed street and search also tries canonical `вулиця ...` / `провулок ...` Poltava variants.
+- If the typed Poltava street is relevant but the exact building is absent, autocomplete can offer the user-entered building as a manual candidate without coordinates. Manual/approximate candidates are never marked verified and never become route/fuel facts.
+- Plain local addresses without an explicit settlement prefix (`Решетилівська 39а`, `Перспективний 10`) are treated as Poltava for the fixed local tariff. Explicit settlement prefixes still win.
+- Availability requests now carry the active Story gift choice; the booking backend estimate echoes `storyGiftChoice` and `storyChemistryFreePortions` so async recalculation cannot drift from the selected reward.
+- Draft restore replays only the checked radio option. An unchecked radio no longer dispatches React `change`, which previously could select the last gift option while restoring state.
+
+### FIXED
+- Selecting `Аромадифузор VA HOME · 50 мл` no longer shows `2 порції безкоштовно` in the Puzzi chemistry row and no longer falls back to chemistry after returning to the previous booking step / restoring the draft.
+- Only `chemistry2` activates the free-chemistry copy and finance calculation. Diffuser selection remains a diffuser through availability refresh, booking creation and admin return flow.
+- The Story summary has an explicit `Оберіть подарунок` state before a choice is made instead of visually pretending one reward was already selected.
+- Searches such as `Решетилівська 39а` no longer tempt the customer with neighbouring house numbers, and unrelated results for inputs such as `Перспективний 10` are filtered out.
+- Address-provider failure or no exact match no longer prevents booking: the customer can finish with a valid manual address and the manager verifies it before prepayment.
+
+### PRESERVED
+- Address source remains OpenStreetMap through Photon; OSRM remains the road-route provider. No proprietary address database is introduced.
+- Poltava / Розсошенці / Щербані / Горбанівка remain the configured 250 грн local-delivery zone; explicit other settlements remain on route/agreement pricing.
+- Manual address fallback never invents coordinates or route kilometres; internal delivery analytics still accept only verified route data as fact.
+- v4.2.40 contact disclosure, return-gift policy, deposit/settlement logic, Finance/Analytics geometry, client-card geometry and referral logic remain unchanged.
+
+### TESTS
+- `npm run test:v4.2.41-address-resilience`;
+- `npm run test:booking-gifts`;
+- `npm run test:booking-cta`;
+- `npm run test:v4.2.40-booking-return-ux`;
+- `npm run test:v4.1.52-manual-address-fallback`;
+- `npm run test:v4.1.53-address-provider-repair`;
+- `npm run test:v4.1.54-local-zone-correction`;
+- full `npm run qa:static`, build and canonical Browser/PWA QA remain release gates.
+

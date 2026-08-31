@@ -346,3 +346,8 @@
 .vx-contact-detail>span{font-size:12px;font-weight:650;color:#5f574e}
 .vx-contact-detail input{width:100%;min-height:52px;border:1px solid rgba(30,26,22,.13);border-radius:14px;background:#fff;padding:0 14px;font:inherit;color:inherit}
 @media(max-width:620px){.vx-contact-preference>summary{min-height:48px;padding-inline:12px}.vx-contact-preference-body{padding-inline:12px}.vx-contact-segments{gap:4px}.vx-contact-segments button{min-height:40px;padding-inline:5px;font-size:11.5px}}
+
+/* v4.2.41 — booking summary financial alignment */
+.booking-summary .vx-summary-delivery-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;column-gap:20px}
+.booking-summary .vx-summary-delivery-row>span{min-width:0;text-align:left}
+.booking-summary .vx-summary-delivery-row>strong{justify-self:end;text-align:right;white-space:nowrap}

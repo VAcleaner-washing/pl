@@ -138,16 +138,39 @@ async function pricingDistance(targetLat: number, targetLon: number) {
 }
 
 
+const STREET_TYPE_RE = /\b(?:вулиця|вул\.?|улица|ул\.?|провулок|пров\.?|переулок|пер\.?|проспект|просп\.?|бульвар|бул\.?|шосе|площа|майдан|набережна|узвіз|алея)\b/giu;
+function normalizeStreet(value: unknown) {
+  return text(value).toLocaleLowerCase("uk-UA").replace(/[’`]/g, "'").replace(STREET_TYPE_RE, " ").replace(/[^\p{L}\p{N}]+/gu, " ").replace(/\s+/g, " ").trim();
+}
+function normalizeHouse(value: unknown) { return text(value).toLocaleLowerCase("uk-UA").replace(/\s+/g, ""); }
+function streetMatchScore(queryStreet: unknown, itemStreet: unknown) {
+  const q = normalizeStreet(queryStreet), item = normalizeStreet(itemStreet);
+  if (!q || !item) return 0;
+  if (q === item) return 4;
+  if (q.includes(item) || item.includes(q)) return 3;
+  const qTokens = q.split(" ").filter((v) => v.length >= 2), itemTokens = new Set(item.split(" ").filter((v) => v.length >= 2));
+  if (!qTokens.length) return 0;
+  const overlap = qTokens.filter((token) => itemTokens.has(token)).length / qTokens.length;
+  return overlap >= 0.67 ? 2 : 0;
+}
 function parseHouseQuery(value: string) {
-  const q = cleanQuery(value).replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i, "").replace(/^(?:вул\.?|вулиця|ул\.?|улица)\s+/i, "").trim();
+  const q = cleanQuery(value).replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i, "").trim();
   const m = q.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
   return m ? { street: m[1].trim(), houseNumber: m[2].trim() } : { street: q, houseNumber: "" };
 }
 function searchVariants(value: string) {
   const raw = cleanQuery(value);
   const parsed = parseHouseQuery(raw);
-  const out = [raw, `${raw}, Полтава`, parsed.houseNumber ? `${parsed.street}, ${parsed.houseNumber}, Полтава` : "", parsed.street ? `${parsed.street}, Полтава` : ""];
-  return [...new Set(out.map(cleanQuery).filter((v) => v.length >= 3))].slice(0, 4);
+  const typedStreet = parsed.street.replace(/^(?:вул\.?|вулиця|ул\.?|улица|провулок|пров\.?|переулок|пер\.?|проспект|просп\.?|бульвар|бул\.?)\s+/i, "").trim();
+  const exact = parsed.houseNumber ? `${typedStreet}, ${parsed.houseNumber}, Полтава` : "";
+  const out = [
+    raw,
+    exact,
+    parsed.houseNumber ? `вулиця ${typedStreet}, ${parsed.houseNumber}, Полтава` : "",
+    parsed.houseNumber ? `провулок ${typedStreet}, ${parsed.houseNumber}, Полтава` : "",
+    parsed.street ? `${typedStreet}, Полтава` : "",
+  ];
+  return [...new Set(out.map(cleanQuery).filter((v) => v.length >= 3))].slice(0, 5);
 }
 async function photonSearch(query: string, signal: AbortSignal) {
   const url = new URL(PHOTON_URL);
@@ -197,9 +220,10 @@ Deno.serve(async (req: Request) => {
 
   const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 5200);
   try {
+    const parsed = parseHouseQuery(q);
     const seenFeatures = new Set<string>();
     const features: any[] = [];
-    let providerFailed = false;
+    let providerFailed = false, exactRelevantHouseFound = false;
     for (const candidate of searchVariants(q)) {
       try {
         const batch = await photonSearch(candidate, controller.signal);
@@ -210,27 +234,41 @@ Deno.serve(async (req: Request) => {
           if (seenFeatures.has(key)) continue;
           seenFeatures.add(key);
           features.push(feature);
+          const featureStreet = text(p.street) || (p.osm_key === "highway" ? text(p.name) : "") || (p.type === "street" ? text(p.name) : "");
+          if (parsed.houseNumber && streetMatchScore(parsed.street, featureStreet) >= 3 && normalizeHouse(parsed.houseNumber) === normalizeHouse(p.housenumber)) exactRelevantHouseFound = true;
         }
       } catch (err) {
         if ((err as any)?.name === "AbortError") throw err;
         providerFailed = true;
       }
-      if (features.some((feature) => Boolean(text(feature?.properties?.housenumber)))) break;
+      if (exactRelevantHouseFound) break;
     }
 
     const seen = new Set<string>();
     let suggestions: any[] = features.filter(inSearchArea).map(formatFeature).filter(Boolean)
-      .sort((a: any, b: any) => Number(Boolean(b.houseNumber)) - Number(Boolean(a.houseNumber)) || a.distanceKm - b.distanceKm)
-      .filter((item: any) => { const key = String(item.address).toLocaleLowerCase("uk-UA"); if (seen.has(key)) return false; seen.add(key); return true; });
+      .map((item: any) => ({ ...item, streetScore: streetMatchScore(parsed.street, item.street || item.label), exactHouse: normalizeHouse(parsed.houseNumber) && normalizeHouse(parsed.houseNumber) === normalizeHouse(item.houseNumber) }))
+      .filter((item: any) => !parsed.street || item.streetScore > 0)
+      .sort((a: any, b: any) => Number(Boolean(b.exactHouse)) - Number(Boolean(a.exactHouse)) || b.streetScore - a.streetScore || Number(Boolean(b.houseNumber)) - Number(Boolean(a.houseNumber)) || a.distanceKm - b.distanceKm)
+      .filter((item: any) => { const key = String(item.address).toLocaleLowerCase("uk-UA"); if (seen.has(key)) return false; seen.add(key); return true; })
+      .map(({ streetScore, exactHouse, ...item }: any) => item);
 
-    // Photon can know a Poltava street but not every building number. For a typed
-    // house in the fixed 250 UAH city zone, keep the street result usable instead
-    // of failing the whole autocomplete. Coordinates are marked approximate and
-    // are never used for distance pricing outside the local zone.
-    const parsed = parseHouseQuery(q);
-    if (parsed.houseNumber && !suggestions.some((item: any) => Boolean(item.houseNumber))) {
-      const streetItem = suggestions.find((item: any) => isPoltavaSettlement(item.settlement) && !item.houseNumber);
-      if (streetItem) suggestions.unshift({ ...streetItem, label: `${streetItem.street || streetItem.label}, ${parsed.houseNumber}`, address: `Полтава, ${streetItem.street || streetItem.label}, ${parsed.houseNumber}`, houseNumber: parsed.houseNumber, approximateCoordinates: true, meta: `Полтава · точний номер введено · координати вулиці` });
+    // Autocomplete is an assistant, not a gate. If OSM/Photon knows the street but
+    // misses the typed building (or returns only neighbouring houses), put the
+    // user's own Poltava address first as a manual option. It has no invented
+    // coordinates and therefore can never pollute route/fuel analytics.
+    const exactHouse = parsed.houseNumber && suggestions.some((item: any) => streetMatchScore(parsed.street, item.street || item.label) >= 3 && normalizeHouse(parsed.houseNumber) === normalizeHouse(item.houseNumber));
+    if (parsed.houseNumber && !exactHouse) {
+      const streetItem = suggestions.find((item: any) => streetMatchScore(parsed.street, item.street || item.label) >= 2);
+      const canonicalStreet = text(streetItem?.street || streetItem?.label || parsed.street);
+      const settlement = text(streetItem?.settlement) || "Полтава";
+      suggestions.unshift({
+        label: `${canonicalStreet}, ${parsed.houseNumber}`,
+        address: `${settlement}, ${canonicalStreet}, ${parsed.houseNumber}`,
+        meta: `${settlement} · введена адреса · менеджер перевірить`,
+        street: canonicalStreet, houseNumber: parsed.houseNumber, settlement,
+        areaType: isPoltavaSettlement(settlement) ? "city" : "outside",
+        distanceKm: null, lat: null, lon: null, manualAddress: true, approximateCoordinates: true,
+      });
     }
 
     suggestions = suggestions.slice(0, 8);

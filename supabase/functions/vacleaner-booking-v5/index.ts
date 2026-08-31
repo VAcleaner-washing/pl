@@ -101,11 +101,18 @@ function normalizeDeliveryPricing(value: unknown) {
 function normalizeSettlement(value: unknown) {
   return String(value || "").toLocaleLowerCase("uk-UA").replace(/^[смт.\s]+/u, "").replace(/[’`]/g, "'").trim();
 }
+function inferredDeliverySettlement(address: string, pricing: any) {
+  const base = String(address || "").split(" · ")[0].trim(), parts = base.split(",").map((v) => v.trim()).filter(Boolean), first = parts[0] || "";
+  const local = (pricing.localSettlements || []).find((item: string) => normalizeSettlement(item) === normalizeSettlement(first));
+  if (local) return local;
+  const streetLike = /\d/.test(first) || /\b(?:вул\.?|вулиця|ул\.?|улица|пров\.?|провулок|переулок|просп\.?|проспект|бул\.?|бульвар|шосе|площа|майдан|набережна|узвіз|алея)\b/i.test(first) || parts.length === 1 || (parts.length === 2 && /^\d+[\p{L}\p{N}/-]*$/u.test(parts[1]));
+  return streetLike ? "Полтава" : first;
+}
 function deliveryQuote(fulfillment: string, address: string, verified: boolean, routeDistanceValue: unknown, pricing: any) {
   if (fulfillment !== "delivery") return { amount: 0, zone: "pickup", quoteRequired: false, pending: false, settlement: "", distanceKm: null, extraKm: 0 };
   const base = String(address || "").split(" · ")[0].trim();
   if (!base) return { amount: pricing.local, zone: "pending", quoteRequired: false, pending: true, settlement: "", distanceKm: null, extraKm: 0 };
-  const settlement = base.split(",")[0].trim(), normalized = normalizeSettlement(settlement);
+  const settlement = inferredDeliverySettlement(base, pricing), normalized = normalizeSettlement(settlement);
   const local = (pricing.localSettlements || []).some((item: string) => normalizeSettlement(item) === normalized);
   if (local) return { amount: pricing.local, zone: "local", quoteRequired: false, pending: false, settlement, distanceKm: 0, extraKm: 0 };
   const distanceKm = Number(routeDistanceValue);
@@ -392,7 +399,7 @@ Deno.serve(async (req: Request) => {
     const delivery = deliveryQuote(fulfillmentForEstimate, estimateAddress, body.deliveryAddressVerified === true, body.deliveryRouteKm ?? body.deliveryDistanceKm, deliveryPricing);
     const baseAmount = Math.max(0, rawBase - discount), deliveryAmount = delivery.amount, totalAmount = baseAmount + selected.amount + deliveryAmount;
     const securityDeposit = depositAmount(productCode, startDate, returnDate, pickupWindow, returnWindow, rules, catalog);
-    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, deliveryZone: delivery.zone, deliveryDistanceKm: delivery.distanceKm, deliveryExtraKm: delivery.extraKm, deliveryQuoteRequired: delivery.quoteRequired, deliveryQuotePending: delivery.pending, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, referralRewardDiscountAmount: referralRewardDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, referralReward: referralRewardDiscount && referralReward ? { id: referralReward.id, amount: referralRewardDiscount, expiresAt: referralReward.expires_at, applied: true } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite" };
+    const estimate = { rentalDays: days, baseBeforeDiscount: rawBase, baseAmount, extrasAmount: selected.amount, deliveryAmount, deliveryZone: delivery.zone, deliveryDistanceKm: delivery.distanceKm, deliveryExtraKm: delivery.extraKm, deliveryQuoteRequired: delivery.quoteRequired, deliveryQuotePending: delivery.pending, totalAmount, prepaymentAmount: 200, loyaltyDiscountAmount: loyaltyDiscount, promoDiscountAmount: promoDiscount, referralRewardDiscountAmount: referralRewardDiscount, discountAmount: discount, discountSource, promo: promo ? { ...promo, applied: promoApplied } : null, referralReward: referralRewardDiscount && referralReward ? { id: referralReward.id, amount: referralRewardDiscount, expiresAt: referralReward.expires_at, applied: true } : null, depositAmount: securityDeposit, loyalty: { ...loyalty, completedOrders: completed }, hasPuzzi, storyGiftEligible, homeResetGiftIncluded: productCode === "elite", storyGiftChoice: storyMention ? storyGiftChoice : "", storyChemistryFreePortions: storyMention && storyGiftChoice === "chemistry2" ? 2 : 0 };
     if (body.action === "availability" || body.action === "promo_lookup") return json({ ...av, estimate });
     if (body.action !== "create") return json({ error: "invalid_action" }, 400);
     if (storyMention && hasPuzzi && productCode !== "elite" && !storyGiftChoice) return json({ error: "gift_choice_required", estimate }, 400);

@@ -141,15 +141,24 @@ function selectItem(ctx,index){
   ctx.selected=item.houseNumber?item.address:'';
   if(item.houseNumber){
     clearMeta(ctx.input);
-    ctx.input.dataset.vacAddressSelected='1';
-    ctx.input.dataset.vacAddressSettlement=String(item.settlement||'');
-    ctx.input.dataset.vacAddressDistanceKm=item.distanceKm==null?'':String(item.distanceKm);
-    ctx.input.dataset.vacAddressLat=item.lat==null?'':String(item.lat);
-    ctx.input.dataset.vacAddressLon=item.lon==null?'':String(item.lon);
-    ctx.input.dataset.vacAddressAreaType=String(item.areaType||'');
-    closeList(ctx);
-    document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
-    hydrateDistanceQuote(ctx,item);
+    const manual=Boolean(item.manualAddress||item.approximateCoordinates);
+    if(manual){
+      if(item.settlement)ctx.input.dataset.vacAddressSettlement=String(item.settlement);
+      if(item.areaType)ctx.input.dataset.vacAddressAreaType=String(item.areaType);
+      closeList(ctx);
+      setStatus(ctx,'manual','Адресу прийнято вручну — бронювання можна завершити. Менеджер перевірить її до передоплати.',false);
+      document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
+    }else{
+      ctx.input.dataset.vacAddressSelected='1';
+      ctx.input.dataset.vacAddressSettlement=String(item.settlement||'');
+      ctx.input.dataset.vacAddressDistanceKm=item.distanceKm==null?'':String(item.distanceKm);
+      ctx.input.dataset.vacAddressLat=item.lat==null?'':String(item.lat);
+      ctx.input.dataset.vacAddressLon=item.lon==null?'':String(item.lon);
+      ctx.input.dataset.vacAddressAreaType=String(item.areaType||'');
+      closeList(ctx);
+      document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
+      hydrateDistanceQuote(ctx,item);
+    }
     ctx.setting=true;
     ctx.input.dispatchEvent(new Event('input',{bubbles:true}));
     ctx.input.dispatchEvent(new Event('change',{bubbles:true}));
@@ -163,6 +172,28 @@ function setActive(ctx,index){
   ctx.active=(index+buttons.length)%buttons.length;
   buttons.forEach((b,i)=>{b.classList.toggle('active',i===ctx.active);b.setAttribute('aria-selected',i===ctx.active?'true':'false')});
   buttons[ctx.active]?.scrollIntoView({block:'nearest'});
+}
+const ADDRESS_STREET_TYPE_RE=/\b(?:вулиця|вул\.?|улица|ул\.?|провулок|пров\.?|переулок|пер\.?|проспект|просп\.?|бульвар|бул\.?|шосе|площа|майдан|набережна|узвіз|алея)\b/giu;
+function normalizeAddressStreet(value){return String(value||'').toLocaleLowerCase('uk-UA').replace(/[’`]/g,"'").replace(ADDRESS_STREET_TYPE_RE,' ').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\s+/g,' ').trim()}
+function parseTypedAddress(value){
+  const q=String(value||'').trim().replace(/\s+/g,' ').replace(/^(?:м\.?\s*)?полтава\s*[,;-]?\s*/i,'').trim();
+  const m=q.match(/^(.*?)[,\s]+(\d+[\p{L}\p{N}/-]*)$/u);
+  return m?{street:m[1].trim(),house:m[2].trim()}:{street:q,house:''};
+}
+function addressStreetScore(queryStreet,itemStreet){
+  const q=normalizeAddressStreet(queryStreet),item=normalizeAddressStreet(itemStreet);if(!q||!item)return 0;if(q===item)return 4;if(q.includes(item)||item.includes(q))return 3;
+  const qt=q.split(' ').filter(v=>v.length>=2),it=new Set(item.split(' ').filter(v=>v.length>=2));if(!qt.length)return 0;return qt.filter(v=>it.has(v)).length/qt.length>=.67?2:0;
+}
+function relevantSuggestions(raw,items){
+  const parsed=parseTypedAddress(raw),rows=(Array.isArray(items)?items:[]).map(item=>({...item,_score:addressStreetScore(parsed.street,item.street||item.label)})).filter(item=>!parsed.street||item._score>0);
+  if(!parsed.house)return rows.sort((a,b)=>b._score-a._score).map(({_score,...item})=>item);
+  const house=String(parsed.house).toLocaleLowerCase('uk-UA').replace(/\s+/g,'');
+  const exact=rows.filter(item=>String(item.houseNumber||'').toLocaleLowerCase('uk-UA').replace(/\s+/g,'')===house);
+  if(exact.length)return exact.sort((a,b)=>b._score-a._score).map(({_score,...item})=>item);
+  // Never tempt the client to click a different nearby house number. If OSM knows
+  // only the street, keep that helper; otherwise the typed street + house remains
+  // a valid manual address and booking can continue.
+  return rows.filter(item=>!item.houseNumber).sort((a,b)=>b._score-a._score).map(({_score,...item})=>item);
 }
 function addressVariants(raw){
   const q=String(raw||'').trim().replace(/\s+/g,' ');
@@ -184,12 +215,12 @@ async function search(ctx){
       const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({q:candidate}),signal:ctx.abort.signal});
       if(!res.ok)continue;
       data=await res.json();
-      items=Array.isArray(data.suggestions)?data.suggestions:[];
+      items=relevantSuggestions(q,data.suggestions);
       if(items.length)break;
       if(data.providerUnavailable)break;
     }
     if(data?.providerUnavailable){closeList(ctx);setStatus(ctx,'manual','Пошук адрес тимчасово недоступний. Введіть адресу вручну — менеджер перевірить її до передоплати.',false);return}
-    if(!items.length){closeList(ctx);setStatus(ctx,'manual','Точного збігу немає. Введіть адресу вручну — менеджер перевірить її до передоплати.',false);return}
+    if(!items.length){closeList(ctx);setStatus(ctx,'manual','Точного збігу немає. Введіть адресу вручну — менеджер перевірить її до передоплати. Бронювання можна завершити без вибору зі списку.',false);return}
     renderList(ctx,items);
     setStatus(ctx,'hint','Оберіть адресу зі списку — так маршрут відкриється точно.');
   }catch(err){
@@ -206,7 +237,7 @@ function validate(ctx,show=true){
     return false;
   }
   ctx.input.setCustomValidity('');
-  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'manual','Адреса введена вручну. Менеджер перевірить її й підтвердить вартість доставки до передоплати.',false);
+  if(!ctx.input.dataset.vacAddressSelected&&show)setStatus(ctx,'manual','Адреса введена вручну — бронювання можна завершити. Менеджер перевірить її до передоплати.',false);
   return true;
 }
 function bindSubmit(ctx){
