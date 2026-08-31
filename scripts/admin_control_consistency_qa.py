@@ -10,7 +10,7 @@ def ck(label,cond):
     ok=bool(cond); checks.append((label,ok)); print(('PASS' if ok else 'FAIL')+': '+label)
 
 def metrics(page):
-    return page.locator('.analytics-periods .chip').evaluate_all("""els=>els.map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {text:e.textContent.trim(),x:r.x,w:r.width,h:r.height,r:s.borderRadius,b:s.borderWidth,bg:s.backgroundImage||s.backgroundColor,fw:s.fontWeight}})""")
+    return page.locator('.analytics-periods').evaluate("""el=>{const cr=el.getBoundingClientRect(),cs=getComputedStyle(el),pr=el.parentElement?.getBoundingClientRect();const buttons=[...el.querySelectorAll('.chip')].map(e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {text:e.textContent.trim(),x:r.x-cr.x,w:r.width,h:r.height,r:s.borderRadius,b:s.borderWidth,bg:s.backgroundImage||s.backgroundColor,fw:s.fontWeight,fs:s.fontSize,color:s.color,active:e.classList.contains('active')}});return {w:cr.width,x:cr.x,parentW:pr?.width||0,fill:pr?.width?cr.width/pr.width:1,display:cs.display,columns:cs.gridTemplateColumns,gap:parseFloat(cs.columnGap||cs.gap||'0')||0,buttons}}""")
 with sync_playwright() as pw:
     opts={'headless':True,'args':['--no-sandbox','--disable-gpu']}
     if Path('/usr/bin/chromium').exists(): opts['executable_path']='/usr/bin/chromium'
@@ -24,27 +24,32 @@ with sync_playwright() as pw:
         page.evaluate("()=>document.querySelector('[data-view=\"analytics\"]')?.click()")
         page.wait_for_timeout(80)
         a=metrics(page)
-        ck(f'{w}: analytics shows 5 period buttons',len(a)==5)
-        ck(f'{w}: analytics buttons >=44px',all(x['h']>=43.5 for x in a))
+        ck(f'{w}: analytics shows 5 period buttons',len(a['buttons'])==5)
+        ck(f'{w}: analytics buttons >=44px',all(x['h']>=43.5 for x in a['buttons']))
         ck(f'{w}: analytics no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=document.documentElement.clientWidth+1'))
         page.evaluate("()=>document.querySelector('[data-view=\"finances\"]')?.click()")
         page.wait_for_timeout(80)
         f=metrics(page)
-        ck(f'{w}: finance shows 5 period buttons',len(f)==5)
-        ck(f'{w}: finance buttons >=44px',all(x['h']>=43.5 for x in f))
+        ck(f'{w}: finance shows 5 period buttons',len(f['buttons'])==5)
+        ck(f'{w}: finance buttons >=44px',all(x['h']>=43.5 for x in f['buttons']))
         ck(f'{w}: finance no horizontal overflow',page.evaluate('document.documentElement.scrollWidth<=document.documentElement.clientWidth+1'))
-        if len(a)==len(f)==5:
-            ck(f'{w}: labels identical',[x['text'] for x in a]==[x['text'] for x in f])
-            ck(f'{w}: button heights identical',max(abs(a[i]['h']-f[i]['h']) for i in range(5))<1.1)
-            ck(f'{w}: radii identical',all(a[i]['r']==f[i]['r'] for i in range(5)))
+        if len(a['buttons'])==len(f['buttons'])==5:
+            ab,fb=a['buttons'],f['buttons']
+            ck(f'{w}: labels identical',[x['text'] for x in ab]==[x['text'] for x in fb])
+            ck(f'{w}: button heights identical',max(abs(ab[i]['h']-fb[i]['h']) for i in range(5))<1.1)
+            ck(f'{w}: button widths identical',max(abs(ab[i]['w']-fb[i]['w']) for i in range(5))<1.1)
+            ck(f'{w}: relative x positions identical',max(abs(ab[i]['x']-fb[i]['x']) for i in range(5))<1.1)
+            ck(f'{w}: period container widths identical',abs(a['w']-f['w'])<1.1)
+            ck(f'{w}: grid columns identical',a['columns']==f['columns'])
+            ck(f'{w}: gaps identical',abs(a['gap']-f['gap'])<0.6)
+            ck(f'{w}: radii identical',all(ab[i]['r']==fb[i]['r'] for i in range(5)))
+            ck(f'{w}: font sizes identical',all(ab[i]['fs']==fb[i]['fs'] for i in range(5)))
+            ck(f'{w}: borders identical',all(ab[i]['b']==fb[i]['b'] for i in range(5)))
+            ck(f'{w}: backgrounds identical',all(ab[i]['bg']==fb[i]['bg'] for i in range(5)))
+            ck(f'{w}: active state identical',all(ab[i]['active']==fb[i]['active'] for i in range(5)))
             if w<=900:
-                ck(f'{w}: button widths identical',max(abs(a[i]['w']-f[i]['w']) for i in range(5))<1.1)
-                ck(f'{w}: button x positions identical',max(abs(a[i]['x']-f[i]['x']) for i in range(5))<1.1)
-                aw=page.locator('.analytics-periods').evaluate('e=>e.getBoundingClientRect().width')
-                fw=page.locator('.finance-period-row .analytics-periods').evaluate('e=>e.getBoundingClientRect().width') if page.locator('.finance-period-row .analytics-periods').count() else 0
-                # At this point page is Finance; compare finance control width to viewport content width.
-                vw=page.evaluate('document.documentElement.clientWidth')
-                ck(f'{w}: finance period grid uses at least 90% of viewport content width',fw>=vw*0.9)
+                ck(f'{w}: analytics fills its mobile control row',a['fill']>=.98)
+                ck(f'{w}: finance fills its mobile control row',f['fill']>=.98)
         page.close()
     browser.close()
 failed=[x for x,ok in checks if not ok]

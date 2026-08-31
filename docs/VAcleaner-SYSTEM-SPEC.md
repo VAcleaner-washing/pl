@@ -3249,6 +3249,7 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 ### TESTS
 - `npm run test:v4.2.39-admin-control-consistency`;
+- `npm run test:admin-control-consistency` (94 geometry/style assertions across 390 / 430 / 1024 / 1280 / 1440);
 - `npm run test:admin-control-consistency`;
 - `npm run test:analytics-visual`;
 - full static/build regression and canonical Browser QA remain release gates.
@@ -3256,26 +3257,43 @@ Customer PII не повинна потрапляти у release ZIP як histor
 # 48. Change record — v4.2.40
 
 ### ADDED
-- **UI-GEO-001 — exact cross-screen geometry contract.** Shared controls are compared by width, x-position, container fill, gap, height and radius across Finance and Analytics, not only labels/height.
-- `scripts/test-v4-2-40-mobile-geometry.mjs` guards the mobile period, client-sheet and booking-finance geometry.
-- `scripts/admin_control_consistency_qa.py` now compares button widths and x-positions between Finance and Analytics on PWA.
+- **PUBLIC-BOOK-UX-001 — progressive contact disclosure.** Public booking keeps only ПІБ + телефон on the default contact surface. Telegram / Instagram are hidden inside one optional `Зручніше в месенджері?` disclosure and appear only after a deliberate tap. Empty messenger input always falls back to phone; CRM fields remain supported in payloads.
+- **RETURN-GIFT-001 — one Story reward policy in public booking and return flow.** At return, the manager can record the same reward promised on the website: Puzzi below 1 000 грн → 2 free Puzzi portions; Puzzi from 1 000 грн → choice of VA HOME 50 ml diffuser or 2 free Puzzi portions; non-Puzzi from 1 000 грн → VA HOME 50 ml diffuser; HOME RESET → 2 Puzzi portions because its diffuser is already included.
+- **CLIENT-GEO-008 — mobile client card owns the full viewport.** On <=900 px no later tablet rule may reapply `calc(100vw - 28px)` to the client modal. Client content, quick actions, KPI and sections share one full-width content axis with symmetric safe-area padding.
+- **BOOK-ACTIONS-008 — action rows consume their container.** Mobile booking-card action groups prioritize the current task: primary action spans full width; common secondary actions fill the next row; corrective/destructive actions are collapsed under `Ще`. Completed cards keep the two visible secondary actions 50/50 with no empty grid cell.
+- **BOOK-FIN-009 — settlement stack.** Mobile completed-booking finance renders the deposit information block first and the refund/due block immediately underneath, both full width with the same geometry.
+- `scripts/test-v4-2-40-booking-return-ux.mjs` protects the new UX/business contracts.
+- **UI-CONS-002 — geometry-level consistency guard.** `scripts/admin_control_consistency_qa.py` now compares exact widths, relative x positions, parent fill, grid columns, gaps, radius, font size, border, background and active state across Finance and Analytics — not only labels/height/overflow.
 
 ### CHANGED
-- On PWA, Finance and Analytics period selectors fill the same 366 px content width at a 390 px viewport and use the same three equal columns.
-- The mobile client card is a true full-viewport sheet; inherited width, margin, transform and scrollbar reservations cannot shift it left/right.
-- Booking finance on mobile uses a vertical information stack: `Залоговий платіж` first, settlement/refund directly below, both with identical full-content width.
+- Public local-address confirmation no longer exposes internal route distance from the VAcleaner base. For Полтава / Розсошенці / Щербані / Горбанівка the customer sees only successful address recognition, delivery-to-entrance context and the configured local tariff. Route km is still resolved and stored for internal logistics, fuel and margin analytics.
+- Admin new/edit booking keeps Telegram, Instagram and preferred channel as CRM data, but moves them into `Додатковий канал зв’язку` progressive disclosure. The block automatically opens when an existing/repeat client actually has messenger data.
+- Return finance now persists `extras.gifts.story` together with the finance calculation. A diffuser choice never reduces Puzzi chemistry; only `chemistry2` activates the two-free-portions calculation.
+- Mobile finance status blocks use one full-width visual language instead of unrelated green/blue blocks of different widths.
+- Finance period controls no longer inherit the old `justify-content: space-between` geometry. Up to 1320 px Finance and Analytics now resolve the same shared full-row grid; on phone both use the same 3-column wrap and on 901–1320 px the same 5-column row.
 
 ### FIXED
-- Finance period buttons no longer render narrower than the visually identical Analytics controls.
-- Client card no longer leaves an asymmetric empty strip on the right side of the iPhone viewport.
-- `Залоговий платіж` is no longer squeezed beside settlement/refund; the label, amount and state remain readable and the refund block sits immediately below it.
+- Completed booking cards no longer leave a blank third action column beside `Приведи друга` and `Виправити статус`.
+- The mobile client card no longer shifts left with a black gutter on the right due to the later <=1220 px modal-width rule overriding the full-screen phone contract.
+- Client-facing address assistance no longer says `Локальний тариф; маршрут від бази 7,5 км`.
+- Closing an eligible 1 000+ Puzzi rental no longer offers only the chemistry checkbox when the public booking promise is diffuser-or-chemistry choice.
+- Finance no longer compresses the shared period selector to ~247 px while Analytics fills the row; the parent-context rule that caused that visual drift is neutralized.
+
+### UX CONTRACT
+- Public booking collects only data needed to complete the current task by default. Optional messenger channels are collapsed by default, not displayed as permanent fields or a permanent three-way selector.
+- Internal operational data (route km, source diagnostics, margin inputs) must stay out of customer-facing copy unless the value changes the customer's decision or price.
+- Repeated controls with the same role must share width, alignment, spacing, radius and responsive behavior; passing overflow tests is not sufficient when visual geometry is inconsistent.
+- Mobile action groups may not leave accidental empty grid cells. Rare corrective/destructive actions must not compete visually with `Видати`, `Прийняти повернення`, `Розрахунок` or `Продовжити` and may live under one explicit `Ще` disclosure.
 
 ### PRESERVED
-- v4.2.39 shared period renderer and 1024/1280 Analytics overflow fix remain intact.
-- v4.2.38 context stability, historical delivery backfill, v4.2.37 route stack, iOS Instagram return flow, booking/referral business logic and VA HOME isolation remain unchanged.
+- Telegram and Instagram remain stored CRM attributes and remain editable in the full client card for referral/follow-up workflows.
+- Delivery route km remains available to admin analytics; only its client-facing disclosure is removed for the fixed local tariff zone.
+- Existing v4.2.39 shared Finance/Analytics period renderer, v4.2.37 navigation stack, referral journal, booking status flow, deposit formulas, delivery pricing and VA HOME isolation remain unchanged.
 
 ### TESTS
-- `npm run test:v4.2.40-mobile-geometry`;
-- `python scripts/admin_control_consistency_qa.py` with exact mobile width/x-position checks;
-- reviewed side-by-side PWA screenshots for Finance vs Analytics, centered client card, and deposit/settlement stack;
-- full static/build/browser/PWA regression remains the release gate.
+- `npm run test:v4.2.40-booking-return-ux`;
+- `npm run test:booking-gifts`;
+- `npm run test:v4.2.36-address-finance-referral`;
+- `npm run test:v4.2.39-admin-control-consistency`;
+- `npm run test:admin-control-consistency` (94 geometry/style assertions across 390 / 430 / 1024 / 1280 / 1440);
+- full `npm run qa:static`, build and canonical Browser/PWA QA remain release gates.

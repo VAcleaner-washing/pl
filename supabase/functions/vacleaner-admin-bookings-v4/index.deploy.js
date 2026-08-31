@@ -1659,10 +1659,31 @@ Deno.serve(async (request)=>{
             if (currentError || !current) return json({
                 error: "invalid_booking"
             }, 404);
-            const packetLimit = productUsesPuzzi(String(current.product_code || ""), catalog, defaultCatalog) ? 8 : 0, usedPackets = cleanInt(body.usedPackets, packetLimit), storyMention = packetLimit > 0 && body.storyMention === true;
+            const packetLimit = productUsesPuzzi(String(current.product_code || ""), catalog, defaultCatalog) ? 8 : 0, usedPackets = cleanInt(body.usedPackets, packetLimit);
             const depositAmount = cleanInt(body.depositAmount ?? current.deposit_amount, 100000), depositPaid = body.depositPaid === true || current.deposit_paid === true;
             const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
             const rawBase = Math.max(0, Number(currentExtras.base_before_discount ?? Number(current.base_amount || 0) + Number(currentExtras?.discount?.amount || 0)) || 0);
+            const currentStory = currentExtras?.gifts?.story && typeof currentExtras.gifts.story === "object" ? currentExtras.gifts.story : null;
+            const legacyStoryChemistry = currentExtras?.chemistry?.story_mention === true;
+            const requestedStoryMention = body.storyMention === true;
+            const requestedStoryChoice = [
+                "diffuser50",
+                "chemistry2"
+            ].includes(String(body.storyGiftChoice || "")) ? String(body.storyGiftChoice) : "";
+            const homeReset = String(current.product_code || "") === "elite";
+            const storyEligible = homeReset || packetLimit > 0 || rawBase >= 1000;
+            const actualStoryMention = requestedStoryMention && storyEligible;
+            let storyGiftChoice = "";
+            if (actualStoryMention) {
+                if (homeReset) storyGiftChoice = "chemistry2";
+                else if (packetLimit > 0 && rawBase >= 1000) storyGiftChoice = requestedStoryChoice || ([
+                    "diffuser50",
+                    "chemistry2"
+                ].includes(String(currentStory?.choice || "")) ? String(currentStory.choice) : legacyStoryChemistry ? "chemistry2" : "diffuser50");
+                else if (packetLimit > 0) storyGiftChoice = "chemistry2";
+                else if (rawBase >= 1000) storyGiftChoice = "diffuser50";
+            }
+            const storyMention = actualStoryMention && storyGiftChoice === "chemistry2" && packetLimit > 0;
             const selectedItems = Array.isArray(currentExtras.selected_items) ? currentExtras.selected_items.map((item)=>{
                 const { opened: _opened, ...rest } = item || {};
                 return {
@@ -1710,6 +1731,15 @@ Deno.serve(async (request)=>{
             const finance = settlementFromBooking(calculationInput, catalog, defaultCatalog), now = new Date().toISOString();
             const extras = {
                 ...discountedExtras,
+                gifts: {
+                    ...currentExtras.gifts || {},
+                    story: actualStoryMention ? {
+                        mention: true,
+                        eligible: true,
+                        choice: storyGiftChoice,
+                        scent: storyGiftChoice === "diffuser50" ? currentStory?.scent || null : null
+                    } : null
+                },
                 chemistry: {
                     used_packets: finance.usedPackets,
                     story_mention: finance.storyMention,

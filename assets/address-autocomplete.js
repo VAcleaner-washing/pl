@@ -97,18 +97,20 @@ async function hydrateDistanceQuote(ctx,item){
   if(local){
     ctx.input.dataset.vacAddressPricingDistanceKm='0';
     ctx.input.dataset.vacAddressDistanceSource='local';
-    setStatus(ctx,'loading','Адресу знайдено. Рахуємо маршрут від бази для аналітики доставки…');
+    const localFee=Math.round(Number(window.VACLEANER_CORE?.deliveryPricing?.local)||250);
+    const publicLocalCopy=`Адресу знайдено. Доставка — до під’їзду · ${localFee} грн. За потреби додайте під’їзд або орієнтир.`;
+    setStatus(ctx,ctx.mode==='public'?'ok':'loading',ctx.mode==='public'?publicLocalCopy:'Адресу знайдено. Рахуємо маршрут від бази для аналітики доставки…');
     try{
       const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({action:'quote',lat:item.lat,lon:item.lon})});
       if(!res.ok)throw new Error('distance_quote_failed');
       const data=await res.json(),routeKm=Number(data.routeKm);
       if(Number.isFinite(routeKm)&&routeKm>0)ctx.input.dataset.vacAddressRouteKm=String(routeKm);else delete ctx.input.dataset.vacAddressRouteKm;
       ctx.input.dataset.vacAddressDistanceSource=String(data.distanceSource||'city');
-      setStatus(ctx,'ok',Number.isFinite(routeKm)&&routeKm>0?`Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир. Локальний тариф; маршрут від бази ${routeKm.toFixed(1).replace('.',',')} км.`:'Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир. Локальний тариф; відстань для аналітики не отримано.');
+      setStatus(ctx,'ok',ctx.mode==='public'?publicLocalCopy:(Number.isFinite(routeKm)&&routeKm>0?`Адресу знайдено. Локальний тариф · маршрут від бази ${routeKm.toFixed(1).replace('.',',')} км для внутрішньої аналітики.`:'Адресу знайдено. Локальний тариф · маршрут для аналітики не отримано.'));
     }catch{
       delete ctx.input.dataset.vacAddressRouteKm;
       ctx.input.dataset.vacAddressDistanceSource='local_route_unavailable';
-      setStatus(ctx,'ok','Адресу знайдено. Доставка — до під’їзду. За потреби додайте орієнтир. Локальний тариф; маршрут для аналітики поки не отримано.');
+      setStatus(ctx,'ok',ctx.mode==='public'?publicLocalCopy:'Адресу знайдено. Локальний тариф · маршрут для внутрішньої аналітики поки не отримано.');
     }
     document.dispatchEvent(new CustomEvent('vacleaner:address-selected',{detail:{mode:ctx.mode,...addressMeta(ctx)}}));
     return;

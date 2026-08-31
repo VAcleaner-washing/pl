@@ -1374,21 +1374,3 @@ html.glass-test .delivery-average-line>strong{font-weight:580}
 
 /* v4.2.39 — shared admin period controls keep identical touch geometry. */
 html.glass-test .admin-periods .chip,html.glass-test .analytics-periods .chip{min-height:44px}
-
-/* v4.2.40 — geometry authority mirrors base mobile contract. */
-@media(max-width:900px){
-  html.glass-test .finance-period-row .admin-period-controls,
-  html.glass-test .finance-period-row .analytics-period-controls,
-  html.glass-test .finance-period-row .admin-periods,
-  html.glass-test .finance-period-row .analytics-periods,
-  html.glass-test .analytics-toolbar .admin-periods,
-  html.glass-test .analytics-toolbar .analytics-periods{width:100%;max-width:none;min-width:0;justify-self:stretch}
-  html.glass-test .finance-period-row .admin-periods,
-  html.glass-test .finance-period-row .analytics-periods,
-  html.glass-test .analytics-toolbar .admin-periods,
-  html.glass-test .analytics-toolbar .analytics-periods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-  html.glass-test .modal:has(.client-card-form),
-  html.glass-test .modal-card:has(.client-card-form),
-  html.glass-test .client-card-form{width:100%;max-width:none;min-width:0;margin:0;box-sizing:border-box}
-  html.glass-test .modal-card:has(.client-card-form){inset:0;height:100%;max-height:none;border-radius:0}
-}

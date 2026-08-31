@@ -8,7 +8,7 @@ check(admin.includes('Фінальний розрахунок при повер�
 check(admin.includes('function settlementStage(b,f=calc(b))'), 'booking finance has an explicit rental-stage resolver');
 check(admin.includes("beforeIssue=!['issued','completed'].includes(status)"), 'confirmed bookings are classified before issue regardless of deposit math');
 check(admin.includes("settlement.phase==='before_issue'?'':`<em"), 'booking card renders no fake due/refund badge before issue');
-check(admin.includes("const finance=b.status==='issued'?'<button class=\"btn\" data-action=\"finance\">Розрахунок</button>':'';"), 'intermediate calculation is available only after issue');
+check(admin.includes("const finance=b.status==='issued'?'<button class=\"btn booking-action-secondary\" data-action=\"finance\">Розрахунок</button>':'';"), 'intermediate calculation is available only after issue');
 check(admin.includes('Попередньо повернути')&&admin.includes('Попередньо доплатити'), 'issued bookings expose a clearly preliminary settlement result');
 check(admin.includes('Попередньо повернути при поверненні')&&admin.includes('Попередньо доплатити при поверненні'), 'detail/upcoming copy ties preliminary settlement to return');
 check(admin.includes("<h2>${complete?'Закриття оренди':'Попередній розрахунок'}</h2>"), 'issued finance modal is named preliminary, not final');

@@ -1513,139 +1513,6 @@ html.pwa-update-transition .mobile-nav{visibility:hidden;opacity:0;pointer-event
   .reactivation-summary>div{grid-column:1/-1;padding:2px 4px}.reactivation-summary>.btn{grid-column:1/-1;width:100%}
   .popularity-head{display:grid;gap:10px}.analytics-metric-switch{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.analytics-metric-switch button{width:100%;padding:0 5px}
   .reactivation-panel button.analytics-line{padding:10px 0}
-
-  /* v4.2.40 — authoritative mobile geometry: shared periods, client sheet centering, finance stack. */
-  /* Finance and Analytics must render the same period selector geometry. */
-  .finance-period-row{
-    display:block;
-    width:100%;
-    min-width:0;
-    margin-bottom:16px;
-  }
-  .finance-period-row .admin-period-controls,
-  .finance-period-row .analytics-period-controls{
-    display:grid;
-    width:100%;
-    max-width:none;
-    min-width:0;
-    justify-items:stretch;
-    justify-content:stretch;
-  }
-  .finance-period-row .admin-periods,
-  .finance-period-row .analytics-periods,
-  .analytics-toolbar .admin-periods,
-  .analytics-toolbar .analytics-periods{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:8px;
-    width:100%;
-    max-width:none;
-    min-width:0;
-    justify-content:stretch;
-    align-items:stretch;
-    overflow:visible;
-  }
-  .finance-period-row .chip,
-  .analytics-toolbar .chip{
-    width:100%;
-    min-width:0;
-    min-height:44px;
-    margin:0;
-    padding-inline:8px;
-    justify-content:center;
-  }
-
-  /* Client card is a true viewport sheet. No inherited width/margin may shift it left. */
-  .modal:has(.client-card-form){
-    position:fixed;
-    inset:0;
-    width:100%;
-    max-width:none;
-    margin:0;
-    padding:0;
-  }
-  .modal-card:has(.client-card-form){
-    position:absolute;
-    inset:0;
-    width:100%;
-    max-width:none;
-    min-width:0;
-    height:100%;
-    max-height:none;
-    margin:0;
-    border:0;
-    border-radius:0;
-    transform:none;
-    box-sizing:border-box;
-  }
-  .client-card-form,
-  .client-card-form>header,
-  .client-card-form>.client-editor-scroll,
-  .client-card-form>footer{
-    width:100%;
-    max-width:none;
-    min-width:0;
-    margin-inline:0;
-    box-sizing:border-box;
-  }
-  .client-editor-scroll{
-    padding-left:12px;
-    padding-right:12px;
-  }
-
-  /* Booking finance: deposit first, settlement directly below, same full-width geometry. */
-  .booking-card .booking-finance{
-    grid-template-columns:minmax(0,1fr) auto;
-    gap:7px 10px;
-  }
-  .booking-card .booking-finance>.booking-deposit-state{
-    grid-column:1/-1;
-    grid-row:3;
-    width:100%;
-    max-width:none;
-    min-height:48px;
-    margin:0;
-    padding:8px 10px;
-    border-radius:10px;
-    display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    align-items:baseline;
-    gap:2px 8px;
-    overflow:visible;
-  }
-  .booking-card .booking-finance>.booking-deposit-state>span{
-    min-width:0;
-    white-space:normal;
-    overflow-wrap:normal;
-    word-break:normal;
-  }
-  .booking-card .booking-finance>.booking-deposit-state>strong{
-    justify-self:end;
-    white-space:nowrap;
-  }
-  .booking-card .booking-finance>.booking-deposit-state>small{
-    grid-column:1/-1;
-    margin:0;
-    white-space:nowrap;
-    font-size:9.5px;
-    line-height:1.15;
-  }
-  .booking-card .booking-finance>em{
-    grid-column:1/-1;
-    grid-row:4;
-    width:100%;
-    min-height:48px;
-    margin:0;
-    padding:8px 10px;
-    border-radius:10px;
-  }
-  .booking-card .booking-finance>.booking-margin-pill{
-    grid-column:1/-1;
-    grid-row:5;
-    width:100%;
-    margin:0;
-    border-radius:10px;
-  }
 }
 @media (max-width:360px){
   .page-head h1{font-size:24px}.booking-row-head{padding:12px}.booking-identity h2{font-size:18px}.modal-form>header h2{font-size:25px}.window-choice span{padding:9px}.time-chip-list{grid-template-columns:repeat(2,minmax(0,1fr))}.booking-form>header .mobile-booking-progress{grid-template-columns:repeat(4,28px);gap:5px}.mobile-booking-progress span{width:28px;height:28px}
@@ -6931,51 +6798,108 @@ html.keyboard-open .pwa-update-prompt{visibility:hidden;opacity:0;pointer-events
   .analytics-toolbar .admin-periods .chip,.analytics-toolbar .analytics-periods .chip{width:100%;min-width:0}
 }
 
+/* v4.2.40 — mobile geometry, action fill, contact disclosure and return gift UX. */
+.booking-contact-more{grid-column:1/-1;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.018);overflow:hidden}
+.booking-contact-more>summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 13px;cursor:pointer;list-style:none;color:#d9dddf}
+.booking-contact-more>summary::-webkit-details-marker{display:none}
+.booking-contact-more>summary::after{content:'+';flex:0 0 auto;color:var(--gold-2);font-size:18px;font-weight:500;line-height:1}
+.booking-contact-more[open]>summary::after{content:'−'}
+.booking-contact-more>summary>span{font-size:12px;font-weight:560}
+.booking-contact-more>summary>small{color:var(--muted);font-size:10px;font-weight:430;text-align:right}
+.booking-contact-more-fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 12px 12px}
+.booking-contact-more-fields .field{min-width:0}
 
+.return-story-bonus{display:grid;gap:10px;padding:13px;border:1px solid rgba(214,164,95,.25);border-radius:14px;background:linear-gradient(145deg,rgba(214,164,95,.07),rgba(255,255,255,.015))}
+.return-story-head{display:grid;gap:3px}
+.return-story-head small{color:var(--gold-2);font-size:9px;font-weight:650;letter-spacing:.09em;text-transform:uppercase}
+.return-story-head strong{font-size:13px;font-weight:580;line-height:1.3}
+.return-story-switch{margin:0}
+.return-story-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;transition:opacity .18s ease}
+.return-story-options.disabled{opacity:.5}
+.return-story-options>label{display:grid;grid-template-columns:20px minmax(0,1fr);gap:9px;align-items:start;min-height:84px;padding:11px;border:1px solid var(--line);border-radius:12px;background:#0b1216;cursor:pointer}
+.return-story-options>label.selected{border-color:rgba(214,164,95,.46);background:rgba(214,164,95,.08)}
+.return-story-options input{width:17px;height:17px;margin:2px 0 0;accent-color:var(--gold-2)}
+.return-story-options span{display:grid;gap:4px;min-width:0}
+.return-story-options b{font-size:11.5px;font-weight:570;line-height:1.3}
+.return-story-options small,.return-story-fixed span{color:var(--muted);font-size:10px;font-weight:430;line-height:1.4}
+.return-story-fixed{display:grid;gap:3px;padding:10px 11px;border:1px solid var(--line);border-radius:11px;background:#0b1216;opacity:.55}
+.return-story-fixed.active{border-color:rgba(214,164,95,.34);background:rgba(214,164,95,.06);opacity:1}
+.return-story-fixed b{font-size:11.5px;font-weight:570}
 
-/* v4.2.40 — narrow-phone finance authority: keep the same vertical stack at 320px. */
-@media(max-width:359px){
-  .booking-card .booking-finance>.booking-deposit-state{
-    grid-column:1/-1;
-    grid-row:3;
-    width:100%;
-    max-width:none;
-    min-height:48px;
-    padding:8px 10px;
-    display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    grid-template-rows:auto auto;
-    gap:2px 8px;
-  }
-  .booking-card .booking-finance>.booking-deposit-state>span{grid-column:1;grid-row:1;white-space:normal;font-size:9.5px;line-height:1.15}
-  .booking-card .booking-finance>.booking-deposit-state>strong{grid-column:2;grid-row:1;justify-self:end;font-size:10px;line-height:1.1;white-space:nowrap}
-  .booking-card .booking-finance>.booking-deposit-state>small{grid-column:1/-1;grid-row:2;justify-self:start;margin:0;font-size:8px;line-height:1.1;letter-spacing:.06em;white-space:nowrap}
-  .booking-card .booking-finance>em{grid-column:1/-1;grid-row:4;width:100%;min-height:48px;margin:0}
-  .booking-card .booking-finance>.booking-margin-pill{grid-column:1/-1;grid-row:5;width:100%}
+@media(max-width:900px){
+  /* A later <=1220 rule used to reintroduce width:calc(100vw - 28px) on phones. */
+  .modal-card:has(.client-card-form){position:absolute;inset:0;width:auto;max-width:none;height:auto;max-height:none;margin:0;justify-self:stretch;border-radius:0}
+  .client-card-form,.client-editor-form{width:100%;max-width:100%;min-width:0}
+  .client-editor-scroll{width:100%;max-width:100%;min-width:0;padding-inline:max(12px,var(--pwa-safe-left)) max(12px,var(--pwa-safe-right));box-sizing:border-box}
+  .client-editor-scroll>.client-quick-actions,.client-editor-scroll>.client-editor-summary,.client-editor-scroll>.client-card-grid{width:100%;max-width:100%;min-width:0;margin-inline:0}
+
+  .booking-contact-more-fields{grid-template-columns:1fr}
+  .booking-contact-more>summary{align-items:flex-start;min-height:0;padding:12px 13px}
+  .booking-contact-more>summary>span,.booking-contact-more>summary>small{text-align:left}
+
+  /* Completed cards must fill the whole action row: primary + two equal secondary buttons. */
+  .booking-card .booking-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .booking-card .booking-actions .primary-action{grid-column:1/-1}
+  .booking-card .booking-actions .secondary-danger{grid-column:auto}
+  .booking-card .booking-actions>.btn:only-child{grid-column:1/-1}
+  .booking-card .booking-actions>.btn:nth-child(2):last-child{grid-column:1/-1}
+  .booking-card .booking-actions>.btn:nth-child(4):last-child{grid-column:1/-1}
+
+  /* Finance hierarchy: total first, then equal full-width deposit and settlement blocks. */
+  .booking-card .booking-finance{grid-template-columns:minmax(0,1fr) auto;gap:7px 8px}
+  .booking-card .booking-finance>small{grid-column:1;grid-row:1}
+  .booking-card .booking-finance>strong{grid-column:2;grid-row:1;justify-self:end}
+  .booking-card .booking-finance>.booking-deposit-state,
+  .booking-card .booking-finance>em{grid-column:1/-1;width:100%;max-width:none;min-width:0;min-height:52px;margin:0;padding:9px 11px;border-radius:12px;box-sizing:border-box}
+  .booking-card .booking-finance>.booking-deposit-state{grid-row:2;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;align-items:center;gap:2px 8px}
+  .booking-card .booking-finance>.booking-deposit-state>span{grid-column:1;grid-row:1;white-space:normal;font-size:10.5px;line-height:1.2}
+  .booking-card .booking-finance>.booking-deposit-state>strong{grid-column:2;grid-row:1;justify-self:end;font-size:13px;line-height:1.15;white-space:nowrap}
+  .booking-card .booking-finance>.booking-deposit-state>small{grid-column:1/-1;grid-row:2;justify-self:start;margin:0;font-size:8.8px;line-height:1.15;letter-spacing:.09em;text-transform:uppercase}
+  .booking-card .booking-finance>em{grid-row:3;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+  .booking-card .booking-finance>em>span{min-width:0;font-size:10.5px;line-height:1.2}
+  .booking-card .booking-finance>em>strong{justify-self:end;font-size:13px;line-height:1.15;white-space:nowrap}
+  .booking-card .booking-finance>.booking-margin-pill{display:none}
+
+  .return-story-options{grid-template-columns:1fr}
 }
 
-/* v4.2.40 — final mobile booking-finance geometry authority. */
+
+/* v4.2.40 final PWA action hierarchy — frequent actions stay visible; corrective/destructive actions live under “Ще”. */
+.booking-action-more{position:relative;min-width:0;margin:0}
+.booking-action-more>summary{list-style:none;cursor:pointer;user-select:none}
+.booking-action-more>summary::-webkit-details-marker{display:none}
+.booking-action-more>summary em{font-style:normal}
+.booking-action-more-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:7px}
+.booking-action-more-items>.btn{width:100%;margin:0}
 @media(max-width:900px){
-  .booking-card .booking-finance>.booking-deposit-state{
-    grid-column:1/-1;
-    grid-row:3;
-    width:100%;
-    max-width:none;
-    min-width:0;
-    min-height:48px;
-    margin:0;
-    padding:8px 10px;
-    border-radius:10px;
-    display:grid;
-    grid-template-columns:minmax(0,1fr) auto;
-    grid-template-rows:auto auto;
-    align-items:baseline;
-    gap:2px 8px;
-    overflow:visible;
-  }
-  .booking-card .booking-finance>.booking-deposit-state>span{grid-column:1;grid-row:1;min-width:0;white-space:normal;word-break:normal;overflow-wrap:normal}
-  .booking-card .booking-finance>.booking-deposit-state>strong{grid-column:2;grid-row:1;justify-self:end;white-space:nowrap}
-  .booking-card .booking-finance>.booking-deposit-state>small{grid-column:1/-1;grid-row:2;justify-self:start;margin:0;white-space:nowrap;font-size:9.5px;line-height:1.15}
-  .booking-card .booking-finance>em{grid-column:1/-1;grid-row:4;width:100%;min-width:0;min-height:48px;margin:0;padding:8px 10px;border-radius:10px}
-  .booking-card .booking-finance>.booking-margin-pill{grid-column:1/-1;grid-row:5;width:100%;margin:0;border-radius:10px}
+  .booking-card .booking-actions:has(>.booking-action-more.compact-third){grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+  .booking-card .booking-actions:has(>.booking-action-more.compact-third)>.primary-action{grid-column:1/-1}
+  .booking-card .booking-actions:has(>.booking-action-more.compact-third)>.booking-action-secondary{grid-column:auto}
+  .booking-card .booking-action-more.compact-third{grid-column:3;align-self:stretch}
+  .booking-card .booking-action-more.compact-third>summary{width:44px;min-width:44px;height:100%;min-height:40px;padding:0;display:grid;place-items:center}
+  .booking-card .booking-action-more.compact-third>summary span{font-size:15px;letter-spacing:.08em;line-height:1}
+  .booking-card .booking-action-more.compact-third>summary em{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .booking-card .booking-action-more.compact-third[open]{grid-column:1/-1}
+  .booking-card .booking-action-more.compact-third[open]>summary{width:100%;grid-template-columns:auto auto;justify-content:center;gap:7px}
+  .booking-card .booking-action-more.compact-third[open]>summary em{position:static;width:auto;height:auto;overflow:visible;clip:auto;white-space:normal}
+  .booking-card .booking-action-more:not(.compact-third){grid-column:auto;align-self:stretch}
+  .booking-card .booking-action-more:not(.compact-third)>summary{width:100%;height:100%;min-height:40px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 8px}
+  .booking-card .booking-action-more:not(.compact-third)[open]{grid-column:1/-1}
+  .booking-card .booking-action-more[open] .booking-action-more-items{grid-column:1/-1}
+  .booking-card .booking-action-more-items .danger{grid-column:auto}
+}
+@media(min-width:901px){
+  .booking-action-more{display:contents}
+  .booking-action-more>summary{display:none}
+  .booking-action-more-items{display:contents}
+}
+
+/* v4.2.40 — period controls are a shared component, never reflowed by parent context. */
+.finance-period-row .admin-period-controls,
+.finance-period-row .analytics-period-controls{justify-content:stretch}
+@media(min-width:901px) and (max-width:1320px){
+  .finance-period-row .admin-periods,
+  .finance-period-row .analytics-periods{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:100%;min-width:0;justify-content:stretch}
+  .finance-period-row .admin-periods .chip,
+  .finance-period-row .analytics-periods .chip{width:100%;min-width:0;justify-content:center}
 }

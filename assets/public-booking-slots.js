@@ -306,27 +306,38 @@ async function checkLoyalty(input){
 function renderContactChannels(){
   const grid=document.querySelector('#booking-contact .booking-contact-grid');
   if(!grid)return;
-  let labels=[...grid.querySelectorAll(':scope > label')];
-  let telegramLabel=labels.find(label=>/^Telegram/i.test(String(label.textContent||'').trim()));
-  if(!telegramLabel){
-    telegramLabel=document.createElement('label');telegramLabel.className='vx-telegram-contact';telegramLabel.innerHTML='Telegram <small>необов’язково</small><input data-vac-contact="telegram" maxlength="80" placeholder="@username або номер" type="text" autocomplete="off">';
-    (labels[1]||labels[0])?.insertAdjacentElement('afterend',telegramLabel);
-    labels=[...grid.querySelectorAll(':scope > label')];
-  }else{const input=telegramLabel.querySelector('input');if(input)input.dataset.vacContact='telegram'}
-  if(!grid.querySelector('.vx-instagram-contact')){
-    const label=document.createElement('label');label.className='vx-instagram-contact';label.innerHTML='Instagram <small>необов’язково</small><input data-vac-contact="instagram" maxlength="80" placeholder="@username" type="text" autocomplete="off">';
-    telegramLabel.insertAdjacentElement('afterend',label);
-  }
-  if(!grid.querySelector('.vx-preferred-contact')){
-    const label=document.createElement('label');label.className='vx-preferred-contact';label.innerHTML='Зручний канал зв’язку <small>необов’язково</small><select data-vac-contact="preferred"><option value="phone">Телефон</option><option value="telegram">Telegram</option><option value="instagram">Instagram</option></select>';
-    grid.querySelector('.vx-instagram-contact')?.insertAdjacentElement('afterend',label);
-  }
+  const labels=[...grid.querySelectorAll(':scope > label')];
+  const phoneLabel=labels.find(label=>/Телефон/i.test(String(label.textContent||'')));
+  const legacyTelegramLabel=labels.find(label=>/^Telegram/i.test(String(label.textContent||'').trim()));
+  const legacyTelegramInput=legacyTelegramLabel?.querySelector('input');
+  if(legacyTelegramLabel){legacyTelegramLabel.classList.add('vx-contact-backing');legacyTelegramLabel.hidden=true}
+  grid.querySelectorAll('.vx-instagram-contact,.vx-preferred-contact,.vx-contact-preference').forEach(node=>node.remove());
+
+  const shell=document.createElement('details');
+  shell.className='vx-contact-preference';
+  shell.innerHTML=`<summary><span>Зручніше в месенджері?</span><small>необов’язково</small></summary><div class="vx-contact-preference-body"><p>Телефон уже достатній для бронювання. Якщо зручніше — можемо написати.</p><div class="vx-contact-segments" role="group" aria-label="Месенджер для зв’язку"><button type="button" data-vac-channel="telegram" aria-pressed="false">Telegram</button><button type="button" data-vac-channel="instagram" aria-pressed="false">Instagram</button></div><label class="vx-contact-detail" hidden><span data-vac-contact-detail-title>Контакт</span><input data-vac-contact-detail maxlength="80" type="text" autocomplete="off"></label></div>`;
+  (phoneLabel||labels[1]||labels[0])?.insertAdjacentElement('afterend',shell);
+  const detailWrap=shell.querySelector('.vx-contact-detail'),detailInput=shell.querySelector('[data-vac-contact-detail]'),detailTitle=shell.querySelector('[data-vac-contact-detail-title]');
+  let channel='phone';
+  const setChannel=(next,{keepValue=false}={})=>{
+    channel=['phone','telegram','instagram'].includes(next)?next:'phone';
+    shell.querySelectorAll('[data-vac-channel]').forEach(btn=>{const active=btn.dataset.vacChannel===channel;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',active?'true':'false')});
+    detailWrap.hidden=channel==='phone';
+    if(channel==='telegram'){detailTitle.textContent='Telegram';detailInput.placeholder='@username або номер';detailInput.inputMode='text';if(!keepValue)detailInput.value=String(legacyTelegramInput?.value||'').trim()}
+    else if(channel==='instagram'){detailTitle.textContent='Instagram';detailInput.placeholder='@username';detailInput.inputMode='text';if(!keepValue)detailInput.value=''}
+    else if(!keepValue)detailInput.value='';
+    if(legacyTelegramInput)legacyTelegramInput.value=channel==='telegram'?String(detailInput.value||'').trim():'';
+  };
+  shell.querySelectorAll('[data-vac-channel]').forEach(btn=>btn.addEventListener('click',()=>{const previous=channel;const previousValue=String(detailInput.value||'').trim();setChannel(btn.dataset.vacChannel);if(previous===btn.dataset.vacChannel&&previous!=='phone')detailInput.value=previousValue;detailInput.dispatchEvent(new Event('input',{bubbles:true}));if(channel!=='phone')detailInput.focus()}));
+  detailInput.addEventListener('input',()=>{if(legacyTelegramInput)legacyTelegramInput.value=channel==='telegram'?String(detailInput.value||'').trim():''});
+  if(String(legacyTelegramInput?.value||'').trim()){setChannel('telegram');shell.open=true}else setChannel('phone');
+
   window.__VAC_BOOKING_CONTACT__=()=>{
-    const telegram=String(grid.querySelector('[data-vac-contact="telegram"]')?.value||'').trim();
-    const instagram=String(grid.querySelector('[data-vac-contact="instagram"]')?.value||'').trim().replace(/^@/,'');
-    let preferred=String(grid.querySelector('[data-vac-contact="preferred"]')?.value||'phone');
-    if(preferred==='telegram'&&!telegram)preferred=instagram?'instagram':'phone';
-    if(preferred==='instagram'&&!instagram)preferred=telegram?'telegram':'phone';
+    const value=String(detailInput.value||'').trim();
+    const telegram=channel==='telegram'?value:'';
+    const instagram=channel==='instagram'?value.replace(/^@/,''):'';
+    let preferred=channel;
+    if(preferred!=='phone'&&!value)preferred='phone';
     return{telegram,instagram,preferredContact:preferred};
   };
 }

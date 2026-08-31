@@ -41,7 +41,7 @@ ok('client lookup previews earned referral reward',adminJs.includes('customer-re
 ok('completed booking exposes referral share action',adminJs.includes('data-action="referral"')&&adminJs.includes('openReferralShare'));
 ok('admin supports Telegram and Instagram referral sharing with two-step confirmation',adminJs.includes("key:'instagram',label:'Instagram'")&&adminJs.includes("key:'telegram',label:'Telegram'")&&adminJs.includes('data-referral-send')&&adminJs.includes('navigator.clipboard.writeText')&&adminJs.includes('bindReferralSendButton')&&adminJs.includes('Так, надіслано'));
 ok('admin shows expiring bonus reminder queue',adminJs.includes('Бонуси скоро спливають')&&adminJs.includes('referralReminderText'));
-ok('public booking renders optional Telegram field even when React form has none',publicSlots.includes("className='vx-telegram-contact'")&&publicSlots.includes('data-vac-contact="telegram"'));
+ok('public booking renders optional messenger choice even when React form has none',publicSlots.includes("shell.className='vx-contact-preference'")&&publicSlots.includes('data-vac-channel="telegram"')&&publicSlots.includes('data-vac-channel="instagram"'));
 ok('public booking sends both social contacts and preferred channel to API',publicSlots.includes('__VAC_BOOKING_CONTACT__')&&publicSlots.includes('customerTelegram')&&publicSlots.includes('customerInstagram')&&publicSlots.includes('preferredContact'));
 const pricing=await import(pathToFileURL(path.join(root,'supabase/functions/vacleaner-admin-bookings-v3/pricing.mjs')).href+'?v421');
 const D=(body,base,extras={})=>pricing.discountInfo(body,base,extras);
