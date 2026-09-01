@@ -7,7 +7,7 @@ spec=importlib.util.spec_from_file_location('pwaqa',ROOT/'scripts/pwa_visual_qa.
 viewports=[(320,844),(390,844),(430,932),(768,1024),(1024,900),(1280,900),(1650,760),(1920,1080)]
 passed=0
 with sync_playwright() as p:
-  b=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium')
+  b=p.chromium.launch(headless=True)
   for w,h in viewports:
     page=m.render_page(b,w,h,standalone=w<=900)
     try:

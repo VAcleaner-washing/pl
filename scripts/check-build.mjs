@@ -4,8 +4,12 @@ import crypto from 'node:crypto';
 import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
 const root=process.cwd(),release=JSON.parse(fs.readFileSync('release.json','utf8')),build=String(release.build);
-const ignoredDirs=new Set(['.git','.venv','.pw-browsers','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__']);
-const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>ignoredDirs.has(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
+const businessConfig=JSON.parse(fs.readFileSync(path.join(root,'config','vacleaner.json'),'utf8'));
+const seoMap=JSON.parse(fs.readFileSync(path.join(root,'config','seo-map.json'),'utf8'));
+const buildContracts=JSON.parse(fs.readFileSync(path.join(root,'config','qa-build-contracts.json'),'utf8'));
+const qaSuites=JSON.parse(fs.readFileSync(path.join(root,'config','qa-suites.json'),'utf8'));
+const ignoredDirs=new Set(['.git','.venv','.pw-browsers','.pages-artifact','node_modules','dist','test-results','pwa-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__']);
+const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>ignoredDirs.has(entry.name)||entry.name.endsWith('-results')||entry.name.endsWith('-test-results')||entry.name.startsWith('tmp-')?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 const files=walk(root),errors=[];
 const retiredChunkNames=['146ntlcv_t6~w-v4016.js','01pb0x0z72e50.js','09z99witl-xo-.js'];
 for(const file of files.filter(f=>/\.(?:html|txt|mjs|js|py)$/.test(f)&&!f.endsWith(`${path.sep}scripts${path.sep}check-build.mjs`))){
@@ -38,22 +42,33 @@ for(const file of files.filter(f=>f.endsWith('.html'))){
   try{new vm.Script(code,{filename:`${rel}#inline-${inlineIndex}`});}
   catch(error){errors.push(`inline JS syntax: ${rel}#${inlineIndex}: ${error.message}`);}
  }
- for(const m of s.matchAll(/\/assets\/(?:vacleaner-core|public-experience|public-catalog|public-booking-slots|public-resilience|admin-v250|public-fixes|mobile-home-fix|site-v400)\.(?:js|css)\?v=([^"']+)/g))if(m[1]!==build)errors.push(`asset version ${m[1]} in ${rel}`);
+	 for(const match of s.matchAll(/(?:src|href)=["'](\/assets\/[^"'?#]+\.(?:js|css)(?:\?[^"']*)?)["']/g)){
+	  const assetUrl=new URL(match[1],'https://vacleaner.pp.ua');
+	  const version=assetUrl.searchParams.get('v');
+	  if(version!==build)errors.push(`asset version ${version||'missing'} in ${rel}: ${assetUrl.pathname}`);
+	 }
  const hasCore=/vacleaner-core\.js/.test(s), needsCore=rel==='bronuvannia/index.html'||rel==='pidbir/index.html'||rel.startsWith('admin/');
  if(hasCore!==needsCore)errors.push(`shared core route mismatch: ${rel}`);
  if(rel!=='bronuvannia/index.html'&&/public-catalog\.js/.test(s))errors.push(`catalog runtime on ${rel}`);
 }
-// Puzzi SEO landing / Search Console / favicon contract (v4.0.19).
-const puzziSeoPath=path.join(root,'tekhnika','karcher-puzzi-8-1','index.html');
+// High-churn copy lives in data files; this checker owns stable structure only.
+const puzziContract=buildContracts.puzziLanding;
+const puzziSeoPath=path.join(root,...puzziContract.path.split('/'));
 if(!fs.existsSync(puzziSeoPath))errors.push('Puzzi SEO landing is missing');
 else{
  const seo=fs.readFileSync(puzziSeoPath,'utf8');
- for(const token of ['<title>Оренда миючого пилососа Kärcher Puzzi 8/1 у Полтаві | VAcleaner</title>','rel="canonical" href="https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/"','"@type":"Service"','"@type":"FAQPage"','"@type":"BreadcrumbList"','700 грн','800 грн','8 порцій','Залоговий платіж','/bronuvannia/?product=puzzi','/rishennia/textile/','width="1086" height="1448"','class="puzzi-cleaning-process"','Сухе прибирання','Розчин і плями','Промивання','Збір вологи','Сушіння й догляд'])if(!seo.includes(token))errors.push(`Puzzi SEO landing contract missing: ${token}`);
- if((seo.match(/class="mobile-booking"/g)||[]).length!==1)errors.push('Puzzi landing must include exactly one mobile booking bar');
- if(seo.includes('"streetAddress"'))errors.push('Puzzi landing must not publish a fixed pickup address');
+ const product=businessConfig.catalog.products.puzzi;
+ const title=seoMap[puzziContract.route]?.title;
+ const required=[`<title>${title}</title>`,`${product.weekday} грн`,`${product.weekend} грн`,...puzziContract.required];
+ for(const token of required)if(!token||!seo.includes(token))errors.push(`Puzzi SEO landing contract missing: ${token||'SEO map title'}`);
+ for(const token of puzziContract.forbidden||[])if(seo.includes(token))errors.push(`Puzzi SEO landing forbidden token: ${token}`);
+ for(const count of puzziContract.counts||[]){
+  const actual=seo.split(count.token).length-1;
+  if(actual!==count.exact)errors.push(`Puzzi SEO landing count ${count.token}: expected ${count.exact}, got ${actual}`);
+ }
 }
 const sitemap=fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
-if(!sitemap.includes('https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/'))errors.push('Puzzi SEO landing missing from sitemap');
+if(!sitemap.includes(`https://vacleaner.pp.ua${puzziContract.route}`))errors.push('Puzzi SEO landing missing from sitemap');
 const googleVerify=path.join(root,'google23d85db681a5b7ee.html');
 if(!fs.existsSync(googleVerify)||fs.readFileSync(googleVerify,'utf8').trim()!=='google-site-verification: google23d85db681a5b7ee.html')errors.push('Google site verification file missing or invalid');
 for(const file of files.filter(f=>f.endsWith('.html'))){const html=fs.readFileSync(file,'utf8');if(/(?:favicon\.(?:ico|svg)|apple-touch-icon\.png)\?v=/.test(html))errors.push(`versioned favicon URL: ${path.relative(root,file)}`)}
@@ -135,24 +150,6 @@ const publicReactBundle=fs.readFileSync(path.join(root,'_next','static','chunks'
 const publicChunkDir=path.join(root,'_next','static','chunks');
 const publicChunkCorpus=fs.readdirSync(publicChunkDir).filter(name=>name.endsWith('.js')).map(name=>fs.readFileSync(path.join(publicChunkDir,name),'utf8')).join('\n');
 const bookingEdgeV5=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-booking-v5','index.ts'),'utf8');
-execFileSync(process.execPath,[path.join(root,'scripts','test-finance.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-deposit-policy.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-stabilization.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-session.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-ux.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-density.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-final-desktop.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-pwa.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-css-architecture.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-operational-health.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-analytics-decision.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-growth-content.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-financial-control.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-package-language.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-v4-1-60-home-package-rhythm.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-retention.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','test-smart-guide-logic.mjs')],{stdio:'pipe'});
-execFileSync(process.execPath,[path.join(root,'scripts','check-backend-inventory.mjs')],{stdio:'pipe'});
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','e2e_smoke.py')],{stdio:'pipe'})}catch{errors.push('Playwright Python source does not compile')}
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','public_booking_resilience_qa.py')],{stdio:'pipe'})}catch{errors.push('public booking resilience source does not compile')}
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','pages.yml'),'utf8');
@@ -162,12 +159,12 @@ const canonicalStatic=workflow.includes('npm run qa:static');
 const canonicalBrowser=workflow.includes('npm run qa:browser');
 const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
 const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&workflow.includes('needs: validate')&&workflow.includes('needs: [validate, browser]');
-const hasAggregateGate=qaRunner.includes('for(const s of browserSuites) npm(s)')&&qaRunner.includes('qa-release-summary.json')&&qaRunner.includes('FULL QA NOT GREEN');
+const hasAggregateGate=qaRunner.includes('config/qa-suites.json')&&qaRunner.includes('qa-release-summary.json')&&qaRunner.includes('FULL QA NOT GREEN');
 if(playwrightInstall<0||!canonicalStatic||!canonicalBrowser||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by canonical split static/browser QA with aggregate failure handling');
-if(!qaRunner.includes('test:e2e'))errors.push('Canonical browser QA does not include E2E smoke');
-if(!qaRunner.includes('test:public-booking'))errors.push('Canonical browser QA does not include public booking resilience');
-if(!qaRunner.includes('test:retention'))errors.push('Canonical static QA does not gate retention rules');
-if(!qaRunner.includes('test:pwa-v424-focus')||!qaRunner.includes('test:pwa'))errors.push('Canonical browser QA must include both focused v4.2.24 PWA regression and full PWA suite');
+if(!qaSuites.browser.includes('test:e2e'))errors.push('Canonical browser QA does not include E2E smoke');
+if(!qaSuites.browser.includes('test:public-booking'))errors.push('Canonical browser QA does not include public booking resilience');
+if(!qaSuites.static.includes('test:retention'))errors.push('Canonical static QA does not gate retention rules');
+if(!qaSuites.browser.includes('test:pwa-focus')||!qaSuites.browser.includes('test:pwa'))errors.push('Canonical browser QA must include both focused PWA regression and full PWA suite');
 const ciRequirements=fs.readFileSync(path.join(root,'requirements-ci.txt'),'utf8');
 if(!/^playwright==\d+\.\d+\.\d+$/m.test(ciRequirements))errors.push('Playwright CI dependency is not pinned');
 for(const token of ["reg.scope===ROOT_SCOPE","reg.update()","reg.unregister()"])if(!publicResilience.includes(token))errors.push(`public legacy-SW retirement missing: ${token}`);
@@ -255,15 +252,8 @@ if(!adminCss.includes('.finance-form .modal-layout{scrollbar-color:')||!adminCss
 if(!adminCss.includes('/* v3.0.64 — discount editor stays inside the one mobile shell contract. */'))errors.push('manual discount mobile UX must remain inside the single primary <=900px shell contract');
 if(!publicExperience.includes('Програма лояльності')||!publicExperience.includes('0–2 завершені оренди')||!publicExperience.includes('після 3 завершених оренд')||!publicExperience.includes('після 6 завершених оренд'))errors.push('public loyalty program copy is missing or ambiguous');
 if(!adminEdge.includes('action === "save_finance"')||!adminEdge.includes('manual_discount: discount.manualType === "none" ? null')||!adminEdge.includes('base_amount: discount.baseAmount'))errors.push('return settlement must support and persist manual discount changes');
-const requiredCopy=[
- 'Передплата 200 грн вноситься тільки після підтвердження заявки, закріплює дату та входить у загальну вартість.',
- 'Новий клієнт надсилає документ менеджеру приватно.',
- 'Сплачуєте при отриманні. Після розрахунку повертаємо залишок.',
- 'Що потрібно для оформлення',
- 'Залоговий платіж',
-];
-for(const phrase of requiredCopy)if(!businessCopy.includes(phrase))errors.push(`required booking copy missing: ${phrase}`);
-for(const phrase of ['базова сума, фактичну фіксує менеджер','Базова сума; фактичну менеджер фіксує при видачі','залог повертається окремо','оплата оренди при видачі','входить у суму оренди','Поворотний залог'])if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
+for(const phrase of buildContracts.bookingCopy.required)if(!businessCopy.includes(phrase))errors.push(`required booking copy missing: ${phrase}`);
+for(const phrase of buildContracts.bookingCopy.forbidden)if(businessCopy.toLowerCase().includes(phrase.toLowerCase()))errors.push(`forbidden financial copy: ${phrase}`);
 if(!bookingHtml.includes('08:00–10:00')||!bookingHtml.includes('17:30–20:00')||bookingHtml.includes('7:00–9:30')||bookingHtml.includes('07:00–09:30'))errors.push('public fallback slots are stale');
 if(!adminHtml.includes('Content-Security-Policy'))errors.push('admin CSP is missing');
 if(!adminRuntime.includes("SESSION_IDLE_MS=30*24*60*60*1000"))errors.push('trusted-device session expiry is missing');
@@ -323,24 +313,17 @@ if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale S
   const booking=fs.readFileSync(path.join(root,'bronuvannia','index.html'),'utf8');
   const react=publicReactBundle;
   const quiz=fs.readFileSync(path.join(root,'assets','public-quiz.js'),'utf8');
-  const required=[
-    'Професійні засоби',
-    'За потреби додайте засоби для плям, запахів або інших поверхонь.',
-    'Вони оплачуються окремо й залишаються у вас.',
-    'VA SPOT FIX · 50 мл',
-    'VA STAIN OX · 30 мл',
-    'Shower Care · 250 мл',
-    'Soft Degreaser · 250 мл',
-    'Grill Force · 250 мл',
-    'Scalex Pro · 250 мл',
-    'Eco Clean · 250 мл',
-    'Glass Perfect Care · 250 мл'
-  ];
+  const presentation=buildContracts.chemistryPresentation;
+  const extraLabels=presentation.requiredExtraCodes.map(code=>businessConfig.catalog.extras[code]?.label);
+  const required=[...presentation.requiredCopy,...extraLabels];
   for(const token of required){
-    if(!booking.includes(token))errors.push(`public booking chemistry copy missing from server HTML: ${token}`);
-    if(!react.includes(token))errors.push(`public booking chemistry copy missing from hydrated bundle: ${token}`);
+    if(!token)errors.push('public booking chemistry contract references an unknown catalog extra');
+    else{
+      if(!booking.includes(token))errors.push(`public booking chemistry copy missing from server HTML: ${token}`);
+      if(!react.includes(token))errors.push(`public booking chemistry copy missing from hydrated bundle: ${token}`);
+    }
   }
-  for(const legacy of ['label:"Універсальний плямовивідник · 50 мл"','label:"Плямовивідник від кави, вина та ягід · 30 мл"']){
+  for(const legacy of presentation.legacyHydrationLabels){
     if(react.includes(legacy))errors.push(`legacy chemistry title can flash during hydration: ${legacy}`);
   }
   if(!quiz.includes('<h3>VA SPOT FIX</h3>')||!quiz.includes('<h3>VA STAIN OX</h3>'))errors.push('Smart Guide stain-care cards do not use VA product names as the primary heading');
@@ -349,10 +332,17 @@ if(e2eSmoke.includes('Weekend deposit updates to 2000 UAH'))errors.push('stale S
   if(!fixes.includes('label.is-va-stain-care.is-selected'))errors.push('selected VA spot-care cards do not have an explicit branded selected-state style');
   const catalog=fs.readFileSync(path.join(root,'assets','public-catalog.js'),'utf8');
   if(!catalog.includes("input.closest('.booking-extras')")||!catalog.includes('requestAnimationFrame(()=>apply(activeCatalog))'))errors.push('public catalog does not restore branded chemistry presentation after React checkbox rerender');
-  const expectedChunk=`/_next/static/chunks/146ntlcv_t6~w-v4041.js?v=${release.build}`;
-  for(const rel of ['bronuvannia/index.html','bronuvannia/index.txt','bronuvannia/__next.bronuvannia.__PAGE__.txt','bronuvannia/__next._full.txt']){
-    const body=fs.readFileSync(path.join(root,rel),'utf8');
-    if(!body.includes(expectedChunk))errors.push(`booking React chunk is not cache-busted in ${rel}`);
+  for(const chunk of buildContracts.cacheBustedNextChunks){
+    const expectedChunk=`/_next/static/chunks/${chunk.file}?v=${release.build}`;
+    for(const rel of chunk.requiredReferences||[]){
+      const body=fs.readFileSync(path.join(root,rel),'utf8');
+      if(!body.includes(expectedChunk))errors.push(`${chunk.file} is not cache-busted in ${rel}`);
+    }
+    for(const file of files.filter(item=>item.endsWith('.html')||item.endsWith('.txt'))){
+      const body=fs.readFileSync(file,'utf8');
+      const rawReference=`/_next/static/chunks/${chunk.file}`;
+      if(body.includes(rawReference)&&!body.includes(expectedChunk))errors.push(`${chunk.file} has a stale reference in ${path.relative(root,file)}`);
+    }
   }
 }
 

@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.46  
-**Baseline build:** 4246  
+**Baseline version:** 4.2.47  
+**Baseline build:** 4247  
 **Останнє оновлення:** 2026-09-01  
 **Власник логіки:** VAcleaner  
 
@@ -2488,6 +2488,16 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 Критичні зміни status, finance, promo activation, referral reward та customer documents виконуються через контрольований admin/backend path.
 
+## SEC-ADMIN-001 — фактичний admin auth
+
+Admin/PWA входить через Supabase Auth. Кожен захищений Edge Function повторно перевіряє bearer token через `auth.getUser()` і наявність user ID в admin allowlist; browser role не має прямого доступу до критичних таблиць.
+
+## SEC-ADMIN-002 — MFA не є чинним gate
+
+MFA зараз не примусово вимагається. Міграція `20260813083000_vacleaner_admin_mfa_guard.sql` створила helper перевірки verified factor, але наступна міграція `20260813101500_vacleaner_remove_admin_mfa_guard.sql` його видаляє, а активні Edge Functions не перевіряють AAL2/MFA. Це фіксація фактичного стану схеми, а не припущення про причину rollback.
+
+Повторне ввімкнення MFA є окремою security-зміною: потрібні погоджена політика, enrollment/recovery UX для обох admin-пристроїв, server-side AAL2 enforcement, аварійний recovery path і окремий regression/browser gate. Не повертати старий helper ізольовано від повного auth flow.
+
 ---
 
 # 26. REGRESSION CONTRACT MAP
@@ -2496,23 +2506,23 @@ Customer PII не повинна потрапляти у release ZIP як histor
 
 | Область | Контракти | Мінімальний regression gate |
 |---|---|---|
-| Booking core | BOOK / SLOT / ADDR | `test-v4-2-22-admin-truth-ux`, booking e2e, public_booking |
-| Client card | CLIENT / NAV | client-card-mobile, glass, desktop-final |
-| RETURN | RET | v4.1.30 return activation, client-promo-regression, v4.2.22 contracts |
-| Referral | REF | v4.2.1, v4.2.9, v4.2.10, v4.2.28, referral-admin-mobile |
-| Delivery | DEL | delivery-settings, v4.1.47.2, v4.1.58, v4.2.22 |
-| Finance | FIN / FINTRUTH | financial-control, finance truth, v4.2.22 |
-| PWA | PWA | pwa-static, pwa visual, glass 320/390/430 |
+| Booking core | BOOK / SLOT / ADDR | current `booking-return` + `address-resilience`, booking E2E, public booking |
+| Client card | CLIENT / NAV | current `client-card` + `admin-navigation`, client-card mobile/visual, desktop-final |
+| RETURN | RET | current `booking-return` + `stabilization`, client-promo-regression, persistence browser QA |
+| Referral | REF | current `referral-core` + `referral-analytics` + `referral-contact`, referral browser QA |
+| Delivery | DEL | delivery-settings, current `delivery-road-truth` + `address-resilience`, finance delivery visual |
+| Finance | FIN / FINTRUTH | financial-control, current `finance-truth` + `finance-extra-breakdown`, stabilization acceptance |
+| PWA | PWA | pwa-static, PWA visual/focus, glass 320/390/430 |
 | Campaigns | CAMP | sms-campaigns, campaign-sms-ux, client-promo-regression |
 | Calendar | CAL | calendar-live, calendar-focused |
-| Search | SEARCH | v4.2.22 + browser search scenario |
-| UI | UI | glass, density, desktop-final, keyboard-nav |
-| Public IA/catalog | WEB / TECH / CROSS | e2e, public-architecture, header parity, public visual contract |
-| Smart Guide | QUIZ | smart-guide-logic, smart-guide-fit, quiz positioning, booking preset continuity |
-| Public booking | PUBBOOK / PUBADDR | public_booking, booking CTA, booking step order, address fallback/provider/delivery tests |
-| Public visual | PUBVIS | public visual contract, home/equipment density, inner heroes, content/growth visual |
-| Public SEO/content | SEO / TRUST / CONTENT | public SEO audit, static copy integrity, growth content |
-| Public resilience | WEBRES / WEBANA | e2e, booking resilience, keyboard-nav, process metadata, attribution checks |
+| Search | SEARCH | current `admin-navigation` + route/browser search scenarios |
+| UI | UI | current `admin-controls`, glass, density, desktop-final, keyboard-nav |
+| Public IA/catalog | WEB / TECH / CROSS | E2E, current `public-architecture`, public visual contract |
+| Smart Guide | QUIZ | smart-guide-logic, smart-guide-fit, booking preset continuity |
+| Public booking | PUBBOOK / PUBADDR | public booking, booking CTA, E2E, current `address-resilience` |
+| Public visual | PUBVIS | public visual contract/parity, home/equipment density, inner heroes, content/growth visual |
+| Public SEO/content | SEO / TRUST / CONTENT | public SEO audit, current `public-seo`, static copy integrity, growth content |
+| Public resilience | WEBRES / WEBANA | E2E, booking resilience, keyboard-nav, process metadata, attribution checks |
 
 **Правило:** якщо додана нова бізнесова можливість, для неї створюється новий contract ID та мінімум один автоматичний regression test.
 
@@ -3575,3 +3585,44 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `npm run test:v4.2.46-finance-extra-breakdown` verifies formatter/category/spec contracts.
 - `npm run test:stabilization-acceptance-browser` verifies the exact desktop and mobile settlement UI with a 450 грн mixed-extra fixture.
 - Full canonical `qa:static` and `qa:browser` remain release-blocking.
+
+
+# 55. Change record — v4.2.47 CI PIPELINE HARDENING
+
+### ADDED
+
+- One data-driven suite registry: `config/qa-suites.json` owns canonical static/browser suites and the curated current-state contract map.
+- `verify:artifact` validates the extracted Pages payload, source/artifact release coherence, deploy-only file boundary, local references and a deterministic SHA-256 digest before Browser QA starts.
+- `.gitignore` for build, dependency, Playwright, screenshot, Python cache and generated QA summary artifacts.
+- Versioned `.githooks/pre-push` plus `npm run hooks:install`; pre-push runs the canonical `npm run qa:static` gate locally.
+- `config/qa-build-contracts.json` stores high-churn exact copy/structure contracts separately from checker code.
+- Explicit security record of the current admin MFA state under `SEC-ADMIN-001/002`.
+
+### CHANGED
+
+- GitHub Browser QA downloads and extracts the exact `github-pages` artifact produced by `validate`. It no longer runs `stamp` or `build`; deploy consumes the same single uploaded artifact after Browser QA passes.
+- `qa-full.mjs` reads suite composition from data, builds only in `static/full`, and always verifies `dist` before Browser suites.
+- Historical `test-v*.mjs` files remain available as audit evidence through `npm run qa:legacy`, but canonical static QA runs a curated current-domain set through `test:current-contracts` instead of permanently appending every release test.
+- Asset cache busting now covers every local `/assets/*.js|css` reference generically. Puzzi title/prices and chemistry labels are resolved from `seo-map.json` / `vacleaner.json`, not repeated as inline checker constants.
+- Hidden nested test execution was removed from `check-build.mjs`; each current test is now visible in the suite registry and QA summary.
+
+### FIXED
+
+- Mobile booking E2E clicks the visible add-on label semantically with `extra_card.click()` and no fixed pixel coordinate.
+- Removed the second unverified Browser-job build, eliminating the possibility that Browser QA and deploy use different `dist` trees.
+- Removed Python setup from the static-only `validate` job.
+- Generated `qa-release-summary.json`, `dist`, test results and caches no longer belong in release source/history.
+
+### PRESERVED
+
+- Public UI, admin/PWA UI, prices, catalog, delivery tariffs, deposit rules, availability, finance formulas, RETURN/referral economics, Supabase schema and VA HOME data are unchanged.
+- Existing historical regression scripts remain runnable on demand; only canonical suite selection and execution architecture changed.
+- Current MFA behavior is documented but not changed. MFA is not silently enabled or disabled by this release.
+
+### TESTS
+
+- `npm run test:ci-pipeline` verifies the one-artifact workflow, no browser rebuild, semantic E2E click, generated-artifact ignores, suite registry, pre-push hook and documented MFA state.
+- `npm run test:current-contracts` runs 20 curated current-domain static contracts.
+- `npm run qa:static` must build one verified Pages artifact; `npm run qa:browser` must consume a prebuilt verified artifact.
+- `npm run qa:legacy` remains available for explicit historical audit and is not a release-blocking default gate.
+- Full canonical `npm run qa:full` remains release-blocking before handoff.

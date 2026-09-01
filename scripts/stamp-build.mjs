@@ -2,6 +2,7 @@ import {execFileSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd();
+const buildContracts=JSON.parse(fs.readFileSync(path.join(root,'config','qa-build-contracts.json'),'utf8'));
 // v4.1.57: the latest checked-in static export is now the canonical public baseline.
 // Historical one-off patch scripts remain in /scripts for audit/regression tests,
 // but are no longer replayed on every release. Only deterministic normalizers and
@@ -12,10 +13,13 @@ execFileSync(process.execPath,[path.join(root,'scripts','generate-config.mjs')],
 execFileSync(process.execPath,[path.join(root,'scripts','apply-delivery-settings.mjs')],{stdio:'inherit'});
 const release=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
 const version=String(release.version), build=String(release.build||version.replace(/\D/g,''));
-const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>['.git','dist'].includes(entry.name)?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
+const ignoredDirs=new Set(['.git','dist','node_modules','.pages-artifact','.pw-browsers','.venv','__pycache__','test-results','pwa-test-results','density-test-results','final-desktop-test-results','playwright-report']);
+const walk=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>ignoredDirs.has(entry.name)||entry.name.endsWith('-results')||entry.name.endsWith('-test-results')||entry.name.startsWith('tmp-')?[]:entry.isDirectory()?walk(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
 for(const file of walk(root).filter(f=>f.endsWith('.html'))){
   let s=fs.readFileSync(file,'utf8');
-  s=s.replace(/(\/assets\/(?:vacleaner-core|public-runtime-loader|public-experience-runtime|public-booking-route-loader|public-shared|public-booking|public-guide|public-home|public-catalog|public-booking-slots|public-resilience|public-quiz|site-attribution|admin-v250|admin-glass-test|address-autocomplete|public-fixes|mobile-home-fix|site-v400|puzzi-seo|booking-trust-v4145|booking-funnel-analytics|seo-v4147|home-smart-guide-v4149|booking-entry-v4149|booking-hardening-v4144)\.(?:js|css))\?v=[^"']+/g,`$1?v=${build}`);
+  // Every local JS/CSS asset follows one generic cache-bust rule. New assets do
+  // not need to be added to a hand-maintained regex before they can ship safely.
+  s=s.replace(/(\/assets\/[^"'?#]+\.(?:js|css))(?:\?[^"']*)?/g,`$1?v=${build}`);
   const rel=path.relative(root,file).replaceAll('\\','/');
   if(!rel.startsWith('admin/')){
     // v4.2.0 production uses route-aware modular runtime; legacy monoliths remain source-only for regression tests.
@@ -32,11 +36,7 @@ for(const file of walk(root).filter(f=>f.endsWith('.html'))){
 }
 // Patched Next chunks keep historical filenames in this static export. Version every HTML/RSC
 // reference so returning browsers cannot hydrate fresh server HTML with stale public components.
-const versionedNextChunks=[
-  '146ntlcv_t6~w-v4041.js', // booking
-  '01pb0x0z72e41.js',       // custom home page
-  '0x2bx8kerxrmz.js',       // shared public header/footer
-];
+const versionedNextChunks=buildContracts.cacheBustedNextChunks.map(item=>item.file);
 for(const file of walk(root).filter(f=>f.endsWith('.html')||f.endsWith('.txt'))){
   let s=fs.readFileSync(file,'utf8');
   for(const chunk of versionedNextChunks){

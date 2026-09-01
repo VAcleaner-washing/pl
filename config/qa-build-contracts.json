@@ -1,0 +1,90 @@
+{
+  "puzziLanding": {
+    "path": "tekhnika/karcher-puzzi-8-1/index.html",
+    "route": "/tekhnika/karcher-puzzi-8-1/",
+    "required": [
+      "rel=\"canonical\" href=\"https://vacleaner.pp.ua/tekhnika/karcher-puzzi-8-1/\"",
+      "\"@type\":\"Service\"",
+      "\"@type\":\"FAQPage\"",
+      "\"@type\":\"BreadcrumbList\"",
+      "8 порцій",
+      "Залоговий платіж",
+      "/bronuvannia/?product=puzzi",
+      "/rishennia/textile/",
+      "width=\"1086\" height=\"1448\"",
+      "class=\"puzzi-cleaning-process\"",
+      "Сухе прибирання",
+      "Розчин і плями",
+      "Промивання",
+      "Збір вологи",
+      "Сушіння й догляд"
+    ],
+    "forbidden": [
+      "\"streetAddress\""
+    ],
+    "counts": [
+      {
+        "token": "class=\"mobile-booking\"",
+        "exact": 1
+      }
+    ]
+  },
+  "bookingCopy": {
+    "required": [
+      "Передплата 200 грн вноситься тільки після підтвердження заявки, закріплює дату та входить у загальну вартість.",
+      "Новий клієнт надсилає документ менеджеру приватно.",
+      "Сплачуєте при отриманні. Після розрахунку повертаємо залишок.",
+      "Що потрібно для оформлення",
+      "Залоговий платіж"
+    ],
+    "forbidden": [
+      "базова сума, фактичну фіксує менеджер",
+      "Базова сума; фактичну менеджер фіксує при видачі",
+      "залог повертається окремо",
+      "оплата оренди при видачі",
+      "входить у суму оренди",
+      "Поворотний залог"
+    ]
+  },
+  "chemistryPresentation": {
+    "requiredCopy": [
+      "Професійні засоби",
+      "За потреби додайте засоби для плям, запахів або інших поверхонь.",
+      "Вони оплачуються окремо й залишаються у вас."
+    ],
+    "requiredExtraCodes": [
+      "spot_lifter",
+      "stain_exit",
+      "shower_care",
+      "soft_degreaser",
+      "grill_force",
+      "scalex_pro",
+      "eco_clean",
+      "glass_perfect"
+    ],
+    "legacyHydrationLabels": [
+      "label:\"Універсальний плямовивідник · 50 мл\"",
+      "label:\"Плямовивідник від кави, вина та ягід · 30 мл\""
+    ]
+  },
+  "cacheBustedNextChunks": [
+    {
+      "file": "146ntlcv_t6~w-v4041.js",
+      "requiredReferences": [
+        "bronuvannia/index.html",
+        "bronuvannia/index.txt",
+        "bronuvannia/__next.bronuvannia.__PAGE__.txt",
+        "bronuvannia/__next._full.txt"
+      ]
+    },
+    {
+      "file": "01pb0x0z72e41.js",
+      "requiredReferences": []
+    },
+    {
+      "file": "0x2bx8kerxrmz.js",
+      "requiredReferences": []
+    }
+  ]
+}
+

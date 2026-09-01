@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.pages-artifact/
+.pw-browsers/
+.venv/
+__pycache__/
+*.py[cod]
+
+qa-release-summary.json
+test-results/
+*-test-results/
+*-results/
+playwright-report/
+glass-test-results/
+final-desktop-audit/
+tmp-*/

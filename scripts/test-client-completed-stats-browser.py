@@ -14,7 +14,7 @@ def mk(idx,status,start,total):
 pwa.BOOKINGS[:]=[mk(1,'confirmed','2026-08-24',950),mk(2,'completed','2025-08-10',700),mk(3,'completed','2025-01-10',600)]
 def norm(value): return re.sub(r'\s+',' ',value.replace('\xa0',' ')).strip()
 with sync_playwright() as pw:
-    browser=pw.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+    browser=pw.chromium.launch(headless=True,args=['--no-sandbox'])
     try:
         for width,height in [(320,800),(390,844),(430,932),(768,1024),(1024,768),(1280,900),(1650,760),(1920,1080)]:
             page=pwa.render_page(browser,width,height)

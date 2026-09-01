@@ -47,7 +47,7 @@ def run(browser,w):
     page.close(); return fail
 
 with sync_playwright() as p:
-    browser=p.chromium.launch(headless=True, executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+    browser=p.chromium.launch(headless=True, args=['--no-sandbox'])
     failures=[]
     for w in (320,390,430): failures += run(browser,w)
     browser.close()

@@ -13,6 +13,7 @@ const bookingHardeningCss=read('assets/booking-hardening-v4144.css');
 const publicBookingCss=read('assets/public-booking.css');
 const chunk=read('_next/static/chunks/146ntlcv_t6~w-v4041.js');
 const qa=read('scripts/qa-full.mjs');
+const qaSuites=read('config/qa-suites.json');
 let checks=0,failed=0;
 const ok=(name,condition)=>{checks++;if(condition)console.log('OK  ',name);else{failed++;console.error('FAIL',name)}};
 
@@ -35,7 +36,7 @@ ok('Story choice survives transient estimate refresh',chunk.includes('en&&K?Numb
 ok('chemistry free copy appears only for chemistry reward',chunk.includes('storyActive&&"chemistry2"===storyChoice')&&chunk.includes('children:"2 порції безкоштовно"'));
 ok('Story summary has explicit unselected state instead of pretending diffuser/chemistry',chunk.includes('"diffuser50"===storyChoice?"Аромадифузор VA HOME · 50 мл":"Оберіть подарунок"'));
 ok('booking estimate echoes authoritative Story choice',booking.includes('storyGiftChoice: storyMention ? storyGiftChoice : ""')&&booking.includes('storyChemistryFreePortions: storyMention && storyGiftChoice === "chemistry2" ? 2 : 0'));
-ok('CI runs v4.2.41 address resilience regression',qa.includes('test:v4.2.41-address-resilience'));
+ok('CI runs current address resilience contract',qa.includes('config/qa-suites.json')&&qaSuites.includes('scripts/test-v4-2-41-address-resilience.mjs'));
 
 
 const bookingSlots=read('assets/public-booking-slots.js');

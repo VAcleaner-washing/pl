@@ -23,7 +23,7 @@ body{{margin:0;background:#070b0e;color:#f4f1eb;font-family:Arial,sans-serif}}#f
 </div></body></html>'''
 
 with sync_playwright() as p:
-    browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+    browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
     passed=0
     for width,height in ((320,760),(390,844),(430,900),(768,1024),(1280,900)):
         page=browser.new_page(viewport={'width':width,'height':height})

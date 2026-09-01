@@ -172,6 +172,20 @@ main>footer:not(.v4-footer){visibility:hidden}
  .social-proof-copy{margin-top:24px;text-align:left;font-size:14px}
 }
 
+/* v4.2.47 — mobile min-content containment and density stability. */
+@media(max-width:620px){
+  .inner-hero,
+  .inner-hero.v4-inner-hero,
+  .product-hero{grid-template-columns:minmax(0,1fr)}
+  .inner-hero>div,
+  .inner-hero>p,
+  .product-copy,
+  .product-image{min-width:0;max-width:100%}
+  .inner-hero h1,
+  .product-copy h1{overflow-wrap:anywhere}
+  .home-v21 .v21-faq{padding-top:62px;padding-bottom:62px}
+}
+
 /* v4.1.50 consistency */
 .package-price-v4150{display:grid;gap:7px;margin:18px 0 12px}.package-price-v4150>span{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08)}.package-price-v4150>span:last-child{border-bottom:0}.package-price-v4150 b{font-size:12px;font-weight:500;color:#9ca4a7}.package-price-v4150 strong{font-size:18px;font-weight:650;color:#f1f3f3;white-space:nowrap}@media(max-width:620px){.package-price-v4150 strong{font-size:17px}}
 

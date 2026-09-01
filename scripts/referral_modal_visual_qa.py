@@ -19,7 +19,7 @@ HTML=f'''<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" 
 </div></div></div></body></html>'''
 
 with sync_playwright() as p:
-    browser=p.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+    browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
     passed=0
     for width,height in ((320,760),(390,844),(430,900),(1024,768),(1280,800),(1440,900),(1648,960)):
         page=browser.new_page(viewport={'width':width,'height':height})

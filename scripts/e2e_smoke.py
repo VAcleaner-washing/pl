@@ -603,7 +603,7 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         checks.check(extra_card.count() == 1 and extra_card.is_visible(), "Mobile add-on card is visible and tappable")
         extra_card.evaluate("el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
         page.wait_for_timeout(80)
-        extra_card.click(position={"x": 36, "y": 36})
+        extra_card.click()
         checks.check(extra.is_checked(), "Mobile add-on card toggles its checkbox through the visible touch target")
         page.wait_for_timeout(50)
         checks.check("До контактів" in cta.inner_text(), "Extra-item checkbox never regresses CTA to date")

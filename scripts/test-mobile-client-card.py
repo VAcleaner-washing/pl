@@ -29,7 +29,7 @@ FIXTURE = '''
 HTML = f'''<!doctype html><html class="glass-test"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>{CSS}</style><style>body{{margin:0;background:#070b0e;color:#f4f1eb;padding:18px;font-family:Arial,sans-serif}}.client-card-grid{{display:block}}.modal-section{{margin-bottom:14px}}.fixture{{max-width:760px;margin:auto}}</style></head><body>{FIXTURE}</body></html>'''
 
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True, executable_path='/usr/bin/chromium', args=['--no-sandbox'])
+    browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     passed = 0
     for width, height in ((320, 760), (390, 844), (430, 900)):
         page = browser.new_page(viewport={'width': width, 'height': height})

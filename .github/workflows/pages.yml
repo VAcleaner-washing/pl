@@ -26,11 +26,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-          cache: pip
-          cache-dependency-path: requirements-ci.txt
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Run canonical static / regression QA
@@ -38,6 +33,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          name: github-pages
           path: dist
 
   browser:
@@ -63,6 +59,16 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
           python -m playwright install --with-deps chromium
+      - name: Download validated Pages artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: .pages-artifact
+      - name: Extract validated Pages artifact
+        run: |
+          test ! -e dist
+          mkdir dist
+          tar -xf .pages-artifact/artifact.tar -C dist
       - name: Run canonical browser / PWA QA
         run: npm run qa:browser
       - name: Upload browser evidence

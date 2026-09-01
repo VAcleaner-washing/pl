@@ -26,7 +26,7 @@ def overlap(a,b):
 
 results=[]
 with sync_playwright() as pw:
-    browser=pw.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox'])
+    browser=pw.chromium.launch(headless=True,args=['--no-sandbox'])
     for w,h in [(320,800),(390,844),(430,932),(768,1024),(1024,768),(1280,900),(1650,760),(1920,1080)]:
         page=pwa.render_page(browser,w,h);dismiss(page)
         if w<=900:pwa.open_mobile_view(page,'bookings')

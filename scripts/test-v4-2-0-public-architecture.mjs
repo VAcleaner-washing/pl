@@ -24,7 +24,11 @@ ok('booking route loader inherits stamped build without hard-coded child version
 ok('runtime can boot safely when lazy-loaded after DOMContentLoaded',runtime.includes('const bootExperience=()=>')&&runtime.includes("if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootExperience"));
 ok('runtime no longer embeds historical booking hardening/trust loaders',!runtime.includes('v4.1.44 booking hardening route loader')&&!runtime.includes('v4.1.45 trust & rules route loader'));
 ok('legacy monoliths are source-only and excluded from Pages artifact',buildScript.includes("'assets/public-experience.css'")&&buildScript.includes("'assets/public-experience.js'"));
-const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
+const ignoredDirs=new Set(['dist','node_modules','.venv','.pw-browsers','.pages-artifact','test-results','playwright-report']);
+const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>{
+ if(e.isDirectory()&&(ignoredDirs.has(e.name)||e.name.endsWith('-test-results')))return [];
+ return e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)];
+});
 const htmlFiles=walk(root).filter(f=>f.endsWith('.html')&&!f.includes(`${path.sep}dist${path.sep}`));
 const publicHtml=htmlFiles.filter(f=>{const rel=path.relative(root,f).replaceAll('\\','/');return !rel.startsWith('admin/')&&!/^google[^/]*\.html$/i.test(rel);});
 const stale=publicHtml.filter(f=>/\/assets\/public-experience\.(?:css|js)(?:\?v=[^"']+)?/.test(fs.readFileSync(f,'utf8')));

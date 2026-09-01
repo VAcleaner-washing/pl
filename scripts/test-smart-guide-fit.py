@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import os
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -20,7 +19,7 @@ def check(ok,label):
         failed.append(label);print('FAIL:',label)
 
 with sync_playwright() as p:
-    browser=p.chromium.launch(headless=True,executable_path=os.environ.get('VAC_TEST_CHROMIUM','/usr/bin/chromium'),args=['--no-sandbox'])
+    browser=p.chromium.launch(headless=True,args=['--no-sandbox'])
     for w,h in SIZES:
         page=browser.new_page(viewport={'width':w,'height':h})
         page.set_content(HTML);page.add_style_tag(content=CSS);page.add_script_tag(content=CORE_JS);page.add_script_tag(content=JS)

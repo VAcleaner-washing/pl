@@ -2,8 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd(),dist=path.join(root,'dist');
 fs.rmSync(dist,{recursive:true,force:true});
-const excludedTop=new Set(['.git','.github','docs','.venv','.pw-browsers','config','scripts','supabase','dist','test-results','pwa-test-results','glass-test-results','density-test-results','final-desktop-test-results','final-desktop-audit','playwright-report','__pycache__','QA-EVIDENCE-v2.9.11.0']);
-const excludedRoot=new Set(['package.json','requirements-ci.txt','manifest.webmanifest','favicon-16-preview.png','favicon-16x16.png','favicon-32x32.png','favicon-64x64.png']);
+const excludedTop=new Set(['.git','.github','.githooks','docs','.venv','.pw-browsers','.pages-artifact','node_modules','config','scripts','supabase','dist','test-results','playwright-report','__pycache__']);
+const excludedRoot=new Set(['package.json','requirements-ci.txt','qa-release-summary.json','manifest.webmanifest','favicon-16-preview.png','favicon-16x16.png','favicon-32x32.png','favicon-64x64.png']);
+const isGeneratedTop=name=>name.startsWith('tmp-')||name.endsWith('-results')||name.endsWith('-test-results');
 const excludedDeployPaths=new Set([
   'admin/bronuvannia-classic',
   'admin/bronuvannia-glass',
@@ -18,7 +19,7 @@ function copy(src,dst,depth=0,relative=''){
  for(const entry of fs.readdirSync(src,{withFileTypes:true})){
    const rel=relative?`${relative}/${entry.name}`:entry.name;
    if(excludedDeployPaths.has(rel))continue;
-   if(depth===0&&(excludedTop.has(entry.name)||entry.name.startsWith('test-results')||entry.name.startsWith('pwa-test-results')||entry.name.startsWith('density-test-results')||entry.name.startsWith('final-desktop-test-results')||entry.name==='final-desktop-audit'||entry.name.startsWith('playwright-report')||excludedRoot.has(entry.name)||entry.name.endsWith('.md')))continue;
+   if(depth===0&&(excludedTop.has(entry.name)||isGeneratedTop(entry.name)||(entry.name.startsWith('.')&&entry.name!=='.nojekyll')||excludedRoot.has(entry.name)||entry.name.endsWith('.md')))continue;
    const from=path.join(src,entry.name),to=path.join(dst,entry.name);
    if(entry.isDirectory()){fs.mkdirSync(to,{recursive:true});copy(from,to,depth+1,rel)}
    else fs.copyFileSync(from,to);
@@ -34,4 +35,6 @@ const files=[];const walk=d=>fs.readdirSync(d,{withFileTypes:true}).forEach(e=>e
 if(files.some(f=>/\.(?:ts|md|map)$/.test(f)))throw new Error('Development files leaked into Pages artifact');
 for(const rel of excludedDeployPaths)if(fs.existsSync(path.join(dist,rel)))throw new Error(`Obsolete deploy path leaked into Pages artifact: ${rel}`);
 for(const name of excludedRoot)if(fs.existsSync(path.join(dist,name)))throw new Error(`Development root file leaked into Pages artifact: ${name}`);
+const leakedTop=fs.readdirSync(dist).filter(name=>isGeneratedTop(name)||name.startsWith('tmp-')||(name.startsWith('.')&&name!=='.nojekyll'));
+if(leakedTop.length)throw new Error(`Generated or development paths leaked into Pages artifact: ${leakedTop.join(', ')}`);
 console.log(`Prepared Pages artifact: ${files.length} files, ${Math.round(files.reduce((n,f)=>n+fs.statSync(f).size,0)/1024)} KiB`);

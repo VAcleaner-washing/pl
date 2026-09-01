@@ -12,7 +12,7 @@ def ck(label,cond):
     ok=bool(cond);checks.append((label,ok));print(('PASS' if ok else 'FAIL')+': '+label)
 
 with sync_playwright() as pw:
-    browser=pw.chromium.launch(headless=True,executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-gpu'])
+    browser=pw.chromium.launch(headless=True,args=['--no-sandbox','--disable-gpu'])
     page=fixture.render_page(browser,390,844,authenticated=True,standalone=True)
     try:
         if page.locator('.pwa-update-later').count(): page.locator('.pwa-update-later').click()

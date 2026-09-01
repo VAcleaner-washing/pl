@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+set -eu
+
+echo "VAcleaner pre-push: canonical static QA"
+npm run qa:static

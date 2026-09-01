@@ -12,6 +12,7 @@ const address=read('assets/address-autocomplete.js');
 const backend=read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const qa=read('scripts/qa-full.mjs');
+const qaSuites=read('config/qa-suites.json');
 const core=read('config/vacleaner.json');
 const cfg=JSON.parse(core);
 let passed=0; const failed=[];
@@ -37,7 +38,7 @@ check(css.includes('width:500px;max-width:100%;flex:0 0 500px')&&css.includes('g
 check(Number(cfg.deliveryPricing?.local)===250&&cfg.deliveryPricing?.localSettlements?.includes('Розсошенці')&&Number(cfg.catalog?.puzziPacketPrice)===50, 'stabilization does not alter delivery or Puzzi consumable pricing');
 check(Number(cfg.depositRules?.oneUnit?.day)===1000&&Number(cfg.depositRules?.twoUnits?.day)===1500&&Number(cfg.depositRules?.general?.day)===2000, 'stabilization does not alter deposit policy');
 check(spec.includes('STAB-ACCEPT-001')&&spec.includes('desktop return-finance')&&spec.includes('payload → backend → persisted state → reload → UI'), 'System Spec records the stabilization acceptance contract');
-check(qa.includes("'test:v4.2.44-stabilization'")&&qa.includes("'test:stabilization-acceptance-browser'"), 'canonical QA includes v4.2.44 static and browser acceptance gates');
+check(qa.includes('config/qa-suites.json')&&qaSuites.includes('scripts/test-v4-2-44-stabilization.mjs')&&qaSuites.includes('test:stabilization-acceptance-browser'), 'canonical QA includes current stabilization static and browser acceptance gates');
 const result={passed,failed,status:failed.length?'failed':'passed'};
 console.log(JSON.stringify(result,null,2));
 process.exit(failed.length?1:0);
