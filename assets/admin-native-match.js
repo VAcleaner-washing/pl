@@ -135,6 +135,11 @@
       grid.classList.add('native-detail-grid-empty');
       stack.querySelectorAll(':scope > article').forEach(a=>a.classList.add('native-detail-row'));
     }
+    const heroStatus=detail.querySelector('.hero-status');
+    const statusText=(heroStatus?.textContent||'').toLowerCase();
+    const statusClass=statusText.includes('видана')?'issued':statusText.includes('повернен')?'completed':statusText.includes('очікує')?'waiting_payment':statusText.includes('нова')?'pending':statusText.includes('скас')?'cancelled':'confirmed';
+    const stack=detail.querySelector('.native-detail-stack');
+    if(stack)stack.dataset.status=statusClass;
     const actions=detail.querySelector('.detail-actions');
     if(actions)actions.classList.add('native-detail-actions');
   }
