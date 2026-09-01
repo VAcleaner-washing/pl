@@ -10,6 +10,14 @@
     chemistry:'Засоби та витратні матеріали',
     settings:'Профіль і параметри'
   };
+  const monthGenitive=['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+  const formatPhone=value=>{
+    const digits=String(value||'').replace(/\D/g,'');
+    const d=digits.startsWith('380')?digits:digits.length===10?'38'+digits:digits;
+    if(d.length!==12||!d.startsWith('380'))return String(value||'');
+    return `+${d.slice(0,3)} ${d.slice(3,5)} ${d.slice(5,8)} ${d.slice(8,10)} ${d.slice(10,12)}`;
+  };
+  const cleanText=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
   let queued=false;
   const queue=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;enhance()})};
 
@@ -19,6 +27,10 @@
     const head=main?.querySelector('.page-head');
     const search=document.querySelector('.search');
     if(main&&head&&search){
+      const subtitle=head.querySelector('p');
+      if(subtitle)subtitle.textContent='Бронювання на найближчі дні';
+      const input=search.querySelector('input');
+      if(input)input.placeholder='Пошук: клієнт, адреса, техніка…';
       let row=main.querySelector('.native-search-row');
       if(!row){
         row=document.createElement('div');
@@ -62,7 +74,7 @@
       const dm=(d.textContent||'').trim().match(/^(\d{2})\.(\d{2})$/);
       if(dm){
         const day=Number(dm[1]),month=Number(dm[2]);
-        const monthName=new Intl.DateTimeFormat('uk-UA',{month:'long'}).format(new Date(2026,month-1,day));
+        const monthName=monthGenitive[month-1]||'';
         const raw=(meta.textContent||'').trim();
         const lead=raw==='сьогодні'?'Сьогодні':raw==='завтра'?'Завтра':raw.charAt(0).toUpperCase()+raw.slice(1);
         d.textContent=`${lead}, ${day} ${monthName}`;
@@ -75,7 +87,14 @@
       const status=row.querySelector('.upcoming-title .status');
       if(time&&status&&!time.contains(status))time.appendChild(status);
       const tel=row.querySelector('.upcoming-client-info a');
-      if(tel)tel.classList.add('native-phone');
+      if(tel){tel.classList.add('native-phone');tel.textContent=formatPhone(tel.textContent)}
+      const stateNode=row.querySelector('.status');
+      if(stateNode){
+        const cls=[...stateNode.classList].find(c=>['pending','waiting_payment','confirmed','issued','completed','cancelled','declined'].includes(c));
+        if(cls)row.dataset.status=cls;
+      }
+      const open=row.querySelector('[data-up="open"]');
+      if(open)open.textContent='Деталі';
       row.classList.add('native-card-ready');
     });
   }
@@ -91,7 +110,8 @@
       menu.prepend(title);
     }
     if(!menu.querySelector('.native-profile-card')){
-      const name=document.querySelector('.top-profile-copy strong')?.textContent?.trim()||'VAcleaner';
+      let name=document.querySelector('.top-profile-copy strong')?.textContent?.trim()||'VAcleaner';
+      if(name==='Vadim')name='Вадим';
       const card=document.createElement('button');
       card.type='button';
       card.className='native-profile-card';
@@ -120,26 +140,78 @@
     detail.dataset.nativeDetail='1';
     const shell=detail.querySelector('.detail-shell');
     const meta=detail.querySelector('.detail-top-meta span');
-    if(meta)meta.textContent=`Бронювання ${meta.textContent.trim()}`;
+    const originalCode=cleanText(meta).replace(/^Бронювання\s+/i,'');
+    if(meta)meta.textContent='Бронювання';
+    const top=detail.querySelector('.detail-top');
+    if(top&&!top.querySelector('.native-detail-code')){
+      const code=document.createElement('em');
+      code.className='native-detail-code';
+      code.textContent=originalCode||'';
+      top.appendChild(code);
+    }
+    const hero=detail.querySelector('.detail-hero');
+    const heroStatus=detail.querySelector('.hero-status');
+    const statusText=cleanText(heroStatus).replace(/^✓\s*/,'').toLowerCase();
+    const statusClass=statusText.includes('видана')?'issued':statusText.includes('повернен')?'completed':statusText.includes('очікує')?'waiting_payment':statusText.includes('нова')?'pending':statusText.includes('скас')?'cancelled':'confirmed';
     const flow=detail.querySelector('.flow');
     if(flow)flow.classList.add('native-detail-flow');
     const grid=detail.querySelector('.detail-grid');
     const info=detail.querySelector('.info-grid');
     const finance=detail.querySelector('.finance-panel');
-    if(shell&&grid&&info){
+    if(shell&&grid&&info&&!detail.querySelector('.native-detail-card')){
+      const client=info.querySelector('.detail-client-link');
+      const delivery=info.querySelector('.detail-delivery-panel');
+      const extras=info.querySelector('.extras-panel');
+      const gift=info.querySelector('.gift-panel');
+      const customerComment=info.querySelector('.comment:not(.admin-note-panel)');
+      const managerNote=info.querySelector('.admin-note-panel');
+      const card=document.createElement('section');
+      card.className='native-detail-card';
+      card.dataset.status=statusClass;
+      const periodNode=hero?.querySelector('.period');
+      const periodClone=periodNode?.cloneNode(true);
+      periodClone?.querySelector('small')?.remove();
+      const period=cleanText(periodClone);
+      const product=cleanText(hero?.querySelector('h1'));
+      const clientName=cleanText(client?.querySelector('h2'));
+      const phone=cleanText(client?.querySelector('a'));
+      const deliveryTitle=cleanText(delivery?.querySelector('h2'));
+      const deliveryPs=[...delivery?.querySelectorAll('p')||[]];
+      const deliveryPrice=cleanText(deliveryPs[0]);
+      const deliveryLink=delivery?.querySelector('a');
+      const deliveryAddress=cleanText(deliveryLink||deliveryPs[1]);
+      const access=cleanText(delivery?.querySelector('.detail-delivery-detail strong'));
+      const extrasText=extras?[...extras.querySelectorAll('div')].map(n=>{const a=cleanText(n.querySelector('span'));const b=cleanText(n.querySelector('strong'));return [a,b].filter(Boolean).join(' · ')}).join(' · '):'';
+      const giftText=gift?[...gift.querySelectorAll('div')].map(n=>cleanText(n)).join(' · '):'';
+      const noteText=cleanText(managerNote?.querySelector('p')||customerComment?.querySelector('p'));
+      let payRows='';
+      if(finance){
+        const rows=[...finance.querySelectorAll('.money-row')].filter(r=>!r.classList.contains('received-total')&&!r.classList.contains('expenses-total')).slice(0,3);
+        payRows=rows.map(r=>{let label=cleanText(r.querySelector('span'));if(label.startsWith('Передоплата'))label='Передоплата';else if(label.startsWith('Фактичний залоговий'))label='Залог';else if(label.startsWith('Оренда'))label='Оренда';return `<div class="native-pay-line"><span>${label}</span><b>${cleanText(r.querySelector('strong'))}</b></div>`}).join('');
+      }
+      const row=(icon,label,body,extra='')=>`<div class="native-detail-info-row"><i aria-hidden="true">${icon}</i><div><small>${label}</small>${body}${extra}</div></div>`;
+      card.innerHTML=[
+        row('◫','Дата і час',`<strong class="native-period">${period.includes('→')?period.split('→').map((x,i)=>`<span>${i?'→ ':''}${x.trim()}</span>`).join(''):(period||'—')}</strong>`),
+        row('⌁','Техніка',`<strong>${product||'—'}</strong>`),
+        row('○','Клієнт',`<strong>${clientName||'—'}</strong>${phone?`<a href="tel:${phone.replace(/\s/g,'')}">${formatPhone(phone)}</a>`:''}`),
+        row('⌖',deliveryTitle||'Видача',`<strong>${deliveryAddress||deliveryPrice||'—'}</strong>${access?`<span>${access}</span>`:''}${deliveryPrice&&deliveryAddress?`<span>${deliveryPrice}</span>`:''}`),
+        extrasText?row('⌬','Додаткова хімія',`<strong>${extrasText}</strong>`):'',
+        giftText?row('✦','Подарунок',`<strong>${giftText}</strong>`):'',
+        payRows?row('▭','Оплата',`<div class="native-payments">${payRows}</div>`):'',
+        noteText?row('▤','Примітка',`<strong>${noteText}</strong>`):''
+      ].join('');
+      hero?.insertAdjacentElement('afterend',card);
       const stack=document.createElement('section');
       stack.className='native-detail-stack';
+      stack.dataset.status=statusClass;
       [...info.children].forEach(node=>stack.appendChild(node));
       if(finance)stack.appendChild(finance);
       grid.insertAdjacentElement('beforebegin',stack);
       grid.classList.add('native-detail-grid-empty');
       stack.querySelectorAll(':scope > article').forEach(a=>a.classList.add('native-detail-row'));
     }
-    const heroStatus=detail.querySelector('.hero-status');
-    const statusText=(heroStatus?.textContent||'').toLowerCase();
-    const statusClass=statusText.includes('видана')?'issued':statusText.includes('повернен')?'completed':statusText.includes('очікує')?'waiting_payment':statusText.includes('нова')?'pending':statusText.includes('скас')?'cancelled':'confirmed';
-    const stack=detail.querySelector('.native-detail-stack');
-    if(stack)stack.dataset.status=statusClass;
+    const oldStack=detail.querySelector('.native-detail-stack');
+    if(oldStack)oldStack.dataset.status=statusClass;
     const actions=detail.querySelector('.detail-actions');
     if(actions)actions.classList.add('native-detail-actions');
   }
