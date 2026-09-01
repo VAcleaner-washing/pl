@@ -1,0 +1,529 @@
+/*
+  VAcleaner experimental Native Dark UI.
+  Test-only layer for /admin/bronuvannia-native-test/.
+  Business logic and production /admin/bronuvannia/ remain untouched.
+*/
+html.native-test{
+  --nt-bg:#070b0e;
+  --nt-surface:#101619;
+  --nt-surface-2:#141b1f;
+  --nt-line:rgba(255,255,255,.075);
+  --nt-line-strong:rgba(255,255,255,.115);
+  --nt-text:#f5f3ef;
+  --nt-muted:#92999d;
+  --nt-gold:#e6b45f;
+  --nt-gold-2:#f1c778;
+  --nt-gold-soft:rgba(230,180,95,.13);
+  --nt-green:#62ca8e;
+  --nt-red:#ff837c;
+  --nt-shadow:0 14px 34px rgba(0,0,0,.22);
+}
+
+@media(max-width:900px){
+  html.native-test,
+  html.native-test body,
+  html.native-test .app{background:var(--nt-bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Inter,sans-serif}
+
+  html.native-test .main{
+    background:var(--nt-bg);
+    padding-right:12px;
+    padding-left:12px;
+    padding-bottom:calc(106px + var(--pwa-safe-bottom));
+  }
+  html.native-test .main::before{display:none}
+
+  /* Header/search: quieter, more native, less glass. */
+  html.native-test .topbar{
+    padding-right:12px;
+    padding-left:12px;
+    border:0;
+    background:linear-gradient(180deg,#070b0e 0%,rgba(7,11,14,.985) 74%,rgba(7,11,14,.94) 100%);
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+  html.native-test .search{
+    height:46px;
+    padding:0 13px;
+    border:1px solid var(--nt-line-strong);
+    border-radius:15px;
+    background:#11171a;
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+  html.native-test .search::before,
+  html.native-test .search::after{display:none}
+  html.native-test .search:focus-within{
+    border-color:rgba(230,180,95,.38);
+    box-shadow:0 0 0 3px rgba(230,180,95,.07);
+  }
+  html.native-test .search input{color:var(--nt-text);font-size:15px;font-weight:450}
+  html.native-test .search input::placeholder{color:#737b80;font-size:13.5px}
+  html.native-test .search-clear{background:#1b2226;border:0}
+
+  /* WOG-like type scale, but still VAcleaner. */
+  html.native-test .page-head{
+    margin-bottom:17px;
+    padding:1px 0 16px;
+    border-bottom:1px solid rgba(255,255,255,.055);
+  }
+  html.native-test .page-head h1{
+    color:var(--nt-text);
+    font-size:30px;
+    line-height:1.05;
+    font-weight:730;
+    letter-spacing:-.045em;
+  }
+  html.native-test .page-head p{
+    margin-top:7px;
+    color:#92999d;
+    font-size:13px;
+    line-height:1.4;
+    font-weight:430;
+  }
+
+  /* Filters: large, flat, easy to scan. */
+  html.native-test .upcoming-scope{
+    gap:8px;
+    margin:0 0 20px;
+    padding:0;
+  }
+  html.native-test .upcoming-scope .chip,
+  html.native-test .booking-toolbar .chip,
+  html.native-test .analytics-periods .chip,
+  html.native-test .client-sort button{
+    min-height:44px;
+    padding:0 15px;
+    border:1px solid var(--nt-line);
+    border-radius:15px;
+    background:#11171a;
+    box-shadow:none;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+    color:#b7bdc0;
+    font-size:12.5px;
+    font-weight:610;
+  }
+  html.native-test .upcoming-scope .chip.active,
+  html.native-test .booking-toolbar .chip.active,
+  html.native-test .analytics-periods .chip.active,
+  html.native-test .client-sort button.active{
+    border-color:rgba(240,197,118,.35);
+    background:linear-gradient(180deg,#e9b861,#dca44b);
+    color:#17130d;
+    box-shadow:0 8px 18px rgba(141,89,22,.16);
+  }
+  html.native-test .upcoming-scope .chip b,
+  html.native-test .booking-toolbar .chip b{
+    min-width:21px;
+    padding:2px 6px;
+    background:rgba(255,255,255,.07);
+    color:inherit;
+    font-size:10.5px;
+  }
+  html.native-test .upcoming-scope .chip.active b,
+  html.native-test .booking-toolbar .chip.active b{background:rgba(20,15,9,.12)}
+
+  /* Upcoming: keep the exact logic, change only hierarchy. */
+  html.native-test .upcoming-board{gap:19px}
+  html.native-test .upcoming-day{gap:9px}
+  html.native-test .upcoming-day>header{
+    position:static;
+    min-height:42px;
+    padding:0 3px 8px;
+    border:0;
+    border-bottom:1px solid rgba(255,255,255,.065);
+    border-radius:0;
+    background:transparent!important;
+    box-shadow:none;
+  }
+  html.native-test .upcoming-day>header>div{display:flex;align-items:baseline;gap:8px;min-width:0}
+  html.native-test .upcoming-day>header span{
+    color:#ebe9e4;
+    font-size:16px;
+    line-height:1;
+    font-weight:650;
+    letter-spacing:-.02em;
+  }
+  html.native-test .upcoming-day>header small{
+    color:#747d81;
+    font-size:11px;
+    font-weight:500;
+    text-transform:none;
+  }
+  html.native-test .upcoming-day>header b{
+    margin-left:auto;
+    padding:5px 8px;
+    border-radius:999px;
+    background:#151c20;
+    color:#aeb5b8;
+    font-size:10px;
+    font-weight:570;
+  }
+  html.native-test .upcoming-list{gap:10px}
+  html.native-test .upcoming-row{
+    position:relative;
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+    width:100%;
+    min-width:0;
+    padding:13px 14px;
+    overflow:hidden;
+    border:1px solid var(--nt-line);
+    border-radius:20px;
+    background:linear-gradient(180deg,#12191d 0%,#0f1518 100%);
+    box-shadow:var(--nt-shadow);
+  }
+  html.native-test .upcoming-row::before{
+    content:"";
+    position:absolute;
+    top:14px;
+    bottom:14px;
+    left:0;
+    width:3px;
+    border-radius:0 3px 3px 0;
+    background:#d8a553;
+    opacity:.95;
+  }
+  html.native-test .upcoming-row.return::before{background:#51bd80}
+  html.native-test .upcoming-row.danger::before{background:#e66f69}
+  html.native-test .upcoming-row:hover{transform:none;border-color:var(--nt-line-strong)}
+
+  html.native-test .upcoming-time{
+    display:grid;
+    grid-template-columns:auto auto minmax(0,1fr) auto;
+    align-items:center;
+    gap:7px;
+    min-height:34px;
+    padding:0 0 11px 2px;
+    border:0;
+    border-bottom:1px solid rgba(255,255,255,.065);
+    text-align:left;
+  }
+  html.native-test .upcoming-time i{display:none}
+  html.native-test .upcoming-time strong{
+    color:var(--nt-gold-2);
+    font-size:18px;
+    line-height:1;
+    font-weight:690;
+    letter-spacing:-.025em;
+  }
+  html.native-test .upcoming-time span{
+    margin:0;
+    color:#a5abad;
+    font-size:11px;
+    font-weight:590;
+    line-height:1;
+    letter-spacing:0;
+    text-transform:none;
+  }
+  html.native-test .upcoming-time .schedule-badge{
+    justify-self:end;
+    align-self:center;
+    width:auto;
+    margin:0;
+    padding:5px 8px;
+    border-radius:999px;
+    font-size:10px;
+    line-height:1;
+  }
+
+  html.native-test .upcoming-main{padding:12px 2px 11px}
+  html.native-test .upcoming-title{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:start;
+    gap:8px;
+  }
+  html.native-test .upcoming-title h3{
+    color:var(--nt-text);
+    font-size:18px;
+    line-height:1.16;
+    font-weight:690;
+    letter-spacing:-.025em;
+  }
+  html.native-test .upcoming-title .status{
+    max-width:132px;
+    padding:6px 8px;
+    border-radius:10px;
+    font-size:10px;
+    font-weight:590;
+    line-height:1.15;
+    text-align:center;
+  }
+  html.native-test .upcoming-client-info{
+    gap:4px;
+    margin:7px 0 8px;
+  }
+  html.native-test .upcoming-client-info strong{
+    color:#e8e8e6;
+    font-size:14px;
+    line-height:1.25;
+    font-weight:590;
+  }
+  html.native-test .upcoming-client-info a{
+    color:#c4a66f;
+    font-size:12.5px;
+    line-height:1.25;
+    font-weight:470;
+  }
+  html.native-test .upcoming-main>small{
+    color:#9ca3a6;
+    font-size:12px;
+    line-height:1.48;
+  }
+  html.native-test .upcoming-route-link{color:#d7b56f}
+  html.native-test .upcoming-extra,
+  html.native-test .upcoming-gift{
+    margin-top:10px;
+    padding:6px 9px;
+    border-color:rgba(230,180,95,.19);
+    background:#171812;
+    color:#d9b775;
+    font-size:10.5px;
+    font-weight:560;
+  }
+
+  html.native-test .upcoming-side{
+    grid-column:1/-1;
+    display:block;
+    width:100%;
+    margin:0;
+    padding-top:9px;
+    border-top:1px solid rgba(255,255,255,.065);
+  }
+  html.native-test .upcoming-money{display:none}
+  html.native-test .upcoming-actions{
+    display:grid;
+    grid-template-columns:minmax(0,.9fr) minmax(0,1.35fr);
+    gap:8px;
+  }
+  html.native-test .upcoming-actions .btn{
+    width:100%;
+    min-height:44px;
+    padding:0 9px;
+    border-radius:14px;
+    font-size:11.5px;
+    font-weight:610;
+  }
+  html.native-test .btn:not(.primary):not(.green):not(.danger),
+  html.native-test .upcoming-actions .subtle{
+    border-color:var(--nt-line-strong);
+    background:#11181b;
+    box-shadow:none;
+    color:#d8dcdd;
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+  html.native-test .btn.primary,
+  html.native-test .upcoming-row.issue .upcoming-actions .btn:last-child{
+    border-color:#e7b65f;
+    background:linear-gradient(180deg,#efc26f,#dca34a);
+    box-shadow:0 8px 20px rgba(156,96,24,.18);
+    color:#17130d;
+  }
+
+  /* Other mobile cards follow the same material system. */
+  html.native-test .booking-card,
+  html.native-test .day-card,
+  html.native-test .operation-card,
+  html.native-test .analytics-panel,
+  html.native-test .settings-card,
+  html.native-test .client-row,
+  html.native-test .client-card,
+  html.native-test .equipment-card,
+  html.native-test .campaign-card,
+  html.native-test .catalog-toolbar{
+    border-color:var(--nt-line);
+    border-radius:18px;
+    background:#101619;
+    box-shadow:none;
+  }
+
+  /* Booking detail: less dashboard, more native stacked screen. */
+  html.native-test .detail{background:var(--nt-bg)}
+  html.native-test .detail-shell{padding-right:12px;padding-left:12px}
+  html.native-test .detail-top{
+    min-height:54px;
+    margin-bottom:10px;
+    padding:6px 2px;
+    border:0;
+    border-radius:0;
+    background:rgba(7,11,14,.96);
+    box-shadow:none;
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+  }
+  html.native-test .detail-top .back{
+    min-height:42px;
+    padding:0 8px;
+    border:0;
+    background:transparent;
+    color:#eceae5;
+    font-size:12.5px;
+    font-weight:590;
+  }
+  html.native-test .detail-top-meta span{color:#ddd9d1;font-size:12px;font-weight:600}
+  html.native-test .detail-top-meta small{color:#777f83;font-size:10.5px}
+  html.native-test .detail-hero{
+    gap:12px;
+    padding:17px;
+    border:1px solid var(--nt-line);
+    border-radius:20px;
+    background:#11181b;
+    box-shadow:none;
+  }
+  html.native-test .detail-hero h1{font-size:26px;font-weight:700;letter-spacing:-.035em}
+  html.native-test .detail-title-row .hero-status{border-radius:10px;font-size:10.5px}
+  html.native-test .detail-hero .period{margin-top:13px;font-size:18px;font-weight:520}
+  html.native-test .detail-hero .period b{color:var(--nt-gold-2);font-weight:650}
+  html.native-test .detail-hero .period small{padding:5px 8px;background:#181f22;font-size:10.5px}
+  html.native-test .detail .card,
+  html.native-test .detail .panel,
+  html.native-test .audit-panel{
+    border-color:var(--nt-line);
+    border-radius:18px;
+    background:#101619;
+    box-shadow:none;
+  }
+  html.native-test .detail .card h3,
+  html.native-test .detail .panel h3{font-size:12px;font-weight:570;color:#91999d}
+  html.native-test .detail .panel h2{font-size:18px;font-weight:650}
+  html.native-test .detail-actions{
+    position:static;
+    bottom:auto;
+    padding:8px;
+    border:1px solid var(--nt-line);
+    border-radius:18px;
+    background:rgba(13,18,21,.94);
+    box-shadow:0 -12px 28px rgba(0,0,0,.28);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+  html.native-test .detail-actions .btn{min-height:46px;border-radius:13px;font-size:11.5px}
+
+  /* Bottom navigation: solid floating bar, larger type, one clear active state. */
+  html.native-test .mobile-nav{
+    right:max(10px,var(--pwa-safe-right));
+    bottom:calc(8px + var(--pwa-safe-bottom));
+    left:max(10px,var(--pwa-safe-left));
+    width:auto;
+    height:68px;
+    padding:5px 6px;
+    gap:1px;
+    overflow:visible;
+    border:1px solid rgba(255,255,255,.09);
+    border-radius:27px;
+    background:rgba(17,22,25,.97);
+    box-shadow:0 18px 44px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.035);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+  html.native-test .mobile-nav::before,
+  html.native-test .mobile-nav::after{display:none}
+  html.native-test .mobile-nav button{
+    min-height:56px;
+    border-radius:20px;
+    gap:4px;
+    color:#888f93;
+    font-size:10.5px;
+    font-weight:590;
+  }
+  html.native-test .mobile-nav svg{width:20px;height:20px;flex-basis:20px;stroke-width:1.75}
+  html.native-test .mobile-nav button.active{
+    border-color:transparent;
+    background:rgba(230,180,95,.105);
+    color:var(--nt-gold-2);
+    box-shadow:none;
+  }
+  html.native-test .mobile-nav .mobile-new-nav{color:var(--nt-gold-2)}
+  html.native-test .mobile-nav .mobile-new-nav i{
+    width:48px;
+    height:48px;
+    min-width:48px;
+    margin-top:-17px;
+    border:1px solid #efc36f;
+    background:linear-gradient(180deg,#f0c36f,#dda64d);
+    box-shadow:0 8px 20px rgba(123,76,19,.34),0 0 0 4px #101619;
+    color:#18130c;
+    font-size:30px;
+    font-weight:330;
+  }
+  html.native-test .mobile-nav .mobile-new-nav span{
+    color:#b69a68;
+    font-size:10.5px;
+    font-weight:590;
+  }
+  html.native-test .mobile-nav .badge{top:0}
+
+  /* More keeps the same handlers but behaves visually like a real screen/sheet. */
+  html.native-test .mobile-more-menu{
+    top:calc(var(--pwa-safe-top) + 14px);
+    right:max(10px,var(--pwa-safe-right));
+    bottom:calc(84px + var(--pwa-safe-bottom));
+    left:max(10px,var(--pwa-safe-left));
+    max-height:none;
+    padding:22px 14px 14px;
+    overflow:auto;
+    border:1px solid var(--nt-line);
+    border-radius:26px;
+    background:#0d1215;
+    box-shadow:0 30px 80px rgba(0,0,0,.65);
+    backdrop-filter:none;
+    -webkit-backdrop-filter:none;
+  }
+  html.native-test .mobile-more-menu::before{
+    content:"Ще";
+    display:block;
+    margin:2px 5px 18px;
+    color:var(--nt-text);
+    font-size:29px;
+    line-height:1;
+    font-weight:730;
+    letter-spacing:-.04em;
+  }
+  html.native-test .mobile-more-grid{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:0;
+    overflow:hidden;
+    border:1px solid var(--nt-line);
+    border-radius:18px;
+    background:#11171a;
+  }
+  html.native-test .mobile-more-grid button{
+    min-height:60px;
+    padding:0 15px;
+    border:0;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    border-radius:0;
+    background:transparent;
+    box-shadow:none;
+    color:#e4e5e3;
+    font-size:14px;
+    font-weight:580;
+  }
+  html.native-test .mobile-more-grid button:last-child{border-bottom:0}
+  html.native-test .mobile-more-grid button svg{width:21px;height:21px;color:#d6a956}
+  html.native-test .mobile-more-grid button.active{background:rgba(230,180,95,.08);color:var(--nt-gold-2)}
+  html.native-test .mobile-more-logout{
+    min-height:52px;
+    margin-top:12px;
+    border:1px solid rgba(255,120,113,.16);
+    border-radius:16px;
+    background:rgba(112,37,34,.12);
+    color:#ee9994;
+    font-size:13px;
+    font-weight:580;
+  }
+}
+
+/* Very narrow phones keep the same design without cramping. */
+@media(max-width:350px){
+  html.native-test .page-head h1{font-size:27px}
+  html.native-test .upcoming-title{grid-template-columns:minmax(0,1fr)}
+  html.native-test .upcoming-title .status{justify-self:start;max-width:none}
+  html.native-test .upcoming-actions{grid-template-columns:1fr}
+  html.native-test .mobile-nav button{font-size:9.5px}
+}
