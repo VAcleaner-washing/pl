@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.45  
-**Baseline build:** 4245  
-**Останнє оновлення:** 2026-08-31  
+**Baseline version:** 4.2.46  
+**Baseline build:** 4246  
+**Останнє оновлення:** 2026-09-01  
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -3538,3 +3538,40 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `npm run test:v4.2.45-client-card-ux` verifies the client-card hierarchy, progressive disclosure, history limit, referral de-duplication and settlement deposit explanation.
 - Existing static regression suite remains release-blocking.
 - Client-card desktop/mobile visual QA and the return-finance scenario remain mandatory acceptance surfaces for this release.
+
+
+# 54. Change record — v4.2.46 FINANCE EXTRA BREAKDOWN
+
+### ADDED
+
+- A shared `extrasBreakdownText()` formatter for human-readable additional-item composition in settlement summaries.
+- Targeted static and browser acceptance coverage for a 450 грн mixed-extra case.
+
+### CHANGED
+
+- In preliminary/final settlement, `Додатково` always explains the non-zero total on a second muted line, using operational categories instead of an unexplained amount.
+- Premium SC 2 nozzles are grouped as `Насадки`; all other sellable extra products are grouped as `Засоби`. Example: `Насадки 200 грн + Засоби 250 грн`.
+- If only one category exists, only that category is shown. If extra total is zero, no explanatory line is rendered.
+- Desktop and PWA use the same `extrasBreakdownText()` source of truth.
+
+### FIXED
+
+- `Додатково` no longer shows an unexplained amount when paid extras exist.
+- Desktop and mobile preliminary/final settlement now expose the same human-readable breakdown.
+
+### UX / ACCEPTANCE
+
+- The breakdown is visually subordinate to the `Додатково` label and amount, matching the hierarchy already used under `Отримано разом`.
+- On 320 / 390 / 430 px the explanation may wrap but must not overlap the amount or create horizontal scrolling.
+- Acceptance fixture covers `Насадки 200 грн + Засоби 250 грн = 450 грн`.
+
+### PRESERVED
+
+- Extras prices, selected-item storage, rental totals, discounts, deposit logic, chemistry logic and backend contracts are unchanged.
+
+
+### TESTS
+
+- `npm run test:v4.2.46-finance-extra-breakdown` verifies formatter/category/spec contracts.
+- `npm run test:stabilization-acceptance-browser` verifies the exact desktop and mobile settlement UI with a 450 грн mixed-extra fixture.
+- Full canonical `qa:static` and `qa:browser` remain release-blocking.

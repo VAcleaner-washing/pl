@@ -6970,3 +6970,8 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 @media(max-width:430px){.client-card-v245 .client-quick-actions-v245{gap:7px}.client-card-v245 details.client-secondary-section>summary{min-height:54px;padding:11px 12px}.client-card-v245 .client-secondary-body{padding:10px 12px 12px}}
 
 .client-card-v245 .client-referral-details{margin-top:10px;width:100%}.client-card-v245 .client-sms-status{display:inline-flex;align-items:center;min-height:24px;padding:3px 8px;border:1px solid var(--line);border-radius:999px;color:#9ca6ab;font-size:10.5px;white-space:nowrap}.client-card-v245 .client-sms-status.delivered{color:#7fd3aa;border-color:rgba(91,188,140,.28);background:rgba(52,137,101,.10)}.client-card-v245 .client-sms-status.failed{color:#d69b8e;border-color:rgba(214,120,105,.28);background:rgba(150,67,53,.10)}
+
+/* v4.2.46 — financial summary breakdown */
+.finance-form .finance-extra-breakdown{display:block;margin-top:3px;color:#8f999e;font-size:10.5px;font-weight:400;line-height:1.35;max-width:38ch}
+.finance-form .finance-extra-row>span{min-width:0}
+@media(max-width:520px){.finance-form .finance-extra-breakdown{max-width:28ch}}
