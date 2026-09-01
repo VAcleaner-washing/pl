@@ -3626,3 +3626,14 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `npm run qa:static` must build one verified Pages artifact; `npm run qa:browser` must consume a prebuilt verified artifact.
 - `npm run qa:legacy` remains available for explicit historical audit and is not a release-blocking default gate.
 - Full canonical `npm run qa:full` remains release-blocking before handoff.
+
+
+### EXPERIMENTAL NATIVE UI TEST — паралельний PWA-візуал
+
+- Production-маршрут `/admin/bronuvannia/` залишається канонічним і не змінює свій UI/поведінку в межах цього тесту.
+- Окремий тестовий маршрут `/admin/bronuvannia-native-test/` використовує `assets/admin-native-test.css` та `assets/admin-native-match.js`.
+- Тестовий шар змінює лише мобільну візуальну ієрархію: типографіку, spacing, картки, bottom navigation, екран `Ще` та presentation detail-екрана.
+- Логіка `Найближчі`, статуси, booking actions, Supabase, фінанси, доставка, залог, RETURN/referral та availability залишаються спільними з production.
+- У картках `Найближчі` зберігається ліва статусна смуга; на detail-екрані бронювання вона повторюється як той самий status cue.
+- Тестова PWA має окремий manifest і не повинна підміняти production PWA.
+- Перед будь-яким перенесенням цього UI у production потрібні окремі mobile browser QA на 320 / 390 / 430 px і повторний повний canonical QA.
