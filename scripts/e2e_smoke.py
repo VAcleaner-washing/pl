@@ -595,8 +595,16 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         page.wait_for_timeout(420)
         checks.check("До контактів" in cta.inner_text(), "Stories estimate refresh keeps CTA on contacts")
 
-        extra = page.locator('#booking-extras .booking-extras input[type="checkbox"]').first
-        extra.check()
+        # Drive the customer-visible add-on card rather than the nested native checkbox.
+        # The card is the real touch target; clicking the input directly is brittle under
+        # the sticky mobile summary/header and does not represent the customer gesture.
+        extra_card = page.locator('#booking-extras .booking-extras label[data-extra-code]').first
+        extra = extra_card.locator('input[type="checkbox"]')
+        checks.check(extra_card.count() == 1 and extra_card.is_visible(), "Mobile add-on card is visible and tappable")
+        extra_card.evaluate("el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'})")
+        page.wait_for_timeout(80)
+        extra_card.click(position={"x": 36, "y": 36})
+        checks.check(extra.is_checked(), "Mobile add-on card toggles its checkbox through the visible touch target")
         page.wait_for_timeout(50)
         checks.check("До контактів" in cta.inner_text(), "Extra-item checkbox never regresses CTA to date")
         page.wait_for_timeout(420)

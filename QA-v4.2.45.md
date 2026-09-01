@@ -43,3 +43,9 @@ GitHub run `33449986879` exposed two stale browser expectations after the intent
 ## Release rule
 
 Production deployment is accepted only after GitHub Actions Static / build gate and Browser QA aggregate gate are both GREEN.
+
+## CI correction · 2026-09-01
+- GitHub Browser QA run 33451399413 reached 33/34; referral iOS and PWA suites passed after the v4.2.45 contract update.
+- The only remaining failure was `test:e2e`: Playwright called `.check()` on the nested native add-on checkbox while the customer-facing clickable surface is the enclosing add-on card/label. Sticky mobile UI could intercept that synthetic input hit target.
+- E2E now drives the visible add-on card, centers it in the viewport, clicks the real touch target, and then asserts that the nested checkbox became checked. Product UI/logic was not rolled back.
+- Static gate after this correction: 103/103 PASS. Referral iOS: 10/10 PASS. Client-card visual: 23/23 PASS.
