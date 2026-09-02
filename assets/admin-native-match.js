@@ -23,14 +23,25 @@
 
   function enhanceShell(){
     if(!mobile())return;
+    const view=document.documentElement.dataset.adminView||'upcoming';
     const main=document.querySelector('.main');
     const head=main?.querySelector('.page-head');
     const search=document.querySelector('.search');
     if(main&&head&&search){
-      const subtitle=head.querySelector('p');
-      if(subtitle)subtitle.textContent='Бронювання на найближчі дні';
+      const placeholders={
+        upcoming:'Пошук: клієнт, адреса, техніка…',
+        bookings:'Пошук: клієнт, код, адреса…',
+        calendar:'Пошук по всій адмінці…',
+        equipment:'Пошук по всій адмінці…',
+        clients:'Пошук: клієнт, телефон, адреса…',
+        campaigns:'Пошук: клієнт, кампанія, код…',
+        finances:'Пошук: витрата, клієнт, код…',
+        analytics:'Пошук по всій адмінці…',
+        chemistry:'Пошук по всій адмінці…',
+        settings:'Пошук по всій адмінці…'
+      };
       const input=search.querySelector('input');
-      if(input)input.placeholder='Пошук: клієнт, адреса, техніка…';
+      if(input)input.placeholder=placeholders[view]||'Пошук по всій адмінці…';
       let row=main.querySelector('.native-search-row');
       if(!row){
         row=document.createElement('div');
@@ -38,29 +49,33 @@
         head.insertAdjacentElement('afterend',row);
       }
       if(search.parentElement!==row)row.appendChild(search);
-      if(!row.querySelector('.native-search-options')){
-        const btn=document.createElement('button');
-        btn.type='button';
-        btn.className='native-search-options';
-        btn.setAttribute('aria-label','Фільтри');
-        btn.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M8 14v6"/></svg>';
-        btn.onclick=()=>{
-          const active=document.querySelector('.upcoming-scope .chip.active');
-          active?.scrollIntoView({behavior:'smooth',block:'center'});
-        };
-        row.appendChild(btn);
+      let filter=row.querySelector('.native-search-options');
+      if(!filter){
+        filter=document.createElement('button');
+        filter.type='button';
+        filter.className='native-search-options';
+        filter.setAttribute('aria-label','Фільтри');
+        filter.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4v6M8 14v6"/></svg>';
+        row.appendChild(filter);
       }
-      if(!head.querySelector('.native-alert-button')){
-        const bell=document.createElement('button');
+      const targets={upcoming:'.upcoming-scope',bookings:'.booking-toolbar',clients:'.clients-toolbar',analytics:'.analytics-periods',finances:'.finance-period-row'};
+      const target=targets[view];
+      filter.hidden=!target;
+      filter.onclick=()=>document.querySelector(target||'')?.scrollIntoView({behavior:'smooth',block:'center'});
+      let bell=head.querySelector('.native-alert-button');
+      if(!bell){
+        bell=document.createElement('button');
         bell.type='button';
         bell.className='native-alert-button';
         bell.setAttribute('aria-label','Нові бронювання');
-        const badge=document.querySelector('#mobileNavBadge');
-        const count=(badge?.textContent||'').trim();
-        bell.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>'+(count?`<b>${count}</b>`:'');
         bell.onclick=()=>document.querySelector('.mobile-nav [data-mobile-view="bookings"]')?.click();
         head.appendChild(bell);
       }
+      const badge=document.querySelector('#mobileNavBadge');
+      const count=(badge?.textContent||'').trim();
+      bell.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>'+(count?`<b>${count}</b>`:'');
+      bell.hidden=!['upcoming','bookings'].includes(view);
+      head.classList.toggle('native-head-has-action',!bell.hidden);
     }
   }
 
@@ -97,6 +112,30 @@
       if(open)open.textContent='Деталі';
       row.classList.add('native-card-ready');
     });
+  }
+
+  function enhanceBookings(){
+    if(!mobile())return;
+    document.querySelectorAll('.booking-card').forEach(card=>{
+      const status=card.querySelector('.status');
+      const cls=status&&[...status.classList].find(c=>['pending','waiting_payment','confirmed','issued','completed','cancelled','declined'].includes(c));
+      if(cls)card.dataset.status=cls;
+      const phone=card.querySelector('.booking-person>a');
+      if(phone)phone.textContent=formatPhone(phone.textContent);
+      card.classList.add('native-booking-card');
+    });
+    document.querySelectorAll('.client-row a[href^="tel:"]').forEach(a=>a.textContent=formatPhone(a.textContent));
+  }
+
+  function enhanceNativeViews(){
+    if(!mobile())return;
+    const view=document.documentElement.dataset.adminView||'';
+    document.body.dataset.nativeView=view;
+    document.querySelectorAll('.campaign-row,.equipment-card,.client-row,.expense-row,.chem-card,.analytics-panel,.day-card,.global-search-card').forEach(el=>el.classList.add('native-surface-ready'));
+    document.querySelectorAll('a[href^="tel:"]').forEach(a=>{const raw=cleanText(a);if((raw.match(/\d/g)||[]).length>=10)a.textContent=formatPhone(raw)});
+    document.querySelectorAll('.modal-form').forEach(modal=>modal.classList.add('native-full-modal'));
+    const editor=document.querySelector('#clientEditor');
+    if(editor)editor.classList.add('native-client-editor');
   }
 
   function enhanceMore(){
@@ -219,8 +258,10 @@
   function enhance(){
     enhanceShell();
     enhanceUpcoming();
+    enhanceBookings();
     enhanceMore();
     enhanceDetail();
+    enhanceNativeViews();
   }
   const observer=new MutationObserver(queue);
   observer.observe(document.documentElement,{subtree:true,childList:true,characterData:false});

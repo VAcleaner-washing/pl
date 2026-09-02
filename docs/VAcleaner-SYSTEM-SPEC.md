@@ -3628,12 +3628,23 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Full canonical `npm run qa:full` remains release-blocking before handoff.
 
 
-### EXPERIMENTAL NATIVE UI TEST — паралельний PWA-візуал
+### EXPERIMENTAL NATIVE UI TEST — паралельний FULL PWA-візуал
 
 - Production-маршрут `/admin/bronuvannia/` залишається канонічним і не змінює свій UI/поведінку в межах цього тесту.
-- Окремий тестовий маршрут `/admin/bronuvannia-native-test/` використовує `assets/admin-native-test.css` та `assets/admin-native-match.js`.
-- Тестовий шар змінює лише мобільну візуальну ієрархію: типографіку, spacing, картки, bottom navigation, екран `Ще` та presentation detail-екрана.
-- Логіка `Найближчі`, статуси, booking actions, Supabase, фінанси, доставка, залог, RETURN/referral та availability залишаються спільними з production.
-- У картках `Найближчі` зберігається ліва статусна смуга; на detail-екрані бронювання вона повторюється як той самий status cue.
-- Тестова PWA має окремий manifest і не повинна підміняти production PWA.
-- Перед будь-яким перенесенням цього UI у production потрібні окремі mobile browser QA на 320 / 390 / 430 px і повторний повний canonical QA.
+- Окремий тестовий маршрут `/admin/bronuvannia-native-test/` використовує `assets/admin-native-test.css` та `assets/admin-native-match.js` і має окремий manifest.
+- Native test — це **повний мобільний UI-шар PWA**, а не демо кількох екранів. Одна візуальна система застосовується до `Найближчі`, `Бронювання`, `Календар`, `Техніка`, `Клієнти`, `Кампанії`, `Фінанси`, `Аналітика`, `Хімія`, `Налаштування`, глобального пошуку та `Ще`.
+- Та сама система поширюється на робочі сценарії: створення/редагування бронювання, detail бронювання, картку клієнта, опрацювання заявки, видачу, попередній/фінальний розрахунок, продовження оренди, витрати, кампанії, SMS та інші modal flows.
+- Візуальна мова: темний graphite shell, SF/Apple-like scale, пласкі surfaces без зайвого glass, gold тільки як primary/action accent, 44+ px touch targets, однакові radius/spacing/typography.
+- У `Найближчі`, картках `Бронювання` та detail бронювання зберігається ліва статусна смуга; її колір відповідає стану, але не змінює бізнес-статус.
+- Бізнес-логіка, booking actions, статуси, Supabase, доставка, залог, фінанси, RETURN/referral, availability, SMS contracts та дані клієнтів залишаються спільними з production. Test-layer не має власної альтернативної бізнес-логіки.
+- На mobile filters/period controls можуть горизонтально прокручуватися, але контент PWA не має створювати horizontal page overflow.
+- Перед перенесенням native UI у production обов’язкові screenshot/scenario QA на 320 / 390 / 430 px для всіх основних views і критичних modal flows, а також повний canonical QA.
+
+### EXPERIMENTAL NATIVE UI · DEEP VISUAL QA v3.2
+
+- Повний native test перевіряється не лише по primary views, а й по вкладених робочих маршрутах та modal flows.
+- `Видача` і `Попередній/фінальний розрахунок` повинні зберігати читабельний booking context (техніка + клієнт) на mobile; context header не може стискатися до декоративної смуги.
+- Calendar у native test показує одну читабельну дату; технічний ISO-дубль `YYYY-MM-DD` не дублюється поруч.
+- SMS primary/step/history/bulk controls та Analytics segmented controls у native test мають мінімальний touch target 44 px.
+- Видимий допоміжний текст на критичних native mobile surfaces не повинен ставати micro-copy менше 10 px.
+- Ці правила є presentation-only: production route, бізнес-логіка, статуси, суми, тарифи, Supabase та workflow actions не змінюються.
