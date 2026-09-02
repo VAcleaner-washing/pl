@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.2.47",
+  "version": "4.3.0",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -14,7 +14,6 @@
     "qa:legacy": "node scripts/run-legacy-regressions.mjs",
     "ci": "npm run qa:full",
     "ci:browser": "npm run qa:browser",
-
     "check:backend": "node scripts/check-backend-inventory.mjs",
     "test:finance": "node scripts/test-finance.mjs",
     "test:session": "node scripts/test-session.mjs",
@@ -50,7 +49,6 @@
     "test:auth-refresh": "node scripts/test-admin-refresh-singleflight.mjs",
     "test:current-contracts": "node scripts/test-current-contracts.mjs",
     "test:ci-pipeline": "node scripts/test-ci-pipeline-contract.mjs",
-
     "test:e2e": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
     "test:pwa": "python scripts/pwa_visual_qa.py --artifacts pwa-test-results",
     "test:desktop-density": "python scripts/desktop_density_qa.py --artifacts density-test-results",

@@ -1,6 +1,6 @@
 {
-  "version": "4.2.47",
-  "build": 4247,
-  "releasedAt": "2026-09-01",
-  "label": "VAcleaner v4.2.47 — CI PIPELINE HARDENING"
+  "version": "4.3.0",
+  "build": 4300,
+  "releasedAt": "2026-09-02",
+  "label": "VAcleaner v4.3.0 — NATIVE PWA PRODUCTION"
 }

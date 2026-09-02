@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.2.47  
-**Baseline build:** 4247  
-**Останнє оновлення:** 2026-09-01  
+**Baseline version:** 4.3.0  
+**Baseline build:** 4300  
+**Останнє оновлення:** 2026-09-02  
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -3743,3 +3743,47 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Analytics/Finance five-period selectors use a balanced 3 + 2 mobile grid and never require horizontal scrolling.
 - Delivery fuel analytics is visually flat: no redundant shell around the per-vehicle rows.
 - V2.7 scoped service worker precaches every CSS layer used by the V2.7 route, including Native V2.5 compatibility CSS, and keeps notification/deep-link fallback inside the V2.7 scope.
+
+
+### EXPERIMENTAL NATIVE UI V2.8 — Issue/Finance context row
+- Parallel route: `/admin/bronuvannia-native-v28/`.
+- `Видача`, `Попередній розрахунок` і `Закриття оренди` keep `Техніка` and `Клієнт` side-by-side on 320 / 390 / 430 px.
+- Long product/customer labels may wrap to two lines but must not force the context into a vertical stack or create horizontal overflow.
+- Business logic, Supabase, pricing, deposits, status actions and production route remain unchanged.
+
+
+# 55. Change record — v4.3.0 NATIVE PWA PRODUCTION
+
+### ADDED
+
+- Approved Native mobile UI is promoted to the canonical `/admin/bronuvannia/` production route.
+- Production process flow exposes private document-photo add/replace/view controls through the existing canonical document service.
+- Header filter control opens a real status/scope action sheet on `Бронювання` and `Найближчі`.
+- Header bell is functional: it opens pending/new bookings when they exist and gives an explicit empty-state message when none exist.
+
+### CHANGED
+
+- Mobile `Найближчі` keeps the proven operational rail: direction arrow, time, `ВИДАЧА / ПОВЕРНЕННЯ`, relative day badge, then booking context and actions.
+- Mobile `Бронювання` keeps four primary operational status filters visible without broken words; all historical/status filters remain reachable from the filter action sheet.
+- Finance/Analytics period selector is a compact one-row five-option segmented control on current iPhone widths, with a small-width fallback that never clips the right edge.
+- Issue / preliminary finance / final settlement keep `Техніка` and `Клієнт` side-by-side as compact context.
+- The approved Native presentation layers are consolidated into production `admin-v430.css` / `admin-v430.js`; parallel Native test routes/assets/manifests/service workers are retired from the release tree.
+
+### FIXED
+
+- Fixed non-working bell and filter/settings controls in mobile `Бронювання` and `Найближчі`.
+- Removed the 4-column status grid that split Ukrainian status labels across multiple lines.
+- Removed the oversized 3+2 Finance/Analytics period layout introduced during test hardening.
+- Preserved right-edge containment for filters, modal footers, SMS RETURN, Client controls and finance surfaces.
+
+### PRESERVED
+
+- Booking state machine, Supabase contracts, pricing, deposits, delivery, availability, finance formulas, SMS/RETURN/referral economics and document privacy/storage remain unchanged.
+- Desktop admin and public-site business behavior remain owned by the existing canonical runtime.
+
+### TESTS
+
+- `npm run qa:static` remains release-blocking.
+- Production mobile visual/user-flow acceptance covers 320 / 390 / 430 px: Upcoming, Bookings, Calendar, Equipment, Clients, Campaigns, Finances, Analytics, Chemistry, Settings, Detail, Process, Issue, Preliminary/Final finance, SMS and Client card.
+- Explicit interaction checks cover header bell, filter action sheet, all booking filters/status handlers, document controls, modal footer containment and period-selector geometry.
+- Version-floor regression contracts are semver-aware so v4.3 continues all v4.2 business/architecture guarantees; the admin shell freeze now explicitly allows the approved v4.3 production UI overlay while preserving canonical business runtime and PWA contracts.

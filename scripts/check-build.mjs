@@ -135,7 +135,7 @@ if(!bookingHtml.includes('<script id="vac-gtm-bootstrap">')||!bookingHtml.includ
 if(!bookingHtml.includes('if(w.__VAC_GTM_LOADED__)return;w.__VAC_GTM_LOADED__=true'))errors.push('booking GTM bootstrap must guard against duplicate hydration load');
 const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
 const classicAdminPath=path.join(root,'admin','bronuvannia-classic','index.html');
-if(!adminHtml.includes('class="glass-test"')||!adminHtml.includes('/assets/admin-glass-test.css')||!adminHtml.includes('/assets/admin-glass-test.js'))errors.push('primary admin route must ship Liquid Glass UI');
+if(!/class="[^"]*\bglass-test\b[^"]*"/.test(adminHtml)||!adminHtml.includes('/assets/admin-glass-test.css')||!adminHtml.includes('/assets/admin-glass-test.js')||!adminHtml.includes('/assets/admin-v430.css')||!adminHtml.includes('/assets/admin-v430.js'))errors.push('primary admin route must ship approved v4.3 mobile UI');
 if(!fs.existsSync(classicAdminPath))errors.push('classic reserve admin route is missing');
 else{const classicAdminHtml=fs.readFileSync(classicAdminPath,'utf8');if(classicAdminHtml.includes('admin-glass-test.css')||classicAdminHtml.includes('class="glass-test"'))errors.push('classic reserve must remain isolated from Liquid Glass');}
 const adminManifest=JSON.parse(fs.readFileSync(path.join(root,'admin','manifest.webmanifest'),'utf8'));

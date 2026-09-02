@@ -343,3 +343,163 @@
   window.addEventListener('DOMContentLoaded',queue,{once:true});
   queue();
 })();
+(()=>{
+  'use strict';
+  const mobile=()=>matchMedia('(max-width:900px)').matches;
+  let queued=false;
+  const q=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply()})};
+  const text=e=>(e?.textContent||'').trim().toLowerCase();
+
+  function markBookings(){
+    document.querySelectorAll('.booking-card').forEach(card=>{
+      const status=card.querySelector('.status');
+      const cls=[...status?.classList||[]].find(x=>['pending','waiting_payment','confirmed','issued','completed','cancelled'].includes(x));
+      if(cls){
+        card.dataset.v22Status=cls;
+        card.classList.toggle('native-v22-compact',cls==='completed'||cls==='cancelled');
+      }
+    });
+  }
+
+  function normalizeSettings(){
+    document.querySelectorAll('.settings-slot-editor .slot-editor-row').forEach(row=>{
+      if(row.querySelector(':scope > .v22-slot-range'))return;
+      const labels=[...row.querySelectorAll(':scope > label')];
+      if(labels.length<2)return;
+      const wrap=document.createElement('div');wrap.className='v22-slot-range';
+      labels[0].querySelector('small')&&(labels[0].querySelector('small').textContent='Початок');
+      labels[1].querySelector('small')&&(labels[1].querySelector('small').textContent='Кінець');
+      labels[0].before(wrap);labels.forEach(l=>wrap.appendChild(l));
+    });
+  }
+
+  function cleanDetail(){
+    document.querySelectorAll('.native-detail-info-row[data-v2-date]').forEach(row=>row.remove());
+  }
+
+  function markFlows(){
+    document.querySelectorAll('.process-form,.issue-form,.finance-form,.extend-form,.booking-form').forEach(form=>form.classList.add('native-v22-flow'));
+  }
+
+  function apply(){
+    if(!mobile())return;
+    document.documentElement.classList.add('native-v22');
+    markBookings();normalizeSettings();cleanDetail();markFlows();
+  }
+  new MutationObserver(q).observe(document.documentElement,{subtree:true,childList:true});
+  addEventListener('resize',q,{passive:true});
+  addEventListener('DOMContentLoaded',q,{once:true});
+  q();
+})();
+
+(()=>{
+  'use strict';
+  const mobile=()=>matchMedia('(max-width:900px)').matches;
+  let queued=false;
+  const queue=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;apply()})};
+  const cleanPhone=value=>String(value||'').replace(/\s+/g,'').trim();
+  const text=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
+  const toastSafe=(message,type)=>{try{if(typeof toast==='function')toast(message,type)}catch{}};
+
+  function syncOnline(){document.documentElement.classList.toggle('native-v24-offline',navigator.onLine===false)}
+
+  function enhanceAudit(){
+    const panel=document.querySelector('.detail .audit-panel');
+    if(!panel||panel.dataset.v43Audit==='1')return;
+    panel.dataset.v43Audit='1';
+    const head=panel.querySelector('.audit-panel-head');if(!head)return;
+    head.setAttribute('role','button');head.setAttribute('tabindex','0');head.setAttribute('aria-expanded','false');
+    const toggle=()=>{const open=panel.classList.toggle('native-v23-audit-open');head.setAttribute('aria-expanded',String(open))};
+    head.addEventListener('click',e=>{if(e.target.closest('#auditReload'))return;toggle()});
+    head.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}});
+  }
+
+  function restoreUpcomingOperationalLayout(){
+    document.querySelectorAll('.upcoming-row').forEach(row=>{
+      row.classList.add('native-v25-upcoming');
+      const time=row.querySelector('.upcoming-time'),title=row.querySelector('.upcoming-title');
+      const status=time?.querySelector(':scope > .status');
+      if(status&&title&&!title.contains(status))title.appendChild(status);
+      const badge=time?.querySelector('.schedule-badge');if(badge)badge.hidden=false;
+    });
+  }
+
+  function makeProfileInformational(){
+    const old=document.querySelector('.mobile-more-menu .native-profile-card:not(.native-v25-profile-static)');
+    if(!old)return;
+    const info=document.createElement('div');
+    info.className='native-profile-card native-v25-profile-static';
+    info.setAttribute('role','group');info.setAttribute('aria-label','Профіль адміністратора');
+    const avatar=old.querySelector('i')?.outerHTML||'<i>VA</i>';
+    const copy=old.querySelector('span')?.outerHTML||'<span><b>Вадим</b><small>Адміністратор</small></span>';
+    info.innerHTML=avatar+copy;old.replaceWith(info);
+  }
+
+  function processDocumentTools(){
+    const form=document.querySelector('.process-form');
+    if(!form||form.querySelector('.native-v25-document-tools'))return;
+    const anchor=form.querySelector('#documentProfileState');if(!anchor)return;
+    const tools=document.createElement('section');tools.className='native-v25-document-tools';
+    tools.innerHTML=`<div class="native-v25-document-head"><div><b>Фото документа</b><small>Приватно · доступне тільки в адмінці</small></div><span data-v25-document-state>Не перевірено</span></div><div class="native-v25-document-actions"><label class="btn subtle native-v25-document-upload"><input type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden data-v25-document-file><span>Додати / замінити</span></label><button class="btn subtle" type="button" data-v25-document-view>Переглянути фото</button></div><div class="native-v25-document-preview" hidden><img alt="Фото документа клієнта"><div><b data-v25-document-name>Фото документа</b><small data-v25-document-meta></small><a target="_blank" rel="noopener">Відкрити оригінал ↗</a></div></div>`;
+    anchor.insertAdjacentElement('afterend',tools);
+    const fileInput=tools.querySelector('[data-v25-document-file]'),viewBtn=tools.querySelector('[data-v25-document-view]'),stateNode=tools.querySelector('[data-v25-document-state]'),preview=tools.querySelector('.native-v25-document-preview'),img=preview.querySelector('img'),name=tools.querySelector('[data-v25-document-name]'),meta=tools.querySelector('[data-v25-document-meta]'),link=preview.querySelector('a');
+    const phone=()=>cleanPhone(form.querySelector('[name="customerPhone"]')?.value);
+    const busy=v=>{viewBtn.disabled=v;fileInput.disabled=v;tools.classList.toggle('busy',v)};
+    const showDocument=data=>{if(!data?.document){preview.hidden=true;stateNode.textContent='Фото не додано';stateNode.classList.remove('stored');return false}stateNode.textContent='Фото збережено';stateNode.classList.add('stored');preview.hidden=false;img.hidden=false;img.src=data.document.url||'';link.href=data.document.url||'#';name.textContent=data.document.name||'Фото документа';meta.textContent=data.document.uploadedAt?`Завантажено ${new Intl.DateTimeFormat('uk-UA',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(data.document.uploadedAt))}`:'Збережено у приватному сховищі';img.onerror=()=>{img.hidden=true;meta.textContent='Попередній перегляд недоступний — відкрийте оригінал.'};return true};
+    const load=async({quiet=false}={})=>{if(typeof documentRequest!=='function'){if(!quiet)toastSafe('Перегляд документа недоступний');return false}if(!phone()){if(!quiet)toastSafe('Спочатку вкажіть телефон клієнта');return false}busy(true);try{const data=await documentRequest('view',{phone:phone()});const ok=showDocument(data);if(!ok&&!quiet)toastSafe('Фото документа ще не додано');return ok}catch(err){stateNode.textContent='Не вдалося завантажити';if(!quiet)toastSafe(err?.message||'Не вдалося відкрити фото');return false}finally{busy(false)}};
+    viewBtn.addEventListener('click',async()=>{if(!preview.hidden){preview.hidden=true;viewBtn.textContent='Переглянути фото';return}const ok=await load();if(ok)viewBtn.textContent='Сховати фото'});
+    fileInput.addEventListener('change',async()=>{const file=fileInput.files?.[0];if(!file)return;if(typeof documentRequest!=='function'){toastSafe('Завантаження документа недоступне');return}if(!phone()){toastSafe('Спочатку вкажіть телефон клієнта');fileInput.value='';return}busy(true);stateNode.textContent='Завантажуємо…';try{await documentRequest('upload',{phone:phone(),file});toastSafe('Фото документа збережено','success');await load({quiet:true});viewBtn.textContent='Сховати фото'}catch(err){stateNode.textContent='Помилка';toastSafe(err?.message||'Фото документа не завантажено')}finally{busy(false);fileInput.value=''}});
+    load({quiet:true});
+  }
+
+  function shortenSmsStepper(){
+    document.querySelectorAll('.sms-campaign-modal .sms-stepper b[data-short]').forEach(el=>{if(!el.dataset.v43Long)el.dataset.v43Long=el.textContent||'';if(mobile())el.textContent=el.dataset.short||el.textContent});
+  }
+
+  function openFilterSheet(view){
+    document.querySelector('.v43-filter-sheet')?.remove();
+    const selector=view==='bookings'?'.booking-toolbar [data-filter]':view==='upcoming'?'.upcoming-scope [data-upcoming-scope]':'';
+    const originals=selector?[...document.querySelectorAll(selector)]:[];
+    if(!originals.length){
+      const fallback={clients:'.clients-toolbar',analytics:'.analytics-periods',finances:'.finance-period-row'}[view];
+      if(fallback){document.querySelector(fallback)?.scrollIntoView({behavior:'smooth',block:'center'});return}
+      toastSafe('Для цього екрана додаткових фільтрів немає');return;
+    }
+    const layer=document.createElement('div');layer.className='native-v2-action-sheet-layer v43-filter-sheet';
+    const sheet=document.createElement('div');sheet.className='native-v2-action-sheet';
+    const head=document.createElement('div');head.className='native-v2-action-sheet-head';head.innerHTML=`<b>${view==='bookings'?'Статус бронювання':'Показати події'}</b><small>Оберіть фільтр</small>`;sheet.appendChild(head);
+    originals.forEach(original=>{
+      const proxy=document.createElement('button');proxy.type='button';proxy.className='btn native-v2-sheet-action'+(original.classList.contains('active')?' active':'');
+      const label=text(original.querySelector('span')||original),count=text(original.querySelector('b'));
+      proxy.innerHTML=`<span>${label}</span>${count?`<b>${count}</b>`:''}`;
+      proxy.addEventListener('click',()=>{layer.remove();original.click()});sheet.appendChild(proxy);
+    });
+    const close=document.createElement('button');close.type='button';close.className='native-v2-sheet-close';close.textContent='Закрити';close.onclick=()=>layer.remove();sheet.appendChild(close);
+    layer.appendChild(sheet);layer.addEventListener('click',e=>{if(e.target===layer)layer.remove()});document.body.appendChild(layer);
+  }
+
+  function bindHeaderControls(){
+    if(document.documentElement.dataset.v43HeaderBound==='1')return;
+    document.documentElement.dataset.v43HeaderBound='1';
+    document.addEventListener('click',event=>{
+      const filter=event.target.closest('.native-search-options');
+      if(filter){event.preventDefault();event.stopImmediatePropagation();openFilterSheet(document.documentElement.dataset.adminView||'');return}
+      const bell=event.target.closest('.native-alert-button');
+      if(bell){
+        event.preventDefault();event.stopImmediatePropagation();
+        const badge=document.querySelector('#mobileNavBadge');const count=Number(String(badge?.textContent||'0').trim())||0;
+        if(count<=0){toastSafe('Нових заявок немає');return}
+        document.querySelector('.mobile-nav [data-mobile-view="bookings"]')?.click();
+        setTimeout(()=>{const pending=document.querySelector('.booking-toolbar [data-filter="pending"]');pending?.click();setTimeout(()=>document.querySelector('.booking-list')?.scrollIntoView({behavior:'smooth',block:'start'}),30)},60);
+      }
+    },true);
+  }
+
+  function apply(){
+    if(!mobile())return;
+    document.documentElement.classList.add('v43-prod','native-v23','native-v24','native-v25','native-v26','native-v27','native-v28');
+    syncOnline();enhanceAudit();restoreUpcomingOperationalLayout();makeProfileInformational();processDocumentTools();shortenSmsStepper();bindHeaderControls();
+  }
+  new MutationObserver(queue).observe(document.documentElement,{subtree:true,childList:true});
+  addEventListener('online',queue,{passive:true});addEventListener('offline',queue,{passive:true});addEventListener('resize',queue,{passive:true});addEventListener('DOMContentLoaded',queue,{once:true});queue();
+})();

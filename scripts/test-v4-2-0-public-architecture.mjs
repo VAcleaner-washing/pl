@@ -5,7 +5,8 @@ const read=rel=>fs.readFileSync(path.join(root,rel),'utf8');
 const exists=rel=>fs.existsSync(path.join(root,rel));
 const ok=(label,cond)=>{if(cond){passed++;console.log('PASS:',label)}else{failed.push(label);console.error('FAIL:',label)}};
 const rel=JSON.parse(read('release.json')),pkg=JSON.parse(read('package.json'));
-ok('release keeps v4.2 modular architecture baseline',String(rel.version).startsWith('4.2.')&&Number(rel.build)>=4200&&pkg.version===rel.version);
+const semverAtLeast=(actual,floor)=>{const a=String(actual).split('.').map(Number),b=String(floor).split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true};
+ok('release keeps v4.2+ modular architecture baseline',semverAtLeast(rel.version,'4.2.0')&&Number(rel.build)>=4200&&pkg.version===rel.version);
 const modules=['assets/public-shared.css','assets/public-booking.css','assets/public-guide.css','assets/public-home.css','assets/public-runtime-loader.js','assets/public-experience-runtime.js','assets/public-booking-route-loader.js','assets/site-attribution.js'];
 for(const f of modules)ok(`${f} exists`,exists(f));
 const limits={

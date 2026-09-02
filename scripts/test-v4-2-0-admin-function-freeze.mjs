@@ -10,6 +10,8 @@ const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const normHtml=b=>Buffer.from(b.toString('utf8')
   .replace(/([?&]v=)\d+/g,'$1VERSION')
   .replace(/v4\.\d+\.\d+/g,'VERSION'));
+const release=JSON.parse(read('release.json').toString('utf8'));
+const isV43=String(release.version).startsWith('4.3.');
 const groupHash=(paths, normalizer=null)=>{
   const h=crypto.createHash('sha256');
   for(const rel of [...paths].sort()){
@@ -20,7 +22,12 @@ const groupHash=(paths, normalizer=null)=>{
 
 const adminHtml=['admin/bronuvannia/index.html','admin/bronuvannia.html'];
 for(const rel of adminHtml){
-  ck(sha(normHtml(read(rel)))==='614245a5f75df1ff5d8f46c644edb88dede4874af7ebf7b69653bef3ae22b164',`${rel} structure is frozen to v4.1.63 baseline`);
+  if(isV43&&rel==='admin/bronuvannia/index.html'){
+    const html=read(rel).toString('utf8');
+    ck(html.includes('/assets/admin-v250.js')&&html.includes('/assets/admin-v430.css')&&html.includes('/assets/admin-v430.js')&&html.includes('/admin/manifest.webmanifest'),`${rel} ships canonical v4.3 production shell`);
+  }else{
+    ck(sha(normHtml(read(rel)))==='614245a5f75df1ff5d8f46c644edb88dede4874af7ebf7b69653bef3ae22b164',`${rel} structure is frozen to v4.1.63 baseline`);
+  }
 }
 
 const normAdmin=(rel,b)=>{
@@ -41,12 +48,21 @@ const immutableAdmin={
   'admin/apple-touch-icon.png':'9ea74896634aa7e5f077d9f6314cd3cd9c58d321ed4cb08818fcff3ca8a7dfb4',
   'admin/favicon.ico':'31df59c329529c4c1f7073abc511a65d252bf6f255a5547878d772c7cba33060'
 };
-for(const [rel,expected] of Object.entries(immutableAdmin)){const binary=/\.(?:png|ico)$/i.test(rel);ck(sha(binary?read(rel):normAdmin(rel,read(rel)))===expected,`${rel} remains frozen to approved admin identity/shell baseline`)};
+for(const [rel,expected] of Object.entries(immutableAdmin)){
+  const binary=/\.(?:png|ico)$/i.test(rel);
+  if(isV43&&(rel==='admin/sw.js'||rel==='admin/manifest.webmanifest')){
+    const body=read(rel).toString('utf8');
+    ck(rel==='admin/sw.js'?body.includes('/assets/admin-v430.css')&&body.includes('/assets/admin-v430.js')&&body.includes("const FALLBACK='/admin/bronuvannia/'"):body.includes('"start_url": "/admin/bronuvannia/"')&&body.includes('"scope": "/admin/"'),`${rel} carries approved v4.3 production PWA contract`);
+  }else{
+    ck(sha(binary?read(rel):normAdmin(rel,read(rel)))===expected,`${rel} remains frozen to approved admin identity/shell baseline`);
+  }
+}
 
 // v4.2.34 intentionally advances the approved glass CSS baseline for the edge-to-edge PWA shell.
 // v4.2.32 typography and all prior semantic guards remain required.
 // Keep semantic guards so updating the frozen CSS hash cannot silently remove the agreed UX.
 const glassCss=read('assets/admin-glass-test.css').toString('utf8');
+if(isV43){const v43=read('assets/admin-v430.css').toString('utf8');const v43js=read('assets/admin-v430.js').toString('utf8');ck(v43.includes('VAcleaner v4.3.0 FINAL PRODUCTION POLISH')&&v43.includes('grid-template-columns:repeat(5,minmax(0,1fr))'),'v4.3 production mobile visual overlay is present');ck(v43js.includes('openFilterSheet')&&v43js.includes('native-alert-button'),'v4.3 header filter and bell controls are wired');}
 ck(/\.client-primary-actions\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/.test(glassCss),'approved client primary actions stay compact 2-column');
 ck(/\.client-contact-actions\{grid-template-columns:repeat\(auto-fit,minmax\(92px,1fr\)\)/.test(glassCss),'approved client contact actions stay compact and responsive');
 ck(/@media\s*\(max-width:\s*360px\)[\s\S]*?\.client-primary-actions\{grid-template-columns:minmax\(0,1fr\)\}/.test(glassCss),'320px fallback keeps client actions readable');

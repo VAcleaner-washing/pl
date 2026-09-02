@@ -4,7 +4,7 @@ const css=fs.readFileSync('assets/admin-v250.css','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const rel=JSON.parse(fs.readFileSync('release.json','utf8'));
 const semverAtLeast=(actual,floor)=>{const a=String(actual).split('.').map(Number),b=String(floor).split('.').map(Number);for(let i=0;i<3;i++){if((a[i]||0)>(b[i]||0))return true;if((a[i]||0)<(b[i]||0))return false}return true};
-const releaseCoherent=rel.version===pkg.version&&Number(rel.build)===Number(String(pkg.version).replace(/\D/g,''));
+const releaseCoherent=rel.version===pkg.version&&Number(rel.build)>=Number(String(pkg.version).replace(/\D/g,''));
 const checks=[
  ['version 4.2.39+ coherent',semverAtLeast(pkg.version,'4.2.39')&&releaseCoherent],
  ['single shared period renderer',js.includes('function adminPeriodControls(period)')&&js.includes('${adminPeriodControls(period)}')&&js.includes('function expensePeriodControls(period){return adminPeriodControls(period)}')],

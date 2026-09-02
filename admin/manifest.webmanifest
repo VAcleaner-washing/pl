@@ -1,7 +1,7 @@
 {
   "name": "VAcleaner Manager",
   "short_name": "VAcleaner",
-  "description": "Адмінка бронювань VAcleaner · Liquid Glass",
+  "description": "Адмінка бронювань і операцій VAcleaner",
   "start_url": "/admin/bronuvannia/",
   "scope": "/admin/",
   "display": "standalone",
