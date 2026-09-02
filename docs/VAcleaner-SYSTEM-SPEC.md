@@ -3790,3 +3790,24 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Mobile More browser E2E verifies all seven secondary destinations by stable `data-more-view` IDs, including Finances, instead of fragile exact-text matching.
 - The PWA update notice is suppressed while any booking/detail workflow is active on both mobile and desktop, so an update prompt cannot cover operational controls.
 - Version-floor regression contracts are semver-aware so v4.3 continues all v4.2 business/architecture guarantees; the admin shell freeze now explicitly allows the approved v4.3 production UI overlay while preserving canonical business runtime and PWA contracts.
+
+
+# 56. Change record — v4.3.1 MOBILE CONTROLS + SMS SCROLL
+
+### FIXED
+
+- Mobile RETURN SMS recipient selection keeps the recipient list as the dedicated vertical scroll owner on iPhone/PWA widths; the fixed footer remains visible while the list scrolls independently.
+- Mobile header filter control on `Клієнти` opens an actionable filter sheet with the canonical client Segment and Sorting controls instead of only scrolling the page.
+- Mobile header filter control on `Фінанси` opens an actionable period sheet backed by the existing canonical Finance/Analytics period controls instead of only scrolling the page.
+- Analytics period action-sheet behavior remains aligned with the same canonical period handlers.
+
+### PRESERVED
+
+- No booking, finance formula, pricing, deposit, delivery, availability, SMS sending, RETURN bonus, referral, Supabase or customer-data business logic is changed.
+- Desktop admin behavior and the public site remain unchanged.
+
+### ACCEPTANCE
+
+- SMS recipient list must accept vertical touch scrolling with a long audience at supported mobile widths while the modal footer remains reachable.
+- Clients and Finances header filter buttons must cause an actionable visible UI change and invoke the existing canonical controls.
+- `npm run qa:static` and the canonical browser/PWA QA remain release-blocking before merge to `main`.
