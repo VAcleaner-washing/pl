@@ -458,16 +458,42 @@
 
   function openFilterSheet(view){
     document.querySelector('.v43-filter-sheet')?.remove();
-    const selector=view==='bookings'?'.booking-toolbar [data-filter]':view==='upcoming'?'.upcoming-scope [data-upcoming-scope]':'';
-    const originals=selector?[...document.querySelectorAll(selector)]:[];
-    if(!originals.length){
-      const fallback={clients:'.clients-toolbar',analytics:'.analytics-periods',finances:'.finance-period-row'}[view];
-      if(fallback){document.querySelector(fallback)?.scrollIntoView({behavior:'smooth',block:'center'});return}
-      toastSafe('Для цього екрана додаткових фільтрів немає');return;
-    }
     const layer=document.createElement('div');layer.className='native-v2-action-sheet-layer v43-filter-sheet';
     const sheet=document.createElement('div');sheet.className='native-v2-action-sheet';
-    const head=document.createElement('div');head.className='native-v2-action-sheet-head';head.innerHTML=`<b>${view==='bookings'?'Статус бронювання':'Показати події'}</b><small>Оберіть фільтр</small>`;sheet.appendChild(head);
+    const head=document.createElement('div');head.className='native-v2-action-sheet-head';
+    const finish=()=>{layer.appendChild(sheet);layer.addEventListener('click',e=>{if(e.target===layer)layer.remove()});document.body.appendChild(layer)};
+
+    if(view==='clients'){
+      const segment=document.querySelector('#clientSegment'),sort=document.querySelector('#clientSort');
+      if(!segment||!sort){toastSafe('Фільтри клієнтів тимчасово недоступні');return}
+      head.innerHTML='<b>Фільтри клієнтів</b><small>Сегмент і сортування</small>';sheet.appendChild(head);
+      const controls=document.createElement('div');controls.className='v43-filter-fields';
+      const makeSelect=(label,source,name)=>{
+        const wrap=document.createElement('label');wrap.className='v43-filter-field';
+        const caption=document.createElement('span');caption.textContent=label;
+        const select=source.cloneNode(true);select.id='';select.name=name;select.value=source.value;
+        wrap.append(caption,select);controls.appendChild(wrap);
+      };
+      makeSelect('Сегмент',segment,'clientSegmentProxy');makeSelect('Сортування',sort,'clientSortProxy');sheet.appendChild(controls);
+      const apply=document.createElement('button');apply.type='button';apply.className='btn primary native-v2-sheet-action';apply.textContent='Застосувати';
+      apply.onclick=()=>{
+        const segmentValue=sheet.querySelector('[name="clientSegmentProxy"]')?.value||segment.value;
+        const sortValue=sheet.querySelector('[name="clientSortProxy"]')?.value||sort.value;
+        layer.remove();
+        const liveSegment=document.querySelector('#clientSegment');
+        if(liveSegment&&liveSegment.value!==segmentValue){liveSegment.value=segmentValue;liveSegment.dispatchEvent(new Event('change',{bubbles:true}))}
+        setTimeout(()=>{const liveSort=document.querySelector('#clientSort');if(liveSort&&liveSort.value!==sortValue){liveSort.value=sortValue;liveSort.dispatchEvent(new Event('change',{bubbles:true}))}},0);
+      };
+      sheet.appendChild(apply);
+      const close=document.createElement('button');close.type='button';close.className='native-v2-sheet-close';close.textContent='Закрити';close.onclick=()=>layer.remove();sheet.appendChild(close);
+      finish();return;
+    }
+
+    const selector=view==='bookings'?'.booking-toolbar [data-filter]':view==='upcoming'?'.upcoming-scope [data-upcoming-scope]':view==='finances'?'.finance-period-row [data-analytics-period]':view==='analytics'?'.analytics-periods [data-analytics-period]':'';
+    const originals=selector?[...document.querySelectorAll(selector)]:[];
+    if(!originals.length){toastSafe('Для цього екрана додаткових фільтрів немає');return}
+    const titles={bookings:['Статус бронювання','Оберіть статус'],upcoming:['Показати події','Оберіть фільтр'],finances:['Період фінансів','Оберіть період'],analytics:['Період аналітики','Оберіть період']};
+    const [title,subtitle]=titles[view]||['Фільтри','Оберіть фільтр'];head.innerHTML=`<b>${title}</b><small>${subtitle}</small>`;sheet.appendChild(head);
     originals.forEach(original=>{
       const proxy=document.createElement('button');proxy.type='button';proxy.className='btn native-v2-sheet-action'+(original.classList.contains('active')?' active':'');
       const label=text(original.querySelector('span')||original),count=text(original.querySelector('b'));
@@ -475,7 +501,7 @@
       proxy.addEventListener('click',()=>{layer.remove();original.click()});sheet.appendChild(proxy);
     });
     const close=document.createElement('button');close.type='button';close.className='native-v2-sheet-close';close.textContent='Закрити';close.onclick=()=>layer.remove();sheet.appendChild(close);
-    layer.appendChild(sheet);layer.addEventListener('click',e=>{if(e.target===layer)layer.remove()});document.body.appendChild(layer);
+    finish();
   }
 
   function bindHeaderControls(){
