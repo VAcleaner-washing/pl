@@ -1,0 +1,180 @@
+/* =====================================================================
+   VAcleaner Native UI V2.4 Visual Polish RC — test route only
+   Purpose: final cross-PWA visual cleanup after V2.3 functional parity.
+   No business logic, pricing, availability or Supabase contract changes.
+   ===================================================================== */
+@media(max-width:900px){
+  html.native-v24{
+    --v24-bg:#070b0e;
+    --v24-surface:#101619;
+    --v24-surface-2:#0c1215;
+    --v24-stroke:#293237;
+    --v24-line:rgba(255,255,255,.065);
+    --v24-muted:#959da1;
+    --v24-gold:#e8b45b;
+  }
+
+  /* ---------- Readability / touch rhythm ---------- */
+  html.native-v24 .search{height:44px!important;min-height:44px!important}
+  html.native-v24 .search input{height:42px!important;min-height:42px!important}
+  html.native-v24 .booking-toolbar .chip,
+  html.native-v24 .filters .chip,
+  html.native-v24 .booking-filters .chip,
+  html.native-v24 .booking-filters button{min-height:44px!important}
+  html.native-v24 .mobile-nav>button>span{font-size:10.5px!important}
+  html.native-v24 .booking-row-body small{font-size:10.5px!important}
+  html.native-v24 .booking-time-meta .schedule-badge{font-size:10.5px!important}
+  html.native-v24 .day-labels>span{font-size:10.5px!important;letter-spacing:.08em!important}
+  html.native-v24 .campaign-summary small{font-size:10.5px!important}
+  html.native-v24 .campaign-metrics small{font-size:10px!important}
+  html.native-v24 .analytics-kpis .kpi>span,
+  html.native-v24 .analytics-kpis .kpi-context,
+  html.native-v24 .analytics-kpis .metric-delta{font-size:10.5px!important;line-height:1.28!important}
+  html.native-v24 .settings-tab small{font-size:10px!important}
+  html.native-v24 .finance-ledger-head label{font-size:10px!important}
+
+  /* ---------- Bookings: sticky filters must never visually cut a card ---------- */
+  html.native-v24[data-admin-view="bookings"] .booking-toolbar{
+    top:-1px!important;
+    margin-bottom:14px!important;
+    padding-top:8px!important;padding-bottom:9px!important;
+    background:#070b0e!important;
+    box-shadow:0 9px 16px #070b0e,0 1px 0 rgba(255,255,255,.045)!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+  html.native-v24[data-admin-view="bookings"] .booking-toolbar::before,
+  html.native-v24[data-admin-view="bookings"] .booking-toolbar::after{display:none!important}
+
+  /* Completed/cancelled remain useful but do not waste a row on a zero balance. */
+  html.native-v24 .booking-card.native-v22-compact .booking-finance>em.neutral{display:none!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-mobile-flags{padding:0 15px 4px 20px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-mobile-flags span{min-height:20px!important;font-size:9.5px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-actions{padding-top:7px!important}
+
+  /* ---------- Detail audit: disclosure, not another card inside a card ---------- */
+  html.native-v24 .audit-panel{border-radius:13px!important}
+  html.native-v24 .audit-panel-head{min-height:52px!important;padding:8px 12px!important}
+  html.native-v24 .audit-panel-head h3{font-size:13.5px!important}
+  html.native-v24 .audit-panel.native-v23-audit-open #auditReload{
+    min-height:44px!important;height:44px!important;padding-inline:12px!important;
+    border-radius:10px!important;font-size:11px!important;
+  }
+  html.native-v24 #auditContent{padding:0 12px 4px!important}
+  html.native-v24 #auditContent .audit-list{gap:0!important}
+  html.native-v24 #auditContent .audit-entry{
+    min-height:56px!important;margin:0!important;padding:11px 0!important;
+    border:0!important;border-bottom:1px solid var(--v24-line)!important;
+    border-radius:0!important;background:transparent!important;
+  }
+  html.native-v24 #auditContent .audit-entry:last-child{border-bottom:0!important}
+  html.native-v24 #auditContent .audit-entry>i{width:7px!important;height:7px!important;box-shadow:0 0 0 4px rgba(232,180,91,.08)!important}
+  html.native-v24 #auditContent .audit-entry strong{font-size:12.5px!important}
+  html.native-v24 #auditContent .audit-entry span,
+  html.native-v24 #auditContent .audit-entry time{font-size:10.5px!important}
+
+  /* ---------- Action sheet: one native list, no button-in-card rhythm ---------- */
+  html.native-v24 .native-v2-action-sheet{
+    gap:0!important;padding:0!important;overflow:hidden!important;
+    border:1px solid var(--v24-stroke)!important;border-radius:18px!important;background:#101619!important;
+  }
+  html.native-v24 .native-v2-action-sheet-head{padding:14px 16px 12px!important;border-bottom:1px solid var(--v24-line)!important}
+  html.native-v24 .native-v2-sheet-action{
+    min-height:52px!important;height:52px!important;padding:0 16px!important;
+    justify-content:flex-start!important;text-align:left!important;
+    border:0!important;border-bottom:1px solid var(--v24-line)!important;border-radius:0!important;
+    background:transparent!important;font-size:13.5px!important;
+  }
+  html.native-v24 .native-v2-sheet-action.danger{background:transparent!important;color:#ff9e98!important}
+  html.native-v24 .native-v2-sheet-close{
+    min-height:52px!important;height:52px!important;border:0!important;border-radius:0!important;
+    background:rgba(255,255,255,.022)!important;font-size:13px!important;
+  }
+
+  /* ---------- More: connection state belongs to profile metadata ---------- */
+  html.native-v24 .native-v23-connection{display:none!important}
+  html.native-v24 .native-profile-card span>small::after{content:' · Онлайн';color:#74cca0!important}
+  html.native-v24.native-v24-offline .native-profile-card span>small::after{content:' · Офлайн';color:#e88d87!important}
+
+  /* ---------- Issue / Finance context: one thin shell, not a framed frame ---------- */
+  html.native-v24 .issue-form .issue-booking-head,
+  html.native-v24 .finance-form .finance-booking-head{
+    gap:0!important;min-height:58px!important;margin:10px 16px 0!important;
+    border:1px solid var(--v24-stroke)!important;border-radius:12px!important;
+    background:transparent!important;box-shadow:none!important;
+  }
+  html.native-v24 .issue-form .issue-booking-head>div,
+  html.native-v24 .finance-form .finance-booking-head>div{
+    min-height:56px!important;padding:9px 11px!important;background:#0c1215!important;
+  }
+  html.native-v24 .issue-form .issue-booking-head>div+div,
+  html.native-v24 .finance-form .finance-booking-head>div+div{border-left:1px solid var(--v24-line)!important}
+  html.native-v24 .issue-form .issue-booking-head small,
+  html.native-v24 .finance-form .finance-booking-head small{margin-bottom:4px!important;font-size:9.5px!important}
+  html.native-v24 .issue-form .issue-booking-head strong,
+  html.native-v24 .finance-form .finance-booking-head strong{font-size:13.5px!important;line-height:1.25!important}
+
+  /* ---------- Finance journal filter: visually anchored, not floating microcopy ---------- */
+  html.native-v24 .finance-ledger-head{align-items:center!important}
+  html.native-v24 .finance-ledger-head label{gap:3px!important}
+  html.native-v24 .finance-ledger-head select{min-height:44px!important;height:44px!important;font-size:12.5px!important}
+
+  /* ---------- SMS: key operational text should not fall into micro-type ---------- */
+  html.native-v24 .sms-campaign-modal .sms-audience-summary small,
+  html.native-v24 .sms-campaign-modal .sms-recipient>span>small,
+  html.native-v24 .sms-campaign-modal .sms-audience-rule small,
+  html.native-v24 .sms-campaign-modal .sms-selected-count,
+  html.native-v24 .sms-campaign-modal .sms-toolbar-field>span{font-size:10.5px!important}
+
+  /* ---------- Settings rail uses the same opaque sticky behavior ---------- */
+  html.native-v24 .settings-tabs{
+    background:#070b0e!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+    box-shadow:0 8px 14px #070b0e,0 1px 0 rgba(255,255,255,.04)!important;
+  }
+}
+
+@media(max-width:350px){
+  html.native-v24 .issue-form .issue-booking-head strong,
+  html.native-v24 .finance-form .finance-booking-head strong{font-size:12.5px!important}
+  html.native-v24 .finance-ledger-head label{font-size:9.5px!important}
+}
+
+@media(max-width:900px){
+  /* Final screenshot pass: filter rail should scroll away instead of covering card headers. */
+  html.native-v24[data-admin-view="bookings"] .booking-toolbar{
+    position:static!important;top:auto!important;z-index:auto!important;
+    box-shadow:none!important;background:#070b0e!important;
+  }
+
+  /* Returned/cancelled rows are history, not active workspaces. */
+  html.native-v24 .booking-card.native-v22-compact .booking-row-head{padding:9px 14px 8px 20px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-identity h2{font-size:17px!important;margin-top:3px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-origin-row{margin-top:3px!important;font-size:11px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-time,
+  html.native-v24 .booking-card.native-v22-compact .booking-person,
+  html.native-v24 .booking-card.native-v22-compact .booking-delivery,
+  html.native-v24 .booking-card.native-v22-compact .booking-finance{padding:8px 14px 8px 20px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-time>strong,
+  html.native-v24 .booking-card.native-v22-compact .booking-person>strong,
+  html.native-v24 .booking-card.native-v22-compact .booking-delivery-head strong{font-size:15px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-person>a,
+  html.native-v24 .booking-card.native-v22-compact .booking-delivery-address{margin-top:4px!important;font-size:12px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-finance>strong{font-size:20px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-deposit-state{min-height:38px!important;margin-top:5px!important;padding:6px 9px!important}
+  html.native-v24 .booking-card.native-v22-compact .booking-actions{padding:7px 14px calc(10px + env(safe-area-inset-bottom,0px)) 20px!important}
+
+  /* Update prompt is a compact system toast, not a second bottom panel. */
+  html.native-v24 .pwa-update-prompt{
+    bottom:calc(var(--mobile-nav-shell) + 8px)!important;
+    padding:8px 9px!important;gap:7px!important;border-radius:14px!important;
+    grid-template-columns:minmax(0,1fr) auto auto!important;
+  }
+  html.native-v24 .pwa-update-prompt>div{gap:0!important}
+  html.native-v24 .pwa-update-prompt b{font-size:12.5px!important;line-height:1.2!important}
+  html.native-v24 .pwa-update-prompt span{display:none!important}
+  html.native-v24 .pwa-update-prompt button{min-height:44px!important;height:44px!important;padding:0 11px!important;border-radius:10px!important;font-size:11px!important}
+}
+
+@media(max-width:350px){
+  html.native-v24 .pwa-update-prompt{grid-template-columns:minmax(0,1fr) auto!important}
+  html.native-v24 .pwa-update-prompt .pwa-update-later{display:none!important}
+}

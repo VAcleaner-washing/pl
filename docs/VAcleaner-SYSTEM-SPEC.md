@@ -3648,3 +3648,62 @@ The final archive may be handed off only after the aggregate status is recorded 
 - SMS primary/step/history/bulk controls та Analytics segmented controls у native test мають мінімальний touch target 44 px.
 - Видимий допоміжний текст на критичних native mobile surfaces не повинен ставати micro-copy менше 10 px.
 - Ці правила є presentation-only: production route, бізнес-логіка, статуси, суми, тарифи, Supabase та workflow actions не змінюються.
+
+
+### EXPERIMENTAL NATIVE UI V2 — cleanup pass
+
+- `/admin/bronuvannia-native-v2/` is a second parallel test route; production `/admin/bronuvannia/` and Native V1 `/admin/bronuvannia-native-test/` remain available and unchanged.
+- V2 fixes hybrid/double control shells in Settings, compacts slot/deposit editors, and preserves one-border-per-control geometry.
+- Booking card action hierarchy is deterministic: one primary action, visible secondary actions, and corrective/destructive actions under a working `Ще` action sheet.
+- Booking cards keep the left status rail and are vertically tightened without changing booking data or state logic.
+- Selected filter state uses a quiet gold selection treatment instead of competing with the primary booking CTA.
+- Client-card display normalizes all-caps names only in presentation; stored customer data is not rewritten.
+- Booking detail removes duplicate date/time presentation and replaces temporary text glyphs with a consistent inline SVG icon set.
+- Calendar summary is compacted; the technical ISO date remains hidden on mobile.
+- V2 uses the same production business logic, Supabase actions, finance/delivery/deposit/referral contracts and booking state transitions.
+
+
+### EXPERIMENTAL NATIVE UI V2.1 — component cleanup
+
+- `/admin/bronuvannia-native-v21/` is a parallel test-only route layered on top of Native V2.
+- V2.1 enforces the visual contract **one interactive component = one visible shell**. Search, composite money/packet controls, settings fields, checkbox/radio controls and modal action surfaces must not render a second nested border/background.
+- Checkbox/radio inputs are exempt from the generic text-input card geometry and remain compact touch-state controls inside their parent choice/switch cards.
+- Booking `Ще` remains a root-level action sheet with real actions; it must never expand into an empty/stretched card region.
+- Settings save actions must be scrollable fully above the bottom navigation and safe area.
+- Preliminary/final settlement keeps the same finance/story business logic but flattens presentation so outer decorative wrappers do not duplicate the borders of inner choices.
+- Targeted V2.1 browser QA covers 320/390/430 px, all primary views, all Settings tabs and critical process/issue/finance/complete/extend/client/SMS flows.
+- Production `/admin/bronuvannia/`, business logic, Supabase contracts, pricing, deposit rules, availability and referral/RETURN economics remain unchanged.
+
+
+## Experimental Native UI V2.2 stabilization
+
+- Parallel route: `/admin/bronuvannia-native-v22/`; production `/admin/bronuvannia/` remains canonical and unchanged.
+- V2.2 is presentation-only stabilization over Native V2.1: flatter Settings, compact completed booking cards, deduplicated detail date/time, flatter process/issue/finance sections, safer bottom actions.
+- Business logic, Supabase contracts, pricing, deposit policy, delivery economics, availability, RETURN/referral and VA HOME data are preserved.
+- V2.2 may move DOM nodes only inside the test route for presentation; original event handlers and source values stay owned by `admin-v250.js`.
+- Acceptance requires targeted 320/390/430 mobile browser QA, no horizontal overflow, 44px+ primary touch targets, no nested control shells, and unchanged production hashes before handoff.
+
+### NATIVE-V23-PARITY-001 — Native V2.3 functional parity test
+
+- `/admin/bronuvannia-native-v23/` is a parallel test route and does not replace `/admin/bronuvannia/`.
+- V2.3 preserves all production booking status transitions and action handlers; visual proxies may change presentation but must invoke the canonical production controls.
+- Booking Detail must expose booking audit history and the status/cancel `Ще` actions when those actions exist in production.
+- Finance must expose expense category filtering.
+- Compact completed/cancelled booking cards may reduce density but must retain deposit state and an explicit comment-presence cue when applicable.
+- Native V2.3 uses a route-specific manifest and route-scoped service worker fallback/deep-link target so test PWA navigation does not intentionally downgrade to the production visual route.
+- Production JS/CSS/SW/manifest, Supabase contracts, pricing, deposits, delivery, availability, SMS, RETURN/referral and finance formulas remain unchanged.
+
+## NATIVE-V24 — Visual Polish RC (test-only route)
+
+- Route: `/admin/bronuvannia-native-v24/`; production `/admin/bronuvannia/` remains canonical and unchanged.
+- V2.4 inherits V2.3 functional parity and changes presentation only.
+- Booking status filters scroll with the page on mobile; they must never float over or hide booking-card headers.
+- Completed/cancelled cards keep deposit truth and comment presence but remove a redundant zero final-balance row and use historical-density spacing.
+- Audit history remains available in booking Detail as a disclosure; expanded events use flat timeline rows and the reload control remains a 44px+ target.
+- Booking `Ще` uses one action-sheet list with equal-height rows; danger actions remain visually distinct without nested button shells.
+- Online/offline state is shown inside profile metadata on `Ще`, not as a detached floating row.
+- Issue/finance booking context uses one thin shell with an internal divider; no framed-frame visual.
+- Campaign, Analytics, Calendar, Settings and SMS microcopy receives a minimum readability polish without changing content or logic.
+- Mobile PWA update notice is a compact system toast above bottom navigation and must not become a second full bottom panel.
+- V2.4 has its own manifest/service-worker scope; offline fallback and push/deep links remain inside the V2.4 route.
+- Pricing, delivery, deposits, availability, booking transitions, finance calculations, campaigns, referral, Supabase and production PWA files remain unchanged.
