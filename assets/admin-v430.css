@@ -3512,3 +3512,10 @@ html.native-test{
   html.v43-prod .booking-toolbar .chip{font-size:8.8px!important}
   html.v43-prod .booking-toolbar .chip:nth-child(4){font-size:7.8px!important}
 }
+
+
+/* v4.3.0 browser-gate hardening: preserve mobile discount usability after Native promotion. */
+@media(max-width:900px){
+  html.v43-prod .booking-form .discount-choice button{min-height:46px!important}
+  html.v43-prod .booking-form .discount-fixed-row input{font-size:16px!important}
+}
