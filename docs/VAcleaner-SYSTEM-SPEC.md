@@ -3707,3 +3707,39 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Mobile PWA update notice is a compact system toast above bottom navigation and must not become a second full bottom panel.
 - V2.4 has its own manifest/service-worker scope; offline fallback and push/deep links remain inside the V2.4 route.
 - Pricing, delivery, deposits, availability, booking transitions, finance calculations, campaigns, referral, Supabase and production PWA files remain unchanged.
+
+
+## NATIVE-V25 — Final Polish RC (test-only route)
+
+- Route: `/admin/bronuvannia-native-v25/`; production `/admin/bronuvannia/` remains canonical and unchanged.
+- V2.5 inherits V2.4 visual polish and V2.3 functional parity; it changes only the parallel Native presentation layer.
+- `Найближчі` restores the proven operational rail: direction arrow, large time, `ВИДАЧА / ПОВЕРНЕННЯ`, and relative badge (`Сьогодні / Завтра / Прострочено`) remain visible at a glance.
+- Process booking exposes private document-photo add/replace and view controls using the existing production `documentRequest()` document service; no document business/storage contract is forked.
+- The profile card on `Ще` is informational only and must not duplicate the separate `Налаштування` navigation item.
+- SMS RETURN header/body, recipient controls and fixed footer must remain non-overlapping and horizontally contained at 320 / 390 / 430 px.
+- Analytics/Finance period controls and Clients segment/sort controls must fit fully inside the viewport instead of ending in a clipped horizontal rail.
+- Settings fuel controls use exactly one visible shell per numeric field; nested framed-input presentation is prohibited.
+- All five Settings tabs must remain fully reachable/visible on target mobile widths.
+- Booking Detail keeps compact `Оновити`, visible `Ще`, audit history and canonical status actions.
+- V2.5 has its own manifest/service-worker scope; offline fallback, local notifications and rewritten production deep links stay inside the V2.5 route.
+- Production CSS/JS/SW/manifest, Supabase contracts, pricing, deposits, delivery, availability, finance formulas, SMS economics, RETURN/referral and document privacy rules remain unchanged.
+- Acceptance requires primary/deep browser QA at 320 / 390 / 430 px, no horizontal overflow, no nested interactive shells, canonical static/build GREEN, artifact verification PASS and unchanged production hashes.
+
+### Native V2.6 real-iPhone visual contract
+- Parallel route `/admin/bronuvannia-native-v26/` inherits V2.5 functional parity.
+- Detail `Оновити` and `Ще` must remain fully visible with 44px+ mobile targets at 320/390/430 px.
+- RETURN SMS campaign title, `Журнал`, close action, sender metadata and footer must not overlap or clip; `Журнал` has a dedicated header row on mobile.
+- V2.6 changes presentation only; production route and business logic remain unchanged.
+
+
+### Native V2.7 Full Re-audit RC — visual safety contract
+
+- Parallel test route: `/admin/bronuvannia-native-v27/`; production `/admin/bronuvannia/` remains unchanged.
+- V2.7 is a visual/geometry hardening pass over V2.6. It does not fork booking, status, pricing, delivery, finance, SMS, referral, document-storage or Supabase business logic.
+- Booking status filters on mobile must not render a half-cut control at the right edge; all statuses stay reachable and readable at 320 / 390 / 430 px.
+- `Найближчі` keeps the left operational rail (direction arrow, time, issue/return, relative day); its action labels must not clip at supported mobile widths.
+- Modal footers may not inherit desktop fixed minimum widths; every footer action must stay inside the viewport at 320 / 390 / 430 px.
+- The PWA update prompt is deferred/hidden while a detail screen, modal workflow, or mobile keyboard is active so it cannot cover operational controls.
+- Analytics/Finance five-period selectors use a balanced 3 + 2 mobile grid and never require horizontal scrolling.
+- Delivery fuel analytics is visually flat: no redundant shell around the per-vehicle rows.
+- V2.7 scoped service worker precaches every CSS layer used by the V2.7 route, including Native V2.5 compatibility CSS, and keeps notification/deep-link fallback inside the V2.7 scope.
