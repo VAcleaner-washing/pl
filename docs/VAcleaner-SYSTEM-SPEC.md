@@ -3788,4 +3788,5 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Production mobile visual/user-flow acceptance covers 320 / 390 / 430 px: Upcoming, Bookings, Calendar, Equipment, Clients, Campaigns, Finances, Analytics, Chemistry, Settings, Detail, Process, Issue, Preliminary/Final finance, SMS and Client card.
 - Explicit interaction checks cover header bell, filter action sheet, all booking filters/status handlers, document controls, modal footer containment and period-selector geometry.
 - Mobile More browser E2E verifies all seven secondary destinations by stable `data-more-view` IDs, including Finances, instead of fragile exact-text matching.
+- The PWA update notice is suppressed while any booking/detail workflow is active on both mobile and desktop, so an update prompt cannot cover operational controls.
 - Version-floor regression contracts are semver-aware so v4.3 continues all v4.2 business/architecture guarantees; the admin shell freeze now explicitly allows the approved v4.3 production UI overlay while preserving canonical business runtime and PWA contracts.
