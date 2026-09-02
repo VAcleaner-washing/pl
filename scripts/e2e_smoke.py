@@ -805,8 +805,9 @@ def admin_tests(browser: Browser, base: str, api_handler, checks: Checks, static
         page.locator(".mobile-nav .more-nav:visible").click()
         checks.check(page.locator('.mobile-nav .more-nav.active:visible').count() == 1 and page.locator('.mobile-nav button[data-mobile-view].active:visible').count() == 0, "Opening More makes More the only active bottom-nav item")
         more = page.locator(".mobile-more-menu:visible")
-        expected_more = ["Техніка", "Клієнти", "Кампанії", "Аналітика", "Хімія", "Налаштування"]
-        checks.check(more.count() == 1 and all(more.get_by_text(label, exact=True).count() == 1 for label in expected_more), "Mobile More contains all six secondary sections")
+        expected_more = ["equipment", "clients", "campaigns", "finances", "analytics", "chemistry", "settings"]
+        actual_more = more.locator('[data-more-view]:visible').evaluate_all("els => els.map(el => el.dataset.moreView)")
+        checks.check(more.count() == 1 and all(item in actual_more for item in expected_more), "Mobile More contains all seven secondary sections")
         page.keyboard.press("Escape")
         page.wait_for_timeout(30)
         checks.check(page.locator('.mobile-nav button[data-mobile-view="upcoming"].active:visible').count() == 1 and page.locator('.mobile-nav .more-nav.active:visible').count() == 0, "Closing More restores the active state of the current primary view")
