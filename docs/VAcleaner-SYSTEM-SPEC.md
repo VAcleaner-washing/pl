@@ -3775,6 +3775,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Removed the 4-column status grid that split Ukrainian status labels across multiple lines.
 - Removed the oversized 3+2 Finance/Analytics period layout introduced during test hardening.
 - Preserved right-edge containment for filters, modal footers, SMS RETURN, Client controls and finance surfaces.
+- Restored mobile manual-discount controls to the production touch/readability contract: choice buttons are 44px+ and the fixed-amount input stays at 16px+ on iPhone widths.
 
 ### PRESERVED
 
@@ -3786,4 +3787,5 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `npm run qa:static` remains release-blocking.
 - Production mobile visual/user-flow acceptance covers 320 / 390 / 430 px: Upcoming, Bookings, Calendar, Equipment, Clients, Campaigns, Finances, Analytics, Chemistry, Settings, Detail, Process, Issue, Preliminary/Final finance, SMS and Client card.
 - Explicit interaction checks cover header bell, filter action sheet, all booking filters/status handlers, document controls, modal footer containment and period-selector geometry.
+- Mobile More browser E2E verifies all seven secondary destinations by stable `data-more-view` IDs, including Finances, instead of fragile exact-text matching.
 - Version-floor regression contracts are semver-aware so v4.3 continues all v4.2 business/architecture guarantees; the admin shell freeze now explicitly allows the approved v4.3 production UI overlay while preserving canonical business runtime and PWA contracts.
