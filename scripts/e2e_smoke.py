@@ -624,6 +624,8 @@ def public_tests(browser: Browser, base: str, api_handler, checks: Checks, stati
         if not promo.is_visible():
             promo_toggle = page.locator('#booking-contact .booking-promo-field .vx-promo-toggle')
             checks.check(promo_toggle.count() == 1 and promo_toggle.is_visible(), "Manual promo disclosure is available on contacts step")
+            promo_toggle.evaluate("el => el.scrollIntoView({block: 'center', inline: 'nearest'})")
+            page.wait_for_timeout(80)
             promo_toggle.click()
             expect(promo).to_be_visible()
         checks.check(promo.is_visible(), "Manual promo field opens before promo entry")
