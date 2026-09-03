@@ -7040,3 +7040,41 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
   text-overflow:ellipsis;
   white-space:nowrap;
 }
+
+
+/* v4.3.3 — canonical mobile interaction contracts. */
+@media(max-width:900px){
+  html.mobile-more-open .mobile-nav .mobile-new-nav i{
+    margin-top:0;
+    transform:none;
+    width:46px;
+    height:46px;
+    min-width:46px;
+  }
+  html.mobile-more-open .mobile-nav .mobile-new-nav span{
+    margin-top:0;
+  }
+  .upcoming-client-info a[href^="tel:"]{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    width:max-content;
+    max-width:100%;
+    padding-left:0;
+  }
+  .upcoming-client-info a[href^="tel:"]::before{
+    content:'📞';
+    position:static;
+    display:inline-block;
+    flex:0 0 auto;
+    width:auto;
+    height:auto;
+    font-size:14px;
+    line-height:1;
+    transform:none;
+  }
+  .upcoming-client-info a[href^="tel:"]::after{
+    display:none;
+    content:none;
+  }
+}
