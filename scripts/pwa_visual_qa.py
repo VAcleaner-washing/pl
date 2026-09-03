@@ -565,12 +565,14 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         campaign_type=page.locator('.campaign-panel').evaluate("""el=>({name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize)})""")
         qa.check(campaign_type['name']>=16 and campaign_type['sub']>=11 and campaign_type['kpi']>=18 and campaign_type['metric']>=13, f"{label}: Campaigns keeps readable typography instead of density micro-type")
         qa.check(page.locator('#smsCampaign').count()==1, f"{label}: campaigns view exposes SMS reactivation")
-        # The production admin always loads the v4.3 native layer. The base render helper
-        # intentionally stays lean for legacy shell checks, so load the production layer
-        # before asserting v4.3 SMS modal geometry.
-        page.add_style_tag(content=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8'))
-        page.add_script_tag(content=(ROOT/'assets/admin-v430.js').read_text(encoding='utf-8'))
-        page.wait_for_timeout(100)
+        # The production admin always loads the v4.3 CSS layer. The base render helper
+        # intentionally stays lean for legacy shell checks, so scope that layer to the
+        # SMS assertions only. Do not inject admin-v430.js here: its persistent observers
+        # would mutate later, unrelated checks in this shared page.
+        sms_classes_before=page.locator('html').get_attribute('class') or ''
+        sms_native_style=page.add_style_tag(content=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8'))
+        page.evaluate("document.documentElement.classList.add('v43-prod','native-v23','native-v24','native-v25','native-v26','native-v27','native-v28')")
+        page.wait_for_timeout(50)
         page.locator('#smsCampaign').click();page.wait_for_selector('.sms-campaign-modal #smsAudienceList');page.wait_for_timeout(80)
         qa.check(page.locator('.sms-campaign-modal').count()==1 and 'Стара база' in page.locator('.sms-campaign-modal').inner_text(), f"{label}: SMS modal renders legacy audience state")
         qa.check(page.locator('.sms-campaign-modal #smsMessage').input_value().count('vacleaner.pp.ua/s')==1, f"{label}: SMS draft contains opt-out URL")
@@ -612,6 +614,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check('dateTime is not defined' not in page.locator('.sms-campaign-modal').inner_text(), f"{label}: SMS history date formatter is available")
         qa.check(no_overflow(page), f"{label}: SMS workflow has no horizontal overflow")
         page.locator('.sms-campaign-modal [data-close]').first.click();page.wait_for_timeout(30)
+        sms_native_style.evaluate("el=>el.remove()")
+        page.evaluate("(classes)=>{document.documentElement.className=classes}",sms_classes_before)
+        page.wait_for_timeout(30)
         open_mobile_view(page,'clients')
         qa.check('Сплячі 180+ днів' in page.locator('#clientSegment').inner_text(), f"{label}: sleeping segment uses 180 days")
         last_text=page.locator('.client-last-date').first.inner_text().strip() if page.locator('.client-last-date').count() else ''
