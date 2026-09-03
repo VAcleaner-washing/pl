@@ -93,6 +93,26 @@ with sync_playwright() as pw:
             ck('client search result opens client card',page.locator('#clientEditor').count()==1)
             page.locator('#clientEditor .client-footer-close').click();page.wait_for_selector('.global-search-layout',timeout=2500);page.wait_for_timeout(40)
             ck('client back restores exact global search',page.locator('#globalSearch').input_value()==phone_query and page.locator('.global-search-layout').count()==1)
+
+        # v4.3.3: mobile More exposes a real full-data refresh, not just a visual button.
+        mobile=fixture.render_page(browser,390,844,authenticated=True,standalone=True)
+        try:
+            if mobile.locator('.pwa-update-later').count(): mobile.locator('.pwa-update-later').click()
+            mobile.add_style_tag(content=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8'))
+            mobile.add_script_tag(content=(ROOT/'assets/admin-v430.js').read_text(encoding='utf-8'))
+            mobile.wait_for_timeout(120)
+            mobile.evaluate("""()=>{window.__refreshActions=[];const previous=window.fetch;window.fetch=async(url,options={})=>{let payload={};try{payload=options.body?JSON.parse(options.body):{}}catch{}if(payload.action)window.__refreshActions.push(payload.action);return previous(url,options)}}""")
+            mobile.locator('.mobile-nav .more-nav').click();mobile.wait_for_selector('.mobile-more-menu');mobile.wait_for_timeout(80)
+            refresh=mobile.locator('.native-data-refresh')
+            ck('mobile More exposes manual data refresh',refresh.count()==1 and 'Оновити дані' in refresh.inner_text())
+            ck('manual refresh explains automatic 15 second sync','Автоматично кожні 15 с' in refresh.inner_text())
+            refresh.click();mobile.wait_for_timeout(250)
+            actions=mobile.evaluate("window.__refreshActions")
+            ck('manual refresh requests bookings, calendar, clients and campaigns',all(x in actions for x in ['list','calendar','clients','campaigns']))
+            ck('manual refresh also refreshes expiring referrals','referrals_expiring' in actions)
+            ck('manual refresh keeps mobile viewport contained',mobile.evaluate('document.documentElement.scrollWidth<=document.documentElement.clientWidth+1'))
+        finally:
+            mobile.close()
     finally:
         page.close();browser.close()
 
