@@ -7001,3 +7001,42 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
   white-space:nowrap;
   font-variant-numeric:tabular-nums;
 }
+
+
+/* v4.3.3 — delivery metadata must shrink inside the canonical Upcoming grid. */
+.upcoming-handoff.delivery{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.upcoming-delivery-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  color:#92999d;
+  font-style:normal;
+}
+.upcoming-delivery-icon svg{
+  display:block;
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.upcoming-handoff-copy{
+  display:block;
+  flex:1 1 0;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
