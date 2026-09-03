@@ -3829,3 +3829,23 @@ The final archive may be handed off only after the aggregate status is recorded 
 
 - At 320 / 390 / 430 px expense rows stay fully inside the viewport, category text does not collide with the amount, long category labels remain readable, and amounts remain right-aligned.
 - The canonical PWA browser suite includes a production-layer finance-ledger geometry regression check.
+
+
+# 58. Change record — UPCOMING EXTRAS PARITY
+
+### CHANGED
+
+- Mobile `Найближчі` shows selected extras directly under the equipment name using the same compact manager-facing labels as `Бронювання`.
+- The generic `Дод. хімія` label is removed because extras may include equipment add-ons such as premium nozzles.
+- Extra prices are not duplicated in the Upcoming identity summary; prices remain available in booking/detail/finance contexts.
+- Multiple extras are shown as one compact names-only line separated by dots.
+
+### PRESERVED
+
+- Selected extras, prices, totals, chemistry accounting, issue/return settlement and Supabase data are unchanged.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px Upcoming extra names remain readable and contained inside the card.
+- The old pseudo-label/icon are suppressed in the production Native layer.
+- Static regression verifies Upcoming reuses the same compact extra-label resolver as Booking cards.
