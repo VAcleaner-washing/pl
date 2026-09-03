@@ -1022,6 +1022,46 @@ def expense_form_controls_suite(browser: Browser, qa: QA) -> None:
         finally:
             page.close()
 
+
+def expense_ledger_mobile_suite(browser: Browser, qa: QA) -> None:
+    base_css=(ROOT/'assets/admin-v250.css').read_text(encoding='utf-8')
+    native_css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+    html="""<!doctype html><html class='native-test native-v2 native-v21 native-v22 native-v23 native-v24 native-v25 native-v26 native-v27 native-v28 v43-prod'><head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'></head><body><section class='finance-ledger'><div class='card expense-table'><button class='expense-row' type='button'><span class='expense-date'>12.08.2026</span><span class='expense-kind'><b>Оснащення й модернізація</b><small>Інвестиція · ручка puzzi</small></span><strong>3 050 грн</strong><i>›</i></button><button class='expense-row' type='button'><span class='expense-date'>12.08.2026</span><span class='expense-kind'><b>Хімія та засоби</b><small>Операційна · Chemspec Spot Lifter</small></span><strong>1 600 грн</strong><i>›</i></button></div></section></body></html>"""
+    for width in (320,390,430):
+        page=browser.new_page(viewport={"width":width,"height":844},is_mobile=True)
+        try:
+            page.set_content(html)
+            page.add_style_tag(content=base_css)
+            page.add_style_tag(content=native_css)
+            rows=page.locator('.expense-row')
+            qa.check(rows.count()==2, f"Finance ledger {width}: fixture renders expense rows")
+            first=rows.first
+            geometry=first.evaluate("""el=>{const r=el.getBoundingClientRect(),kind=el.querySelector('.expense-kind'),title=kind.querySelector('b'),note=kind.querySelector('small'),date=el.querySelector('.expense-date'),amount=el.querySelector(':scope>strong');const box=x=>{const b=x.getBoundingClientRect();return{left:b.left,right:b.right,top:b.top,bottom:b.bottom,width:b.width,height:b.height,scrollWidth:x.scrollWidth,clientWidth:x.clientWidth,whiteSpace:getComputedStyle(x).whiteSpace}};return{row:box(el),kind:box(kind),title:box(title),note:box(note),date:box(date),amount:box(amount),doc:document.documentElement.scrollWidth,viewport:innerWidth}}""")
+            qa.check(geometry['doc']<=geometry['viewport']+1 and geometry['row']['left']>=-1 and geometry['row']['right']<=width+1, f"Finance ledger {width}: row stays inside viewport")
+            qa.check(geometry['kind']['left']<geometry['amount']['left'] and geometry['kind']['right']<=geometry['amount']['left']-6, f"Finance ledger {width}: category never collides with amount")
+            qa.check(geometry['title']['whiteSpace']!='nowrap' and geometry['title']['scrollWidth']<=geometry['title']['clientWidth']+1, f"Finance ledger {width}: long category title is readable instead of clipped")
+            qa.check(geometry['date']['top']>=geometry['kind']['top'] and geometry['amount']['right']<=geometry['row']['right']+1, f"Finance ledger {width}: date is secondary and amount remains right anchored")
+        finally:
+            page.close()
+
+
+def upcoming_extra_identity_suite(browser: Browser, qa: QA) -> None:
+    base_css=(ROOT/'assets/admin-v250.css').read_text(encoding='utf-8')
+    native_css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+    html="""<!doctype html><html class='native-test native-v2 native-v21 native-v22 native-v23 native-v24 native-v25 native-v26 native-v27 native-v28 v43-prod'><head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'></head><body><article class='upcoming-row issue native-v25-upcoming'><div class='upcoming-main'><div class='upcoming-title'><h3>SC 2 + робот</h3><span class='status confirmed'>Підтверджена</span></div><div class='upcoming-extra'><i aria-hidden='true'>+</i><span>Насадки Преміум · Shower Care 250 мл · SPOT FIX 50 мл</span></div><div class='upcoming-client-info'><strong>Іванова Ольга Юріївна</strong></div></div></article></body></html>"""
+    for width in (320,390,430):
+        page=browser.new_page(viewport={"width":width,"height":844},is_mobile=True)
+        try:
+            page.set_content(html)
+            page.add_style_tag(content=base_css)
+            page.add_style_tag(content=native_css)
+            metrics=page.locator('.upcoming-extra').evaluate("""el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el),after=getComputedStyle(el,'::after'),before=getComputedStyle(el,'::before'),span=el.querySelector('span').getBoundingClientRect(),row=el.closest('.upcoming-row').getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,font:parseFloat(s.fontSize),display:s.display,after:after.content,before:before.content,spanRight:span.right,rowLeft:row.left,rowRight:row.right}}""")
+            qa.check(metrics['display']=='flex' and metrics['font']>=11, f"Upcoming extras {width}: identity summary is readable and uses booking-like inline geometry")
+            qa.check(metrics['after'] in ('none','normal','""') and metrics['before'] in ('none','normal','""'), f"Upcoming extras {width}: old generic pseudo-label/icon are suppressed")
+            qa.check(metrics['left']>=metrics['rowLeft']-1 and metrics['right']<=metrics['rowRight']+1 and metrics['spanRight']<=metrics['rowRight']+1, f"Upcoming extras {width}: long extra names stay inside the card")
+        finally:
+            page.close()
+
 def public_date_suite(browser: Browser, qa: QA) -> None:
     page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
     try:
@@ -1151,6 +1191,8 @@ def main() -> int:
             landscape_suite(browser, qa)
             auth_suite(browser, qa)
             expense_form_controls_suite(browser, qa)
+            expense_ledger_mobile_suite(browser, qa)
+            upcoming_extra_identity_suite(browser, qa)
             public_date_suite(browser, qa)
             public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
