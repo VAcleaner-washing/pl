@@ -3643,3 +3643,44 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
   }
   html.native-v28 .finance-ledger .expense-row>i{display:none!important}
 }
+
+
+/* v4.3.2 — Upcoming extras use the same identity pattern as Booking cards. */
+@media(max-width:900px){
+  html.native-v28 .upcoming-row .upcoming-extra{
+    display:flex!important;
+    align-items:flex-start!important;
+    gap:6px!important;
+    max-width:100%!important;
+    margin:0 0 10px!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    color:#cdbb9d!important;
+    font-size:11.5px!important;
+    line-height:1.32!important;
+    font-weight:480!important;
+  }
+  html.native-v28 .upcoming-row .upcoming-extra::before,
+  html.native-v28 .upcoming-row .upcoming-extra::after{
+    display:none!important;
+    content:none!important;
+  }
+  html.native-v28 .upcoming-row .upcoming-extra>i{
+    flex:0 0 auto!important;
+    margin:0!important;
+    color:var(--nt-gold-2,#efbd61)!important;
+    font-style:normal!important;
+    font-weight:580!important;
+  }
+  html.native-v28 .upcoming-row .upcoming-extra>span{
+    min-width:0!important;
+    color:#cdbb9d!important;
+    overflow-wrap:anywhere!important;
+  }
+}
+@media(max-width:390px){
+  html.native-v28 .upcoming-row .upcoming-extra{font-size:11px!important}
+}
