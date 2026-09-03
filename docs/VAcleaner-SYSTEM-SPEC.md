@@ -3874,23 +3874,29 @@ The final archive may be handed off only after the aggregate status is recorded 
 - While the mobile `Ще` sheet is open, the raised center `Нове` circle is lowered fully inside the bottom navigation so it cannot overlap the sheet; closing `Ще` restores the raised primary-action geometry.
 
 
-# 60. Change record — v4.3.3 BOOKING DETAIL MOBILE
+# 60. Change record — v4.3.3 BOOKING DETAIL + RETURN UX
 
 ### CHANGED
 
-- Mobile booking detail uses one consistent right-aligned value axis for delivery price, selected extras and payment amounts.
-- Delivery keeps the route address/action, shows access/orientation text, and adds a dedicated one-way `Відстань до точки` metric from the stored route snapshot.
+- Mobile booking detail follows the manager workflow order: `Техніка → Додатково → Клієнт → Доставка → Фінанси`.
+- The upper `Додатково` section is identity-only: selected add-ons are readable by name without duplicating prices.
+- `Доставка` contains only operational information: navigable address, access/orientation text and one-way `Відстань до точки` from the stored route snapshot.
+- The financial block owns the money and presents one right-aligned value axis in this order: `Передоплата → Залог → Оренда → Додатково → Доставка`.
 - When a missing/stale delivery route is refreshed while the detail screen is open, the visible distance updates in place.
-- Extras use the neutral section label `Додатково`; each selected item is a separate name/value row, so equipment add-ons are never mislabeled as chemistry.
 - The visible mobile client row is an explicit keyboard/touch target that opens the client card; tapping the phone number still starts a call instead.
+- Booking source copy is explicit (`Джерело · …`) so values such as `Телефон` are not mistaken for missing client data.
+- Issued-booking actions use one full-width primary return CTA followed by balanced secondary actions.
+- In `Попередній розрахунок`, the complete money breakdown appears before the preliminary settlement result, the manual control is named `Знижка на оренду`, and the discount exclusion note is concise and scroll-safe above the footer.
 
 ### PRESERVED
 
-- Delivery tariff calculation, route persistence, finance formulas, extra prices, deposits, settlement, booking state transitions and Supabase write contracts are unchanged.
+- Delivery tariff calculation, route persistence, finance formulas, extra prices, deposits, settlement, manual discount logic, booking state transitions and Supabase write contracts are unchanged.
 - The delivery address remains directly navigable.
+- `Прийняти повернення`, `Розрахунок`, `Продовжити` and corrective actions keep their existing business behavior.
 
 ### ACCEPTANCE
 
-- At 320 / 390 / 430 px delivery, extras and payment amounts align to the same right edge without clipping.
+- At 320 / 390 / 430 px the mobile detail order is deterministic and all five finance amounts align to the same right edge without clipping.
 - A known one-way route distance is visible in booking detail and updates after an in-place route refresh.
 - Tapping the client row opens the client card while the telephone remains a separate call action.
+- `Попередній розрахунок` shows the full breakdown before the refund/due result and its explanatory note is not hidden behind the fixed footer.
