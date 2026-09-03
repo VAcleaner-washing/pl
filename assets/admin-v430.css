@@ -3787,7 +3787,7 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
     position:fixed!important;
     top:auto!important;
     right:auto!important;
-    bottom:calc(var(--pwa-safe-bottom) + 14px)!important;
+    bottom:calc(var(--pwa-safe-bottom) + 2px)!important;
     left:50%!important;
     margin-top:0!important;
     transform:translateX(-50%)!important;
@@ -3838,7 +3838,7 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
     stroke-linejoin:round!important;
   }
   html.mobile-more-open .mobile-nav .mobile-new-nav i{
-    transform:none!important;
+    transform:translateX(-50%)!important;
   }
 }
 
