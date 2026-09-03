@@ -3811,3 +3811,21 @@ The final archive may be handed off only after the aggregate status is recorded 
 - SMS recipient list must accept vertical touch scrolling with a long audience at supported mobile widths while the modal footer remains reachable.
 - Clients and Finances header filter buttons must cause an actionable visible UI change and invoke the existing canonical controls.
 - `npm run qa:static` and the canonical browser/PWA QA remain release-blocking before merge to `main`.
+
+
+# 57. Change record — v4.3.2 MOBILE FINANCE LEDGER
+
+### FIXED
+
+- Mobile `Фінанси → Журнал витрат` uses a two-column expense row: category/note on the left and amount anchored on the right, with the date demoted to secondary metadata below the category.
+- Long expense categories may wrap naturally; notes remain one-line ellipsized and must not push the amount outside the card.
+- The desktop expense ledger layout remains unchanged.
+
+### PRESERVED
+
+- Expense data, category values, operating/investment classification, finance formulas, equipment payback, delivery profitability and Supabase write paths are unchanged.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px expense rows stay fully inside the viewport, category text does not collide with the amount, long category labels remain readable, and amounts remain right-aligned.
+- The canonical PWA browser suite includes a production-layer finance-ledger geometry regression check.
