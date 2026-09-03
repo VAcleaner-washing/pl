@@ -1044,6 +1044,24 @@ def expense_ledger_mobile_suite(browser: Browser, qa: QA) -> None:
         finally:
             page.close()
 
+
+def upcoming_extra_identity_suite(browser: Browser, qa: QA) -> None:
+    base_css=(ROOT/'assets/admin-v250.css').read_text(encoding='utf-8')
+    native_css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+    html="""<!doctype html><html class='native-test native-v2 native-v21 native-v22 native-v23 native-v24 native-v25 native-v26 native-v27 native-v28 v43-prod'><head><meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'></head><body><article class='upcoming-row issue native-v25-upcoming'><div class='upcoming-main'><div class='upcoming-title'><h3>SC 2 + робот</h3><span class='status confirmed'>Підтверджена</span></div><div class='upcoming-extra'><i aria-hidden='true'>+</i><span>Насадки Преміум · Shower Care 250 мл · SPOT FIX 50 мл</span></div><div class='upcoming-client-info'><strong>Іванова Ольга Юріївна</strong></div></div></article></body></html>"""
+    for width in (320,390,430):
+        page=browser.new_page(viewport={"width":width,"height":844},is_mobile=True)
+        try:
+            page.set_content(html)
+            page.add_style_tag(content=base_css)
+            page.add_style_tag(content=native_css)
+            metrics=page.locator('.upcoming-extra').evaluate("""el=>{const r=el.getBoundingClientRect(),s=getComputedStyle(el),after=getComputedStyle(el,'::after'),before=getComputedStyle(el,'::before'),span=el.querySelector('span').getBoundingClientRect(),row=el.closest('.upcoming-row').getBoundingClientRect();return{left:r.left,right:r.right,top:r.top,bottom:r.bottom,font:parseFloat(s.fontSize),display:s.display,after:after.content,before:before.content,spanRight:span.right,rowLeft:row.left,rowRight:row.right}}""")
+            qa.check(metrics['display']=='flex' and metrics['font']>=11, f"Upcoming extras {width}: identity summary is readable and uses booking-like inline geometry")
+            qa.check(metrics['after'] in ('none','normal','""') and metrics['before'] in ('none','normal','""'), f"Upcoming extras {width}: old generic pseudo-label/icon are suppressed")
+            qa.check(metrics['left']>=metrics['rowLeft']-1 and metrics['right']<=metrics['rowRight']+1 and metrics['spanRight']<=metrics['rowRight']+1, f"Upcoming extras {width}: long extra names stay inside the card")
+        finally:
+            page.close()
+
 def public_date_suite(browser: Browser, qa: QA) -> None:
     page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
     try:
@@ -1174,6 +1192,7 @@ def main() -> int:
             auth_suite(browser, qa)
             expense_form_controls_suite(browser, qa)
             expense_ledger_mobile_suite(browser, qa)
+            upcoming_extra_identity_suite(browser, qa)
             public_date_suite(browser, qa)
             public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
