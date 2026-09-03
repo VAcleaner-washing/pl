@@ -3826,6 +3826,6 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
     stroke-linejoin:round!important;
   }
   html.mobile-more-open .mobile-nav .mobile-new-nav i{
-    transform:translateY(14px)!important;
+    transform:none!important;
   }
 }
