@@ -4147,7 +4147,7 @@ html.native-v28 .upcoming-handoff-copy{
     font-size:11px!important;
     font-weight:650!important;
     letter-spacing:.08em!important;
-    text-transform:uppercase!important;
+    text-transform:none!important;
   }
   html.native-v28 .finance-form .finance-flow-received>.finance-flow-title>span,
   html.native-v28 .finance-form .finance-flow-received>.finance-flow-title>strong{
@@ -4188,7 +4188,7 @@ html.native-v28 .upcoming-handoff-copy{
     font-size:9.5px!important;
     font-weight:650!important;
     letter-spacing:.08em!important;
-    text-transform:uppercase!important;
+    text-transform:none!important;
   }
   html.native-v28 .finance-form .finance-flow-final>strong{
     font-size:18px!important;
