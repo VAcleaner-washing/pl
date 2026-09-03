@@ -1192,30 +1192,6 @@ html.glass-test .expense-equipment-field[hidden]{display:none!important}
 }
 
 
-/* v4.3.3 — when More is open, keep the center New action fully inside the glass tab bar. */
-@media(max-width:900px){
-  html.glass-test.mobile-more-open .mobile-nav .mobile-new-nav i{
-    position:absolute!important;
-    top:7px!important;
-    right:auto!important;
-    bottom:auto!important;
-    left:50%!important;
-    width:46px!important;
-    height:46px!important;
-    min-width:46px!important;
-    margin:0!important;
-    transform:translateX(-50%)!important;
-  }
-  html.glass-test.mobile-more-open .mobile-nav .mobile-new-nav span{
-    position:absolute!important;
-    right:0!important;
-    bottom:3px!important;
-    left:0!important;
-    margin:0!important;
-    transform:none!important;
-  }
-}
-
 /* v4.2.22 settings grid ownership — every card has one explicit area */
 .settings-grid{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
