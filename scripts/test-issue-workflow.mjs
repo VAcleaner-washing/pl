@@ -12,7 +12,7 @@ check(admin.includes("const finance=b.status==='issued'?'<button class=\"btn boo
 check(admin.includes('Попередньо повернути')&&admin.includes('Попередньо доплатити'), 'issued bookings expose a clearly preliminary settlement result');
 check(admin.includes('Попередньо повернути при поверненні')&&admin.includes('Попередньо доплатити при поверненні'), 'detail/upcoming copy ties preliminary settlement to return');
 check(admin.includes("<h2>${complete?'Закриття оренди':'Попередній розрахунок'}</h2>"), 'issued finance modal is named preliminary, not final');
-check(admin.includes("complete?'Фінальний взаєморозрахунок при поверненні':'Попередній взаєморозрахунок при поверненні'"), 'finance modal labels intermediate and final stages separately');
+check(admin.includes("${complete?`<div class=\"deposit-return-box")&&admin.includes('name="settlementCompleted"')&&!admin.includes('Попередній взаєморозрахунок при поверненні'), 'finance modal keeps settlement confirmation final-only without duplicating the preliminary result');
 const issueStart=admin.indexOf('function openIssue(b)');
 const issueEnd=admin.indexOf('function openExtendRental',issueStart);
 const issueBlock=admin.slice(issueStart,issueEnd);
