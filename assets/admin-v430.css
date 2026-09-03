@@ -3779,3 +3779,16 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
   }
   html.native-v28 .upcoming-client-info a[href^="tel:"]::after{display:none!important;content:none!important}
 }
+
+
+/* v4.3.3 — More sheet must not be covered by the raised center New action. */
+@media(max-width:900px){
+  html.mobile-more-open .mobile-nav .mobile-new-nav i{
+    margin-top:0!important;
+    width:46px!important;
+    height:46px!important;
+    min-width:46px!important;
+    box-shadow:0 6px 16px rgba(0,0,0,.28)!important;
+  }
+  html.mobile-more-open .mobile-nav .mobile-new-nav span{margin-top:0!important}
+}
