@@ -3887,6 +3887,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Booking source copy is explicit (`Джерело · …`) so values such as `Телефон` are not mistaken for missing client data.
 - Issued-booking actions use one full-width primary return CTA followed by balanced secondary actions.
 - In `Попередній розрахунок`, the complete money breakdown appears before the preliminary settlement result, the manual control is named `Знижка на оренду`, and the discount exclusion note is concise and scroll-safe above the footer.
+- The finance breakdown always keeps `Додатково` visible, including a `0 грн` state, so the five-part money structure stays stable and predictable.
 
 ### PRESERVED
 
