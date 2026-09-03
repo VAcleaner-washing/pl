@@ -3900,3 +3900,20 @@ The final archive may be handed off only after the aggregate status is recorded 
 - A known one-way route distance is visible in booking detail and updates after an in-place route refresh.
 - Tapping the client row opens the client card while the telephone remains a separate call action.
 - `Попередній розрахунок` shows the full breakdown before the refund/due result and its explanatory note is not hidden behind the fixed footer.
+
+
+# 61. Change record — v4.3.3 OPERATIONAL CTA HIERARCHY
+
+### SYSTEM
+
+- Mobile operational actions use one semantic hierarchy across `Найближчі`, `Бронювання` and booking detail flows.
+- Neutral navigation/actions such as `Деталі` stay dark and restrained.
+- Issue/confirmation actions use the amber primary treatment.
+- Return completion uses the green success treatment and must never be neutralized by a generic secondary-button selector.
+- Corrective/destructive actions remain secondary or behind `Ще`; they do not compete with the next required operational action.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px `Прийняти повернення` is visibly stronger than `Деталі`.
+- `Видати техніку` and `Прийняти повернення` remain visually distinct from each other and from neutral actions.
+- Future visual changes must preserve action meaning, not only button geometry.
