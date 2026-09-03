@@ -4,6 +4,8 @@ import fs from 'node:fs';
 const runtime=fs.readFileSync(new URL('../assets/admin-v250.js',import.meta.url),'utf8');
 const sw=fs.readFileSync(new URL('../admin/sw.js',import.meta.url),'utf8');
 const css=fs.readFileSync(new URL('../assets/admin-v250.css',import.meta.url),'utf8');
+const nativeRuntime=fs.readFileSync(new URL('../assets/admin-v430.js',import.meta.url),'utf8');
+const nativeCss=fs.readFileSync(new URL('../assets/admin-v430.css',import.meta.url),'utf8');
 const html=fs.readFileSync(new URL('../admin/bronuvannia/index.html',import.meta.url),'utf8');
 const manifest=JSON.parse(fs.readFileSync(new URL('../admin/manifest.webmanifest',import.meta.url),'utf8'));
 const rootRetireSw=fs.readFileSync(new URL('../sw.js',import.meta.url),'utf8');
@@ -51,6 +53,11 @@ ok(css.includes('.mobile-more-logout{width:100%'),'mobile logout has an explicit
 ok(runtime.includes("state.listScroll=$('.main')?.scrollTop||0"),'detail captures main scroll container');
 ok(runtime.includes('void main.offsetHeight;main.scrollTop=restoreTop'),'detail restores list position after layout');
 
+ok(runtime.includes('const LIVE_BOOKING_SYNC_MS=15000'),'operational bookings/expenses auto-refresh every 15 seconds');
+ok(runtime.includes('async function refreshAllData({notify=true}={})')&&runtime.includes('window.VACLEANER_REFRESH_DATA=()=>refreshAllData({notify:true})'),'runtime exposes an explicit full manual data refresh');
+ok(runtime.includes("invokeData({action:'clients'})")&&runtime.includes("invokeData({action:'campaigns'})"),'full refresh includes clients and campaigns, not only bookings');
+ok(nativeRuntime.includes("className='native-data-refresh'")&&nativeRuntime.includes("Автоматично кожні 15 с"),'mobile More exposes the manual refresh control and explains auto-refresh');
+ok(nativeCss.includes('v4.3.3 — manual full data refresh')&&nativeCss.includes('.native-data-refresh'),'manual refresh has an explicit contained mobile visual contract');
 ok(runtime.includes('function syncDisplayMode()')&&runtime.includes('pwa-standalone'),'standalone PWA is detected separately from Safari');
 ok(runtime.includes('lockStandaloneZoom')&&runtime.includes("e.touches?.length>1"),'standalone PWA intentionally blocks pinch zoom to keep the manager UI static');
 ok(runtime.includes('booking-client-link')&&runtime.includes('openBookingClient'),'booking client block opens the client card');
