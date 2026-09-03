@@ -3849,3 +3849,23 @@ The final archive may be handed off only after the aggregate status is recorded 
 - At 320 / 390 / 430 px Upcoming extra names remain readable and contained inside the card.
 - The old pseudo-label/icon are suppressed in the production Native layer.
 - Static regression verifies Upcoming reuses the same compact extra-label resolver as Booking cards.
+
+
+# 59. Change record — v4.3.3 MANUAL DATA REFRESH
+
+### CHANGED
+
+- Operational bookings and expense data continue to auto-refresh every 15 seconds while the admin is active, and also resync when the app becomes visible/focused again.
+- Mobile `Ще` now includes an explicit `Оновити дані` action for a manager-controlled full refresh.
+- Manual refresh reloads bookings, expenses, calendar, clients, campaigns and expiring referral rewards, then rerenders the current view without requiring an app restart.
+- The refresh control explains the existing 15-second automatic sync so the manager knows the button is a fallback/force-refresh, not the primary data path.
+
+### PRESERVED
+
+- Booking state transitions, finance formulas, pricing, deposits, delivery, availability, SMS, referral economics and Supabase schemas are unchanged.
+- Primary mobile screens stay uncluttered; manual refresh lives under `Ще`.
+
+### ACCEPTANCE
+
+- Static QA must verify the 15-second live-sync contract and explicit full-refresh export.
+- Browser QA must verify the mobile refresh button exists, triggers bookings/calendar/clients/campaigns/referral refresh requests, and does not create horizontal overflow.
