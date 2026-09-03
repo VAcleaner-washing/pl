@@ -4000,8 +4000,10 @@ html.native-v28 .upcoming-main>small.upcoming-handoff.delivery{
   display:flex!important;
   align-items:center!important;
   gap:8px!important;
+  width:100%!important;
   min-width:0!important;
   max-width:100%!important;
+  overflow:hidden!important;
 }
 html.native-v28 .upcoming-delivery-icon{
   display:inline-flex!important;
@@ -4026,8 +4028,10 @@ html.native-v28 .upcoming-delivery-icon svg{
 }
 html.native-v28 .upcoming-handoff-copy{
   display:block!important;
+  flex:1 1 0%!important;
+  width:0!important;
   min-width:0!important;
-  max-width:100%!important;
+  max-width:none!important;
   overflow:hidden!important;
   text-overflow:ellipsis!important;
   white-space:nowrap!important;
