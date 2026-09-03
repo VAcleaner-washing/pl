@@ -7048,7 +7048,7 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
     position:fixed;
     top:auto;
     right:auto;
-    bottom:calc(var(--pwa-safe-bottom) + 14px);
+    bottom:calc(var(--pwa-safe-bottom) + 2px);
     left:50%;
     margin-top:0;
     transform:translateX(-50%);
