@@ -266,7 +266,9 @@
       const deliveryLink=delivery?.querySelector('a');
       const deliveryAddress=cleanText(deliveryLink||deliveryPs[1]);
       const access=cleanText(delivery?.querySelector('.detail-delivery-detail strong'));
-      const extrasText=extras?[...extras.querySelectorAll('div')].map(n=>{const a=cleanText(n.querySelector('span'));const b=cleanText(n.querySelector('strong'));return [a,b].filter(Boolean).join(' · ')}).join(' · '):'';
+      const deliveryDistance=cleanText(delivery?.querySelector('[data-detail-route-distance] strong'));
+      const deliveryAddressHtml=deliveryLink?`<div class="native-detail-address">${deliveryLink.outerHTML}</div>`:`<strong class="native-detail-address">${deliveryAddress||deliveryPrice||'—'}</strong>`;
+      const extrasRows=extras?[...extras.querySelectorAll(':scope > div')].map(n=>{const label=cleanText(n.querySelector('span'));const price=cleanText(n.querySelector('strong'));return label?`<div class="native-detail-money-line"><span>${label}</span><b>${price||'—'}</b></div>`:''}).join(''):'';
       const giftText=gift?[...gift.querySelectorAll('div')].map(n=>cleanText(n)).join(' · '):'';
       const noteText=cleanText(managerNote?.querySelector('p')||customerComment?.querySelector('p'));
       let payRows='';
@@ -274,18 +276,25 @@
         const rows=[...finance.querySelectorAll('.money-row')].filter(r=>!r.classList.contains('received-total')&&!r.classList.contains('expenses-total')).slice(0,3);
         payRows=rows.map(r=>{let label=cleanText(r.querySelector('span'));if(label.startsWith('Передоплата'))label='Передоплата';else if(label.startsWith('Фактичний залоговий'))label='Залог';else if(label.startsWith('Оренда'))label='Оренда';return `<div class="native-pay-line"><span>${label}</span><b>${cleanText(r.querySelector('strong'))}</b></div>`}).join('');
       }
+      const deliveryMeta=deliveryTitle.toLowerCase().includes('доставка')?`<div class="native-detail-money-lines">${deliveryDistance?`<div class="native-detail-money-line native-detail-distance-line" data-native-detail-distance><span>Відстань до точки</span><b>${deliveryDistance}</b></div>`:''}${deliveryPrice?`<div class="native-detail-money-line"><span>Доставка</span><b>${deliveryPrice}</b></div>`:''}</div>`:'';
       const row=(icon,label,body,extra='',attrs='')=>`<div class="native-detail-info-row" ${attrs}><i aria-hidden="true">${iconSvg(icon)}</i><div><small>${label}</small>${body}${extra}</div></div>`;
       card.innerHTML=[
         row('date','Дата і час',`<strong class="native-period">${period.includes('→')?period.split('→').map((x,i)=>`<span>${i?'→ ':''}${x.trim()}</span>`).join(''):(period||'—')}</strong>`,'','data-v2-date="1"'),
         row('equipment','Техніка',`<strong>${product||'—'}</strong>`),
-        row('client','Клієнт',`<strong>${titleCaseDisplay(clientName)||'—'}</strong>${phone?`<a href="tel:${phone.replace(/\s/g,'')}">${formatPhone(phone)}</a>`:''}`),
-        row('delivery',deliveryTitle||'Видача',`<strong>${deliveryAddress||deliveryPrice||'—'}</strong>${access?`<span>${access}</span>`:''}${deliveryPrice&&deliveryAddress?`<span>${deliveryPrice}</span>`:''}`),
-        extrasText?row('extras','Додаткова хімія',`<strong>${extrasText}</strong>`):'',
+        row('client','Клієнт',`<strong>${titleCaseDisplay(clientName)||'—'}</strong>${phone?`<a href="tel:${phone.replace(/\s/g,'')}">${formatPhone(phone)}</a>`:''}`,'','data-native-detail-client role="button" tabindex="0"'),
+        row('delivery',deliveryTitle||'Видача',`${deliveryAddressHtml}${access?`<span class="native-detail-access">${access}</span>`:''}${deliveryMeta}`),
+        extrasRows?row('extras','Додатково',`<div class="native-detail-money-lines native-detail-extras">${extrasRows}</div>`):'',
         giftText?row('gift','Подарунок',`<strong>${giftText}</strong>`):'',
         payRows?row('payment','Оплата',`<div class="native-payments">${payRows}</div>`):'',
         noteText?row('note','Примітка',`<strong>${noteText}</strong>`):''
       ].join('');
       hero?.insertAdjacentElement('afterend',card);
+      const nativeClient=card.querySelector('[data-native-detail-client]');
+      if(nativeClient&&client){
+        nativeClient.setAttribute('aria-label',`Відкрити картку клієнта ${clientName||''}`);
+        nativeClient.addEventListener('click',event=>{if(event.target.closest('a'))return;client.click()});
+        nativeClient.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&!event.target.closest('a')){event.preventDefault();client.click()}});
+      }
       const stack=document.createElement('section');
       stack.className='native-detail-stack';
       stack.dataset.status=statusClass;
