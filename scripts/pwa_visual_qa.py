@@ -1168,6 +1168,28 @@ def finance_preview_native_suite(browser: Browser, qa: QA) -> None:
     finally:
         BOOKINGS[3].clear();BOOKINGS[3].update(original)
 
+
+def operational_cta_hierarchy_suite(browser: Browser, qa: QA) -> None:
+    css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+    html="""<!doctype html><html class='native-test native-v28'><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body>
+    <article class='upcoming-row return'><div class='upcoming-actions'><button class='btn subtle' data-up='open'>Деталі</button><button class='btn green' data-up='complete'>Прийняти повернення</button></div></article>
+    <article class='upcoming-row issue'><div class='upcoming-actions'><button class='btn subtle' data-up='open'>Деталі</button><button class='btn primary' data-up='issue'>Видати техніку</button></div></article>
+    </body></html>"""
+    for width in (320,390,430):
+        page=browser.new_page(viewport={"width":width,"height":844},is_mobile=True)
+        try:
+            page.set_content(html)
+            page.add_style_tag(content=css)
+            styles=page.locator('.upcoming-row.return [data-up="complete"]').evaluate("""el=>{const s=getComputedStyle(el);return{bg:s.backgroundImage,bgc:s.backgroundColor,color:s.color,border:s.borderTopColor,font:s.fontWeight}}""")
+            neutral=page.locator('.upcoming-row.return [data-up="open"]').evaluate("""el=>{const s=getComputedStyle(el);return{bg:s.backgroundImage,bgc:s.backgroundColor,color:s.color}}""")
+            issue=page.locator('.upcoming-row.issue [data-up="issue"]').evaluate("""el=>{const s=getComputedStyle(el);return{bg:s.backgroundImage,bgc:s.backgroundColor,color:s.color}}""")
+            qa.check(styles['bg']!='none' and (styles['bg']!=neutral['bg'] or styles['bgc']!=neutral['bgc']), f"CTA {width}: return action is visually highlighted above neutral Details")
+            qa.check(issue['bg']!='none' and (issue['bg']!=neutral['bg'] or issue['bgc']!=neutral['bgc']), f"CTA {width}: issue action remains visually primary")
+            qa.check(styles['bg']!=issue['bg'] or styles['bgc']!=issue['bgc'], f"CTA {width}: return and issue actions keep distinct semantic emphasis")
+        finally:
+            page.close()
+
+
 def public_date_suite(browser: Browser, qa: QA) -> None:
     page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
     try:
@@ -1301,6 +1323,7 @@ def main() -> int:
             upcoming_extra_identity_suite(browser, qa)
             booking_detail_native_suite(browser, qa)
             finance_preview_native_suite(browser, qa)
+            operational_cta_hierarchy_suite(browser, qa)
             public_date_suite(browser, qa)
             public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
