@@ -3887,7 +3887,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Booking source copy is explicit (`Джерело · …`) so values such as `Телефон` are not mistaken for missing client data.
 - Issued-booking actions use one full-width primary return CTA followed by balanced secondary actions.
 - In `Попередній розрахунок`, the complete money breakdown appears before the preliminary settlement result, the manual control is named `Знижка на оренду`, and the discount exclusion note is concise and scroll-safe above the footer.
-- The finance breakdown always keeps `Додатково` visible, including a `0 грн` state, so the five-part money structure stays stable and predictable.
+- The finance breakdown always keeps `Додатково` visible, including a `0 грн` state, so the five-part money structure stays stable and predictable.\n- Mobile finance live-summary uses the short manager-facing deposit label `Залог`; verbose deposit wording must not replace or hide that row.
 
 ### PRESERVED
 
@@ -3900,7 +3900,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - At 320 / 390 / 430 px the mobile detail order is deterministic and all five finance amounts align to the same right edge without clipping.
 - A known one-way route distance is visible in booking detail and updates after an in-place route refresh.
 - Tapping the client row opens the client card while the telephone remains a separate call action.
-- `Попередній розрахунок` shows the full breakdown before the refund/due result and its explanatory note is not hidden behind the fixed footer.
+- `Попередній розрахунок` shows the full breakdown before the refund/due result and its explanatory note is not hidden behind the fixed footer.\n- At 320 / 390 / 430 px the `Залог` row is present in both booking-detail finance and the live finance summary, and the center `Нове` action is fully inside bottom navigation while `Ще` is open.
 
 
 # 61. Change record — v4.3.3 OPERATIONAL CTA HIERARCHY
