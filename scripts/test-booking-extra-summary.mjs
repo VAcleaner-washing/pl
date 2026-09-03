@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 const admin=fs.readFileSync('assets/admin-v250.js','utf8');
 const css=fs.readFileSync('assets/admin-v250.css','utf8');
+const nativeCss=fs.readFileSync('assets/admin-v430.css','utf8');
 let passed=0;const ok=(value,label)=>{if(!value)throw new Error(`FAIL: ${label}`);passed++};
 ok(admin.includes('const ADMIN_EXTRA_LABELS=Object.freeze({'),'admin defines compact manager-facing extra labels');
 ok(admin.includes("spot_lifter:'SPOT FIX 50 мл'")&&admin.includes("stain_exit:'STAIN OX 30 мл'")&&admin.includes("neutralix:'Neutralix 250 мл'"),'common cleaning extras keep practical compact names');
@@ -8,9 +9,12 @@ ok(admin.includes('function extrasHeaderInline(b)'),'booking header extras use a
 ok(admin.includes('headerExtras=extrasHeaderInline(b)'),'booking card computes extra summary once');
 ok(admin.includes('class="booking-identity-extras"'),'booking card renders selected extras next to booking identity');
 ok(admin.includes("mobileFlags=`${customerComment?'<span>Коментар</span>':''}`")&&!admin.includes("mobileFlags=`${getSelectedExtras(b).length?'<span>Додатково</span>':''}"),'mobile no longer replaces extra names with a generic “Додатково” badge');
-ok(admin.includes("extraText=extras.length===1?`${adminExtraLabel(extras[0])}"),'upcoming uses compact extra names too');
+ok(admin.includes('extraText=extrasHeaderInline(b)'),'upcoming reuses the same names-only extra resolver as booking cards');
+ok(admin.includes('class="upcoming-extra"><i aria-hidden="true">+</i><span>${h(extraText)}</span>'),'upcoming renders selected extras directly under the equipment identity');
+ok(!admin.includes("extraText=extras.length===1?`${adminExtraLabel(extras[0])} · ${money(extraSum)}`"),'upcoming identity summary does not duplicate extra prices');
 ok(admin.includes('<article class="card panel extras-panel"><h3>Додатково</h3>'),'detail keeps the full extras panel with prices');
 ok(css.includes('/* v4.0.96 — show selected extras where the manager identifies the booking.'),'v4.0.96 extras-at-a-glance CSS layer exists');
 ok(css.includes('.booking-identity-extras{')&&css.includes('font-size:11.5px'),'header extras stay readable rather than micro-sized');
 ok(css.includes('@media(max-width:390px)')&&css.includes('.booking-card .booking-identity-extras{font-size:11px}'),'small-phone extra names keep an explicit readable floor');
+ok(nativeCss.includes('Upcoming extras use the same identity pattern as Booking cards')&&nativeCss.includes('.upcoming-extra::after')&&nativeCss.includes('content:none!important'),'production Native CSS suppresses the old generic “Дод. хімія” pseudo-label');
 console.log(`Booking extra summary PASS: ${passed} checks.`);
