@@ -3872,3 +3872,25 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Mobile `Найближчі` keeps the callable phone directly under the customer name and renders the `📞` handset immediately beside the formatted number on the same baseline.
 - Mobile `Найближчі` delivery metadata uses a dedicated outlined van icon beside `Доставка`, replacing the ambiguous legacy location glyph while preserving the route link.
 - While the mobile `Ще` sheet is open, the raised center `Нове` circle is lowered fully inside the bottom navigation so it cannot overlap the sheet; closing `Ще` restores the raised primary-action geometry.
+
+
+# 60. Change record — v4.3.3 BOOKING DETAIL MOBILE
+
+### CHANGED
+
+- Mobile booking detail uses one consistent right-aligned value axis for delivery price, selected extras and payment amounts.
+- Delivery keeps the route address/action, shows access/orientation text, and adds a dedicated one-way `Відстань до точки` metric from the stored route snapshot.
+- When a missing/stale delivery route is refreshed while the detail screen is open, the visible distance updates in place.
+- Extras use the neutral section label `Додатково`; each selected item is a separate name/value row, so equipment add-ons are never mislabeled as chemistry.
+- The visible mobile client row is an explicit keyboard/touch target that opens the client card; tapping the phone number still starts a call instead.
+
+### PRESERVED
+
+- Delivery tariff calculation, route persistence, finance formulas, extra prices, deposits, settlement, booking state transitions and Supabase write contracts are unchanged.
+- The delivery address remains directly navigable.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px delivery, extras and payment amounts align to the same right edge without clipping.
+- A known one-way route distance is visible in booking detail and updates after an in-place route refresh.
+- Tapping the client row opens the client card while the telephone remains a separate call action.
