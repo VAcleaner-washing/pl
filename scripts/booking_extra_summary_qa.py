@@ -52,7 +52,9 @@ with sync_playwright() as pw:
         else:page.locator('.nav button[data-view="upcoming"]').click()
         page.wait_for_timeout(50)
         up=page.locator('.upcoming-extra').first
-        check(results,up.count()==1 and 'SPOT FIX 50 мл' in up.inner_text().replace('\u00a0',' '),f'{w}: upcoming also surfaces compact extra names')
+        up_text=up.inner_text().replace('\u00a0',' ').replace('\n',' ').strip() if up.count() else ''
+        check(results,up.count()==1 and all(x in up_text for x in ['SPOT FIX 50 мл','STAIN OX 30 мл','Neutralix 250 мл']),f'{w}: upcoming mirrors booking extra names')
+        check(results,'грн' not in up_text and 'Дод. хімія' not in up_text,f'{w}: upcoming identity extras do not duplicate price or generic chemistry label')
         check(results,pwa.no_overflow(page),f'{w}: upcoming stays inside viewport with extra names')
         page.close()
     browser.close()
