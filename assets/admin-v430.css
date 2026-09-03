@@ -3921,3 +3921,47 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
     font-weight:520!important;
   }
 }
+
+
+/* v4.3.3 — booking/detail/return UX consolidation. */
+@media(max-width:900px){
+  html.native-v28 .booking-origin-row{margin-top:5px!important;font-size:10.5px!important;color:#858d91!important}
+  html.native-v28 .booking-card[data-v22-status="issued"] .booking-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 48px!important;gap:8px!important}
+  html.native-v28 .booking-card[data-v22-status="issued"] .booking-actions>.primary-action{grid-column:1/-1!important}
+  html.native-v28 .booking-card[data-v22-status="issued"] .booking-action-secondary{grid-column:auto!important;min-width:0!important;padding-inline:8px!important;white-space:normal!important;line-height:1.12!important}
+  html.native-v28 .booking-card[data-v22-status="issued"] .booking-action-more{grid-column:3!important;min-width:48px!important}
+  html.native-v28 .booking-card[data-v22-status="issued"] .booking-action-more>summary em{display:none!important}
+
+  html.native-v28 .native-detail-extra-list{display:grid!important;gap:5px!important;min-width:0!important}
+  html.native-v28 .native-detail-extra-name{color:#d9c39d!important;font-size:14px!important;font-weight:540!important}
+  html.native-v28 .native-detail-distance-line{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:14px!important;align-items:baseline!important;margin-top:7px!important;padding-top:8px!important;border-top:1px solid rgba(255,255,255,.055)!important}
+  html.native-v28 .native-detail-distance-line span{color:#9ba2a6!important;font-size:13px!important}
+  html.native-v28 .native-detail-distance-line b{justify-self:end!important;color:#e6e5e1!important;font-size:13px!important;font-weight:560!important;white-space:nowrap!important}
+
+  html.native-v28 .finance-form .native-finance-breakdown{width:100%!important;margin:14px 0 0!important;padding:12px 13px!important;border:1px solid rgba(255,255,255,.085)!important;border-radius:14px!important;background:#0d1316!important;box-shadow:none!important}
+  html.native-v28 .finance-form .native-finance-breakdown>h3{margin:0 0 9px!important;font-size:13px!important;font-weight:600!important;color:#aab0b3!important}
+  html.native-v28 .finance-form .native-finance-breakdown .live{display:grid!important;gap:0!important}
+  html.native-v28 .finance-form .native-finance-breakdown .live>div{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:12px!important;align-items:baseline!important;padding:7px 0!important;border:0!important;border-top:1px solid rgba(255,255,255,.055)!important;background:transparent!important}
+  html.native-v28 .finance-form .native-finance-breakdown .live>div:first-child{border-top:0!important}
+  html.native-v28 .finance-form .native-finance-breakdown .live span{min-width:0!important;color:#cfd2d1!important;font-size:12.5px!important;line-height:1.3!important}
+  html.native-v28 .finance-form .native-finance-breakdown .live strong{justify-self:end!important;white-space:nowrap!important;font-size:13px!important;font-weight:590!important}
+  html.native-v28 .finance-form .native-finance-breakdown .received-total,
+  html.native-v28 .finance-form .native-finance-breakdown .expenses-total{background:transparent!important}
+  html.native-v28 .finance-form .native-finance-breakdown .balance{margin-top:3px!important;padding-top:9px!important}
+
+  html.native-v28 .finance-form .manual-discount-editor{margin-top:12px!important;padding:12px 0 0!important;border:0!important;border-top:1px solid rgba(255,255,255,.065)!important;border-radius:0!important;background:transparent!important}
+  html.native-v28 .finance-form .manual-discount-head{margin-bottom:8px!important}
+  html.native-v28 .finance-form .manual-discount-head b{font-size:14px!important}
+  html.native-v28 .finance-form .discount-live-preview{min-height:0!important;margin-top:8px!important;padding:8px 10px!important;border-radius:10px!important}
+  html.native-v28 .finance-form .deposit-return-box{margin-top:12px!important}
+  html.native-v28 .finance-form .deposit-return-box>div:first-child{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:6px 12px!important;align-items:start!important}
+  html.native-v28 .finance-form .deposit-return-box #settlementHeadline{justify-self:end!important;max-width:170px!important;text-align:right!important;font-size:22px!important;line-height:1.12!important}
+  html.native-v28 .finance-form .deposit-return-box>div:first-child>span{grid-column:1/-1!important}
+  html.native-v28 .finance-form .note{margin-bottom:16px!important;font-size:11.5px!important;line-height:1.45!important}
+  html.native-v28 .finance-form .modal-layout{padding-bottom:calc(92px + var(--pwa-safe-bottom))!important}
+}
+@media(max-width:359px){
+  html.native-v28 .booking-card[data-v22-status="issued"] .booking-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px!important}
+  html.native-v28 .booking-card[data-v22-status="issued"] .booking-action-more{min-width:44px!important}
+  html.native-v28 .finance-form .deposit-return-box #settlementHeadline{max-width:145px!important;font-size:20px!important}
+}
