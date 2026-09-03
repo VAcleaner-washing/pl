@@ -3723,3 +3723,34 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
   html.native-v28 .native-data-refresh:disabled{opacity:.72!important}
 }
 @keyframes v43-refresh-spin{to{transform:rotate(360deg)}}
+
+
+/* v4.3.3 — explicit manual data refresh in mobile More. */
+@media(max-width:900px){
+  html.native-v28 .native-data-refresh{
+    display:grid!important;
+    grid-template-columns:34px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:11px!important;
+    width:100%!important;
+    min-height:58px!important;
+    margin:0 0 12px!important;
+    padding:10px 13px!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    border-radius:15px!important;
+    background:#11171a!important;
+    color:#eceae5!important;
+    text-align:left!important;
+  }
+  html.native-v28 .native-data-refresh>i{
+    width:34px!important;height:34px!important;display:grid!important;place-items:center!important;
+    border:1px solid rgba(230,180,95,.22)!important;border-radius:11px!important;
+    color:#e8b85f!important;font-size:20px!important;font-style:normal!important;
+  }
+  html.native-v28 .native-data-refresh>span{display:grid!important;gap:2px!important;min-width:0!important}
+  html.native-v28 .native-data-refresh b{font-size:13px!important;font-weight:610!important}
+  html.native-v28 .native-data-refresh small{font-size:10px!important;color:#878f93!important;font-weight:450!important}
+  html.native-v28 .native-data-refresh.busy>i{animation:v43-refresh-spin .75s linear infinite}
+  html.native-v28 .native-data-refresh:disabled{opacity:.65!important}
+}
+@keyframes v43-refresh-spin{to{transform:rotate(360deg)}}
