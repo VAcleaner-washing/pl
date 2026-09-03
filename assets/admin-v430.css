@@ -3684,3 +3684,42 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
 @media(max-width:390px){
   html.native-v28 .upcoming-row .upcoming-extra{font-size:11px!important}
 }
+
+
+/* v4.3.3 — manual full data refresh lives in More without cluttering primary screens. */
+@media(max-width:900px){
+  html.native-v28 .native-data-refresh{
+    width:100%!important;
+    min-height:54px!important;
+    margin:0 0 12px!important;
+    padding:9px 13px!important;
+    display:grid!important;
+    grid-template-columns:32px minmax(0,1fr)!important;
+    align-items:center!important;
+    gap:10px!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    border-radius:15px!important;
+    background:#0f1518!important;
+    color:#e7e7e3!important;
+    text-align:left!important;
+    box-shadow:none!important;
+  }
+  html.native-v28 .native-data-refresh>i{
+    width:32px!important;
+    height:32px!important;
+    display:grid!important;
+    place-items:center!important;
+    border-radius:10px!important;
+    background:rgba(230,180,95,.08)!important;
+    color:var(--nt-gold-2,#efbd61)!important;
+    font-size:20px!important;
+    font-style:normal!important;
+    line-height:1!important;
+  }
+  html.native-v28 .native-data-refresh>span{display:grid!important;gap:2px!important;min-width:0!important}
+  html.native-v28 .native-data-refresh b{font-size:13px!important;font-weight:600!important;line-height:1.2!important}
+  html.native-v28 .native-data-refresh small{font-size:10.5px!important;font-weight:450!important;color:#8f979b!important;line-height:1.25!important}
+  html.native-v28 .native-data-refresh.busy>i{animation:v43-refresh-spin .8s linear infinite!important}
+  html.native-v28 .native-data-refresh:disabled{opacity:.72!important}
+}
+@keyframes v43-refresh-spin{to{transform:rotate(360deg)}}
