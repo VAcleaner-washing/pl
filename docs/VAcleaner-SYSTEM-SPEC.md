@@ -3869,3 +3869,4 @@ The final archive may be handed off only after the aggregate status is recorded 
 
 - Static QA must verify the 15-second live-sync contract and explicit full-refresh export.
 - Browser QA must verify the mobile refresh button exists, triggers bookings/calendar/clients/campaigns/referral refresh requests, and does not create horizontal overflow.
+- Mobile `Найближчі` keeps the callable phone directly under the customer name and renders the `📞` handset immediately beside the formatted number on the same baseline.
