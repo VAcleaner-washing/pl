@@ -267,25 +267,40 @@
       const deliveryAddress=cleanText(deliveryLink||deliveryPs[1]);
       const access=cleanText(delivery?.querySelector('.detail-delivery-detail strong'));
       const deliveryDistance=cleanText(delivery?.querySelector('[data-detail-route-distance] strong'));
-      const deliveryAddressHtml=deliveryLink?`<div class="native-detail-address">${deliveryLink.outerHTML}</div>`:`<strong class="native-detail-address">${deliveryAddress||deliveryPrice||'—'}</strong>`;
-      const extrasRows=extras?[...extras.querySelectorAll(':scope > div')].map(n=>{const label=cleanText(n.querySelector('span'));const price=cleanText(n.querySelector('strong'));return label?`<div class="native-detail-money-line"><span>${label}</span><b>${price||'—'}</b></div>`:''}).join(''):'';
+      const deliveryAddressHtml=deliveryLink?`<div class="native-detail-address">${deliveryLink.outerHTML}</div>`:`<strong class="native-detail-address">${deliveryAddress||'—'}</strong>`;
+      const extraItems=extras?[...extras.querySelectorAll(':scope > div')].map(n=>({label:cleanText(n.querySelector('span')),price:cleanText(n.querySelector('strong'))})).filter(x=>x.label):[];
+      const extrasNames=extraItems.map(x=>`<strong class="native-detail-extra-name">+ ${x.label}</strong>`).join('');
       const giftText=gift?[...gift.querySelectorAll('div')].map(n=>cleanText(n)).join(' · '):'';
       const noteText=cleanText(managerNote?.querySelector('p')||customerComment?.querySelector('p'));
       let payRows='';
       if(finance){
-        const rows=[...finance.querySelectorAll('.money-row')].filter(r=>!r.classList.contains('received-total')&&!r.classList.contains('expenses-total')).slice(0,3);
-        payRows=rows.map(r=>{let label=cleanText(r.querySelector('span'));if(label.startsWith('Передоплата'))label='Передоплата';else if(label.startsWith('Фактичний залоговий'))label='Залог';else if(label.startsWith('Оренда'))label='Оренда';return `<div class="native-pay-line"><span>${label}</span><b>${cleanText(r.querySelector('strong'))}</b></div>`}).join('');
+        const rows=[...finance.querySelectorAll('.money-row')];
+        const data=rows.map(r=>({node:r,label:cleanText(r.querySelector('span')),amount:cleanText(r.querySelector('strong'))}));
+        const pick=(test)=>data.find(test);
+        const pre=pick(x=>x.label.startsWith('Передоплата'));
+        const dep=pick(x=>x.label.startsWith('Фактичний залоговий'));
+        const rental=pick(x=>x.label.startsWith('Оренда після знижки'))||pick(x=>x.label==='Оренда')||pick(x=>x.label.startsWith('Оренда до знижки'));
+        const extra=pick(x=>x.node.classList.contains('finance-extra-row'));
+        const deliveryMoney=pick(x=>x.label==='Доставка');
+        const line=(label,item)=>item?`<div class="native-pay-line"><span>${label}</span><b>${item.amount}</b></div>`:'';
+        payRows=[
+          line('Передоплата',pre),
+          line('Залог',dep),
+          line('Оренда',rental),
+          line('Додатково',extra),
+          line('Доставка',deliveryMoney)
+        ].join('');
       }
-      const deliveryMeta=deliveryTitle.toLowerCase().includes('доставка')?`<div class="native-detail-money-lines">${deliveryDistance?`<div class="native-detail-money-line native-detail-distance-line" data-native-detail-distance><span>Відстань до точки</span><b>${deliveryDistance}</b></div>`:''}${deliveryPrice?`<div class="native-detail-money-line"><span>Доставка</span><b>${deliveryPrice}</b></div>`:''}</div>`:'';
+      const deliveryMeta=deliveryTitle.toLowerCase().includes('доставка')&&deliveryDistance?`<div class="native-detail-distance-line" data-native-detail-distance><span>Відстань до точки</span><b>${deliveryDistance}</b></div>`:'';
       const row=(icon,label,body,extra='',attrs='')=>`<div class="native-detail-info-row" ${attrs}><i aria-hidden="true">${iconSvg(icon)}</i><div><small>${label}</small>${body}${extra}</div></div>`;
       card.innerHTML=[
         row('date','Дата і час',`<strong class="native-period">${period.includes('→')?period.split('→').map((x,i)=>`<span>${i?'→ ':''}${x.trim()}</span>`).join(''):(period||'—')}</strong>`,'','data-v2-date="1"'),
         row('equipment','Техніка',`<strong>${product||'—'}</strong>`),
+        extrasNames?row('extras','Додатково',`<div class="native-detail-extra-list">${extrasNames}</div>`):'',
+        giftText?row('gift','Подарунок',`<strong>${giftText}</strong>`):'',
         row('client','Клієнт',`<strong>${titleCaseDisplay(clientName)||'—'}</strong>${phone?`<a href="tel:${phone.replace(/\s/g,'')}">${formatPhone(phone)}</a>`:''}`,'','data-native-detail-client role="button" tabindex="0"'),
         row('delivery',deliveryTitle||'Видача',`${deliveryAddressHtml}${access?`<span class="native-detail-access">${access}</span>`:''}${deliveryMeta}`),
-        extrasRows?row('extras','Додатково',`<div class="native-detail-money-lines native-detail-extras">${extrasRows}</div>`):'',
-        giftText?row('gift','Подарунок',`<strong>${giftText}</strong>`):'',
-        payRows?row('payment','Оплата',`<div class="native-payments">${payRows}</div>`):'',
+        payRows?row('payment','Фінанси',`<div class="native-payments">${payRows}</div>`):'',
         noteText?row('note','Примітка',`<strong>${noteText}</strong>`):''
       ].join('');
       hero?.insertAdjacentElement('afterend',card);
@@ -360,12 +375,32 @@
     });
   }
 
+  function enhanceFinanceModal(){
+    if(!mobile())return;
+    const form=document.querySelector('.finance-form');
+    if(!form||form.dataset.v43FinanceUx==='1')return;
+    form.dataset.v43FinanceUx='1';
+    const section=form.querySelector('.modal-section');
+    const summary=form.querySelector('.modal-summary');
+    const settlement=section?.querySelector('.deposit-return-box');
+    if(summary&&section&&settlement){
+      summary.classList.add('native-finance-breakdown');
+      const title=summary.querySelector('h3');if(title)title.textContent='Фінансовий розрахунок';
+      settlement.insertAdjacentElement('beforebegin',summary);
+    }
+    const editor=form.querySelector('.manual-discount-editor');
+    const editorTitle=editor?.querySelector('.manual-discount-head b');if(editorTitle)editorTitle.textContent='Знижка на оренду';
+    const note=section?.querySelector('.note');
+    if(note)note.textContent='Знижка застосовується лише до оренди. Доставка, додаткові позиції, хімія та залоговий платіж рахуються без знижки.';
+  }
+
   function enhance(){
     enhanceShell();
     enhanceUpcoming();
     enhanceBookings();
     enhanceMore();
     enhanceDetail();
+    enhanceFinanceModal();
     enhanceNativeViews();
     enhanceV2Cleanup();
   }
