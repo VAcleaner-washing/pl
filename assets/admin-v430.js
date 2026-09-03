@@ -182,6 +182,29 @@
       const grid=menu.querySelector('.mobile-more-grid');
       grid?.insertAdjacentElement('beforebegin',card);
     }
+    if(!menu.querySelector('.native-data-refresh')){
+      const refresh=document.createElement('button');
+      refresh.type='button';
+      refresh.className='native-data-refresh';
+      refresh.setAttribute('aria-label','Оновити дані');
+      refresh.innerHTML='<i aria-hidden="true">↻</i><span><b>Оновити дані</b><small>Автоматично кожні 15 с</small></span>';
+      refresh.onclick=async()=>{
+        if(refresh.disabled)return;
+        const small=refresh.querySelector('small'),icon=refresh.querySelector('i');
+        refresh.disabled=true;refresh.classList.add('busy');if(small)small.textContent='Оновлюємо…';if(icon)icon.textContent='↻';
+        try{
+          if(typeof window.VACLEANER_REFRESH_DATA!=='function')throw new Error('Оновлення даних недоступне');
+          await window.VACLEANER_REFRESH_DATA();
+          if(small)small.textContent='Оновлено щойно';
+          setTimeout(()=>{if(small?.isConnected)small.textContent='Автоматично кожні 15 с'},1800);
+        }catch(err){
+          if(small)small.textContent='Не вдалося оновити';
+          toastSafe(err?.message||'Не вдалося оновити дані');
+        }finally{refresh.disabled=false;refresh.classList.remove('busy')}
+      };
+      const grid=menu.querySelector('.mobile-more-grid');
+      grid?.insertAdjacentElement('beforebegin',refresh);
+    }
     menu.querySelectorAll('[data-more-view]').forEach(btn=>{
       if(btn.querySelector('small'))return;
       const id=btn.dataset.moreView;
