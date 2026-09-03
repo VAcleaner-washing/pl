@@ -3965,3 +3965,31 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
   html.native-v28 .booking-card[data-v22-status="issued"] .booking-action-more{min-width:44px!important}
   html.native-v28 .finance-form .deposit-return-box #settlementHeadline{max-width:145px!important;font-size:20px!important}
 }
+
+
+/* v4.3.3 — one operational CTA hierarchy across mobile booking surfaces. */
+@media(max-width:900px){
+  html.native-v28 .upcoming-actions .btn.subtle{
+    border-color:#2b3438!important;
+    background:#101619!important;
+    color:#e2e4e2!important;
+    box-shadow:none!important;
+  }
+  html.native-v28 .upcoming-row.issue .upcoming-actions [data-up="issue"],
+  html.native-v28 .upcoming-row.issue .upcoming-actions [data-up="confirm"]{
+    border-color:#e7b65f!important;
+    background:linear-gradient(180deg,#efc26f,#dca34a)!important;
+    color:#17130d!important;
+    box-shadow:0 8px 20px rgba(156,96,24,.18)!important;
+  }
+  html.native-v28 .upcoming-row.return .upcoming-actions [data-up="complete"]{
+    border-color:#2b9b66!important;
+    background:linear-gradient(180deg,#239b63,#17834f)!important;
+    color:#f3fff9!important;
+    box-shadow:0 8px 20px rgba(20,120,73,.20)!important;
+    font-weight:620!important;
+  }
+  html.native-v28 .upcoming-row.return .upcoming-actions [data-up="complete"]:active{
+    transform:translateY(1px)!important;
+  }
+}
