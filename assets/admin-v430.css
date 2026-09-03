@@ -3993,3 +3993,42 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
     transform:translateY(1px)!important;
   }
 }
+
+
+/* v4.3.3 — delivery metadata contract across tablet/desktop/mobile. */
+html.native-v28 .upcoming-main>small.upcoming-handoff.delivery{
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  min-width:0!important;
+  max-width:100%!important;
+}
+html.native-v28 .upcoming-delivery-icon{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px!important;
+  color:#92999d!important;
+  font-style:normal!important;
+}
+html.native-v28 .upcoming-delivery-icon svg{
+  display:block!important;
+  width:18px!important;
+  height:18px!important;
+  flex:0 0 18px!important;
+  fill:none!important;
+  stroke:currentColor!important;
+  stroke-width:1.7!important;
+  stroke-linecap:round!important;
+  stroke-linejoin:round!important;
+}
+html.native-v28 .upcoming-handoff-copy{
+  display:block!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
