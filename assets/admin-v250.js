@@ -339,10 +339,11 @@ function syncMobileNavActive({moreOpen=false}={}){
 function openMobileMore(){
   const items=[['equipment','Техніка',ico.tech],['clients','Клієнти',ico.clients],['campaigns','Кампанії',ico.campaign],['finances','Фінанси',ico.wallet],['analytics','Аналітика',ico.chart],['chemistry','Хімія',ico.chem],['settings','Налаштування',ico.gear]];
   const layer=$('#layer');
-  if(layer.querySelector('.mobile-more-menu')){layer.innerHTML='';syncMobileNavActive();return}
+  if(layer.querySelector('.mobile-more-menu')){layer.innerHTML='';document.documentElement.classList.remove('mobile-more-open');syncMobileNavActive();return}
+  document.documentElement.classList.add('mobile-more-open');
   syncMobileNavActive({moreOpen:true});
   layer.innerHTML=`<div class="mobile-more-menu" role="menu" aria-label="Ще"><div class="mobile-more-grid">${items.map(([id,label,icon])=>`<button type="button" role="menuitem" data-more-view="${id}" class="${state.view===id?'active':''}">${icon}<span>${label}</span></button>`).join('')}</div><button class="mobile-more-logout" type="button" role="menuitem" data-mobile-logout><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg><span>Вийти з акаунта</span></button></div>`;
-  const close=()=>{layer.innerHTML='';syncMobileNavActive();document.removeEventListener('pointerdown',outside,true)};
+  const close=()=>{layer.innerHTML='';document.documentElement.classList.remove('mobile-more-open');syncMobileNavActive();document.removeEventListener('pointerdown',outside,true)};
   const outside=e=>{if(e.target.closest('.mobile-more-menu,.more-nav'))return;close()};
   requestAnimationFrame(()=>document.addEventListener('pointerdown',outside,true));
   $$('[data-more-view]',layer).forEach(b=>b.onclick=()=>{const v=b.dataset.moreView;close();switchView(v,{clearSearch:true})});
