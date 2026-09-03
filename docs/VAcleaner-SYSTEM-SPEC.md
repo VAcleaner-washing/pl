@@ -3918,3 +3918,30 @@ The final archive may be handed off only after the aggregate status is recorded 
 - At 320 / 390 / 430 px `Прийняти повернення` is visibly stronger than `Деталі`.
 - `Видати техніку` and `Прийняти повернення` remain visually distinct from each other and from neutral actions.
 - Future visual changes must preserve action meaning, not only button geometry.
+
+
+# 62. Change record — v4.3.4 FINANCE CLARITY + SMS AUDIENCE SCROLL
+
+### CHANGED
+
+- Mobile booking cards never show an unlabeled headline finance amount. The headline amount is explicitly identified as `Разом витрати`.
+- `Попередній розрахунок` is structured into three money-direction groups: `Отримано` → `Списується` → `Підсумок`.
+- The preliminary/final summary contains an explicit result row: `До повернення клієнту`, `До доплати клієнтом` or a zero balance.
+- Finance color semantics are restrained and directional: received money uses muted green, deductions use muted terracotta/red, and the final result uses a clear state treatment without changing any formula.
+- The mobile finance breakdown is one visual surface; the redundant inner frame around the breakdown is removed.
+- On mobile SMS recipient selection, audience controls, audience counters, the `Одержувачі` heading and the client list scroll together as one continuous step surface.
+- The SMS audience list itself no longer owns a nested mobile scroll; the workflow footer stays outside that scroll surface and remains reachable.
+
+### PRESERVED
+
+- Finance formulas, deposit/prepayment values, rental/delivery/extras/chemistry calculations, discounts, settlement persistence, booking statuses and Supabase write contracts are unchanged.
+- SMS audience eligibility, consent/cooldown logic, sorting, selection, SendPulse routes and send/preflight behavior are unchanged.
+- Desktop SMS list scrolling remains unchanged.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px the booking finance headline explicitly says `Разом витрати`.
+- At 320 / 390 / 430 px the preliminary finance breakdown visibly contains `Отримано`, `Списується`, `Підсумок` and an explicit refund/due result.
+- The mobile preliminary finance breakdown has no redundant inner frame.
+- At 320 / 390 / 430 px the SMS recipient step is the single vertical scroll owner; scrolling moves the audience controls and recipients together while the footer stays outside the scrolling panel.
+- Full canonical static and browser/PWA QA remain release-blocking before merge to `main`.
