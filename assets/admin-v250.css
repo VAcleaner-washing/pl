@@ -7055,3 +7055,29 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
     margin-top:0!important;
   }
 }
+
+
+/* v4.3.3 — booking detail delivery distance is an explicit metric. */
+.detail-delivery-distance{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:baseline;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.detail-delivery-distance>span{
+  min-width:0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+}
+.detail-delivery-distance>strong{
+  justify-self:end;
+  color:var(--text);
+  font-size:13px;
+  font-weight:560;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
