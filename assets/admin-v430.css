@@ -3792,3 +3792,40 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
   }
   html.mobile-more-open .mobile-nav .mobile-new-nav span{margin-top:0!important}
 }
+
+
+/* v4.3.3 — Upcoming delivery icon + More sheet center-action clearance. */
+@media(max-width:900px){
+  html.native-v28 .upcoming-main>small.upcoming-handoff.delivery{
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:8px!important;
+    padding-left:0!important;
+  }
+  html.native-v28 .upcoming-main>small.upcoming-handoff.delivery::before{
+    display:none!important;
+    content:none!important;
+  }
+  html.native-v28 .upcoming-delivery-icon{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:18px!important;
+    height:18px!important;
+    flex:0 0 18px!important;
+    color:#92999d!important;
+    font-style:normal!important;
+  }
+  html.native-v28 .upcoming-delivery-icon svg{
+    width:18px!important;
+    height:18px!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.7!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+  }
+  html.mobile-more-open .mobile-nav .mobile-new-nav i{
+    transform:translateY(14px)!important;
+  }
+}
