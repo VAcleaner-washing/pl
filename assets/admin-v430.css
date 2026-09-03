@@ -4076,6 +4076,30 @@ html.native-v28 .upcoming-handoff-copy{
     font-weight:670!important;
     white-space:nowrap!important;
   }
+  html.native-v28 .booking-finance>.booking-finance-received-summary{
+    grid-column:1/-1!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
+    align-items:baseline!important;
+    margin:7px 0 0!important;
+    padding:8px 0 0!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+    color:#78d6a6!important;
+  }
+  html.native-v28 .booking-finance>.booking-finance-received-summary>span{
+    display:block!important;
+    color:#78d6a6!important;
+    font-size:11.5px!important;
+    font-weight:560!important;
+  }
+  html.native-v28 .booking-finance>.booking-finance-received-summary>strong{
+    justify-self:end!important;
+    color:#87ddb0!important;
+    font-size:14px!important;
+    font-weight:640!important;
+    white-space:nowrap!important;
+  }
 
   /* Preliminary calculation: one clean surface, grouped by money direction. */
   html.native-v28 .finance-form .native-finance-breakdown{
