@@ -74,6 +74,12 @@ ok(css.includes('.app{position:static;inset:auto;width:100%'),'mobile app wrappe
 ok(css.includes('.main{\n    position:fixed;top:calc(var(--mobile-topbar) + var(--pwa-safe-top))'),'mobile main is independently fixed like VA HOME');
 ok(!css.includes('grid-template-rows:calc(var(--mobile-topbar) + var(--pwa-safe-top)) minmax(0,1fr) var(--mobile-nav-shell)'),'standalone PWA does not override the proven fixed mobile nav contract');
 ok(runtime.includes('client-mobile-stats')&&css.includes('.client-mobile-stats'),'mobile client cards expose rental count and spend');
+ok(runtime.includes('const LIVE_BOOKING_SYNC_MS=15000'),'admin live data sync polls every 15 seconds');
+ok(runtime.includes("document.addEventListener('visibilitychange',syncNow)")&&runtime.includes("window.addEventListener('focus',syncNow)")&&runtime.includes("window.addEventListener('pageshow',syncNow)"),'admin refreshes live data when the app becomes active again');
+ok(runtime.includes('window.VACLEANER_REFRESH_DATA=()=>refreshAllData({notify:true})'),'manual full-data refresh hook is exposed for the native mobile layer');
+ok(nativeRuntime.includes("className='native-data-refresh'")&&nativeRuntime.includes('Оновити дані')&&nativeRuntime.includes('Автоматично кожні 15 с'),'mobile More exposes an explicit data refresh action with truthful auto-sync copy');
+ok(nativeCss.includes('v4.3.3 — explicit manual data refresh in mobile More')&&nativeCss.includes('.native-data-refresh'),'manual data refresh has a production mobile visual contract');
+
 
 for(const token of [
   '--pwa-safe-top','--pwa-safe-bottom','--mobile-topbar:64px','--mobile-nav:66px',
