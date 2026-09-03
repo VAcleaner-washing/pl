@@ -1155,7 +1155,7 @@ def finance_preview_native_suite(browser: Browser, qa: QA) -> None:
                 relation=page.locator('.finance-form .modal-section').evaluate("""el=>{const s=el.querySelector('.native-finance-breakdown'),d=el.querySelector('.deposit-return-box');return !!s&&!!d&&Boolean(s.compareDocumentPosition(d)&Node.DOCUMENT_POSITION_FOLLOWING)}""")
                 qa.check(relation, f"Finance preview {width}: money breakdown appears before preliminary settlement")
                 live=summary.locator('.live').inner_text()
-                qa.check(all(x in live for x in ['Передоплата','Залоговий','Оренда','Доставка','Додатково']), f"Finance preview {width}: summary explains all monetary components")
+                qa.check(all(x in live for x in ['Передоплата','Залог','Оренда','Доставка','Додатково']), f"Finance preview {width}: summary explains all monetary components")
                 qa.check(page.locator('.finance-form .manual-discount-head b').inner_text().strip()=='Знижка на оренду', f"Finance preview {width}: discount control states what it affects")
                 note=page.locator('.finance-form .note')
                 qa.check('лише до оренди' in note.inner_text(), f"Finance preview {width}: discount exclusion note is concise")
