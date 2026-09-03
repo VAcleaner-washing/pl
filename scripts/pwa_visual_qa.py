@@ -1070,6 +1070,50 @@ def upcoming_extra_identity_suite(browser: Browser, qa: QA) -> None:
         finally:
             page.close()
 
+
+def booking_detail_native_suite(browser: Browser, qa: QA) -> None:
+    original=json.loads(json.dumps(BOOKINGS[2]))
+    try:
+        BOOKINGS[2]["fulfillment"]="delivery"
+        BOOKINGS[2]["delivery_amount"]=250
+        BOOKINGS[2]["delivery_route_km"]=6.4
+        BOOKINGS[2]["fulfillment_address"]="Полтава, вулиця Соборності, 43А"
+        BOOKINGS[2]["fulfillment_address_detail"]="БЦ Панорама"
+        BOOKINGS[2]["extras"]["selected_items"]=[{"code":"premium_nozzles","label":"Насадки «Преміум» до SC 2","price":200,"payment_mode":"upfront"}]
+        BOOKINGS[2]["extras_amount"]=200
+        native_css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+        native_js=(ROOT/'assets/admin-v430.js').read_text(encoding='utf-8')
+        for width in (320,390,430):
+            page=render_page(browser,width,844)
+            try:
+                if page.locator('.pwa-update-later').count():
+                    page.locator('.pwa-update-later').click();page.wait_for_timeout(30)
+                page.evaluate("document.documentElement.classList.add('native-test')")
+                page.add_style_tag(content=native_css)
+                page.add_script_tag(content=native_js)
+                page.wait_for_timeout(180)
+                page.locator('.mobile-nav [data-mobile-view="bookings"]').click();page.wait_for_timeout(80)
+                target=page.locator(f'.booking-card[data-id="{BOOKINGS[2]["id"]}"] .booking-row-head')
+                target.click();page.wait_for_selector('.native-detail-card');page.wait_for_timeout(100)
+                client=page.locator('.native-detail-info-row[data-native-detail-client]')
+                qa.check(client.count()==1 and client.get_attribute('role')=='button', f"Booking detail {width}: client row is an explicit clickable target")
+                distance=page.locator('[data-native-detail-distance]')
+                qa.check(distance.count()==1 and '6,4 км' in distance.inner_text(), f"Booking detail {width}: one-way distance to the delivery point is visible")
+                delivery_line=page.locator('.native-detail-info-row').filter(has=page.locator('small',has_text='Доставка')).locator('.native-detail-money-line').filter(has=page.locator('span',has_text='Доставка'))
+                qa.check(delivery_line.count()>=1 and '250 грн' in delivery_line.first.inner_text(), f"Booking detail {width}: delivery amount is right-column financial data")
+                extras=page.locator('.native-detail-info-row').filter(has=page.locator('small',has_text='Додатково')).locator('.native-detail-money-line')
+                qa.check(extras.count()==1 and 'Насадки «Преміум» до SC 2' in extras.inner_text() and '200 грн' in extras.inner_text(), f"Booking detail {width}: extra name and amount share one financial row")
+                right_edges=page.locator('.native-detail-card .native-detail-money-line>b,.native-detail-card .native-pay-line>b').evaluate_all("els=>els.map(el=>el.getBoundingClientRect().right)")
+                qa.check(len(right_edges)>=5 and max(right_edges)-min(right_edges)<=2, f"Booking detail {width}: delivery, extras and payment amounts share one right axis")
+                qa.check(page.locator('.native-detail-address .detail-route-link').count()==1, f"Booking detail {width}: delivery address remains a direct navigation link")
+                client.locator('strong').click();page.wait_for_selector('#clientEditor');page.wait_for_timeout(60)
+                qa.check(page.locator('#clientEditor').count()==1, f"Booking detail {width}: tapping client opens the client card")
+            finally:
+                page.close()
+    finally:
+        BOOKINGS[2].clear();BOOKINGS[2].update(original)
+
+
 def public_date_suite(browser: Browser, qa: QA) -> None:
     page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
     try:
@@ -1201,6 +1245,7 @@ def main() -> int:
             expense_form_controls_suite(browser, qa)
             expense_ledger_mobile_suite(browser, qa)
             upcoming_extra_identity_suite(browser, qa)
+            booking_detail_native_suite(browser, qa)
             public_date_suite(browser, qa)
             public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
