@@ -3784,10 +3784,13 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
 /* v4.3.3 — More sheet must not be covered by the raised center New action. */
 @media(max-width:900px){
   html.mobile-more-open .mobile-nav .mobile-new-nav i{
-    position:absolute!important;
-    top:6px!important;
-    left:calc(50% - 23px)!important;
+    position:fixed!important;
+    top:auto!important;
+    right:auto!important;
+    bottom:calc(var(--pwa-safe-bottom) + 14px)!important;
+    left:50%!important;
     margin-top:0!important;
+    transform:translateX(-50%)!important;
     width:46px!important;
     height:46px!important;
     min-width:46px!important;
