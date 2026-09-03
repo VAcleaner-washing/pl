@@ -565,6 +565,12 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         campaign_type=page.locator('.campaign-panel').evaluate("""el=>({name:parseFloat(getComputedStyle(el.querySelector('.campaign-main>strong')).fontSize),sub:parseFloat(getComputedStyle(el.querySelector('.campaign-main>small')).fontSize),kpi:parseFloat(getComputedStyle(el.querySelector('.campaign-summary b')).fontSize),metric:parseFloat(getComputedStyle(el.querySelector('.campaign-metrics b')).fontSize)})""")
         qa.check(campaign_type['name']>=16 and campaign_type['sub']>=11 and campaign_type['kpi']>=18 and campaign_type['metric']>=13, f"{label}: Campaigns keeps readable typography instead of density micro-type")
         qa.check(page.locator('#smsCampaign').count()==1, f"{label}: campaigns view exposes SMS reactivation")
+        # The production admin always loads the v4.3 native layer. The base render helper
+        # intentionally stays lean for legacy shell checks, so load the production layer
+        # before asserting v4.3 SMS modal geometry.
+        page.add_style_tag(content=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8'))
+        page.add_script_tag(content=(ROOT/'assets/admin-v430.js').read_text(encoding='utf-8'))
+        page.wait_for_timeout(100)
         page.locator('#smsCampaign').click();page.wait_for_selector('.sms-campaign-modal #smsAudienceList');page.wait_for_timeout(80)
         qa.check(page.locator('.sms-campaign-modal').count()==1 and 'Стара база' in page.locator('.sms-campaign-modal').inner_text(), f"{label}: SMS modal renders legacy audience state")
         qa.check(page.locator('.sms-campaign-modal #smsMessage').input_value().count('vacleaner.pp.ua/s')==1, f"{label}: SMS draft contains opt-out URL")
