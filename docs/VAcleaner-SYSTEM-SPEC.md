@@ -3849,3 +3849,72 @@ The final archive may be handed off only after the aggregate status is recorded 
 - At 320 / 390 / 430 px Upcoming extra names remain readable and contained inside the card.
 - The old pseudo-label/icon are suppressed in the production Native layer.
 - Static regression verifies Upcoming reuses the same compact extra-label resolver as Booking cards.
+
+
+# 59. Change record — v4.3.3 MANUAL DATA REFRESH
+
+### CHANGED
+
+- Operational bookings and expense data continue to auto-refresh every 15 seconds while the admin is active, and also resync when the app becomes visible/focused again.
+- Mobile `Ще` now includes an explicit `Оновити дані` action for a manager-controlled full refresh.
+- Manual refresh reloads bookings, expenses, calendar, clients, campaigns and expiring referral rewards, then rerenders the current view without requiring an app restart.
+- The refresh control explains the existing 15-second automatic sync so the manager knows the button is a fallback/force-refresh, not the primary data path.
+
+### PRESERVED
+
+- Booking state transitions, finance formulas, pricing, deposits, delivery, availability, SMS, referral economics and Supabase schemas are unchanged.
+- Primary mobile screens stay uncluttered; manual refresh lives under `Ще`.
+
+### ACCEPTANCE
+
+- Static QA must verify the 15-second live-sync contract and explicit full-refresh export.
+- Browser QA must verify the mobile refresh button exists, triggers bookings/calendar/clients/campaigns/referral refresh requests, and does not create horizontal overflow.
+- Mobile `Найближчі` keeps the callable phone directly under the customer name and renders the `📞` handset immediately beside the formatted number on the same baseline.
+- Mobile `Найближчі` delivery metadata uses a dedicated outlined van icon beside `Доставка`, replacing the ambiguous legacy location glyph while preserving the route link.
+- While the mobile `Ще` sheet is open, the raised center `Нове` circle is lowered fully inside the bottom navigation so it cannot overlap the sheet; closing `Ще` restores the raised primary-action geometry.
+
+
+# 60. Change record — v4.3.3 BOOKING DETAIL + RETURN UX
+
+### CHANGED
+
+- Mobile booking detail follows the manager workflow order: `Техніка → Додатково → Клієнт → Доставка → Фінанси`.
+- The upper `Додатково` section is identity-only: selected add-ons are readable by name without duplicating prices.
+- `Доставка` contains only operational information: navigable address, access/orientation text and one-way `Відстань до точки` from the stored route snapshot.
+- The financial block owns the money and presents one right-aligned value axis in this order: `Передоплата → Залог → Оренда → Додатково → Доставка`.
+- When a missing/stale delivery route is refreshed while the detail screen is open, the visible distance updates in place.
+- The visible mobile client row is an explicit keyboard/touch target that opens the client card; tapping the phone number still starts a call instead.
+- Booking source copy is explicit (`Джерело · …`) so values such as `Телефон` are not mistaken for missing client data.
+- Issued-booking actions use one full-width primary return CTA followed by balanced secondary actions.
+- In `Попередній розрахунок`, the complete money breakdown appears before the preliminary settlement result, the manual control is named `Знижка на оренду`, and the discount exclusion note is concise and scroll-safe above the footer.
+- The finance breakdown always keeps `Додатково` visible, including a `0 грн` state, so the five-part money structure stays stable and predictable.\n- Mobile finance live-summary uses the short manager-facing deposit label `Залог`; verbose deposit wording must not replace or hide that row.
+
+### PRESERVED
+
+- Delivery tariff calculation, route persistence, finance formulas, extra prices, deposits, settlement, manual discount logic, booking state transitions and Supabase write contracts are unchanged.
+- The delivery address remains directly navigable.
+- `Прийняти повернення`, `Розрахунок`, `Продовжити` and corrective actions keep their existing business behavior.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px the mobile detail order is deterministic and all five finance amounts align to the same right edge without clipping.
+- A known one-way route distance is visible in booking detail and updates after an in-place route refresh.
+- Tapping the client row opens the client card while the telephone remains a separate call action.
+- `Попередній розрахунок` shows the full breakdown before the refund/due result and its explanatory note is not hidden behind the fixed footer.\n- At 320 / 390 / 430 px the `Залог` row is present in both booking-detail finance and the live finance summary, and the center `Нове` action is fully inside bottom navigation while `Ще` is open.
+
+
+# 61. Change record — v4.3.3 OPERATIONAL CTA HIERARCHY
+
+### SYSTEM
+
+- Mobile operational actions use one semantic hierarchy across `Найближчі`, `Бронювання` and booking detail flows.
+- Neutral navigation/actions such as `Деталі` stay dark and restrained.
+- Issue/confirmation actions use the amber primary treatment.
+- Return completion uses the green success treatment and must never be neutralized by a generic secondary-button selector.
+- Corrective/destructive actions remain secondary or behind `Ще`; they do not compete with the next required operational action.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px `Прийняти повернення` is visibly stronger than `Деталі`.
+- `Видати техніку` and `Прийняти повернення` remain visually distinct from each other and from neutral actions.
+- Future visual changes must preserve action meaning, not only button geometry.

@@ -6975,3 +6975,116 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 .finance-form .finance-extra-breakdown{display:block;margin-top:3px;color:#8f999e;font-size:10.5px;font-weight:400;line-height:1.35;max-width:38ch}
 .finance-form .finance-extra-row>span{min-width:0}
 @media(max-width:520px){.finance-form .finance-extra-breakdown{max-width:28ch}}
+
+
+/* v4.3.3 — booking detail delivery distance is an explicit metric. */
+.detail-delivery-distance{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:baseline;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.detail-delivery-distance>span{
+  min-width:0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+}
+.detail-delivery-distance>strong{
+  justify-self:end;
+  color:var(--text);
+  font-size:13px;
+  font-weight:560;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+
+
+/* v4.3.3 — delivery metadata must shrink inside the canonical Upcoming grid. */
+.upcoming-handoff.delivery{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  max-width:100%;
+  overflow:hidden;
+}
+.upcoming-delivery-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  color:#92999d;
+  font-style:normal;
+}
+.upcoming-delivery-icon svg{
+  display:block;
+  width:18px;
+  height:18px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.upcoming-handoff-copy{
+  display:block;
+  flex:1 1 0;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+
+/* v4.3.3 — canonical mobile interaction contracts. */
+@media(max-width:900px){
+  html.glass-test.mobile-more-open .mobile-nav .mobile-new-nav i{
+    position:absolute;
+    top:7px;
+    right:auto;
+    bottom:auto;
+    left:50%;
+    margin:0;
+    transform:translateX(-50%);
+    width:46px;
+    height:46px;
+    min-width:46px;
+  }
+  html.glass-test.mobile-more-open .mobile-nav .mobile-new-nav span{
+    position:absolute;
+    right:0;
+    bottom:3px;
+    left:0;
+    margin:0;
+    transform:none;
+  }
+  .upcoming-client-info a[href^="tel:"]{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    width:max-content;
+    max-width:100%;
+    padding-left:0;
+  }
+  .upcoming-client-info a[href^="tel:"]::before{
+    content:'📞';
+    position:static;
+    display:inline-block;
+    flex:0 0 auto;
+    width:auto;
+    height:auto;
+    font-size:14px;
+    line-height:1;
+    transform:none;
+  }
+  .upcoming-client-info a[href^="tel:"]::after{
+    display:none;
+    content:none;
+  }
+}

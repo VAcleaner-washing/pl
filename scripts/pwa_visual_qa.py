@@ -308,9 +308,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(new_box is not None and regular_box is not None and new_box['y'] < regular_box['y'], f"{label}: center New action rises above the VA HOME-style nav row")
         page.locator('.mobile-nav .more-nav:visible').click();page.wait_for_timeout(20)
         qa.check(page.locator('.mobile-nav .more-nav.active:visible').count()==1 and page.locator('.mobile-nav button[data-mobile-view].active:visible').count()==0, f"{label}: opening More temporarily makes More the only active bottom-nav item")
+        more_nav_box=page.locator('.mobile-nav').bounding_box();more_new_box=page.locator('#mobileNewBooking:visible i').bounding_box()
+        qa.check(page.locator('html').evaluate("el=>el.classList.contains('mobile-more-open')") and more_nav_box is not None and more_new_box is not None and more_new_box['y']>=more_nav_box['y']-1, f"{label}: More lowers the raised New circle fully inside bottom navigation instead of covering the sheet")
         qa.check(page.locator('.mobile-more-menu [data-more-view="equipment"]:visible').count()==1 and page.locator('.mobile-more-menu [data-more-view="analytics"]:visible').count()==1, f"{label}: equipment and analytics both live in More")
         page.locator('.mobile-more-menu [data-more-view="analytics"]:visible').click();page.wait_for_timeout(30)
         qa.check(page.locator('.mobile-nav .more-nav.active:visible').count()==1 and page.locator('.mobile-nav button[data-mobile-view="analytics"]:visible').count()==0, f"{label}: analytics activates More without a second visible active item")
+        restored_new_box=page.locator('#mobileNewBooking:visible i').bounding_box();restored_nav_box=page.locator('.mobile-nav').bounding_box()
+        qa.check(not page.locator('html').evaluate("el=>el.classList.contains('mobile-more-open')") and restored_new_box is not None and restored_nav_box is not None and restored_new_box['y']<restored_nav_box['y'], f"{label}: closing More restores the intentionally raised New action")
         page.locator('.mobile-nav button[data-mobile-view="bookings"]:visible').click();page.wait_for_timeout(30)
         qa.check(page.locator('.connection-state:visible').count()==0, f"{label}: mobile topbar keeps only search and primary action")
         qa.check(page.locator('.operations-bar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: attention cards never hide in a horizontal carousel")
@@ -447,6 +451,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.upcoming-row .upcoming-client-info a[href^="tel:"]').count()>=1, f"{label}: upcoming phone remains a direct call action")
                 identity_geometry=page.locator('.upcoming-row .upcoming-client-info').evaluate_all("""blocks=>blocks.map(block=>{const name=block.querySelector(':scope>strong')?.getBoundingClientRect(),phone=block.querySelector(':scope>a')?.getBoundingClientRect();return{name,phone}})""")
                 qa.check(bool(identity_geometry) and all(row['name'] and row['phone'] and row['phone']['top']>=row['name']['bottom']-1 and abs(row['phone']['left']-row['name']['left'])<=1.5 for row in identity_geometry), f"{label}: upcoming phone sits directly below and left-aligned with the customer name")
+                phone_icon=page.locator('.upcoming-row .upcoming-client-info a[href^="tel:"]').first.evaluate("""el=>({display:getComputedStyle(el).display,align:getComputedStyle(el).alignItems,before:getComputedStyle(el,'::before').content})""")
+                qa.check(phone_icon['display'] in ('flex','inline-flex') and phone_icon['align']=='center' and '📞' in phone_icon['before'], f"{label}: upcoming phone uses the handset icon aligned on the number baseline")
+                delivery_icon=page.locator('.upcoming-row .upcoming-handoff.delivery .upcoming-delivery-icon svg').first
+                qa.check(delivery_icon.count()>=1 and delivery_icon.evaluate("el=>getComputedStyle(el).stroke!='none'"), f"{label}: upcoming delivery uses the dedicated van line icon")
                 time_geometry=page.locator('.upcoming-row .upcoming-time').evaluate_all("""rails=>rails.map(rail=>{const rr=rail.getBoundingClientRect(),center=rr.left+rr.width/2,items=[...rail.querySelectorAll(':scope>i,:scope>strong,:scope>span,:scope>em')].map(el=>{const r=el.getBoundingClientRect();return{center:r.left+r.width/2,clientWidth:el.clientWidth,scrollWidth:el.scrollWidth}});return{items,center}})""")
                 qa.check(bool(time_geometry) and all(all(abs(item['center']-rail['center'])<=1.5 for item in rail['items']) for rail in time_geometry), f"{label}: upcoming arrow, time, event type and day badge share one centered axis")
                 qa.check(all(all(item['scrollWidth']<=item['clientWidth']+1 for item in rail['items']) for rail in time_geometry), f"{label}: upcoming time rail labels fit without clipping")
@@ -1062,6 +1070,126 @@ def upcoming_extra_identity_suite(browser: Browser, qa: QA) -> None:
         finally:
             page.close()
 
+
+def booking_detail_native_suite(browser: Browser, qa: QA) -> None:
+    original=json.loads(json.dumps(BOOKINGS[2]))
+    try:
+        BOOKINGS[2]["fulfillment"]="delivery"
+        BOOKINGS[2]["delivery_amount"]=250
+        BOOKINGS[2]["delivery_route_km"]=6.4
+        BOOKINGS[2]["fulfillment_address"]="Полтава, вулиця Соборності, 43А"
+        BOOKINGS[2]["fulfillment_address_detail"]="БЦ Панорама"
+        BOOKINGS[2]["extras"]["selected_items"]=[{"code":"premium_nozzles","label":"Насадки «Преміум» до SC 2","price":200,"payment_mode":"upfront"}]
+        BOOKINGS[2]["extras_amount"]=200
+        native_css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+        native_js=(ROOT/'assets/admin-v430.js').read_text(encoding='utf-8')
+        for width in (320,390,430):
+            page=render_page(browser,width,844)
+            try:
+                if page.locator('.pwa-update-later').count():
+                    page.locator('.pwa-update-later').click();page.wait_for_timeout(30)
+                page.evaluate("document.documentElement.classList.add('native-test')")
+                page.add_style_tag(content=native_css)
+                page.add_script_tag(content=native_js)
+                page.wait_for_timeout(180)
+                page.locator('.mobile-nav [data-mobile-view="bookings"]').click();page.wait_for_timeout(80)
+                page.locator(f'.booking-card[data-id="{BOOKINGS[2]["id"]}"] .booking-row-head').click()
+                page.wait_for_selector('.native-detail-card');page.wait_for_timeout(100)
+
+                labels=page.locator('.native-detail-card .native-detail-info-row>div>small').evaluate_all("els=>els.map(e=>e.textContent.trim())")
+                expected=['Техніка','Додатково','Клієнт','Доставка','Фінанси']
+                positions=[labels.index(x) if x in labels else -1 for x in expected]
+                qa.check(all(x>=0 for x in positions) and positions==sorted(positions), f"Booking detail {width}: operational order is equipment, extras, client, delivery, finance")
+
+                extras=page.locator('.native-detail-info-row').filter(has=page.locator('small',has_text='Додатково')).locator('.native-detail-extra-name')
+                qa.check(extras.count()==1 and 'Насадки «Преміум» до SC 2' in extras.inner_text() and 'грн' not in extras.inner_text(), f"Booking detail {width}: upper extras section is identity only, without duplicated money")
+
+                client=page.locator('.native-detail-info-row[data-native-detail-client]')
+                qa.check(client.count()==1 and client.get_attribute('role')=='button', f"Booking detail {width}: client row is an explicit clickable target")
+
+                delivery=page.locator('.native-detail-info-row').filter(has=page.locator('small',has_text='Доставка'))
+                distance=delivery.locator('[data-native-detail-distance]')
+                qa.check(distance.count()==1 and '6,4 км' in distance.inner_text(), f"Booking detail {width}: one-way distance to the delivery point is visible")
+                qa.check('250 грн' not in delivery.inner_text(), f"Booking detail {width}: delivery section contains logistics, not duplicated finance")
+                qa.check(page.locator('.native-detail-address .detail-route-link').count()==1, f"Booking detail {width}: delivery address remains a direct navigation link")
+
+                finance=page.locator('.native-detail-info-row').filter(has=page.locator('small',has_text='Фінанси'))
+                finance_text=finance.inner_text()
+                qa.check(all(x in finance_text for x in ['Передоплата','Залог','Оренда','Додатково','Доставка','200 грн','250 грн']), f"Booking detail {width}: finance block owns prepayment, deposit, rental, extras and delivery")
+                right_edges=finance.locator('.native-pay-line>b').evaluate_all("els=>els.map(el=>el.getBoundingClientRect().right)")
+                qa.check(len(right_edges)>=5 and max(right_edges)-min(right_edges)<=2, f"Booking detail {width}: all finance amounts share one right axis")
+
+                client.locator('strong').click();page.wait_for_selector('#clientEditor');page.wait_for_timeout(60)
+                qa.check(page.locator('#clientEditor').count()==1, f"Booking detail {width}: tapping client opens the client card")
+            finally:
+                page.close()
+    finally:
+        BOOKINGS[2].clear();BOOKINGS[2].update(original)
+
+
+def finance_preview_native_suite(browser: Browser, qa: QA) -> None:
+    original=json.loads(json.dumps(BOOKINGS[3]))
+    try:
+        BOOKINGS[3]["fulfillment"]="delivery"
+        BOOKINGS[3]["delivery_amount"]=250
+        BOOKINGS[3]["extras"]["selected_items"]=[{"code":"premium_nozzles","label":"Насадки «Преміум» до SC 2","price":200,"payment_mode":"upfront"}]
+        BOOKINGS[3]["extras_amount"]=200
+        native_css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+        native_js=(ROOT/'assets/admin-v430.js').read_text(encoding='utf-8')
+        for width in (320,390,430):
+            page=render_page(browser,width,844)
+            try:
+                if page.locator('.pwa-update-later').count():
+                    page.locator('.pwa-update-later').click();page.wait_for_timeout(30)
+                page.evaluate("document.documentElement.classList.add('native-test')")
+                page.add_style_tag(content=native_css)
+                page.add_script_tag(content=native_js)
+                page.wait_for_timeout(180)
+                page.locator('.mobile-nav [data-mobile-view="bookings"]').click();page.wait_for_timeout(80)
+                issued=page.locator(f'.booking-card[data-id="{BOOKINGS[3]["id"]}"]')
+                issued.locator('[data-action="finance"]').click();page.wait_for_selector('.finance-form');page.wait_for_timeout(120)
+
+                summary=page.locator('.finance-form .native-finance-breakdown')
+                settlement=page.locator('.finance-form .deposit-return-box')
+                qa.check(summary.count()==1 and summary.locator('h3').inner_text().strip()=='Фінансовий розрахунок', f"Finance preview {width}: full money breakdown has an explicit heading")
+                relation=page.locator('.finance-form .modal-section').evaluate("""el=>{const s=el.querySelector('.native-finance-breakdown'),d=el.querySelector('.deposit-return-box');return !!s&&!!d&&Boolean(s.compareDocumentPosition(d)&Node.DOCUMENT_POSITION_FOLLOWING)}""")
+                qa.check(relation, f"Finance preview {width}: money breakdown appears before preliminary settlement")
+                live=summary.locator('.live').inner_text()
+                qa.check(all(x in live for x in ['Передоплата','Залог','Оренда','Доставка','Додатково']), f"Finance preview {width}: summary explains all monetary components")
+                qa.check(page.locator('.finance-form .manual-discount-head b').inner_text().strip()=='Знижка на оренду', f"Finance preview {width}: discount control states what it affects")
+                note=page.locator('.finance-form .note')
+                qa.check('лише до оренди' in note.inner_text(), f"Finance preview {width}: discount exclusion note is concise")
+                layout=page.locator('.finance-form .modal-layout')
+                layout.evaluate("el=>el.scrollTop=el.scrollHeight");page.wait_for_timeout(30)
+                note_box=note.bounding_box();footer_box=page.locator('.finance-form>footer').bounding_box()
+                qa.check(note_box is not None and footer_box is not None and note_box['y']+note_box['height']<=footer_box['y']+1, f"Finance preview {width}: explanatory note is not clipped by the fixed footer")
+            finally:
+                page.close()
+    finally:
+        BOOKINGS[3].clear();BOOKINGS[3].update(original)
+
+
+def operational_cta_hierarchy_suite(browser: Browser, qa: QA) -> None:
+    css=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8')
+    html="""<!doctype html><html class='native-test native-v28'><head><meta name='viewport' content='width=device-width,initial-scale=1'></head><body>
+    <article class='upcoming-row return'><div class='upcoming-actions'><button class='btn subtle' data-up='open'>Деталі</button><button class='btn green' data-up='complete'>Прийняти повернення</button></div></article>
+    <article class='upcoming-row issue'><div class='upcoming-actions'><button class='btn subtle' data-up='open'>Деталі</button><button class='btn primary' data-up='issue'>Видати техніку</button></div></article>
+    </body></html>"""
+    for width in (320,390,430):
+        page=browser.new_page(viewport={"width":width,"height":844},is_mobile=True)
+        try:
+            page.set_content(html)
+            page.add_style_tag(content=css)
+            styles=page.locator('.upcoming-row.return [data-up="complete"]').evaluate("""el=>{const s=getComputedStyle(el);return{bg:s.backgroundImage,bgc:s.backgroundColor,color:s.color,border:s.borderTopColor,font:s.fontWeight}}""")
+            neutral=page.locator('.upcoming-row.return [data-up="open"]').evaluate("""el=>{const s=getComputedStyle(el);return{bg:s.backgroundImage,bgc:s.backgroundColor,color:s.color}}""")
+            issue=page.locator('.upcoming-row.issue [data-up="issue"]').evaluate("""el=>{const s=getComputedStyle(el);return{bg:s.backgroundImage,bgc:s.backgroundColor,color:s.color}}""")
+            qa.check(styles['bg']!='none' and (styles['bg']!=neutral['bg'] or styles['bgc']!=neutral['bgc']), f"CTA {width}: return action is visually highlighted above neutral Details")
+            qa.check(issue['bg']!='none' and (issue['bg']!=neutral['bg'] or issue['bgc']!=neutral['bgc']), f"CTA {width}: issue action remains visually primary")
+            qa.check(styles['bg']!=issue['bg'] or styles['bgc']!=issue['bgc'], f"CTA {width}: return and issue actions keep distinct semantic emphasis")
+        finally:
+            page.close()
+
+
 def public_date_suite(browser: Browser, qa: QA) -> None:
     page=browser.new_page(viewport={"width":390,"height":844},is_mobile=True)
     try:
@@ -1193,6 +1321,9 @@ def main() -> int:
             expense_form_controls_suite(browser, qa)
             expense_ledger_mobile_suite(browser, qa)
             upcoming_extra_identity_suite(browser, qa)
+            booking_detail_native_suite(browser, qa)
+            finance_preview_native_suite(browser, qa)
+            operational_cta_hierarchy_suite(browser, qa)
             public_date_suite(browser, qa)
             public_nearest_availability_suite(browser, qa)
             desktop_suite(browser, qa)
