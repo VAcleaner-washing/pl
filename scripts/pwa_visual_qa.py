@@ -522,9 +522,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.booking-card', has_text='HIST-PWA-001').count()==0, f"{label}: recent returned rental is absent from Finished rentals")
         if page.locator('[data-filter="all"]').count(): page.locator('[data-filter="all"]').click()
 
-        # Finance UI follows the rental stage. Before issue there is no fake due/refund
-        # control; after issue the preliminary settlement and the received deposit must
-        # both remain contained and non-overlapping.
+        # Finance UI follows the rental stage. These assertions must run against the
+        # same production native CSS layer that the real admin loads; the lean base
+        # render alone cannot catch late production grid overrides.
+        finance_classes_before=page.locator('html').get_attribute('class') or ''
+        finance_native_style=page.add_style_tag(content=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8'))
+        page.evaluate("document.documentElement.classList.add('v43-prod','native-v23','native-v24','native-v25','native-v26','native-v27','native-v28')")
+        page.wait_for_timeout(50)
         page.locator('[data-filter="confirmed"]').click();page.wait_for_timeout(30)
         confirmed_finance=page.locator(f'.booking-card[data-id="{BOOKINGS[2]["id"]}"] .booking-finance')
         confirmed_geometry=confirmed_finance.evaluate("""el=>{const p=el.getBoundingClientRect(),badge=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},badge:Boolean(badge),dep:dep?{l:dep.left,r:dep.right,h:dep.height}:null}}""")
@@ -539,6 +543,10 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(fg['received'] is not None and fg['dep'] is not None and fg['due'] is not None and fg['received']['b']<=fg['dep']['t']+1 and fg['dep']['b']<=fg['due']['t']+1, f"{label}: received, deposit and preliminary settlement use separate vertical rows without overlap")
         dep_readability=issued_finance.locator('.booking-deposit-state').evaluate("""el=>{const r=el.getBoundingClientRect(),label=el.querySelector('span'),amount=el.querySelector('strong'),state=el.querySelector('small'),lr=label?.getBoundingClientRect(),ar=amount?.getBoundingClientRect(),sr=state?.getBoundingClientRect(),ls=label?getComputedStyle(label):null,as=amount?getComputedStyle(amount):null;return{box:{l:r.left,r:r.right},label:lr?{l:lr.left,r:lr.right,h:lr.height}:null,amount:ar?{l:ar.left,r:ar.right,h:ar.height}:null,state:sr?{l:sr.left,r:sr.right,h:sr.height}:null,wordBreak:ls?.wordBreak,overflowWrap:ls?.overflowWrap,amountWhiteSpace:as?.whiteSpace}}""")
         qa.check(dep_readability['label'] is not None and dep_readability['amount'] is not None and dep_readability['state'] is not None and dep_readability['label']['l']>=dep_readability['box']['l']-1 and dep_readability['label']['r']<=dep_readability['box']['r']+1 and dep_readability['amount']['r']<=dep_readability['box']['r']+1 and dep_readability['state']['r']<=dep_readability['box']['r']+1 and dep_readability['wordBreak']=='normal' and dep_readability['overflowWrap']=='normal' and dep_readability['amountWhiteSpace']=='nowrap', f"{label}: deposit label, amount and state remain readable without character fragmentation")
+        if width==390: qa.shot(page,'mobile-390-finance-card-v435.png')
+        finance_native_style.evaluate("el=>el.remove()")
+        page.evaluate("(classes)=>{document.documentElement.className=classes}",finance_classes_before)
+        page.wait_for_timeout(30)
         page.locator('[data-filter="all"]').click();page.wait_for_timeout(30)
 
         # Global search stays global from every tab and client results open the full CRM card.
