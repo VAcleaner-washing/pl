@@ -3784,13 +3784,22 @@ html.v43-prod body.detail-open .pwa-update-prompt{display:none!important}
 /* v4.3.3 — More sheet must not be covered by the raised center New action. */
 @media(max-width:900px){
   html.mobile-more-open .mobile-nav .mobile-new-nav i{
+    position:absolute!important;
+    top:6px!important;
+    left:calc(50% - 23px)!important;
     margin-top:0!important;
     width:46px!important;
     height:46px!important;
     min-width:46px!important;
     box-shadow:0 6px 16px rgba(0,0,0,.28)!important;
   }
-  html.mobile-more-open .mobile-nav .mobile-new-nav span{margin-top:0!important}
+  html.mobile-more-open .mobile-nav .mobile-new-nav span{
+    position:absolute!important;
+    right:0!important;
+    bottom:3px!important;
+    left:0!important;
+    margin-top:0!important;
+  }
 }
 
 
