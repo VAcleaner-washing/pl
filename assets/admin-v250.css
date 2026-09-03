@@ -7045,6 +7045,9 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 /* v4.3.3 — canonical mobile interaction contracts. */
 @media(max-width:900px){
   html.mobile-more-open .mobile-nav .mobile-new-nav i{
+    position:absolute;
+    top:6px;
+    left:calc(50% - 23px);
     margin-top:0;
     transform:none;
     width:46px;
@@ -7052,6 +7055,10 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
     min-width:46px;
   }
   html.mobile-more-open .mobile-nav .mobile-new-nav span{
+    position:absolute;
+    right:0;
+    bottom:3px;
+    left:0;
     margin-top:0;
   }
   .upcoming-client-info a[href^="tel:"]{
