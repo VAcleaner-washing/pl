@@ -278,7 +278,7 @@
         const data=rows.map(r=>({node:r,label:cleanText(r.querySelector('span')),amount:cleanText(r.querySelector('strong'))}));
         const pick=(test)=>data.find(test);
         const pre=pick(x=>x.label.startsWith('Передоплата'));
-        const dep=pick(x=>x.label.startsWith('Фактичний залоговий'));
+        const dep=pick(x=>x.label.startsWith('Залог')||x.label.startsWith('Фактичний залоговий'));
         const rental=pick(x=>x.label.startsWith('Оренда після знижки'))||pick(x=>x.label==='Оренда')||pick(x=>x.label.startsWith('Оренда до знижки'));
         const extra=pick(x=>x.node.classList.contains('finance-extra-row'));
         const deliveryMoney=pick(x=>x.label==='Доставка');
