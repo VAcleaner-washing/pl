@@ -1,0 +1,15 @@
+/* VAcleaner v4.3.10 — client-card read/edit disclosure repair.
+   The promoted Native mobile layer applies `.fields { display:grid!important }`.
+   Keep the client edit form truly hidden until the manager explicitly enters edit mode. */
+@media(max-width:900px){
+  html.native-test .client-card-v245 .client-contact-edit-fields[hidden]{
+    display:none!important;
+  }
+  html.native-test .client-card-v245 .client-contact-section-v245.is-editing .client-contact-read{
+    display:none!important;
+  }
+  html.native-test .client-card-v245 .client-contact-section-v245.is-editing .client-contact-edit-fields{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+  }
+}
