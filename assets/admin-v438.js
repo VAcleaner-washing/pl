@@ -20,7 +20,9 @@ function sanitizeField(field,emit){
   return true;
 }
 function sweep(){
-  const field=document.querySelector('.sms-campaign-modal #smsMessage');
+  /* smsMessage is a unique workspace field. Do not couple transport safety to
+     one container: the composer is dynamically remounted between workflow modes. */
+  const field=document.getElementById('smsMessage');
   if(field)sanitizeField(field,true);
 }
 document.addEventListener('input',event=>sanitizeField(event.target,false),true);
