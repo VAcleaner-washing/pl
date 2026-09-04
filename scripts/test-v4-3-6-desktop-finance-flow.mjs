@@ -14,6 +14,7 @@ const checks=[
   ['booking deposit is flattened into the finance axis',css.includes('.booking-card .booking-finance>.booking-deposit-state')&&css.includes('grid-template-areas:"label value" "state value"')&&css.includes('border-radius:0!important')&&css.includes('background:transparent!important')],
   ['booking settlement result is not a second card',css.includes('.booking-card .booking-finance>em')&&css.includes('border-top:1px solid rgba(255,255,255,.055)!important')&&css.includes('box-shadow:none!important')],
   ['desktop booking finance has an explicit flat override',css.includes('Booking card: keep the desktop finance column flat and aligned too.')&&css.includes('.booking-finance-received-summary+span')&&css.includes('text-overflow:clip!important')],
+  ['desktop finance headline stacks before the money rows',css.includes('grid-column:1/-1!important;\n    grid-row:1!important')&&css.includes('grid-row:2!important')&&css.includes('grid-row:5!important')],
   ['mobile settlement modal removes the table-in-a-card shell',css.includes('.finance-form .modal-summary')&&css.includes('.finance-flow-group+.finance-flow-group')&&css.includes('.finance-flow-title+div')],
   ['deposit helper is rendered below its label instead of inline',css.includes('.finance-flow-group>div>span>small')&&css.includes('display:block!important')],
   ['system spec contains the v4.3.6 finance flow change record',spec.includes('Change record — v4.3.6 FINANCE FLOW CONSISTENCY')]
