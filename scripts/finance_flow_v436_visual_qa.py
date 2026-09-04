@@ -78,15 +78,19 @@ with sync_playwright() as p:
         final_box=page.locator('.finance-flow-final').bounding_box()
         final_amount=page.locator('.finance-flow-final>strong').bounding_box()
         check(final_box is not None and final_amount is not None and final_amount['x']+final_amount['width']<=final_box['x']+final_box['width']+1,f'{width}: final result amount stays contained and right aligned')
+
+        deposit=page.locator('.booking-deposit-state')
+        result=page.locator('.booking-finance>em.refund')
+        dep_style=deposit.evaluate("el=>{const s=getComputedStyle(el);return{radius:s.borderRadius,bg:s.backgroundColor,shadow:s.boxShadow}}")
+        result_style=result.evaluate("el=>{const s=getComputedStyle(el);return{radius:s.borderRadius,bg:s.backgroundColor,shadow:s.boxShadow}}")
+        check(dep_style['radius']=='0px' and dep_style['bg'] in ('rgba(0, 0, 0, 0)','transparent') and dep_style['shadow']=='none',f'{width}: booking deposit is a finance row, not an inner card')
+        check(result_style['radius']=='0px' and result_style['bg'] in ('rgba(0, 0, 0, 0)','transparent') and result_style['shadow']=='none',f'{width}: booking settlement result is a finance row, not a second inner card')
+        dep=deposit.locator('strong').bounding_box();res=result.locator('strong').bounding_box();received=page.locator('.booking-finance-received-summary>strong').bounding_box()
+        check(dep and res and received and max(dep['x']+dep['width'],res['x']+res['width'],received['x']+received['width'])-min(dep['x']+dep['width'],res['x']+res['width'],received['x']+received['width'])<=2,f'{width}: received, deposit and settlement result share one right money axis')
+        label_fit=result.locator('span').evaluate("el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,whiteSpace:getComputedStyle(el).whiteSpace})")
+        check(label_fit['scrollWidth']<=label_fit['clientWidth']+1,f'{width}: preliminary settlement label is not clipped')
+
         if mobile:
-            deposit=page.locator('.booking-deposit-state')
-            result=page.locator('.booking-finance>em.refund')
-            dep_style=deposit.evaluate("el=>{const s=getComputedStyle(el);return{radius:s.borderRadius,bg:s.backgroundColor,shadow:s.boxShadow}}")
-            result_style=result.evaluate("el=>{const s=getComputedStyle(el);return{radius:s.borderRadius,bg:s.backgroundColor,shadow:s.boxShadow}}")
-            check(dep_style['radius']=='0px' and dep_style['bg'] in ('rgba(0, 0, 0, 0)','transparent') and dep_style['shadow']=='none','390: deposit is a finance row, not a blue inner card')
-            check(result_style['radius']=='0px' and result_style['bg'] in ('rgba(0, 0, 0, 0)','transparent') and result_style['shadow']=='none','390: preliminary result is a finance row, not a second green inner card')
-            dep=deposit.locator('strong').bounding_box();res=result.locator('strong').bounding_box();received=page.locator('.booking-finance-received-summary>strong').bounding_box()
-            check(dep and res and received and max(dep['x']+dep['width'],res['x']+res['width'],received['x']+received['width'])-min(dep['x']+dep['width'],res['x']+res['width'],received['x']+received['width'])<=2,'390: received, deposit and preliminary result share one right money axis')
             page.screenshot(path=str(OUT_MOBILE/'mobile-390-finance-flow-v436.png'),full_page=True)
         else:
             page.screenshot(path=str(OUT_DESKTOP/'1440-finance-flow-v436.png'),full_page=True)
