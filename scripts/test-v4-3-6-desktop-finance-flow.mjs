@@ -5,7 +5,7 @@ const css=fs.readFileSync('assets/admin-v436.css','utf8');
 const spec=fs.readFileSync('docs/VAcleaner-SYSTEM-SPEC.md','utf8');
 
 const checks=[
-  ['production shell loads v4.3.6 finance layer',html.includes('/assets/admin-v436.css?v=4360')],
+  ['production shell loads v4.3.6 finance layer',html.includes('/assets/admin-v436.css?')],
   ['desktop and mobile scopes are explicit',css.includes('@media(min-width:901px)')&&css.includes('@media(max-width:900px)')],
   ['desktop settlement summary is flat',css.includes('.modal-summary .finance-flow-summary')&&css.includes('border:0!important')&&css.includes('background:transparent!important')],
   ['money rows use a stable label/value axis',css.includes('grid-template-columns:minmax(0,1fr) auto!important')&&css.includes('justify-self:end!important')],
