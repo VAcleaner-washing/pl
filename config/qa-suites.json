@@ -51,6 +51,7 @@
     "test:referral-modal-visual",
     "test:referral-ios-launch",
     "test:finance-delivery-visual",
+    "test:finance-flow-v436-visual",
     "test:admin-typography-browser",
     "test:admin-context-navigation",
     "test:admin-route-smoke",
