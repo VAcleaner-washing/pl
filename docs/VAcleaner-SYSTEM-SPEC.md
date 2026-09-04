@@ -4128,6 +4128,6 @@ The final archive may be handed off only after the aggregate status is recorded 
 
 ### TESTS
 
-- `scripts/test-v4-3-10-client-card-edit-mode.mjs` via canonical `test:client-card-mobile`.
-- `scripts/test-mobile-client-card.py` validates read → edit → done disclosure state and rejects duplicate visible contact blocks at 320 / 390 / 430 px.
+- `scripts/test-v4-3-10-client-card-edit-mode.mjs` via canonical `test:pwa-static`.
+- `scripts/test-mobile-client-card.py` via canonical `test:client-card-mobile` validates read → edit → done disclosure state and rejects duplicate visible contact blocks at 320 / 390 / 430 px.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
