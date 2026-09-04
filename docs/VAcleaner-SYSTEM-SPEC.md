@@ -4102,3 +4102,32 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-9-sms-brand-copy.mjs` via canonical `test:sms-campaigns`.
 - `scripts/sms_v439_copy_qa.py` via canonical `test:campaign-sms-ux`.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
+
+
+# 68. Change record — v4.3.10 CLIENT CARD EDIT DISCLOSURE
+
+### ADDED
+
+- `assets/admin-v4310.css` restores the authored hidden state for the client-card read/edit disclosures under the shared mobile `.fields` grid rule.
+- `scripts/test-v4-3-10-client-card-edit-mode.mjs` and the expanded `scripts/test-mobile-client-card.py` lock the client contact view/edit state at 320 / 390 / 430 px.
+
+### CHANGED
+
+- **CLIENT-005 / CLIENT-006** — the client card shows one contact representation at a time: read-only contact summary in normal mode, editable form fields only after the explicit `Редагувати` action, then the read-only summary again after `Готово`.
+- The repair is presentation-only and uses the existing `[hidden]` disclosure state from the canonical client-card logic; it does not introduce a second data/edit implementation.
+
+### FIXED
+
+- Removed the apparent duplicate ПІБ / phone / channel / address block in the mobile client card caused by the broad `.fields { display:grid!important }` rule overriding the HTML hidden state.
+- Read-only and editable contact blocks can no longer be visible simultaneously.
+
+### PRESERVED
+
+- Client profile data, save/persistence flow, completed-rental count, document, rental history, bonuses, SMS, referral, booking creation and client lookup logic are unchanged.
+- Supabase, SMS/RETURN, finance, delivery, deposits, service worker, public booking and VA HOME are unchanged.
+
+### TESTS
+
+- `scripts/test-v4-3-10-client-card-edit-mode.mjs` via canonical `test:client-card-mobile`.
+- `scripts/test-mobile-client-card.py` validates read → edit → done disclosure state and rejects duplicate visible contact blocks at 320 / 390 / 430 px.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
