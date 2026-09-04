@@ -11,8 +11,9 @@ const checks=[
   ['money rows use a stable label/value axis',css.includes('grid-template-columns:minmax(0,1fr) auto!important')&&css.includes('justify-self:end!important')],
   ['received and expenses keep directional semantics',css.includes('.finance-flow-received')&&css.includes('#87ddb0')&&css.includes('.finance-flow-expenses')&&css.includes('#e09a90')],
   ['final result has explicit refund/due/neutral states',css.includes('.finance-flow-final.refund')&&css.includes('.finance-flow-final.due')&&css.includes('.finance-flow-final.neutral')],
-  ['mobile booking deposit is flattened into the finance axis',css.includes('.booking-card .booking-finance>.booking-deposit-state')&&css.includes('grid-template-areas:"label value" "state value"')&&css.includes('border-radius:0!important')&&css.includes('background:transparent!important')],
-  ['mobile booking settlement result is not a second card',css.includes('.booking-card .booking-finance>em')&&css.includes('border-top:1px solid rgba(255,255,255,.055)!important')&&css.includes('box-shadow:none!important')],
+  ['booking deposit is flattened into the finance axis',css.includes('.booking-card .booking-finance>.booking-deposit-state')&&css.includes('grid-template-areas:"label value" "state value"')&&css.includes('border-radius:0!important')&&css.includes('background:transparent!important')],
+  ['booking settlement result is not a second card',css.includes('.booking-card .booking-finance>em')&&css.includes('border-top:1px solid rgba(255,255,255,.055)!important')&&css.includes('box-shadow:none!important')],
+  ['desktop booking finance has an explicit flat override',css.includes('Booking card: keep the desktop finance column flat and aligned too.')&&css.includes('.booking-finance-received-summary+span')&&css.includes('text-overflow:clip!important')],
   ['mobile settlement modal removes the table-in-a-card shell',css.includes('.finance-form .modal-summary')&&css.includes('.finance-flow-group+.finance-flow-group')&&css.includes('.finance-flow-title+div')],
   ['deposit helper is rendered below its label instead of inline',css.includes('.finance-flow-group>div>span>small')&&css.includes('display:block!important')],
   ['system spec contains the v4.3.6 finance flow change record',spec.includes('Change record — v4.3.6 FINANCE FLOW CONSISTENCY')]
