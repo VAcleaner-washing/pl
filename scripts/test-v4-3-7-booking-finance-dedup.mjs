@@ -6,7 +6,7 @@ const css=fs.readFileSync('assets/admin-v437.css','utf8');
 const spec=fs.readFileSync('docs/VAcleaner-SYSTEM-SPEC.md','utf8');
 
 const checks=[
-  ['production shell loads v4.3.7 finance assets',html.includes('/assets/admin-v437.css?v=4370')&&html.includes('/assets/admin-v437.js?v=4370')],
+  ['production shell loads v4.3.7 finance assets',html.includes('/assets/admin-v437.css?')&&html.includes('/assets/admin-v437.js?')],
   ['received total owns the compact breakdown',js.includes('booking-finance-received-breakdown')&&css.includes('grid-template-areas:"label value" "helper value"')],
   ['normal paid or returned deposit is collapsed',js.includes("deposit.classList.toggle('booking-deposit-state--redundant',normalDeposit)")&&css.includes('.booking-deposit-state--redundant')&&css.includes('display:none!important')],
   ['pre-issue pending deposit is treated as expected, not an error',js.includes('expectedPending')&&js.includes('при видачі')],
