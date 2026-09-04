@@ -4038,3 +4038,34 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/finance_card_v437_visual_qa.py` chained into the canonical finance-flow browser gate at 390 px and 1440 px.
 - Full canonical static/build/browser/PWA QA remains release-blocking before merge.
 
+
+
+# 66. Change record — v4.3.8 SMS JOURNAL + TRANSPORT HARDENING
+
+### ADDED
+
+- `assets/admin-v438.css` repairs the mobile/PWA SMS journal viewport so history mode uses the full available screen and the last journal row is reachable.
+- `assets/admin-v438.js` normalizes unsupported supplementary-plane pictographs out of the SMS composer before preview/preflight/send.
+- `scripts/test-v4-3-8-sms-hardening.mjs` and `scripts/sms_v438_visual_qa.py` lock the transport and viewport contracts.
+
+### CHANGED
+
+- Mobile SMS journal no longer reserves hidden workflow-footer/bottom-navigation space after entering history mode.
+- RETURN SMS generated from the current default template is transported without the `😊` code point that SendPulse currently renders as question marks on the active route.
+- Cyrillic/Ukrainian copy, discount, promo link, 21-day activation and opt-out text remain intact.
+
+### FIXED
+
+- Removed the dead black strip below the mobile SMS journal.
+- Eliminated `??????` in place of the RETURN smile by normalizing unsupported pictographs before SendPulse preflight/send.
+
+### PRESERVED
+
+- SMS audience selection, consent/legacy attestation, cooldown, SendPulse route choice, balance/preflight, dispatch persistence, promo activation, RETURN eligibility/economics and opt-out logic are unchanged.
+- Supabase schema/functions, booking/finance, delivery, referral, public booking, service worker and VA HOME are unchanged.
+
+### TESTS
+
+- `scripts/test-v4-3-8-sms-hardening.mjs` via canonical `test:sms-campaigns`.
+- `scripts/sms_v438_visual_qa.py` chained into canonical `test:campaign-sms-ux` at 390 px and 430 px.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.

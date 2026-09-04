@@ -1,0 +1,72 @@
+/* VAcleaner v4.3.8 — SMS journal viewport + bottom-gap repair. */
+
+@media (max-width:900px){
+  /* SMS is a full-screen operational workspace on mobile/PWA. Do not reserve the
+     normal page/bottom-nav geometry underneath the modal. */
+  html.v43-prod .modal:has(.sms-campaign-modal){
+    padding:0!important;
+    align-items:stretch!important;
+    justify-content:stretch!important;
+  }
+  html.v43-prod .modal-card:has(.sms-campaign-modal){
+    width:100vw!important;
+    height:100dvh!important;
+    min-height:100dvh!important;
+    max-height:100dvh!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+  }
+  html.v43-prod .sms-campaign-modal{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+  }
+
+  /* In Journal mode the workflow footer is intentionally absent. The stage and
+     history list must reclaim that space instead of leaving a dead black strip. */
+  html.v43-prod .sms-campaign-modal.history-mode .sms-workspace-body{
+    position:static!important;
+    inset:auto!important;
+    display:flex!important;
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:hidden!important;
+    padding:0!important;
+  }
+  html.v43-prod .sms-campaign-modal.history-mode .sms-stage{
+    position:relative!important;
+    display:flex!important;
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:hidden!important;
+  }
+  html.v43-prod .sms-campaign-modal.history-mode .sms-history-panel{
+    position:absolute!important;
+    inset:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
+    height:100%!important;
+    max-height:none!important;
+    overflow:hidden!important;
+    padding:12px 10px calc(12px + var(--pwa-safe-bottom))!important;
+  }
+  html.v43-prod .sms-campaign-modal.history-mode #smsHistory{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    padding:0 3px calc(18px + var(--pwa-safe-bottom)) 0!important;
+    scroll-padding-bottom:calc(18px + var(--pwa-safe-bottom))!important;
+    overscroll-behavior-y:contain!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
