@@ -1,0 +1,137 @@
+/* v4.3.6 — finance flow consistency: desktop uses the same semantic money hierarchy as PWA. */
+@media(min-width:901px){
+  html.v43-prod .finance-form .modal-summary{
+    padding:16px 18px!important;
+  }
+  html.v43-prod .finance-form .modal-summary>h3{
+    margin:0 0 12px!important;
+    color:#f1f0ec!important;
+    font-size:18px!important;
+    font-weight:650!important;
+    letter-spacing:-.015em!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-summary{
+    display:grid!important;
+    gap:12px!important;
+    border:0!important;
+    border-radius:0!important;
+    overflow:visible!important;
+    background:transparent!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-group{
+    display:grid!important;
+    gap:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-group>div{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:16px!important;
+    align-items:baseline!important;
+    min-width:0!important;
+    padding:8px 0!important;
+    border:0!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+    background:transparent!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-group>.finance-flow-title{
+    padding:0 0 7px!important;
+    border-top:0!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-title>span{
+    color:#aeb5b8!important;
+    font-size:11px!important;
+    line-height:1.2!important;
+    font-weight:650!important;
+    letter-spacing:.07em!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-received>.finance-flow-title>span{
+    color:#78d6a6!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-expenses>.finance-flow-title>span{
+    color:#d98b80!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-group>div>span{
+    min-width:0!important;
+    color:#c7ccce!important;
+    font-size:13px!important;
+    line-height:1.35!important;
+    font-weight:450!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-group>div>span>small{
+    display:block!important;
+    margin-top:2px!important;
+    color:#7f898e!important;
+    font-size:10px!important;
+    line-height:1.3!important;
+    font-weight:430!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-group>div>strong{
+    justify-self:end!important;
+    color:#f0efeb!important;
+    font-size:13px!important;
+    line-height:1.25!important;
+    font-weight:620!important;
+    white-space:nowrap!important;
+    text-align:right!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-group .received-total,
+  html.v43-prod .finance-form .modal-summary .finance-flow-group .expenses-total{
+    margin-top:2px!important;
+    padding-top:10px!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-received .received-total>strong{
+    color:#87ddb0!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-expenses .expenses-total>strong{
+    color:#e09a90!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-final{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:16px!important;
+    align-items:center!important;
+    min-height:64px!important;
+    margin:2px 0 0!important;
+    padding:12px 14px!important;
+    border:0!important;
+    border-radius:13px!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-final>span{
+    display:grid!important;
+    gap:3px!important;
+    min-width:0!important;
+    color:#e8e8e4!important;
+    font-size:13px!important;
+    line-height:1.3!important;
+    font-weight:590!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-final>span>small{
+    color:#8f989c!important;
+    font-size:9.5px!important;
+    line-height:1.2!important;
+    font-weight:650!important;
+    letter-spacing:.08em!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-final>strong{
+    justify-self:end!important;
+    font-size:19px!important;
+    line-height:1!important;
+    font-weight:700!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-final.refund{
+    background:rgba(49,151,101,.15)!important;
+    color:#8ce0b3!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-final.due{
+    background:rgba(190,91,79,.14)!important;
+    color:#e99b91!important;
+  }
+  html.v43-prod .finance-form .modal-summary .finance-flow-final.neutral{
+    background:rgba(230,180,95,.10)!important;
+    color:#efbd62!important;
+  }
+}
