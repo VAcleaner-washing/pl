@@ -2694,6 +2694,8 @@ MFA зараз не примусово вимагається. Міграція 
 - повний browser aggregate workflow перед production merge;
 - responsive widths 320 / 390 / 430 / 1024 / 1280 / 1440 / 1648.
 
+
+
 # 32. Change record — v4.2.24
 
 ### ADDED
@@ -2864,6 +2866,8 @@ MFA зараз не примусово вимагається. Міграція 
 - `scripts/pwa_visual_qa.py` — create payload перевіряє ADDR-011: clean route address + separate address detail + untouched customer comment;
 - повний static/build/browser/PWA/responsive QA перед production merge.
 
+
+
 # 37. Change record — v4.2.29
 
 ### ADDED
@@ -2904,6 +2908,7 @@ MFA зараз не примусово вимагається. Міграція 
 - `scripts/admin_context_navigation_qa.py`;
 - `scripts/pwa_visual_qa.py`;
 - full static/build/browser/PWA/responsive QA перед production merge.
+
 
 # 38. Change record — v4.2.30
 
@@ -2977,6 +2982,8 @@ MFA зараз не примусово вимагається. Міграція 
 - `scripts/desktop_density_qa.py`;
 - full static/build/browser/PWA regression + pre-commit visual screenshot/scenario audit before the single production commit.
 
+
+
 # 40. Change record — v4.2.32
 
 ### ADDED
@@ -3040,6 +3047,8 @@ MFA зараз не примусово вимагається. Міграція 
 - `scripts/pwa_visual_qa.py`;
 - full static/build/browser/PWA regression + pre-commit visual screenshot/scenario audit before the single production commit.
 
+
+
 # 42. Change record — v4.2.34
 
 ### ADDED
@@ -3051,7 +3060,7 @@ MFA зараз не примусово вимагається. Міграція 
 ### CHANGED
 
 - **REL-001/002/003 + AI-RULE-004/007/012** — окрема QA-гілка більше не є обов’язковою. Робота й перевірки виконуються локально в release candidate; після кожного fix запускається targeted QA, а перед одним production commit — повний regression/browser/PWA/responsive gate, visual screenshot audit, user-flow/backend state і changed-file scope audit.
-- Visual pre-commit audit тепер обов’язково генерує й **переглядає** контрольні скріншоти 320 / 390 / 430 / 768 / 1440; transient visual-audit/ артефакти не входять у фінальний ZIP.
+- Visual pre-commit audit тепер обов’язково генерує й **переглядає** контрольні скріншоти 320 / 390 / 430 / 768 / 1440; transient visual/test artifacts не входять у release ZIP.
 - Standalone `.main` більше не резервує окремий чорний сектор над bottom navigation; safe-area доступність забезпечується scroll padding/content padding, а не обрізанням scroll surface.
 - У referral flow після відкриття Instagram/Telegram confirmation control показує `□ Так, надіслано`; після успішного журналювання — `✓ Надіслано`.
 - `referral_mark_sent` спочатку фіксує durable journal event, потім синхронізує customer/reward state; retry по вже існуючому event повторно доводить state без дубля журналу.
@@ -3108,6 +3117,8 @@ MFA зараз не примусово вимагається. Міграція 
 - `scripts/final_desktop_visual_qa.py` finance badge geometry on wide desktop;
 - full static/build/browser/PWA regression + reviewed screenshot audit before commit.
 
+
+
 # 44. Change record — v4.2.36
 
 ### ADDED
@@ -3146,6 +3157,7 @@ MFA зараз не примусово вимагається. Міграція 
 - reviewed 320/390/430 mobile screenshots for booking finance and referral action state;
 - reviewed desktop global-search hover state and iOS standalone Instagram-launch contract;
 - production DB verification for the migrated booking/customer.
+
 
 # 45. Change record — v4.2.37
 
@@ -3202,6 +3214,8 @@ MFA зараз не примусово вимагається. Міграція 
 - Regression coverage belongs to both the static v4.2.37 contract and real-browser route smoke.
 - A nested client card uses an explicit `←` header control with the parent route in its accessible label. The unchanged mobile client card still does not waste height on a permanent footer.
 
+
+
 # 46. Change record — v4.2.38
 
 ### ADDED
@@ -3215,13 +3229,14 @@ MFA зараз не примусово вимагається. Міграція 
 - Historical completed delivery records with missing `delivery_amount` were backfilled in production to the confirmed 250 грн tariff; the latest delivery profitability sample therefore uses 30/30 known prices and 29/30 matched price + road-route records.
 
 ### PRESERVED
-- v4.2.37 context-navigation stability and 250 грн historical-delivery backfill remain unchanged.
+- v4.2.37 deep route stack, exact global-search restoration, calm hover system, iOS Instagram return flow, PWA safe-area behavior and all booking/client/referral business rules remain unchanged.
 - Current delivery tariff calculation for new bookings remains unchanged; this release does not replace or bypass the configured 250/350/manual tariff logic.
 
 ### TESTS
 - `npm run test:admin-context-navigation` must pass with the detail shell fully detached before list interaction.
 - `npm run test:v4.2.37-route-smoke` remains the canonical fast deep-route regression for PWA 390px and desktop 1440px.
 - `npm run qa:static` and the canonical GitHub Browser QA aggregate remain release gates.
+
 
 # 47. Change record — v4.2.39
 
@@ -3285,6 +3300,7 @@ MFA зараз не примусово вимагається. Міграція 
 - Delivery route km remains available to admin analytics; only its client-facing disclosure is removed for the fixed local tariff zone.
 - Existing v4.2.39 shared Finance/Analytics period renderer, v4.2.37 navigation stack, referral journal, booking status flow, deposit formulas, delivery pricing and VA HOME isolation remain unchanged.
 
+
 ### CI HARDENING — wide desktop period controls
 - On desktop widths >=1321 px Analytics and Finance must not rely on intrinsic text width for the shared period selector. The control rail is a deterministic 500 px, five-equal-column grid in both contexts, aligned to the right.
 - This prevents browser/font-metric differences from changing the container width or relative button x-positions at 1440 px while preserving the full-row layouts on 901–1320 px and the 3-column PWA layout on <=900 px.
@@ -3303,6 +3319,7 @@ MFA зараз не примусово вимагається. Міграція 
 ### ADDED
 - **ADDR-RESILIENCE-001 — autocomplete assists, never blocks conversion.** A valid manual `street + house number` remains submit-able when OpenStreetMap/Photon misses the exact building or the provider is unavailable.
 - **PROMO-UX-002 — visible optional promo entry.** Step 04 uses one full-width `Є промокод? / Додати` disclosure with a >=50 px target instead of a low-contrast text link.
+
 - **BOOKING-UX-024 — financial summary alignment.** У desktop summary рядок `Доставка` є фінансовим рядком: назва завжди зліва, фактична сума/статус завжди справа на одній осі з орендою, передоплатою та залоговим платежем. Суму не можна склеювати з label зліва.
 - **STORY-GIFT-STATE-001 — one selected reward, one source of truth.** For eligible Puzzi rentals from 1 000 грн, `diffuser50` and `chemistry2` are mutually exclusive states across UI, estimate, create payload, draft restore and return finance.
 - `scripts/test-v4-2-41-address-resilience.mjs` protects address fallback, promo visibility and Story gift state.
@@ -3345,6 +3362,8 @@ MFA зараз не примусово вимагається. Міграція 
 - Public booking CSS не додає новий `!important` debt; delivery summary geometry має працювати через нормальну specificity.
 - Release не є готовим при будь-якому fail у `qa:static` або `qa:browser`; локальний focused PASS не замінює canonical aggregate gate.
 
+
+
 # 50. Change record — v4.2.42
 
 ### ADDED
@@ -3375,9 +3394,11 @@ MFA зараз не примусово вимагається. Міграція 
 - `npm run test:v4.2.42-promo-visibility`.
 - `npm run qa:static` must remain fully green before release.
 
+
 ## UI-DELIVERY-CARD-001 — booking card delivery axis
 
 У картці бронювання блок `Видача` читається як фінансово-операційний рядок: `Доставка` / `Самовивіз` зліва, сума доставки справа на тій самій горизонтальній осі. Адреса/маршрут іде окремим рядком нижче. Не склеювати `250 грн · адреса` в один текстовий span. На mobile сума повинна бути візуально вирівняна по правому краю так само послідовно, як ключові суми у фінансовому блоці.
+
 
 # 51. Change record — v4.2.43
 
@@ -3408,6 +3429,8 @@ MFA зараз не примусово вимагається. Міграція 
 - `npm run test:admin-return-gift-persistence`;
 - `npm run qa:static`;
 - canonical Browser/PWA QA remains a release-blocking gate.
+
+
 
 # 52. Change record — v4.2.44 STABILIZATION / ACCEPTANCE
 
@@ -3492,6 +3515,7 @@ Mandatory targeted gates added by this release:
 
 The final archive may be handed off only after the aggregate status is recorded with explicit PASS/FAIL counts and screenshot evidence from the stabilization acceptance suite.
 
+
 # 53. Change record — v4.2.45 CLIENT CARD UX
 
 ### ADDED
@@ -3525,6 +3549,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Existing static regression suite remains release-blocking.
 - Client-card desktop/mobile visual QA and the return-finance scenario remain mandatory acceptance surfaces for this release.
 
+
 # 54. Change record — v4.2.46 FINANCE EXTRA BREAKDOWN
 
 ### ADDED
@@ -3554,11 +3579,13 @@ The final archive may be handed off only after the aggregate status is recorded 
 
 - Extras prices, selected-item storage, rental totals, discounts, deposit logic, chemistry logic and backend contracts are unchanged.
 
+
 ### TESTS
 
 - `npm run test:v4.2.46-finance-extra-breakdown` verifies formatter/category/spec contracts.
 - `npm run test:stabilization-acceptance-browser` verifies the exact desktop and mobile settlement UI with a 450 грн mixed-extra fixture.
 - Full canonical `qa:static` and `qa:browser` remain release-blocking.
+
 
 # 55. Change record — v4.2.47 CI PIPELINE HARDENING
 
@@ -3600,6 +3627,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `npm run qa:legacy` remains available for explicit historical audit and is not a release-blocking default gate.
 - Full canonical `npm run qa:full` remains release-blocking before handoff.
 
+
 ### EXPERIMENTAL NATIVE UI TEST — паралельний FULL PWA-візуал
 
 - Production-маршрут `/admin/bronuvannia/` залишається канонічним і не змінює свій UI/поведінку в межах цього тесту.
@@ -3621,6 +3649,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Видимий допоміжний текст на критичних native mobile surfaces не повинен ставати micro-copy менше 10 px.
 - Ці правила є presentation-only: production route, бізнес-логіка, статуси, суми, тарифи, Supabase та workflow actions не змінюються.
 
+
 ### EXPERIMENTAL NATIVE UI V2 — cleanup pass
 
 - `/admin/bronuvannia-native-v2/` is a second parallel test route; production `/admin/bronuvannia/` and Native V1 `/admin/bronuvannia-native-test/` remain available and unchanged.
@@ -3633,6 +3662,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Calendar summary is compacted; the technical ISO date remains hidden on mobile.
 - V2 uses the same production business logic, Supabase actions, finance/delivery/deposit/referral contracts and booking state transitions.
 
+
 ### EXPERIMENTAL NATIVE UI V2.1 — component cleanup
 
 - `/admin/bronuvannia-native-v21/` is a parallel test-only route layered on top of Native V2.
@@ -3643,6 +3673,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Preliminary/final settlement keeps the same finance/story business logic but flattens presentation so outer decorative wrappers do not duplicate the borders of inner choices.
 - Targeted V2.1 browser QA covers 320/390/430 px, all primary views, all Settings tabs and critical process/issue/finance/complete/extend/client/SMS flows.
 - Production `/admin/bronuvannia/`, business logic, Supabase contracts, pricing, deposit rules, availability and referral/RETURN economics remain unchanged.
+
 
 ## Experimental Native UI V2.2 stabilization
 
@@ -3677,6 +3708,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - V2.4 has its own manifest/service-worker scope; offline fallback and push/deep links remain inside the V2.4 route.
 - Pricing, delivery, deposits, availability, booking transitions, finance calculations, campaigns, referral, Supabase and production PWA files remain unchanged.
 
+
 ## NATIVE-V25 — Final Polish RC (test-only route)
 
 - Route: `/admin/bronuvannia-native-v25/`; production `/admin/bronuvannia/` remains canonical and unchanged.
@@ -3699,6 +3731,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - RETURN SMS campaign title, `Журнал`, close action, sender metadata and footer must not overlap or clip; `Журнал` has a dedicated header row on mobile.
 - V2.6 changes presentation only; production route and business logic remain unchanged.
 
+
 ### Native V2.7 Full Re-audit RC — visual safety contract
 
 - Parallel test route: `/admin/bronuvannia-native-v27/`; production `/admin/bronuvannia/` remains unchanged.
@@ -3711,11 +3744,13 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Delivery fuel analytics is visually flat: no redundant shell around the per-vehicle rows.
 - V2.7 scoped service worker precaches every CSS layer used by the V2.7 route, including Native V2.5 compatibility CSS, and keeps notification/deep-link fallback inside the V2.7 scope.
 
+
 ### EXPERIMENTAL NATIVE UI V2.8 — Issue/Finance context row
 - Parallel route: `/admin/bronuvannia-native-v28/`.
 - `Видача`, `Попередній розрахунок` і `Закриття оренди` keep `Техніка` and `Клієнт` side-by-side on 320 / 390 / 430 px.
 - Long product/customer labels may wrap to two lines but must not force the context into a vertical stack or create horizontal overflow.
 - Business logic, Supabase, pricing, deposits, status actions and production route remain unchanged.
+
 
 # 55. Change record — v4.3.0 NATIVE PWA PRODUCTION
 
@@ -3756,6 +3791,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - The PWA update notice is suppressed while any booking/detail workflow is active on both mobile and desktop, so an update prompt cannot cover operational controls.
 - Version-floor regression contracts are semver-aware so v4.3 continues all v4.2 business/architecture guarantees; the admin shell freeze now explicitly allows the approved v4.3 production UI overlay while preserving canonical business runtime and PWA contracts.
 
+
 # 56. Change record — v4.3.1 MOBILE CONTROLS + SMS SCROLL
 
 ### FIXED
@@ -3776,6 +3812,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Clients and Finances header filter buttons must cause an actionable visible UI change and invoke the existing canonical controls.
 - `npm run qa:static` and the canonical browser/PWA QA remain release-blocking before merge to `main`.
 
+
 # 57. Change record — v4.3.2 MOBILE FINANCE LEDGER
 
 ### FIXED
@@ -3792,6 +3829,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 
 - At 320 / 390 / 430 px expense rows stay fully inside the viewport, category text does not collide with the amount, long category labels remain readable, and amounts remain right-aligned.
 - The canonical PWA browser suite includes a production-layer finance-ledger geometry regression check.
+
 
 # 58. Change record — UPCOMING EXTRAS PARITY
 
@@ -3811,6 +3849,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - At 320 / 390 / 430 px Upcoming extra names remain readable and contained inside the card.
 - The old pseudo-label/icon are suppressed in the production Native layer.
 - Static regression verifies Upcoming reuses the same compact extra-label resolver as Booking cards.
+
 
 # 59. Change record — v4.3.3 MANUAL DATA REFRESH
 
@@ -3833,6 +3872,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Mobile `Найближчі` keeps the callable phone directly under the customer name and renders the `📞` handset immediately beside the formatted number on the same baseline.
 - Mobile `Найближчі` delivery metadata uses a dedicated outlined van icon beside `Доставка`, replacing the ambiguous legacy location glyph while preserving the route link.
 - While the mobile `Ще` sheet is open, the raised center `Нове` circle is lowered fully inside the bottom navigation so it cannot overlap the sheet; closing `Ще` restores the raised primary-action geometry.
+
 
 # 60. Change record — v4.3.3 BOOKING DETAIL + RETURN UX
 
@@ -3862,6 +3902,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Tapping the client row opens the client card while the telephone remains a separate call action.
 - `Попередній розрахунок` shows the full breakdown before the refund/due result and its explanatory note is not hidden behind the fixed footer.\n- At 320 / 390 / 430 px the `Залог` row is present in both booking-detail finance and the live finance summary, and the center `Нове` action is fully inside bottom navigation while `Ще` is open.
 
+
 # 61. Change record — v4.3.3 OPERATIONAL CTA HIERARCHY
 
 ### SYSTEM
@@ -3877,6 +3918,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 - At 320 / 390 / 430 px `Прийняти повернення` is visibly stronger than `Деталі`.
 - `Видати техніку` and `Прийняти повернення` remain visually distinct from each other and from neutral actions.
 - Future visual changes must preserve action meaning, not only button geometry.
+
 
 # 62. Change record — v4.3.4 FINANCE CLARITY + SMS AUDIENCE SCROLL
 
@@ -3928,33 +3970,37 @@ The final archive may be handed off only after the aggregate status is recorded 
 - The fixed footer never covers the final explanatory content.
 - Full canonical static and browser/PWA QA remain release-blocking before merge to `main`.
 
-# 64. Change record — v4.3.6 DESKTOP FINANCE FLOW
+# 64. Change record — v4.3.6 FINANCE FLOW CONSISTENCY
 
 ### ADDED
 
-- `assets/admin-v436.css` is a narrowly scoped production presentation layer loaded after `admin-v430.css` only for desktop widths `>=901px`.
-- `scripts/test-v4-3-6-desktop-finance-flow.mjs` is registered in `currentContracts` and guards the exact desktop settlement hierarchy, flat surface and mobile isolation.
+- `assets/admin-v436.css` — вузький production presentation layer поверх `admin-v430.css` для узгодженої фінансової ієрархії на mobile/PWA і desktop.
+- `scripts/test-v4-3-6-desktop-finance-flow.mjs` — canonical static contract для структури, семантики кольорів, правої осі сум і відсутності вкладених finance-card shells.
+- `scripts/finance_flow_v436_visual_qa.py` — exact browser regression для 390 px mobile/PWA та 1440 px desktop із screenshot evidence.
 
 ### CHANGED
 
-- Desktop `Попередній розрахунок` uses the same semantic money-direction hierarchy as the approved mobile flow: `Отримано` → `Списується` → explicit final result under `Підсумок`.
-- Each finance row uses one label/value axis: description and helper copy remain on the left, the monetary value is aligned on the right, and subtotals remain visually distinct without duplicating amounts.
-- Received money keeps a restrained muted-green semantic, expenses keep a restrained terracotta/red semantic, and the final result uses `refund` / `due` / `neutral` state treatment.
-- The desktop finance summary is one visual surface: the redundant nested inner frame/background is removed while separators and spacing preserve scanability.
+- Mobile booking card використовує одну фінансову вісь: `Разом витрати` → `Отримано` → `Залоговий платіж` → попередній/фінальний результат. Залог і результат більше не виглядають як окремі картки всередині фінансового блоку.
+- Mobile `Попередній розрахунок` / фінальне закриття використовує одну плоску структуру `Отримано → Списується → Підсумок`; helper-стан залогу відображається окремим рядком під label, а всі суми вирівняні по одній правій осі.
+- Desktop settlement використовує ту саму semantic money-direction hierarchy: отримане — стриманий зелений акцент, списання — terracotta/red, фінальний refund/due/neutral — один явний результат.
+- Фінансовий breakdown на mobile і desktop є однією surface: section separators замість redundant inner frame/background.
 
 ### FIXED
 
-- Desktop settlement labels and amounts no longer collapse visually into strings such as `Передоплата200 грн`, `Доставка250 грн` or `ПідсумокДо повернення…`.
-- The final refund/due amount is visually dominant once, while section labels and subtotals remain secondary and readable.
+- Mobile `Залоговий платіж 2 000 грн · отримано` більше не рендериться як велика синя внутрішня картка.
+- Mobile `Попередньо повернути / доплатити` більше не рендериться як друга велика зелена/червона внутрішня картка.
+- У попередньому розрахунку `Залог` і `Отримано` більше не злипаються в один візуальний рядок.
+- Desktop labels і amounts більше не злипаються у строки типу `Передоплата200 грн`, `Доставка250 грн` або `ПідсумокДо повернення…`.
+- Фінальний refund/due amount залишається одним очевидним підсумком без дублювання.
 
 ### PRESERVED
 
-- Mobile/PWA presentation from v4.3.5 remains unchanged by the v4.3.6 layer; the new CSS has no `max-width:900px` rules.
-- Finance formulas, received/expense/refund/due calculations, deposits, prepayment, rental, delivery, extras, chemistry, discounts, persistence and booking state transitions are unchanged.
-- Supabase, SMS/RETURN/referral behavior and service-worker behavior are unchanged.
+- Finance formulas, received/expense/refund/due calculations, передоплата, залог, оренда, доставка, extras, chemistry, discounts, persistence і booking status transitions не змінюються.
+- Supabase schema/functions/data, SMS/RETURN/referral behavior, availability, delivery pricing та service-worker behavior не змінюються.
+- Public booking і VA HOME не зачіпаються.
 
 ### TESTS
 
-- `scripts/test-v4-3-6-desktop-finance-flow.mjs` via canonical `test:current-contracts`;
-- `test:css-architecture`, `test:final-desktop-static` and artifact verification remain release-blocking;
-- canonical Browser QA, including `test:desktop-final`, PWA suites and reviewed desktop finance screenshots, remains release-blocking before merge to `main`.
+- `scripts/test-v4-3-6-desktop-finance-flow.mjs` через canonical `test:current-contracts`;
+- `scripts/finance_flow_v436_visual_qa.py` через canonical Browser QA — exact 390 px + 1440 px geometry and screenshots;
+- `test:css-architecture`, `test:final-desktop-static`, artifact verification, PWA/browser suites і full canonical QA залишаються release-blocking перед merge у `main`.
