@@ -4069,3 +4069,36 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-8-sms-hardening.mjs` via canonical `test:sms-campaigns`.
 - `scripts/sms_v438_visual_qa.py` chained into canonical `test:campaign-sms-ux` at 390 px and 430 px.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
+
+
+# 67. Change record — v4.3.9 SMS BRAND COPY
+
+### ADDED
+
+- `assets/admin-v439.js` adds a narrow RETURN-copy presentation/transport layer on top of the v4.3.8 sanitizer.
+- `scripts/test-v4-3-9-sms-brand-copy.mjs` and `scripts/sms_v439_copy_qa.py` lock brand identity, supported-symbol preservation and the three-part Unicode SMS budget.
+
+### CHANGED
+
+- RETURN SMS now identifies the sender/service immediately: `VAcleaner — оренда техніки для прибирання у Полтаві`.
+- The default RETURN copy may use up to three concatenated Unicode SMS parts instead of being constrained to the previous two-part target.
+- Transport-safe BMP symbols such as `★`, `✓`, `—`, `%` and `−` remain allowed; unsupported supplementary-plane pictographs that SendPulse renders as question marks remain filtered by v4.3.8.
+- The visible opt-out label is `Відмова`, with the same `vacleaner.pp.ua/s` opt-out route.
+
+### FIXED
+
+- A recipient can understand who is writing and what VAcleaner is without relying only on the sender ID.
+- The copy no longer sacrifices clear brand/service identification merely to stay inside two Unicode SMS parts.
+- The default discount copy uses a supported typographic minus and a transport-safe star instead of the provider-broken `😊`.
+
+### PRESERVED
+
+- Personalized RETURN link generation, 21-day activation, discount value/economics, audience eligibility, consent/legacy policy, 90-day cooldown, opt-out behavior, preflight/send route and dispatch persistence are unchanged.
+- v4.3.8 SMS-journal viewport repair and supplementary-pictograph transport filter remain active.
+- Supabase schema/functions, booking/finance, delivery, referral, public booking, service worker and VA HOME are unchanged.
+
+### TESTS
+
+- `scripts/test-v4-3-9-sms-brand-copy.mjs` via canonical `test:sms-campaigns`.
+- `scripts/sms_v439_copy_qa.py` via canonical `test:campaign-sms-ux`.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
