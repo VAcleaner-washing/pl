@@ -57,6 +57,10 @@ def check(ok,label):
     checks.append((bool(ok),label))
     print(('PASS' if ok else 'FAIL')+': '+label)
 
+def overlap(a,b):
+    if not a or not b: return True
+    return not (a['x']+a['width']<=b['x'] or b['x']+b['width']<=a['x'] or a['y']+a['height']<=b['y'] or b['y']+b['height']<=a['y'])
+
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True)
     for width,height in ((390,844),(1440,1000)):
@@ -85,10 +89,16 @@ with sync_playwright() as p:
         result_style=result.evaluate("el=>{const s=getComputedStyle(el);return{radius:s.borderRadius,bg:s.backgroundColor,shadow:s.boxShadow}}")
         check(dep_style['radius']=='0px' and dep_style['bg'] in ('rgba(0, 0, 0, 0)','transparent') and dep_style['shadow']=='none',f'{width}: booking deposit is a finance row, not an inner card')
         check(result_style['radius']=='0px' and result_style['bg'] in ('rgba(0, 0, 0, 0)','transparent') and result_style['shadow']=='none',f'{width}: booking settlement result is a finance row, not a second inner card')
-        dep=deposit.locator('strong').bounding_box();res=result.locator('strong').bounding_box();received=page.locator('.booking-finance-received-summary>strong').bounding_box()
-        check(dep and res and received and max(dep['x']+dep['width'],res['x']+res['width'],received['x']+received['width'])-min(dep['x']+dep['width'],res['x']+res['width'],received['x']+received['width'])<=2,f'{width}: received, deposit and settlement result share one right money axis')
+        dep=deposit.locator('strong').bounding_box();res=result.locator('strong').bounding_box();received=page.locator('.booking-finance-received-summary>strong').bounding_box();expense=page.locator('.booking-finance-expenses>b').bounding_box()
+        money_boxes=[x for x in (dep,res,received,expense) if x]
+        check(len(money_boxes)==4 and max(x['x']+x['width'] for x in money_boxes)-min(x['x']+x['width'] for x in money_boxes)<=2,f'{width}: booking finance amounts share one right money axis')
         label_fit=result.locator('span').evaluate("el=>({scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,whiteSpace:getComputedStyle(el).whiteSpace})")
         check(label_fit['scrollWidth']<=label_fit['clientWidth']+1,f'{width}: preliminary settlement label is not clipped')
+        if not mobile:
+            finance_label=page.locator('.booking-finance>small').bounding_box()
+            expense_label=page.locator('.booking-finance-expenses>span').bounding_box()
+            expense_amount=page.locator('.booking-finance-expenses>b').bounding_box()
+            check(not overlap(finance_label,expense_label) and not overlap(finance_label,expense_amount),f'{width}: finance heading does not overlap the expense headline')
 
         if mobile:
             page.screenshot(path=str(OUT_MOBILE/'mobile-390-finance-flow-v436.png'),full_page=True)
