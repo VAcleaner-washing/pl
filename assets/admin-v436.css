@@ -387,3 +387,153 @@
   html.v43-prod .finance-form .finance-flow-final.due{background:rgba(190,91,79,.14)!important;color:#e99b91!important}
   html.v43-prod .finance-form .finance-flow-final.neutral{background:rgba(230,180,95,.10)!important;color:#efbd62!important}
 }
+
+@media(min-width:901px){
+  /* Booking card: keep the desktop finance column flat and aligned too. */
+  html.v43-prod .booking-card .booking-finance{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-auto-rows:auto!important;
+    gap:0 12px!important;
+    align-items:start!important;
+    min-width:0!important;
+  }
+  html.v43-prod .booking-card .booking-finance>small{
+    grid-column:1!important;
+    grid-row:1!important;
+    align-self:center!important;
+    margin:0!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-expenses{
+    grid-column:2!important;
+    grid-row:1!important;
+    display:grid!important;
+    grid-template-columns:auto auto!important;
+    gap:8px!important;
+    align-items:baseline!important;
+    margin:0!important;
+    min-width:0!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-expenses>span{
+    color:#d98b80!important;
+    font-size:11px!important;
+    line-height:1.2!important;
+    font-weight:560!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-expenses>b{
+    color:#f1f0ec!important;
+    font-size:17px!important;
+    line-height:1.1!important;
+    font-weight:680!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-received-summary{
+    grid-column:1/-1!important;
+    grid-row:2!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
+    align-items:baseline!important;
+    width:100%!important;
+    margin:0!important;
+    padding:10px 0!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-received-summary>strong{
+    justify-self:end!important;
+    color:#87ddb0!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-received-summary+span{
+    display:none!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state{
+    grid-column:1/-1!important;
+    grid-row:3!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"label value" "state value"!important;
+    gap:2px 12px!important;
+    align-items:center!important;
+    width:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:10px 0!important;
+    border:0!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state>span{
+    grid-area:label!important;
+    min-width:0!important;
+    color:#c7ccce!important;
+    font-size:12px!important;
+    line-height:1.25!important;
+    font-weight:470!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state>strong{
+    grid-area:value!important;
+    justify-self:end!important;
+    align-self:center!important;
+    color:#87ddb0!important;
+    font-size:14px!important;
+    line-height:1.2!important;
+    font-weight:650!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state>small{
+    grid-area:state!important;
+    margin:0!important;
+    color:#78d6a6!important;
+    font-size:10px!important;
+    line-height:1.2!important;
+    font-weight:520!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state.pending>strong,
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state.pending>small{
+    color:#aab1b4!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em{
+    grid-column:1/-1!important;
+    grid-row:4!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
+    align-items:baseline!important;
+    width:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:10px 0 0!important;
+    border:0!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em>span{
+    min-width:0!important;
+    color:#c7ccce!important;
+    font-size:12px!important;
+    line-height:1.3!important;
+    font-weight:520!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em>strong{
+    justify-self:end!important;
+    font-size:14px!important;
+    line-height:1.2!important;
+    font-weight:680!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em.refund>strong{color:#87ddb0!important}
+  html.v43-prod .booking-card .booking-finance>em.due>strong{color:#e09a90!important}
+  html.v43-prod .booking-card .booking-finance>em.neutral>strong{color:#d7b36d!important}
+}
