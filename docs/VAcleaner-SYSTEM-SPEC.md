@@ -4004,3 +4004,37 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-6-desktop-finance-flow.mjs` через canonical `test:current-contracts`;
 - `scripts/finance_flow_v436_visual_qa.py` через canonical Browser QA — exact 390 px + 1440 px geometry and screenshots;
 - `test:css-architecture`, `test:final-desktop-static`, artifact verification, PWA/browser suites і full canonical QA залишаються release-blocking перед merge у `main`.
+
+
+# 65. Change record — v4.3.7 BOOKING FINANCE DEDUP
+
+### ADDED
+
+- `assets/admin-v437.js` and `assets/admin-v437.css` add a narrow presentation-only booking-card finance layer.
+- `scripts/test-v4-3-7-booking-finance-dedup.mjs` and `scripts/finance_card_v437_visual_qa.py` guard exact normal/exception deposit states at 390 px and 1440 px.
+
+### CHANGED
+
+- Booking-card `Отримано` is the single primary received-money row.
+- When deposit is normal/paid, its composition moves to subordinate helper copy under `Отримано`: `Передоплата … · залог …`.
+- A pending deposit before issue is expected and appears only in helper copy as `залог … при видачі`.
+- A separate deposit row is reserved for exceptional post-issue state where deposit is missing.
+
+### FIXED
+
+- Paid deposit no longer repeats `Отримано` as a second `Залоговий платіж … · отримано` row.
+- The card no longer presents one fact (`received includes deposit`) as two competing successful states.
+- Post-issue missing deposit remains explicit as `Залог не отримано` / `потрібна перевірка`.
+
+### PRESERVED
+
+- `f.received`, prepayment, securityDeposit, refund/due, expenses, delivery, extras, chemistry, discounts, persistence and booking status logic are unchanged.
+- Detailed breakdown in `Розрахунок` is unchanged.
+- Supabase, SMS/RETURN/referral, availability, service worker, public booking and VA HOME are unchanged.
+
+### TESTS
+
+- `scripts/test-v4-3-7-booking-finance-dedup.mjs` via canonical `test:pwa-static`.
+- `scripts/finance_card_v437_visual_qa.py` chained into the canonical finance-flow browser gate at 390 px and 1440 px.
+- Full canonical static/build/browser/PWA QA remains release-blocking before merge.
+
