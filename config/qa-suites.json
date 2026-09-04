@@ -91,7 +91,7 @@
     {"domain": "stabilization", "file": "scripts/test-v4-2-44-stabilization.mjs"},
     {"domain": "client-card", "file": "scripts/test-v4-2-45-client-card-ux.mjs"},
     {"domain": "finance-extra-breakdown", "file": "scripts/test-v4-2-46-finance-extra-breakdown.mjs"},
+    {"domain": "desktop-finance-flow", "file": "scripts/test-v4-3-6-desktop-finance-flow.mjs"},
     {"domain": "home-package-rhythm", "file": "scripts/test-v4-1-60-home-package-rhythm.mjs"}
   ]
 }
-
