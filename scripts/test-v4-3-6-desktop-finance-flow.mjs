@@ -15,7 +15,7 @@ const checks=[
   ['mobile booking settlement result is not a second card',css.includes('.booking-card .booking-finance>em')&&css.includes('border-top:1px solid rgba(255,255,255,.055)!important')&&css.includes('box-shadow:none!important')],
   ['mobile settlement modal removes the table-in-a-card shell',css.includes('.finance-form .modal-summary')&&css.includes('.finance-flow-group+.finance-flow-group')&&css.includes('.finance-flow-title+div')],
   ['deposit helper is rendered below its label instead of inline',css.includes('.finance-flow-group>div>span>small')&&css.includes('display:block!important')],
-  ['system spec contains the v4.3.6 finance change record',spec.includes('Change record — v4.3.6 DESKTOP FINANCE FLOW')]
+  ['system spec contains the v4.3.6 finance flow change record',spec.includes('Change record — v4.3.6 FINANCE FLOW CONSISTENCY')]
 ];
 
 let failed=0;
