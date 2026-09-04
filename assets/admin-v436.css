@@ -1,4 +1,4 @@
-/* v4.3.6 — finance flow consistency: desktop uses the same semantic money hierarchy as PWA. */
+/* v4.3.6 — finance flow consistency across desktop and mobile. */
 @media(min-width:901px){
   html.v43-prod .finance-form .modal-summary{
     padding:16px 18px!important;
@@ -134,4 +134,256 @@
     background:rgba(230,180,95,.10)!important;
     color:#efbd62!important;
   }
+}
+
+@media(max-width:900px){
+  /* Booking card: one finance language, no nested deposit/result cards. */
+  html.v43-prod .booking-card .booking-finance{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-auto-rows:auto!important;
+    gap:0 12px!important;
+    align-items:start!important;
+  }
+  html.v43-prod .booking-card .booking-finance>small{
+    grid-column:1!important;
+    grid-row:1!important;
+    align-self:center!important;
+    margin:0!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-expenses{
+    grid-column:2!important;
+    grid-row:1!important;
+    align-self:start!important;
+    margin:0!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-finance-received-summary{
+    grid-column:1/-1!important;
+    grid-row:2!important;
+    width:100%!important;
+    margin:0!important;
+    padding:11px 0 10px!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state{
+    grid-column:1/-1!important;
+    grid-row:3!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"label value" "state value"!important;
+    gap:2px 12px!important;
+    align-items:center!important;
+    width:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:10px 0!important;
+    border:0!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state>span{
+    grid-area:label!important;
+    color:#c7ccce!important;
+    font-size:12.5px!important;
+    line-height:1.25!important;
+    font-weight:470!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state>strong{
+    grid-area:value!important;
+    justify-self:end!important;
+    align-self:center!important;
+    color:#87ddb0!important;
+    font-size:14px!important;
+    line-height:1.2!important;
+    font-weight:650!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state>small{
+    grid-area:state!important;
+    margin:0!important;
+    color:#78d6a6!important;
+    font-size:10.5px!important;
+    line-height:1.2!important;
+    font-weight:520!important;
+  }
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state.pending>strong,
+  html.v43-prod .booking-card .booking-finance>.booking-deposit-state.pending>small{
+    color:#aab1b4!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em{
+    grid-column:1/-1!important;
+    grid-row:4!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
+    align-items:baseline!important;
+    width:100%!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:11px 0 0!important;
+    border:0!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em>span{
+    min-width:0!important;
+    color:#c7ccce!important;
+    font-size:12.5px!important;
+    line-height:1.3!important;
+    font-weight:520!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em>strong{
+    justify-self:end!important;
+    font-size:15px!important;
+    line-height:1.2!important;
+    font-weight:680!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .booking-card .booking-finance>em.refund>strong{color:#87ddb0!important}
+  html.v43-prod .booking-card .booking-finance>em.due>strong{color:#e09a90!important}
+  html.v43-prod .booking-card .booking-finance>em.neutral>strong{color:#d7b36d!important}
+
+  /* Settlement modal: remove table-in-a-card feeling, keep one final result surface. */
+  html.v43-prod .finance-form .modal-summary{
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  html.v43-prod .finance-form .modal-summary>h3{
+    margin:0 0 10px!important;
+    padding:0!important;
+    color:#b9bec0!important;
+    font-size:16px!important;
+    line-height:1.25!important;
+    font-weight:610!important;
+  }
+  html.v43-prod .finance-form .finance-flow-summary{
+    display:grid!important;
+    gap:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  html.v43-prod .finance-form .finance-flow-group{
+    display:grid!important;
+    gap:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  html.v43-prod .finance-form .finance-flow-group+.finance-flow-group{
+    margin-top:13px!important;
+    padding-top:13px!important;
+    border-top:1px solid rgba(255,255,255,.075)!important;
+  }
+  html.v43-prod .finance-form .finance-flow-group>div{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
+    align-items:baseline!important;
+    min-width:0!important;
+    padding:9px 2px!important;
+    border:0!important;
+    border-top:1px solid rgba(255,255,255,.045)!important;
+    background:transparent!important;
+  }
+  html.v43-prod .finance-form .finance-flow-group>.finance-flow-title{
+    grid-template-columns:minmax(0,1fr)!important;
+    margin:0!important;
+    padding:0 2px 7px!important;
+    border-top:0!important;
+  }
+  html.v43-prod .finance-form .finance-flow-title+div{
+    border-top:0!important;
+  }
+  html.v43-prod .finance-form .finance-flow-title>span{
+    font-size:11px!important;
+    line-height:1.2!important;
+    font-weight:650!important;
+    letter-spacing:.075em!important;
+  }
+  html.v43-prod .finance-form .finance-flow-title>strong{display:none!important}
+  html.v43-prod .finance-form .finance-flow-received>.finance-flow-title>span{color:#78d6a6!important}
+  html.v43-prod .finance-form .finance-flow-expenses>.finance-flow-title>span{color:#d98b80!important}
+  html.v43-prod .finance-form .finance-flow-group>div>span{
+    min-width:0!important;
+    color:#c9cdcf!important;
+    font-size:12.5px!important;
+    line-height:1.32!important;
+    font-weight:450!important;
+  }
+  html.v43-prod .finance-form .finance-flow-group>div>span>small{
+    display:block!important;
+    margin-top:2px!important;
+    color:#7f888c!important;
+    font-size:10.5px!important;
+    line-height:1.28!important;
+    font-weight:430!important;
+  }
+  html.v43-prod .finance-form .finance-flow-group>div>strong{
+    justify-self:end!important;
+    color:#f0efeb!important;
+    font-size:13px!important;
+    line-height:1.2!important;
+    font-weight:620!important;
+    white-space:nowrap!important;
+    text-align:right!important;
+  }
+  html.v43-prod .finance-form .finance-flow-group .received-total,
+  html.v43-prod .finance-form .finance-flow-group .expenses-total{
+    margin-top:2px!important;
+    padding-top:10px!important;
+  }
+  html.v43-prod .finance-form .finance-flow-received .received-total>span,
+  html.v43-prod .finance-form .finance-flow-received .received-total>strong{color:#87ddb0!important}
+  html.v43-prod .finance-form .finance-flow-expenses .expenses-total>span,
+  html.v43-prod .finance-form .finance-flow-expenses .expenses-total>strong{color:#e09a90!important}
+  html.v43-prod .finance-form .finance-flow-final{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
+    align-items:center!important;
+    min-height:60px!important;
+    margin:14px 0 0!important;
+    padding:12px 14px!important;
+    border:0!important;
+    border-radius:14px!important;
+    box-shadow:none!important;
+  }
+  html.v43-prod .finance-form .finance-flow-final>span{
+    display:grid!important;
+    gap:3px!important;
+    min-width:0!important;
+    color:#e7e7e3!important;
+    font-size:12.5px!important;
+    line-height:1.28!important;
+    font-weight:590!important;
+  }
+  html.v43-prod .finance-form .finance-flow-final>span>small{
+    color:#90989c!important;
+    font-size:9.5px!important;
+    line-height:1.2!important;
+    font-weight:650!important;
+    letter-spacing:.08em!important;
+  }
+  html.v43-prod .finance-form .finance-flow-final>strong{
+    justify-self:end!important;
+    font-size:17px!important;
+    line-height:1!important;
+    font-weight:700!important;
+    white-space:nowrap!important;
+  }
+  html.v43-prod .finance-form .finance-flow-final.refund{background:rgba(49,151,101,.15)!important;color:#8ce0b3!important}
+  html.v43-prod .finance-form .finance-flow-final.due{background:rgba(190,91,79,.14)!important;color:#e99b91!important}
+  html.v43-prod .finance-form .finance-flow-final.neutral{background:rgba(230,180,95,.10)!important;color:#efbd62!important}
 }
