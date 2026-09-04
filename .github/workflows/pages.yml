@@ -8,7 +8,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 concurrency:
@@ -26,6 +26,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Repair v4.3.6 System Spec
+        if: ${{ github.ref == 'refs/heads/qa/v4.3.6-finance-flow-clean' && github.event_name == 'push' }}
+        run: |
+          node scripts/repair-v436-spec.mjs
+          if ! git diff --quiet -- docs/VAcleaner-SYSTEM-SPEC.md; then
+            git config user.name 'VAcleaner QA'
+            git config user.email 'vacleaner.washing@gmail.com'
+            git add docs/VAcleaner-SYSTEM-SPEC.md
+            git commit -m 'v4.3.6: align System Spec with finance flow consistency'
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
       - name: Run canonical static / regression QA
