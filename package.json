@@ -75,6 +75,7 @@
     "test:admin-typography-browser": "python scripts/admin_typography_qa.py",
     "test:admin-context-navigation": "python scripts/admin_context_navigation_qa.py",
     "test:finance-delivery-visual": "python scripts/finance_delivery_visual_qa.py",
+    "test:finance-flow-v436-visual": "python scripts/finance_flow_v436_visual_qa.py",
     "test:referral-ios-launch": "python scripts/referral_ios_launch_qa.py",
     "test:admin-route-smoke": "python scripts/v4_2_37_route_smoke_qa.py",
     "test:admin-control-consistency": "python scripts/admin_control_consistency_qa.py",
