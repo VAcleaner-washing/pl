@@ -4240,3 +4240,77 @@ html.native-v28 .upcoming-handoff-copy{
   }
   html.native-v28 .sms-campaign-modal .sms-recipient-head h3{font-size:15px!important}
 }
+
+
+/* v4.3.5 — finance summary cleanup after real-device regression review. */
+@media(max-width:900px){
+  /* Booking card: every finance element owns a separate row; no auto-placement overlap. */
+  html.native-v28 .booking-card .booking-finance{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-auto-rows:auto!important;
+    align-items:start!important;
+    gap:8px 10px!important;
+  }
+  html.native-v28 .booking-card .booking-finance>small{
+    grid-column:1!important;
+    grid-row:1!important;
+    align-self:center!important;
+  }
+  html.native-v28 .booking-card .booking-finance>.booking-finance-expenses{
+    grid-column:2!important;
+    grid-row:1!important;
+    align-self:start!important;
+  }
+  html.native-v28 .booking-card .booking-finance>.booking-finance-received-summary{
+    grid-column:1/-1!important;
+    grid-row:2!important;
+    width:100%!important;
+    margin:0!important;
+    padding:9px 0 0!important;
+  }
+  html.native-v28 .booking-card .booking-finance>.booking-deposit-state{
+    grid-column:1/-1!important;
+    grid-row:3!important;
+    justify-self:stretch!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:48px!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  html.native-v28 .booking-card .booking-finance>em{
+    grid-column:1/-1!important;
+    grid-row:4!important;
+    justify-self:stretch!important;
+    width:100%!important;
+    min-height:48px!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+  html.native-v28 .booking-card .booking-finance>span:not(.booking-deposit-state):not(.booking-finance-received-summary){
+    display:none!important;
+  }
+
+  /* Breakdown headers describe direction; subtotal rows are the only place totals repeat. */
+  html.native-v28 .finance-form .finance-flow-title{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  html.native-v28 .finance-form .finance-flow-title>strong{
+    display:none!important;
+  }
+
+  /* Preliminary mode has one result only: the green/red final row in the breakdown.
+     Final close keeps only the confirmation control below it. */
+  html.native-v28 .finance-form:not(.complete-form) .deposit-return-box{
+    display:none!important;
+  }
+  html.native-v28 .finance-form.complete-form .deposit-return-box{
+    margin-top:12px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+  }
+  html.native-v28 .finance-form.complete-form .deposit-return-box>.deposit-return-switch{
+    margin:0!important;
+  }
+}

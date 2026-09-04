@@ -522,9 +522,13 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(page.locator('.booking-card', has_text='HIST-PWA-001').count()==0, f"{label}: recent returned rental is absent from Finished rentals")
         if page.locator('[data-filter="all"]').count(): page.locator('[data-filter="all"]').click()
 
-        # Finance UI follows the rental stage. Before issue there is no fake due/refund
-        # control; after issue the preliminary settlement and the received deposit must
-        # both remain contained and non-overlapping.
+        # Finance UI follows the rental stage. These assertions must run against the
+        # same production native CSS layer that the real admin loads; the lean base
+        # render alone cannot catch late production grid overrides.
+        finance_classes_before=page.locator('html').get_attribute('class') or ''
+        finance_native_style=page.add_style_tag(content=(ROOT/'assets/admin-v430.css').read_text(encoding='utf-8'))
+        page.evaluate("document.documentElement.classList.add('v43-prod','native-v23','native-v24','native-v25','native-v26','native-v27','native-v28')")
+        page.wait_for_timeout(50)
         page.locator('[data-filter="confirmed"]').click();page.wait_for_timeout(30)
         confirmed_finance=page.locator(f'.booking-card[data-id="{BOOKINGS[2]["id"]}"] .booking-finance')
         confirmed_geometry=confirmed_finance.evaluate("""el=>{const p=el.getBoundingClientRect(),badge=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},badge:Boolean(badge),dep:dep?{l:dep.left,r:dep.right,h:dep.height}:null}}""")
@@ -533,12 +537,16 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         page.locator('[data-filter="issued"]').click();page.wait_for_timeout(30)
         issued_finance=page.locator(f'.booking-card[data-id="{BOOKINGS[3]["id"]}"] .booking-finance')
         qa.check('Разом витрати' in issued_finance.inner_text(), f"{label}: issued booking finance headline names the total instead of showing an ambiguous amount")
-        issued_geometry=issued_finance.evaluate("""el=>{const p=el.getBoundingClientRect(),due=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},due:due?{l:due.left,r:due.right,t:due.top,b:due.bottom,h:due.height}:null,dep:dep?{l:dep.left,r:dep.right,t:dep.top,b:dep.bottom,h:dep.height}:null}}""")
+        issued_geometry=issued_finance.evaluate("""el=>{const p=el.getBoundingClientRect(),received=el.querySelector('.booking-finance-received-summary')?.getBoundingClientRect(),due=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},received:received?{l:received.left,r:received.right,t:received.top,b:received.bottom,h:received.height}:null,due:due?{l:due.left,r:due.right,t:due.top,b:due.bottom,h:due.height}:null,dep:dep?{l:dep.left,r:dep.right,t:dep.top,b:dep.bottom,h:dep.height}:null}}""")
         fg=issued_geometry
-        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['l']>=fg['p']['l']-1 and fg['dep']['r']<=fg['p']['r']+1, f"{label}: issued preliminary settlement and deposit stay inside finance card")
-        qa.check(fg['due'] is not None and fg['dep'] is not None and fg['due']['h']>=48 and fg['dep']['h']>=48 and not (fg['due']['r']>fg['dep']['l'] and fg['dep']['r']>fg['due']['l'] and fg['due']['b']>fg['dep']['t'] and fg['dep']['b']>fg['due']['t']), f"{label}: issued preliminary settlement and deposit never overlap")
+        qa.check(fg['received'] is not None and fg['due'] is not None and fg['dep'] is not None and fg['received']['l']>=fg['p']['l']-1 and fg['received']['r']<=fg['p']['r']+1 and fg['due']['l']>=fg['p']['l']-1 and fg['dep']['r']<=fg['p']['r']+1, f"{label}: received, deposit and settlement rows stay inside finance card")
+        qa.check(fg['received'] is not None and fg['dep'] is not None and fg['due'] is not None and fg['received']['b']<=fg['dep']['t']+1 and fg['dep']['b']<=fg['due']['t']+1, f"{label}: received, deposit and preliminary settlement use separate vertical rows without overlap")
         dep_readability=issued_finance.locator('.booking-deposit-state').evaluate("""el=>{const r=el.getBoundingClientRect(),label=el.querySelector('span'),amount=el.querySelector('strong'),state=el.querySelector('small'),lr=label?.getBoundingClientRect(),ar=amount?.getBoundingClientRect(),sr=state?.getBoundingClientRect(),ls=label?getComputedStyle(label):null,as=amount?getComputedStyle(amount):null;return{box:{l:r.left,r:r.right},label:lr?{l:lr.left,r:lr.right,h:lr.height}:null,amount:ar?{l:ar.left,r:ar.right,h:ar.height}:null,state:sr?{l:sr.left,r:sr.right,h:sr.height}:null,wordBreak:ls?.wordBreak,overflowWrap:ls?.overflowWrap,amountWhiteSpace:as?.whiteSpace}}""")
         qa.check(dep_readability['label'] is not None and dep_readability['amount'] is not None and dep_readability['state'] is not None and dep_readability['label']['l']>=dep_readability['box']['l']-1 and dep_readability['label']['r']<=dep_readability['box']['r']+1 and dep_readability['amount']['r']<=dep_readability['box']['r']+1 and dep_readability['state']['r']<=dep_readability['box']['r']+1 and dep_readability['wordBreak']=='normal' and dep_readability['overflowWrap']=='normal' and dep_readability['amountWhiteSpace']=='nowrap', f"{label}: deposit label, amount and state remain readable without character fragmentation")
+        if width==390: qa.shot(page,'mobile-390-finance-card-v435.png')
+        finance_native_style.evaluate("el=>el.remove()")
+        page.evaluate("(classes)=>{document.documentElement.className=classes}",finance_classes_before)
+        page.wait_for_timeout(30)
         page.locator('[data-filter="all"]').click();page.wait_for_timeout(30)
 
         # Global search stays global from every tab and client results open the full CRM card.
@@ -1163,11 +1171,13 @@ def finance_preview_native_suite(browser: Browser, qa: QA) -> None:
                 summary=page.locator('.finance-form .native-finance-breakdown')
                 settlement=page.locator('.finance-form .deposit-return-box')
                 qa.check(summary.count()==1 and summary.locator('h3').inner_text().strip()=='Фінансовий розрахунок', f"Finance preview {width}: full money breakdown has an explicit heading")
-                relation=page.locator('.finance-form .modal-section').evaluate("""el=>{const s=el.querySelector('.native-finance-breakdown'),d=el.querySelector('.deposit-return-box');return !!s&&!!d&&Boolean(s.compareDocumentPosition(d)&Node.DOCUMENT_POSITION_FOLLOWING)}""")
-                qa.check(relation, f"Finance preview {width}: money breakdown appears before preliminary settlement")
+                relation=page.locator('.finance-form .modal-section').evaluate("""el=>{const s=el.querySelector('.native-finance-breakdown'),e=el.querySelector('.manual-discount-editor');return !!s&&!!e&&Boolean(s.compareDocumentPosition(e)&Node.DOCUMENT_POSITION_FOLLOWING)}""")
+                qa.check(relation, f"Finance preview {width}: money breakdown is part of the factual flow before discount controls")
+                qa.check(settlement.count()==0 and page.locator('.finance-form #settlementHeadline').count()==0, f"Finance preview {width}: preliminary mode has no duplicated legacy settlement result")
                 live=summary.locator('.live').inner_text()
                 qa.check(all(x in live for x in ['Передоплата','Залог','Оренда','Доставка','Додатково']), f"Finance preview {width}: summary explains all monetary components")
                 qa.check(all(x in live for x in ['Отримано','Списується','Підсумок']) and ('До повернення клієнту' in live or 'До доплати клієнтом' in live or 'Фінальний баланс' in live), f"Finance preview {width}: summary has received, deducted and final-result hierarchy")
+                qa.check(summary.locator('.finance-flow-title strong').count()==0 and summary.locator('.received-total').count()==1 and summary.locator('.expenses-total').count()==1, f"Finance preview {width}: section headings do not duplicate subtotal amounts")
                 frame=summary.evaluate("""el=>({border:getComputedStyle(el).borderTopWidth,bg:getComputedStyle(el).backgroundColor})""")
                 qa.check(frame['border']=='0px', f"Finance preview {width}: financial breakdown has no redundant inner frame")
                 qa.check(page.locator('.finance-form .manual-discount-head b').inner_text().strip()=='Знижка на оренду', f"Finance preview {width}: discount control states what it affects")

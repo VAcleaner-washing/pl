@@ -382,11 +382,11 @@
     form.dataset.v43FinanceUx='1';
     const section=form.querySelector('.modal-section');
     const summary=form.querySelector('.modal-summary');
-    const settlement=section?.querySelector('.deposit-return-box');
-    if(summary&&section&&settlement){
+    if(summary&&section){
       summary.classList.add('native-finance-breakdown');
       const title=summary.querySelector('h3');if(title)title.textContent='Фінансовий розрахунок';
-      settlement.insertAdjacentElement('beforebegin',summary);
+      const anchor=section.querySelector('.manual-discount-editor')||section.querySelector('.deposit-return-box')||section.querySelector('.note');
+      if(anchor)anchor.insertAdjacentElement('beforebegin',summary);else section.appendChild(summary);
     }
     const editor=form.querySelector('.manual-discount-editor');
     const editorTitle=editor?.querySelector('.manual-discount-head b');if(editorTitle)editorTitle.textContent='Знижка на оренду';

@@ -3945,3 +3945,27 @@ The final archive may be handed off only after the aggregate status is recorded 
 - The mobile preliminary finance breakdown has no redundant inner frame.
 - At 320 / 390 / 430 px the SMS recipient step is the single vertical scroll owner; scrolling moves the audience controls and recipients together while the footer stays outside the scrolling panel.
 - Full canonical static and browser/PWA QA remain release-blocking before merge to `main`.
+
+# 63. Change record — v4.3.5 FINANCE SUMMARY CLEANUP
+
+### CHANGED
+
+- Mobile booking-card finance uses deterministic vertical rows: headline expenses, received total, deposit state, then preliminary/final settlement. Auto-placement must never put received and deposit content in the same grid row.
+- Booking-card `Отримано` and `Разом витрати` remain explicit, but legacy hidden finance copy does not compete with the visible summary.
+- In `Попередній розрахунок`, `Отримано` and `Списується` are section labels only; their amounts appear once in `Разом отримано` and `Разом витрати`.
+- The final result appears once in the finance breakdown under `Підсумок`.
+- Preliminary mode no longer renders the old second `Попередній взаєморозрахунок при поверненні` result card below the new breakdown.
+- Final-close mode keeps only the settlement confirmation control below the breakdown; it does not duplicate the refund/due amount.
+
+### PRESERVED
+
+- Finance formulas, received/expense/refund/due calculations, deposits, prepayment, rental, delivery, extras, chemistry, discount behavior, persistence and booking state transitions are unchanged.
+- SMS behavior from v4.3.4 is unchanged.
+
+### ACCEPTANCE
+
+- At 320 / 390 / 430 px `Отримано`, the deposit state and the preliminary/final settlement are contained in separate non-overlapping booking-card rows.
+- At 320 / 390 / 430 px preliminary finance has exactly one received subtotal, one expense subtotal and one final refund/due result.
+- Preliminary finance contains no legacy duplicate settlement card or `settlementHeadline`.
+- The fixed footer never covers the final explanatory content.
+- Full canonical static and browser/PWA QA remain release-blocking before merge to `main`.
