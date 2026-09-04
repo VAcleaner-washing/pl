@@ -39,6 +39,9 @@ checks=[]
 def check(ok,label):
     checks.append((bool(ok),label)); print(('PASS' if ok else 'FAIL')+': '+label)
 
+def norm(text):
+    return ' '.join(text.replace('\xa0',' ').split())
+
 with sync_playwright() as p:
     browser=p.chromium.launch(headless=True)
     for width,height in ((390,844),(1440,1000)):
@@ -46,23 +49,24 @@ with sync_playwright() as p:
         page.set_content(html,wait_until='load'); page.wait_for_timeout(80)
         paid=page.locator('[data-case="paid"] .booking-finance')
         helper=paid.locator('.booking-finance-received-breakdown')
-        check(helper.inner_text().strip()=='Передоплата 200 грн · залог 2 000 грн',f'{width}: paid received row shows one compact prepayment/deposit breakdown')
+        check(norm(helper.inner_text().strip())=='Передоплата 200 грн · залог 2 000 грн',f'{width}: paid received row shows one compact prepayment/deposit breakdown')
         paid_dep=paid.locator('.booking-deposit-state')
         check(paid_dep.evaluate("el=>getComputedStyle(el).display")=='none',f'{width}: paid deposit row is removed as redundant')
         legacy=paid.locator('.booking-finance-received-legacy')
         check(legacy.count()==1 and legacy.evaluate("el=>getComputedStyle(el).display")=='none',f'{width}: legacy received sentence is hidden')
-        paid_text=paid.inner_text()
+        paid_text=norm(paid.inner_text())
         check(paid_text.count('Отримано')==1,f'{width}: paid booking card has one visible received label')
         check('2 200 грн' in paid_text and 'Попередньо повернути' in paid_text,f'{width}: received total and settlement result remain visible')
 
         pre=page.locator('[data-case="preissue"] .booking-finance')
         check(pre.locator('.booking-deposit-state').evaluate("el=>getComputedStyle(el).display")=='none',f'{width}: expected pre-issue deposit does not create a second row')
-        check('залог 2 000 грн при видачі' in pre.locator('.booking-finance-received-breakdown').inner_text(),f'{width}: pre-issue helper explains when deposit is due')
+        check('залог 2 000 грн при видачі' in norm(pre.locator('.booking-finance-received-breakdown').inner_text()),f'{width}: pre-issue helper explains when deposit is due')
 
         exc=page.locator('[data-case="exception"] .booking-finance')
         exc_dep=exc.locator('.booking-deposit-state')
         check(exc_dep.evaluate("el=>getComputedStyle(el).display")!='none',f'{width}: missing post-issue deposit remains visible')
-        check('Залог не отримано' in exc_dep.inner_text() and 'потрібна перевірка' in exc_dep.inner_text(),f'{width}: exceptional deposit state is explicit')
+        exc_text=norm(exc_dep.inner_text()).lower()
+        check('залог не отримано' in exc_text and 'потрібна перевірка' in exc_text,f'{width}: exceptional deposit state is explicit')
 
         if width==390:
             paid.screenshot(path=str(OUT/'mobile-390-booking-finance-v437.png'))
