@@ -399,29 +399,33 @@
     min-width:0!important;
   }
   html.v43-prod .booking-card .booking-finance>small{
-    grid-column:1!important;
+    grid-column:1/-1!important;
     grid-row:1!important;
     align-self:center!important;
-    margin:0!important;
+    margin:0 0 7px!important;
   }
   html.v43-prod .booking-card .booking-finance>.booking-finance-expenses{
-    grid-column:2!important;
-    grid-row:1!important;
+    grid-column:1/-1!important;
+    grid-row:2!important;
     display:grid!important;
-    grid-template-columns:auto auto!important;
-    gap:8px!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:12px!important;
     align-items:baseline!important;
+    width:100%!important;
     margin:0!important;
+    padding:0 0 10px!important;
     min-width:0!important;
   }
   html.v43-prod .booking-card .booking-finance>.booking-finance-expenses>span{
+    min-width:0!important;
     color:#d98b80!important;
     font-size:11px!important;
     line-height:1.2!important;
     font-weight:560!important;
-    white-space:nowrap!important;
+    white-space:normal!important;
   }
   html.v43-prod .booking-card .booking-finance>.booking-finance-expenses>b{
+    justify-self:end!important;
     color:#f1f0ec!important;
     font-size:17px!important;
     line-height:1.1!important;
@@ -430,7 +434,7 @@
   }
   html.v43-prod .booking-card .booking-finance>.booking-finance-received-summary{
     grid-column:1/-1!important;
-    grid-row:2!important;
+    grid-row:3!important;
     display:grid!important;
     grid-template-columns:minmax(0,1fr) auto!important;
     gap:12px!important;
@@ -450,7 +454,7 @@
   }
   html.v43-prod .booking-card .booking-finance>.booking-deposit-state{
     grid-column:1/-1!important;
-    grid-row:3!important;
+    grid-row:4!important;
     display:grid!important;
     grid-template-columns:minmax(0,1fr) auto!important;
     grid-template-areas:"label value" "state value"!important;
@@ -501,7 +505,7 @@
   }
   html.v43-prod .booking-card .booking-finance>em{
     grid-column:1/-1!important;
-    grid-row:4!important;
+    grid-row:5!important;
     display:grid!important;
     grid-template-columns:minmax(0,1fr) auto!important;
     gap:12px!important;
