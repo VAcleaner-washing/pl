@@ -10,18 +10,18 @@ permissions:
 
 jobs:
   append-spec:
-    if: ${{ !contains(github.event.head_commit.message, 'docs: record v4.3.11') && !contains(github.event.head_commit.message, 'chore: remove temp v4.3.11') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: qa/v4.3.11-process-contact-buttons
           fetch-depth: 0
-      - name: Append v4.3.11 System Spec record
+      - name: Append System Spec and remove temporary workflow
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+          import textwrap
           path=Path('docs/VAcleaner-SYSTEM-SPEC.md')
           block=r'''
 
@@ -54,12 +54,14 @@ jobs:
           - `scripts/process_contact_v4311_visual_qa.py` via canonical Browser QA validates centered/no-underline contact actions and `Зателефонувати` at 390 / 430 px.
           - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
           '''
-          # Strip the YAML-safe indentation baked into this temporary workflow.
-          import textwrap
-          path.write_text(path.read_text(encoding='utf-8')+textwrap.dedent(block),encoding='utf-8')
+          text=path.read_text(encoding='utf-8')
+          marker='# 69. Change record — v4.3.11 PROCESS CONTACT BUTTON POLISH'
+          if marker not in text:
+              path.write_text(text+textwrap.dedent(block),encoding='utf-8')
           PY
+          git rm .github/workflows/temp-v4311-spec.yml
           git config user.name "VAcleaner-washing"
           git config user.email "vacleaner.washing@gmail.com"
           git add docs/VAcleaner-SYSTEM-SPEC.md
-          git commit -m "docs: record v4.3.11 process contact buttons"
+          git commit -m "docs: record v4.3.11 and remove temp workflow"
           git push origin HEAD:qa/v4.3.11-process-contact-buttons
