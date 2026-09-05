@@ -4131,3 +4131,33 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-10-client-card-edit-mode.mjs` via canonical `test:pwa-static`.
 - `scripts/test-mobile-client-card.py` via canonical `test:client-card-mobile` validates read → edit → done disclosure state and rejects duplicate visible contact blocks at 320 / 390 / 430 px.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
+
+
+# 69. Change record — v4.3.11 PROCESS CONTACT BUTTON POLISH
+
+### ADDED
+
+- `assets/admin-v4311.css` normalizes link-backed contact actions in the booking-processing step so Instagram, Telegram and phone actions use one centered button geometry without link underlines.
+- `assets/admin-v4311.js` replaces the manager-facing legacy call label `Подзвонити` with `Зателефонувати` while preserving the existing `tel:` target.
+- `scripts/test-v4-3-11-process-contact-actions.mjs` and `scripts/process_contact_v4311_visual_qa.py` lock exact copy and mobile geometry at 390 / 430 px.
+
+### CHANGED
+
+- **UI-003 / BOOK-003** — in `Опрацювати заявку → Надіслати умови клієнту`, link-backed contact actions are presented as buttons, not raw underlined links.
+- The phone action is labeled `Зателефонувати`; Instagram remains the primary preferred-channel action when appropriate, with its text optically centered inside the CTA.
+
+### FIXED
+
+- Instagram no longer renders with an underlined, top-left link label inside the gold button surface on iPhone/PWA.
+- The process phone CTA no longer uses the less natural manager-facing wording `Подзвонити`.
+
+### PRESERVED
+
+- Instagram/Telegram URLs, preferred-channel selection, text-copy action, telephone number, booking-processing state, confirmation flow and contact persistence are unchanged.
+- Supabase, SMS/RETURN, referral, finance, delivery, deposits, availability, service worker, public booking and VA HOME are unchanged.
+
+### TESTS
+
+- `scripts/test-v4-3-11-process-contact-actions.mjs` via canonical `test:pwa-static`.
+- `scripts/process_contact_v4311_visual_qa.py` via canonical Browser QA validates centered/no-underline contact actions and `Зателефонувати` at 390 / 430 px.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.

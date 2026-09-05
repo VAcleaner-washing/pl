@@ -70,7 +70,8 @@
     "test:booking-gifts-visual",
     "test:admin-return-gift-persistence",
     "test:stabilization-acceptance-browser",
-    "test:client-card-visual"
+    "test:client-card-visual",
+    "test:process-contact-v4311"
   ],
   "currentContracts": [
     {"domain": "public-seo", "file": "scripts/test-v4-1-47-seo-local.mjs"},

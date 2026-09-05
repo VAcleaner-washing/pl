@@ -1,0 +1,19 @@
+/* VAcleaner v4.3.11 — process contact-action alignment.
+   Presentation only: communication targets and handlers remain canonical. */
+html.native-test .process-form .process-actions a.btn{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  text-decoration:none!important;
+  line-height:1.15!important;
+}
+html.native-test .process-form .process-actions a.btn:link,
+html.native-test .process-form .process-actions a.btn:visited,
+html.native-test .process-form .process-actions a.btn:hover,
+html.native-test .process-form .process-actions a.btn:active{
+  text-decoration:none!important;
+}
+html.native-test .process-form .process-actions #sendInstagram{
+  padding-inline:14px!important;
+}
