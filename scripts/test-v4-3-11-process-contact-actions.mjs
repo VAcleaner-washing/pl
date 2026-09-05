@@ -19,9 +19,10 @@ check(js.includes("call.textContent='Зателефонувати'"),'manager-fa
 check(js.includes('a.btn[href^="tel:"]'),'copy change is scoped to the existing tel action');
 check(js.includes("call.setAttribute('aria-label','Зателефонувати клієнту')"),'call action has matching accessible label');
 
-const failed=checks.filter(([,ok])=>!ok);
+const failed=checks.filter(([ok])=>!ok);
 if(failed.length){
   console.error(`v4.3.11 process contact regression: ${failed.length} failed`);
+  for(const [,label] of failed) console.error(` - ${label}`);
   process.exit(1);
 }
 console.log(`v4.3.11 process contact regression: ${checks.length}/${checks.length} PASS`);
