@@ -20,14 +20,8 @@ jobs:
       - name: Append approved v4.3.13 contract
         shell: bash
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          path = Path('docs/VAcleaner-SYSTEM-SPEC.md')
-          text = path.read_text(encoding='utf-8')
-          marker = '# 71. Change record — v4.3.13 ADMIN TIME PICKER UX'
-          if marker not in text:
-              addition = r'''
-
+          if ! grep -q '^# 71. Change record — v4.3.13 ADMIN TIME PICKER UX$' docs/VAcleaner-SYSTEM-SPEC.md; then
+            cat >> docs/VAcleaner-SYSTEM-SPEC.md <<'EOF'
 
 # 71. Change record — v4.3.13 ADMIN TIME PICKER UX
 
@@ -54,9 +48,8 @@ jobs:
 - `scripts/test-v4-3-13-admin-time-ux.mjs` verifies the 30-minute selector, canonical change event and PWA asset contract.
 - `scripts/admin_booking_v4312_visual_qa.py` verifies the exact mobile surface at 390 / 430 px, including 48 all-day `:00 / :30` choices, no native interactive time input, and canonical `pickupTime` update.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
-'''
-              path.write_text(text.rstrip() + addition + '\n', encoding='utf-8')
-          PY
+EOF
+          fi
           rm .github/workflows/v4313-spec-append.yml
           git config user.name 'VAcleaner Release QA'
           git config user.email 'vacleaner.washing@gmail.com'
