@@ -37,7 +37,7 @@ const legacyWorkflowNotes = new Set([
 const cleanAdminNote = (value, max = 800)=>cleanText(value, max).split(/\r?\n/).map((line)=>line.trim()).filter((line)=>line && !legacyWorkflowNotes.has(line) && !line.startsWith("[[VAC_PROCESS:")).join("\n").slice(0, max);
 const validBookingId = (value)=>/^[0-9a-f-]{36}$/i.test(String(value ?? ""));
 const dateValue = (value)=>typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : "";
-const validTime = (value)=>typeof value === "string" && /^\d{2}:\d{2}$/.test(value);
+const validTime = (value)=>typeof value === "string" && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 const normalizePhone = (value)=>{
     const digits = String(value ?? "").replace(/\D/g, "");
     if (digits.length === 10 && digits.startsWith("0")) return `+38${digits}`;
@@ -301,12 +301,14 @@ function normalizeSelectedExtras(value, productCode, catalog) {
 }
 function periodFromBody(body, slots) {
     const startDate = dateValue(body.startDate), returnDate = dateValue(body.returnDate);
-    const pickupWindow = body.pickupWindow === "evening" ? "evening" : "morning";
-    const returnWindow = body.returnWindow === "evening" ? "evening" : "morning";
-    const pickupTime = String(body.pickupTime || (pickupWindow === "morning" ? slots.morningStart : slots.eveningStart));
-    const returnTime = String(body.returnTime || (returnWindow === "morning" ? slots.morningEnd : slots.eveningEnd));
+    const requestedPickupWindow = body.pickupWindow === "evening" ? "evening" : "morning";
+    const requestedReturnWindow = body.returnWindow === "evening" ? "evening" : "morning";
+    const pickupTime = String(body.pickupTime || (requestedPickupWindow === "morning" ? slots.morningStart : slots.eveningStart));
+    const returnTime = String(body.returnTime || (requestedReturnWindow === "morning" ? slots.morningEnd : slots.eveningEnd));
     if (!startDate || !returnDate) throw new Error("invalid_dates");
-    if (!validTime(pickupTime) || !validTime(returnTime) || !inWindow(pickupTime, pickupWindow, slots) || !inWindow(returnTime, returnWindow, slots)) throw new Error("invalid_exact_time");
+    if (!validTime(pickupTime) || !validTime(returnTime)) throw new Error("invalid_exact_time");
+    const pickupWindow = pickupTime >= slots.eveningStart ? "evening" : "morning";
+    const returnWindow = returnTime >= slots.eveningStart ? "evening" : "morning";
     const days = rentalDays(startDate, returnDate, pickupWindow, returnWindow);
     if (days < 1 || days > 14) throw new Error("invalid_rental_period");
     return {
@@ -1246,7 +1248,12 @@ Deno.serve(async (request)=>{
                 error: "inventory_conflict",
                 availability: av
             }, 409);
-            const customerName = cleanText(body.customerName, 120), customerPhone = normalizePhone(body.customerPhone), fulfillment = body.fulfillment === "delivery" ? "delivery" : "pickup";
+            const customerName = cleanText(body.customerName, 120), customerPhone = normalizePhone(body.customerPhone);
+            const requestedFulfillment = body.fulfillment === "delivery" ? "delivery" : "pickup";
+            const outboundMethod = body.deliveryOutboundMethod === "pickup" ? "pickup" : body.deliveryOutboundMethod === "delivery" ? "delivery" : requestedFulfillment === "delivery" ? "delivery" : "pickup";
+            const returnMethod = body.deliveryReturnMethod === "return_to_location" ? "return_to_location" : body.deliveryReturnMethod === "pickup" ? "pickup" : requestedFulfillment === "delivery" ? "pickup" : "return_to_location";
+            const deliveryLegs = Number(outboundMethod === "delivery") + Number(returnMethod === "pickup"), deliveryFactor = deliveryLegs / 2;
+            const fulfillment = deliveryLegs > 0 ? "delivery" : "pickup";
             const address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 220) : "Полтава, вул. Європейська, 146Е", addressDetail = fulfillment === "delivery" ? cleanText(body.deliveryAddressDetail, 180) : "";
             if (customerName.length < 2 || !customerPhone || fulfillment === "delivery" && address.length < 8) return json({
                 error: "invalid_customer_data"
@@ -1300,8 +1307,10 @@ Deno.serve(async (request)=>{
             const depositAmount = depositSnapshotLocked ? Math.max(0, Number(existing?.deposit_amount || calculatedDeposit) || 0) : calculatedDeposit;
             const requestedDeliveryOverride = body.deliveryAmountOverride === undefined || body.deliveryAmountOverride === null || body.deliveryAmountOverride === "" ? null : cleanInt(body.deliveryAmountOverride, 100000);
             const autoDelivery = deliveryQuote(fulfillment, address, body.deliveryAddressVerified === true, body.deliveryRouteKm ?? body.deliveryDistanceKm, deliveryPricing);
-            const preserveExistingDelivery = Boolean(existing?.fulfillment === "delivery" && Number(existing.delivery_amount) > 0 && requestedDeliveryOverride === null);
-            const deliveryAmount = fulfillment === "delivery" ? requestedDeliveryOverride !== null ? requestedDeliveryOverride : preserveExistingDelivery ? Math.max(0, Number(existing.delivery_amount) || 0) : autoDelivery.amount : 0, prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
+            const deliveryModeExplicit = body.deliveryOutboundMethod !== undefined || body.deliveryReturnMethod !== undefined;
+            const preserveExistingDelivery = Boolean(existing?.fulfillment === "delivery" && Number(existing.delivery_amount) > 0 && requestedDeliveryOverride === null && !deliveryModeExplicit);
+            const automaticDeliveryAmount = Math.round((Number(autoDelivery.amount) || 0) * deliveryFactor);
+            const deliveryAmount = fulfillment === "delivery" ? requestedDeliveryOverride !== null ? requestedDeliveryOverride : preserveExistingDelivery ? Math.max(0, Number(existing.delivery_amount) || 0) : automaticDeliveryAmount : 0, prepaymentPaid = body.prepaymentPaid === true || existing?.prepayment_paid === true;
             const requestedProcessing = body.processing && typeof body.processing === "object" ? body.processing : null;
             const processing = requestedProcessing ? {
                 contacted: requestedProcessing.contacted === true,
@@ -1368,6 +1377,12 @@ Deno.serve(async (request)=>{
                     verified: body.deliveryAddressVerified === true,
                     settlement: autoDelivery.settlement,
                     amount: deliveryAmount,
+                    round_trip_amount: Number(autoDelivery.amount) || 0,
+                    outbound_method: outboundMethod,
+                    return_method: returnMethod,
+                    legs: deliveryLegs,
+                    factor: deliveryFactor,
+                    trip_multiplier: deliveryLegs * 2,
                     pricing_distance_km: autoDelivery.distanceKm,
                     extra_km: autoDelivery.extraKm,
                     route_km: Number.isFinite(Number(body.deliveryRouteKm)) ? Number(body.deliveryRouteKm) : null,
@@ -1375,7 +1390,12 @@ Deno.serve(async (request)=>{
                 } : {
                     zone: "pickup",
                     quote_required: false,
-                    amount: 0
+                    amount: 0,
+                    outbound_method: outboundMethod,
+                    return_method: returnMethod,
+                    legs: 0,
+                    factor: 0,
+                    trip_multiplier: 0
                 },
                 base_before_discount: rawBase,
                 selected_items: selectedItems,
