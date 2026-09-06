@@ -16,7 +16,6 @@ Playwright fixture while the production DOM remains untouched.
 from playwright.sync_api import Locator
 
 _original_select_option = Locator.select_option
-_original_click = Locator.click
 _locator_compat_installed = False
 
 _QA_LEGACY_BRIDGE = r"""
@@ -81,6 +80,11 @@ def _install_locator_compat() -> None:
     if _locator_compat_installed:
         return
 
+    # Capture click at installation time, not module import time. The full PWA
+    # runner installs its own filter-sheet proxy first; chaining to it preserves
+    # that existing regression behavior instead of silently replacing it.
+    previous_click = Locator.click
+
     def select_option_with_hidden_fulfillment(self: Locator, *args, **kwargs):
         try:
             if (
@@ -129,7 +133,7 @@ def _install_locator_compat() -> None:
                             return None
         except Exception:
             pass
-        return _original_click(self, *args, **kwargs)
+        return previous_click(self, *args, **kwargs)
 
     Locator.select_option = select_option_with_hidden_fulfillment
     Locator.click = click_with_hidden_window_bridge
