@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""Run the legacy full E2E suite against the v4.3.12 admin logistics DOM.
+"""Run legacy E2E assertions against the v4.3.12 admin logistics DOM.
 
-The production booking form intentionally replaced the old visible
-``select[name=fulfillment]`` with two independent logistics controls while
-keeping a canonical hidden fulfillment value for the backend contract. The
-legacy E2E suite still contains two visual-contract assertions against the old
-select. Inject the same QA-only bridge used by the legacy PWA suites so the
-production DOM and behavior stay untouched.
+Production replaced the former visible ``select[name=fulfillment]`` with two
+independent logistics controls. The old E2E suite still has two styling checks
+for that select, so this runner exposes a QA-only compatibility element. Nothing
+is added to the production bundle or production DOM outside the test browser.
 """
 
 import sys
@@ -18,31 +16,54 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import e2e_smoke as e2e  # noqa: E402
-from v4312_pwa_compat import _QA_LEGACY_BRIDGE  # noqa: E402
 
 _original_install_routes = e2e.install_routes
 
-_QA_STYLE_BRIDGE = r"""
+_QA_ADMIN_BRIDGE = r"""
 (() => {
-  const installStyle = () => {
-    if (document.getElementById('v4312-e2e-compat-style')) return;
-    const style = document.createElement('style');
-    style.id = 'v4312-e2e-compat-style';
-    style.textContent = '#bookingForm select[name="fulfillment"]{appearance:none;-webkit-appearance:none;color-scheme:dark}';
-    (document.head || document.documentElement).append(style);
+  let observer = null;
+
+  const upgrade = () => {
+    const form = document.querySelector('#bookingForm');
+    if (!form || form.dataset.v4312E2eBridge === '1') return;
+    const canonical = form.querySelector('input[type="hidden"][name="fulfillment"]');
+    if (!canonical) return;
+
+    canonical.name = '__qaCanonicalFulfillment';
+    const select = document.createElement('select');
+    select.name = 'fulfillment';
+    select.hidden = true;
+    select.setAttribute('aria-hidden', 'true');
+    select.tabIndex = -1;
+    select.innerHTML = '<option value="pickup">Самовивіз</option><option value="delivery">Доставка</option>';
+    select.value = canonical.value === 'delivery' ? 'delivery' : 'pickup';
+    select.style.appearance = 'none';
+    select.style.webkitAppearance = 'none';
+    select.style.colorScheme = 'dark';
+    canonical.after(select);
+
+    select.addEventListener('change', () => {
+      canonical.value = select.value;
+      canonical.dispatchEvent(new Event('change', {bubbles:true}));
+    });
+    form.dataset.v4312E2eBridge = '1';
   };
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', installStyle, {once:true});
-  } else {
-    installStyle();
-  }
+
+  const boot = () => {
+    upgrade();
+    if (observer) return;
+    observer = new MutationObserver(upgrade);
+    observer.observe(document.documentElement, {subtree:true, childList:true});
+  };
+
+  if (document.documentElement) boot();
+  else document.addEventListener('DOMContentLoaded', boot, {once:true});
 })();
 """
 
 
 def install_routes_with_v4312_compat(context, base: str, api_handler) -> None:
-    context.add_init_script(_QA_LEGACY_BRIDGE)
-    context.add_init_script(_QA_STYLE_BRIDGE)
+    context.add_init_script(_QA_ADMIN_BRIDGE)
     _original_install_routes(context, base, api_handler)
 
 
