@@ -7091,7 +7091,7 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 
 
 /* v4.3.12 — admin-only exact time + two-leg logistics */
-#bookingForm .rental-moment .window-choice[hidden]{display:none!important}
+#bookingForm .rental-moment .window-choice[hidden]{display:none}
 #bookingForm .admin-exact-time-picker{display:grid;gap:6px;margin-top:8px}
 #bookingForm .admin-exact-time-picker input[type="time"]{width:100%;min-height:46px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.055);color:inherit;padding:0 12px;font:inherit;font-weight:700}
 #bookingForm .admin-time-tariff-hint{font-size:12px;line-height:1.35;color:var(--muted,#9ca5ad)}
