@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+// Release guard for the documented BOOK-ADMIN-TIME-001 v4.3.13 interaction contract.
 const read = path => fs.readFileSync(path, 'utf8');
 const index = read('admin/bronuvannia/index.html');
 const js = read('assets/admin-v4313.js');
