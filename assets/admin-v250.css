@@ -7088,3 +7088,20 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
     content:none;
   }
 }
+
+
+/* v4.3.12 — admin-only exact time + two-leg logistics */
+#bookingForm .rental-moment .window-choice[hidden]{display:none}
+#bookingForm .admin-exact-time-picker{display:grid;gap:6px;margin-top:8px}
+#bookingForm .admin-exact-time-picker input[type="time"]{width:100%;min-height:46px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.055);color:inherit;padding:0 12px;font:inherit;font-weight:700}
+#bookingForm .admin-time-tariff-hint{font-size:12px;line-height:1.35;color:var(--muted,#9ca5ad)}
+#bookingForm .admin-logistics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#bookingForm .admin-logistics-card{min-width:0;border:1px solid rgba(255,255,255,.11);border-radius:14px;padding:12px;background:rgba(255,255,255,.035);display:grid;gap:10px}
+#bookingForm .admin-logistics-card>div:first-child{display:grid;gap:2px}
+#bookingForm .admin-logistics-card strong{font-size:14px}
+#bookingForm .admin-logistics-card small,#bookingForm .admin-logistics-note{font-size:12px;color:var(--muted,#9ca5ad)}
+#bookingForm .admin-logistics-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#bookingForm .admin-logistics-toggle button{min-width:0;min-height:42px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.045);color:inherit;padding:8px 9px;font:inherit;font-size:12px;font-weight:750;line-height:1.15}
+#bookingForm .admin-logistics-toggle button.active{border-color:rgba(224,190,120,.72);background:rgba(224,190,120,.13);box-shadow:inset 0 0 0 1px rgba(224,190,120,.16)}
+#bookingForm .admin-logistics-note{grid-column:1/-1;margin:0;padding:0 2px}
+@media(max-width:680px){#bookingForm .admin-logistics-grid{grid-template-columns:1fr}#bookingForm .admin-logistics-note{grid-column:auto}}

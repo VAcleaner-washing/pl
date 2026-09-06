@@ -1,10 +1,16 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import sys
 from pathlib import Path
-import runpy
 
 from playwright.sync_api import Locator
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+import pwa_visual_qa as pwa  # noqa: E402
+from v4312_pwa_compat import install  # noqa: E402
 
 # The shared PWA suite intentionally omits admin-v430.js so persistent production
 # observers cannot mutate unrelated legacy checks. When the suite temporarily
@@ -31,4 +37,5 @@ def _click_with_filter_sheet_proxy(self: Locator, *args, **kwargs):
 
 
 Locator.click = _click_with_filter_sheet_proxy
-runpy.run_path(str(Path(__file__).with_name("pwa_visual_qa.py")), run_name="__main__")
+install(pwa)
+raise SystemExit(pwa.main())

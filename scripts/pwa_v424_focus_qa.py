@@ -4,6 +4,10 @@ from playwright.sync_api import sync_playwright
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('pwaqa', ROOT/'scripts/pwa_visual_qa.py')
 m=importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+# v4.3.12 keeps the old fulfillment select hidden as a QA/integration bridge.
+# Make this standalone focus fixture load the same logistics prelude as production.
+from v4312_pwa_compat import install as install_v4312
+install_v4312(m)
 checks=[]
 def ck(name, cond):
     checks.append((name,bool(cond)))
