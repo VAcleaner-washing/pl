@@ -4,6 +4,7 @@ import vm from 'node:vm';
 const read = (path) => fs.readFileSync(path, 'utf8');
 const admin = read('assets/admin-v250.js');
 const edge = read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
+const deployEdge = read('supabase/functions/vacleaner-admin-bookings-v4/index.deploy.js');
 const publicEdge = read('supabase/functions/vacleaner-booking-v5/index.ts');
 const release = JSON.parse(read('release.json'));
 const coreSource = read('assets/vacleaner-core.js');
@@ -64,6 +65,22 @@ check(
 check(
   edge.includes('trip_multiplier: deliveryLegs * 2'),
   'backend snapshots route multiplier 2 for one leg and 4 for two'
+);
+check(
+  deployEdge.includes('pickupTime >= slots.eveningStart ? "evening" : "morning"') &&
+    deployEdge.includes('returnTime >= slots.eveningStart ? "evening" : "morning"'),
+  'deploy fallback derives the same arbitrary-time tariff windows'
+);
+check(
+  deployEdge.includes('deliveryFactor = deliveryLegs / 2') &&
+    deployEdge.includes('automaticDeliveryAmount = Math.round((Number(autoDelivery.amount) || 0) * deliveryFactor)'),
+  'deploy fallback keeps the same 0/50/100 delivery pricing'
+);
+check(
+  deployEdge.includes('trip_multiplier: deliveryLegs * 2') &&
+    deployEdge.includes('outbound_method: outboundMethod') &&
+    deployEdge.includes('return_method: returnMethod'),
+  'deploy fallback persists the same logistics and mileage snapshot'
 );
 check(
   !publicEdge.includes('deliveryOutboundMethod') && !publicEdge.includes('deliveryReturnMethod'),
