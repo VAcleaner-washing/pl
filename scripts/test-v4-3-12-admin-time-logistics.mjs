@@ -5,6 +5,7 @@ const read = (path) => fs.readFileSync(path, 'utf8');
 const admin = read('assets/admin-v250.js');
 const edge = read('supabase/functions/vacleaner-admin-bookings-v4/index.ts');
 const publicEdge = read('supabase/functions/vacleaner-booking-v5/index.ts');
+const release = JSON.parse(read('release.json'));
 const coreSource = read('assets/vacleaner-core.js');
 const context = { window: {} };
 vm.createContext(context);
@@ -17,6 +18,10 @@ const check = (ok, label) => {
   console.log(`${ok ? 'PASS' : 'FAIL'}: ${label}`);
 };
 
+check(
+  release.version === '4.3.0' && Number(release.build) === 4300,
+  'v4.3.12 change record preserves canonical 4.3.0/4300 package baseline'
+);
 check(
   admin.includes('type="time" name="${name}"') && admin.includes('step="60"'),
   'admin uses unrestricted exact clock controls'
