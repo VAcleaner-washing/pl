@@ -13,8 +13,8 @@ const check = (ok, label) => {
 };
 
 check(
-  index.includes('/assets/admin-v4313.css?v=4313') && index.includes('/assets/admin-v4313.js?v=4313'),
-  'admin loads v4.3.13 time UX assets'
+  /\/assets\/admin-v4313\.css\?v=\d+/.test(index) && /\/assets\/admin-v4313\.js\?v=\d+/.test(index),
+  'admin loads v4.3.13 time UX assets after canonical build stamping'
 );
 check(
   js.includes('const STEP_MINUTES = 30') && js.includes('minute += STEP_MINUTES'),
@@ -33,8 +33,8 @@ check(
   'custom picker has dedicated mobile touch geometry'
 );
 check(
-  sw.includes("const CACHE='vacleaner-manager-4313'") && sw.includes('/assets/admin-v4313.js?v=4313') && sw.includes('/assets/admin-v4313.css?v=4313'),
-  'installed PWA precaches v4.3.13 time UX assets'
+  /const CACHE='vacleaner-manager-\d+'/.test(sw) && /\/assets\/admin-v4313\.js\?v=\d+/.test(sw) && /\/assets\/admin-v4313\.css\?v=\d+/.test(sw),
+  'installed PWA precaches v4.3.13 time UX assets after canonical build stamping'
 );
 
 const failed = checks.filter(([ok]) => !ok);
