@@ -4161,3 +4161,31 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-11-process-contact-actions.mjs` via canonical `test:pwa-static`.
 - `scripts/process_contact_v4311_visual_qa.py` via canonical Browser QA validates centered/no-underline contact actions and `Зателефонувати` at 390 / 430 px.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge.
+
+
+# 70. Change record — v4.3.12 ADMIN FLEX TIME + TWO-LEG LOGISTICS
+
+### ADDED
+
+- **BOOK-ADMIN-TIME-001** — менеджер в адмінці може вказати точний час видачі та повернення з точністю до хвилини, без обмеження публічними вікнами 08:00–10:00 / 17:30–20:00.
+- **BOOK-ADMIN-LOGISTICS-001** — логістика адмін-бронювання має два незалежні напрямки: `На початку` (`Клієнт забирає` / `Доставляємо`) і `Повернення` (`Клієнт повертає` / `Забираємо`).
+- `extras.delivery` зберігає `outbound_method`, `return_method`, `legs`, `factor`, `round_trip_amount` і `trip_multiplier`.
+
+### CHANGED
+
+- **Тільки адмінка:** точний час автоматично мапиться на існуючу тарифну/availability модель: час від поточної `eveningStart` (зараз 17:30) — `evening`, усе раніше — `morning`.
+- Приклад: неділя 14:00 залишається вихідним тарифним моментом; будній день до 17:30 працює як поточний ранковий/будній момент, а чинна межа 17:30 зберігає існуючу логіку.
+- Доставка рахується за кількістю напрямків VAcleaner: 0 напрямків = 0%, 1 напрямок = 50%, 2 напрямки = 100% поточного тарифу за адресою. Для локального тарифу 250 грн один напрямок = 125 грн.
+- Паливна собівартість та повний пробіг використовують `×2` для одного напрямку VAcleaner і `×4` для двох.
+
+### PRESERVED
+
+- **Публічне бронювання на сайті не змінено:** клієнт і далі бачить і використовує поточні ранкові/вечірні слоти та чинну публічну delivery-модель.
+- Каталог, базові weekday/weekend ціни, Friday/Saturday/Sunday tariff semantics, deposit groups, inventory half-day capacity model, SMS/RETURN, referral, VA HOME та public booking Edge function не змінені.
+- Менеджер як і раніше може вручну скоригувати суму доставки, якщо автоматичний маршрут/тариф потребує погодження.
+
+### TESTS
+
+- `scripts/test-v4-3-12-admin-time-logistics.mjs` через canonical `test:pwa-static`.
+- `scripts/admin_booking_v4312_visual_qa.py` через Browser QA перевіряє 390 / 430 px, exact-time control, дві логістичні картки та приклад 125 грн для одного локального напрямку.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge; production Supabase Edge deployment is allowed only after the green PR gate.

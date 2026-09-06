@@ -39,7 +39,7 @@
     "test:delivery-settings": "node scripts/test-delivery-settings.mjs",
     "test:copy-integrity": "node scripts/test-static-copy-integrity.mjs",
     "test:booking-date-default": "node scripts/test-public-booking-date-default.mjs",
-    "test:pwa-static": "node scripts/test-pwa.mjs && node scripts/test-v4-3-7-booking-finance-dedup.mjs && node scripts/test-v4-3-10-client-card-edit-mode.mjs && node scripts/test-v4-3-11-process-contact-actions.mjs",
+    "test:pwa-static": "node scripts/test-pwa.mjs && node scripts/test-v4-3-7-booking-finance-dedup.mjs && node scripts/test-v4-3-10-client-card-edit-mode.mjs && node scripts/test-v4-3-11-process-contact-actions.mjs && node scripts/test-v4-3-12-admin-time-logistics.mjs",
     "test:sms-campaigns": "node scripts/test-sms-campaigns.mjs && node scripts/test-v4-3-8-sms-hardening.mjs && node scripts/test-v4-3-9-sms-brand-copy.mjs",
     "test:admin-labels": "node scripts/test-admin-product-labels.mjs",
     "test:client-promo-regression": "node scripts/test-client-promo-regression.mjs",
@@ -82,6 +82,7 @@
     "test:admin-return-gift-persistence": "python scripts/admin_return_gift_persistence_qa.py",
     "test:stabilization-acceptance-browser": "python scripts/stabilization_acceptance_qa.py",
     "test:client-card-visual": "python scripts/client_card_v4245_qa.py",
-    "test:process-contact-v4311": "python scripts/process_contact_v4311_visual_qa.py"
+    "test:process-contact-v4311": "python scripts/process_contact_v4311_visual_qa.py",
+    "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py"
   }
 }
