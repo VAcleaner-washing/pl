@@ -4189,3 +4189,30 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-12-admin-time-logistics.mjs` через canonical `test:pwa-static`.
 - `scripts/admin_booking_v4312_visual_qa.py` через Browser QA перевіряє 390 / 430 px, exact-time control, дві логістичні картки та приклад 125 грн для одного локального напрямку.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge; production Supabase Edge deployment is allowed only after the green PR gate.
+
+
+# 71. Change record — v4.3.13 ADMIN TIME PICKER UX
+
+### CHANGED
+
+- **BOOK-ADMIN-TIME-001** — visible admin exact-time selection now uses a VAcleaner-owned 30-minute grid across the full day (`:00` / `:30`) instead of the native iOS minute-by-minute wheel. This v4.3.13 UI contract supersedes the v4.3.12 visible minute-precision selector for new manager choices.
+- Existing canonical `pickupTime` / `returnTime` values and the v4.3.12 tariff boundary mapping at `17:30` remain the source of truth for booking calculations and persistence.
+- A legacy/stored off-grid time is preserved and may be displayed as the current value until the manager deliberately chooses a new time; a new selection is always on the 30-minute grid.
+
+### FIXED
+
+- On iPhone/PWA, tapping exact time no longer opens the native iOS wheel over the booking modal.
+- The exact-time control remains inside the VAcleaner form, uses the product visual system and cannot offer minute-by-minute choices.
+- Obsolete visible `Вікно видачі` / `Вікно повернення` labels are hidden while the exact-time admin control is active, removing duplicate time concepts from the same step.
+
+### PRESERVED
+
+- Public booking still uses the canonical morning/evening slot model and is unchanged by this release.
+- v4.3.12 two-leg logistics, delivery factor/mileage logic, rental pricing, deposits, availability, booking status transitions, Supabase contracts, SMS/RETURN, referral and VA HOME are unchanged.
+- No Supabase production mutation is required for this presentation/interaction repair.
+
+### TESTS
+
+- `scripts/test-v4-3-13-admin-time-ux.mjs` verifies the 30-minute selector, canonical change event and PWA asset contract.
+- `scripts/admin_booking_v4312_visual_qa.py` verifies the exact mobile surface at 390 / 430 px, including 48 all-day `:00 / :30` choices, no native interactive time input, and canonical `pickupTime` update.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
