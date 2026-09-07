@@ -1,0 +1,60 @@
+name: v4.3.14 System Spec append
+
+on:
+  push:
+    branches:
+      - qa/v4.3.14-admin-time-bottom-sheet
+
+permissions:
+  contents: write
+
+jobs:
+  append-spec:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/v4.3.14-admin-time-bottom-sheet
+          fetch-depth: 0
+      - name: Append approved v4.3.14 contract
+        shell: bash
+        run: |
+          if ! grep -q '^# 72. Change record — v4.3.14 ADMIN TIME BOTTOM SHEET$' docs/VAcleaner-SYSTEM-SPEC.md; then
+            cat >> docs/VAcleaner-SYSTEM-SPEC.md <<'EOF'
+
+# 72. Change record — v4.3.14 ADMIN TIME BOTTOM SHEET
+
+### CHANGED
+
+- **BOOK-ADMIN-TIME-001** — the 30-minute admin exact-time selector remains canonical, but its visible choices move from an expanded panel inside the booking form to a dedicated VAcleaner bottom sheet.
+- The booking form itself now shows only the selected exact time as one compact full-width control. Opening time selection must not increase the height of the booking form or push the return section downward.
+- The bottom sheet owns its own vertical scroll, uses a three-column `:00 / :30` grid on iPhone widths, and closes immediately after a time is selected.
+
+### FIXED
+
+- Removed the heavy 48-button in-form expansion that visually stretched step 1 and displaced the return section.
+- Removed the verbose manager-facing helper `Будь-який час · тарифний момент ... · межа вечора 17:30` from the visible booking form.
+- The native iOS minute wheel remains disabled; the admin keeps one product-owned time picker instead of mixing native and custom controls.
+
+### PRESERVED
+
+- New manager time selections remain limited to 30-minute steps.
+- Existing stored off-grid legacy times are preserved until the manager deliberately selects a new time.
+- Canonical `pickupTime` / `returnTime`, the 17:30 tariff boundary mapping, two-leg logistics, delivery factor/mileage logic, rental pricing, deposits, availability, booking status transitions, Supabase contracts, SMS/RETURN, referral, public booking and VA HOME are unchanged.
+- No Supabase production mutation is required for this presentation-only repair.
+
+### TESTS
+
+- `scripts/test-v4-3-14-admin-time-bottom-sheet.mjs` verifies the fixed overlay, 30-minute grid, canonical change event and PWA cache contract.
+- Canonical `test:pwa-static` delegates the superseded v4.3.13 time entry to the current v4.3.14 contract.
+- `scripts/admin_booking_v4312_visual_qa.py` verifies 390 / 430 px: fixed bottom sheet, three-column time grid, no form-height expansion, hidden legacy hint, canonical `pickupTime` update and preserved two-leg logistics.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+EOF
+          fi
+          rm .github/workflows/v4314-spec-append.yml
+          git config user.name 'VAcleaner Release QA'
+          git config user.email 'vacleaner.washing@gmail.com'
+          git add docs/VAcleaner-SYSTEM-SPEC.md .github/workflows/v4314-spec-append.yml
+          git commit -m 'docs(v4.3.14): define admin time bottom-sheet contract'
+          git push origin HEAD:qa/v4.3.14-admin-time-bottom-sheet
