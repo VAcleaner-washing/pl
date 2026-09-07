@@ -4216,3 +4216,31 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-13-admin-time-ux.mjs` verifies the 30-minute selector, canonical change event and PWA asset contract.
 - `scripts/admin_booking_v4312_visual_qa.py` verifies the exact mobile surface at 390 / 430 px, including 48 all-day `:00 / :30` choices, no native interactive time input, and canonical `pickupTime` update.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+
+# 72. Change record — v4.3.14 ADMIN TIME BOTTOM SHEET
+
+### CHANGED
+
+- **BOOK-ADMIN-TIME-001** — the 30-minute admin exact-time selector remains canonical, but its visible choices move from an expanded panel inside the booking form to a dedicated VAcleaner bottom sheet.
+- The booking form itself now shows only the selected exact time as one compact full-width control. Opening time selection must not increase the height of the booking form or push the return section downward.
+- The bottom sheet owns its own vertical scroll, uses a three-column `:00 / :30` grid on iPhone widths, and closes immediately after a time is selected.
+
+### FIXED
+
+- Removed the heavy 48-button in-form expansion that visually stretched step 1 and displaced the return section.
+- Removed the verbose manager-facing helper `Будь-який час · тарифний момент ... · межа вечора 17:30` from the visible booking form.
+- The native iOS minute wheel remains disabled; the admin keeps one product-owned time picker instead of mixing native and custom controls.
+
+### PRESERVED
+
+- New manager time selections remain limited to 30-minute steps.
+- Existing stored off-grid legacy times are preserved until the manager deliberately selects a new time.
+- Canonical `pickupTime` / `returnTime`, the 17:30 tariff boundary mapping, two-leg logistics, delivery factor/mileage logic, rental pricing, deposits, availability, booking status transitions, Supabase contracts, SMS/RETURN, referral, public booking and VA HOME are unchanged.
+- No Supabase production mutation is required for this presentation-only repair.
+
+### TESTS
+
+- `scripts/test-v4-3-14-admin-time-bottom-sheet.mjs` verifies the fixed overlay, 30-minute grid, canonical change event and PWA cache contract.
+- Canonical `test:pwa-static` delegates the superseded v4.3.13 time entry to the current v4.3.14 contract.
+- `scripts/admin_booking_v4312_visual_qa.py` verifies 390 / 430 px: fixed bottom sheet, three-column time grid, no form-height expansion, hidden legacy hint, canonical `pickupTime` update and preserved two-leg logistics.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
