@@ -1,6 +1,6 @@
-const CACHE='vacleaner-manager-4314';
+const CACHE='vacleaner-manager-4315';
 const FALLBACK='/admin/bronuvannia/';
-const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4300','/assets/admin-v250.css?v=4300','/assets/admin-v250.js?v=4300','/assets/admin-glass-test.css?v=4300','/assets/admin-glass-test.js?v=4300','/assets/admin-v430.css?v=4300','/assets/admin-v430.js?v=4300','/assets/admin-v4314.css?v=4314','/assets/admin-v4314.js?v=4314','/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png','/admin/apple-touch-icon.png?v=4300'];
+const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4300','/assets/admin-v250.css?v=4300','/assets/admin-v250.js?v=4300','/assets/admin-glass-test.css?v=4300','/assets/admin-glass-test.js?v=4300','/assets/admin-v430.css?v=4300','/assets/admin-v430.js?v=4300','/assets/admin-v4315.css?v=4315','/assets/admin-v4315.js?v=4315','/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png','/admin/apple-touch-icon.png?v=4300'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()]));});
