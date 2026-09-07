@@ -4244,3 +4244,31 @@ The final archive may be handed off only after the aggregate status is recorded 
 - Canonical `test:pwa-static` delegates the superseded v4.3.13 time entry to the current v4.3.14 contract.
 - `scripts/admin_booking_v4312_visual_qa.py` verifies 390 / 430 px: fixed bottom sheet, three-column time grid, no form-height expansion, hidden legacy hint, canonical `pickupTime` update and preserved two-leg logistics.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+
+# 73. Change record — v4.3.15 ADMIN TIME COMPACT SHEET
+
+### CHANGED
+
+- **BOOK-ADMIN-TIME-001** — the v4.3.14 bottom-sheet selector is reduced to a compact mobile surface capped at about 54% of the viewport instead of behaving like a near full-screen second page.
+- The sheet header is fixed and contains only the contextual title `Час видачі` or `Час повернення` plus close control; the redundant `Крок 30 хв` subtitle is removed.
+- Only the time-grid body scrolls. On open, the currently selected time is explicitly centered inside that scroll area so the manager lands near the active value rather than at the start of the day.
+
+### FIXED
+
+- The exact-time selector no longer occupies most of the iPhone display for a one-field choice.
+- Opening the picker preserves the booking form position and height; the underlying modal is dimmed but not reflowed.
+- The 3-column time grid remains touch-friendly while showing a smaller, focused window of nearby times.
+
+### PRESERVED
+
+- New manager selections remain restricted to 30-minute steps.
+- Existing off-grid stored times remain preserved until a manager deliberately selects a new time.
+- Canonical `pickupTime` / `returnTime`, 17:30 tariff boundary mapping, two-leg logistics, delivery factor/mileage, pricing, deposits, availability, statuses, Supabase contracts, SMS/RETURN, referral, public booking and VA HOME are unchanged.
+- No Supabase production mutation is required for this presentation-only repair.
+
+### TESTS
+
+- `scripts/test-v4-3-15-admin-time-compact-sheet.mjs` verifies compact height, fixed header/scroll-body contract, centered current selection, 30-minute grid and PWA cache.
+- `scripts/test-v4-3-14-admin-time-bottom-sheet.mjs` delegates the superseded v4.3.14 guard to the current v4.3.15 contract while keeping the canonical package chain stable.
+- `scripts/admin_booking_v4312_visual_qa.py` verifies 390 / 430 px: ~54% viewport height, bottom anchoring, fixed header, centered 08:00, 3-column grid, no form-height expansion, canonical update and preserved logistics.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
