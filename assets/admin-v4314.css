@@ -1,0 +1,248 @@
+/* VAcleaner v4.3.14 — compact admin time bottom sheet. */
+
+.admin-exact-time-picker{
+  position:relative;
+  display:grid;
+  gap:0;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+.admin-exact-time-picker > input.admin-v4314-native-time{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  min-width:0!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  opacity:0!important;
+  pointer-events:none!important;
+  overflow:hidden!important;
+}
+
+.admin-v4314-hide-window-label,
+.admin-exact-time-picker .admin-time-tariff-hint{
+  display:none!important;
+}
+
+.admin-v4314-time-trigger{
+  width:100%;
+  min-height:58px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:0 18px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(17,25,29,.96),rgba(8,14,18,.96));
+  color:#eef2f3;
+  font:inherit;
+  font-size:18px;
+  font-weight:650;
+  letter-spacing:.01em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+.admin-v4314-time-trigger::after{
+  content:'›';
+  color:#efc06a;
+  font-size:28px;
+  font-weight:400;
+  line-height:1;
+  transform:rotate(90deg);
+}
+
+.admin-v4314-time-trigger:focus-visible,
+.admin-v4314-time-trigger[aria-expanded="true"]{
+  border-color:rgba(239,192,106,.56);
+  box-shadow:0 0 0 3px rgba(239,192,106,.08),inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.admin-v4314-time-overlay{
+  position:fixed;
+  inset:0;
+  z-index:2147482000;
+  display:none;
+  align-items:flex-end;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.admin-v4314-time-overlay.is-open{
+  display:flex;
+  pointer-events:auto;
+}
+
+.admin-v4314-time-backdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.58);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+
+.admin-v4314-time-sheet{
+  position:relative;
+  width:min(100%,560px);
+  max-height:min(72dvh,650px);
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr);
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  border-bottom:0;
+  border-radius:24px 24px 0 0;
+  background:#0b1115;
+  box-shadow:0 -20px 56px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.04);
+  transform:translateY(18px);
+  opacity:0;
+  transition:transform .18s ease,opacity .18s ease;
+}
+
+.admin-v4314-time-overlay.is-open .admin-v4314-time-sheet{
+  transform:translateY(0);
+  opacity:1;
+}
+
+.admin-v4314-time-sheet-head{
+  min-height:74px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:16px 18px 14px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  background:rgba(11,17,21,.98);
+}
+
+.admin-v4314-time-sheet-head > div{
+  min-width:0;
+  display:grid;
+  gap:3px;
+}
+
+.admin-v4314-time-sheet-head strong{
+  color:#f4f6f7;
+  font-size:18px;
+  font-weight:650;
+  line-height:1.2;
+}
+
+.admin-v4314-time-sheet-head small{
+  color:#8f9aa1;
+  font-size:13px;
+  font-weight:480;
+}
+
+.admin-v4314-time-close{
+  flex:0 0 44px;
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  padding:0;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:rgba(20,28,33,.88);
+  color:#e9edef;
+  font:inherit;
+  font-size:28px;
+  font-weight:400;
+  line-height:1;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.admin-v4314-time-scroll{
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:14px 16px calc(18px + env(safe-area-inset-bottom));
+  scrollbar-width:thin;
+}
+
+.admin-v4314-time-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:9px;
+}
+
+.admin-v4314-time-option{
+  min-width:0;
+  min-height:50px;
+  padding:0 8px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:rgba(18,27,32,.72);
+  color:#dbe1e4;
+  font:inherit;
+  font-size:17px;
+  font-weight:600;
+  letter-spacing:.01em;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+.admin-v4314-time-option:active{transform:scale(.985)}
+
+.admin-v4314-time-option.is-selected{
+  border-color:rgba(239,192,106,.72);
+  background:linear-gradient(145deg,rgba(111,85,43,.78),rgba(65,51,31,.84));
+  color:#ffd985;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+.admin-v4314-current-off-grid{
+  grid-column:1/-1;
+  min-height:46px;
+  color:#ffd985;
+  font-size:15px;
+}
+
+html.admin-v4314-time-sheet-open,
+body.admin-v4314-time-sheet-open{
+  overflow:hidden!important;
+  overscroll-behavior:none!important;
+}
+
+@media(max-width:520px){
+  .admin-v4314-time-trigger{
+    min-height:56px;
+    padding:0 16px;
+    font-size:17px;
+  }
+  .admin-v4314-time-sheet{
+    width:100%;
+    max-height:70dvh;
+  }
+  .admin-v4314-time-sheet-head{
+    min-height:70px;
+    padding:14px 16px 12px;
+  }
+  .admin-v4314-time-scroll{
+    padding:12px 14px calc(16px + env(safe-area-inset-bottom));
+  }
+  .admin-v4314-time-grid{gap:8px}
+  .admin-v4314-time-option{
+    min-height:48px;
+    font-size:16px;
+  }
+}
+
+@media(min-width:901px){
+  .admin-v4314-time-overlay{align-items:flex-end;padding:0 20px 22px}
+  .admin-v4314-time-sheet{
+    border-bottom:1px solid rgba(255,255,255,.12);
+    border-radius:22px;
+    max-height:min(68vh,620px);
+  }
+}
