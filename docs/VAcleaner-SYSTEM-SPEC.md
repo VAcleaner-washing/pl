@@ -4272,3 +4272,23 @@ The final archive may be handed off only after the aggregate status is recorded 
 - `scripts/test-v4-3-14-admin-time-bottom-sheet.mjs` delegates the superseded v4.3.14 guard to the current v4.3.15 contract while keeping the canonical package chain stable.
 - `scripts/admin_booking_v4312_visual_qa.py` verifies 390 / 430 px: ~54% viewport height, bottom anchoring, fixed header, centered 08:00, 3-column grid, no form-height expansion, canonical update and preserved logistics.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+
+
+## Admin exact-time range — v4.3.16
+
+### ADDED
+- Admin exact-time bottom sheet exposes selectable times only from **07:00 through 21:00 inclusive**.
+
+### CHANGED
+- The existing 30-minute grid is constrained to the operational daytime window: `07:00, 07:30, ... 20:30, 21:00`.
+- Previously saved exact times outside 07:00–21:00 remain visible as a legacy current value when editing, but are not offered as new selectable slots.
+
+### FIXED
+- Removes unnecessary overnight choices (`00:00–06:30` and `21:30–23:30`) from the admin/PWA picker.
+
+### PRESERVED
+- 30-minute step, canonical `pickupTime` / `returnTime` events, tariff mapping, public booking slots and v4.3.12 two-leg logistics remain unchanged.
+
+### TESTS
+- `scripts/test-v4-3-16-admin-time-range.mjs`
+- `scripts/admin_booking_v4316_time_range_qa.py` at 390 / 430 px.
