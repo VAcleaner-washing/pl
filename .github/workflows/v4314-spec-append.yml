@@ -1,13 +1,9 @@
 name: v4.3.14 System Spec append
-
 on:
   push:
-    branches:
-      - qa/v4.3.14-admin-time-bottom-sheet
-
+    branches: [qa/v4.3.14-admin-time-bottom-sheet]
 permissions:
   contents: write
-
 jobs:
   append-spec:
     if: github.actor != 'github-actions[bot]'
@@ -21,36 +17,7 @@ jobs:
         shell: bash
         run: |
           if ! grep -q '^# 72. Change record — v4.3.14 ADMIN TIME BOTTOM SHEET$' docs/VAcleaner-SYSTEM-SPEC.md; then
-            cat >> docs/VAcleaner-SYSTEM-SPEC.md <<'EOF'
-
-# 72. Change record — v4.3.14 ADMIN TIME BOTTOM SHEET
-
-### CHANGED
-
-- **BOOK-ADMIN-TIME-001** — the 30-minute admin exact-time selector remains canonical, but its visible choices move from an expanded panel inside the booking form to a dedicated VAcleaner bottom sheet.
-- The booking form itself now shows only the selected exact time as one compact full-width control. Opening time selection must not increase the height of the booking form or push the return section downward.
-- The bottom sheet owns its own vertical scroll, uses a three-column `:00 / :30` grid on iPhone widths, and closes immediately after a time is selected.
-
-### FIXED
-
-- Removed the heavy 48-button in-form expansion that visually stretched step 1 and displaced the return section.
-- Removed the verbose manager-facing helper `Будь-який час · тарифний момент ... · межа вечора 17:30` from the visible booking form.
-- The native iOS minute wheel remains disabled; the admin keeps one product-owned time picker instead of mixing native and custom controls.
-
-### PRESERVED
-
-- New manager time selections remain limited to 30-minute steps.
-- Existing stored off-grid legacy times are preserved until the manager deliberately selects a new time.
-- Canonical `pickupTime` / `returnTime`, the 17:30 tariff boundary mapping, two-leg logistics, delivery factor/mileage logic, rental pricing, deposits, availability, booking status transitions, Supabase contracts, SMS/RETURN, referral, public booking and VA HOME are unchanged.
-- No Supabase production mutation is required for this presentation-only repair.
-
-### TESTS
-
-- `scripts/test-v4-3-14-admin-time-bottom-sheet.mjs` verifies the fixed overlay, 30-minute grid, canonical change event and PWA cache contract.
-- Canonical `test:pwa-static` delegates the superseded v4.3.13 time entry to the current v4.3.14 contract.
-- `scripts/admin_booking_v4312_visual_qa.py` verifies 390 / 430 px: fixed bottom sheet, three-column time grid, no form-height expansion, hidden legacy hint, canonical `pickupTime` update and preserved two-leg logistics.
-- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
-EOF
+            echo 'CiMgNzIuIENoYW5nZSByZWNvcmQg4oCUIHY0LjMuMTQgQURNSU4gVElNRSBCT1RUT00gU0hFRVQKCiMjIyBDSEFOR0VECgotICoqQk9PSy1BRE1JTi1USU1FLTAwMSoqIOKAlCB0aGUgMzAtbWludXRlIGFkbWluIGV4YWN0LXRpbWUgc2VsZWN0b3IgcmVtYWlucyBjYW5vbmljYWwsIGJ1dCBpdHMgdmlzaWJsZSBjaG9pY2VzIG1vdmUgZnJvbSBhbiBleHBhbmRlZCBwYW5lbCBpbnNpZGUgdGhlIGJvb2tpbmcgZm9ybSB0byBhIGRlZGljYXRlZCBWQWNsZWFuZXIgYm90dG9tIHNoZWV0LgotIFRoZSBib29raW5nIGZvcm0gaXRzZWxmIG5vdyBzaG93cyBvbmx5IHRoZSBzZWxlY3RlZCBleGFjdCB0aW1lIGFzIG9uZSBjb21wYWN0IGZ1bGwtd2lkdGggY29udHJvbC4gT3BlbmluZyB0aW1lIHNlbGVjdGlvbiBtdXN0IG5vdCBpbmNyZWFzZSB0aGUgaGVpZ2h0IG9mIHRoZSBib29raW5nIGZvcm0gb3IgcHVzaCB0aGUgcmV0dXJuIHNlY3Rpb24gZG93bndhcmQuCi0gVGhlIGJvdHRvbSBzaGVldCBvd25zIGl0cyBvd24gdmVydGljYWwgc2Nyb2xsLCB1c2VzIGEgdGhyZWUtY29sdW1uIGA6MDAgLyA6MzBgIGdyaWQgb24gaVBob25lIHdpZHRocywgYW5kIGNsb3NlcyBpbW1lZGlhdGVseSBhZnRlciBhIHRpbWUgaXMgc2VsZWN0ZWQuCgojIyMgRklYRUQKCi0gUmVtb3ZlZCB0aGUgaGVhdnkgNDgtYnV0dG9uIGluLWZvcm0gZXhwYW5zaW9uIHRoYXQgdmlzdWFsbHkgc3RyZXRjaGVkIHN0ZXAgMSBhbmQgZGlzcGxhY2VkIHRoZSByZXR1cm4gc2VjdGlvbi4KLSBSZW1vdmVkIHRoZSB2ZXJib3NlIG1hbmFnZXItZmFjaW5nIGhlbHBlciBg0JHRg9C00Ywt0Y/QutC40Lkg0YfQsNGBIMK3INGC0LDRgNC40YTQvdC40Lkg0LzQvtC80LXQvdGCIC4uLiDCtyDQvNC10LbQsCDQstC10YfQvtGA0LAgMTc6MzBgIGZyb20gdGhlIHZpc2libGUgYm9va2luZyBmb3JtLgotIFRoZSBuYXRpdmUgaU9TIG1pbnV0ZSB3aGVlbCByZW1haW5zIGRpc2FibGVkOyB0aGUgYWRtaW4ga2VlcHMgb25lIHByb2R1Y3Qtb3duZWQgdGltZSBwaWNrZXIgaW5zdGVhZCBvZiBtaXhpbmcgbmF0aXZlIGFuZCBjdXN0b20gY29udHJvbHMuCgojIyMgUFJFU0VSVkVECgotIE5ldyBtYW5hZ2VyIHRpbWUgc2VsZWN0aW9ucyByZW1haW4gbGltaXRlZCB0byAzMC1taW51dGUgc3RlcHMuCi0gRXhpc3Rpbmcgc3RvcmVkIG9mZi1ncmlkIGxlZ2FjeSB0aW1lcyBhcmUgcHJlc2VydmVkIHVudGlsIHRoZSBtYW5hZ2VyIGRlbGliZXJhdGVseSBzZWxlY3RzIGEgbmV3IHRpbWUuCi0gQ2Fub25pY2FsIGBwaWNrdXBUaW1lYCAvIGByZXR1cm5UaW1lYCwgdGhlIDE3OjMwIHRhcmlmZiBib3VuZGFyeSBtYXBwaW5nLCB0d28tbGVnIGxvZ2lzdGljcywgZGVsaXZlcnkgZmFjdG9yL21pbGVhZ2UgbG9naWMsIHJlbnRhbCBwcmljaW5nLCBkZXBvc2l0cywgYXZhaWxhYmlsaXR5LCBib29raW5nIHN0YXR1cyB0cmFuc2l0aW9ucywgU3VwYWJhc2UgY29udHJhY3RzLCBTTVMvUkVUVVJOLCByZWZlcnJhbCwgcHVibGljIGJvb2tpbmcgYW5kIFZBIEhPTUUgYXJlIHVuY2hhbmdlZC4KLSBObyBTdXBhYmFzZSBwcm9kdWN0aW9uIG11dGF0aW9uIGlzIHJlcXVpcmVkIGZvciB0aGlzIHByZXNlbnRhdGlvbi1vbmx5IHJlcGFpci4KCiMjIyBURVNUUwoKLSBgc2NyaXB0cy90ZXN0LXY0LTMtMTQtYWRtaW4tdGltZS1ib3R0b20tc2hlZXQubWpzYCB2ZXJpZmllcyB0aGUgZml4ZWQgb3ZlcmxheSwgMzAtbWludXRlIGdyaWQsIGNhbm9uaWNhbCBjaGFuZ2UgZXZlbnQgYW5kIFBXQSBjYWNoZSBjb250cmFjdC4KLSBDYW5vbmljYWwgYHRlc3Q6cHdhLXN0YXRpY2AgZGVsZWdhdGVzIHRoZSBzdXBlcnNlZGVkIHY0LjMuMTMgdGltZSBlbnRyeSB0byB0aGUgY3VycmVudCB2NC4zLjE0IGNvbnRyYWN0LgotIGBzY3JpcHRzL2FkbWluX2Jvb2tpbmdfdjQzMTJfdmlzdWFsX3FhLnB5YCB2ZXJpZmllcyAzOTAgLyA0MzAgcHg6IGZpeGVkIGJvdHRvbSBzaGVldCwgdGhyZWUtY29sdW1uIHRpbWUgZ3JpZCwgbm8gZm9ybS1oZWlnaHQgZXhwYW5zaW9uLCBoaWRkZW4gbGVnYWN5IGhpbnQsIGNhbm9uaWNhbCBgcGlja3VwVGltZWAgdXBkYXRlIGFuZCBwcmVzZXJ2ZWQgdHdvLWxlZyBsb2dpc3RpY3MuCi0gRnVsbCBjYW5vbmljYWwgU3RhdGljL2J1aWxkICsgQnJvd3Nlci9QV0EgUUEgcmVtYWlucyByZWxlYXNlLWJsb2NraW5nIGJlZm9yZSBtZXJnZSB0byBgbWFpbmAuCg==' | base64 -d >> docs/VAcleaner-SYSTEM-SPEC.md
           fi
           rm .github/workflows/v4314-spec-append.yml
           git config user.name 'VAcleaner Release QA'
