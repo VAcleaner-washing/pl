@@ -8,16 +8,16 @@ ASSETS = DIST / 'assets' if (DIST / 'assets' / 'admin-v250.css').exists() else R
 OUT = ROOT / 'pwa-test-results'
 OUT.mkdir(exist_ok=True)
 css = (ASSETS / 'admin-v250.css').read_text(encoding='utf-8')
-css += '\n' + (ASSETS / 'admin-v4314.css').read_text(encoding='utf-8')
-js = (ASSETS / 'admin-v4314.js').read_text(encoding='utf-8')
+css += '\n' + (ASSETS / 'admin-v4315.css').read_text(encoding='utf-8')
+js = (ASSETS / 'admin-v4315.js').read_text(encoding='utf-8')
 
 markup = '''
 <form id="bookingForm">
   <section class="form-section">
     <div class="section-title"><span>1</span><div><h3>Оренда</h3><p>Адмінка · точний час</p></div></div>
     <div class="fields">
-      <label class="field rental-moment"><span>Видача</span><input type="date" value="2026-09-06"><span class="legacy-window-label">Вікно видачі</span><div class="time-chip-picker admin-exact-time-picker"><input name="pickupTime" type="time" value="14:00"><small class="admin-time-tariff-hint">Будь-який час · тарифний момент: вихідний · межа вечора 17:30</small></div></label>
-      <label class="field rental-moment"><span>Повернення</span><input type="date" value="2026-09-07"><span class="legacy-window-label">Вікно повернення</span><div class="time-chip-picker admin-exact-time-picker"><input name="returnTime" type="time" value="14:00"><small class="admin-time-tariff-hint">Будь-який час · тарифний момент: будній · межа вечора 17:30</small></div></label>
+      <label class="field rental-moment"><span>Видача</span><input type="date" value="2026-09-06"><span class="legacy-window-label">Вікно видачі</span><div class="time-chip-picker admin-exact-time-picker"><input name="pickupTime" type="time" value="08:00"><small class="admin-time-tariff-hint">Будь-який час · тарифний момент: вихідний · межа вечора 17:30</small></div></label>
+      <label class="field rental-moment"><span>Повернення</span><input type="date" value="2026-09-07"><span class="legacy-window-label">Вікно повернення</span><div class="time-chip-picker admin-exact-time-picker"><input name="returnTime" type="time" value="08:00"><small class="admin-time-tariff-hint">Будь-який час · тарифний момент: будній · межа вечора 17:30</small></div></label>
     </div>
   </section>
   <section class="form-section">
@@ -34,7 +34,7 @@ markup = '''
 </form>
 '''
 
-html = f'''<!doctype html><html class="native-test native-v28 v43-prod v4314"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>{css}
+html = f'''<!doctype html><html class="native-test native-v28 v43-prod v4315"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>{css}
 body{{background:#070b0e!important;color:#eef2f3!important;padding:18px!important}}
 #bookingForm{{max-width:760px;margin:auto;display:grid;gap:16px}}
 .form-section{{background:#10161a;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}}
@@ -57,7 +57,7 @@ with sync_playwright() as p:
         page.wait_for_timeout(100)
 
         native = page.locator('input[name="pickupTime"]')
-        trigger = page.locator('.admin-v4314-time-trigger').first
+        trigger = page.locator('.admin-v4315-time-trigger').first
         trigger_box = trigger.bounding_box()
         check(native.get_attribute('type') == 'hidden', f'{width}: native iOS time control is removed from interaction')
         check(trigger_box and trigger_box['width'] > 250 and trigger_box['height'] >= 54, f'{width}: compact time trigger keeps full-width touch geometry')
@@ -66,24 +66,45 @@ with sync_playwright() as p:
 
         form_height_before = page.locator('#bookingForm').bounding_box()['height']
         trigger.click()
-        overlay = page.locator('.admin-v4314-time-overlay')
-        sheet = page.locator('.admin-v4314-time-sheet')
-        check(overlay.is_visible() and sheet.is_visible(), f'{width}: time opens as a global bottom sheet')
-        check(page.locator('.admin-v4314-time-sheet').evaluate("el => getComputedStyle(el).position") == 'relative', f'{width}: sheet is contained by fixed overlay')
-        check(page.locator('.admin-v4314-time-overlay').evaluate("el => getComputedStyle(el).position") == 'fixed', f'{width}: picker overlay is fixed to viewport')
+        page.wait_for_timeout(60)
+        overlay = page.locator('.admin-v4315-time-overlay')
+        sheet = page.locator('.admin-v4315-time-sheet')
+        scroll = page.locator('.admin-v4315-time-scroll')
+        head = page.locator('.admin-v4315-time-sheet-head')
+        check(overlay.is_visible() and sheet.is_visible(), f'{width}: time opens as a global compact bottom sheet')
+        check(page.locator('.admin-v4315-time-overlay').evaluate("el => getComputedStyle(el).position") == 'fixed', f'{width}: picker overlay is fixed to viewport')
         check(abs(page.locator('#bookingForm').bounding_box()['height'] - form_height_before) < 2, f'{width}: opening time does not expand booking form')
-        check(page.locator('#adminV4314TimeTitle').inner_text().strip() == 'Оберіть час видачі', f'{width}: sheet title keeps booking context')
+        check(page.locator('#adminV4315TimeTitle').inner_text().strip() == 'Час видачі', f'{width}: sheet uses compact context title')
+        check(page.locator('.admin-v4315-time-sheet-head small').count() == 0, f'{width}: redundant 30-minute subtitle is absent')
 
-        options = page.locator('.admin-v4314-time-option')
+        sheet_box = sheet.bounding_box()
+        check(sheet_box and sheet_box['height'] <= height * 0.56 and sheet_box['height'] >= height * 0.50, f'{width}: sheet stays within roughly half of the viewport')
+        check(sheet_box and abs((sheet_box['y'] + sheet_box['height']) - height) < 3, f'{width}: compact sheet remains anchored to viewport bottom')
+        check(sheet.evaluate("el => getComputedStyle(el).overflow") == 'hidden', f'{width}: sheet shell itself does not scroll')
+        check(scroll.evaluate("el => getComputedStyle(el).overflowY") in ('auto', 'scroll'), f'{width}: only time grid body owns vertical scroll')
+
+        options = page.locator('.admin-v4315-time-option')
         check(options.count() == 48, f'{width}: sheet exposes all-day 30-minute grid')
         values = options.evaluate_all("els => els.map(el => el.dataset.time)")
         check(all(v.endswith(':00') or v.endswith(':30') for v in values), f'{width}: every selectable time uses 30-minute step')
         check('14:30' in values and '14:01' not in values, f'{width}: minute-by-minute choices are impossible')
-        cols = page.locator('.admin-v4314-time-grid').evaluate("el => getComputedStyle(el).gridTemplateColumns.split(' ').length")
+        cols = page.locator('.admin-v4315-time-grid').evaluate("el => getComputedStyle(el).gridTemplateColumns.split(' ').length")
         check(cols == 3, f'{width}: mobile time sheet uses three balanced columns')
 
-        page.screenshot(path=str(OUT / f'admin-booking-v4314-time-sheet-{width}.png'), full_page=False)
-        page.locator('.admin-v4314-time-option[data-time="14:30"]').click()
+        selected = page.locator('.admin-v4315-time-option.is-selected')
+        selected_box = selected.bounding_box()
+        scroll_box = scroll.bounding_box()
+        selected_center = selected_box['y'] + selected_box['height'] / 2
+        scroll_center = scroll_box['y'] + scroll_box['height'] / 2
+        check(abs(selected_center - scroll_center) < 45, f'{width}: current 08:00 selection opens centered in the sheet')
+
+        head_y_before = head.bounding_box()['y']
+        scroll.evaluate("el => el.scrollTop = Math.min(el.scrollHeight, el.scrollTop + 220)")
+        page.wait_for_timeout(20)
+        check(abs(head.bounding_box()['y'] - head_y_before) < 2, f'{width}: sheet header stays fixed while only hours scroll')
+
+        page.screenshot(path=str(OUT / f'admin-booking-v4315-time-sheet-{width}.png'), full_page=False)
+        page.locator('.admin-v4315-time-option[data-time="14:30"]').click()
         check(native.input_value() == '14:30', f'{width}: sheet selection updates canonical pickupTime')
         check(not overlay.is_visible(), f'{width}: sheet closes immediately after selection')
 
@@ -95,6 +116,6 @@ with sync_playwright() as p:
 
 failed = [label for ok, label in checks if not ok]
 result = {'passed': len(checks) - len(failed), 'failed': len(failed), 'failures': failed}
-(OUT / 'admin-booking-v4314-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
+(OUT / 'admin-booking-v4315-result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
 print(json.dumps(result, ensure_ascii=False))
 raise SystemExit(1 if failed else 0)
