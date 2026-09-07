@@ -118,7 +118,13 @@
     if (!grid || !scroll) return;
     const selected = grid.querySelector('.admin-v4315-time-option.is-selected');
     if (!selected) return;
-    const target = selected.offsetTop - ((scroll.clientHeight - selected.offsetHeight) / 2);
+    const selectedRect = selected.getBoundingClientRect();
+    const scrollRect = scroll.getBoundingClientRect();
+    const selectedCenter = selectedRect.top + (selectedRect.height / 2);
+    const scrollCenter = scrollRect.top + (scrollRect.height / 2);
+    const delta = selectedCenter - scrollCenter;
+    const maxScroll = Math.max(0, scroll.scrollHeight - scroll.clientHeight);
+    const target = Math.min(maxScroll, scroll.scrollTop + delta);
     scroll.scrollTop = Math.max(0, target);
   }
 
@@ -140,9 +146,9 @@
     trigger.setAttribute('aria-expanded', 'true');
 
     requestAnimationFrame(() => {
+      closeButton?.focus({preventScroll: true});
       centerSelected();
       requestAnimationFrame(centerSelected);
-      closeButton?.focus({preventScroll: true});
     });
   }
 
