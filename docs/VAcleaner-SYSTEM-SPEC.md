@@ -4306,7 +4306,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 
 Pending/activation після закриття issuance window дозволені лише доки сама кампанія `active`, `starts_at` уже настала, `ends_at` ще не минула, promo не використаний і SMS issuance відповідає тому самому campaign/code/phone.
 
-`RET-001…004` зберігаються: SMS sent ≠ active; менеджер бачить pending RETURN, ставить `Клієнт підтвердив SMS`, після чого server-side activation фіксує `activation_source=admin` і запускає 21-денний строк.
+`RET-001…004` зберігаються: SMS sent ≠ active; менеджер бачить pending RETURN, ставить `Клієнт показав SMS`, після чого server-side activation фіксує `activation_source=admin` і застосовує залишок 21-денного строку, який рахується від фактичної відправки SMS.
 
 # 72. Change record — v4.3.17 RETURN ISSUANCE WINDOW
 
@@ -4327,10 +4327,43 @@ Pending/activation після закриття issuance window дозволен�
 ### PRESERVED
 
 - **RET-001** — факт SMS `submitted/sent/delivered` сам по собі не активує promo.
-- **RET-002/003/004** — pending → activated → used, customer link, manager checkbox та 21 днів від activation не змінені.
+- **RET-002/003/004** — pending → activated → used, customer link і manager checkbox зберігаються; правило «21 день від activation» виправлене у v4.3.18 на «21 день від фактичної відправки SMS».
 - Тарифи, доставка, referral, public booking, inventory і VA HOME не змінені.
 
 ### TESTS
 
 - `scripts/test-v4-3-17-return-issued-window.mjs` — issuance window лишається gate для нових SMS, але не для pending/manager activation уже виданого RETURN.
 - Canonical `test:sms-campaigns` включає цей regression guard; перед release обов’язковий повний static + browser/PWA QA.
+
+
+---
+
+# 74. Change record — v4.3.18 RETURN SMS 21-DAY WINDOW
+
+## RET-009 — строк RETURN рахується від SMS, а не від активації
+
+Персональний RETURN, виданий через SMS, має один незмінний строк: **21 день від фактичного `submitted/sent/delivered` SMS issuance timestamp**. Перехід за посиланням або підтвердження менеджером не створюють нові 21 день і не продовжують строк.
+
+Є рівно два способи активації вже виданого RETURN:
+1. клієнт переходить за персональним посиланням у SMS (`activation_source=sms_link`), після чого код можна використати на сайті;
+2. клієнт показує / надсилає SMS менеджеру, а менеджер у бронюванні ставить `Клієнт показав SMS` (`activation_source=admin`).
+
+В обох випадках `expires_at = sms_issued_at + 21 days`. Якщо на момент переходу або менеджерського підтвердження 21 день уже минув, активація та використання заборонені. Повторний перехід або повторне підтвердження ідемпотентні й не змінюють `expires_at`.
+
+`issuance_ends_at` обмежує тільки **відправку нових RETURN SMS**. Для вже надісланого SMS джерелом строку є його власний issuance timestamp, а не `issuance_ends_at`, `campaign.ends_at` чи момент активації. Технічний `campaign.ends_at` може бути доведений лише до фіксованого `sms_issued_at + 21 days`, щоб не блокувати валідний код, але не визначає строк бонусу.
+
+### FIXED
+- усунуто регресію, де пізній клік по SMS або пізня галочка менеджера давали клієнту нові 21 день;
+- pending RETURN у бронюванні показується тільки поки 21-денний строк від SMS ще чинний;
+- старий active RETURN при lookup нормалізує `expires_at` до фактичного SMS + 21 день, тому старе завищене expiry не дає використати прострочений бонус;
+- текст SMS прямо каже `Діє 21 день від отримання SMS`; менеджерська галочка — `Клієнт показав SMS`.
+
+### PRESERVED
+- SMS sent саме по собі не робить promo active;
+- персональне SMS-посилання та manager checkbox залишаються двома шляхами активації;
+- promo одноразовий і після redemption повторно не використовується;
+- тарифи, доставка, referral, inventory, public booking pricing і VA HOME не змінюються.
+
+### TESTS
+- `scripts/test-v4-3-18-return-sms-window.mjs`;
+- legacy v4.1.30 / v4.3.17 guards делегують до RET-009, щоб старий помилковий activation-timed контракт не повернувся.

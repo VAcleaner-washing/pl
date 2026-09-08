@@ -94,7 +94,7 @@ const campaigns=fs.readFileSync('supabase/functions/vacleaner-campaigns-v1/index
 has(campaigns,'action==="pending_bonus"','admin must be able to see an issued but inactive SMS bonus');
 has(campaigns,'action==="activate_bonus"','admin must explicitly activate a pending SMS bonus');
 has(campaigns,'sentAt:issuedAt','pending bonus must expose when the SMS was issued');
-has(admin,'Клієнт підтвердив SMS','booking UX must require an explicit manager confirmation');
+has(admin,'Клієнт показав SMS','booking UX must require an explicit manager confirmation');
 has(admin,'data-activate-pending-promo','booking UX must not auto-activate an SMS merely because it was sent');
 
 // Address truth: route address, courier detail and customer comment are separate values.
