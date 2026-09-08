@@ -1,0 +1,30 @@
+name: v4.3.18 RETURN patch
+on:
+  push:
+    branches:
+      - qa/v4.3.18-return-sms-21d-window
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/v4.3.18-return-sms-21d-window
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Apply corrected RETURN contract
+        run: python scripts/v4318_patch.py
+      - name: Remove one-shot patch tooling
+        run: rm -f scripts/v4318_patch.py .github/workflows/v4318-patch.yml
+      - name: Commit corrected contract
+        run: |
+          git config user.name "VAcleaner QA"
+          git config user.email "vacleaner.washing@gmail.com"
+          git add -A
+          git diff --cached --check
+          git commit -m "v4.3.18 — RETURN 21 days from SMS issuance"
+          git push origin HEAD:qa/v4.3.18-return-sms-21d-window
