@@ -4292,3 +4292,45 @@ The final archive may be handed off only after the aggregate status is recorded 
 ### TESTS
 - `scripts/test-v4-3-16-admin-time-range.mjs`
 - `scripts/admin_booking_v4316_time_range_qa.py` at 390 / 430 px.
+
+
+---
+
+# 10A. RETURN / SMS — ISSUANCE VS ACTIVATION
+
+## RET-008 — issued RETURN не зникає після закриття issuance window
+
+`issuance_ends_at` обмежує тільки **видачу нових** персональних RETURN-пропозицій / SMS.
+
+Якщо персональний RETURN уже був коректно виданий клієнту до `issuance_ends_at` і є доказ у `vacleaner_sms_dispatch_recipients` зі статусом `submitted` / `sent` / `delivered`, закриття issuance window не може приховати цей pending bonus у бронюванні і не може блокувати ручну активацію менеджером.
+
+Pending/activation після закриття issuance window дозволені лише доки сама кампанія `active`, `starts_at` уже настала, `ends_at` ще не минула, promo не використаний і SMS issuance відповідає тому самому campaign/code/phone.
+
+`RET-001…004` зберігаються: SMS sent ≠ active; менеджер бачить pending RETURN, ставить `Клієнт підтвердив SMS`, після чого server-side activation фіксує `activation_source=admin` і запускає 21-денний строк.
+
+# 72. Change record — v4.3.17 RETURN ISSUANCE WINDOW
+
+### ADDED
+
+- **RET-008** — окремий контракт між строком видачі нових RETURN-пропозицій і життєвим циклом уже виданого pending bonus.
+
+### CHANGED
+
+- `vacleaner-campaigns-v1.pending_bonus` та `activate_bonus` після факту валідного SMS issuance орієнтуються на `campaign.ends_at`, а не на `issuance_ends_at`.
+- `campaignPromoContext` для нової SMS-видачі як і раніше блокується після `issuance_ends_at`.
+
+### FIXED
+
+- Уже надісланий RETURN більше не зникає з admin booking після закриття вікна видачі кампанії.
+- Менеджер може підтвердити SMS та активувати такий issued bonus у межах активної кампанії.
+
+### PRESERVED
+
+- **RET-001** — факт SMS `submitted/sent/delivered` сам по собі не активує promo.
+- **RET-002/003/004** — pending → activated → used, customer link, manager checkbox та 21 днів від activation не змінені.
+- Тарифи, доставка, referral, public booking, inventory і VA HOME не змінені.
+
+### TESTS
+
+- `scripts/test-v4-3-17-return-issued-window.mjs` — issuance window лишається gate для нових SMS, але не для pending/manager activation уже виданого RETURN.
+- Canonical `test:sms-campaigns` включає цей regression guard; перед release обов’язковий повний static + browser/PWA QA.
