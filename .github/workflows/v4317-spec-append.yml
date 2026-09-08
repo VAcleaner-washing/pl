@@ -1,0 +1,34 @@
+name: v4317 spec append
+on:
+  push:
+    branches:
+      - qa/v4.3.17-return-sms-promo-activation
+permissions:
+  contents: write
+jobs:
+  append-spec:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: qa/v4.3.17-return-sms-promo-activation
+      - name: Append RETURN issuance-window contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('docs/VAcleaner-SYSTEM-SPEC.md')
+          s=p.read_text()
+          marker='## RET-008 — issued RETURN не зникає після закриття issuance window'
+          if marker not in s:
+              s += '''\n\n---\n\n# 10A. RETURN / SMS — ISSUANCE VS ACTIVATION\n\n## RET-008 — issued RETURN не зникає після закриття issuance window\n\n`issuance_ends_at` обмежує тільки **видачу нових** персональних RETURN-пропозицій / SMS.\n\nЯкщо персональний RETURN уже був коректно виданий клієнту до `issuance_ends_at` і є доказ у `vacleaner_sms_dispatch_recipients` зі статусом `submitted` / `sent` / `delivered`, закриття issuance window не може приховати цей pending bonus у бронюванні і не може блокувати ручну активацію менеджером.\n\nPending/activation після закриття issuance window дозволені лише доки сама кампанія `active`, `starts_at` уже настала, `ends_at` ще не минула, promo не використаний і SMS issuance відповідає тому самому campaign/code/phone.\n\n`RET-001…004` зберігаються: SMS sent ≠ active; менеджер бачить pending RETURN, ставить `Клієнт підтвердив SMS`, після чого server-side activation фіксує `activation_source=admin` і запускає 21-денний строк.\n\n# 72. Change record — v4.3.17 RETURN ISSUANCE WINDOW\n\n### ADDED\n\n- **RET-008** — окремий контракт між строком видачі нових RETURN-пропозицій і життєвим циклом уже виданого pending bonus.\n\n### CHANGED\n\n- `vacleaner-campaigns-v1.pending_bonus` та `activate_bonus` після факту валідного SMS issuance орієнтуються на `campaign.ends_at`, а не на `issuance_ends_at`.\n- `campaignPromoContext` для нової SMS-видачі як і раніше блокується після `issuance_ends_at`.\n\n### FIXED\n\n- Уже надісланий RETURN більше не зникає з admin booking після закриття вікна видачі кампанії.\n- Менеджер може підтвердити SMS та активувати такий issued bonus у межах активної кампанії.\n\n### PRESERVED\n\n- **RET-001** — факт SMS `submitted/sent/delivered` сам по собі не активує promo.\n- **RET-002/003/004** — pending → activated → used, customer link, manager checkbox та 21 днів від activation не змінені.\n- Тарифи, доставка, referral, public booking, inventory і VA HOME не змінені.\n\n### TESTS\n\n- `scripts/test-v4-3-17-return-issued-window.mjs` — issuance window лишається gate для нових SMS, але не для pending/manager activation уже виданого RETURN.\n- Canonical `test:sms-campaigns` включає цей regression guard; перед release обов’язковий повний static + browser/PWA QA.\n'''
+              p.write_text(s)
+          PY
+      - name: Commit spec and remove helper
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/v4317-spec-append.yml
+          git add docs/VAcleaner-SYSTEM-SPEC.md
+          git commit -m "docs: clarify issued RETURN activation window"
+          git push origin HEAD:qa/v4.3.17-return-sms-promo-activation
