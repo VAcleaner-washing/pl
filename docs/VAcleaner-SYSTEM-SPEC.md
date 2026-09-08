@@ -1992,7 +1992,7 @@ SMS кампанії повинні поважати:
 
 ## CAMP-004 — UI кодів
 
-Один або кілька promo codes не повинні створювати модалку з величезньою пустою висотою.
+Один або кілька promo codes не повинні створювати модалку з величезною пустою висотою.
 
 Список прокручується всередині; modal має адекватний max-height.
 
@@ -2700,7 +2700,7 @@ MFA зараз не примусово вимагається. Міграція 
 
 ### ADDED
 
-- **DEL-011** — точна локальна адреса тепер зберігає реальний one-way route від бази навіть при фіксованому локальному тарифі 250 грн.
+- **DEL-011** — локальна точна адреса зберігає реальний one-way route від бази навіть при фіксованому локальному тарифі 250 грн.
 - **DEL-012** — у фінансах є керований backfill останніх доставок без distance; зберігаються тільки точні house-level маршрути.
 - **DEL-013** — legacy delivery address перед backfill очищається від під’їзду/орієнтира/коментаря та повторно шукається через кілька нормалізованих варіантів; приблизні street-only координати як і раніше не записуються.
 - **DEL-014** — production `vacleaner-admin-data-v1` підтримує authenticated `save_delivery_route`; backfill не вважається успішним, доки route snapshot реально не записаний у booking extras.
@@ -3229,8 +3229,8 @@ MFA зараз не примусово вимагається. Міграція 
 - Historical completed delivery records with missing `delivery_amount` were backfilled in production to the confirmed 250 грн tariff; the latest delivery profitability sample therefore uses 30/30 known prices and 29/30 matched price + road-route records.
 
 ### PRESERVED
-- v4.2.37 deep route stack, exact global-search restoration, calm hover system, iOS Instagram return flow, PWA safe-area behavior and all booking/client/referral business rules remain unchanged.
-- Current delivery tariff calculation for new bookings remains unchanged; this release does not replace or bypass the configured 250/350/manual tariff logic.
+- v4.2.37 context-navigation stability and 250 грн historical-delivery backfill remain unchanged.
+- v4.2.37 deep route restoration, calm hover, iOS Instagram return flow, PWA safe-area behavior and all booking/client/referral business rules remain unchanged.
 
 ### TESTS
 - `npm run test:admin-context-navigation` must pass with the detail shell fully detached before list interaction.
@@ -4367,3 +4367,42 @@ Pending/activation після закриття issuance window дозволен�
 ### TESTS
 - `scripts/test-v4-3-18-return-sms-window.mjs`;
 - legacy v4.1.30 / v4.3.17 guards делегують до RET-009, щоб старий помилковий activation-timed контракт не повернувся.
+
+
+---
+
+# 75. Change record — v4.3.19 IPHONE LANDSCAPE BOOKING DETAIL
+
+## PWA-LANDSCAPE-001 — phone-landscape booking detail bridge
+
+Booking detail на iPhone-class landscape viewport зберігає компактну вертикально прокручувану геометрію, коли visual viewport має ширину 901–1024 px, висоту до 500 px і landscape orientation. Це presentation-only bridge для шва canonical Native breakpoint 900 px; він застосовується тільки до booking detail і не переводить увесь admin/tablet shell у mobile mode.
+
+На **932×430**:
+
+- booking detail є власником вертикального scroll і не має horizontal overflow;
+- desktop hero photography приховується, щоб не створювати чорну/мертву зону;
+- detail grids/panels мають auto-height без розтягнутих desktop minimum rows;
+- корисний booking content починається вже в першому viewport;
+- actions доступні після scroll і зберігають touch target не менше 44 px.
+
+Tablet/desktop 1024×768 та звичайна global admin geometry залишаються поза цим bridge.
+
+### CHANGED
+
+- **PWA-LANDSCAPE-001** — додана вузька 901–1024 × ≤500 landscape geometry для booking detail без зміни canonical `max-width:900px` mobile breakpoint.
+
+### FIXED
+
+- iPhone landscape booking detail більше не повинен показувати гігантські чорні/порожні проміжки між `Техніка`, `Додатково` та operational actions через desktop grid/stretch rules.
+
+### PRESERVED
+
+- Booking, public booking, time picker, logistics, finance, RETURN/SMS, referral, Supabase та VA HOME business logic не змінюються.
+- Normal tablet/desktop admin breakpoints не змінюються.
+- Production Supabase не змінюється.
+
+### TESTS
+
+- `scripts/test-v4-3-19-admin-landscape-detail.mjs`;
+- `scripts/admin_booking_v4319_landscape_qa.py` — exact browser regression на 932×430 із 1024×768 negative control;
+- full canonical Static/build + Browser/PWA QA залишається release-blocking перед merge у `main`.
