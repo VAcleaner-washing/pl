@@ -25,9 +25,10 @@ async function qualifyingDispatch(db:any,promoCode:any,phone:string){
   const {data:dispatches,error:dispatchError}=await db.from("vacleaner_sms_dispatches").select("id,campaign_id,status,sent_at,created_at").in("id",dispatchIds);
   if(dispatchError)throw dispatchError;
   const byId=new Map((dispatches||[]).map((r:any)=>[String(r.id),r]));
-  for(const recipient of recipients||[]){const dispatch=byId.get(String(recipient.dispatch_id||""));if(dispatch&&String(dispatch.campaign_id||"")===String(promoCode.campaign_id||""))return dispatch}
+  for(const recipient of recipients||[]){const dispatch=byId.get(String(recipient.dispatch_id||""));if(dispatch&&String(dispatch.campaign_id||"")===String(promoCode.campaign_id||""))return {dispatch,issuedAt:String(recipient.created_at||dispatch.sent_at||dispatch.created_at||"")}}
   return null;
 }
+const promoExpiryFromIssuedAt=(issuedAt:unknown)=>{const issuedMs=new Date(String(issuedAt||"")).getTime();return Number.isFinite(issuedMs)?new Date(issuedMs+BONUS_VALID_DAYS*86400000):null};
 
 async function promoPayload(db:any,promoCode:any,campaign:any,source:string){
   const {count:uses,error}=await db.from("vacleaner_promo_redemptions").select("id",{count:"exact",head:true}).eq("promo_code_id",promoCode.id);if(error)throw error;
@@ -57,17 +58,24 @@ Deno.serve(async(req:Request)=>{
       const phone=normalizePhone(promoCode.customer_phone);if(!phone)return json({error:"invalid_promo"},404);
       const {data:campaign,error:campaignError}=await db.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,starts_at,ends_at,issuance_ends_at").eq("id",promoCode.campaign_id).maybeSingle();if(campaignError)throw campaignError;
       if(!campaign||!["return","personal"].includes(String(campaign.campaign_type||"")))return json({error:"invalid_promo"},404);
-      const existing=await promoPayload(db,promoCode,campaign,"sms_link");if(existing)return json({ok:true,alreadyActivated:true,promo:existing});
-      const now=Date.now(),starts=campaign.starts_at?new Date(campaign.starts_at).getTime():0,issuanceEnd=campaign.issuance_ends_at?new Date(campaign.issuance_ends_at).getTime():(campaign.ends_at?new Date(campaign.ends_at).getTime():0);
-      if(campaign.status!=="active"||(starts&&starts>now)||(issuanceEnd&&issuanceEnd<=now))return json({error:"activation_window_expired"},409);
-      const dispatch=await qualifyingDispatch(db,promoCode,phone);if(!dispatch)return json({error:"sms_not_issued"},409);
+      const issued=await qualifyingDispatch(db,promoCode,phone);if(!issued)return json({error:"sms_not_issued"},409);
+      const expiresAtDate=promoExpiryFromIssuedAt(issued.issuedAt),now=Date.now(),starts=campaign.starts_at?new Date(campaign.starts_at).getTime():0;
+      if(!expiresAtDate||expiresAtDate.getTime()<=now)return json({error:"activation_window_expired"},409);
+      if(campaign.status!=="active"||(starts&&starts>now))return json({error:"activation_window_expired"},409);
+      const expiresAt=expiresAtDate.toISOString(),campaignEnd=campaign.ends_at?new Date(campaign.ends_at).getTime():0;
+      if(!campaignEnd||campaignEnd<expiresAtDate.getTime()){const {error:extendError}=await db.from("vacleaner_campaigns").update({ends_at:expiresAt,updated_at:new Date().toISOString()}).eq("id",campaign.id);if(extendError)throw extendError}
+      let current=promoCode;
+      if(promoCode.active){
+        const storedEnd=promoCode.expires_at?new Date(promoCode.expires_at).getTime():0;
+        if(storedEnd!==expiresAtDate.getTime()){const {data:fixed,error:fixError}=await db.from("vacleaner_promo_codes").update({expires_at:expiresAt}).eq("id",promoCode.id).select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,activated_at,activation_source,activation_dispatch_id").single();if(fixError)throw fixError;current=fixed}
+        const existing=await promoPayload(db,current,campaign,"sms_link");if(existing)return json({ok:true,alreadyActivated:true,promo:existing});
+      }
       const {count:uses,error:usesError}=await db.from("vacleaner_promo_redemptions").select("id",{count:"exact",head:true}).eq("promo_code_id",promoCode.id);if(usesError)throw usesError;if(Number(uses||0)>0)return json({error:"promo_used"},409);
-      const activatedAt=new Date(),expiresAt=new Date(activatedAt.getTime()+BONUS_VALID_DAYS*86400000),patch={active:true,activated_at:activatedAt.toISOString(),activation_source:"sms_link",activation_dispatch_id:dispatch.id,activated_by:null,expires_at:expiresAt.toISOString()};
-      const campaignEnd=campaign.ends_at?new Date(campaign.ends_at).getTime():0;if(!campaignEnd||campaignEnd<expiresAt.getTime()){const {error:extendError}=await db.from("vacleaner_campaigns").update({ends_at:expiresAt.toISOString(),updated_at:activatedAt.toISOString()}).eq("id",campaign.id);if(extendError)throw extendError}
+      const activatedAt=new Date(),patch={active:true,activated_at:activatedAt.toISOString(),activation_source:"sms_link",activation_dispatch_id:issued.dispatch.id,activated_by:null,expires_at:expiresAt};
       const {data:activated,error:activateError}=await db.from("vacleaner_promo_codes").update(patch).eq("id",promoCode.id).eq("active",false).select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,activated_at,activation_source").maybeSingle();if(activateError)throw activateError;
       const row=activated||await db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,activated_at,activation_source").eq("id",promoCode.id).single().then((x:any)=>x.data);
       const payload=await promoPayload(db,row,campaign,"sms_link");if(!payload)return json({error:"promo_unavailable"},409);
-      return json({ok:true,alreadyActivated:false,validDays:BONUS_VALID_DAYS,promo:payload});
+      return json({ok:true,alreadyActivated:false,validDays:BONUS_VALID_DAYS,issuedAt:issued.issuedAt,promo:payload});
     }
 
     if(action!=="lookup")return json({error:"invalid_action"},400);
@@ -77,7 +85,7 @@ Deno.serve(async(req:Request)=>{
     const {data:codes,error:codesError}=await db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,activated_at,activation_source").eq("customer_phone",phone).eq("active",true).order("activated_at",{ascending:false,nullsFirst:false}).limit(20);if(codesError)throw codesError;
     for(const promoCode of codes||[]){
       const {data:campaign,error:campaignError}=await db.from("vacleaner_campaigns").select("id,name,campaign_type,status,discount_type,discount_value,starts_at,ends_at,issuance_ends_at").eq("id",promoCode.campaign_id).maybeSingle();if(campaignError)throw campaignError;if(!campaign)continue;
-      if(["return","personal"].includes(String(campaign.campaign_type||""))&&!await qualifyingDispatch(db,promoCode,phone))continue;
+      if(["return","personal"].includes(String(campaign.campaign_type||""))){const issued=await qualifyingDispatch(db,promoCode,phone);if(!issued)continue;const fixedExpiry=promoExpiryFromIssuedAt(issued.issuedAt);if(!fixedExpiry||fixedExpiry.getTime()<=Date.now())continue;const storedEnd=promoCode.expires_at?new Date(promoCode.expires_at).getTime():0;if(storedEnd!==fixedExpiry.getTime()){const {error:fixError}=await db.from("vacleaner_promo_codes").update({expires_at:fixedExpiry.toISOString()}).eq("id",promoCode.id);if(fixError)throw fixError;promoCode.expires_at=fixedExpiry.toISOString()}}
       const payload=await promoPayload(db,promoCode,campaign,"phone");if(payload)return json({promo:payload});
     }
     return json({promo:null});

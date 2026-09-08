@@ -15,7 +15,7 @@ const lacks=(src,needle,msg)=>assert.ok(!src.includes(needle),msg);
 // RETURN: delivered SMS is visible as pending, not auto-active, and deployed inventory matches the fixed source.
 has(campaigns,'action==="pending_bonus"','campaign backend must expose pending SMS bonus');
 has(campaigns,'action==="activate_bonus"','campaign backend must keep explicit manager activation');
-has(admin,'Клієнт підтвердив SMS','booking UI must require explicit confirmation before activation');
+has(admin,'Клієнт показав SMS','booking UI must require explicit confirmation before activation');
 const campaignInventory=inventory.functions.find(x=>x.slug==='vacleaner-campaigns-v1');
 assert.equal(campaignInventory?.version,20,'production campaign inventory must record deployed v20 with pending_bonus');
 
