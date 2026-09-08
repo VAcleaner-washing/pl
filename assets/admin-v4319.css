@@ -1,0 +1,182 @@
+/* VAcleaner v4.3.19 — iPhone landscape booking-detail bridge.
+   Scope is deliberately narrow: 901–1024px wide, <=500px high, landscape only.
+   This keeps normal tablet/desktop admin geometry untouched and changes no business logic. */
+@media (min-width:901px) and (max-width:1024px) and (max-height:500px) and (orientation:landscape){
+  html.v43-prod .detail{
+    inset:0!important;
+    width:100vw!important;
+    max-width:none!important;
+    height:100vh!important;
+    height:100dvh!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+    background:#070b0e!important;
+  }
+
+  html.v43-prod .detail-shell{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0!important;
+    padding:10px max(18px,var(--pwa-safe-right,0px)) calc(18px + var(--pwa-safe-bottom,0px)) max(18px,var(--pwa-safe-left,0px))!important;
+  }
+
+  html.v43-prod .detail-top{
+    position:sticky!important;
+    top:0!important;
+    z-index:25!important;
+    min-height:56px!important;
+    height:auto!important;
+    margin:0 0 10px!important;
+    padding:6px 10px!important;
+    border:1px solid rgba(255,255,255,.085)!important;
+    border-radius:16px!important;
+    background:rgba(12,18,21,.985)!important;
+    box-shadow:0 10px 22px rgba(7,11,14,.62)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+
+  html.v43-prod .detail-top .back,
+  html.v43-prod .detail-top button{
+    min-height:44px!important;
+  }
+
+  html.v43-prod .detail-top-meta{
+    min-width:0!important;
+  }
+
+  html.v43-prod .detail-top-meta span,
+  html.v43-prod .detail-top-meta small,
+  html.v43-prod .native-detail-code{
+    white-space:nowrap!important;
+  }
+
+  html.v43-prod .detail-hero{
+    position:relative!important;
+    display:block!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0 0 10px!important;
+    padding:14px 16px!important;
+    overflow:hidden!important;
+    border-radius:16px!important;
+  }
+
+  html.v43-prod .detail-hero .hero-images{
+    display:none!important;
+  }
+
+  html.v43-prod .detail-hero h1{
+    margin:0!important;
+    font-size:24px!important;
+    line-height:1.1!important;
+  }
+
+  html.v43-prod .detail-hero .period{
+    margin-top:9px!important;
+    font-size:14px!important;
+    line-height:1.35!important;
+  }
+
+  html.v43-prod .detail-hero .hero-status{
+    min-height:30px!important;
+    height:auto!important;
+    margin-top:9px!important;
+    padding:6px 10px!important;
+  }
+
+  html.v43-prod .detail .flow{
+    min-height:0!important;
+    height:auto!important;
+    margin:0 0 10px!important;
+    padding:12px 14px!important;
+  }
+
+  html.v43-prod .detail .steps{
+    min-height:0!important;
+  }
+
+  html.v43-prod .detail .step i{
+    width:32px!important;
+    height:32px!important;
+    margin-bottom:6px!important;
+  }
+
+  html.v43-prod .detail-grid,
+  html.v43-prod .detail .info-grid{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-auto-rows:auto!important;
+    align-items:start!important;
+    align-content:start!important;
+    gap:10px!important;
+    min-width:0!important;
+    min-height:0!important;
+    height:auto!important;
+  }
+
+  html.v43-prod .detail-grid>*,
+  html.v43-prod .detail .info-grid>*,
+  html.v43-prod .detail .panel,
+  html.v43-prod .detail .card,
+  html.v43-prod .detail .finance-panel,
+  html.v43-prod .detail .extras-panel,
+  html.v43-prod .detail .gift-panel,
+  html.v43-prod .detail .comment,
+  html.v43-prod .detail .audit-panel{
+    min-width:0!important;
+    min-height:0!important;
+    height:auto!important;
+    align-self:start!important;
+  }
+
+  html.v43-prod .detail .panel,
+  html.v43-prod .detail .card{
+    padding:14px 16px!important;
+  }
+
+  html.v43-prod .detail .panel h2{
+    margin-bottom:6px!important;
+    font-size:18px!important;
+    line-height:1.2!important;
+  }
+
+  html.v43-prod .detail .panel p,
+  html.v43-prod .detail .panel strong,
+  html.v43-prod .detail .panel a{
+    overflow-wrap:anywhere!important;
+  }
+
+  html.v43-prod .detail-actions,
+  html.v43-prod .native-detail-actions{
+    position:static!important;
+    inset:auto!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:10px 0 0!important;
+    padding:10px!important;
+    gap:8px!important;
+    transform:none!important;
+  }
+
+  html.v43-prod .detail-actions .btn,
+  html.v43-prod .detail-actions summary,
+  html.v43-prod .native-detail-actions .btn,
+  html.v43-prod .native-detail-actions summary{
+    min-height:44px!important;
+    height:auto!important;
+  }
+
+  html.v43-prod .detail::after{
+    content:"";
+    display:block;
+    height:max(8px,var(--pwa-safe-bottom,0px));
+  }
+}
