@@ -86,7 +86,11 @@ with sync_playwright() as pw:
             page.wait_for_timeout(80)
             actions=page.locator('.detail-actions')
             box=actions.bounding_box() if actions.count() else None
-            heights=actions.locator('.btn,summary').evaluate_all("els=>els.filter(el=>getComputedStyle(el).display!=='none').map(el=>el.getBoundingClientRect().height)") if actions.count() else []
+            heights=actions.locator('.btn,summary').evaluate_all("""els=>els.flatMap(el=>{
+              const style=getComputedStyle(el),rect=el.getBoundingClientRect();
+              const visible=style.display!=='none'&&style.visibility!=='hidden'&&rect.width>0&&rect.height>0&&el.getClientRects().length>0;
+              return visible?[rect.height]:[];
+            })""") if actions.count() else []
             DIAG['actions_count']=actions.count()
             DIAG['actions_box']=box
             DIAG['action_heights']=heights
