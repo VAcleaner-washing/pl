@@ -48,7 +48,8 @@ with sync_playwright() as p:
         requests=[]
         page.route('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-prepayment-waiver-v1', lambda route, request: (requests.append(json.loads(request.post_data or '{}')), route.fulfill(status=200,content_type='application/json',body='{"prepaymentWaiver":true,"booking":{}}'))[1])
         page.set_content(html,wait_until='load')
-        page.evaluate("localStorage.setItem('sb-test-auth-token', JSON.stringify({access_token:'qa-access-token-that-is-long-enough-123456789'}))")
+        # This QA never submits the backend action, so it must not depend on localStorage.
+        # page.set_content() uses an opaque origin in Chromium where localStorage can be blocked.
         page.add_script_tag(content=js)
         page.wait_for_timeout(80)
 
