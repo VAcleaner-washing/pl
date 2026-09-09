@@ -7,7 +7,7 @@ const edge=fs.readFileSync('supabase/functions/vacleaner-prepayment-waiver-v1/in
 const migration=fs.readFileSync('supabase/migrations/20260909104500_vacleaner_prepayment_waiver.sql','utf8');
 const settlement=fs.readFileSync('supabase/functions/vacleaner-admin-bookings-v4/settlement.mjs','utf8');
 
-assert.match(html,/admin-v4319-prepayment-waiver\.js\?v=4319/,'admin loads the v4.3.19 waiver layer');
+assert.match(html,/admin-v4319-prepayment-waiver\.js\?v=\d+/,'admin loads the v4.3.19 waiver layer with source or stamped release namespace');
 assert.match(ui,/Без передоплати · день у день \/ за домовленістю/,'manager sees an explicit waiver choice');
 assert.match(ui,/paid\.checked\|\|waiver\.checked/,'confirmation accepts either paid prepayment or an explicit waiver');
 assert.match(ui,/if\(!waiver\.checked\)return legacySubmit/,'normal paid confirmation keeps the existing workflow');
