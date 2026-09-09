@@ -39,7 +39,7 @@
     "test:delivery-settings": "node scripts/test-delivery-settings.mjs",
     "test:copy-integrity": "node scripts/test-static-copy-integrity.mjs",
     "test:booking-date-default": "node scripts/test-public-booking-date-default.mjs",
-    "test:pwa-static": "node scripts/test-pwa.mjs && node scripts/test-v4-3-7-booking-finance-dedup.mjs && node scripts/test-v4-3-10-client-card-edit-mode.mjs && node scripts/test-v4-3-11-process-contact-actions.mjs && node scripts/test-v4-3-12-admin-time-logistics.mjs && node scripts/test-v4-3-13-admin-time-ux.mjs && node scripts/test-v4-3-16-admin-time-range.mjs",
+    "test:pwa-static": "node scripts/test-pwa.mjs && node scripts/test-v4-3-7-booking-finance-dedup.mjs && node scripts/test-v4-3-10-client-card-edit-mode.mjs && node scripts/test-v4-3-11-process-contact-actions.mjs && node scripts/test-v4-3-12-admin-time-logistics.mjs && node scripts/test-v4-3-13-admin-time-ux.mjs && node scripts/test-v4-3-16-admin-time-range.mjs && node scripts/test-v4-3-19-admin-landscape-detail.mjs && node scripts/test-v4-3-19-prepayment-waiver.mjs && node scripts/test-v4-3-19-admin-triple-kit.mjs",
     "test:sms-campaigns": "node scripts/test-sms-campaigns.mjs && node scripts/test-v4-3-8-sms-hardening.mjs && node scripts/test-v4-3-9-sms-brand-copy.mjs && node scripts/test-v4-3-17-return-issued-window.mjs",
     "test:admin-labels": "node scripts/test-admin-product-labels.mjs",
     "test:client-promo-regression": "node scripts/test-client-promo-regression.mjs",
@@ -83,6 +83,6 @@
     "test:stabilization-acceptance-browser": "python scripts/v4312_qa_runner.py scripts/stabilization_acceptance_qa.py",
     "test:client-card-visual": "python scripts/client_card_v4245_qa.py",
     "test:process-contact-v4311": "python scripts/process_contact_v4311_visual_qa.py",
-    "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py && python scripts/admin_booking_v4316_time_range_qa.py"
+    "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py && python scripts/admin_booking_v4316_time_range_qa.py && python scripts/v4312_qa_runner.py scripts/admin_booking_v4319_landscape_qa.py && python scripts/admin_prepayment_waiver_v4319_qa.py"
   }
 }

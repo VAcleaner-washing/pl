@@ -1,6 +1,6 @@
-const CACHE='vacleaner-manager-4316';
+const CACHE='vacleaner-manager-4319';
 const FALLBACK='/admin/bronuvannia/';
-const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4300','/assets/admin-v250.css?v=4300','/assets/admin-v250.js?v=4300','/assets/admin-glass-test.css?v=4300','/assets/admin-glass-test.js?v=4300','/assets/admin-v430.css?v=4300','/assets/admin-v430.js?v=4300','/assets/admin-v4315.css?v=4315','/assets/admin-v4316.js?v=4316','/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png','/admin/apple-touch-icon.png?v=4300'];
+const CORE=[FALLBACK,'/assets/vacleaner-core.js?v=4300','/assets/admin-v4319-triple-kit.js?v=4319','/assets/admin-v250.css?v=4300','/assets/admin-v250.js?v=4300','/assets/admin-glass-test.css?v=4300','/assets/admin-glass-test.js?v=4300','/assets/admin-v430.css?v=4300','/assets/admin-v430.js?v=4300','/assets/admin-v4315.css?v=4315','/assets/admin-v4316.js?v=4316','/assets/admin-v4319.css?v=4319','/assets/admin-v4319-prepayment-waiver.js?v=4319','/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png','/admin/apple-touch-icon.png?v=4300'];
 
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)));});
 self.addEventListener('activate',event=>{event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))),self.clients.claim()]));});
