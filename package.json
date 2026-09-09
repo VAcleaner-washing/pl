@@ -83,6 +83,6 @@
     "test:stabilization-acceptance-browser": "python scripts/v4312_qa_runner.py scripts/stabilization_acceptance_qa.py",
     "test:client-card-visual": "python scripts/client_card_v4245_qa.py",
     "test:process-contact-v4311": "python scripts/process_contact_v4311_visual_qa.py",
-    "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py && python scripts/admin_booking_v4316_time_range_qa.py && python scripts/v4312_qa_runner.py scripts/admin_booking_v4319_landscape_qa.py"
+    "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py && python scripts/admin_booking_v4316_time_range_qa.py && python scripts/v4312_qa_runner.py scripts/admin_booking_v4319_landscape_qa.py && python scripts/admin_prepayment_waiver_v4319_qa.py"
   }
 }
