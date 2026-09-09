@@ -69,8 +69,9 @@ with sync_playwright() as pw:
             check(metrics['heroImages']=='none','932x430: desktop hero photography cannot create a black dead zone')
             check(metrics['grid'] is not None and metrics['grid']['y']<430 and metrics['gridMinHeight']=='0px','932x430: useful booking content starts in the first viewport without stretched minimum height')
 
-            technique=page.locator('.detail').get_by_text('Техніка',exact=True).first
-            check(technique.count()==1 and technique.bounding_box() is not None and technique.bounding_box()['y']<430,'932x430: Technique section is visible before the first viewport ends')
+            first_panel=page.locator('.detail .detail-client-link').first
+            first_panel_box=first_panel.bounding_box() if first_panel.count() else None
+            check(first_panel.count()==1 and first_panel_box is not None and first_panel_box['y']<430,'932x430: first booking panel is visible before the first viewport ends')
 
             page.locator('.detail').evaluate("el=>el.scrollTop=el.scrollHeight")
             page.wait_for_timeout(80)
