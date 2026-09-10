@@ -1,0 +1,31 @@
+/* VAcleaner v4.3.20 — Upcoming card title/status alignment on mobile. */
+@media(max-width:900px){
+  html.native-v25 .upcoming-row.native-v25-upcoming .upcoming-title{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) max-content!important;
+    align-items:start!important;
+    justify-content:stretch!important;
+    gap:8px!important;
+    min-width:0!important;
+  }
+  html.native-v25 .upcoming-row.native-v25-upcoming .upcoming-title h3{
+    grid-column:1!important;
+    grid-row:1!important;
+    width:auto!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    overflow-wrap:anywhere;
+  }
+  html.native-v25 .upcoming-row.native-v25-upcoming .upcoming-title .status{
+    grid-column:2!important;
+    grid-row:1!important;
+    justify-self:end!important;
+    align-self:start!important;
+    width:auto!important;
+    max-width:132px!important;
+    margin:0!important;
+    flex:none!important;
+    white-space:nowrap;
+  }
+}
