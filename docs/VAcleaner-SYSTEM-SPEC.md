@@ -4406,3 +4406,32 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `scripts/test-v4-3-19-admin-landscape-detail.mjs`;
 - `scripts/admin_booking_v4319_landscape_qa.py` — exact browser regression на 932×430 із 1024×768 negative control;
 - full canonical Static/build + Browser/PWA QA залишається release-blocking перед merge у `main`.
+
+---
+
+# 76. Change record — v4.3.20 UPCOMING STATUS ALIGNMENT
+
+## UPCOMING-STATUS-001 — mobile status badge stays in the header
+
+На mobile/PWA картка `Найближчі` тримає статус бронювання у верхньому правому куті заголовка незалежно від довжини назви техніки. Назва техніки займає ліву гнучку колонку й може переноситися, але не має права виштовхувати `Підтверджена` / інший status chip на окремий рядок під назву.
+
+### CHANGED
+
+- Заголовок mobile `Найближчі` використовує дві колонки: `minmax(0,1fr)` для назви техніки та `max-content` для status chip.
+- Довгі назви на кшталт `Puzzi + Jimmy + робот` можуть переноситися тільки всередині лівої колонки.
+
+### FIXED
+
+- `Підтверджена` більше не падає під назву техніки у довгій картці й лишається вирівняною праворуч зверху, як у коротких бронюваннях.
+
+### PRESERVED
+
+- Дані бронювання, статусна машина, час, extras, клієнт, телефон, доставка, кнопки `Деталі` / `Видати техніку`, фінанси, Supabase, RETURN/SMS/referral, public booking та VA HOME не змінюються.
+- Desktop/tablet layout поза mobile breakpoint не змінюється.
+
+### TESTS
+
+- `scripts/test-v4-3-20-upcoming-status.mjs` — static contract для двоколонкового title/status layout і PWA asset/cache.
+- `scripts/admin_upcoming_status_v4320_qa.py` — browser regression на 390 / 430 px із довгою назвою `Puzzi + Jimmy + робот`.
+- Full canonical Static/build + Browser/PWA QA залишається release-blocking перед merge у `main`.
+
