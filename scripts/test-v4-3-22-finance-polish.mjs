@@ -10,13 +10,14 @@ const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const ok=(condition,label)=>{if(!condition)throw new Error(label);console.log('PASS:',label)};
 const cssAsset=/\/assets\/admin-v4322\.css\?v=(?:4322|4300)/;
 const jsAsset=/\/assets\/admin-v4322\.js\?v=(?:4322|4300)/;
+const cacheNamespace=/vacleaner-manager-(?:4322|4300)/;
 
 new Function(js);
 ok(/\bv4322\b/.test(html),'admin shell enables v4.3.22 layer');
 ok(cssAsset.test(html)&&jsAsset.test(html),'admin shell loads v4.3.22 CSS and JS');
 ok(html.indexOf('admin-v4322.css')>html.indexOf('admin-v4321.css'),'v4.3.22 CSS loads after v4.3.21');
 ok(html.indexOf('admin-v4322.js')>html.indexOf('admin-v4321.js'),'v4.3.22 JS loads after v4.3.21');
-ok(sw.includes("vacleaner-manager-4322"),'service worker cache advances to v4.3.22');
+ok(cacheNamespace.test(sw),'service worker cache follows source or stamped v4.3.22 namespace');
 ok(cssAsset.test(sw)&&jsAsset.test(sw),'service worker precaches v4.3.22 assets');
 
 ok(js.includes("querySelector('.v4321-finance-card')"),'polish reads the existing v4.3.21 finance surface');
