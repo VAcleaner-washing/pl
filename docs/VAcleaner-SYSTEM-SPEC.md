@@ -4435,3 +4435,43 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `scripts/admin_upcoming_status_v4320_qa.py` — browser regression на 390 / 430 px із довгою назвою `Puzzi + Jimmy + робот`.
 - Full canonical Static/build + Browser/PWA QA залишається release-blocking перед merge у `main`.
 
+
+---
+
+## UI-009 — booking detail finance hierarchy
+
+- Mobile booking detail separates factual money received from client from charges accrued by the rental.
+- `Отримано від клієнта` contains factual prepayment and factual deposit only; a deposit is factual received money only after issue/completion, and a waived prepayment remains 0.
+- `Нараховано` contains rental, paid extras and delivery.
+- The summary exposes `Отримано`, `Витрати` and one final `До повернення` / `До доплати` result without changing settlement formulas.
+- This is a presentation layer over existing booking finance data; it does not create a second pricing or settlement source of truth.
+
+# 77. Change record — v4.3.21 BOOKING DETAIL FINANCE HIERARCHY
+
+### ADDED
+
+- **UI-009** — dedicated mobile booking-detail finance section with received/charged grouping and explicit final result.
+- `assets/admin-v4321.js` / `assets/admin-v4321.css` and targeted static/browser regression coverage.
+
+### CHANGED
+
+- Mobile booking detail moves finance out of the generic information row into a dedicated compact finance surface.
+- Received money is visually separated from rental charges: prepayment/deposit vs rental/extras/delivery.
+- Summary hierarchy is `Отримано` → `Витрати` → `До повернення / До доплати`.
+
+### FIXED
+
+- Prepayment and deposit no longer visually read as part of rental expenses inside booking detail.
+- The detail screen now gives the same clear settlement direction as the booking-list finance summary while preserving a fuller breakdown.
+
+### PRESERVED
+
+- Finance formulas, prepayment/deposit facts, rental/extras/delivery amounts, discounts, settlement persistence and booking statuses are unchanged.
+- Supabase schema/functions/data, public booking, SMS/RETURN/referral, availability, delivery pricing and VA HOME are unchanged.
+- Desktop admin is unchanged; this layer is scoped to mobile/PWA booking detail.
+
+### TESTS
+
+- `scripts/test-v4-3-21-booking-detail-finance.mjs`.
+- `scripts/admin_booking_detail_v4321_qa.py` at 390 / 430 px with screenshot evidence and overflow checks.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
