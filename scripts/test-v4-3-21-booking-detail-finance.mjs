@@ -1,3 +1,4 @@
+// Release-gate retrigger after normalizing the v4.3.21 branch history.
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 
