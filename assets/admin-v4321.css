@@ -1,0 +1,464 @@
+/* VAcleaner v4.3.21 — mobile booking detail aligned to the approved reference.
+   Presentation-only layer: existing booking/finance/action logic remains the source of truth. */
+@media(max-width:900px){
+  html.v4321.detail-open body{background:#070b0e!important}
+  html.v4321.detail-open .mobile-nav{display:none!important}
+
+  html.v4321 .v4321-detail-ready .detail-shell{
+    padding:calc(14px + var(--pwa-safe-top)) 15px calc(22px + var(--pwa-safe-bottom))!important;
+    background:#070b0e!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-top{
+    display:grid!important;
+    grid-template-columns:42px minmax(0,1fr) auto!important;
+    gap:8px!important;
+    align-items:center!important;
+    min-height:48px!important;
+    margin:0 0 12px!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-top .back{
+    width:42px!important;
+    min-width:42px!important;
+    height:42px!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    font-size:0!important;
+    border:0!important;
+    background:transparent!important;
+    color:#f4f3ef!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-top .back::before{
+    content:'←';
+    font-size:28px!important;
+    line-height:1!important;
+    font-weight:300!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-top-meta{
+    grid-column:2!important;
+    min-width:0!important;
+    text-align:left!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-top-meta span{
+    font-size:23px!important;
+    line-height:1.05!important;
+    font-weight:720!important;
+    letter-spacing:-.035em!important;
+    color:#f4f3ef!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-code{
+    grid-column:3!important;
+    justify-self:end!important;
+    max-width:42vw!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    color:#a3aaad!important;
+    font-size:12.5px!important;
+    line-height:1.2!important;
+    font-weight:450!important;
+    white-space:nowrap!important;
+  }
+
+  html.v4321 .v4321-detail-ready .detail-hero{
+    margin:0!important;
+    padding:0 3px 15px!important;
+    border:0!important;
+    background:transparent!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-title-row{
+    display:block!important;
+    margin:0 0 8px!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-title-row .hero-status{
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:7px!important;
+    min-height:34px!important;
+    margin:0!important;
+    padding:7px 12px!important;
+    border-radius:999px!important;
+    border:1px solid rgba(92,220,153,.5)!important;
+    background:rgba(25,119,78,.12)!important;
+    color:#5ce09e!important;
+    font-size:12px!important;
+    line-height:1!important;
+    font-weight:560!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-title-row .hero-status::before{
+    content:'';
+    width:7px;
+    height:7px;
+    flex:0 0 7px;
+    border-radius:50%;
+    background:currentColor;
+    box-shadow:0 0 10px currentColor;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-card[data-status="waiting_payment"]~* .hero-status,
+  html.v4321 .v4321-detail-ready .detail-title-row .hero-status.waiting_payment{color:#e8b95f!important;border-color:rgba(232,185,95,.48)!important;background:rgba(154,105,24,.12)!important}
+  html.v4321 .v4321-detail-ready .detail-hero .period{
+    display:block!important;
+    margin:0!important;
+    color:#a4aaad!important;
+    font-size:13px!important;
+    line-height:1.35!important;
+    font-weight:450!important;
+    letter-spacing:.01em!important;
+  }
+  html.v4321 .v4321-detail-ready .detail-hero .period b{color:#a4aaad!important;font-weight:480!important}
+  html.v4321 .v4321-detail-ready .detail-hero .period small{display:none!important}
+  html.v4321 .v4321-detail-ready .native-detail-flow{display:none!important}
+
+  /* Main information card. Date stays in the hero; finance moves to its own card. */
+  html.v4321 .v4321-detail-ready .native-detail-card{
+    position:relative!important;
+    overflow:hidden!important;
+    margin:0 0 13px!important;
+    border:1px solid #293237!important;
+    border-radius:18px!important;
+    background:linear-gradient(180deg,#10171a,#0d1316)!important;
+    box-shadow:0 12px 34px rgba(0,0,0,.16)!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-card::before{
+    width:5px!important;
+    background:#e9b252!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-card[data-status="confirmed"]::before{background:#56ca83!important}
+  html.v4321 .v4321-detail-ready .native-detail-card[data-status="waiting_payment"]::before{background:#e7b255!important}
+  html.v4321 .v4321-detail-ready .native-detail-card[data-status="issued"]::before{background:#efbf5d!important}
+  html.v4321 .v4321-detail-ready .native-detail-card[data-status="pending"]::before{background:#6ea9ff!important}
+  html.v4321 .v4321-detail-ready .native-detail-card[data-status="completed"]::before{background:#7e898e!important}
+  html.v4321 .v4321-detail-ready .native-detail-card[data-status="cancelled"]::before{background:#ef756f!important}
+  html.v4321 .v4321-detail-ready .native-detail-info-row[data-v4321-row="date"],
+  html.v4321 .v4321-detail-ready .native-detail-info-row[data-v4321-row="finance"]{display:none!important}
+  html.v4321 .v4321-detail-ready .native-detail-info-row{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:42px minmax(0,1fr) 18px!important;
+    column-gap:11px!important;
+    align-items:center!important;
+    min-height:78px!important;
+    padding:14px 17px 14px 20px!important;
+    border-bottom:1px solid rgba(255,255,255,.07)!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row:last-child{border-bottom:0!important}
+  html.v4321 .v4321-detail-ready .native-detail-info-row>i{
+    grid-column:1!important;
+    width:34px!important;
+    height:34px!important;
+    display:grid!important;
+    place-items:center!important;
+    border:1px solid rgba(255,255,255,.065)!important;
+    border-radius:10px!important;
+    background:#151d21!important;
+    color:#d9dcdd!important;
+    box-shadow:inset 0 0 18px rgba(255,255,255,.025)!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row>i svg{
+    width:20px!important;
+    height:20px!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.7!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row>div{
+    grid-column:2!important;
+    min-width:0!important;
+    display:grid!important;
+    gap:3px!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row>div>small{
+    color:#929a9e!important;
+    font-size:11.5px!important;
+    line-height:1.2!important;
+    font-weight:460!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row strong{
+    color:#f3f2ee!important;
+    font-size:15.5px!important;
+    line-height:1.28!important;
+    font-weight:600!important;
+    overflow-wrap:anywhere!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row a,
+  html.v4321 .v4321-detail-ready .native-detail-info-row span{
+    color:#aeb5b8!important;
+    font-size:13px!important;
+    line-height:1.3!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row.v4321-chevron-row::after{
+    content:'›';
+    grid-column:3!important;
+    justify-self:end!important;
+    align-self:center!important;
+    color:#aab1b4!important;
+    font-size:29px!important;
+    line-height:1!important;
+    font-weight:250!important;
+  }
+  html.v4321 .v4321-detail-ready .native-detail-info-row[data-v4321-row="extras"]>i{color:#d5d9da!important}
+  html.v4321 .v4321-detail-ready .native-detail-info-row[data-v4321-row="client"]{cursor:pointer!important}
+  html.v4321 .v4321-detail-ready .native-detail-address{min-width:0!important}
+
+  /* Dedicated finance card. */
+  html.v4321 .v4321-finance-card{
+    position:relative;
+    overflow:hidden;
+    display:grid;
+    gap:11px;
+    margin:0 0 13px;
+    padding:16px 13px 13px 19px;
+    border:1px solid #293237;
+    border-radius:18px;
+    background:linear-gradient(180deg,#10171a,#0d1316);
+    box-shadow:0 12px 34px rgba(0,0,0,.16);
+  }
+  html.v4321 .v4321-finance-card::before{
+    content:'';
+    position:absolute;
+    left:0;
+    top:0;
+    bottom:0;
+    width:5px;
+    border-radius:18px 0 0 18px;
+    background:#e9b252;
+  }
+  html.v4321 .v4321-finance-head{
+    display:grid;
+    grid-template-columns:38px minmax(0,1fr) auto;
+    gap:10px;
+    align-items:center;
+    min-height:44px;
+    padding:0 3px 1px 0;
+  }
+  html.v4321 .v4321-finance-icon{
+    width:34px;
+    height:34px;
+    display:grid;
+    place-items:center;
+    color:#efbd5f;
+  }
+  html.v4321 .v4321-finance-icon svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+  html.v4321 .v4321-finance-head h2{
+    margin:0;
+    color:#f3f2ee;
+    font-size:19px;
+    line-height:1;
+    font-weight:690;
+    letter-spacing:-.025em;
+  }
+  html.v4321 .v4321-finance-head>div{
+    display:grid;
+    gap:2px;
+    justify-items:end;
+    text-align:right;
+  }
+  html.v4321 .v4321-finance-head>div small{
+    color:#e1847e;
+    font-size:9.5px;
+    line-height:1.1;
+    font-weight:590;
+  }
+  html.v4321 .v4321-finance-head>div strong{
+    color:#f4f3ef;
+    font-size:20px;
+    line-height:1;
+    font-weight:690;
+    white-space:nowrap;
+  }
+  html.v4321 .v4321-finance-group{
+    display:grid;
+    gap:7px;
+    padding:11px 12px 10px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:12px;
+    background:rgba(255,255,255,.012);
+  }
+  html.v4321 .v4321-finance-group.received{border-color:rgba(78,197,135,.34)!important;background:rgba(34,122,83,.045)!important}
+  html.v4321 .v4321-finance-group.charged{border-color:rgba(221,102,96,.30)!important;background:rgba(139,55,51,.04)!important}
+  html.v4321 .v4321-finance-group h3{
+    margin:0 0 2px;
+    font-size:11.5px;
+    line-height:1.2;
+    font-weight:590;
+  }
+  html.v4321 .v4321-finance-group.received h3{color:#65d79d}
+  html.v4321 .v4321-finance-group.charged h3{color:#e37e78}
+  html.v4321 .v4321-finance-line{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:12px;
+    align-items:baseline;
+    min-width:0;
+  }
+  html.v4321 .v4321-finance-line>span{
+    min-width:0;
+    color:#aeb4b7;
+    font-size:12.5px;
+    line-height:1.28;
+    font-weight:450;
+  }
+  html.v4321 .v4321-finance-line>span small{
+    display:block;
+    margin-top:1px;
+    color:#747e83;
+    font-size:9.5px;
+    line-height:1.25;
+  }
+  html.v4321 .v4321-finance-line>b{
+    justify-self:end;
+    color:#f0efeb;
+    font-size:13px;
+    line-height:1.2;
+    font-weight:590;
+    white-space:nowrap;
+  }
+  html.v4321 .v4321-finance-line.discount>span,
+  html.v4321 .v4321-finance-line.discount>b{color:#d7aa61!important}
+  html.v4321 .v4321-finance-empty{color:#7e878b;font-size:11px}
+
+  html.v4321 .v4321-finance-summaries{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:9px;
+  }
+  html.v4321 .v4321-finance-summary{
+    display:grid;
+    grid-template-columns:36px minmax(0,1fr);
+    gap:9px;
+    align-items:center;
+    min-width:0;
+    min-height:68px;
+    padding:9px 10px;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+  }
+  html.v4321 .v4321-finance-summary.received{border-color:rgba(72,213,142,.45);background:rgba(28,123,79,.12);color:#58dc98}
+  html.v4321 .v4321-finance-summary.charged{border-color:rgba(231,105,99,.40);background:rgba(139,48,44,.11);color:#ee7c77}
+  html.v4321 .v4321-summary-icon{width:34px;height:34px;display:grid;place-items:center;color:currentColor}
+  html.v4321 .v4321-summary-icon svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  html.v4321 .v4321-finance-summary>span:last-child{min-width:0;display:grid;gap:2px}
+  html.v4321 .v4321-finance-summary small{color:currentColor;font-size:10.5px;line-height:1.1;font-weight:520}
+  html.v4321 .v4321-finance-summary strong{color:currentColor;font-size:18px;line-height:1;font-weight:690;white-space:nowrap;letter-spacing:-.02em}
+
+  html.v4321 .v4321-finance-balance{
+    display:grid;
+    grid-template-columns:34px minmax(0,1fr) auto;
+    gap:10px;
+    align-items:center;
+    min-height:58px;
+    padding:10px 12px;
+    border:1px solid rgba(235,183,84,.7);
+    border-radius:12px;
+    background:rgba(135,90,18,.10);
+    color:#f0bd59;
+  }
+  html.v4321 .v4321-finance-balance.due{border-color:rgba(231,105,99,.5);background:rgba(139,48,44,.10);color:#ee827c}
+  html.v4321 .v4321-finance-balance.neutral{border-color:rgba(235,183,84,.45);background:rgba(135,90,18,.07);color:#dfb25e}
+  html.v4321 .v4321-balance-icon{width:30px;height:30px;display:grid;place-items:center}
+  html.v4321 .v4321-balance-icon svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+  html.v4321 .v4321-finance-balance>span:nth-child(2){font-size:12.5px;line-height:1.2;font-weight:560}
+  html.v4321 .v4321-finance-balance>strong{justify-self:end;font-size:20px;line-height:1;font-weight:700;white-space:nowrap;letter-spacing:-.02em}
+
+  /* History is a compact row until opened; existing audit data remains live underneath. */
+  html.v4321 .v4321-history-row{
+    width:100%;
+    min-height:56px;
+    margin:0 0 13px;
+    padding:8px 14px;
+    display:grid;
+    grid-template-columns:34px minmax(0,1fr) 18px;
+    gap:10px;
+    align-items:center;
+    border:1px solid #293237;
+    border-radius:14px;
+    background:linear-gradient(180deg,#10171a,#0d1316);
+    color:#ecece8;
+    text-align:left;
+    box-shadow:none;
+  }
+  html.v4321 .v4321-history-icon{width:32px;height:32px;display:grid;place-items:center;color:#d2d6d7}
+  html.v4321 .v4321-history-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+  html.v4321 .v4321-history-row>span:nth-child(2){font-size:13.5px;line-height:1.2;font-weight:560}
+  html.v4321 .v4321-history-row>i{justify-self:end;color:#aab1b4;font-style:normal;font-size:28px;line-height:1;font-weight:250;transition:transform .18s ease}
+  html.v4321 .v4321-history-row[aria-expanded="true"]>i{transform:rotate(90deg)}
+  html.v4321 .v4321-detail-ready .audit-panel{display:none!important}
+  html.v4321 .v4321-detail-ready.v4321-history-open .audit-panel{
+    display:block!important;
+    margin:0 0 13px!important;
+    padding:14px!important;
+    border:1px solid #293237!important;
+    border-radius:14px!important;
+    background:#0f1619!important;
+  }
+  html.v4321 .v4321-detail-ready.v4321-history-open .audit-panel-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin-bottom:10px!important}
+  html.v4321 .v4321-detail-ready.v4321-history-open .audit-panel-head small{font-size:10px!important;color:#7f888c!important}
+  html.v4321 .v4321-detail-ready.v4321-history-open .audit-panel-head h3{margin:2px 0 0!important;font-size:15px!important;color:#f0efeb!important}
+  html.v4321 .v4321-detail-ready.v4321-history-open .audit-panel-head .btn{min-height:36px!important;padding:0 11px!important;font-size:11px!important}
+
+  /* Action hierarchy follows the reference while existing data-action handlers stay untouched. */
+  html.v4321 .v4321-detail-ready .native-detail-actions.v4321-actions{
+    position:static!important;
+    inset:auto!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    transform:none!important;
+  }
+  html.v4321 .v4321-detail-ready .v4321-actions>.v4321-primary-action{
+    grid-column:1/-1!important;
+    min-height:55px!important;
+    border:1px solid #edb85d!important;
+    border-radius:14px!important;
+    background:linear-gradient(180deg,#f1c46f,#e5aa4a)!important;
+    color:#17130d!important;
+    box-shadow:0 8px 22px rgba(143,91,18,.16)!important;
+    font-size:13.5px!important;
+    font-weight:650!important;
+  }
+  html.v4321 .v4321-detail-ready .v4321-actions>.booking-action-secondary{
+    min-width:0!important;
+    min-height:54px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:9px!important;
+    padding:0 10px!important;
+    border:1px solid #293237!important;
+    border-radius:14px!important;
+    background:#0f1619!important;
+    color:#e8e9e6!important;
+    font-size:12.5px!important;
+    line-height:1.15!important;
+    font-weight:560!important;
+  }
+  html.v4321 .v4321-action-icon{width:21px;height:21px;flex:0 0 21px;display:grid;place-items:center;color:#e5e7e5}
+  html.v4321 .v4321-action-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  html.v4321 .v4321-detail-ready .v4321-actions>.booking-action-more{display:none!important}
+  html.v4321 .v4321-detail-ready .v4321-actions>.referral-action,
+  html.v4321 .v4321-detail-ready .v4321-actions>[data-action="status"]{grid-column:1/-1!important;min-height:48px!important}
+}
+
+@media(max-width:350px){
+  html.v4321 .v4321-detail-ready .detail-shell{padding-left:11px!important;padding-right:11px!important}
+  html.v4321 .v4321-detail-ready .native-detail-code{max-width:37vw!important;font-size:11px!important}
+  html.v4321 .v4321-detail-ready .native-detail-info-row{grid-template-columns:38px minmax(0,1fr) 15px!important;column-gap:8px!important;padding-left:17px!important;padding-right:12px!important}
+  html.v4321 .v4321-detail-ready .native-detail-info-row>i{width:32px!important;height:32px!important}
+  html.v4321 .v4321-finance-card{padding-left:16px;padding-right:10px}
+  html.v4321 .v4321-finance-head{grid-template-columns:34px minmax(0,1fr) auto;gap:7px}
+  html.v4321 .v4321-finance-head h2{font-size:17px}
+  html.v4321 .v4321-finance-head>div strong{font-size:17px}
+  html.v4321 .v4321-finance-summaries{grid-template-columns:minmax(0,1fr)}
+  html.v4321 .v4321-finance-summary{min-height:58px}
+  html.v4321 .v4321-finance-balance{grid-template-columns:30px minmax(0,1fr) auto;gap:7px;padding-left:9px;padding-right:9px}
+  html.v4321 .v4321-finance-balance>strong{font-size:18px}
+  html.v4321 .v4321-detail-ready .native-detail-actions.v4321-actions{grid-template-columns:minmax(0,1fr)!important}
+  html.v4321 .v4321-detail-ready .v4321-actions>*{grid-column:1!important}
+}
