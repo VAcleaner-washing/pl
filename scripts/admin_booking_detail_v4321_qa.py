@@ -15,6 +15,9 @@ def check(cond,label):
     RESULTS.append({'label':label,'ok':ok})
     if not ok: FAIL.append(label)
 
+def norm(value):
+    return ' '.join(str(value or '').split())
+
 HTML='''<!doctype html><html class="v43-prod v4321"><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <div class="detail"><section class="native-detail-card" data-status="issued">
   <div class="native-detail-info-row"><i></i><div><small>Техніка</small><strong>Puzzi + SC 2</strong></div></div>
@@ -47,10 +50,12 @@ with sync_playwright() as pw:
             text=card.inner_text()
             check(page.locator('.native-detail-card .native-detail-info-row').count()==4,f'{width}px: finance is a separate detail card')
             check('Отримано від клієнта' in text and 'Нараховано' in text,f'{width}px: received and charged groups are explicit')
-            check('2 200 грн' in text and '1 400 грн' in text and '800 грн' in text,f'{width}px: 2200 received / 1400 expenses / 800 refund is truthful')
+            received_amount=norm(page.locator('.v4321-summary-received strong').inner_text())
+            expenses_amount=norm(page.locator('.v4321-summary-expenses strong').inner_text())
+            result_amount=norm(page.locator('.v4321-summary-result strong').inner_text())
+            check(received_amount=='2 200 грн' and expenses_amount=='1 400 грн' and result_amount=='800 грн',f'{width}px: 2200 received / 1400 expenses / 800 refund is truthful')
             result=page.locator('.v4321-summary-result')
-            result_label=result.locator('small').inner_text().strip()
-            result_amount=result.locator('strong').inner_text().strip()
+            result_label=norm(result.locator('small').inner_text())
             check(result_label=='До повернення' and result_amount=='800 грн',f'{width}px: final refund result is prominent')
             widths=page.evaluate('()=>({inner:innerWidth,doc:document.documentElement.scrollWidth,body:document.body.scrollWidth})')
             check(widths['doc']<=widths['inner']+1 and widths['body']<=widths['inner']+1,f'{width}px: no horizontal overflow')
