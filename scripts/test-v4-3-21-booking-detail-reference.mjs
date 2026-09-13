@@ -1,3 +1,4 @@
+// v4.3.21 release-candidate regression: reference booking detail remains UI-only.
 import fs from 'node:fs';
 
 const html=fs.readFileSync('admin/bronuvannia/index.html','utf8');
