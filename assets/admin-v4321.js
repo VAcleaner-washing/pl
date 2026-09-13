@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const mobile=()=>window.matchMedia('(max-width: 900px)').matches;
 const clean=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
-const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[ch]));
 const icon=name=>({
   coins:'<svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="9" cy="6" rx="5" ry="2.5"/><path d="M4 6v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5V6M4 10v4c0 1.4 2.2 2.5 5 2.5 1.1 0 2.1-.2 2.9-.5"/><path d="M12 12c.8-.7 2.3-1.2 4-1.2 2.8 0 5 1.1 5 2.5s-2.2 2.5-5 2.5-5-1.1-5-2.5c0-.5.3-.9 1-1.3Z"/><path d="M11 13.3v4c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-4"/></svg>',
   down:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M8.5 13.5 12 17l3.5-3.5"/></svg>',
@@ -97,18 +97,55 @@ function buildHistory(detail){
     if(open)requestAnimationFrame(()=>audit.scrollIntoView({behavior:'smooth',block:'nearest'}));
   });
 }
+function styleStatus(detail,nativeCard){
+  const status=String(nativeCard.dataset.status||'confirmed');
+  detail.dataset.v4321Status=status;
+  const pill=detail.querySelector('.hero-status');
+  if(!pill)return;
+  const text=clean(pill).replace(/^✓\s*/,'');
+  if(text&&pill.textContent!==text)pill.textContent=text;
+  const palette={
+    issued:['#5ce09e','rgba(92,224,158,.5)','rgba(25,119,78,.12)'],
+    confirmed:['#5ce09e','rgba(92,224,158,.5)','rgba(25,119,78,.12)'],
+    waiting_payment:['#efbd61','rgba(239,189,97,.5)','rgba(151,103,24,.12)'],
+    pending:['#79b5ff','rgba(121,181,255,.5)','rgba(52,101,160,.12)'],
+    completed:['#a8b0b4','rgba(168,176,180,.4)','rgba(94,104,109,.11)'],
+    cancelled:['#ef817b','rgba(239,129,123,.48)','rgba(144,55,51,.11)']
+  }[status]||['#5ce09e','rgba(92,224,158,.5)','rgba(25,119,78,.12)'];
+  pill.style.setProperty('color',palette[0],'important');
+  pill.style.setProperty('border-color',palette[1],'important');
+  pill.style.setProperty('background',palette[2],'important');
+}
 function enhanceActions(detail){
   const actions=detail.querySelector('.native-detail-actions');
   if(!actions)return;
   actions.classList.add('v4321-actions');
+  const narrow=window.matchMedia('(max-width: 350px)').matches;
   actions.querySelectorAll('[data-action]').forEach(button=>{
     const action=button.dataset.action||'';
-    button.classList.toggle('v4321-primary-action',button.classList.contains('primary-action'));
+    const primary=button.classList.contains('primary-action');
+    button.classList.toggle('v4321-primary-action',primary);
     if((action==='finance'||action==='extend')&&!button.querySelector('.v4321-action-icon')){
       const span=document.createElement('span');
       span.className='v4321-action-icon';
       span.innerHTML=icon(action==='finance'?'calculator':'calendar');
       button.prepend(span);
+    }
+    if(narrow){
+      button.style.setProperty('grid-column','1','important');
+      button.style.setProperty('grid-row','auto','important');
+    }else if(primary){
+      button.style.setProperty('grid-column','1 / -1','important');
+      button.style.setProperty('grid-row','1','important');
+    }else if(action==='finance'){
+      button.style.setProperty('grid-column','1','important');
+      button.style.setProperty('grid-row','2','important');
+    }else if(action==='extend'){
+      button.style.setProperty('grid-column','2','important');
+      button.style.setProperty('grid-row','2','important');
+    }else if(action==='edit'){
+      button.style.setProperty('grid-column','1 / -1','important');
+      button.style.setProperty('grid-row','2','important');
     }
   });
 }
@@ -117,6 +154,7 @@ function enhance(){
   document.querySelectorAll('.detail').forEach(detail=>{
     const nativeCard=detail.querySelector('.native-detail-card');
     if(!nativeCard)return;
+    styleStatus(detail,nativeCard);
     markInfoRows(nativeCard);
     buildFinance(detail,nativeCard);
     buildHistory(detail);
