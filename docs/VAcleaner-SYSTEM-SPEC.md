@@ -4435,3 +4435,43 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `scripts/admin_upcoming_status_v4320_qa.py` — browser regression на 390 / 430 px із довгою назвою `Puzzi + Jimmy + робот`.
 - Full canonical Static/build + Browser/PWA QA залишається release-blocking перед merge у `main`.
 
+---
+
+# 77. Change record — v4.3.21
+
+## UI-009 — detail booking finance hierarchy
+
+Для мобільної detail-картки бронювання у статусах `issued` / `completed` фінансовий блок має відділяти фактично отримані від клієнта кошти від нарахованих витрат.
+
+- `Отримано від клієнта`: передоплата + фактичний залоговий платіж.
+- `Нараховано`: оренда + додатково + доставка.
+- Підсумок явно показує `Отримано`, `Витрати` і `До повернення` або `До доплати`.
+- Передоплата та залог не можуть візуально подаватися як складові витрат.
+- Формули, тарифи, persisted data, settlement rules і Supabase не змінюються: v4.3.21 є presentation-only шаром над наявними фінансовими даними.
+- До видачі техніки редизайн не повинен вигадувати факт отримання залогу; для `pending` / `waiting_payment` / `confirmed` зберігається чинний фінансовий рядок.
+
+### ADDED
+
+- Окремий mobile finance card у detail бронювання для виданих/завершених оренд.
+- Групи `Отримано від клієнта` та `Нараховано`.
+- Підсумкові tiles `Отримано / Витрати / До повернення|До доплати`.
+
+### CHANGED
+
+- Фінанси у detail більше не показуються одним плоским списком для `issued/completed`.
+- Service Worker кешує v4.3.21 presentation assets.
+
+### FIXED
+
+- Прибрана візуальна неоднозначність, де передоплата та залог стояли поруч із орендою/додатково/доставкою й могли сприйматися як витрати.
+
+### PRESERVED
+
+- Усі фінансові суми та формули.
+- Передоплата, залог, доставка, знижки, RETURN/referral, availability/resources, public booking і VA HOME.
+- Desktop і pre-issue detail states.
+
+### TESTS
+
+- `scripts/test-v4-3-21-detail-finance.mjs` — static contract: групування, формули presentation layer, відсутність backend mutation.
+- `scripts/admin_detail_finance_v4321_qa.py` — browser regression на 390/430 px: 2200 отримано, 1400 витрати, 800 до повернення, no horizontal overflow; negative control для `confirmed`.
