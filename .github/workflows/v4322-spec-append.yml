@@ -1,0 +1,68 @@
+name: v4.3.22 System Spec append
+
+on:
+  push:
+    branches:
+      - qa/v4.3.22-finance-polish
+
+permissions:
+  contents: write
+
+jobs:
+  append-spec:
+    if: github.event.head_commit.message == 'chore: append v4.3.22 System Spec via scoped QA workflow'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: qa/v4.3.22-finance-polish
+
+      - name: Append approved v4.3.22 contract and remove helper workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! grep -q 'Change record — v4.3.22 BOOKING DETAIL FINANCE POLISH' docs/VAcleaner-SYSTEM-SPEC.md; then
+            cat >> docs/VAcleaner-SYSTEM-SPEC.md <<'EOF'
+
+          ---
+
+          # 78. Change record — v4.3.22 BOOKING DETAIL FINANCE POLISH
+
+          ### ADDED
+
+          - `assets/admin-v4322.js` / `assets/admin-v4322.css` add a presentation-only polish layer on top of the canonical v4.3.21 booking-detail finance surface.
+          - `scripts/test-v4-3-22-finance-polish.mjs` and `scripts/admin_booking_v4322_finance_polish_qa.py` lock the approved mobile hierarchy at 320 / 390 / 430 px.
+
+          ### CHANGED
+
+          - **UI-009** — the finance header no longer repeats `Разом витрати`; detailed charges and the summary remain the single visible sources for that amount.
+          - The mobile received group is labeled `Отримано`; the manager-facing deposit label is `Застава` with helper copy `повертається після розрахунку`.
+          - The compact two-column summary is `Отримано` / `Нараховано`; the final full-width result remains the canonical `Повернено клієнту`, `До повернення`, `Доплату отримано` or `До доплати` state supplied by the existing settlement source.
+          - Completed booking actions use a deliberate hierarchy: `Деталі розрахунку` full width, then `Приведи друга` and `Ще`; `Виправити статус` stays owned by the existing status-correction action and is reached through `Ще`.
+
+          ### FIXED
+
+          - Removed the duplicated expense total and the nested green/red framed-card effect inside the finance card.
+          - Completed booking actions no longer render as an equal-weight vertical ladder.
+          - `Ще` does not create a second action implementation; it delegates to the existing `data-action="status"` control.
+
+          ### PRESERVED
+
+          - All finance amounts/formulas, prepayment/deposit facts, rental/extras/delivery/chemistry values, discounts, refund/due math, persistence and booking status transitions are unchanged.
+          - Existing `data-action` handlers remain the only action source; v4.3.22 does not call backend endpoints or recalculate money.
+          - Supabase, public booking, SMS/RETURN/referral, delivery pricing, availability, desktop admin and VA HOME are unchanged.
+
+          ### TESTS
+
+          - `scripts/test-v4-3-22-finance-polish.mjs` via canonical `test:pwa-static`.
+          - `scripts/admin_booking_v4322_finance_polish_qa.py` via canonical `test:admin-booking-flex` at 320 / 390 / 430 px with overflow and action-delegation checks.
+          - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+          EOF
+          fi
+          rm -f .github/workflows/v4322-spec-append.yml
+          git config user.name 'VAcleaner QA'
+          git config user.email 'vacleaner.washing@gmail.com'
+          git add docs/VAcleaner-SYSTEM-SPEC.md .github/workflows/v4322-spec-append.yml
+          git commit -m 'v4.3.22: document booking finance polish'
+          git push origin HEAD:qa/v4.3.22-finance-polish
