@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -6,10 +7,12 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'pwa-test-results'
 OUT.mkdir(exist_ok=True)
 FAIL=[]
+RESULTS=[]
 
 def check(cond,label):
     ok=bool(cond)
     print(('PASS' if ok else 'FAIL')+': '+label)
+    RESULTS.append({'label':label,'ok':ok})
     if not ok: FAIL.append(label)
 
 HTML='''<!doctype html><html class="v43-prod v4321"><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
@@ -45,7 +48,10 @@ with sync_playwright() as pw:
             check(page.locator('.native-detail-card .native-detail-info-row').count()==4,f'{width}px: finance is a separate detail card')
             check('Отримано від клієнта' in text and 'Нараховано' in text,f'{width}px: received and charged groups are explicit')
             check('2 200 грн' in text and '1 400 грн' in text and '800 грн' in text,f'{width}px: 2200 received / 1400 expenses / 800 refund is truthful')
-            check(page.locator('.v4321-summary-result').inner_text().startswith('↶\nДо повернення'),f'{width}px: final refund result is prominent')
+            result=page.locator('.v4321-summary-result')
+            result_label=result.locator('small').inner_text().strip()
+            result_amount=result.locator('strong').inner_text().strip()
+            check(result_label=='До повернення' and result_amount=='800 грн',f'{width}px: final refund result is prominent')
             widths=page.evaluate('()=>({inner:innerWidth,doc:document.documentElement.scrollWidth,body:document.body.scrollWidth})')
             check(widths['doc']<=widths['inner']+1 and widths['body']<=widths['inner']+1,f'{width}px: no horizontal overflow')
             summary_boxes=page.locator('.v4321-summary-card').evaluate_all('els=>els.map(e=>e.getBoundingClientRect())')
@@ -55,5 +61,6 @@ with sync_playwright() as pw:
     finally:
         browser.close()
 
-print(f'TOTAL {12} · PASS {12-len(FAIL)} · FAIL {len(FAIL)}')
+(OUT/'admin-booking-detail-v4321-result.json').write_text(json.dumps({'results':RESULTS,'failures':FAIL,'total':len(RESULTS),'passed':len(RESULTS)-len(FAIL),'failed':len(FAIL)},ensure_ascii=False,indent=2),encoding='utf-8')
+print(f'TOTAL {len(RESULTS)} · PASS {len(RESULTS)-len(FAIL)} · FAIL {len(FAIL)}')
 if FAIL: raise SystemExit(1)
