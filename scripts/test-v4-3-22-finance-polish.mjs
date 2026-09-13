@@ -1,3 +1,4 @@
+// v4.3.22 canonical finance-polish release gate.
 import fs from 'node:fs';
 
 const read=path=>fs.readFileSync(path,'utf8');
