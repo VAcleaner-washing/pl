@@ -1,0 +1,202 @@
+/* VAcleaner v4.3.22 — booking-detail finance polish.
+   Presentation only: amounts/actions stay owned by the canonical v4.3.21/core runtime. */
+@media(max-width:900px){
+  html.v4322 .v4322-detail-ready .v4322-finance-card{
+    gap:0!important;
+    padding:17px 14px 14px 20px!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-head{
+    grid-template-columns:38px minmax(0,1fr)!important;
+    gap:10px!important;
+    min-height:46px!important;
+    padding:0 4px 12px 0!important;
+    border-bottom:1px solid rgba(255,255,255,.075)!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-head h2{
+    font-size:19px!important;
+    font-weight:650!important;
+  }
+
+  /* One finance surface: section separators instead of framed cards inside a card. */
+  html.v4322 .v4322-detail-ready .v4321-finance-group,
+  html.v4322 .v4322-detail-ready .v4321-finance-group.received,
+  html.v4322 .v4322-detail-ready .v4321-finance-group.charged{
+    gap:0!important;
+    padding:14px 10px 5px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-group.charged{
+    margin-top:5px!important;
+    padding-top:15px!important;
+    border-top:1px solid rgba(255,255,255,.075)!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-group h3{
+    margin:0 0 6px!important;
+    font-size:12px!important;
+    line-height:1.2!important;
+    font-weight:590!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-group.received h3{color:#58d99a!important}
+  html.v4322 .v4322-detail-ready .v4321-finance-group.charged h3{color:#e77e79!important}
+  html.v4322 .v4322-detail-ready .v4321-finance-line{
+    min-height:47px!important;
+    padding:8px 0!important;
+    align-items:center!important;
+    border-bottom:1px solid rgba(255,255,255,.055)!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-line:last-child{border-bottom:0!important}
+  html.v4322 .v4322-detail-ready .v4321-finance-line>span{
+    color:#d1d4d4!important;
+    font-size:13px!important;
+    line-height:1.25!important;
+    font-weight:460!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-line>span small{
+    margin-top:3px!important;
+    color:#778185!important;
+    font-size:10px!important;
+    line-height:1.22!important;
+    font-weight:430!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-line>b{
+    color:#f1f0ec!important;
+    font-size:13.5px!important;
+    font-weight:590!important;
+  }
+
+  /* Summary keeps directional color but with restrained surfaces. */
+  html.v4322 .v4322-detail-ready .v4321-finance-summaries{
+    gap:8px!important;
+    margin-top:10px!important;
+    padding-top:11px!important;
+    border-top:1px solid rgba(255,255,255,.075)!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-summary{
+    min-height:64px!important;
+    padding:9px 10px!important;
+    border-radius:12px!important;
+    box-shadow:none!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-summary.received{
+    border-color:rgba(70,204,137,.34)!important;
+    background:rgba(28,115,76,.075)!important;
+    color:#58dc98!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-summary.charged{
+    border-color:rgba(225,103,98,.31)!important;
+    background:rgba(135,48,45,.07)!important;
+    color:#eb7c77!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-summary strong{
+    font-size:18px!important;
+    font-weight:670!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-balance{
+    min-height:58px!important;
+    margin-top:9px!important;
+    border-color:rgba(231,177,76,.62)!important;
+    background:rgba(121,83,20,.075)!important;
+    box-shadow:none!important;
+  }
+  html.v4322 .v4322-detail-ready .v4321-finance-balance>span:nth-child(2){font-weight:550!important}
+  html.v4322 .v4322-detail-ready .v4321-finance-balance>strong{font-weight:690!important}
+
+  /* Completed booking: details first, frequent referral + rare actions below. */
+  html.v4322 .v4322-detail-ready .native-detail-actions.v4321-actions.v4322-completed-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-details-action{
+    grid-column:1/-1!important;
+    grid-row:1!important;
+    min-height:54px!important;
+    display:grid!important;
+    grid-template-columns:24px minmax(0,1fr) 18px!important;
+    gap:9px!important;
+    align-items:center!important;
+    justify-content:stretch!important;
+    padding:0 14px!important;
+    border:1px solid #293237!important;
+    border-radius:14px!important;
+    background:#0f1619!important;
+    color:#e8e9e6!important;
+    box-shadow:none!important;
+    font-size:13px!important;
+    font-weight:560!important;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-details-action::after{
+    content:'›';
+    grid-column:3;
+    justify-self:end;
+    color:#aab1b4;
+    font-size:27px;
+    line-height:1;
+    font-weight:250;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-details-action>.v4321-action-icon{
+    grid-column:1!important;
+    justify-self:start!important;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-details-action>.v4322-action-label{
+    grid-column:2!important;
+    min-width:0!important;
+    text-align:left!important;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-referral-action,
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-more-action{
+    min-width:0!important;
+    min-height:52px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:9px!important;
+    padding:0 10px!important;
+    border:1px solid #293237!important;
+    border-radius:14px!important;
+    background:#0f1619!important;
+    color:#e8e9e6!important;
+    box-shadow:none!important;
+    font-size:12.5px!important;
+    line-height:1.15!important;
+    font-weight:550!important;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-referral-action{
+    grid-column:1!important;
+    grid-row:2!important;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-more-action{
+    grid-column:2!important;
+    grid-row:2!important;
+  }
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-hidden-status{display:none!important}
+  html.v4322 .v4322-action-icon{
+    width:21px;
+    height:21px;
+    flex:0 0 21px;
+    display:grid;
+    place-items:center;
+    color:#e2e5e4;
+  }
+  html.v4322 .v4322-action-icon svg{
+    width:20px;
+    height:20px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.7;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  html.v4322 .v4322-more-action .v4322-action-icon svg{fill:currentColor;stroke:none}
+}
+
+@media(max-width:350px){
+  html.v4322 .v4322-detail-ready .v4321-finance-group{padding-left:6px!important;padding-right:6px!important}
+  html.v4322 .v4322-detail-ready .v4321-finance-line{gap:8px!important}
+  html.v4322 .v4322-detail-ready .v4321-finance-line>span{font-size:12.5px!important}
+  html.v4322 .v4322-detail-ready .v4321-finance-line>b{font-size:13px!important}
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-referral-action,
+  html.v4322 .v4322-detail-ready .v4322-completed-actions>.v4322-more-action{font-size:11.5px!important;padding-left:8px!important;padding-right:8px!important}
+}
