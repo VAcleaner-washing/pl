@@ -1,5 +1,6 @@
 /* VAcleaner v4.3.23 — mobile booking status rail polish.
-   Presentation only: existing filters, counts and click behavior remain canonical. */
+   Presentation only: existing filters, counts and click behavior remain canonical.
+   Canonical QA retrigger after System Spec update. */
 @media(max-width:900px){
   html.v4323[data-admin-view="bookings"] .booking-toolbar{
     grid-template-columns:.82fr .78fr 1.04fr 1.36fr!important;
