@@ -32,7 +32,7 @@ function polishFinance(detail){
     if(heading)heading.textContent='Отримано';
     [...receivedGroup.querySelectorAll('.v4321-finance-line')].forEach(row=>{
       const span=row.querySelector(':scope > span');
-      if(/^Залог\b/i.test(text(span)))setLeadingLabel(span,'Застава','повертається після розрахунку');
+      if(/^Залог(?:\s|$)/i.test(text(span)))setLeadingLabel(span,'Застава','повертається після розрахунку');
     });
   }
   if(chargedGroup){const heading=chargedGroup.querySelector(':scope > h3');if(heading)heading.textContent='Нараховано'}
