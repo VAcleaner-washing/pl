@@ -1,6 +1,7 @@
 (()=>{'use strict';
 const mobile=()=>window.matchMedia('(max-width: 900px)').matches;
 const text=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
+const leadingText=node=>[...(node?.childNodes||[])].filter(child=>child.nodeType===Node.TEXT_NODE).map(child=>String(child.textContent||'').trim()).filter(Boolean).join(' ');
 const icon=name=>({
   dots:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.55"/><circle cx="12" cy="12" r="1.55"/><circle cx="19" cy="12" r="1.55"/></svg>',
   person:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="7" r="3.2"/><path d="M3.5 19c.5-4 2.5-6 5.5-6s5 2 5.5 6M18 10v7M14.5 13.5h7"/></svg>'
@@ -32,7 +33,7 @@ function polishFinance(detail){
     if(heading)heading.textContent='Отримано';
     [...receivedGroup.querySelectorAll('.v4321-finance-line')].forEach(row=>{
       const span=row.querySelector(':scope > span');
-      if(/^Залог(?:\s|$)/i.test(text(span)))setLeadingLabel(span,'Застава','повертається після розрахунку');
+      if(/^Залог$/i.test(leadingText(span)))setLeadingLabel(span,'Застава','повертається після розрахунку');
     });
   }
   if(chargedGroup){const heading=chargedGroup.querySelector(':scope > h3');if(heading)heading.textContent='Нараховано'}
