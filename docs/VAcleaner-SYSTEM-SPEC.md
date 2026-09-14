@@ -4509,3 +4509,33 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `scripts/test-v4-3-22-finance-polish.mjs` via canonical `test:pwa-static`.
 - `scripts/admin_booking_v4322_finance_polish_qa.py` via canonical `test:admin-booking-flex` at 320 / 390 / 430 px with overflow and action-delegation checks.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+
+# 79. Change record — v4.3.23 BOOKING STATUS FILTER POLISH
+
+### ADDED
+
+- `assets/admin-v4323.css` adds a presentation-only mobile/PWA polish layer for the booking status filter rail.
+- `scripts/test-v4-3-23-booking-filter-polish.mjs` and `scripts/admin_booking_v4323_filter_polish_qa.py` lock the approved filter treatment at 320 / 390 / 430 px.
+
+### CHANGED
+
+- The booking status selector keeps the same four canonical filters but uses one calmer segmented surface with no internal vertical dividers.
+- Count values stay visible and move into the normal inline flow instead of floating in circular corner badges.
+- The active segment uses a restrained gold tint and subtle inset definition instead of a heavy outlined tile.
+- Narrow mobile widths allocate more room to the longer `Підтверджені` label while keeping all four filters visible.
+
+### FIXED
+
+- Removed the visually noisy divider-and-badge treatment that made the booking filter row look like a table.
+- Prevented the long confirmed-status label from feeling cramped on narrow iPhone widths.
+
+### PRESERVED
+
+- Filter labels, `data-filter` values, counts, click handlers, booking status semantics and list filtering remain unchanged.
+- Booking finance, pricing, deposits, prepayment, delivery, Supabase, RETURN/SMS/referral, availability, VA HOME and desktop behavior are unchanged.
+- Canonical package/build baseline remains `4.3.0 / 4300`.
+
+### TESTS
+
+- Static gate verifies v4.3.23 load order, service-worker cache inclusion, mobile scoping, inline counts and untouched filter semantics.
+- Browser gate verifies all four filters stay visible and clickable at 320 / 390 / 430 px, with no page or rail overflow, no heavy active border and no circular count badges.
