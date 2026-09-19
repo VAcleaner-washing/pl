@@ -4571,5 +4571,5 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 - Static gate verifies desktop scoping, load order, service-worker cache inclusion, inline counts and untouched filter semantics.
 - Browser gate verifies 1024 / 1280 / 1440 / 1648 px: all eight filters visible, no horizontal overflow, lightweight counts, restrained active state, operations row below the desktop scroll boundary and sticky rail below the fixed top bar.
-- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.\n- Canonical QA is rerun from the documented release-candidate head before merge.
 
