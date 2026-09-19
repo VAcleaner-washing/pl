@@ -1,5 +1,5 @@
 /* VAcleaner v4.3.24 — desktop booking status polish.
-   Presentation only: desktop filter geometry and safe sticky offset. */
+   Presentation only: desktop filter geometry and safe sticky offset.\n   Canonical QA retrigger after System Spec update. */
 @media(min-width:901px){
   html.v4324[data-admin-view="bookings"] .main{
     padding-top:24px!important;
