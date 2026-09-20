@@ -4539,3 +4539,37 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 - Static gate verifies v4.3.23 load order, service-worker cache inclusion, mobile scoping, inline counts and untouched filter semantics.
 - Browser gate verifies all four filters stay visible and clickable at 320 / 390 / 430 px, with no page or rail overflow, no heavy active border and no circular count badges.
+
+# 80. Change record — v4.3.24 DESKTOP BOOKING POLISH
+
+### ADDED
+
+- `assets/admin-v4324.css` adds a presentation-only desktop polish layer for the booking status toolbar.
+- `scripts/test-v4-3-24-desktop-booking-polish.mjs` and `scripts/admin_booking_v4324_desktop_polish_qa.py` lock the desktop treatment and sticky-header safety.
+
+### CHANGED
+
+- Desktop booking filters keep all eight canonical statuses and the same `data-filter` behavior, but use calmer compact chips with inline counts instead of circular count badges.
+- The active filter uses a restrained gold tint rather than the heavy filled treatment.
+- The desktop sticky filter rail keeps an 8 px safe inset inside the scroll pane so it cannot tuck under the fixed top bar.
+- The booking content pane keeps a small top safety offset and scroll padding so the operational cards begin cleanly below the fixed header boundary.
+
+### FIXED
+
+- Removed the visually noisy desktop count bubbles and oversized active filter treatment.
+- Prevented the sticky booking filter rail from occupying the negative top offset used by the older desktop density layer.
+
+### PRESERVED
+
+- Filter labels, counts, `data-filter` values, click handlers, booking status semantics and list filtering remain unchanged.
+- Operations-card actions and metrics remain unchanged.
+- Mobile/PWA v4.3.23 filter treatment remains unchanged.
+- Booking finance, pricing, deposits, prepayment, delivery, Supabase, RETURN/SMS/referral, availability and VA HOME are unchanged.
+- Canonical package/build baseline remains `4.3.0 / 4300`.
+
+### TESTS
+
+- Static gate verifies desktop scoping, load order, service-worker cache inclusion, inline counts and untouched filter semantics.
+- Browser gate verifies 1024 / 1280 / 1440 / 1648 px: all eight filters visible, no horizontal overflow, lightweight counts, restrained active state, operations row below the desktop scroll boundary and sticky rail below the fixed top bar.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.\n- Canonical QA is rerun from the documented release-candidate head before merge.
+
