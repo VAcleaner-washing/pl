@@ -108,7 +108,7 @@ if(!fs.existsSync(path.join(root,'supabase','functions','vacleaner-customer-docu
 const sw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');if(!sw.includes(`vacleaner-manager-${build}`))errors.push('service worker cache version mismatch');
 const adminSw=fs.readFileSync(path.join(root,'admin','sw.js'),'utf8');
 
-if(!adminSw.includes("if(data.title==='Нове бронювання VAcleaner')return"))errors.push('legacy technical booking push is not suppressed in the PWA service worker');
+if(adminSw.includes("if(data.title==='Нове бронювання VAcleaner')return"))errors.push('public booking push must not be suppressed in the PWA service worker');
 const adminRuntime=fs.readFileSync(path.join(root,'assets','admin-v250.js'),'utf8');
 const pwaVisualQa=fs.readFileSync(path.join(root,'scripts','pwa_visual_qa.py'),'utf8');
 
