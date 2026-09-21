@@ -40,6 +40,8 @@ for(const [name,source] of [['edge source',edgeTs],['edge deploy',edgeDeploy]]){
 check(reminders.includes('title: `Нове бронювання · ${adminProductLabel(booking.product_code, booking.product_label)}`'),'new-booking push uses the internal admin equipment label');
 check(reminders.includes('${booking.customer_name || "Клієнт"}\\n${shortDate(booking.start_date)} ${pickupTime} → ${shortDate(booking.return_date)} ${returnTime} · ${money(booking.total_amount)} грн\\nПотрібне підтвердження'),'new-booking push body is compact and structured');
 check(!`${reminders}\n${worker}\n${bookingPush}`.includes('from VAcleaner'),'VAcleaner push payload contains no literal "from VAcleaner" copy');
-check(worker.includes("if(data.title==='Нове бронювання VAcleaner')return"),'legacy duplicate public-booking push remains suppressed');
+check(bookingPush.includes('const eventKey = `public:new:${booking.id}`'),'public booking direct push owns the canonical new-booking event key');
+check(bookingPush.includes('title: "Нове бронювання VAcleaner"'),'public booking creates the immediate new-booking push payload');
+check(!worker.includes("if(data.title==='Нове бронювання VAcleaner')return"),'service worker displays immediate public-booking push instead of suppressing it');
 
 console.log(`Process metadata / push copy PASS: ${checks.length} checks.`);

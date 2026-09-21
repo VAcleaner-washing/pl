@@ -4573,3 +4573,29 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - Browser gate verifies 1024 / 1280 / 1440 / 1648 px: all eight filters visible, no horizontal overflow, lightweight counts, restrained active state, operations row below the desktop scroll boundary and sticky rail below the fixed top bar.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.\n- Canonical QA is rerun from the documented release-candidate head before merge.
 
+# 81. Change record — v4.3.25 PUBLIC BOOKING PUSH DELIVERY
+
+### CHANGED
+
+- Public website bookings continue to send an immediate Web Push from `vacleaner-booking-v5` using the canonical `public:new:<booking_id>` dispatch key.
+- The admin service worker no longer suppresses the exact immediate payload titled `Нове бронювання VAcleaner`.
+- `vacleaner-reminders-v1` remains the retry/fallback path and uses the same dispatch key, so a successfully delivered immediate push is not duplicated later.
+
+### FIXED
+
+- Fixed the failure mode where the backend successfully sent the public-booking Web Push and marked `public:new:<booking_id>` delivered, but `admin/sw.js` discarded that exact notification before calling `showNotification`.
+- Because the reminder fallback saw the same event key as already delivered, the manager could receive no visible notification at all. The service worker now renders the immediate push instead of discarding it.
+
+### PRESERVED
+
+- Push subscription storage, VAPID keys, device limits, peer-admin issue/return notifications, reminder dispatch claims and booking deep links remain unchanged.
+- Booking creation, pricing, availability, deposits, delivery, Supabase data contracts, RETURN/SMS/referral and VA HOME are unchanged.
+- A failed provider send still leaves the dispatch retryable; a successful send remains deduplicated against the reminder fallback.
+- Canonical package/build baseline remains `4.3.0 / 4300`.
+
+### TESTS
+
+- `scripts/test-v4-3-25-public-booking-push.mjs` verifies the worker no longer drops the immediate push and that direct/fallback paths share the canonical event key.
+- Existing `test:process-metadata` and `check-build` guards now reject reintroduction of the service-worker suppression.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+
