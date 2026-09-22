@@ -1,0 +1,112 @@
+/* VAcleaner v4.3.27 — pending documents reminder.
+   Presentation only: warns about missing new-client documents without blocking paid booking processing. */
+
+.booking-document-warning{
+  width:calc(100% - 40px);
+  margin:0 20px 14px;
+  padding:11px 13px;
+  border:1px solid rgba(232,180,91,.28);
+  border-radius:13px;
+  background:rgba(232,180,91,.075);
+  color:#d6d9da;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:2px 12px;
+  text-align:left;
+  cursor:pointer;
+}
+.booking-document-warning span{
+  color:#efc36c;
+  font-size:12px;
+  font-weight:800;
+}
+.booking-document-warning small{
+  grid-column:1;
+  color:#9ca4a8;
+  font-size:11px;
+  line-height:1.4;
+}
+.booking-document-warning b{
+  grid-column:2;
+  grid-row:1/3;
+  align-self:center;
+  color:#efc36c;
+  font-size:11px;
+  font-weight:800;
+}
+.booking-document-warning:hover{
+  border-color:rgba(232,180,91,.42);
+  background:rgba(232,180,91,.1);
+}
+
+.upcoming-doc-warning{
+  margin-top:7px;
+  padding:0;
+  border:0;
+  background:transparent;
+  color:#efc36c;
+  font-size:11px;
+  font-weight:800;
+  text-align:left;
+  cursor:pointer;
+}
+.upcoming-doc-warning:hover{text-decoration:underline}
+
+.issue-document-warning{
+  margin:0 0 14px;
+  padding:13px 14px;
+  border:1px solid rgba(232,180,91,.3);
+  border-radius:14px;
+  background:rgba(232,180,91,.08);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:4px 12px;
+  align-items:center;
+}
+.issue-document-warning b{
+  color:#efc36c;
+  font-size:13px;
+}
+.issue-document-warning span{
+  color:#aab1b4;
+  font-size:11px;
+  line-height:1.45;
+}
+.issue-document-warning .btn{
+  grid-column:2;
+  grid-row:1/3;
+  min-height:36px;
+  white-space:nowrap;
+}
+
+@media(max-width:900px){
+  .booking-document-warning{
+    width:calc(100% - 28px);
+    margin:0 14px 12px;
+    padding:10px 11px;
+    border-radius:12px;
+  }
+  .booking-document-warning small{
+    font-size:10.5px;
+  }
+  .issue-document-warning{
+    grid-template-columns:1fr;
+  }
+  .issue-document-warning .btn{
+    grid-column:1;
+    grid-row:auto;
+    width:100%;
+    margin-top:5px;
+  }
+}
+
+@media(max-width:360px){
+  .booking-document-warning{
+    grid-template-columns:1fr;
+  }
+  .booking-document-warning b{
+    grid-column:1;
+    grid-row:auto;
+    margin-top:3px;
+  }
+}
