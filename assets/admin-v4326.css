@@ -1,0 +1,93 @@
+/* VAcleaner v4.3.26 — editable confirmation message.
+   Presentation only: keeps the generated booking message readable while allowing per-send edits. */
+
+.confirm-message-editor{
+  margin-top:14px;
+  display:grid;
+  gap:9px;
+}
+.confirm-message-editor-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.confirm-message-editor-head>div{
+  min-width:0;
+  display:grid;
+  gap:2px;
+}
+.confirm-message-editor-head b{
+  color:var(--text);
+  font-size:13px;
+}
+.confirm-message-editor-head small,
+.confirm-message-editor-note{
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.45;
+}
+.confirm-message-editor-head .btn{
+  min-height:36px;
+  padding:8px 11px;
+  flex:0 0 auto;
+  font-size:11px;
+}
+.confirm-preview.confirm-message-textarea{
+  display:block;
+  width:100%;
+  min-height:320px;
+  max-height:720px;
+  box-sizing:border-box;
+  margin-top:0;
+  padding:14px;
+  resize:vertical;
+  overflow:auto;
+  color:#d6d9da;
+  background:#0d1316;
+  border:1px solid var(--line);
+  border-radius:14px;
+  outline:none;
+  font:inherit;
+  font-size:13px;
+  line-height:1.55;
+  letter-spacing:0;
+  caret-color:#efc36c;
+  -webkit-text-size-adjust:100%;
+}
+.confirm-preview.confirm-message-textarea:focus{
+  border-color:rgba(232,180,91,.46);
+  box-shadow:0 0 0 3px rgba(232,180,91,.08);
+}
+.confirm-message-editor-note{
+  display:block;
+  padding:0 2px;
+}
+
+@media(max-width:900px){
+  .confirm-message-editor-head{
+    align-items:flex-start;
+  }
+  .confirm-message-editor-head .btn{
+    min-height:34px;
+    padding:7px 9px;
+    white-space:nowrap;
+  }
+  .confirm-preview.confirm-message-textarea{
+    min-height:360px;
+    font-size:14px;
+    line-height:1.58;
+  }
+}
+
+@media(max-width:390px){
+  .confirm-message-editor-head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:8px;
+  }
+  .confirm-message-editor-head .btn{
+    font-size:10px;
+    padding-inline:8px;
+  }
+}

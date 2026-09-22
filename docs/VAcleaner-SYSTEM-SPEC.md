@@ -4599,3 +4599,31 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - Existing `test:process-metadata` and `check-build` guards now reject reintroduction of the service-worker suppression.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
 
+# 82. Change record — v4.3.26 EDITABLE CONFIRMATION MESSAGE
+
+### ADDED
+
+- The booking-processing modal now shows the generated customer confirmation message in an editable textarea.
+- A `Відновити шаблон` action restores the generated message after manual edits.
+- `assets/admin-v4326.css` provides responsive styling for the editable message area on mobile/PWA and desktop.
+- Dedicated static and browser regression tests cover editability, reset behavior, copy-source behavior and viewport containment.
+
+### CHANGED
+
+- The generated message still updates automatically from booking/customer data until the manager starts editing it manually.
+- Once the manager types into the message, later form changes no longer overwrite that manual text during the current modal session.
+- `Скопіювати текст` now copies exactly what is currently visible in the editable field, including manager edits.
+
+### PRESERVED
+
+- Editing the outgoing message does not change booking dates, pricing, deposit, prepayment, customer data, processing flags, status transitions or backend payloads.
+- The editable text is a per-send working copy only; it is not persisted into booking data.
+- Existing generated template content, document rules, Telegram/Instagram contact actions and confirmation workflow remain unchanged.
+- Canonical package/build baseline remains `4.3.0 / 4300`.
+
+### TESTS
+
+- `scripts/test-v4-3-26-editable-confirmation-message.mjs` verifies the integrated runtime contract and service-worker asset wiring.
+- `scripts/admin_booking_v4326_confirmation_message_qa.py` verifies editing/reset behavior and no overflow at 320 / 390 / 430 / 1024 px.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+
