@@ -13,11 +13,10 @@ ok(admin.includes('function bookingDocumentsPending(booking)'), 'runtime has a s
 ok(admin.includes("meta?.documents_required===true&&meta?.identity_verified!==true"), 'pending state derives from existing processing metadata');
 ok(!admin.includes("toast('Для нового клієнта перевірте документ')"), 'missing identity verification no longer blocks processing');
 ok(!admin.includes("toast('Для нового клієнта вкажіть номер документа')"), 'missing document number no longer blocks processing');
-const validation=admin.match(/const validateProcess=\(state,requirePayment=false\)=>\{([^}]+(?:\}[^;]*)?)\};/)?.[0]||'';
-ok(validation.includes("state.contacted"), 'processing still requires contact confirmation');
-ok(validation.includes("state.confirmationSent"), 'processing still requires sent terms');
-ok(validation.includes("requirePayment&&!state.prepaymentPaid"), 'booking confirmation still requires 200 грн prepayment');
-ok(!validation.includes('identityVerified')&&!validation.includes('state.doc'), 'document completion is not part of the confirmation blocker');
+ok(admin.includes("if(!state.contacted){toast('Позначте, що з клієнтом зв’язались');return false}"), 'processing still requires contact confirmation');
+ok(admin.includes("if(!state.confirmationSent){toast('Позначте, що умови клієнту надіслано');return false}"), 'processing still requires sent terms');
+ok(admin.includes("if(requirePayment&&!state.prepaymentPaid){toast('Підтвердіть отримання 200 грн');return false}"), 'booking confirmation still requires 200 грн prepayment');
+ok(!admin.includes("if(state.documentsRequired&&state.fd.get('identityVerified')")&&!admin.includes("if(state.documentsRequired&&state.doc.length<4)"), 'document completion is not part of the confirmation blocker');
 ok(admin.includes("identity_verified:state.documentsRequired?(state.fd.get('identityVerified')==='on'&&state.doc.length>=4):true"), 'new-client document metadata becomes verified only with checkbox plus number');
 ok(admin.includes('class="booking-document-warning"'), 'booking card exposes pending-document reminder');
 ok(admin.includes('class="upcoming-doc-warning"'), 'upcoming issue row exposes pending-document reminder');
