@@ -4627,3 +4627,38 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `scripts/admin_booking_v4326_confirmation_message_qa.py` verifies editing/reset behavior and no overflow at 320 / 390 / 430 / 1024 px.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
 
+# 83. Change record — v4.3.27 PENDING DOCUMENTS REMINDER
+
+### CHANGED
+
+- A new-client booking may be saved and confirmed after the 200 грн prepayment even when the identity document has not yet been received.
+- Processing still requires that the manager has contacted the customer, sent the rental terms, and (for confirmation) recorded the 200 грн prepayment.
+- Document completion is no longer a blocking condition for booking confirmation.
+
+### ADDED
+
+- Confirmed / waiting-payment / issued booking cards show an amber `Документи не отримані` reminder while a new client's document is still pending.
+- The `Найближчі` issue row shows the same reminder before handoff.
+- The issue modal displays a visible warning and a direct `Додати документи` action before equipment handoff.
+- The process modal explains that documents may be collected after prepayment but should be completed before issue.
+
+### DATA CONTRACT
+
+- No new database columns are introduced.
+- Existing `extras.processing.documents_required` and `extras.processing.identity_verified` remain the source of truth.
+- For a new client, `identity_verified` becomes true only when the document checkbox is confirmed and a document number of at least four characters is present.
+- Repeat / known clients are not marked as pending documents.
+
+### PRESERVED
+
+- Booking pricing, availability, delivery, deposits, prepayment amount, status transition API, Supabase tables, RETURN/SMS/referral and VA HOME remain unchanged.
+- Existing editable confirmation-message behavior from v4.3.26 remains unchanged.
+- Issuing equipment is not hard-blocked by the reminder; the manager sees the warning and can add documents from the issue flow.
+- Canonical package/build baseline remains `4.3.0 / 4300`.
+
+### TESTS
+
+- `scripts/test-v4-3-27-pending-documents-reminder.mjs` verifies that document checks no longer block paid confirmation, that the processing metadata remains authoritative, and that reminders are wired into booking, upcoming and issue flows.
+- `scripts/admin_booking_v4327_pending_documents_qa.py` verifies the reminder surfaces on mobile and desktop without horizontal overflow.
+- Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
+
