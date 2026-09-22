@@ -1,0 +1,35 @@
+import fs from 'node:fs';
+
+const read=p=>fs.readFileSync(p,'utf8');
+const admin=read('assets/admin-v250.js');
+const css=read('assets/admin-v4327.css');
+const html=read('admin/bronuvannia/index.html');
+const sw=read('admin/sw.js');
+const pkg=JSON.parse(read('package.json'));
+const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
+const ok=(value,label)=>{if(!value)throw new Error(label);console.log('PASS:',label)};
+
+ok(admin.includes('function bookingDocumentsPending(booking)'), 'runtime has a single pending-document helper');
+ok(admin.includes("meta?.documents_required===true&&meta?.identity_verified!==true"), 'pending state derives from existing processing metadata');
+ok(!admin.includes("toast('Для нового клієнта перевірте документ')"), 'missing identity verification no longer blocks processing');
+ok(!admin.includes("toast('Для нового клієнта вкажіть номер документа')"), 'missing document number no longer blocks processing');
+ok(admin.includes("if(!state.contacted){toast('Позначте, що з клієнтом зв’язались');return false}"), 'processing still requires contact confirmation');
+ok(admin.includes("if(!state.confirmationSent){toast('Позначте, що умови клієнту надіслано');return false}"), 'processing still requires sent terms');
+ok(admin.includes("if(requirePayment&&!state.prepaymentPaid){toast('Підтвердіть отримання 200 грн');return false}"), 'booking confirmation still requires 200 грн prepayment');
+ok(!admin.includes("if(state.documentsRequired&&state.fd.get('identityVerified')")&&!admin.includes("if(state.documentsRequired&&state.doc.length<4)"), 'document completion is not part of the confirmation blocker');
+ok(admin.includes("identity_verified:state.documentsRequired?(state.fd.get('identityVerified')==='on'&&state.doc.length>=4):true"), 'new-client document metadata becomes verified only with checkbox plus number');
+ok(admin.includes('class="booking-document-warning"'), 'booking card exposes pending-document reminder');
+ok(admin.includes('class="upcoming-doc-warning"'), 'upcoming issue row exposes pending-document reminder');
+ok(admin.includes('class="issue-document-warning"'), 'issue modal exposes pending-document reminder');
+ok(admin.includes("id=\"issueAddDocuments\""), 'issue reminder includes direct add-documents action');
+ok(admin.includes("a==='confirm'||a==='process'||a==='documents'"), 'document reminder delegates to the canonical processing flow');
+ok(admin.includes("Бронювання підтверджено · ⚠ документи ще потрібно отримати"), 'confirmation toast preserves the pending-documents reminder');
+ok(/class="[^"]*\bv4327\b/.test(html), 'admin enables v4.3.27 presentation layer');
+ok(/\/assets\/admin-v4327\.css\?v=(4327|4300)/.test(html), 'admin loads v4.3.27 CSS');
+ok(/vacleaner-manager-(4327|4300)/.test(sw), 'service-worker cache follows v4.3.27 source or stamped namespace');
+ok(/\/assets\/admin-v4327\.css\?v=(4327|4300)/.test(sw), 'service worker precaches v4.3.27 CSS');
+ok(css.includes('.booking-document-warning')&&css.includes('.upcoming-doc-warning')&&css.includes('.issue-document-warning'), 'all reminder surfaces have dedicated styling');
+ok(pkg.scripts['test:pwa-static'].includes('test-v4-3-27-pending-documents-reminder.mjs'), 'static aggregate includes v4.3.27 regression');
+ok(pkg.scripts['test:admin-booking-flex'].includes('admin_booking_v4327_pending_documents_qa.py'), 'browser aggregate includes v4.3.27 reminder QA');
+ok(spec.includes('Change record — v4.3.27 PENDING DOCUMENTS REMINDER'), 'System Spec records v4.3.27');
+console.log('v4.3.27 pending documents reminder static gate: PASS');
