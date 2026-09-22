@@ -19,7 +19,7 @@ check(admin.includes('function processMetaFromNote(value)'),'frontend can recove
 check(admin.includes('function cleanManagerNote(value)'),'frontend cleans workflow metadata before display/edit');
 check(admin.includes('!x.startsWith(PROCESS_MARKER_PREFIX)'),'hidden process marker is never exposed as manager note text');
 check(!admin.includes('const noteFor=state=>'),'processing no longer serializes human workflow sentences into admin_note');
-check(admin.includes("processMetaFor=state=>({contacted:state.contacted,confirmation_sent:state.confirmationSent,documents_required:state.documentsRequired,identity_verified:state.fd.get('identityVerified')==='on'"),'processing state is built as structured metadata');
+check(admin.includes("processMetaFor=state=>({contacted:state.contacted,confirmation_sent:state.confirmationSent,documents_required:state.documentsRequired,identity_verified:state.documentsRequired?(state.fd.get('identityVerified')==='on'&&state.doc.length>=4):true"),'processing state is built as structured metadata and only marks new-client documents verified when a number is present');
 check(admin.includes("customer_kind:state.documentsRequired?'new':(customerProfile?.isRepeatCustomer?'repeat':'known')"),'customer kind is mutually exclusive');
 check(admin.includes('processing:processMetaFor(state),adminNote:adminNoteFor(state)'),'processing edit sends structured metadata plus backward-compatible hidden marker');
 check(admin.includes("adminNoteFor=state=>[managerNote,processMarker(processMetaFor(state))].filter(Boolean).join('\\n')"),'process save preserves human note and stores only hidden machine state beside it');
