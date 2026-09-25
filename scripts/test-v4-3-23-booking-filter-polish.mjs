@@ -8,7 +8,7 @@ const pkg=JSON.parse(read('package.json'));
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const ok=(condition,label)=>{if(!condition)throw new Error(label);console.log('PASS:',label)};
 
-ok(pkg.version==='4.3.0','canonical package baseline remains 4.3.0');
+ok(/^4\.3\.\d+$/.test(String(pkg.version)),'historical UI regression remains valid on the current v4.3.x package release');
 ok(/class="[^"]*\bv4323\b/.test(html),'admin enables v4.3.23 presentation layer');
 const prev=html.indexOf('/assets/admin-v4322.css');
 const next=html.indexOf('/assets/admin-v4323.css');
