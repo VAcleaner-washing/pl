@@ -13,7 +13,7 @@ ok(/class="[^"]*\bv4324\b/.test(html),'admin enables v4.3.24 presentation layer'
 const prev=html.indexOf('/assets/admin-v4323.css');
 const next=html.indexOf('/assets/admin-v4324.css');
 ok(prev>=0&&next>prev,'v4.3.24 CSS loads after v4.3.23');
-ok(/vacleaner-manager-(4324|43\\d+)/.test(sw),'service worker cache follows source or stamped namespace');
+ok(/vacleaner-manager-(4324|43\d+)/.test(sw),'service worker cache follows source or stamped namespace');
 ok(sw.includes('/assets/admin-v4324.css'),'service worker precaches v4.3.24 CSS');
 ok(css.includes('@media(min-width:901px)'),'desktop polish stays outside mobile/PWA breakpoint');
 ok(css.includes('html.v4324[data-admin-view="bookings"] .booking-toolbar'),'desktop polish is scoped to booking status toolbar');
