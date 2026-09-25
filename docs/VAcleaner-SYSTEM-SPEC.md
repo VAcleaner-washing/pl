@@ -4683,3 +4683,22 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 - Admin service-worker source cache is bumped to `4328`; the standard release stamper may rewrite the cache namespace to the canonical package build during CI.
 - `scripts/test-v4-3-28-prepayment-persistence.mjs` guards the paid/unpaid processing transitions and PWA delivery path.
+
+
+# 85. Change record — v4.3.29 PREPAYMENT CACHE BUST
+
+### FIXED
+
+- The v4.3.28 prepayment-persistence logic is now shipped under a new canonical build `4329` instead of reusing the old `4300` asset URLs.
+- CI release stamping rewrites the admin runtime asset query, `PWA_BUILD`, service-worker registration URL and service-worker cache namespace to `4329`.
+- This forces installed iPhone/PWA clients to fetch the current admin runtime where `Передплата 200 грн отримана` saves and confirms the booking.
+
+### PRESERVED
+
+- Booking finance logic, tariffs, deposit policy, delivery, RETURN/SMS/referral, Supabase schema/functions and VA HOME behavior are unchanged.
+- Missing documents remain a non-blocking reminder after paid confirmation.
+
+### RELEASE
+
+- Canonical release: `4.3.29 / 4329`.
+- Full Static/build + Browser/PWA QA remains mandatory before merge to `main`.
