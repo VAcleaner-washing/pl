@@ -20,8 +20,8 @@ const check = (ok, label) => {
 };
 
 check(
-  release.version === '4.3.0' && Number(release.build) === 4300,
-  'v4.3.12 change record preserves canonical 4.3.0/4300 package baseline'
+  /^4\.3\.\d+$/.test(String(release.version)) && Number(release.build) >= 4300,
+  'v4.3.12 regression remains valid on the current v4.3.x canonical release'
 );
 check(
   admin.includes('type="time" name="${name}"') && admin.includes('step="60"'),
