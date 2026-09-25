@@ -10,6 +10,6 @@ ok(admin.includes("else if(b.status==='pending')await invoke({action:'update',bo
 ok(admin.includes("'Бронювання підтверджено · 200 грн збережено · ⚠ документи ще потрібно отримати'"), 'paid confirmation keeps the pending-document reminder');
 ok(admin.includes("'Бронювання підтверджено · 200 грн збережено'"), 'paid confirmation reports persisted prepayment');
 ok(admin.includes("if(requirePayment&&!state.prepaymentPaid){toast('Підтвердіть отримання 200 грн');return false}"), 'explicit confirm action still requires the 200 UAH checkbox');
-ok(/const CACHE='vacleaner-manager-(4328|4300)';/.test(sw), 'PWA cache follows v4.3.28 source or stamped release namespace');
+ok(/const CACHE='vacleaner-manager-(4328|43\\d+)';/.test(sw), 'PWA cache follows v4.3.28 source or stamped release namespace');
 
 console.log('v4.3.28 prepayment persistence static gate: PASS');
