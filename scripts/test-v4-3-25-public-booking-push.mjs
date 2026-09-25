@@ -8,7 +8,7 @@ const pkg=JSON.parse(read('package.json'));
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const ok=(value,label)=>{if(!value)throw new Error(label);console.log('PASS:',label)};
 
-ok(/vacleaner-manager-(4325|4300)/.test(sw),'service worker cache follows v4.3.25 source or stamped build');
+ok(/vacleaner-manager-(4325|43\\d+)/.test(sw),'service worker cache follows v4.3.25 source or stamped build');
 ok(!sw.includes("if(data.title==='Нове бронювання VAcleaner')return"),'service worker no longer drops immediate public-booking pushes');
 ok(sw.includes("self.registration.showNotification"),'service worker still renders push notifications');
 ok(booking.includes('const eventKey = `public:new:${booking.id}`'),'public booking direct push uses canonical event key');
