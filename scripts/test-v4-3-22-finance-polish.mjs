@@ -9,9 +9,9 @@ const css=read('assets/admin-v4322.css');
 const previous=read('assets/admin-v4321.js');
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const ok=(condition,label)=>{if(!condition)throw new Error(label);console.log('PASS:',label)};
-const cssAsset=/\/assets\/admin-v4322\.css\?v=(?:4322|4300)/;
-const jsAsset=/\/assets\/admin-v4322\.js\?v=(?:4322|4300)/;
-const cacheNamespace=/vacleaner-manager-(?:4322|4300)/;
+const cssAsset=/\/assets\/admin-v4322\.css\?v=(?:4322|43\d+)/;
+const jsAsset=/\/assets\/admin-v4322\.js\?v=(?:4322|43\d+)/;
+const cacheNamespace=/vacleaner-manager-(?:4322|43\d+)/;
 
 new Function(js);
 ok(/\bv4322\b/.test(html),'admin shell enables v4.3.22 layer');

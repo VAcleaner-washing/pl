@@ -15,7 +15,7 @@ const checks=[
   [js.includes("balance>=0?'До повернення':'До доплати'"),'final result supports refund and due states'],
   [css.includes('.v4321-finance-group.received')&&css.includes('.v4321-finance-group.charged'),'finance groups keep directional color semantics'],
   [css.includes('.v4321-summary-card.received')&&css.includes('.v4321-summary-card.expenses')&&css.includes('.v4321-summary-result'),'finance summary has received expenses and final result'],
-  [/vacleaner-manager-(?:4321|4300)/.test(sw)&&sw.includes('/assets/admin-v4321.css?')&&sw.includes('/assets/admin-v4321.js?'),'service worker preloads the new detail layer before and after build stamping'],
+  [/vacleaner-manager-(?:4321|43\d+)/.test(sw)&&sw.includes('/assets/admin-v4321.css?')&&sw.includes('/assets/admin-v4321.js?'),'service worker preloads the new detail layer before and after build stamping'],
 ];
 for(const [ok,label] of checks){assert.ok(ok,label);console.log('PASS:',label)}
 console.log(JSON.stringify({passed:checks.length,failed:0}));

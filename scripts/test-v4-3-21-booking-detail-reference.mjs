@@ -8,15 +8,15 @@ const sw=fs.readFileSync('admin/sw.js','utf8');
 const core=fs.readFileSync('assets/admin-v250.js','utf8');
 
 const ok=(cond,label)=>{if(!cond)throw new Error(label);console.log('PASS:',label)};
-const cssAsset=/\/assets\/admin-v4321\.css\?v=(?:4321|4300)/;
-const jsAsset=/\/assets\/admin-v4321\.js\?v=(?:4321|4300)/;
+const cssAsset=/\/assets\/admin-v4321\.css\?v=(?:4321|43\d+)/;
+const jsAsset=/\/assets\/admin-v4321\.js\?v=(?:4321|43\d+)/;
 
 ok(/\bv4321\b/.test(html),'admin enables v4.3.21 booking-detail layer');
 ok(cssAsset.test(html),'admin loads v4.3.21 CSS from source or stamped build');
 ok(jsAsset.test(html),'admin loads v4.3.21 JS from source or stamped build');
 ok(html.indexOf('admin-v4321.css')>html.indexOf('admin-v4320.css'),'v4.3.21 CSS loads after v4.3.20');
 ok(html.indexOf('admin-v4321.js')>html.indexOf('admin-v430.js'),'v4.3.21 enhancer loads after native detail enhancer');
-ok(/vacleaner-manager-(?:4321|4300)/.test(sw),'service worker cache follows source or stamped v4.3.21 namespace');
+ok(/vacleaner-manager-(?:4321|43\d+)/.test(sw),'service worker cache follows source or stamped v4.3.21 namespace');
 ok(cssAsset.test(sw)&&jsAsset.test(sw),'service worker caches v4.3.21 assets');
 
 new Function(js);

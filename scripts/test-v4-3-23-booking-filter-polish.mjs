@@ -8,12 +8,12 @@ const pkg=JSON.parse(read('package.json'));
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const ok=(condition,label)=>{if(!condition)throw new Error(label);console.log('PASS:',label)};
 
-ok(pkg.version==='4.3.0','canonical package baseline remains 4.3.0');
+ok(/^4\.3\.\d+$/.test(String(pkg.version)),'historical UI regression remains valid on the current v4.3.x package release');
 ok(/class="[^"]*\bv4323\b/.test(html),'admin enables v4.3.23 presentation layer');
 const prev=html.indexOf('/assets/admin-v4322.css');
 const next=html.indexOf('/assets/admin-v4323.css');
 ok(prev>=0&&next>prev,'v4.3.23 CSS loads after v4.3.22');
-ok(/vacleaner-manager-(4323|4300)/.test(sw),'service worker cache follows source or stamped namespace');
+ok(/vacleaner-manager-(4323|43\d+)/.test(sw),'service worker cache follows source or stamped namespace');
 ok(sw.includes('/assets/admin-v4323.css'),'service worker precaches v4.3.23 CSS');
 ok(css.includes('@media(max-width:900px)'),'polish remains mobile/PWA scoped');
 ok(css.includes('html.v4323[data-admin-view="bookings"] .booking-toolbar'),'polish is scoped to booking status rail');

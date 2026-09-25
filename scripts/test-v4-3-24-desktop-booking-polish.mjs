@@ -8,12 +8,12 @@ const pkg=JSON.parse(read('package.json'));
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 const ok=(condition,label)=>{if(!condition)throw new Error(label);console.log('PASS:',label)};
 
-ok(pkg.version==='4.3.0','canonical package baseline remains 4.3.0');
+ok(/^4\.3\.\d+$/.test(String(pkg.version)),'historical UI regression remains valid on the current v4.3.x package release');
 ok(/class="[^"]*\bv4324\b/.test(html),'admin enables v4.3.24 presentation layer');
 const prev=html.indexOf('/assets/admin-v4323.css');
 const next=html.indexOf('/assets/admin-v4324.css');
 ok(prev>=0&&next>prev,'v4.3.24 CSS loads after v4.3.23');
-ok(/vacleaner-manager-(4324|4300)/.test(sw),'service worker cache follows source or stamped namespace');
+ok(/vacleaner-manager-(4324|43\d+)/.test(sw),'service worker cache follows source or stamped namespace');
 ok(sw.includes('/assets/admin-v4324.css'),'service worker precaches v4.3.24 CSS');
 ok(css.includes('@media(min-width:901px)'),'desktop polish stays outside mobile/PWA breakpoint');
 ok(css.includes('html.v4324[data-admin-view="bookings"] .booking-toolbar'),'desktop polish is scoped to booking status toolbar');

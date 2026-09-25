@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.0  
-**Baseline build:** 4300  
+**Baseline version:** 4.3.29  
+**Baseline build:** 4329  
 **Останнє оновлення:** 2026-09-02  
 **Власник логіки:** VAcleaner  
 
@@ -4683,3 +4683,35 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 - Admin service-worker source cache is bumped to `4328`; the standard release stamper may rewrite the cache namespace to the canonical package build during CI.
 - `scripts/test-v4-3-28-prepayment-persistence.mjs` guards the paid/unpaid processing transitions and PWA delivery path.
+
+
+# 85. Change record — v4.3.29 PREPAYMENT CACHE BUST
+
+### ADDED
+
+- Canonical build `4329` as a dedicated delivery boundary for the v4.3.28 prepayment-persistence fix.
+
+### CHANGED
+
+- Release stamping now produces fresh admin asset URLs, `PWA_BUILD`, service-worker registration URL and service-worker cache namespace from `4.3.29 / 4329`.
+- Historical v4.3.x PWA regression checks accept the current canonical v4.3.x stamped build instead of freezing the release at `4300`.
+
+### FIXED
+
+- Installed iPhone/PWA clients no longer stay on the old `4300` admin runtime after the prepayment fix ships.
+- The active runtime contains the v4.3.28 flow where `Передплата 200 грн отримана` saves the payment and confirms the booking.
+
+### PRESERVED
+
+- Booking finance logic, tariffs, deposit policy, delivery, RETURN/SMS/referral, Supabase schema/functions and VA HOME behavior are unchanged.
+- Missing documents remain a non-blocking reminder after paid confirmation.
+
+### TESTS
+
+- Canonical Static/build QA must stamp and validate build `4329`.
+- Existing v4.3.28 prepayment-persistence regression remains part of `test:pwa-static`.
+- Full Browser/PWA QA remains mandatory before merge to `main`.
+
+### RELEASE
+
+- Canonical release: `4.3.29 / 4329`.
