@@ -25,9 +25,9 @@ ok(admin.includes("id=\"issueAddDocuments\""), 'issue reminder includes direct a
 ok(admin.includes("a==='confirm'||a==='process'||a==='documents'"), 'document reminder delegates to the canonical processing flow');
 ok(admin.includes("Бронювання підтверджено · ⚠ документи ще потрібно отримати"), 'confirmation toast preserves the pending-documents reminder');
 ok(/class="[^"]*\bv4327\b/.test(html), 'admin enables v4.3.27 presentation layer');
-ok(/\/assets\/admin-v4327\.css\?v=(4327|4300)/.test(html), 'admin loads v4.3.27 CSS');
-ok(/vacleaner-manager-(4327|4300)/.test(sw), 'service-worker cache follows v4.3.27 source or stamped namespace');
-ok(/\/assets\/admin-v4327\.css\?v=(4327|4300)/.test(sw), 'service worker precaches v4.3.27 CSS');
+ok(/\/assets\/admin-v4327\.css\?v=(4327|43\\d+)/.test(html), 'admin loads v4.3.27 CSS');
+ok(/vacleaner-manager-(4327|43\\d+)/.test(sw), 'service-worker cache follows v4.3.27 source or stamped namespace');
+ok(/\/assets\/admin-v4327\.css\?v=(4327|43\\d+)/.test(sw), 'service worker precaches v4.3.27 CSS');
 ok(css.includes('.booking-document-warning')&&css.includes('.upcoming-doc-warning')&&css.includes('.issue-document-warning'), 'all reminder surfaces have dedicated styling');
 ok(pkg.scripts['test:pwa-static'].includes('test-v4-3-27-pending-documents-reminder.mjs'), 'static aggregate includes v4.3.27 regression');
 ok(pkg.scripts['test:admin-booking-flex'].includes('admin_booking_v4327_pending_documents_qa.py'), 'browser aggregate includes v4.3.27 reminder QA');
