@@ -4662,3 +4662,24 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `scripts/admin_booking_v4327_pending_documents_qa.py` verifies the reminder surfaces on mobile and desktop without horizontal overflow.
 - Full canonical Static/build + Browser/PWA QA remains release-blocking before merge to `main`.
 
+
+
+# 84. Change record — v4.3.28 PREPAYMENT PERSISTENCE
+
+### FIXED
+
+- In the admin processing flow, marking `Передплата 200 грн отримана` and pressing the save action now results in a confirmed booking instead of returning to `waiting_payment` with 0 грн received.
+- While the 200 грн checkbox is active, the save action is explicitly labelled `Зберегти й підтвердити` so its effect is unambiguous.
+- After the transition, the booking reloads with the real prepayment state and the finance block includes the 200 грн received.
+
+### PRESERVED
+
+- If the 200 грн checkbox is not active, a new processed request still moves to `waiting_payment`.
+- Missing new-client documents remain non-blocking after payment: the booking is confirmed and the existing document reminder remains until the document is added and verified.
+- The separate explicit `Підтвердити бронювання` action still requires the 200 грн checkbox.
+- Pricing, deposit policy, delivery, RETURN/SMS/referral behavior, Supabase schema and VA HOME are unchanged.
+
+### DELIVERY
+
+- Admin service-worker source cache is bumped to `4328`; the standard release stamper may rewrite the cache namespace to the canonical package build during CI.
+- `scripts/test-v4-3-28-prepayment-persistence.mjs` guards the paid/unpaid processing transitions and PWA delivery path.
