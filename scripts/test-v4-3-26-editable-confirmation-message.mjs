@@ -18,9 +18,9 @@ ok(admin.includes("resetConfirmMessage?.addEventListener('click'"),'manager can 
 ok(admin.includes("navigator.clipboard.writeText(String(preview?.value||confirmationMessage(b,form)))"),'copy action uses the edited text');
 ok(admin.includes("Редагування змінює лише текст для відправки"),'UI explains that message edits do not mutate booking data');
 ok(/class="[^"]*\bv4326\b/.test(html),'admin enables v4.3.26 presentation layer');
-ok(/\/assets\/admin-v4326\.css\?v=(4326|4300)/.test(html),'admin loads v4.3.26 CSS');
-ok(/vacleaner-manager-(4326|4300)/.test(sw),'service-worker cache follows source or stamped namespace');
-ok(/\/assets\/admin-v4326\.css\?v=(4326|4300)/.test(sw),'service worker precaches v4.3.26 CSS');
+ok(/\/assets\/admin-v4326\.css\?v=(4326|43\\d+)/.test(html),'admin loads v4.3.26 CSS');
+ok(/vacleaner-manager-(4326|43\\d+)/.test(sw),'service-worker cache follows source or stamped namespace');
+ok(/\/assets\/admin-v4326\.css\?v=(4326|43\\d+)/.test(sw),'service worker precaches v4.3.26 CSS');
 ok(css.includes('.confirm-preview.confirm-message-textarea'),'editable message has dedicated textarea styling');
 ok(css.includes('min-height:360px'),'mobile editor keeps a comfortable editing height');
 ok(pkg.scripts['test:pwa-static'].includes('test-v4-3-26-editable-confirmation-message.mjs'),'static aggregate includes v4.3.26 regression');
