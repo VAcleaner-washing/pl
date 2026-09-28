@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.30  
-**Baseline build:** 4330  
+**Baseline version:** 4.3.31  
+**Baseline build:** 4331  
 **Останнє оновлення:** 2026-09-28  
 **Власник логіки:** VAcleaner  
 
@@ -242,6 +242,13 @@ VAcleaner і VA HOME можуть використовувати спільни�
 # 2. DOMAIN MODEL / ДЖЕРЕЛА ПРАВДИ
 
 ## DATA-001 — бронювання
+
+### SRC-BOOK-001 — джерело бронювання
+
+- Для ручного створення/редагування бронювання доступні окремі джерела: `Instagram`, `Telegram`, `Телефон`, `Сайт`, `Інше`.
+- Значення Telegram зберігається як `source = 'telegram'` і не повинно зливатися з `Інше` в аналітиці.
+- Публічне онлайн-бронювання як і раніше зберігає `vacleaner_website`; ця зміна стосується менеджерського вибору джерела та звітності.
+
 
 Source of truth: `vacleaner_bookings` + `vacleaner_booking_resources` + snapshot у `extras`.
 
@@ -4750,3 +4757,36 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 ### RELEASE
 
 - Canonical release: `4.3.30 / 4330`.
+
+
+# 87. Change record — v4.3.31 TELEGRAM BOOKING SOURCE
+
+### ADDED
+
+- Telegram as a first-class booking source in the admin create/edit booking form.
+- Dedicated Telegram cohort in source analytics.
+
+### CHANGED
+
+- Booking source selector now shows: Instagram → Telegram → Телефон → Сайт → Інше.
+- Source labels and source-performance analytics recognize `telegram` explicitly.
+
+### FIXED
+
+- Telegram-origin bookings no longer need to be saved as `Інше` or misclassified under another channel.
+- Analytics no longer collapses `source = 'telegram'` into the generic Other bucket.
+
+### PRESERVED
+
+- Public website bookings still use `vacleaner_website` and appear as `Сайт`.
+- Booking pricing, inventory, delivery, finance, referral, customer contact preferences and Telegram contact fields are unchanged.
+
+### TESTS
+
+- `scripts/test-v4-3-31-booking-source-telegram.mjs` guards selector, label and analytics mapping.
+- `scripts/test-analytics-decision.mjs` covers Telegram as its own source cohort.
+- Full Static and Browser/PWA QA remain mandatory before production merge.
+
+### RELEASE
+
+- Canonical release: `4.3.31 / 4331`.

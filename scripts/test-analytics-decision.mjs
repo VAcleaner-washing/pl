@@ -28,15 +28,19 @@ for(const name of ['recordedChemistryRevenue','revenueBreakdown','analyticsSourc
 const monday={status:'completed',source:'vacleaner_website',start_date:'2026-08-10',total_amount:1200,base_amount:800,delivery_amount:200,extras_amount:200,rawBase:900,extras:{chemistry:{amount:100}}};
 const saturday={status:'completed',source:'phone',start_date:'2026-08-08',total_amount:700,base_amount:700,delivery_amount:0,extras_amount:0,rawBase:700,extras:{}};
 const cancelled={status:'cancelled',source:'instagram',start_date:'2026-08-09',total_amount:0};
+const telegram={status:'confirmed',source:'telegram',start_date:'2026-08-11',total_amount:900,base_amount:900,delivery_amount:0,extras_amount:0,rawBase:900,extras:{}};
 
 assert.deepEqual({...context.revenueBreakdown([monday,saturday])},{rental:1500,delivery:200,chemistry:100,extras:100,discount:100,adjustment:0,total:1900},'revenue components must reconcile to recorded total and keep discounts separate');
-const sourceRows=JSON.parse(JSON.stringify(context.sourcePerformance([monday,saturday,cancelled]))).map(row=>({key:row.key,created:row.created,completed:row.completed,cancelled:row.cancelled}));
+const sourceRows=JSON.parse(JSON.stringify(context.sourcePerformance([monday,saturday,cancelled,telegram]))).map(row=>({key:row.key,created:row.created,completed:row.completed,cancelled:row.cancelled}));
 assert.deepEqual(sourceRows,[
   {key:'website',created:1,completed:1,cancelled:0},
   {key:'phone',created:1,completed:1,cancelled:0},
   {key:'instagram',created:1,completed:0,cancelled:1},
+  {key:'telegram',created:1,completed:0,cancelled:0},
 ],'source cohort must count created bookings and their current outcome');
 assert.equal(context.sourcePerformance([monday,cancelled]).find(row=>row.key==='website').completionRate,100,'source performance must expose completion rate');
+assert.equal(context.analyticsSourceKey('telegram'),'telegram','Telegram source must keep its own analytics cohort');
+assert.equal(context.analyticsSourceLabel('telegram'),'Telegram','Telegram source must have a readable analytics label');
 const demand=context.weekdayDemand([monday,saturday],{start:new Date('2026-08-01T00:00:00'),end:new Date('2026-09-01T00:00:00')});
 assert.equal(demand.rows[0].count,1,'Monday issue demand missing');
 assert.equal(demand.rows[5].count,1,'Saturday issue demand missing');

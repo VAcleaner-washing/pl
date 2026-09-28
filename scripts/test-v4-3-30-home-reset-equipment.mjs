@@ -9,8 +9,8 @@ const release=JSON.parse(read('release.json'));
 const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
 let failed=0;
 function ok(value,label){if(value)console.log('PASS:',label);else{failed++;console.error('FAIL:',label)}}
-ok(pkg.version==='4.3.30','package version is 4.3.30');
-ok(release.version==='4.3.30'&&Number(release.build)===4330,'release is 4.3.30 / 4330');
+ok(/^4\.3\.\d+$/.test(pkg.version)&&Number(pkg.version.split('.')[2])>=30,'release remains on v4.3.30+');
+ok(/^4\.3\.\d+$/.test(release.version)&&Number(release.version.split('.')[2])>=30&&Number(release.build)>=4330,'release remains v4.3.30+ / build 4330+');
 ok(/class="[^"]*\bv4330\b/.test(html),'admin shell enables v4.3.30 layer');
 ok(/\/assets\/admin-v4330\.css\?v=(4330|43\d+)/.test(html),'admin loads v4.3.30 CSS');
 ok(/\/assets\/admin-v4330\.js\?v=(4330|43\d+)/.test(html),'admin loads v4.3.30 JS');
