@@ -16,7 +16,7 @@ ok(/\/assets\/admin-v4330\.css\?v=(4330|43\d+)/.test(html),'admin loads v4.3.30 
 ok(/\/assets\/admin-v4330\.js\?v=(4330|43\d+)/.test(html),'admin loads v4.3.30 JS');
 ok(sw.includes('/assets/admin-v4330.css')&&sw.includes('/assets/admin-v4330.js'),'service worker caches v4.3.30 assets');
 ok(js.includes('Kärcher Puzzi 8/1')&&js.includes('Kärcher SC 2 Deluxe')&&js.includes('Jimmy JV35')&&js.includes('ABIR WD8'),'HOME RESET exposes all four equipment units');
-ok(js.includes("aria-expanded")&&js.includes("keydown")&&js.includes("event.key==='Enter'")&&js.includes("event.key!==' '"),'disclosure supports accessible keyboard interaction');
+ok(js.includes("aria-expanded")&&js.includes("keydown")&&js.includes("event.key!=='Enter'")&&js.includes("event.key!==' '"),'disclosure supports accessible keyboard interaction');
 ok(js.includes("4 одиниці техніки · показати склад")&&js.includes("4 одиниці техніки · згорнути"),'disclosure state is explicit');
 ok(css.includes('.v4330-home-reset-kit[hidden]')&&css.includes('[aria-expanded="true"]'),'expanded/collapsed states are styled');
 ok(spec.includes('HOME RESET equipment row')&&spec.includes('4.3.30'),'system spec protects HOME RESET disclosure');
