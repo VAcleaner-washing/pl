@@ -4731,6 +4731,11 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - The existing chevron on the HOME RESET equipment row now represents a real action instead of a decorative affordance.
 - Expansion happens inline, so the manager keeps the booking context and does not navigate away from the client/order screen.
 
+### FIXED
+
+- The HOME RESET chevron in mobile booking detail is no longer a decorative dead-end: it now opens the actual kit composition.
+- Managers no longer need to leave the booking or remember the HOME RESET composition to verify which units must be prepared.
+
 ### PRESERVED
 
 - Product pricing, booking contents, inventory resource mapping, deposits, gifts, delivery, finance and client data are unchanged.
