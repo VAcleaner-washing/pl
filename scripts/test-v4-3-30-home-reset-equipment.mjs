@@ -1,0 +1,23 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8');
+const html=read('admin/bronuvannia/index.html');
+const js=read('assets/admin-v4330.js');
+const css=read('assets/admin-v4330.css');
+const sw=read('admin/sw.js');
+const pkg=JSON.parse(read('package.json'));
+const release=JSON.parse(read('release.json'));
+const spec=read('docs/VAcleaner-SYSTEM-SPEC.md');
+let failed=0;
+function ok(value,label){if(value)console.log('PASS:',label);else{failed++;console.error('FAIL:',label)}}
+ok(pkg.version==='4.3.30','package version is 4.3.30');
+ok(release.version==='4.3.30'&&Number(release.build)===4330,'release is 4.3.30 / 4330');
+ok(/class="[^"]*\bv4330\b/.test(html),'admin shell enables v4.3.30 layer');
+ok(/\/assets\/admin-v4330\.css\?v=(4330|43\d+)/.test(html),'admin loads v4.3.30 CSS');
+ok(/\/assets\/admin-v4330\.js\?v=(4330|43\d+)/.test(html),'admin loads v4.3.30 JS');
+ok(sw.includes('/assets/admin-v4330.css')&&sw.includes('/assets/admin-v4330.js'),'service worker caches v4.3.30 assets');
+ok(js.includes('Kärcher Puzzi 8/1')&&js.includes('Kärcher SC 2 Deluxe')&&js.includes('Jimmy JV35')&&js.includes('ABIR WD8'),'HOME RESET exposes all four equipment units');
+ok(js.includes("aria-expanded")&&js.includes("keydown")&&js.includes("event.key==='Enter'")&&js.includes("event.key!==' '"),'disclosure supports accessible keyboard interaction');
+ok(js.includes("4 одиниці техніки · показати склад")&&js.includes("4 одиниці техніки · згорнути"),'disclosure state is explicit');
+ok(css.includes('.v4330-home-reset-kit[hidden]')&&css.includes('[aria-expanded="true"]'),'expanded/collapsed states are styled');
+ok(spec.includes('HOME RESET equipment row')&&spec.includes('4.3.30'),'system spec protects HOME RESET disclosure');
+if(failed)process.exit(1);
