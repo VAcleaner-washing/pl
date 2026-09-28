@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.29  
-**Baseline build:** 4329  
-**Останнє оновлення:** 2026-09-02  
+**Baseline version:** 4.3.30  
+**Baseline build:** 4330  
+**Останнє оновлення:** 2026-09-28  
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -3879,6 +3879,7 @@ The final archive may be handed off only after the aggregate status is recorded 
 ### CHANGED
 
 - Mobile booking detail follows the manager workflow order: `Техніка → Додатково → Клієнт → Доставка → Фінанси`.
+- The `HOME RESET` equipment row is an explicit disclosure control: tap/click or Enter/Space expands the four included units (`Kärcher Puzzi 8/1`, `Kärcher SC 2 Deluxe`, `Jimmy JV35`, `ABIR WD8`) in place without leaving the booking.
 - The upper `Додатково` section is identity-only: selected add-ons are readable by name without duplicating prices.
 - `Доставка` contains only operational information: navigable address, access/orientation text and one-way `Відстань до точки` from the stored route snapshot.
 - The financial block owns the money and presents one right-aligned value axis in this order: `Передоплата → Залог → Оренда → Додатково → Доставка`.
@@ -4715,3 +4716,37 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 ### RELEASE
 
 - Canonical release: `4.3.29 / 4329`.
+
+
+# 86. Change record — v4.3.30 HOME RESET EQUIPMENT DISCLOSURE
+
+### ADDED
+
+- Interactive HOME RESET equipment disclosure in the mobile booking detail.
+- The expanded list shows the four operational units included in the kit: Kärcher Puzzi 8/1, Kärcher SC 2 Deluxe, Jimmy JV35 and the ABIR WD8 window robot.
+- Keyboard-accessible toggle behavior with `aria-expanded`, `aria-controls`, Enter and Space support.
+
+### CHANGED
+
+- The existing chevron on the HOME RESET equipment row now represents a real action instead of a decorative affordance.
+- Expansion happens inline, so the manager keeps the booking context and does not navigate away from the client/order screen.
+
+### FIXED
+
+- The HOME RESET chevron in mobile booking detail is no longer a decorative dead-end: it now opens the actual kit composition.
+- Managers no longer need to leave the booking or remember the HOME RESET composition to verify which units must be prepared.
+
+### PRESERVED
+
+- Product pricing, booking contents, inventory resource mapping, deposits, gifts, delivery, finance and client data are unchanged.
+- Non-HOME RESET equipment rows keep their previous behavior.
+
+### TESTS
+
+- `scripts/test-v4-3-30-home-reset-equipment.mjs` guards release wiring, the four-item kit and accessibility contract.
+- `scripts/admin_booking_v4330_home_reset_qa.py` checks 390/430 px interaction, containment, keyboard toggle and non-HOME RESET isolation.
+- Full Static and Browser/PWA QA remain mandatory before production merge.
+
+### RELEASE
+
+- Canonical release: `4.3.30 / 4330`.
