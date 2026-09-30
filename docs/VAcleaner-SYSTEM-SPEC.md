@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.31  
-**Baseline build:** 4331  
-**Останнє оновлення:** 2026-09-28  
+**Baseline version:** 4.3.32  
+**Baseline build:** 4332  
+**Останнє оновлення:** 2026-09-30  
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -1252,6 +1252,8 @@ FAQ copy повинно бути узгоджене з:
 - support.
 
 FAQ — не окреме джерело правил; він відображає основні contracts.
+
+- **CONTENT-LINK-001** — кожна editorial-порада повинна мати контекстні внутрішні переходи до релевантного `/rishennia/*/` і сторінки техніки `/tekhnika/*/` біля основного контенту, а не лише у фінальному CTA. Перша змістовна згадка ключової техніки в тексті має бути клікабельною, якщо для неї існує внутрішня сторінка.
 
 ## TRUST-005 — reviews
 
@@ -4790,3 +4792,37 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 ### RELEASE
 
 - Canonical release: `4.3.31 / 4331`.
+
+
+# 88. Change record — v4.3.32 CONTEXTUAL ADVICE ROUTES
+
+### ADDED
+
+- Contextual internal-link strip near the beginning of all 8 advice articles.
+- Inline links on the first meaningful equipment mention inside each article.
+- Direct routes from advice content to the matching solution and equipment pages.
+
+### CHANGED
+
+- Blog advice no longer relies only on the bottom “Наступний крок” block for internal navigation.
+- Mattress articles additionally expose the Puzzi + Jimmy booking path because Jimmy does not have a standalone equipment page.
+- Window advice connects both ABIR WD8 and SC 2 where the article discusses those tools.
+
+### FIXED
+
+- Readers can now move from the exact advice context to the equipment/solution being discussed without returning to the blog index or site navigation.
+- Internal linking around high-intent editorial content is explicit for both UX and SEO.
+
+### PRESERVED
+
+- Advice copy, safety guidance, pricing, booking rules and bottom CTA blocks are unchanged except for added links.
+- Existing canonical URLs, metadata, schema and public booking parameters remain unchanged.
+
+### TESTS
+
+- `scripts/test-blog-context-links.mjs` verifies all 8 articles expose a near-content solution route, equipment route and inline equipment link.
+- The test runs under the canonical public SEO QA suite.
+
+### RELEASE
+
+- Canonical release: `4.3.32 / 4332`.

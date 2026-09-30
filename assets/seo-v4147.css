@@ -29,3 +29,70 @@
  .v4-article .seo-route-links>div{display:grid;grid-template-columns:1fr}
  .v4-article .seo-route-links a{border-radius:12px;min-height:44px}
 }
+
+
+/* Contextual internal routes inside advice articles */
+.content-context-links{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+  margin:18px 0 30px;
+  padding:12px 0;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.content-context-links>span{
+  margin-right:2px;
+  color:#8f989c;
+  font-size:11px;
+  line-height:1;
+  font-weight:650;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.content-context-links>a{
+  display:inline-flex;
+  align-items:center;
+  min-height:34px;
+  padding:7px 11px;
+  border:1px solid rgba(233,178,82,.18);
+  border-radius:999px;
+  background:rgba(233,178,82,.045);
+  color:#e7c078;
+  font-size:12px;
+  line-height:1.2;
+  font-weight:600;
+  text-decoration:none;
+}
+.content-context-links>a:hover{
+  border-color:rgba(233,178,82,.38);
+  background:rgba(233,178,82,.075);
+}
+.v4-article .content-inline-link{
+  color:inherit;
+  text-decoration-line:underline;
+  text-decoration-color:rgba(233,178,82,.55);
+  text-decoration-thickness:1px;
+  text-underline-offset:3px;
+}
+.v4-article .content-inline-link:hover{
+  color:#e7c078;
+  text-decoration-color:currentColor;
+}
+@media(max-width:640px){
+  .content-context-links{
+    gap:7px;
+    margin:15px 0 24px;
+    padding:10px 0;
+  }
+  .content-context-links>span{
+    width:100%;
+    margin-bottom:1px;
+  }
+  .content-context-links>a{
+    min-height:32px;
+    padding:6px 10px;
+    font-size:11.5px;
+  }
+}
