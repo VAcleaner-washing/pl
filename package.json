@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.32",
+  "version": "4.3.33",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -84,6 +84,7 @@
     "test:stabilization-acceptance-browser": "python scripts/v4312_qa_runner.py scripts/stabilization_acceptance_qa.py",
     "test:client-card-visual": "python scripts/client_card_v4245_qa.py",
     "test:process-contact-v4311": "python scripts/process_contact_v4311_visual_qa.py",
-    "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py && python scripts/admin_booking_v4316_time_range_qa.py && python scripts/v4312_qa_runner.py scripts/admin_booking_v4319_landscape_qa.py && python scripts/admin_prepayment_waiver_v4319_qa.py && python scripts/admin_upcoming_status_v4320_qa.py && python scripts/admin_booking_v4321_detail_qa.py && python scripts/admin_booking_v4322_finance_polish_qa.py && python scripts/admin_booking_v4323_filter_polish_qa.py && python scripts/admin_booking_v4324_desktop_polish_qa.py && python scripts/admin_booking_v4326_confirmation_message_qa.py && python scripts/admin_booking_v4327_pending_documents_qa.py && python scripts/admin_booking_v4330_home_reset_qa.py"
+    "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py && python scripts/admin_booking_v4316_time_range_qa.py && python scripts/v4312_qa_runner.py scripts/admin_booking_v4319_landscape_qa.py && python scripts/admin_prepayment_waiver_v4319_qa.py && python scripts/admin_upcoming_status_v4320_qa.py && python scripts/admin_booking_v4321_detail_qa.py && python scripts/admin_booking_v4322_finance_polish_qa.py && python scripts/admin_booking_v4323_filter_polish_qa.py && python scripts/admin_booking_v4324_desktop_polish_qa.py && python scripts/admin_booking_v4326_confirmation_message_qa.py && python scripts/admin_booking_v4327_pending_documents_qa.py && python scripts/admin_booking_v4330_home_reset_qa.py",
+    "test:admin-entrypoint-finance": "python scripts/admin_entrypoint_finance_qa.py --root dist --artifacts admin-entrypoint-test-results"
   }
 }

@@ -22,6 +22,9 @@ const walk=directory=>fs.readdirSync(directory,{withFileTypes:true}).flatMap(ent
 });
 const files=walk(artifactRoot).sort();
 const sourceRelease=JSON.parse(fs.readFileSync(path.join(sourceRoot,'release.json'),'utf8'));
+const adminEntrypoints=['admin/bronuvannia/index.html','admin/bronuvannia.html'].map(rel=>path.join(artifactRoot,rel));
+if(adminEntrypoints.some(file=>!fs.existsSync(file)))errors.push('canonical admin entrypoint or compatibility alias is missing');
+else if(!fs.readFileSync(adminEntrypoints[0]).equals(fs.readFileSync(adminEntrypoints[1])))errors.push('admin entrypoints disagree: extensionless Pages route would serve an outdated shell');
 const artifactReleasePath=path.join(artifactRoot,'release.json');
 if(!fs.existsSync(artifactReleasePath))errors.push('release.json is missing from Pages artifact');
 else{

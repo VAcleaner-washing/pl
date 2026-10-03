@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.32
-**Baseline build:** 4332
+**Baseline version:** 4.3.33
+**Baseline build:** 4333
 **Останнє оновлення:** 2026-10-03
 **Власник логіки:** VAcleaner  
 
@@ -4816,3 +4816,32 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 - Canonical browser QA includes `test:public-hydration`: sitemap routes on desktop/mobile, booking product selection and delayed client scripts, with runtime errors treated as failures.
 - Production publication and live Supabase integration require separate verification; this change does not deploy backend functions.
+
+
+# 89. Change record — v4.3.33 ADMIN ENTRYPOINT AND FINANCE CONSISTENCY
+
+### FIXED
+
+- GitHub Pages resolves `/admin/bronuvannia` to `admin/bronuvannia.html` before the directory index. This alias now serves the current canonical shell, including desktop finance styles and receipt deduplication, instead of the obsolete Glass-only export.
+- Booking-card received totals and deposit explanations, preliminary settlement and rental completion use the approved current presentation at all three admin entrypoints.
+- Desktop settlement summaries scroll with the form so a tall summary can reveal its final refund/due amount above the fixed footer; the existing sticky summary could conceal this amount on shorter windows.
+
+### CHANGED
+
+- Canonical release: `4.3.33 / 4333`; every local asset reference and PWA cache carries the release build.
+- The v4.3 admin-shell contract requires both entrypoints to contain the current finance assets and to be byte-identical. The obsolete v4.1.63 HTML freeze remains applicable only to older release branches.
+
+### ADDED
+
+- Release stamping mirrors the fully stamped canonical `admin/bronuvannia/index.html` into its `.html` compatibility alias. Pages artifact verification also rejects missing or divergent entrypoints.
+- Browser QA loads the complete deployed HTML with Pages-style extensionless precedence, opens both settlement forms and checks booking-card receipt deduplication, money alignment, query/hash preservation and unchanged refund examples on all entrypoints at 320 / 390 / 430 / 768 / 1024 / 1280 / 1440 / 1648 / 1920 px.
+
+### PRESERVED
+
+- Existing admin URLs, authentication/session handling, links, finance calculations, booking statuses, prices, deposits and backend functions are unchanged. The financial forms are not submitted against production during visual checks.
+- The canonical approved visual design and the v4.3.32 public React hydration fix remain intact.
+
+### TESTS
+
+- `test:current-contracts`, `verify:artifact` and `test:admin-entrypoint-finance` guard source, deploy artifact and full-page browser behavior respectively. Browser evidence is retained in CI.
+- Full canonical static and browser/PWA QA is required before the single production commit, followed by Actions/deploy and live checks of the extensionless route.

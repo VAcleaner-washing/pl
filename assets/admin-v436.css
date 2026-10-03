@@ -1,6 +1,8 @@
 /* v4.3.6 — finance flow consistency across desktop and mobile. */
 @media(min-width:901px){
   html.v43-prod .finance-form .modal-summary{
+    /* Tall summaries must scroll with the form to clear its fixed footer. */
+    position:static!important;
     padding:16px 18px!important;
   }
   html.v43-prod .finance-form .modal-summary>h3{

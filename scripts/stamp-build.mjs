@@ -54,4 +54,8 @@ fs.writeFileSync(adminSw,sw);
 const adminRuntime=path.join(root,'assets','admin-v250.js');
 let runtime=fs.readFileSync(adminRuntime,'utf8').replace(/const PWA_BUILD='\d+'/,`const PWA_BUILD='${build}'`).replace(/(\/admin\/sw\.js)\?v=\d+/g,`$1?v=${build}`);
 fs.writeFileSync(adminRuntime,runtime);
+// GitHub Pages serves the .html export for the extensionless admin URL before
+// its directory index. Keep this compatibility entrypoint byte-identical to the
+// stamped canonical shell, including every finance stylesheet and enhancer.
+fs.copyFileSync(path.join(root,'admin','bronuvannia','index.html'),path.join(root,'admin','bronuvannia.html'));
 console.log(`Stamped VAcleaner ${version} (${build})`);

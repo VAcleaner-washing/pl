@@ -80,6 +80,7 @@ jobs:
             qa-release-summary.json
             test-results
             hydration-test-results
+            admin-entrypoint-test-results
             pwa-test-results
             density-test-results
             final-desktop-test-results

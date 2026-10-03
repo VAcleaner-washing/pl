@@ -56,6 +56,7 @@
     "test:admin-typography-browser",
     "test:admin-context-navigation",
     "test:admin-route-smoke",
+    "test:admin-entrypoint-finance",
     "test:admin-control-consistency",
     "test:pwa-focus",
     "test:pwa",

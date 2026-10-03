@@ -22,13 +22,15 @@ const groupHash=(paths, normalizer=null)=>{
 
 const adminHtml=['admin/bronuvannia/index.html','admin/bronuvannia.html'];
 for(const rel of adminHtml){
-  if(isV43&&rel==='admin/bronuvannia/index.html'){
+  if(isV43){
     const html=read(rel).toString('utf8');
     ck(html.includes('/assets/admin-v250.js')&&html.includes('/assets/admin-v430.css')&&html.includes('/assets/admin-v430.js')&&html.includes('/admin/manifest.webmanifest'),`${rel} ships canonical v4.3 production shell`);
+    ck(html.includes('v43-prod')&&html.includes('/assets/admin-v436.css')&&html.includes('/assets/admin-v437.css')&&html.includes('/assets/admin-v437.js'),`${rel} ships approved finance presentation and receipt deduplication`);
   }else{
     ck(sha(normHtml(read(rel)))==='614245a5f75df1ff5d8f46c644edb88dede4874af7ebf7b69653bef3ae22b164',`${rel} structure is frozen to v4.1.63 baseline`);
   }
 }
+if(isV43)ck(read(adminHtml[0]).equals(read(adminHtml[1])),'extensionless/.html and slash admin entrypoints are byte-identical');
 
 const normAdmin=(rel,b)=>{
   let s=b.toString('utf8');
