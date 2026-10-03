@@ -11,6 +11,7 @@ execFileSync(process.execPath,[path.join(root,'scripts','sync-static-copy.mjs')]
 execFileSync(process.execPath,[path.join(root,'scripts','harden-public-metadata.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','generate-config.mjs')],{stdio:'inherit'});
 execFileSync(process.execPath,[path.join(root,'scripts','apply-delivery-settings.mjs')],{stdio:'inherit'});
+execFileSync(process.execPath,[path.join(root,'scripts','sync-public-hydration.mjs')],{stdio:'inherit'});
 const release=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
 const version=String(release.version), build=String(release.build||version.replace(/\D/g,''));
 const ignoredDirs=new Set(['.git','dist','node_modules','.pages-artifact','.pw-browsers','.venv','__pycache__','test-results','pwa-test-results','density-test-results','final-desktop-test-results','playwright-report']);

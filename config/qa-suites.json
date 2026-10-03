@@ -38,6 +38,7 @@
     "test:ci-pipeline"
   ],
   "browser": [
+    "test:public-hydration",
     "test:public-visual-parity",
     "test:analytics-visual",
     "test:growth-visual",

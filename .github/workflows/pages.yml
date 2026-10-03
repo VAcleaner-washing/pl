@@ -79,6 +79,7 @@ jobs:
           path: |
             qa-release-summary.json
             test-results
+            hydration-test-results
             pwa-test-results
             density-test-results
             final-desktop-test-results

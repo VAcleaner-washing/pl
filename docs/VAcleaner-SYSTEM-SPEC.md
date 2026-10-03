@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.31  
-**Baseline build:** 4331  
-**Останнє оновлення:** 2026-09-28  
+**Baseline version:** 4.3.32
+**Baseline build:** 4332
+**Останнє оновлення:** 2026-10-03
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -4790,3 +4790,29 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 ### RELEASE
 
 - Canonical release: `4.3.31 / 4331`.
+
+
+# 88. Change record — v4.3.32 REACT HYDRATION AND CACHE CONSISTENCY
+
+### CHANGED
+
+- Canonical release: `4.3.32 / 4332`; HTML/RSC asset references, admin runtime and service-worker cache/registration share this build.
+
+### FIXED
+
+- `scripts/sync-public-hydration.mjs` synchronizes the retained static export with its client footer, home copy and gift link, booking empty state and consent, and server-rendered solution/package/process Flight sections.
+- Booking add-on attributes are retained during hydration; existing pickup notes and related guides are no longer discarded by React recovery.
+- The legacy compatibility stylesheet now mirrors the existing modular promo field grid span, keeping the initial booking markup consistent across both style bundles.
+
+### ADDED
+
+- Public DOM enhancements execute only after the owning React page commits, through `assets/public-hydration.js` and the `vacleaner:hydrated` event. Hydration errors are neither suppressed nor filtered.
+
+### PRESERVED
+
+- The approved final public layout and existing booking, pricing, contact, finance and PWA behavior remain the intended baseline; no CSS redesign is part of this release.
+
+### TESTS
+
+- Canonical browser QA includes `test:public-hydration`: sitemap routes on desktop/mobile, booking product selection and delayed client scripts, with runtime errors treated as failures.
+- Production publication and live Supabase integration require separate verification; this change does not deploy backend functions.
