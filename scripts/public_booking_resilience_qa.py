@@ -60,6 +60,26 @@ def main():
         assert consent_page.locator('.vx-marketing-consent input').is_checked() is False, 'Marketing consent must default to unchecked'
         assert 'Отримувати персональні пропозиції та бонуси VAcleaner' in consent_page.locator('.vx-marketing-consent').inner_text()
         consent_page.close()
+
+        # Targeted calendar regression runs in its own short-lived page so the
+        # existing mutation-plateau resilience scenario stays untouched.
+        calendar_page=browser.new_page(viewport={'width':390,'height':844})
+        calendar_page.route('**/*',route_handler)
+        calendar_page.set_content(HTML,wait_until='domcontentloaded')
+        calendar_page.add_script_tag(path=str(ROOT/'assets/vacleaner-core.js'))
+        calendar_page.add_script_tag(path=str(ROOT/'assets/public-booking-slots.js'))
+        calendar_page.add_script_tag(path=str(ROOT/'assets/public-experience.js'))
+        calendar_page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
+        calendar_page.wait_for_timeout(160)
+        bounds=calendar_page.evaluate("""()=>{const input=document.querySelector('.booking-date-grid input[type="date"]');const now=new Date();now.setHours(12,0,0,0);const pad=n=>String(n).padStart(2,'0');const today=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());const minDate=new Date(input.min+'T12:00:00');const maxDate=new Date(input.max+'T12:00:00');const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];return {today,min:input.min,max:input.max,span:Math.round((maxDate-minDate)/86400000),month:months[now.getMonth()]+' '+now.getFullYear()}}""")
+        assert bounds['min']==bounds['today'], f"Stale static min was not rolled to today: {bounds}"
+        assert bounds['span']==147, f"Fixture booking horizon changed while rolling bounds: {bounds}"
+        calendar_page.locator('.vx-date-trigger').first.click()
+        shown_month=calendar_page.locator('.vx-calendar-month').text_content().strip()
+        assert shown_month==bounds['month'], f"Calendar opened on stale static-export month: {shown_month!r} != {bounds['month']!r}"
+        assert calendar_page.locator('.vx-calendar-prev').is_disabled(), 'Previous-month navigation must be disabled at the current rolling minimum month'
+        calendar_page.close()
+
         page=browser.new_page(viewport={'width':390,'height':844})
         errors=[]
         page.on('pageerror',lambda exc: errors.append(str(exc)))
@@ -69,26 +89,12 @@ def main():
         page.add_script_tag(path=str(ROOT/'assets/vacleaner-core.js'))
         page.add_script_tag(path=str(ROOT/'assets/public-booking-slots.js'))
         page.add_script_tag(path=str(ROOT/'assets/public-experience.js'))
-        # set_content() has already fired DOMContentLoaded; replay it so this harness
-        # exercises the same public-experience bootstrap that a real page load gets.
-        page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
         page.wait_for_timeout(450)
         first=page.evaluate('window.__mutationCount')
         page.wait_for_timeout(700)
         second=page.evaluate('window.__mutationCount')
         delta=second-first
         assert delta <= 5, f'Mutation storm detected after settle: {first} -> {second} (delta {delta})'
-
-        # Regression: static-exported booking bounds must roll forward at runtime.
-        # A stale saved value must not drag the custom calendar back to the export month.
-        bounds=page.evaluate("""()=>{const input=document.querySelector('.booking-date-grid input[type="date"]');const now=new Date();now.setHours(12,0,0,0);const pad=n=>String(n).padStart(2,'0');const today=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());const minDate=new Date(input.min+'T12:00:00');const maxDate=new Date(input.max+'T12:00:00');const months=['січень','лютий','березень','квітень','травень','червень','липень','серпень','вересень','жовтень','листопад','грудень'];return {today,min:input.min,max:input.max,span:Math.round((maxDate-minDate)/86400000),month:months[now.getMonth()]+' '+now.getFullYear()}}""")
-        assert bounds['min']==bounds['today'], f"Stale static min was not rolled to today: {bounds}"
-        assert bounds['span']==147, f"Fixture booking horizon changed while rolling bounds: {bounds}"
-        page.locator('.vx-date-trigger').first.click()
-        shown_month=page.locator('.vx-calendar-month').text_content().strip()
-        assert shown_month==bounds['month'], f"Calendar opened on stale static-export month: {shown_month!r} != {bounds['month']!r}"
-        assert page.locator('.vx-calendar-prev').is_disabled(), 'Previous-month navigation must be disabled at the current rolling minimum month'
-        page.locator('.vx-calendar-close').click()
 
         before=page.url
         result=page.evaluate("""async()=>{const r=await fetch('https://yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'create',productCode:'puzzi',startDate:'2026-08-07',returnDate:'2026-08-08',pickupWindow:'evening',returnWindow:'evening'})});let d={};try{d=await r.clone().json()}catch{};return {status:r.status,data:d}}""")
