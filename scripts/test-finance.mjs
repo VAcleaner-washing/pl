@@ -78,6 +78,8 @@ assert.match(adminSource,/Math\.min\(100,digits\(form\.used\)\)/,'admin chemistr
 assert.match(adminSource,/name="rentalAdjustmentAmount"/,'admin return finance must expose a positive rental adjustment amount');
 assert.match(adminSource,/name="rentalAdjustmentReason"/,'positive rental adjustment must keep an audit reason');
 assert.match(adminSource,/rentalAdjustmentAmount:adjustment\.amount,rentalAdjustmentReason:adjustment\.reason/,'save_finance must persist the positive rental adjustment');
+const adminEdgeV4=fs.readFileSync(new URL('../supabase/functions/vacleaner-admin-bookings-v4/index.ts',import.meta.url),'utf8');
+assert.match(adminEdgeV4,/const rentalAdjustment = Math\.max\(0, Math\.round\(Number\(booking\?\.extras\?\.rental_adjustment\?\.amount\) \|\| 0\)\);\s*const revenue = Math\.max\(0, Math\.round\(Number\(booking\?\.base_amount\) \|\| 0\)\) \+ rentalAdjustment;/,'equipment allocation must include the positive rental adjustment');
 
 const explicitConfirmation=settlementConfirmation({returned:true,settlementConfirmed:true,refundPaid:true,duePaid:false},example);
 assert.equal(explicitConfirmation.ok,true); assert.equal(explicitConfirmation.legacy,false);
