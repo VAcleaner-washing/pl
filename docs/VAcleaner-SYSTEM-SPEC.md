@@ -4885,6 +4885,8 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 # 91. Change record — v4.3.35 FINANCE CHARGES AND CHEMISTRY ABOVE EIGHT
 
+### ADDED
+
 ### FIN-CHARGE-001 — positive manual charges
 - The manager's issued/completed rental finance form supports a nonnegative fixed `+ грн` charge, with a required brief reason when amount is positive. Amount zero removes the charge.
 - Persist in `vacleaner_bookings.extras.manual_charge = { amount, reason }` (or `null`), with amount validated server-side up to 100000 and reason sanitized to 160 characters. No table migrations.
@@ -4892,10 +4894,15 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `save_finance` requests without manual charge fields (such as the issue flow) must preserve any stored charge. Explicit zero clears it, subsequent edit replaces it instead of incrementing; reload and reopen show persisted amount/reason.
 - The existing extension action is the only means of changing reserved rental date/time and checking inventory conflicts. A fee reason such as "Продовження на 2 години" alone **does not** change reserved slots.
 
+### CHANGED
+
 ### FIN-CHEM-001 — more than eight Puzzi packets
 - Standard issued quantity is eight; after additional packets are physically provided, the manager may record actual use over eight, up to a protected maximum of 100. Backend, frontend and both active settlement modules must agree.
 - Each paid packet is charged at `catalog.puzziPacketPrice` (fallback 50 грн). The existing **two free Puzzi packets** gift continues to deduct exactly two when eligible and explicitly selected; VA HOME diffuser gifts do not activate free packets.
 - Non-Puzzi booking still has zero Puzzi chemical charge. Rental pricing, weekend tariffs, deposits, availability and other extras are unchanged.
+
+### FIXED
+- Older releases silently clamped ten actual Puzzi packets to eight and had no independent +UAH finance line.
 
 ### PRESERVED / INTEGRATION
 - `settlementFromBooking` computes selected extras + actual chemistry + manual charge; `save_deposit_return` trusts the saved authoritative amount, and extension recalculation preserves charges.
