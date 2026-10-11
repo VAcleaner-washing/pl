@@ -64,8 +64,10 @@ Deno.serve(async (request: Request) => {
       cancelled: ["pending", "waiting_payment", "confirmed"],
     };
     if (!allowed[currentStatus]?.includes(nextStatus)) return json({ error: "invalid_transition" }, 409);
-    if (nextStatus === "confirmed" && current.prepayment_paid !== true) return json({ error: "prepayment_required" }, 409);
-    if (nextStatus === "issued" && (current.prepayment_paid !== true || current.deposit_paid !== true)) return json({ error: "issue_payment_required" }, 409);
+    const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+    const prepaymentSatisfied = current.prepayment_paid === true || currentExtras?.prepayment_waiver?.active === true;
+    if (nextStatus === "confirmed" && !prepaymentSatisfied) return json({ error: "prepayment_required" }, 409);
+    if (nextStatus === "issued" && (!prepaymentSatisfied || current.deposit_paid !== true)) return json({ error: "issue_payment_required" }, 409);
     if (["pending", "waiting_payment"].includes(nextStatus) && current.deposit_paid === true) return json({ error: "deposit_already_received" }, 409);
 
     const referralRollback = currentStatus === "completed" && nextStatus === "issued" ? await referralRollbackState(supabase, bookingId) : { use: null, reward: null };
@@ -91,7 +93,7 @@ Deno.serve(async (request: Request) => {
       throw reservationError;
     }
 
-    const now = new Date().toISOString(), currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+    const now = new Date().toISOString();
     const patch: Record<string, any> = { updated_at: now };
     if (currentStatus === "cancelled") {
       const { cancellation: _cancellation, ...restExtras } = currentExtras;
