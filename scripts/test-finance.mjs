@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import {settlementConfirmation, settlementFromBooking, selectedExtrasAmount} from '../supabase/functions/vacleaner-admin-bookings-v3/settlement.mjs';
+import {settlementFromBooking as settlementV4} from '../supabase/functions/vacleaner-admin-bookings-v4/settlement.mjs';
+import {settlementFromBooking as settlementExtend} from '../supabase/functions/vacleaner-extend-rental-v1/settlement.mjs';
+import fs from 'node:fs';
 import {discountInfo} from '../supabase/functions/vacleaner-admin-bookings-v3/pricing.mjs';
 
 const catalog={puzziPacketPrice:50,products:{
@@ -25,8 +28,12 @@ assert.equal(story.freePackets,2); assert.equal(story.paidPackets,1); assert.equ
 const noStory=settlementFromBooking(base({extras:{chemistry:{used_packets:3,story_mention:false}}}),catalog,catalog);
 assert.equal(noStory.chemistryAmount,150);
 
-const clamped=settlementFromBooking(base({extras:{chemistry:{used_packets:10,story_mention:true}}}),catalog,catalog);
-assert.equal(clamped.usedPackets,8); assert.equal(clamped.chemistryAmount,300);
+const extraChemistry=settlementFromBooking(base({extras:{chemistry:{used_packets:10,story_mention:true}}}),catalog,catalog);
+assert.equal(extraChemistry.usedPackets,10); assert.equal(extraChemistry.freePackets,2); assert.equal(extraChemistry.paidPackets,8); assert.equal(extraChemistry.chemistryAmount,400);
+for(const fn of [settlementV4,settlementExtend]){
+  const row=fn(base({extras:{chemistry:{used_packets:10,story_mention:true}}}),catalog,catalog);
+  assert.equal(row.usedPackets,10); assert.equal(row.chemistryAmount,400);
+}
 
 const nonPuzzi=settlementFromBooking(base({product_code:'sc2',base_amount:500,extras:{chemistry:{used_packets:8,story_mention:false}}}),catalog,catalog);
 assert.equal(nonPuzzi.usedPackets,0); assert.equal(nonPuzzi.chemistryAmount,0);
@@ -48,6 +55,29 @@ assert.equal(eliteDue.refundAmount,900); assert.equal(eliteDue.dueAmount,0);
 
 const unpaidDeposit=settlementFromBooking(base({deposit_paid:false,deposit_amount:1000}),catalog,catalog);
 assert.equal(unpaidDeposit.receivedAmount,200); assert.equal(unpaidDeposit.dueAmount,800);
+
+const surchargeBooking=base({base_amount:600,delivery_amount:0,extras:{rental_adjustment:{amount:200,reason:'Додаткові години'},chemistry:{used_packets:0,story_mention:false}}});
+for(const fn of [settlementFromBooking,settlementV4,settlementExtend]){
+  const row=fn(surchargeBooking,catalog,catalog);
+  assert.equal(row.rentalAdjustmentAmount,200);
+  assert.equal(row.rentalAdjustmentReason,'Додаткові години');
+  assert.equal(row.totalExtras,0);
+  assert.equal(row.totalAmount,800);
+  assert.equal(row.receivedAmount,1200);
+  assert.equal(row.refundAmount,400);
+}
+const surchargeWithChem=settlementFromBooking(base({base_amount:700,delivery_amount:250,extras:{rental_adjustment:{amount:150,reason:'Продовження'},chemistry:{used_packets:10,story_mention:false}}}),catalog,catalog);
+assert.equal(surchargeWithChem.chemistryAmount,500);
+assert.equal(surchargeWithChem.rentalAdjustmentAmount,150);
+assert.equal(surchargeWithChem.totalExtras,500);
+assert.equal(surchargeWithChem.totalAmount,1600);
+assert.equal(surchargeWithChem.dueAmount,400);
+
+const adminSource=fs.readFileSync(new URL('../assets/admin-v250.js',import.meta.url),'utf8');
+assert.match(adminSource,/Math\.min\(100,digits\(form\.used\)\)/,'admin chemistry counter must accept more than eight portions');
+assert.match(adminSource,/name="rentalAdjustmentAmount"/,'admin return finance must expose a positive rental adjustment amount');
+assert.match(adminSource,/name="rentalAdjustmentReason"/,'positive rental adjustment must keep an audit reason');
+assert.match(adminSource,/rentalAdjustmentAmount:adjustment\.amount,rentalAdjustmentReason:adjustment\.reason/,'save_finance must persist the positive rental adjustment');
 
 const explicitConfirmation=settlementConfirmation({returned:true,settlementConfirmed:true,refundPaid:true,duePaid:false},example);
 assert.equal(explicitConfirmation.ok,true); assert.equal(explicitConfirmation.legacy,false);
@@ -87,4 +117,4 @@ assert.equal(legacyOnOpen.selectedExtrasAmount,100); assert.equal(legacyOnOpen.t
 const cappedFixed=discountInfo({manualDiscountType:'fixed',manualDiscountValue:5000,manualDiscountReason:'Компенсація'},700,{});
 assert.equal(cappedFixed.amount,700); assert.equal(cappedFixed.baseAmount,0);
 
-console.log('Finance tests passed: selected extras are charged immediately.');
+console.log('Finance tests passed: extras, >8 chemistry portions and positive rental adjustments are charged correctly.');
