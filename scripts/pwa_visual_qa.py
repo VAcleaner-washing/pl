@@ -1195,6 +1195,7 @@ def finance_preview_native_suite(browser: Browser, qa: QA) -> None:
                 qa.check(chemistry.input_value()=='10' and '10 − 2 бонус = 400 грн' in chemistry_live, f"Finance preview {width}: more than eight chemistry portions are accepted and charged")
                 note=page.locator('.finance-form .note')
                 qa.check('лише на базову оренду' in note.inner_text() and 'додається після знижки' in note.inner_text(), f"Finance preview {width}: discount and surcharge order is explicit")
+                adjustment.scroll_into_view_if_needed(); page.wait_for_timeout(80)
                 qa.shot(page,f'finance-preview-surcharge-{width}-v4335.png')
                 layout=page.locator('.finance-form .modal-layout')
                 layout.evaluate("el=>el.scrollTop=el.scrollHeight");page.wait_for_timeout(30)
