@@ -63,6 +63,26 @@
   function isoDate(date){
     return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
   }
+  function localCalendarToday(){
+    const date=new Date();
+    date.setHours(12,0,0,0);
+    return date;
+  }
+  function normalizeBookingDateBounds(input){
+    const today=localCalendarToday();
+    if(!input)return {today,min:null,max:null};
+    const sourceMin=parseDate(input.min),sourceMax=parseDate(input.max);
+    if(!sourceMin||sourceMin<today){
+      const rollingDays=sourceMin&&sourceMax&&sourceMax>=sourceMin?Math.max(1,Math.round((sourceMax-sourceMin)/86400000)):null;
+      input.min=isoDate(today);
+      if(rollingDays!==null){
+        const nextMax=new Date(today);
+        nextMax.setDate(nextMax.getDate()+rollingDays);
+        input.max=isoDate(nextMax);
+      }
+    }
+    return {today,min:parseDate(input.min),max:parseDate(input.max)};
+  }
   function sameDay(a,b){return !!a&&!!b&&a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
   function addCalendarDays(value,days){
     const date=parseDate(value);
@@ -113,6 +133,7 @@
 
   function enhanceDate(input){
     if(!input.closest('.booking-date-grid'))return;
+    normalizeBookingDateBounds(input);
     if(dateState.has(input)){updateDateTrigger(input);return;}
     input.classList.add('vx-native-control');
     input.tabIndex=-1;
@@ -148,8 +169,7 @@
     layer.querySelector('.vx-calendar-next').addEventListener('click',()=>{viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1,12);renderCalendar()});
     layer.querySelector('.vx-calendar-today').addEventListener('click',()=>{
       if(!activeDateInput)return;
-      const today=new Date();today.setHours(12,0,0,0);
-      const min=parseDate(activeDateInput.min),max=parseDate(activeDateInput.max);
+      const {today,min,max}=normalizeBookingDateBounds(activeDateInput);
       if((min&&today<min)||(max&&today>max))return;
       chooseDate(today);
     });
@@ -185,9 +205,10 @@
   function openCalendar(input){
     activeDateInput=input;
     calendarReturnFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const {min,max}=normalizeBookingDateBounds(input);
     const selected=parseDate(input.value);
-    const min=parseDate(input.min);
-    viewDate=selected||min||new Date();
+    const selectedInRange=selected&&(!min||selected>=min)&&(!max||selected<=max)?selected:null;
+    viewDate=selectedInRange||min||localCalendarToday();
     viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),1,12);
     const layer=ensureCalendar();
     layer.querySelector('.vx-calendar-title').textContent=`Дата ${dateRole(input)}`;
@@ -216,7 +237,8 @@
     layer.querySelector('.vx-calendar-month').textContent=`${months[month]} ${year}`;
     const first=new Date(year,month,1,12),last=new Date(year,month+1,0,12);
     const leading=(first.getDay()+6)%7;
-    const min=parseDate(activeDateInput?.min),max=parseDate(activeDateInput?.max),selected=parseDate(activeDateInput?.value),today=new Date();today.setHours(12,0,0,0);
+    const bounds=normalizeBookingDateBounds(activeDateInput);
+    const min=bounds.min,max=bounds.max,selected=parseDate(activeDateInput?.value),today=bounds.today;
     const minMonth=min?new Date(min.getFullYear(),min.getMonth(),1,12):null;
     const maxMonth=max?new Date(max.getFullYear(),max.getMonth(),1,12):null;
     layer.querySelector('.vx-calendar-prev').disabled=!!minMonth&&viewDate<=minMonth;
