@@ -4314,3 +4314,10 @@ html.native-v28 .upcoming-handoff-copy{
     margin:0!important;
   }
 }
+
+/* v4.3.35 — a calm, independent money adjustment below the rental discount. */
+html.native-v28 .finance-form .finance-manual-charge.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;align-items:start;margin:14px 0 0;padding:14px 0 0;border:0;border-top:1px solid rgba(255,255,255,.07);background:transparent}
+html.native-v28 .finance-form .finance-manual-charge .field{min-width:0}
+html.native-v28 .finance-form .finance-manual-charge .field-help{grid-column:1/-1;margin:0;color:#9da6a7;font-size:11px;line-height:1.4}
+html.native-v28 .finance-form .finance-manual-charge-row strong{color:#efc16b}
+@media(max-width:620px){html.native-v28 .finance-form .finance-manual-charge.fields{grid-template-columns:minmax(0,1fr)}}

@@ -25,14 +25,15 @@ export function settlementFromBooking(current, catalog, defaultCatalog = {}) {
   const currentExtras = current?.extras && typeof current.extras === "object" ? current.extras : {};
   const selectedAmount = selectedExtrasAmount(currentExtras);
   const chemistry = currentExtras.chemistry && typeof currentExtras.chemistry === "object" ? currentExtras.chemistry : {};
-  const packetLimit = productUsesPuzzi(String(current?.product_code || ""), catalog, defaultCatalog) ? 8 : 0;
+  const packetLimit = productUsesPuzzi(String(current?.product_code || ""), catalog, defaultCatalog) ? 100 : 0;
   const usedPackets = cleanInt(chemistry.used_packets, packetLimit);
   const storyMention = packetLimit > 0 && chemistry.story_mention === true;
   const freePackets = storyMention ? Math.min(2, usedPackets) : 0;
   const paidPackets = Math.max(0, usedPackets - freePackets);
   const packetPrice = Math.max(0, Number(catalog?.puzziPacketPrice || defaultCatalog?.puzziPacketPrice || 50));
   const chemistryAmount = paidPackets * packetPrice;
-  const totalExtras = selectedAmount + chemistryAmount;
+  const manualChargeAmount = cleanInt(currentExtras?.manual_charge?.amount, 100000);
+  const totalExtras = selectedAmount + chemistryAmount + manualChargeAmount;
   const totalAmount = Math.max(0, Number(current?.base_amount || 0)) + Math.max(0, Number(current?.delivery_amount || 0)) + totalExtras;
   const prepaymentAmount = current?.prepayment_paid === true ? Math.max(0, Number(current?.prepayment_amount || 200)) : 0;
   const depositAmount = current?.deposit_paid === true ? Math.max(0, Number(current?.deposit_amount || 0)) : 0;
@@ -45,6 +46,7 @@ export function settlementFromBooking(current, catalog, defaultCatalog = {}) {
     paidPackets,
     packetPrice,
     chemistryAmount,
+    manualChargeAmount,
     selectedExtrasAmount: selectedAmount,
     totalExtras,
     prepaymentAmount,

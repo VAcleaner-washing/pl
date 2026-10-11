@@ -43,7 +43,7 @@ with sync_playwright() as p:
   page.screenshot(path=str(ART/'mobile-390-delivery-aligned.png'),full_page=True)
 
   # Wrap mock backend so save_finance mutates the fixture exactly like v8 production source.
-  page.evaluate('''(()=>{const prior=window.fetch;window.__lastStoryFinancePayload=null;window.fetch=async(url,options={})=>{let p={};try{p=options.body?JSON.parse(options.body):{}}catch{};if(String(url).includes('vacleaner-admin-bookings-v4')&&p.action==='save_finance'){window.__lastStoryFinancePayload=p;const x=window.__bookings.find(v=>v.id===p.bookingId);if(x){const choice=p.storyMention?p.storyGiftChoice:'';x.extras=x.extras||{};x.extras.gifts={...(x.extras.gifts||{}),story:p.storyMention?{mention:true,eligible:true,choice,scent:null}:null};x.extras.chemistry={...(x.extras.chemistry||{}),used_packets:Number(p.usedPackets||0),story_mention:choice==='chemistry2'};const used=Number(p.usedPackets||0),free=choice==='chemistry2'?Math.min(2,used):0,chem=(used-free)*50;x.extras.chemistry.free_packets=free;x.extras.chemistry.paid_packets=used-free;x.extras.chemistry.amount=chem;x.extras_amount=chem;x.total_amount=Number(x.base_amount||0)+Number(x.delivery_amount||0)+chem;const received=Number(x.prepayment_amount||200)+Number(x.deposit_amount||0);const refund=Math.max(0,received-x.total_amount);return {ok:true,status:200,json:async()=>({booking:x,finance:{refundAmount:refund,dueAmount:0,totalAmount:x.total_amount,receivedAmount:received}})};} }return prior(url,options);};})()''')
+  page.evaluate('''(()=>{const prior=window.fetch;window.__lastStoryFinancePayload=null;window.fetch=async(url,options={})=>{let p={};try{p=options.body?JSON.parse(options.body):{}}catch{};if(String(url).includes('vacleaner-admin-bookings-v4')&&p.action==='save_finance'){window.__lastStoryFinancePayload=p;const x=window.__bookings.find(v=>v.id===p.bookingId);if(x){const choice=p.storyMention?p.storyGiftChoice:'';x.extras=x.extras||{};x.extras.gifts={...(x.extras.gifts||{}),story:p.storyMention?{mention:true,eligible:true,choice,scent:null}:null};x.extras.chemistry={...(x.extras.chemistry||{}),used_packets:Number(p.usedPackets||0),story_mention:choice==='chemistry2'};const used=Number(p.usedPackets||0),free=choice==='chemistry2'?Math.min(2,used):0,chem=(used-free)*50;x.extras.chemistry.free_packets=free;x.extras.chemistry.paid_packets=used-free;x.extras.chemistry.amount=chem;x.extras.manual_charge={amount:Number(p.manualChargeAmount||0),reason:String(p.manualChargeReason||'')};x.extras_amount=chem+x.extras.manual_charge.amount;x.total_amount=Number(x.base_amount||0)+Number(x.delivery_amount||0)+x.extras_amount;const received=Number(x.prepayment_amount||200)+Number(x.deposit_amount||0);const refund=Math.max(0,received-x.total_amount);return {ok:true,status:200,json:async()=>({booking:x,finance:{refundAmount:refund,dueAmount:0,totalAmount:x.total_amount,receivedAmount:received}})};} }return prior(url,options);};})()''')
 
   card.locator('[data-action="finance"]').click()
   page.wait_for_selector('#financeForm')
@@ -64,6 +64,28 @@ with sync_playwright() as p:
   live=page.locator('#live').inner_text()
   check('100 грн' in live and '2 − 0 бонус' in live,'diffuser selection charges used chemistry instead of granting two free portions')
   page.screenshot(path=str(ART/'mobile-390-diffuser-persisted.png'),full_page=True)
+  # New contract: count all actually used packets; allow a justified +UAH fee.
+  page.locator('#financeForm [name="used"]').fill('10')
+  page.locator('#financeForm [name="manualChargeAmount"]').fill('150')
+  check('500 грн' in page.locator('#live').inner_text(),'10 paid portions are 500 UAH without story chemistry gift')
+  check('150 грн' in page.locator('#live').inner_text(),'manual +150 updates finance preview')
+  page.locator('#financeForm button[type="submit"]').click()
+  check(page.locator('#financeForm').count()==1,'positive extra fee requires an explanation')
+  page.locator('#financeForm [name="manualChargeReason"]').fill('Продовження на 2 години')
+  page.locator('#financeForm button[type="submit"]').click()
+  page.wait_for_selector('#financeForm',state='detached')
+  payload=page.evaluate('window.__lastStoryFinancePayload')
+  check(payload and payload.get('usedPackets')==10 and payload.get('manualChargeAmount')==150 and payload.get('manualChargeReason')=='Продовження на 2 години','finance payload stores quantity, positive amount and reason')
+  page.wait_for_timeout(100)
+  card=page.locator(f'.booking-card[data-id="{b["id"]}"]')
+  card.locator('[data-action="finance"]').click(); page.wait_for_selector('#financeForm')
+  check(page.locator('#financeForm [name="used"]').input_value()=='10','chemistry quantity survives save and reopening')
+  check(page.locator('#financeForm [name="manualChargeAmount"]').input_value()=='150','manual charge survives save and reopening')
+  check(page.locator('#financeForm [name="manualChargeReason"]').input_value()=='Продовження на 2 години','charge reason survives reopening')
+  live=page.locator('#live').inner_text()
+  check('500 грн' in live and '150 грн' in live and '400 грн' in live,'settlement is 1200 rent + 250 delivery + 500 chemistry + 150 fee, less 1700 received = 400 due')
+  page.screenshot(path=str(ART/'mobile-390-manual-charge-persisted.png'),full_page=True)
+
  finally:
   browser.close()
 

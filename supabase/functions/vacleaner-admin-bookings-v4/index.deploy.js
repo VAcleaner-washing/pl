@@ -1679,9 +1679,13 @@ Deno.serve(async (request)=>{
             if (currentError || !current) return json({
                 error: "invalid_booking"
             }, 404);
-            const packetLimit = productUsesPuzzi(String(current.product_code || ""), catalog, defaultCatalog) ? 8 : 0, usedPackets = cleanInt(body.usedPackets, packetLimit);
+            const packetLimit = productUsesPuzzi(String(current.product_code || ""), catalog, defaultCatalog) ? 100 : 0, usedPackets = cleanInt(body.usedPackets, packetLimit);
             const depositAmount = cleanInt(body.depositAmount ?? current.deposit_amount, 100000), depositPaid = body.depositPaid === true || current.deposit_paid === true;
             const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+            const chargeProvided = Object.prototype.hasOwnProperty.call(body, "manualChargeAmount");
+            const manualChargeAmount = cleanInt(chargeProvided ? body.manualChargeAmount : currentExtras?.manual_charge?.amount, 100000);
+            const manualChargeReason = cleanText(chargeProvided ? body.manualChargeReason : currentExtras?.manual_charge?.reason, 160);
+            if (manualChargeAmount > 0 && !manualChargeReason) return json({error: "manual_charge_reason_required"}, 400);
             const rawBase = Math.max(0, Number(currentExtras.base_before_discount ?? Number(current.base_amount || 0) + Number(currentExtras?.discount?.amount || 0)) || 0);
             const currentStory = currentExtras?.gifts?.story && typeof currentExtras.gifts.story === "object" ? currentExtras.gifts.story : null;
             const legacyStoryChemistry = currentExtras?.chemistry?.story_mention === true;
@@ -1716,6 +1720,7 @@ Deno.serve(async (request)=>{
             const discountedExtras = {
                 ...currentExtras,
                 selected_items: selectedItems,
+                manual_charge: manualChargeAmount ? { amount: manualChargeAmount, reason: manualChargeReason } : null,
                 referral_reward: discount.referralRewardAmount > 0 ? currentExtras?.referral_reward : null,
                 discount: {
                     type: discount.type,
