@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.33
-**Baseline build:** 4333
-**Останнє оновлення:** 2026-10-03
+**Baseline version:** 4.3.34
+**Baseline build:** 4334
+**Останнє оновлення:** 2026-10-11
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -825,6 +825,14 @@ Draft включає щонайменше:
 Source: `vacleaner-settings`, fallback canonical config.
 
 Дата повернення не може бути раніше дати видачі. Rental duration/pricing використовує єдину core-логіку.
+
+Public booking date bounds є **rolling runtime contract**, а не датою static export:
+
+- мінімальна дата отримання не може бути раніше локальної поточної дати користувача;
+- якщо static export містить застарілий `min`, runtime переносить `min/max` вперед, зберігаючи наявний горизонт бронювання;
+- production static horizon `2026-08-05 → 2027-02-01` дорівнює 180 дням і після rollover лишається 180 днів;
+- календар відкривається на місяці валідної обраної дати; якщо дата порожня або вже в минулому — на місяці актуального `min` / сьогодні;
+- застарілий draft не може повернути календар у минулий місяць, а минулі дати не стають доступними.
 
 ## PUBBOOK-005 — availability
 
@@ -4845,3 +4853,32 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 - `test:current-contracts`, `verify:artifact` and `test:admin-entrypoint-finance` guard source, deploy artifact and full-page browser behavior respectively. Browser evidence is retained in CI.
 - Full canonical static and browser/PWA QA is required before the single production commit, followed by Actions/deploy and live checks of the extensionless route.
+
+
+# 90. Change record — v4.3.34 ROLLING PUBLIC BOOKING CALENDAR
+
+### ADDED
+
+- Targeted static regression verifies the rolling date-bound contract in both public calendar source and hydration runtime.
+- Browser regression opens the real custom calendar from stale static-export bounds and verifies that it lands on the current local month with the past-month arrow blocked.
+
+### CHANGED
+
+- Canonical release: `4.3.34 / 4334`; cache-busted public assets and release stamping move to build `4334`.
+- Public booking date bounds now roll from the user's local current date while preserving the configured/static booking horizon instead of treating the export-day `min/max` as permanent values.
+
+### FIXED
+
+- Public booking no longer opens on **Серпень 2026** merely because the static export carried `min="2026-08-05"`. On 11 October 2026 an empty booking calendar opens on **Жовтень 2026**.
+- A stale saved date outside the current allowed range no longer pins the calendar view to a past month.
+
+### PRESERVED
+
+- Rental pricing, weekend logic, availability/resources, delivery, prepayment, deposits, booking statuses, SMS/referral, Supabase functions and VA HOME are unchanged.
+- A valid future date already selected by the customer still opens its own month; return-date `+1 day` behavior remains unchanged.
+
+### TESTS
+
+- `test:booking-date-default` guards source/runtime date rollover and horizon preservation.
+- `test:public-booking` executes the stale-bound browser scenario and verifies current-month opening.
+- Full canonical static + Browser/PWA QA remains mandatory before squash-merging the single production release commit into `main`.
