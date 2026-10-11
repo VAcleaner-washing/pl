@@ -30,6 +30,7 @@ assert.match(admin,/manualChargeAmount:chargeValue\(\)/,'frontend submits the fi
 assert.match(admin,/manualChargeReason:chargeReason\(\)/,'frontend submits a reason');
 assert.match(admin,/Math\.min\(100,packetValue\(\)\+Number/,'packet stepper allows more than eight');
 assert.match(admin,/manualCharge:chargeValue\(\)/,'live preview includes positive fee');
+assert.match(admin,/box\.innerHTML=live\(b,\{[^}]*manualCharge:chargeValue\(\)\}\)/,'unsaved positive fee must update visible live summary, not just hidden calculation');
 for(const [name,code] of [['source',edge],['deploy',deploy]]){
  assert.match(code,/manual_charge\s*:\s*manualChargeAmount\s*\?/,name+' must persist an explicit charge');
  assert.match(code,/manual_charge_reason_required/,name+' must require a reason');
