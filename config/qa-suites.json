@@ -27,6 +27,7 @@
     "test:booking-extras",
     "test:density",
     "test:finance",
+    "test:finance-additions",
     "test:session",
     "test:ux",
     "test:final-desktop-static",
