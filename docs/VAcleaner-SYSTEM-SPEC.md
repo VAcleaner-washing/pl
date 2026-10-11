@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.35
-**Baseline build:** 4335
+**Baseline version:** 4.3.36
+**Baseline build:** 4336
 **Останнє оновлення:** 2026-10-11
 **Власник логіки:** VAcleaner  
 
@@ -4912,3 +4912,28 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `test:finance-additions` covers >8 packets, two-packet gift, independent positive amount, repeated save/replace/clear, extension agreement, discounts, non-Puzzi protection and source contracts.
 - `test:admin-return-gift-persistence` checks manager entry, required reason, live calculation, submit, reload/reopen and persisted +150 грн/10-packet scenario.
 - Full Static, Browser/PWA, regression, cache-version and production-deploy verification are mandatory.
+
+
+# 92. Change record — v4.3.36 WAIVER-AWARE STATUS CORRECTION
+
+### FIXED
+
+### STATUS-CORR-002 — prepayment waiver counts as a valid prerequisite
+- Manual status correction must treat an active `extras.prepayment_waiver.active = true` as equivalent to the satisfied prepayment prerequisite for status eligibility.
+- A booking with an approved prepayment waiver may be corrected to `confirmed`, and may be corrected to `issued` when its deposit is actually recorded as paid.
+- `completed → issued` rollback remains available for waived bookings: settlement completion/return-payment flags reopen, while recorded rental amounts, chemistry, surcharge, deposit receipt, history and audit data remain intact.
+- This rule does **not** fabricate a 200 грн prepayment: `prepayment_paid` stays false and `prepayment_amount` stays zero for waived bookings.
+
+### UX
+- Status-correction errors must be presented as human Ukrainian manager messages. Raw backend codes such as `issue_payment_required`, `prepayment_required` and `deposit_already_received` must not be shown directly in the modal.
+
+### PRESERVED
+- Inventory conflict checks, referral rollback protection, actual deposit requirements, financial amounts, booking dates/resources, delivery and ordinary paid-prepayment bookings are unchanged.
+- Status correction still cannot target `completed`; completion remains owned by the return/settlement flow.
+
+### TESTS
+- `test:status-waiver-correction` guards paid-or-waived prerequisite semantics, completed→issued settlement reopening and human error copy.
+- Full canonical Static and Browser/PWA QA remain mandatory before production deployment.
+
+### RELEASE
+- Canonical release: `4.3.36 / 4336`.
