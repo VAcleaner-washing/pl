@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.34
-**Baseline build:** 4334
+**Baseline version:** 4.3.35
+**Baseline build:** 4335
 **Останнє оновлення:** 2026-10-11
 **Власник логіки:** VAcleaner  
 
@@ -1745,7 +1745,11 @@ Source of truth: `config/vacleaner.json`.
 
 Базова ціна однієї використаної порції: **50 грн**.
 
-Story bonus та інша chemistry-логіка повинні бути окремою складовою від rental revenue.
+Стандартна видача містить **8 порцій**, але це не ліміт фактичного використання. Якщо під час оренди клієнту додатково передали хімію, при попередньому/фінальному розрахунку менеджер може зафіксувати фактичну кількість **понад 8** (контрольований admin range `0–100`).
+
+Story bonus, як і раніше, робить безкоштовними максимум перші **2 фактично використані** порції. Решта використаних порцій оплачуються за canonical `puzziPacketPrice`.
+
+Chemistry amount є окремою складовою від rental revenue і не входить у rental adjustment.
 
 ## CAT-003 — назви
 
@@ -1780,6 +1784,19 @@ UI не повинен просто показувати зменшену сум
 Зароблений loyalty tier не повинен залежати від ручного toggle менеджера.
 
 Менеджер не може випадково «вимкнути» вже зароблену клієнтом лояльність.
+
+## DISC-004 — позитивне коригування оренди
+
+Окрім знижки менеджер може додати до **rental revenue** погоджену фіксовану суму, наприклад за кілька додаткових годин або інше фактичне продовження, яке не оформлюється як повна додаткова доба.
+
+Positive adjustment:
+
+- зберігається окремо як `extras.rental_adjustment = { amount, reason }`;
+- завжди має явну причину, якщо `amount > 0`;
+- додається **після** promo/loyalty/manual discount і сам не дисконтується;
+- не змінює canonical `base_amount`, щоб не спотворювати discount/extension logic;
+- входить у загальний settlement, rental revenue analytics та equipment revenue allocation;
+- не змішується з delivery, chemistry або selected extras.
 
 ---
 
@@ -2160,7 +2177,7 @@ Equipment baseline зберігається глобально через settin
 - deposit;
 - extras, що не є rental price конкретної техніки.
 
-Джерело — rental/base revenue після відповідних rental discounts.
+Джерело — rental/base revenue після відповідних rental discounts **+ explicit positive rental adjustment**, якщо менеджер фактично додав доплату до оренди. Chemistry/delivery/extras до rental pool не входять.
 
 ## FIN-005 — комплекти
 
@@ -2415,6 +2432,12 @@ Finance відповідає за фінансову правду.
 ## CHEM-002 — legacy products
 
 Legacy/disabled позиція не повинна випадково повертатися у primary recommendations після unrelated UI change.
+
+## CHEM-003 — фактичне використання при поверненні
+
+Admin settlement фіксує **фактичну** кількість використаних Puzzi-порцій, а не лише кількість стартового комплекту. Вісім порцій — стандартна видача; додатково передані порції можуть збільшити фактичне використання понад 8 і повинні коректно збільшити chemistry amount.
+
+Для product без ресурсу Puzzi chemistry usage залишається 0. Значення понад 100 в admin settlement не приймаються.
 
 ---
 
@@ -4882,3 +4905,39 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `test:booking-date-default` guards source/runtime date rollover and horizon preservation.
 - `test:public-booking` executes the stale-bound browser scenario and verifies current-month opening.
 - Full canonical static + Browser/PWA QA remains mandatory before squash-merging the single production release commit into `main`.
+
+
+# 91. Change record — v4.3.35 RENTAL SURCHARGE + ACTUAL CHEMISTRY
+
+### ADDED
+
+- У попередній/фінальний розрахунок додано окремий контроль **«Доплата до оренди»**: фіксована сума + обов’язкова причина (`Додаткові години`, `Продовження`, `Домовленість` або власний текст).
+- Positive adjustment зберігається в `extras.rental_adjustment`, відображається окремим `+ грн` рядком у settlement і входить у rental revenue/equipment allocation.
+- Browser/PWA QA перевіряє сценарій `+200 грн · Додаткові години` та фактичне використання 10 порцій хімії.
+
+### CHANGED
+
+- Canonical release: `4.3.35 / 4335`; frontend/PWA cache bust переходить на build `4335`.
+- Admin chemistry counter для Puzzi-продуктів приймає фактичне використання `0–100` замість старого hard cap 8.
+- Стандартна видача **8 порцій** не змінюється; змінено лише можливість зафіксувати додатково передані та використані порції.
+- Settlement order: `discounted base rental + positive rental adjustment + delivery + selected extras + chemistry`.
+- Positive rental adjustment не зменшує/не підміняє discount analytics; він додається до rental revenue після знижки.
+
+### FIXED
+
+- Менеджер більше не втрачає оплату за 9-ту, 10-ту та наступні фактично використані Puzzi-порції через UI/backend clamp на 8.
+- Кілька додаткових годин тепер можна коректно додати як `+ грн` до оренди без фальшивого збільшення повної доби та без використання негативної знижки навпаки.
+- `vacleaner-extend-rental-v1` зберігає >8 chemistry usage і positive rental adjustment при подальшому продовженні, не обрізаючи settlement назад до 8.
+
+### PRESERVED
+
+- Ціна однієї використаної Puzzi-порції залишається **50 грн**.
+- Story bonus залишається максимум **2 безкоштовні порції**.
+- Canonical rental tariffs, weekend logic, delivery, prepayment, deposit, promo/loyalty/referral/manual discount rules, booking statuses, SMS і VA HOME не змінюються.
+- `base_amount` залишається discounted canonical rental base; positive adjustment зберігається окремо.
+
+### TESTS
+
+- `test:finance` захищає >8 chemistry, 2-story-free rule, positive rental adjustment, total/refund/due та parity між v3/v4/extend settlement modules.
+- `test:pwa` у finance preview перевіряє реальний UI на 320 / 390 / 430 px: `+200 грн` із причиною, 10 використаних порцій і live recalculation.
+- Canonical static + Browser/PWA QA обов’язкові перед production release; backend deploy перевіряється окремо в Supabase та не зачіпає VA HOME.
