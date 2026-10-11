@@ -4916,6 +4916,14 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 # 92. Change record — v4.3.36 WAIVER-AWARE STATUS CORRECTION
 
+### ADDED
+- Regression coverage for status correction when a booking uses the approved no-prepayment waiver.
+- Human-readable manager messages for payment-related status-correction rejections.
+
+### CHANGED
+- Status eligibility now evaluates a shared paid-or-waived prepayment prerequisite instead of checking only `prepayment_paid = true`.
+- Canonical release moves to `4.3.36 / 4336` with the corresponding PWA/cache stamp.
+
 ### FIXED
 
 ### STATUS-CORR-002 — prepayment waiver counts as a valid prerequisite
