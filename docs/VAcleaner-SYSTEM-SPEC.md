@@ -4913,6 +4913,7 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 - У попередній/фінальний розрахунок додано окремий контроль **«Доплата до оренди»**: фіксована сума + обов’язкова причина (`Додаткові години`, `Продовження`, `Домовленість` або власний текст).
 - Positive adjustment зберігається в `extras.rental_adjustment`, відображається окремим `+ грн` рядком у settlement і входить у rental revenue/equipment allocation.
+- UI та backend однаково обмежують manual positive adjustment діапазоном `0–100 000 грн`, щоб live preview не розходився із persisted settlement.
 - Browser/PWA QA перевіряє сценарій `+200 грн · Додаткові години` та фактичне використання 10 порцій хімії.
 
 ### CHANGED
