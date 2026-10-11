@@ -100,7 +100,8 @@ function normalizeDeliveryPricing(value: unknown) {
 function equipmentRevenueAllocationSnapshot(booking: any, catalog: any, now = new Date().toISOString()) {
   const current = booking?.extras?.equipment_revenue_allocation;
   if (current && typeof current === "object" && current.amounts && typeof current.amounts === "object") return current;
-  const revenue = Math.max(0, Math.round(Number(booking?.base_amount) || 0));
+  const rentalAdjustment = Math.max(0, Math.round(Number(booking?.extras?.rental_adjustment?.amount) || 0));
+  const revenue = Math.max(0, Math.round(Number(booking?.base_amount) || 0)) + rentalAdjustment;
   const product = catalog?.products?.[String(booking?.product_code || "")];
   const resources = product?.resources && typeof product.resources === "object" ? product.resources : {};
   const args: [string, string, string, string] = [String(booking?.start_date || ""), String(booking?.return_date || ""), String(booking?.pickup_window || "morning"), String(booking?.return_window || "evening")];
