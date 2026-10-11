@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.34
-**Baseline build:** 4334
+**Baseline version:** 4.3.35
+**Baseline build:** 4335
 **Останнє оновлення:** 2026-10-11
 **Власник логіки:** VAcleaner  
 
@@ -4882,3 +4882,26 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 - `test:booking-date-default` guards source/runtime date rollover and horizon preservation.
 - `test:public-booking` executes the stale-bound browser scenario and verifies current-month opening.
 - Full canonical static + Browser/PWA QA remains mandatory before squash-merging the single production release commit into `main`.
+
+# 91. Change record — v4.3.35 FINANCE CHARGES AND CHEMISTRY ABOVE EIGHT
+
+### FIN-CHARGE-001 — positive manual charges
+- The manager's issued/completed rental finance form supports a nonnegative fixed `+ грн` charge, with a required brief reason when amount is positive. Amount zero removes the charge.
+- Persist in `vacleaner_bookings.extras.manual_charge = { amount, reason }` (or `null`), with amount validated server-side up to 100000 and reason sanitized to 160 characters. No table migrations.
+- This is **not** a discount, a deposit, an advance payment, a referral credit or a delivery tariff. It is added only once to `extras_amount` and `total_amount`; it is never discounted by rental promotions.
+- `save_finance` requests without manual charge fields (such as the issue flow) must preserve any stored charge. Explicit zero clears it, subsequent edit replaces it instead of incrementing; reload and reopen show persisted amount/reason.
+- The existing extension action is the only means of changing reserved rental date/time and checking inventory conflicts. A fee reason such as "Продовження на 2 години" alone **does not** change reserved slots.
+
+### FIN-CHEM-001 — more than eight Puzzi packets
+- Standard issued quantity is eight; after additional packets are physically provided, the manager may record actual use over eight, up to a protected maximum of 100. Backend, frontend and both active settlement modules must agree.
+- Each paid packet is charged at `catalog.puzziPacketPrice` (fallback 50 грн). The existing **two free Puzzi packets** gift continues to deduct exactly two when eligible and explicitly selected; VA HOME diffuser gifts do not activate free packets.
+- Non-Puzzi booking still has zero Puzzi chemical charge. Rental pricing, weekend tariffs, deposits, availability and other extras are unchanged.
+
+### PRESERVED / INTEGRATION
+- `settlementFromBooking` computes selected extras + actual chemistry + manual charge; `save_deposit_return` trusts the saved authoritative amount, and extension recalculation preserves charges.
+- Prepayment 200 грн, deposits, delivery, discounts/referral, SMS, VA HOME and Supabase auth/schema are unchanged. No backend mutation is authorized without full QA and isolated VAcleaner-only deployment.
+
+### TESTS
+- `test:finance-additions` covers >8 packets, two-packet gift, independent positive amount, repeated save/replace/clear, extension agreement, discounts, non-Puzzi protection and source contracts.
+- `test:admin-return-gift-persistence` checks manager entry, required reason, live calculation, submit, reload/reopen and persisted +150 грн/10-packet scenario.
+- Full Static, Browser/PWA, regression, cache-version and production-deploy verification are mandatory.
