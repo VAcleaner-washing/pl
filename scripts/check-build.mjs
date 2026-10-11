@@ -266,7 +266,7 @@ const documentEdge=fs.readFileSync(path.join(root,'supabase','functions','vaclea
 for(const token of ['vacleaner-client-documents','admin_users','createSignedUrl','createBucket','public: false','MAX_FILE_SIZE'])if(!documentEdge.includes(token))errors.push(`private customer document security missing: ${token}`);
 const customerDocumentMigration=fs.readFileSync(path.join(root,'supabase','migrations','20260808221500_vacleaner_customer_document_photos.sql'),'utf8');
 for(const token of ['document_photo_path','document_photo_name','document_photo_mime','document_photo_uploaded_at'])if(!customerDocumentMigration.includes(token))errors.push(`customer document migration missing: ${token}`);
-if(!adminRuntime.includes('Math.min(8,packetValue()')||!adminRuntime.includes('const value=Math.min(8,digits(form.used))'))errors.push('chemistry packet UI is not limited to 8');
+if(!adminRuntime.includes('Math.min(100,packetValue()')||!adminRuntime.includes('const value=Math.min(100,digits(form.used))'))errors.push('chemistry packet UI must support actual count beyond 8 with 100-packet safety cap');
 if(adminRuntime.includes('refundAmount:result.refund')||adminRuntime.includes('dueAmount:result.due'))errors.push('client still submits calculated refund or due');
 if(!adminRuntime.includes('settlementConfirmed:true')||!adminRuntime.includes('refundPaid:Number(finalFinance.refundAmount||0)>0')||!adminRuntime.includes('duePaid:Number(finalFinance.dueAmount||0)>0'))errors.push('settlement confirmations are incomplete');
 if(/refund_amount\s*:\s*cleanInt\(body\.refundAmount|due_amount\s*:\s*cleanInt\(body\.dueAmount/.test(adminEdge))errors.push('edge function stores client refund or due directly');
