@@ -385,13 +385,13 @@
     if(summary&&section){
       summary.classList.add('native-finance-breakdown');
       const title=summary.querySelector('h3');if(title)title.textContent='Фінансовий розрахунок';
-      const anchor=section.querySelector('.manual-discount-editor')||section.querySelector('.deposit-return-box')||section.querySelector('.note');
+      const anchor=section.querySelector('[data-rental-adjustment-editor]')||section.querySelector('[data-discount-editor]')||section.querySelector('.deposit-return-box')||section.querySelector('.note');
       if(anchor)anchor.insertAdjacentElement('beforebegin',summary);else section.appendChild(summary);
     }
-    const editor=form.querySelector('.manual-discount-editor');
+    const editor=form.querySelector('[data-discount-editor]');
     const editorTitle=editor?.querySelector('.manual-discount-head b');if(editorTitle)editorTitle.textContent='Знижка на оренду';
     const note=section?.querySelector('.note');
-    if(note)note.textContent='Знижка застосовується лише до оренди. Доставка, додаткові позиції, хімія та залоговий платіж рахуються без знижки.';
+    if(note)note.textContent='Знижка діє лише на базову оренду; якщо є loyalty або promo, система автоматично бере найбільшу вигоду. Доплата до оренди додається після знижки. Доставка, додаткові позиції, хімія та залоговий платіж не дисконтуються.';
   }
 
   function enhance(){
