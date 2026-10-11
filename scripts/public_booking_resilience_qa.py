@@ -69,6 +69,9 @@ def main():
         page.add_script_tag(path=str(ROOT/'assets/vacleaner-core.js'))
         page.add_script_tag(path=str(ROOT/'assets/public-booking-slots.js'))
         page.add_script_tag(path=str(ROOT/'assets/public-experience.js'))
+        # set_content() has already fired DOMContentLoaded; replay it so this harness
+        # exercises the same public-experience bootstrap that a real page load gets.
+        page.evaluate("document.dispatchEvent(new Event('DOMContentLoaded'))")
         page.wait_for_timeout(450)
         first=page.evaluate('window.__mutationCount')
         page.wait_for_timeout(700)
