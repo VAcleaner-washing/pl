@@ -833,9 +833,12 @@ Deno.serve(async (request: Request) => {
     if (action === "save_finance") {
       const bookingId = String(body.bookingId || ""); if (!validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const { data: current, error: currentError } = await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single(); if (currentError || !current) return json({ error: "invalid_booking" }, 404);
-      const packetLimit = productUsesPuzzi(String(current.product_code || ""), catalog, defaultCatalog) ? 8 : 0, usedPackets = cleanInt(body.usedPackets, packetLimit);
+      const packetLimit = productUsesPuzzi(String(current.product_code || ""), catalog, defaultCatalog) ? 100 : 0, usedPackets = cleanInt(body.usedPackets, packetLimit);
       const depositAmount = cleanInt(body.depositAmount ?? current.deposit_amount, 100000), depositPaid = body.depositPaid === true || current.deposit_paid === true;
       const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+      const rentalAdjustmentAmount = cleanInt(body.rentalAdjustmentAmount ?? currentExtras?.rental_adjustment?.amount, 100000);
+      const rentalAdjustmentReason = cleanText(body.rentalAdjustmentReason ?? currentExtras?.rental_adjustment?.reason, 160);
+      if (rentalAdjustmentAmount > 0 && !rentalAdjustmentReason) return json({ error: "rental_adjustment_reason_required" }, 400);
       const rawBase = Math.max(0, Number(currentExtras.base_before_discount ?? (Number(current.base_amount || 0) + Number(currentExtras?.discount?.amount || 0))) || 0);
       const currentStory = currentExtras?.gifts?.story && typeof currentExtras.gifts.story === "object" ? currentExtras.gifts.story : null;
       const legacyStoryChemistry = currentExtras?.chemistry?.story_mention === true;
@@ -862,6 +865,7 @@ Deno.serve(async (request: Request) => {
         referral_reward: discount.referralRewardAmount > 0 ? currentExtras?.referral_reward : null,
         discount: { type: discount.type, percent: discount.percent, amount: discount.amount, source: discount.source, primary_source: discount.primarySource, loyalty_amount: discount.loyaltyAmount, referral_reward_amount: discount.referralRewardAmount, reason: discount.primarySource === "manual" ? discount.manualReason : "" },
         manual_discount: discount.manualType === "none" ? null : { type: discount.manualType, value: discount.manualValue, amount: discount.manualAmount, reason: discount.manualReason },
+        rental_adjustment: rentalAdjustmentAmount > 0 ? { amount: rentalAdjustmentAmount, reason: rentalAdjustmentReason } : null,
         base_before_discount: rawBase };
       const calculationInput = { ...current, base_amount: discount.baseAmount, deposit_amount: depositAmount, deposit_paid: depositPaid, extras: { ...discountedExtras, chemistry: { used_packets: usedPackets, story_mention: storyMention } } };
       const finance = settlementFromBooking(calculationInput, catalog, defaultCatalog), now = new Date().toISOString();
