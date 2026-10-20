@@ -77,7 +77,8 @@
     "test:stabilization-acceptance-browser",
     "test:client-card-visual",
     "test:process-contact-v4311",
-    "test:admin-booking-flex"
+    "test:admin-booking-flex",
+    "test:auth-recovery-browser"
   ],
   "currentContracts": [
     {

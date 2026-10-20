@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.37
-**Baseline build:** 4337
+**Baseline version:** 4.3.38
+**Baseline build:** 4338
 **Останнє оновлення:** 2026-10-20
 **Власник логіки:** VAcleaner  
 
@@ -4973,3 +4973,44 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 ### PRESERVED
 - Public booking, tariffs, discounts, prepayments/waivers, deposits, settlement, resource reservation authority, SMS/referral, other Edge Functions and VA HOME are unchanged.
 - Financial rules remain protected by existing finance/booking regressions; a stored fee reason does not extend reserved date/time.
+
+
+# 94. Change record — v4.3.38 / PWA session recovery
+
+### ADDED
+
+- AUTH-001: shared authenticated requests and isolated session-recovery/browser/dispatch regression coverage.
+
+### CHANGED
+
+- Settings, documents, push and the waiver adapter use the existing session authority.
+
+### FIXED
+
+- Delayed 401 refresh churn, terminal refresh rejection loop and stale refresh overwriting logout/sign-in.
+
+## AUTH-001 — one session recovery path
+
+- Admin API, settings saves, private document requests, push management and the prepayment-waiver adapter use the same authenticated request helper and existing session storage.
+- A known expired or near-expiry access token is refreshed before a protected request. Unknown legacy token formats retain the bounded 401 recovery path. Client-side expiry decoding schedules refresh only; server authorization remains authoritative.
+- Concurrent refreshes share one promise and the existing persistent-session Web Lock. A late 401 carries the rejected access token, allowing the caller to reuse a token already refreshed by another request.
+- A terminal refresh rejection (401/403 or a recognized invalid/revoked-refresh-token 400) reaches the existing sign-in path as 401. Network, rate-limit and server failures preserve the remembered session and the retry UI.
+- An outstanding refresh cannot restore a logged-out session or overwrite a newly signed-in session. A changed session aborts the old request.
+- Only an explicit 401 permits one replay. Network failures, 403, 429 and 5xx do not automatically replay booking/finance or other mutations.
+
+### PRESERVED
+
+- Trusted-device preference, 30-day idle policy, current-device logout, PWA update/cache behavior, all finance and booking formulas, prepayment waiver eligibility, inventory authority, SMS rules, Edge Functions and VA HOME objects.
+- No backend deployment or production booking/finance writes are required for this frontend candidate.
+
+### TESTS
+
+- `scripts/test-admin-refresh-singleflight.mjs` retains concurrent refresh coverage.
+- `scripts/test-admin-session-recovery.mjs` executes the real request/recovery code and adapters with isolated HTTP fixtures, including terminal auth errors, delayed 401s, logout/login races and no replay after uncertain mutation outcomes.
+- `scripts/admin_session_recovery_qa.py` exercises the shipped admin artifact and real retry/sign-in UI with mocked Auth/API at 320/390/430/768/1440 px.
+
+### REMINDER AUDIT — 20 October 2026
+
+The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUNTIME_SERVICE_DEGRADED`; adjacent cron requests at 18:59 and 19:01 returned 200. The cron is active every minute. This is not evidence of a reminder-handler defect. Existing atomic dispatch leases prevent concurrent sends, delivered events stay deduplicated and unsuccessful sends remain retryable. Live reminder v9 has notification-label differences from the repository; dispatch/retry behavior is the same. No reminder deployment is included.
+
+- `scripts/test-reminder-dispatch.mjs` executes the real reminder dispatch helper with isolated claim/provider fixtures for concurrency, delivered-event dedupe and failed-send retry. The same helper was checked against live v9; production sends were not triggered.

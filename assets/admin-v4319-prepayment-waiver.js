@@ -1,20 +1,6 @@
 (()=>{'use strict';
-const SUPABASE='https://yweluzclearwrazdkahu.supabase.co';
-const API=SUPABASE+'/functions/v1/vacleaner-prepayment-waiver-v1';
-const KEY='sb_publishable_-UdAKDf5jzIP6N9rBp927g_VhyJKeog';
 const WAIVER_LABEL='Без передоплати · день у день / за домовленістю';
 
-function findAccessToken(){
-  const visit=value=>{if(!value||typeof value!=='object')return'';if(typeof value.access_token==='string'&&value.access_token.length>20)return value.access_token;for(const child of Object.values(value)){const token=visit(child);if(token)return token}return''};
-  for(const storage of [localStorage,sessionStorage]){
-    for(let i=0;i<storage.length;i++){
-      const key=storage.key(i);if(!key)continue;
-      const raw=storage.getItem(key);if(!raw||!raw.includes('access_token'))continue;
-      try{const token=visit(JSON.parse(raw));if(token)return token}catch{}
-    }
-  }
-  return'';
-}
 function injectStyles(){if(document.getElementById('v4319WaiverStyles'))return;const style=document.createElement('style');style.id='v4319WaiverStyles';style.textContent=`
 .prepayment-waiver-switch{border:1px solid rgba(107,130,144,.28);background:rgba(255,255,255,.035);border-radius:16px;padding:13px 14px;margin-top:10px}
 .prepayment-waiver-switch.is-active{border-color:rgba(62,185,128,.52);background:rgba(62,185,128,.09)}
@@ -24,8 +10,8 @@ function injectStyles(){if(document.getElementById('v4319WaiverStyles'))return;c
 .prepayment-waiver-finance-note{display:block;margin-top:3px;font-size:11px;opacity:.72;font-weight:600}
 @media(max-width:900px), (min-width:901px) and (max-width:1024px) and (max-height:500px) and (orientation:landscape){.prepayment-waiver-switch{border-radius:14px;padding:12px}.prepayment-waiver-status{font-size:12px}}
 `;document.head.appendChild(style)}
-function messageForError(code){return({unauthorized:'Сесія закінчилась. Увійдіть в адмінку ще раз.',forbidden:'Недостатньо прав менеджера.',inventory_conflict:'На цей час техніка вже зайнята. Оновіть бронювання.',invalid_transition:'Статус бронювання вже змінився. Оновіть сторінку.',contact_required:'Позначте, що з клієнтом зв’язались.',confirmation_required:'Позначте, що умови клієнту надіслано.',identity_required:'Для нового клієнта перевірте документ.',document_required:'Для нового клієнта вкажіть номер документа.',invalid_customer_data:'Перевірте ПІБ і телефон клієнта.',service_error:'Не вдалося підтвердити без передоплати. Спробуйте ще раз.'})[code]||'Не вдалося підтвердити без передоплати.'}
-async function confirmWithoutPrepayment(payload){const token=findAccessToken();if(!token)throw Object.assign(new Error('unauthorized'),{code:'unauthorized'});const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'apikey':KEY},body:JSON.stringify(payload)});const data=await response.json().catch(()=>({}));if(!response.ok)throw Object.assign(new Error(data.error||'service_error'),{code:data.error||'service_error'});return data}
+function messageForError(code){return({unauthorized:'Сесія закінчилась. Увійдіть в адмінку ще раз.',session_expired:'Сесія закінчилась. Увійдіть в адмінку ще раз.',session_changed:'Сесія змінилася. Повторіть дію.',forbidden:'Недостатньо прав менеджера.',inventory_conflict:'На цей час техніка вже зайнята. Оновіть бронювання.',invalid_transition:'Статус бронювання вже змінився. Оновіть сторінку.',contact_required:'Позначте, що з клієнтом зв’язались.',confirmation_required:'Позначте, що умови клієнту надіслано.',identity_required:'Для нового клієнта перевірте документ.',document_required:'Для нового клієнта вкажіть номер документа.',invalid_customer_data:'Перевірте ПІБ і телефон клієнта.',service_error:'Не вдалося підтвердити без передоплати. Спробуйте ще раз.'})[code]||'Не вдалося підтвердити без передоплати.'}
+async function confirmWithoutPrepayment(payload){if(typeof window.VACLEANER_CONFIRM_WITHOUT_PREPAYMENT!=='function')throw Object.assign(new Error('service_error'),{code:'service_error'});return window.VACLEANER_CONFIRM_WITHOUT_PREPAYMENT(payload)}
 function formState(form){const documentsRequired=form.dataset.documentsRequired==='1',documentNumber=String(form.documentNumber?.value||'').trim();return{contacted:form.contacted?.checked===true,confirmationSent:form.confirmationSent?.checked===true,documentsRequired,identityVerified:form.identityVerified?.checked===true,documentNumber,customerName:String(form.customerName?.value||'').trim(),customerPhone:String(form.customerPhone?.value||'').trim(),customerAddress:String(form.customerAddress?.value||'').trim(),documentType:String(form.documentType?.value||'Паспорт'),customerKind:documentsRequired?'new':'known'}}
 function validateWaiver(state){if(!state.contacted)return'Позначте, що з клієнтом зв’язались';if(state.documentsRequired&&!state.identityVerified)return'Для нового клієнта перевірте документ';if(state.documentsRequired&&state.documentNumber.length<4)return'Для нового клієнта вкажіть номер документа';if(!state.confirmationSent)return'Позначте, що умови клієнту надіслано';return''}
 function enhanceProcess(form){if(!form||form.dataset.v4319Waiver==='1')return;form.dataset.v4319Waiver='1';injectStyles();const paid=form.querySelector('input[name="prepaymentPaid"]'),paidLabel=paid?.closest('.switch'),preview=form.querySelector('#confirmPreview'),confirmBtn=form.querySelector('#confirmProcess'),saveBtn=form.querySelector('#saveProcess');if(!paid||!paidLabel||!confirmBtn)return;

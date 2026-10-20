@@ -1,6 +1,6 @@
 {
-  "version": "4.3.37",
-  "build": 4337,
+  "version": "4.3.38",
+  "build": 4338,
   "releasedAt": "2026-10-20",
-  "label": "VAcleaner v4.3.37 — DELIVERY PERSISTENCE AND BACKEND PARITY"
+  "label": "VAcleaner v4.3.38 — PWA SESSION RECOVERY"
 }
