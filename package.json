@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.36",
+  "version": "4.3.37",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -15,6 +15,8 @@
     "ci": "npm run qa:full",
     "ci:browser": "npm run qa:browser",
     "check:backend": "node scripts/check-backend-inventory.mjs",
+    "check:backend-live": "node scripts/check-backend-live.mjs",
+    "test:backend-logistics": "node scripts/test-backend-logistics.mjs && node scripts/test-backend-live-check.mjs",
     "test:finance": "node scripts/test-finance.mjs",
     "test:session": "node scripts/test-session.mjs",
     "test:ux": "node scripts/test-ux.mjs",

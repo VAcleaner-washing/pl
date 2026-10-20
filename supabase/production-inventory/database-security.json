@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-28T15:59:00Z",
+  "capturedAt": "2026-10-20T14:46:31.928Z",
   "postgresVersion": "17.6",
   "tables": [
     "vacleaner_address_cache",
@@ -11,6 +11,7 @@
     "vacleaner_customers",
     "vacleaner_expenses",
     "vacleaner_inventory",
+    "vacleaner_notification_dispatch_claims",
     "vacleaner_promo_codes",
     "vacleaner_promo_redemptions",
     "vacleaner_push_config",
@@ -40,8 +41,13 @@
   "productionFunctions": [
     "vacleaner_admin_attach_booking_promo(p_booking_id uuid, p_promo_code_id uuid, p_campaign_id uuid, p_customer_phone text, p_discount_amount integer, p_base_before_discount integer, p_extras jsonb, p_base_amount integer, p_total_amount integer)",
     "vacleaner_admin_detach_booking_promo(p_booking_id uuid, p_extras jsonb, p_base_amount integer, p_total_amount integer)",
-    "vacleaner_apply_reservation(p_booking_id uuid, p_start_date date, p_return_date date, p_pickup_window text, p_return_window text, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_rental_days integer, p_resources jsonb, p_target_status text, p_hold_expires_at timestamp with time zone)",
+    "vacleaner_apply_reservation(p_booking_id uuid, p_start_date date, p_return_date date, p_pickup_window text, p_return_window text, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_rental_days integer, p_resources jsonb, p_target_status text, p_hold_expires_at timestamp with time zone DEFAULT NULL::timestamp with time zone)",
+    "vacleaner_block_public_admin_bundle_v1()",
+    "vacleaner_claim_notification_dispatch(p_event_key text, p_booking_id uuid, p_event_type text, p_lease_seconds integer DEFAULT 120)",
     "vacleaner_confirm_booking(p_booking_id uuid)",
+    "vacleaner_confirm_without_prepayment_v1(p_booking_id uuid, p_extras jsonb, p_customer_name text DEFAULT NULL::text, p_customer_phone text DEFAULT NULL::text)",
+    "vacleaner_finish_notification_dispatch(p_event_key text, p_delivered boolean)",
+    "vacleaner_keep_admin_bundle_v1()",
     "vacleaner_log_booking_change()",
     "vacleaner_operational_health()",
     "vacleaner_preserve_best_promo_discount()",
@@ -52,7 +58,12 @@
     "vacleaner_admin_attach_booking_promo",
     "vacleaner_admin_detach_booking_promo",
     "vacleaner_apply_reservation",
+    "vacleaner_block_public_admin_bundle_v1",
+    "vacleaner_claim_notification_dispatch",
     "vacleaner_confirm_booking",
+    "vacleaner_confirm_without_prepayment_v1",
+    "vacleaner_finish_notification_dispatch",
+    "vacleaner_keep_admin_bundle_v1",
     "vacleaner_log_booking_change",
     "vacleaner_operational_health",
     "vacleaner_preserve_best_promo_discount",
@@ -62,13 +73,13 @@
     "vacleaner_slot_index"
   ],
   "bookingTriggers": [
+    "vacleaner_block_public_admin_bundle_v1",
     "vacleaner_booking_audit_trigger",
     "vacleaner_preserve_best_promo_discount_trg"
   ],
   "clientDenyPolicies": {
     "total": 19,
-    "restrictive": 13,
-    "model": "Every current vacleaner_* table is RLS-enabled. Referral tables, including referral message analytics, use explicit restrictive ALL-deny policies; address cache has no browser allow policy and therefore defaults to deny."
+    "restrictive": 13
   },
   "referralVerification": {
     "codes": 294,

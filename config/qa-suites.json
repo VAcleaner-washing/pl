@@ -7,6 +7,7 @@
     "test:public-seo",
     "test:growth-content",
     "check:backend",
+    "test:backend-logistics",
     "test:deposit-policy",
     "test:stabilization",
     "test:css-architecture",

@@ -9,16 +9,16 @@ if(!fs.existsSync(dbFile))errors.push('production database security inventory is
 if(!errors.length){
   const inventory=JSON.parse(fs.readFileSync(file,'utf8'));
   const bySlug=new Map(inventory.functions.map(item=>[item.slug,item]));
-  const expectedVersions={
-    'vacleaner-booking-v5':25,'vacleaner-admin-bookings-v4':8,'vacleaner-settings':20,'vacleaner-push':8,
-    'vacleaner-admin-data-v1':17,'vacleaner-campaigns-v1':20,'vacleaner-reminders-v1':8,'vacleaner-booking-promo-v1':3,
-    'vacleaner-address-v1':13,'vacleaner-sms-v2':5,'vacleaner-sms-audit-v1':2,'vacleaner-status-correction-v1':7,
-    'vacleaner-customer-documents-v1':5,'vacleaner-extend-rental-v1':5,
-  };
-  for(const [slug,version] of Object.entries(expectedVersions)){const row=bySlug.get(slug);if(!row||row.status!=='ACTIVE'||row.version!==version||!/^[a-f0-9]{64}$/.test(row.sha256||''))errors.push(`production ${slug} inventory mismatch`)}
+  // Versions have one authority: the dated, observed production inventory.
+  // A static check validates its shape; check-backend-live verifies deployed code.
+  const requiredFunctions=['vacleaner-booking-v5','vacleaner-admin-bookings-v4','vacleaner-settings','vacleaner-push',
+    'vacleaner-admin-data-v1','vacleaner-campaigns-v1','vacleaner-reminders-v1','vacleaner-booking-promo-v1',
+    'vacleaner-address-v1','vacleaner-sms-v2','vacleaner-sms-audit-v1','vacleaner-status-correction-v1',
+    'vacleaner-customer-documents-v1','vacleaner-extend-rental-v1','vacleaner-prepayment-waiver-v1'];
+  for(const slug of requiredFunctions){const row=bySlug.get(slug);if(!row||row.status!=='ACTIVE'||!Number.isInteger(row.version)||row.version<1||!/^[a-f0-9]{64}$/.test(row.sha256||''))errors.push(`production ${slug} inventory mismatch`)}
   if(inventory.frontendEntrypoints?.adminBookings!=='vacleaner-admin-bookings-v4')errors.push('admin frontend entrypoint must be vacleaner-admin-bookings-v4');
   if(inventory.frontendEntrypoints?.publicBooking!=='vacleaner-booking-v5')errors.push('public booking entrypoint must be vacleaner-booking-v5');
-  const adminFunctions=['vacleaner-admin-bookings-v4','vacleaner-admin-data-v1','vacleaner-campaigns-v1','vacleaner-sms-v2','vacleaner-sms-audit-v1','vacleaner-booking-promo-v1','vacleaner-status-correction-v1','vacleaner-customer-documents-v1','vacleaner-extend-rental-v1','vacleaner-push'];
+  const adminFunctions=['vacleaner-admin-bookings-v4','vacleaner-admin-data-v1','vacleaner-campaigns-v1','vacleaner-sms-v2','vacleaner-sms-audit-v1','vacleaner-booking-promo-v1','vacleaner-status-correction-v1','vacleaner-customer-documents-v1','vacleaner-extend-rental-v1','vacleaner-push','vacleaner-prepayment-waiver-v1'];
   for(const slug of adminFunctions)if(bySlug.get(slug)?.verifyJwt!==false)errors.push(`${slug} must use internal auth with gateway verifyJwt=false`);
   for(const slug of adminFunctions){const p=path.join(root,'supabase','functions',slug,'index.ts');const code=fs.readFileSync(p,'utf8');if(!code.includes('auth.getUser(')||!(code.includes('admin_users')||code.includes('vacleaner_admin_users')))errors.push(`${slug} internal admin authentication missing`)}
   const v4=fs.readFileSync(path.join(root,'supabase','functions','vacleaner-admin-bookings-v4','index.ts'),'utf8');
@@ -27,7 +27,7 @@ if(!errors.length){
   for(const [caller,deps] of Object.entries(inventory.dependencyGraph||{}))for(const dep of deps)if(!bySlug.has(dep))errors.push(`untracked dependency ${caller} -> ${dep}`);
 
   const db=JSON.parse(fs.readFileSync(dbFile,'utf8'));
-  const expectedTables=['vacleaner_address_cache','vacleaner_admin_users','vacleaner_booking_audit','vacleaner_booking_resources','vacleaner_bookings','vacleaner_campaigns','vacleaner_customers','vacleaner_expenses','vacleaner_inventory','vacleaner_promo_codes','vacleaner_promo_redemptions','vacleaner_push_config','vacleaner_push_subscriptions','vacleaner_referral_codes','vacleaner_referral_messages','vacleaner_referral_rewards','vacleaner_referral_uses','vacleaner_settings','vacleaner_sms_dispatch_recipients','vacleaner_sms_dispatches'];
+  const expectedTables=['vacleaner_address_cache','vacleaner_admin_users','vacleaner_booking_audit','vacleaner_booking_resources','vacleaner_bookings','vacleaner_campaigns','vacleaner_customers','vacleaner_expenses','vacleaner_inventory','vacleaner_notification_dispatch_claims','vacleaner_promo_codes','vacleaner_promo_redemptions','vacleaner_push_config','vacleaner_push_subscriptions','vacleaner_referral_codes','vacleaner_referral_messages','vacleaner_referral_rewards','vacleaner_referral_uses','vacleaner_settings','vacleaner_sms_dispatch_recipients','vacleaner_sms_dispatches'];
   const actualTables=[...(db.tables||[])].sort();
   if(JSON.stringify(actualTables)!==JSON.stringify([...expectedTables].sort()))errors.push('database table inventory does not match current authoritative vacleaner_* tables');
   if(db.rlsEnabledOnAllTables!==true)errors.push('RLS is not recorded as enabled on every VAcleaner table');

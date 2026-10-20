@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.36
-**Baseline build:** 4336
-**Останнє оновлення:** 2026-10-11
+**Baseline version:** 4.3.37
+**Baseline build:** 4337
+**Останнє оновлення:** 2026-10-20
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -36,7 +36,7 @@
 
 - `main` — production-only.
 - Будь-яка зміна починається з актуального успішного production commit / release archive, що точно йому відповідає.
-- Обов’язкова окрема QA-гілка **не використовується**: робота й перевірки виконуються локально в окремому release-candidate каталозі/архіві, не в `main`.
+- Кожна затверджена задача виконується в окремій гілці від актуального `main` і проходить PR; локальні перевірки виконуються в release-candidate каталозі, не в production.
 - У `main` дозволений тільки вже перевірений release commit.
 - Проміжні `fix`, `fix2`, `final-final`, browser-fix або QA-експерименти у `main` заборонені.
 
@@ -67,7 +67,7 @@ Visual audit повинен охоплювати ключові admin/PWA екр
 Після локального PRE-COMMIT GREEN:
 
 - один release commit у `main`;
-- без обов’язкової QA-гілки і без проміжних fix-комітів;
+- squash merge перевіреного PR з окремої гілки, без проміжних fix-комітів у `main`;
 - одна версія;
 - один build;
 - один фінальний ZIP;
@@ -130,7 +130,7 @@ Visual audit повинен охоплювати ключові admin/PWA екр
 ## AI-RULE-004 — локальний release candidate до production commit
 
 - Кожна функціональна/UX/SEO/backend правка виконується локально в окремому release-candidate каталозі/архіві, що базується на актуальному production baseline.
-- Окрема `qa/vX.X.X-*` гілка не є обов’язковою і не повинна створювати зайву бюрократію.
+- Для кожної затвердженої задачі обов’язкові окрема гілка та PR; merge і production deploy виконуються лише в межах наданого дозволу.
 - `main` не використовується як місце для експериментів: commit у `main` робиться лише після повного pre-commit gate.
 - Якщо перевірки не GREEN — продовжувати виправлення локально, не створюючи серію проміжних production commits.
 
@@ -4945,3 +4945,31 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 ### RELEASE
 - Canonical release: `4.3.36 / 4336`.
+
+# 93. Change record — v4.3.37 DELIVERY PERSISTENCE AND BACKEND PARITY
+
+### CHANGED
+- Candidate version/build and generated public/admin asset cache namespaces move to `4.3.37 / 4337` through the existing deterministic stamp; no public UI or price changes.
+
+### FIXED
+- **BOOK-ADMIN-LOGISTICS-002** — admin create/edit persists independent outbound/return methods, legs, factor and route trip multiplier. Zero/one/two VAcleaner legs use 0/50/100% of the round-trip quote; a positive manual delivery amount is already final and is never halved again.
+- An older client omitting direction fields preserves an existing one-way choice when fulfillment is unchanged. Explicit switching to self-pickup clears delivery legs and charges. Existing delivery amounts remain preserved on legacy edits without a new amount or explicit directions.
+- No historical booking is rewritten in the background; no schema migration or bulk finance recalculation is part of this release.
+
+### ADDED
+- `test:backend-logistics` executes the real TypeScript HTTP handler and generated JavaScript fallback against isolated Supabase I/O fixtures. It verifies create, reload, edit, idempotent retry, all four logistics choices, manual overrides, legacy edits, reservation failures, authorization and >8 chemistry packets/manual charges. It makes no production writes.
+- `check:backend-live -- --snapshot=/path/to/connector-export.json` compares the authenticated live Edge Function export with repository source, recursively checking local dependency hashes, project, status and gateway JWT configuration. A green static inventory check is never a live deployment-parity claim.
+- Production inventory refreshed from read-only Supabase metadata on 20 October 2026, including prepayment waiver and notification dispatch claims. This snapshot describes the observed baseline; it does not claim the v4.3.37 candidate has been deployed.
+
+### RELEASE / QA
+- Canonical candidate: `4.3.37 / 4337`. Separate branch, PR and full Static + Browser/PWA gates are required; production deployment requires the owner's approval of the reviewed candidate.
+- Before the isolated admin backend deployment, save its current full bundle and verify the observed version/hash have not changed. Deploy only `vacleaner-admin-bookings-v4` and its reviewed local files; verify live dependency hashes afterwards before updating the production inventory.
+- Branch/PR workflow supersedes the earlier optional-branch release wording.
+
+### TESTS
+- `test:backend-logistics`: real handler/source-fallback persistence tests plus drift-check negative controls, including stale snapshots and missing dependencies.
+- Existing Static, finance, booking, public, Browser/PWA and responsive gates remain required; green fixtures do not claim a live database write or physical-iPhone verification.
+
+### PRESERVED
+- Public booking, tariffs, discounts, prepayments/waivers, deposits, settlement, resource reservation authority, SMS/referral, other Edge Functions and VA HOME are unchanged.
+- Financial rules remain protected by existing finance/booking regressions; a stored fee reason does not extend reserved date/time.

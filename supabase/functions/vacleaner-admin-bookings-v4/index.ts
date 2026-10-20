@@ -679,17 +679,22 @@ Deno.serve(async (request: Request) => {
       const period = periodFromBody(body, slots), bookingId = action === "edit" ? String(body.bookingId || "") : "";
       if (action === "edit" && !validBookingId(bookingId)) return json({ error: "invalid_booking" }, 400);
       const av = await availability(supabase, product, period, bookingId); if (!av.available) return json({ error: "inventory_conflict", availability: av }, 409);
+      const existing = action === "edit" ? (await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single()).data : null;
+      if (action === "edit" && !existing) return json({ error: "invalid_booking" }, 404);
+      const currentExtras = existing?.extras && typeof existing.extras === "object" ? existing.extras : {};
       const customerName = cleanText(body.customerName, 120), customerPhone = normalizePhone(body.customerPhone);
       const requestedFulfillment = body.fulfillment === "delivery" ? "delivery" : "pickup";
-      const outboundMethod = body.deliveryOutboundMethod === "pickup" ? "pickup" : body.deliveryOutboundMethod === "delivery" ? "delivery" : requestedFulfillment === "delivery" ? "delivery" : "pickup";
-      const returnMethod = body.deliveryReturnMethod === "return_to_location" ? "return_to_location" : body.deliveryReturnMethod === "pickup" ? "pickup" : requestedFulfillment === "delivery" ? "pickup" : "return_to_location";
+      // Older clients omit direction fields. Keep an existing one-way choice when
+      // fulfillment is unchanged; explicit direction fields still own new choices.
+      const savedDelivery = existing?.fulfillment === requestedFulfillment ? currentExtras?.delivery : null;
+      const savedOutbound = savedDelivery?.outbound_method, savedReturn = savedDelivery?.return_method;
+      const outboundMethod = body.deliveryOutboundMethod === "pickup" ? "pickup" : body.deliveryOutboundMethod === "delivery" ? "delivery" : savedOutbound === "pickup" || savedOutbound === "delivery" ? savedOutbound : requestedFulfillment === "delivery" ? "delivery" : "pickup";
+      const returnMethod = body.deliveryReturnMethod === "return_to_location" ? "return_to_location" : body.deliveryReturnMethod === "pickup" ? "pickup" : savedReturn === "return_to_location" || savedReturn === "pickup" ? savedReturn : requestedFulfillment === "delivery" ? "pickup" : "return_to_location";
       const deliveryLegs = Number(outboundMethod === "delivery") + Number(returnMethod === "pickup"), deliveryFactor = deliveryLegs / 2;
       const fulfillment = deliveryLegs > 0 ? "delivery" : "pickup";
       const address = fulfillment === "delivery" ? cleanText(body.deliveryAddress, 220) : "Полтава, вул. Європейська, 146Е", addressDetail = fulfillment === "delivery" ? cleanText(body.deliveryAddressDetail, 180) : "";
       if (customerName.length < 2 || !customerPhone || (fulfillment === "delivery" && address.length < 8)) return json({ error: "invalid_customer_data" }, 400);
-      const rawBase = rentalBase(product, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow), existing = action === "edit" ? (await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single()).data : null;
-      if (action === "edit" && !existing) return json({ error: "invalid_booking" }, 404);
-      const currentExtras = existing?.extras && typeof existing.extras === "object" ? existing.extras : {};
+      const rawBase = rentalBase(product, period.startDate, period.returnDate, period.pickupWindow, period.returnWindow);
       let enteredReferral: any = null;
       if (action === "create" && cleanText(body.referralCode, 32)) {
         const { count: completedCount, error: completedError } = await supabase.from("vacleaner_bookings").select("id", { count: "exact", head: true }).eq("customer_phone", customerPhone).eq("status", "completed");
