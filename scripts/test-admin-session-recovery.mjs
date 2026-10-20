@@ -17,7 +17,7 @@ function harness(fetcher,initial={access_token:'old-access',refresh_token:'refre
     getSession:()=>storage.session,sessionPersistent:()=>true,saveSession:next=>{storage.session=next},
     fetch:async(url,options={})=>{calls.push({url,options});return fetcher(url,options)}};
   vm.createContext(context);
-  const adapters=['saveGlobalCatalog','saveGlobalSlots','saveGlobalDepositRules','saveGlobalDeliveryPricing','saveGlobalEquipmentBaselines','documentRequest','pushInvoke'];
+  const adapters=['loadGlobalSlots','saveGlobalCatalog','saveGlobalSlots','saveGlobalDepositRules','saveGlobalDeliveryPricing','saveGlobalEquipmentBaselines','documentRequest','pushInvoke'];
   const source=adapters.map(name=>runtime.match(new RegExp(`^async function ${name}\\(.*$`,'m'))?.[0]).join('\n');
   const waiverExport=runtime.match(/^window.VACLEANER_CONFIRM_WITHOUT_PREPAYMENT=.*$/m)?.[0]||'';
   const waiverAdapter=waiverRuntime.match(/^async function confirmWithoutPrepayment\(.*$/m)?.[0]||'';
@@ -26,6 +26,11 @@ function harness(fetcher,initial={access_token:'old-access',refresh_token:'refre
 }
 const cases=[];
 const test=async(name,run)=>{try{await run();cases.push({name,ok:true});console.log('PASS',name)}catch(error){cases.push({name,ok:false});console.error('FAIL',name,error.message)}};
+
+for(const initial of [null,{access_token:'expired',refresh_token:'refresh-1',expires_at:1}])await test(`public settings GET remains independent of ${initial?'expired':'missing'} session`,async()=>{
+  const api=harness(async(url,options)=>{assert.equal(url,'https://api.example/settings');assert.equal(options.headers?.Authorization,undefined);return json({})},initial);
+  await api.loadGlobalSlots();assert.equal(api.calls.length,1);
+});
 
 await test('late 401 reuses the token already refreshed by a sibling request',async()=>{
   const late=deferred();let refreshes=0;

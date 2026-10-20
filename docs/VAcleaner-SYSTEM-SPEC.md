@@ -4991,7 +4991,7 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 
 ## AUTH-001 — one session recovery path
 
-- Admin API, settings saves, private document requests, push management and the prepayment-waiver adapter use the same authenticated request helper and existing session storage.
+- Admin API, settings saves, private document requests, push management and the prepayment-waiver adapter use the same authenticated request helper and existing session storage. Public settings GET remains unauthenticated and never refreshes a missing/expired manager session.
 - A known expired or near-expiry access token is refreshed before a protected request. Unknown legacy token formats retain the bounded 401 recovery path. Client-side expiry decoding schedules refresh only; server authorization remains authoritative.
 - Concurrent refreshes share one promise and the existing persistent-session Web Lock. A late 401 carries the rejected access token, allowing the caller to reuse a token already refreshed by another request.
 - A terminal refresh rejection (401/403 or a recognized invalid/revoked-refresh-token 400) reaches the existing sign-in path as 401. Network, rate-limit and server failures preserve the remembered session and the retry UI.

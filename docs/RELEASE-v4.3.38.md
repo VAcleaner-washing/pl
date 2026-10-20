@@ -20,7 +20,7 @@ Delivery acknowledgements are event-wide after at least one provider send succee
 
 ## Verification and rollout
 
-- `npm run test:auth-refresh`: original single-flight guard plus 28 real-code session/adapter recovery scenarios and five reminder-dispatch scenarios.
+- `npm run test:auth-refresh`: original single-flight guard plus 30 real-code session/adapter recovery scenarios and five reminder-dispatch scenarios.
 - `npm run qa:static`: canonical static, finance, booking, backend, version and artifact checks.
 - `npm run qa:browser`: all canonical suites plus actual shipped-asset session recovery at 320/390/430/768/1440 px, including real sign-in/retry UI and screenshots. Auth/API I/O is intercepted in an isolated browser context.
 - Browser screenshots must be reviewed and the exact PR head must pass CI before merge. Physical iPhone and authenticated production CRUD are not claimed.
