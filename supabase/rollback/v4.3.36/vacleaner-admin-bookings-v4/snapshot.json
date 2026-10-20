@@ -1,0 +1,17 @@
+{
+  "capturedAt": "2026-10-20T15:15:04.101Z",
+  "projectRef": "yweluzclearwrazdkahu",
+  "slug": "vacleaner-admin-bookings-v4",
+  "version": 10,
+  "status": "ACTIVE",
+  "verifyJwt": false,
+  "bundleHash": "ca4062046d07137b4497db875953452398943271693c077c8d7fe624b18f72fb",
+  "entrypoint": "index.ts",
+  "files": [
+    "index.ts",
+    "config.ts",
+    "settlement.mjs",
+    "pricing.mjs",
+    "referral.ts"
+  ]
+}
