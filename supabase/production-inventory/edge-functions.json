@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-08-31T17:23:14Z",
+  "capturedAt": "2026-10-20T15:17:34.905Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -15,7 +15,8 @@
     "statusCorrection": "vacleaner-status-correction-v1",
     "customerDocuments": "vacleaner-customer-documents-v1",
     "extendRental": "vacleaner-extend-rental-v1",
-    "address": "vacleaner-address-v1"
+    "address": "vacleaner-address-v1",
+    "prepaymentWaiver": "vacleaner-prepayment-waiver-v1"
   },
   "dependencyGraph": {
     "vacleaner-booking-v5": [],
@@ -35,7 +36,8 @@
     "vacleaner-push": [],
     "vacleaner-settings": [],
     "vacleaner-reminders-v1": [],
-    "vacleaner-address-v1": []
+    "vacleaner-address-v1": [],
+    "vacleaner-prepayment-waiver-v1": []
   },
   "authPolicy": {
     "gatewayJwtForActiveAdminFunctions": false,
@@ -48,64 +50,64 @@
   "functions": [
     {
       "slug": "vacleaner-booking-v5",
-      "version": 25,
+      "version": 27,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "4d784f4e52d27286abccdec2b860bc144f7f93ce127f4f2d6e6e2832effe305d",
+      "sha256": "8abe68b62d1e5f97811f74f7370157d897cdac1fe5efd31e392829cf81833145",
       "role": "active public booking entrypoint",
       "runtime": "active"
     },
     {
       "slug": "vacleaner-admin-bookings-v4",
-      "version": 8,
+      "version": 11,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "8c57775f1c28a622db76b3da6673a77414dbb1f6e442f3902a3ba64ddf8b4a83",
+      "sha256": "c5b2b05fc4bcaaa2678b27ddaddfea603d04d590fefab50cc6d11e589c37cb7b",
       "role": "active direct admin booking, referral analytics and finance entrypoint; custom auth + admin allowlist",
       "runtime": "active"
     },
     {
       "slug": "vacleaner-settings",
-      "version": 20,
+      "version": 21,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "5e7d5f3af46c8ca6a4e6dcd950e2099fcaa42bf7478cb6436de758c33a29a145",
+      "sha256": "78c40d03ab9cbc1a1a90504841941f9f0b1014aa7ec017090ccb39cc8c402cb0",
       "role": "active shared settings",
       "runtime": "active"
     },
     {
       "slug": "vacleaner-push",
-      "version": 8,
+      "version": 9,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "83537656b13c8581fc9b57d43de3a3144033412f8cf7855835c4f8b67717651f",
+      "sha256": "1e72027a462933da85da5dcc15c3c6793a34ec005f3216bc53047178684dc4c2",
       "role": "active admin push; custom auth + admin allowlist",
       "runtime": "active"
     },
     {
       "slug": "vacleaner-admin-data-v1",
-      "version": 17,
+      "version": 18,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "297fee836697fdd249ab0103ca1b10babc3e2090bdee3e5ff3346eced4461222",
+      "sha256": "0dc13dc4b51ae7e9fb5e645f447399e6dcd29ce41f8d7d2bceaeb51de79f4041",
       "role": "active admin clients, analytics, referral data and delivery-route backfill; custom auth + admin allowlist",
       "runtime": "active"
     },
     {
       "slug": "vacleaner-campaigns-v1",
-      "version": 20,
+      "version": 21,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "7c6ddb9a85e08bfd4a6ab5e08294997145fd1a6650f75ee5c8c0fff75ba8971f",
+      "sha256": "bd0e8a4755135d7f558bd0c79034cec2a053f4fa602221d39eb97f3b5da66632",
       "role": "active campaign lifecycle; custom auth + admin allowlist",
       "runtime": "active"
     },
     {
       "slug": "vacleaner-reminders-v1",
-      "version": 8,
+      "version": 9,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "0a9e9d53d124d92e48125b603b2e8851a9b1f2705b611b794316e967df4ac90a",
+      "sha256": "5d8ecbb2ad2c778922c985a70b12659f677a448aea7ba76a1ed513e0b10f9dce",
       "role": "active server reminder runner with custom server authentication",
       "runtime": "active"
     },
@@ -123,7 +125,7 @@
       "version": 13,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "e67383550a49b74fc9eba80b541024261ffc15d0bb9101848c7a4de2ef7d5bd0",
+      "sha256": "6e9e02c8ad941d6fb8e915fc5f9dec31f5869cc8a054884c06090b658be2bdb5",
       "role": "active public address provider with server-side cache",
       "runtime": "active"
     },
@@ -147,10 +149,10 @@
     },
     {
       "slug": "vacleaner-status-correction-v1",
-      "version": 7,
+      "version": 8,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "e9017467f70467cf2c3919758c861c3d3fbb0aba6fdf03b60e30efcc2aefbf88",
+      "sha256": "52d4f81200ae5304c5c74d32e9d2d967813be2c6cada120e8478eba34882b462",
       "role": "active admin status correction; custom auth + admin allowlist",
       "runtime": "active"
     },
@@ -165,10 +167,10 @@
     },
     {
       "slug": "vacleaner-extend-rental-v1",
-      "version": 5,
+      "version": 7,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "325801634c199a5026cb95c30399416a76f1f693d7562d2868fe424177ffb476",
+      "sha256": "cc24e57270e108ac905fa595a3ac7b1d473661449cf8005082790b2f19a67b3d",
       "role": "active rental extension service; custom auth + admin allowlist",
       "runtime": "active"
     },
@@ -234,6 +236,28 @@
       "sha256": "fdf6a38e9163571d59e517af0bbee758971d3456e1243b6456585e627fe58ec2",
       "role": "legacy authoritative implementation retained as rollback source; active frontend uses v4 direct",
       "runtime": "legacy"
+    },
+    {
+      "slug": "vacleaner-prepayment-waiver-v1",
+      "version": 1,
+      "verifyJwt": false,
+      "status": "ACTIVE",
+      "sha256": "a9b6511d9b330e649af7c1c4683f5e3f61cd8a08a15b2f8b64fca7b0d4cea6c1",
+      "role": "approved prepayment waiver; custom auth + admin allowlist",
+      "runtime": "active"
     }
-  ]
+  ],
+  "snapshotPurpose": "Observed production metadata after the approved isolated admin v11 deployment. Frontend Pages release is verified separately.",
+  "rolloutVerification": {
+    "function": "vacleaner-admin-bookings-v4",
+    "version": 11,
+    "verifiedAt": "2026-10-20T15:17:34.905Z",
+    "sourceCommit": "fe62b7f2cc2be18c1fe59d05d12ad8e4fd57b747",
+    "verifiedLocalFiles": 5,
+    "sourceAndDependencies": "exact UTF-8 match via fresh authenticated get_edge_function export",
+    "rollbackRef": "rollback/v4336-admin-v10-20261020",
+    "rollbackCommit": "54a33bfbb7a4f087452a1eb7aca0a93b98752b0b",
+    "previousVersion": 10,
+    "previousBundleHash": "ca4062046d07137b4497db875953452398943271693c077c8d7fe624b18f72fb"
+  }
 }
