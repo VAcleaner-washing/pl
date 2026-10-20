@@ -4,7 +4,13 @@ Production baseline: `278a881b9e4ffbaef3d8c4223126d0103cad90d7`, frontend `4.3.3
 
 ## Reviewed scope
 
-Only the `vacleaner-admin-bookings-v4` Edge Function is a backend deployment target. Production was observed at version 10, bundle hash `ca4062046d07137b4497db875953452398943271693c077c8d7fe624b18f72fb`. The dated inventory records this observed baseline, not a prospective v11.
+Only the `vacleaner-admin-bookings-v4` Edge Function is a backend deployment target. The pre-deployment baseline was version 10, bundle hash `ca4062046d07137b4497db875953452398943271693c077c8d7fe624b18f72fb`. The inventory records observed production metadata and a separate verified rollout checkpoint.
+
+## Verified backend deployment — 20 October 2026
+
+The owner approved the deployment. Admin v11 is ACTIVE with bundle hash `c5b2b05fc4bcaaa2678b27ddaddfea603d04d590fefab50cc6d11e589c37cb7b`; gateway JWT configuration is unchanged. All five live source/dependency files exactly match reviewed commit `fe62b7f2cc2be18c1fe59d05d12ad8e4fd57b747`, and `check:backend-live` passed on the fresh export. No booking/finance rows were written for verification.
+
+The exact previous bundle is preserved in recovery branch `rollback/v4336-admin-v10-20261020`, commit `54a33bfbb7a4f087452a1eb7aca0a93b98752b0b`, under `supabase/rollback/v4.3.36/vacleaner-admin-bookings-v4/`. Frontend Pages deployment is the next separately verified release step.
 
 The canonical repository already contained independent delivery directions. Production did not. The candidate retains that reviewed logic and additionally preserves an existing one-way choice when an older client omits direction fields. Explicit logistics still control 0/50/100% pricing. A manual delivery override remains a final amount.
 

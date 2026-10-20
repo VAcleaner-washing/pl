@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-20T14:46:31.928Z",
+  "capturedAt": "2026-10-20T15:17:34.905Z",
   "projectRef": "yweluzclearwrazdkahu",
   "frontendEntrypoints": {
     "publicBooking": "vacleaner-booking-v5",
@@ -59,10 +59,10 @@
     },
     {
       "slug": "vacleaner-admin-bookings-v4",
-      "version": 10,
+      "version": 11,
       "verifyJwt": false,
       "status": "ACTIVE",
-      "sha256": "ca4062046d07137b4497db875953452398943271693c077c8d7fe624b18f72fb",
+      "sha256": "c5b2b05fc4bcaaa2678b27ddaddfea603d04d590fefab50cc6d11e589c37cb7b",
       "role": "active direct admin booking, referral analytics and finance entrypoint; custom auth + admin allowlist",
       "runtime": "active"
     },
@@ -247,5 +247,17 @@
       "runtime": "active"
     }
   ],
-  "snapshotPurpose": "Observed production baseline before v4.3.37 deployment; this is not a claim that the candidate is live."
+  "snapshotPurpose": "Observed production metadata after the approved isolated admin v11 deployment. Frontend Pages release is verified separately.",
+  "rolloutVerification": {
+    "function": "vacleaner-admin-bookings-v4",
+    "version": 11,
+    "verifiedAt": "2026-10-20T15:17:34.905Z",
+    "sourceCommit": "fe62b7f2cc2be18c1fe59d05d12ad8e4fd57b747",
+    "verifiedLocalFiles": 5,
+    "sourceAndDependencies": "exact UTF-8 match via fresh authenticated get_edge_function export",
+    "rollbackRef": "rollback/v4336-admin-v10-20261020",
+    "rollbackCommit": "54a33bfbb7a4f087452a1eb7aca0a93b98752b0b",
+    "previousVersion": 10,
+    "previousBundleHash": "ca4062046d07137b4497db875953452398943271693c077c8d7fe624b18f72fb"
+  }
 }

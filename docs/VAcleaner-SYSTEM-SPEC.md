@@ -4959,7 +4959,7 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 ### ADDED
 - `test:backend-logistics` executes the real TypeScript HTTP handler and generated JavaScript fallback against isolated Supabase I/O fixtures. It verifies create, reload, edit, idempotent retry, all four logistics choices, manual overrides, legacy edits, reservation failures, authorization and >8 chemistry packets/manual charges. It makes no production writes.
 - `check:backend-live -- --snapshot=/path/to/connector-export.json` compares the authenticated live Edge Function export with repository source, recursively checking local dependency hashes, project, status and gateway JWT configuration. A green static inventory check is never a live deployment-parity claim.
-- Production inventory refreshed from read-only Supabase metadata on 20 October 2026, including prepayment waiver and notification dispatch claims. This snapshot describes the observed baseline; it does not claim the v4.3.37 candidate has been deployed.
+- Production inventory refreshed from read-only Supabase metadata on 20 October 2026, including prepayment waiver and notification dispatch claims. Observed function metadata is updated only after live verification; a separate rollout checkpoint records the tested source commit and rollback reference. Frontend deployment is verified separately.
 
 ### RELEASE / QA
 - Canonical candidate: `4.3.37 / 4337`. Separate branch, PR and full Static + Browser/PWA gates are required; production deployment requires the owner's approval of the reviewed candidate.
