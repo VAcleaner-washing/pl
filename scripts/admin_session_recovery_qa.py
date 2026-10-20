@@ -14,11 +14,12 @@ def exercise(browser, base, config, checks, width, scenario):
     context = browser.new_context(viewport={'width': width, 'height': 1000}, service_workers='block')
     context.add_init_script(smoke.session_script() + "\nconst fixtureSession=JSON.parse(localStorage.getItem('vacleaner_session'));fixtureSession.expires_at=1;localStorage.setItem('vacleaner_session',JSON.stringify(fixtureSession));")
     fallback = api_handler(config)
-    requests = {'refresh': 0, 'protected': 0, 'old_token': 0}
+    requests = {'refresh': 0, 'protected': 0, 'old_token': 0, 'trace': []}
     outage = {'active': scenario == 'outage'}
 
     def route_handler(route):
         url = route.request.url
+        requests['trace'].append({'path': url.split('.co')[-1], 'method': route.request.method, 'auth': route.request.headers.get('authorization', '') in ['Bearer test-access-token', 'Bearer recovered-token']})
         if '/auth/v1/token?grant_type=refresh_token' in url:
             requests['refresh'] += 1
             if scenario == 'terminal':
@@ -47,17 +48,20 @@ def exercise(browser, base, config, checks, width, scenario):
         if scenario == 'terminal':
             expect(page.get_by_role('heading', name='Вхід в адмінку')).to_be_visible()
             checks.check(page.evaluate("localStorage.getItem('vacleaner_session') === null"), label + ': rejected session cleared by sign-in path')
-            checks.check(requests['refresh'] == 1 and requests['protected'] == 0, label + ': one refresh and no protected replay')
+            checks.check(requests['refresh'] == 1 and requests['protected'] == 0, label + ': one refresh and no protected replay ' + repr(requests))
             checks.screenshot(page, label + '-signin.png')
         else:
             expect(page.locator('#retryLoad')).to_be_visible()
             checks.check(page.evaluate("JSON.parse(localStorage.getItem('vacleaner_session')).refresh_token === 'test-refresh-token'"), label + ': outage preserves session')
-            checks.check(requests['refresh'] == 1 and requests['protected'] == 0, label + ': outage sends no business request')
+            checks.check(requests['refresh'] == 1 and requests['protected'] == 0, label + ': outage sends no business request ' + repr(requests))
             checks.screenshot(page, label + '-temporary-error.png')
             outage['active'] = False
             page.locator('#retryLoad').click()
+            mobile_bookings = page.locator('.mobile-nav button[data-mobile-view="bookings"]')
+            if mobile_bookings.is_visible():
+                mobile_bookings.click()
             expect(page.locator('.booking-card').first).to_be_visible()
-            checks.check(requests['refresh'] == 2 and requests['old_token'] == 0, label + ': retry recovers with one refresh and fresh tokens')
+            checks.check(requests['refresh'] == 2 and requests['old_token'] == 0, label + ': retry recovers with one refresh and fresh tokens ' + repr(requests))
             checks.check(page.evaluate("JSON.parse(localStorage.getItem('vacleaner_session')).refresh_token === 'rotated-fixture'"), label + ': rotated token persisted')
             checks.screenshot(page, label + '-recovered.png')
         checks.check(smoke.no_horizontal_overflow(page), label + ': no overflow')
@@ -66,6 +70,8 @@ def exercise(browser, base, config, checks, width, scenario):
         checks.check(False, label + ': ' + str(error))
         checks.capture_failure(page, label)
     finally:
+        checks.artifacts.mkdir(parents=True, exist_ok=True)
+        (checks.artifacts / (label + '-requests.json')).write_text(json.dumps(requests, indent=2) + '\n')
         context.close()
 
 

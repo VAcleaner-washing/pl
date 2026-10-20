@@ -69,6 +69,8 @@ jobs:
           test ! -e dist
           mkdir dist
           tar -xf .pages-artifact/artifact.tar -C dist
+      - name: Session recovery smoke gate
+        run: npm run test:auth-recovery-browser
       - name: Run canonical browser / PWA QA
         run: npm run qa:browser
       - name: Upload browser evidence
