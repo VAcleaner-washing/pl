@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.39",
+  "version": "4.3.40",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -92,6 +92,9 @@
     "test:rental-status-guards-browser": "python scripts/rental_status_guards_qa.py",
     "test:rental-status-guards": "node scripts/test-rental-status-guards.mjs",
     "test:status-waiver-correction": "node scripts/test-v4-3-36-status-waiver-correction.mjs",
-    "test:auth-recovery-browser": "python scripts/admin_session_recovery_qa.py"
+    "test:auth-recovery-browser": "python scripts/admin_session_recovery_qa.py",
+    "test:pwa-startup": "node scripts/test-pwa-startup.mjs",
+    "test:admin-startup-browser": "python scripts/admin_startup_qa.py",
+    "test:pwa-cache-browser": "python scripts/pwa_cache_qa.py"
   }
 }

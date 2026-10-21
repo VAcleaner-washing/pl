@@ -28,7 +28,7 @@ ok(html.includes('apple-mobile-web-app-title'),'Apple PWA title exists');
 ok(sw.includes(`const CACHE='vacleaner-manager-${build}'`),'service-worker cache matches build');
 ok(sw.includes("event.data?.type==='SKIP_WAITING'"),'worker supports controlled activation');
 ok(!/addEventListener\('install'[\s\S]{0,260}skipWaiting/.test(sw),'install never silently activates a new worker');
-ok(sw.includes("caches.match(FALLBACK)"),'navigation has offline shell fallback');
+ok(sw.includes('readCached(FALLBACK)')&&sw.includes('if(documentRequest)'),'navigation has current-worker offline shell fallback (behavior covered by test:pwa-startup)');
 ok(sw.includes("existing.navigate(target.href)"),'push navigates an existing PWA window');
 ok(sw.includes("VACLEANER_OPEN_BOOKING"),'push passes booking deep-link message');
 ok(sw.includes("target.searchParams.set('booking'"),'push URL carries booking id');
