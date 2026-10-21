@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.39
-**Baseline build:** 4339
+**Baseline version:** 4.3.40
+**Baseline build:** 4340
 **Останнє оновлення:** 2026-10-21
 **Власник логіки:** VAcleaner  
 
@@ -5042,3 +5042,31 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - `test:rental-status-guards`: real TypeScript and generated deployment-JavaScript handlers with isolated Supabase I/O; payment/waiver/deposit matrix, no-write rejection, untrusted request flags, retry, completion bypass, refund and due settlement.
 - `test:rental-status-guards-browser`: shipped assets at 320/390/1440 px, clear rejection, enabled retry, no automatic mutation replay or horizontal overflow.
 - Full canonical static/browser/PWA gates and reviewed screenshots are required. Only admin v4 needs a backend deployment; no schema/data migration or other function deployment.
+
+
+# 96. Change record — v4.3.40 / PWA startup and cache
+
+### ADDED
+- STARTUP-001: one shared initial/recovery data load. Settings and all five existing business reads begin together; settings settle before applying data, recalculating calendar slots or rendering the first working view.
+- CACHE-001: exact same-origin `/assets/*.js|css?v=<worker build>` requests use the current worker cache first. A cache miss fetches and stores the resource; other versions, extra query parameters and unversioned assets retain network-first behavior.
+
+### CHANGED
+- Focus, pageshow, visibility and polling do not start a competing read while initial/full refresh is pending. Repeated starts bind one set of activation listeners and one 15-second interval. Later activation and manual refresh still read authoritative API data.
+- Startup retry, online recovery and live first-load recovery use the same settings/data path. No dataset is deferred or shown as a fabricated empty financial result.
+- HTML remains network-first with the existing offline shell fallback. Cache writes are tied to the fetch event lifetime; quota/unavailability cannot discard a successful network response.
+
+### FIXED
+- Activation events during startup no longer duplicate the initial settings/business requests. The initial fingerprint is established after loading, avoiding a redundant redraw of unchanged data.
+- Reopening an installed manager can reuse release-addressed JS/CSS without fetching those bytes again.
+- Runtime cache copies are created before any asynchronous cache operation, so the browser cannot consume the network response before it is cloned.
+- Successful startup/recovery clears the loading accessibility state for every initial view, including mobile Upcoming.
+
+### PRESERVED
+- API requests, authentication, mutation replay rules, finance/booking/status guards, settings authority, push behavior and the user-controlled PWA update/skip-waiting flow. No Supabase deployment, schema migration, live booking writes or VA HOME changes.
+- Cache storage contains static resources, not API responses or a second financial source of truth. Offline startup keeps the existing explicit retry/error behavior.
+
+### TESTS
+- `test:pwa-startup`: real startup/live functions and worker fetch handler with isolated I/O; parallel reads, coherent settings, single flight, failure/retry, activation listeners, exact build keys, offline misses, API bypass and cache quota failure.
+- `test:admin-startup-browser`: shipped assets at 390/1440 px with controlled API delays, repeated timing samples and focus/pageshow during startup; later focus remains live.
+- `test:pwa-cache-browser`: real worker lifecycle, warm resource reuse, network-first HTML, offline shell/API failure and waiting-worker update consent.
+- Full canonical Static/build and Browser/PWA gates plus responsive screenshots. Lab timing does not claim production Core Web Vitals or a physical iPhone/Safari run.

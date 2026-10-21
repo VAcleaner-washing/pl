@@ -23,6 +23,7 @@
     "test:smart-guide-logic",
     "test:booking-date-default",
     "test:pwa-static",
+    "test:pwa-startup",
     "test:sms-campaigns",
     "test:auth-refresh",
     "test:booking-extras",
@@ -80,6 +81,8 @@
     "test:process-contact-v4311",
     "test:admin-booking-flex",
     "test:auth-recovery-browser",
+    "test:admin-startup-browser",
+    "test:pwa-cache-browser",
     "test:rental-status-guards-browser"
   ],
   "currentContracts": [
