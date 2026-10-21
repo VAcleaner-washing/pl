@@ -269,7 +269,14 @@ def make_api_handler(config: dict[str, Any]):
             body = {"publicKey": "B" * 88, "subscribedDevices": 0, "delivered": True}
         else:
             body = {}
-        route.fulfill(status=200, content_type="application/json", body=json.dumps(body, ensure_ascii=False))
+        # Give routed API fixtures an explicit CORS contract instead of relying
+        # on browser-adapter inference. The same-origin worker adapter has no headers.
+        route.fulfill(status=200, content_type="application/json", body=json.dumps(body, ensure_ascii=False),
+                      headers={"Access-Control-Allow-Origin": getattr(request, "headers", {}).get("origin", "*"),
+                               "Access-Control-Allow-Credentials": "true",
+                               "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+                               "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+                               "Cache-Control": "no-store"})
 
     return handler
 

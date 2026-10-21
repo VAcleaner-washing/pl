@@ -57,9 +57,13 @@ def main() -> int:
             page = context.new_page()
             for route in (routes if not slow else ['/', '/bronuvannia/', '/komplekty/', '/rishennia/textile/']):
                 errors = []
+                failed_requests = []
                 def on_error(error):
                     errors.append(str(error))
+                def on_request_failed(request):
+                    failed_requests.append({'url':request.url,'reason':request.failure})
                 page.on('pageerror', on_error)
+                page.on('requestfailed', on_request_failed)
                 response = page.goto(base + route, wait_until='networkidle')
                 if page.locator('script[src*="/assets/public-hydration.js"]').count():
                     page.wait_for_selector('html[data-vacleaner-hydrated="1"]', state='attached')
@@ -73,9 +77,12 @@ def main() -> int:
                 result = {'route': route, 'width': width, 'slowScripts': slow,
                           'status': response.status, 'errors': [str(e) for e in errors],
                           'pendingEnhancements': pending}
+                if errors:
+                    result['failedRequests'] = failed_requests
                 result['passed'] = response.status == 200 and not errors and pending == 0
                 results.append(result)
                 page.remove_listener('pageerror', on_error)
+                page.remove_listener('requestfailed', on_request_failed)
                 if not result['passed']:
                     page.screenshot(path=str(artifacts / f'failure-{len(results)}.png'))
                 print(f"{'PASS' if result['passed'] else 'FAIL'} {width} slow={slow} {route}", flush=True)

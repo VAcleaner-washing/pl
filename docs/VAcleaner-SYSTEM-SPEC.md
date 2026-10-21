@@ -51,6 +51,7 @@
 - backend/static contracts;
 - service worker/cache bust;
 - усі локально доступні browser/PWA suites з canonical workflow;
+- окремий WebKit gate на тому самому validated Pages artifact: mobile forms, public hydration та startup; deploy залежить від Static/build, Chromium Browser/PWA і WebKit;
 - responsive QA: 320 / 390 / 430 / 1024 / 1280 / 1440 / 1648 px;
 - **visual screenshot audit** мінімум на 320 / 390 / 430 / 768 / 1440 px;
 - перегляд ключових екранів, а не лише генерація скрінів: overflow, overlap, clipping, вирівнювання, типографіка, відступи, safe-area, floating controls, модалки, hidden CTA;
@@ -5117,5 +5118,6 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 ### TESTS
 - `test:mobile-forms` and `test:webkit` load shipped HTML/assets with isolated read-only API fixtures; unexpected business mutations fail the run. No fixture CSS or compatibility DOM is injected.
+- Cross-origin API fixtures supply explicit CORS and no-store headers instead of relying on browser-adapter inference. Public hydration failures retain failed-request diagnostics; assertions are not filtered or relaxed.
 - The new checks must fail against build 4341 and pass after the repair. Canonical Static/build and Browser/PWA gates, finance/booking/session regressions and screenshot review remain required.
 - WebKit on Linux and an emulated iPhone/standalone flag are not a physical Safari/iPhone check. Native keyboard, hardware safe areas, installation and push delivery require a real device; existing Chromium worker lifecycle coverage remains required.
