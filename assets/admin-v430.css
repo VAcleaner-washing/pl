@@ -1091,6 +1091,10 @@ html.native-test{
     border-top:1px solid var(--nt-stroke-soft)!important;background:rgba(8,12,15,.98)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
   }
   html.native-test .modal-form>footer .btn{width:100%!important;min-height:50px!important}
+  /* Keep settlement actions in a real grid row so the scrollport excludes them. */
+  html.native-test #financeForm{grid-template-rows:auto auto minmax(0,1fr) auto!important}
+  html.native-test #financeForm>footer{position:relative!important;inset:auto!important}
+  html.native-test #financeForm>.modal-layout{min-height:0!important;padding-bottom:16px!important}
   html.native-test .booking-form-scroll,html.native-test .client-editor-scroll,html.native-test .expense-form-scroll,html.native-test .campaign-form-body,html.native-test .extend-rental-scroll,
   html.native-test .modal-layout,html.native-test .process-grid,html.native-test .sms-workspace-body{
     height:auto!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;scrollbar-width:none!important;
@@ -1113,12 +1117,19 @@ html.native-test{
   html.native-test .issue-booking-head,html.native-test .finance-booking-head{padding:13px!important;border-radius:14px!important;background:#0d1316!important;border-color:var(--nt-stroke)!important}
 
   /* client card */
-  html.native-test #clientEditor .client-editor-summary{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
+  html.native-test #clientEditor .client-editor-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
   html.native-test #clientEditor .client-editor-summary>div{padding:10px!important;border-radius:12px!important;background:#0d1316!important}
   html.native-test #clientEditor .client-card-grid{grid-template-columns:1fr!important;gap:12px!important}
   html.native-test #clientEditor .client-quick-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
-  html.native-test #clientEditor .client-quick-actions .btn:first-child{grid-column:1/-1!important}
+  html.native-test #clientEditor .client-quick-actions>:not(:first-child){grid-column:auto!important}
+  html.native-test #clientEditor .client-quick-actions>:first-child,
+  html.native-test #clientEditor .client-quick-actions>:last-child:nth-child(even){grid-column:1/-1!important}
   html.native-test #clientEditor .client-rental-history article{grid-template-columns:minmax(0,1fr) auto!important;padding:11px!important;border-radius:12px!important;background:#0d1316!important}
+  html.native-test #clientEditor .client-card-grid>.modal-section{margin:0!important}
+  html.native-test #clientEditor .client-card-grid>details.modal-section{padding:0!important}
+  html.native-test #clientEditor .client-secondary-section>summary{gap:8px!important;flex-wrap:wrap}
+  html.native-test #clientEditor .client-secondary-section>summary>span{min-width:0;flex:1 1 160px}
+  html.native-test #clientEditor:has(.client-save:disabled) .client-editor-scroll{padding-bottom:calc(16px + var(--pwa-safe-bottom))!important}
 
   /* SMS full workflow */
   html.native-test .sms-campaign-modal .sms-workspace-body{position:absolute!important;top:calc(82px + var(--pwa-safe-top))!important;right:0!important;bottom:calc(78px + var(--pwa-safe-bottom))!important;left:0!important;padding:12px 16px!important}

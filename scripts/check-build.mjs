@@ -158,7 +158,7 @@ const playwrightInstall=workflow.indexOf('python -m playwright install --with-de
 const canonicalStatic=workflow.includes('npm run qa:static');
 const canonicalBrowser=workflow.includes('npm run qa:browser');
 const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
-const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&workflow.includes('needs: validate')&&workflow.includes('needs: [validate, browser]');
+const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&/^\s*webkit:/m.test(workflow)&&workflow.includes('needs: validate')&&workflow.includes('needs: [validate, browser, webkit]')&&workflow.includes('npm run test:webkit');
 const hasAggregateGate=qaRunner.includes('config/qa-suites.json')&&qaRunner.includes('qa-release-summary.json')&&qaRunner.includes('FULL QA NOT GREEN');
 if(playwrightInstall<0||!canonicalStatic||!canonicalBrowser||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by canonical split static/browser QA with aggregate failure handling');
 if(!qaSuites.browser.includes('test:e2e'))errors.push('Canonical browser QA does not include E2E smoke');

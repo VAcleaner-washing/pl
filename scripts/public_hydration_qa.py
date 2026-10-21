@@ -19,6 +19,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', default='dist')
     parser.add_argument('--artifacts', default='hydration-test-results')
+    parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromium')
     args = parser.parse_args()
     root = Path(args.root).resolve()
     artifacts = Path(args.artifacts).resolve()
@@ -28,13 +29,15 @@ def main() -> int:
     config = json.loads((PROJECT / 'config/vacleaner.json').read_text())
     results = []
     with static_server(root) as base, sync_playwright() as playwright:
-        options = {'headless': True, 'args': ['--no-sandbox']}
-        executable = os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE')
+        options = {'headless': True}
+        if args.browser == 'chromium':
+            options['args'] = ['--no-sandbox']
+        executable = os.environ.get(f'PLAYWRIGHT_{args.browser.upper()}_EXECUTABLE')
         if executable:
             options['executable_path'] = executable
-        elif Path('/usr/bin/chromium').exists():
+        elif args.browser == 'chromium' and Path('/usr/bin/chromium').exists():
             options['executable_path'] = '/usr/bin/chromium'
-        browser = playwright.chromium.launch(**options)
+        browser = getattr(playwright, args.browser).launch(**options)
         for width, slow in [(1440, False), (390, False), (390, True)]:
             context = browser.new_context(viewport={'width': width, 'height': 844})
             api = make_api_handler(config)
@@ -54,9 +57,13 @@ def main() -> int:
             page = context.new_page()
             for route in (routes if not slow else ['/', '/bronuvannia/', '/komplekty/', '/rishennia/textile/']):
                 errors = []
+                failed_requests = []
                 def on_error(error):
                     errors.append(str(error))
+                def on_request_failed(request):
+                    failed_requests.append({'url':request.url,'reason':request.failure})
                 page.on('pageerror', on_error)
+                page.on('requestfailed', on_request_failed)
                 response = page.goto(base + route, wait_until='networkidle')
                 if page.locator('script[src*="/assets/public-hydration.js"]').count():
                     page.wait_for_selector('html[data-vacleaner-hydrated="1"]', state='attached')
@@ -70,15 +77,18 @@ def main() -> int:
                 result = {'route': route, 'width': width, 'slowScripts': slow,
                           'status': response.status, 'errors': [str(e) for e in errors],
                           'pendingEnhancements': pending}
+                if errors:
+                    result['failedRequests'] = failed_requests
                 result['passed'] = response.status == 200 and not errors and pending == 0
                 results.append(result)
                 page.remove_listener('pageerror', on_error)
+                page.remove_listener('requestfailed', on_request_failed)
                 if not result['passed']:
                     page.screenshot(path=str(artifacts / f'failure-{len(results)}.png'))
                 print(f"{'PASS' if result['passed'] else 'FAIL'} {width} slow={slow} {route}", flush=True)
             context.close()
         browser.close()
-    summary = {'passed': sum(r['passed'] for r in results),
+    summary = {'browser': args.browser, 'passed': sum(r['passed'] for r in results),
                'failed': [r for r in results if not r['passed']], 'results': results}
     (artifacts / 'result.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))
     print(json.dumps({'passed': summary['passed'], 'failed': len(summary['failed'])}))

@@ -13,3 +13,29 @@
     grid-template-columns:1fr!important;
   }
 }
+
+/* Shipped client history must fit narrow phones, including long booking codes. */
+@media(max-width:520px){
+  html.native-test #clientEditor .client-rental-history article{
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:10px!important;
+  }
+  html.native-test #clientEditor .client-rental-history article>div:last-child{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:10px!important;
+  }
+  html.native-test #clientEditor .client-rental-open{
+    grid-column:1/-1;
+    width:100%;
+    min-height:44px;
+  }
+}
+
+/* Native mobile forms and the existing phone-landscape bridge share readable fields. */
+@media (max-width:900px), (max-width:1024px) and (max-height:500px) and (orientation:landscape){
+  html.v43-prod #bookingForm .admin-logistics-toggle button{min-height:44px}
+  html.v43-prod #layer .modal-form :is(input,select,textarea):not([type="checkbox"]):not([type="radio"]){
+    font-size:16px!important;
+  }
+}
