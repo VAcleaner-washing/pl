@@ -50,6 +50,15 @@ for(const file of walk(root).filter(f=>f.endsWith('.html')||f.endsWith('.txt')))
 
 const adminSw=path.join(root,'admin','sw.js');
 let sw=fs.readFileSync(adminSw,'utf8').replace(/vacleaner-manager-\d+/g,`vacleaner-manager-${build}`).replace(/\?v=\d+/g,`?v=${build}`);
+// The shipped HTML is the asset authority, including newer presentation layers.
+// A fresh install must work offline without a second online launch to fill gaps.
+const adminHtml=fs.readFileSync(path.join(root,'admin','bronuvannia','index.html'),'utf8');
+const adminAssets=[...new Set([...adminHtml.matchAll(/(?:src|href)=["'](\/assets\/[^"'?#]+\.(?:js|css)\?v=\d+)["']/g)].map(match=>match[1]))];
+if(!adminAssets.length)throw new Error('Cannot build admin precache without shell assets');
+for(const url of adminAssets)if(!fs.existsSync(path.join(root,url.split('?')[0])))throw new Error(`Missing admin precache asset: ${url}`);
+const precache=[...adminAssets,'/admin/manifest.webmanifest','/admin/icon-192.png','/admin/icon-512.png',`/admin/apple-touch-icon.png?v=${build}`];
+if(!/^const CORE=.*;$/m.test(sw))throw new Error('Admin precache marker is missing');
+sw=sw.replace(/^const CORE=.*;$/m,`const CORE=[FALLBACK,${precache.map(url=>`'${url}'`).join(',')}];`);
 fs.writeFileSync(adminSw,sw);
 const adminRuntime=path.join(root,'assets','admin-v250.js');
 let runtime=fs.readFileSync(adminRuntime,'utf8').replace(/const PWA_BUILD='\d+'/,`const PWA_BUILD='${build}'`).replace(/(\/admin\/sw\.js)\?v=\d+/g,`$1?v=${build}`);

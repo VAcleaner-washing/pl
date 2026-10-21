@@ -106,7 +106,27 @@ def exercise(browser, server, base, config, checks, width):
         page.wait_for_selector('#pageTitle')
         page.wait_for_function('async () => !!(await navigator.serviceWorker.getRegistration())?.active')
         page.wait_for_function('() => !!navigator.serviceWorker.controller')
-        # Populate runtime-only assets not in the install CORE list.
+        coverage = page.evaluate('''async()=>{
+          const required=[...document.querySelectorAll('script[src^="/assets/"],link[href^="/assets/"]')].map(el=>el.src||el.href);
+          const cache=await caches.open('vacleaner-manager-'+new URL(required[0]).searchParams.get('v'));
+          const missing=[];for(const url of required)if(!await cache.match(url))missing.push(url);
+          return {count:required.length,missing};
+        }''')
+        checks.check(coverage['count'] >= 35 and not coverage['missing'], label + ': first install precaches all shipped JS/CSS ' + repr(coverage))
+        # Test the first offline launch before any controlled online reload can prime caches.
+        context.set_offline(True)
+        first_offline = []
+        def offline_response(response):
+            if '/assets/' in response.url:
+                first_offline.append({'status': response.status, 'worker': response.from_service_worker})
+        page.on('response', offline_response)
+        page.reload(wait_until='load')
+        expect(page.locator('#retryLoad')).to_be_visible()
+        checks.check(len(first_offline) >= 35 and all(r['status'] == 200 and r['worker'] for r in first_offline), label + ': first offline launch serves every JS/CSS successfully')
+        checks.check(page.evaluate("!!localStorage.getItem('vacleaner_session')"), label + ': first offline launch preserves session')
+        checks.screenshot(page, label + '-first-offline.png')
+        page.remove_listener('response', offline_response)
+        context.set_offline(False)
         page.reload(wait_until='load')
         page.wait_for_function("() => document.querySelector('#view')?.getAttribute('aria-busy') !== 'true'")
         page.wait_for_timeout(300)

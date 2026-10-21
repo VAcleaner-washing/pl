@@ -5049,6 +5049,7 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### ADDED
 - STARTUP-001: one shared initial/recovery data load. Settings and all five existing business reads begin together; settings settle before applying data, recalculating calendar slots or rendering the first working view.
 - CACHE-001: exact same-origin `/assets/*.js|css?v=<worker build>` requests use the current worker cache first. A cache miss fetches and stores the resource; other versions, extra query parameters and unversioned assets retain network-first behavior.
+- The deterministic build derives the worker install asset list from the canonical admin HTML, including every shipped JS/CSS layer. Fresh-install offline support must not depend on a second online launch; missing precache files fail the build.
 
 ### CHANGED
 - Focus, pageshow, visibility and polling do not start a competing read while initial/full refresh is pending. Repeated starts bind one set of activation listeners and one 15-second interval. Later activation and manual refresh still read authoritative API data.
@@ -5069,4 +5070,5 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - `test:pwa-startup`: real startup/live functions and worker fetch handler with isolated I/O; parallel reads, coherent settings, single flight, failure/retry, activation listeners, exact build keys, offline misses, API bypass and cache quota failure.
 - `test:admin-startup-browser`: shipped assets at 390/1440 px with controlled API delays, repeated timing samples and focus/pageshow during startup; later focus remains live.
 - `test:pwa-cache-browser`: real worker lifecycle, warm resource reuse, network-first HTML, offline shell/API failure and waiting-worker update consent.
+- Precache coverage and the first offline launch are checked before priming runtime caches; update fixtures serve coherent next-build HTML/runtime/worker URLs.
 - Full canonical Static/build and Browser/PWA gates plus responsive screenshots. Lab timing does not claim production Core Web Vitals or a physical iPhone/Safari run.

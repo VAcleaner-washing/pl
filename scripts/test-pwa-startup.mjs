@@ -60,6 +60,12 @@ await test('optional campaign/referral outages retain the established fallback',
 });
 
 const worker=fs.readFileSync('admin/sw.js','utf8'),build=worker.match(/vacleaner-manager-(\d+)/)[1];
+await test('install precache covers every shipped admin JS/CSS without a second online launch',async()=>{
+  const context={self:{addEventListener:()=>{}}};vm.runInNewContext(worker+';globalThis.core=CORE;',context);
+  const html=fs.readFileSync('admin/bronuvannia/index.html','utf8');
+  const required=[...html.matchAll(/(?:src|href)=["'](\/assets\/[^"']+\.(?:js|css)\?v=\d+)["']/g)].map(match=>match[1]);
+  assert.ok(required.length>=35);assert.deepEqual(required.filter(url=>!context.core.includes(url)),[]);
+});
 function swHarness(){
   const handlers={},entries=new Map(),network=[],waiting=[];let offline=false,quota=false;
   const key=request=>new URL(typeof request==='string'?request:request.url,'https://fixture.local').href;
