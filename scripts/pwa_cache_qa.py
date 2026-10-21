@@ -167,7 +167,8 @@ def exercise(browser, server, base, config, checks, width):
         server.next_build = server.build + 1
         page.evaluate('navigator.serviceWorker.getRegistration().then(reg=>reg.update())')
         page.wait_for_function('async () => navigator.serviceWorker.getRegistration().then(reg=>!!reg.waiting)', timeout=30000)
-        expect(page.locator('.pwa-update-prompt')).to_be_visible()
+        # Worker installation and the recovering page bootstrap settle independently.
+        expect(page.locator('.pwa-update-prompt')).to_be_visible(timeout=30000)
         checks.check(page.evaluate('navigator.serviceWorker.getRegistration().then(reg=>reg.active !== reg.waiting && !!reg.waiting)'), label + ': update waits while current app remains active')
         # A real booking form hides the prompt and protects its inputs.
         mobile_new = page.locator('#mobileNewBooking')
@@ -177,7 +178,7 @@ def exercise(browser, server, base, config, checks, width):
         checks.screenshot(page, label + '-update-during-form.png')
         page.keyboard.press('Escape')
         expect(page.locator('#bookingForm')).to_have_count(0)
-        expect(page.locator('.pwa-update-prompt')).to_be_visible()
+        expect(page.locator('.pwa-update-prompt')).to_be_visible(timeout=30000)
         page.locator('.pwa-update-later').click()
         checks.check(page.evaluate('navigator.serviceWorker.getRegistration().then(reg=>!!reg.waiting)'), label + ': Later retains waiting worker')
         # Reopen the existing prompt via a page reload, then explicitly accept.

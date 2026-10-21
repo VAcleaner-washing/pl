@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.40
-**Baseline build:** 4340
+**Baseline version:** 4.3.41
+**Baseline build:** 4341
 **Останнє оновлення:** 2026-10-21
 **Власник логіки:** VAcleaner  
 
@@ -5072,3 +5072,25 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - `test:pwa-cache-browser`: real worker lifecycle, warm resource reuse, network-first HTML, offline shell/API failure and waiting-worker update consent.
 - Precache coverage and the first offline launch are checked before priming runtime caches; update fixtures serve coherent next-build HTML/runtime/worker URLs.
 - Full canonical Static/build and Browser/PWA gates plus responsive screenshots. Lab timing does not claim production Core Web Vitals or a physical iPhone/Safari run.
+
+
+# 97. Change record — v4.3.41 / PWA update lifecycle
+
+### ADDED
+- UPDATE-001: regression coverage executes the real worker registration function with an already-installing or already-installed worker, a waiting worker and an offline registration failure.
+
+### FIXED
+- Registration observes the current installing worker immediately, as well as future updatefound events. An installation event fired before register() resolves can no longer leave an installed update without its existing consent prompt.
+- When an update check fails during offline startup, an existing exact `/admin/` registration remains the lifecycle authority. Its update listeners and online retry are still attached; no new worker is forced to activate.
+
+### CHANGED
+- Each worker is observed once. The existing prompt still checks controller/deferral state and remains hidden while a form or keyboard is active.
+- Build 4341 gives the runtime fix its own immutable asset/cache identity, including devices that have already received build 4340.
+
+### PRESERVED
+- Version-addressed caching, complete first-install offline shell, network-first HTML, API/session authority, explicit skip-waiting consent, push/deep links, finance/booking/status logic, Supabase and VA HOME.
+
+### TESTS
+- `test:pwa-startup` covers missed updatefound ordering, immediate installed state, waiting state, duplicate observation, existing-registration offline recovery and no automatic activation.
+- `test:pwa-cache-browser` retains the full first-offline/online/update sequence against real worker lifecycle at 390/1440 px; the update test is not bypassed by resetting the online page.
+- Full canonical Static/build and Browser/PWA gates, finance/session regressions and visual review remain required. Physical Safari and live business mutations are not claimed.
