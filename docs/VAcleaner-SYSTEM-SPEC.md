@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.38
-**Baseline build:** 4338
-**Останнє оновлення:** 2026-10-20
+**Baseline version:** 4.3.39
+**Baseline build:** 4339
+**Останнє оновлення:** 2026-10-21
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5014,3 +5014,31 @@ Tablet/desktop 1024×768 та звичайна global admin geometry залиш�
 The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUNTIME_SERVICE_DEGRADED`; adjacent cron requests at 18:59 and 19:01 returned 200. The cron is active every minute. This is not evidence of a reminder-handler defect. Existing atomic dispatch leases prevent concurrent sends, delivered events stay deduplicated and unsuccessful sends remain retryable. Live reminder v9 has notification-label differences from the repository; dispatch/retry behavior is the same. No reminder deployment is included.
 
 - `scripts/test-reminder-dispatch.mjs` executes the real reminder dispatch helper with isolated claim/provider fixtures for concurrency, delivered-event dedupe and failed-send retry. The same helper was checked against live v9; production sends were not triggered.
+
+
+# 95. Change record — v4.3.39 / rental status guards
+
+### ADDED
+
+## STATUS-GUARD-001 — authoritative issue prerequisites
+- The admin v4 `update → issued` path requires stored `deposit_paid = true` plus either stored `prepayment_paid = true` or `extras.prepayment_waiver.active = true`. Request fields cannot fabricate these facts.
+- A waiver does not create a payment: false/zero prepayment fields remain false/zero. Existing correction prerequisites remain unchanged.
+- An already-issued retry returns the stored booking without writing payments, timestamps, audit entries or notifications.
+
+### CHANGED
+
+## STATUS-GUARD-002 — one completion path
+- General `update → completed` is rejected with `settlement_required`, including requests carrying refund/due confirmation flags. Completion belongs to existing `save_deposit_return` and its authoritative settlement calculation/confirmation checks.
+- The manager receives a Ukrainian instruction to accept the return and confirm the final settlement. Issue prerequisite errors also have Ukrainian labels.
+- Existing saved rentals are not rewritten. Prices, chemistry, manual fees, delivery, discounts, inventory, extension and status-correction behavior stay unchanged.
+
+### FIXED
+- Generic status requests can no longer bypass stored issue prerequisites or the final settlement handler.
+
+### PRESERVED
+- Existing prices, finance records, approved waivers, inventory and idempotent issue behavior.
+
+### TESTS
+- `test:rental-status-guards`: real TypeScript and generated deployment-JavaScript handlers with isolated Supabase I/O; payment/waiver/deposit matrix, no-write rejection, untrusted request flags, retry, completion bypass, refund and due settlement.
+- `test:rental-status-guards-browser`: shipped assets at 320/390/1440 px, clear rejection, enabled retry, no automatic mutation replay or horizontal overflow.
+- Full canonical static/browser/PWA gates and reviewed screenshots are required. Only admin v4 needs a backend deployment; no schema/data migration or other function deployment.

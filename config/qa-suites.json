@@ -30,6 +30,7 @@
     "test:finance",
     "test:finance-additions",
     "test:status-waiver-correction",
+    "test:rental-status-guards",
     "test:session",
     "test:ux",
     "test:final-desktop-static",
@@ -78,7 +79,8 @@
     "test:client-card-visual",
     "test:process-contact-v4311",
     "test:admin-booking-flex",
-    "test:auth-recovery-browser"
+    "test:auth-recovery-browser",
+    "test:rental-status-guards-browser"
   ],
   "currentContracts": [
     {

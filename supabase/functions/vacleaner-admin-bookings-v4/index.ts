@@ -797,6 +797,14 @@ Deno.serve(async (request: Request) => {
       // Idempotent retry guard: a stale admin modal/tab may repeat an already successful issue request.
       // Returning the current booking is safer than surfacing a raw invalid_transition for a completed same-state action.
       if (nextStatus === "issued" && String(current.status || "") === "issued") return json({ booking: safeBooking(current), alreadyApplied: true });
+      // Completion belongs exclusively to save_deposit_return, which validates
+      // the authoritative balance and explicit refund/due confirmation.
+      if (nextStatus === "completed") return json({ error: "settlement_required" }, 409);
+      if (nextStatus === "issued") {
+        const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+        const prepaymentSatisfied = current.prepayment_paid === true || currentExtras?.prepayment_waiver?.active === true;
+        if (!prepaymentSatisfied || current.deposit_paid !== true) return json({ error: "issue_payment_required" }, 409);
+      }
       if (nextStatus === "confirmed" || nextStatus === "waiting_payment") {
         const reservationAllowed = nextStatus === "confirmed" ? ["pending", "waiting_payment", "confirmed"] : ["pending", "waiting_payment"];
         if (!reservationAllowed.includes(String(current.status || ""))) return json({ error: "invalid_transition" }, 409);
@@ -812,8 +820,8 @@ Deno.serve(async (request: Request) => {
           throw reservationError;
         }
       }
-      const allowed = nextStatus === "issued" ? ["confirmed"] : nextStatus === "completed" ? ["confirmed", "issued"] : ["pending", "waiting_payment", "confirmed", "issued"];
-      if (!["issued", "completed", "declined", "cancelled"].includes(nextStatus) || !allowed.includes(current.status)) return json({ error: "invalid_transition" }, 409);
+      const allowed = nextStatus === "issued" ? ["confirmed"] : ["pending", "waiting_payment", "confirmed", "issued"];
+      if (!["issued", "declined", "cancelled"].includes(nextStatus) || !allowed.includes(current.status)) return json({ error: "invalid_transition" }, 409);
       const now = new Date().toISOString(), patch: Record<string, any> = { status: nextStatus, admin_note: cleanAdminNote(body.adminNote, 800) || cleanAdminNote(current.admin_note, 800) || null, updated_at: now };
       if (nextStatus === "cancelled") {
         const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
@@ -826,12 +834,10 @@ Deno.serve(async (request: Request) => {
       else patch.hold_expires_at = null;
       if (nextStatus === "confirmed") { patch.prepayment_paid = true; patch.prepayment_amount = 200; patch.prepayment_paid_at = current.prepayment_paid_at || now; patch.confirmed_at = current.confirmed_at || now; }
       if (nextStatus === "issued") patch.issued_at = current.issued_at || now;
-      if (nextStatus === "completed") { patch.completed_at = current.completed_at || now; const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {}; const allocation = equipmentRevenueAllocationSnapshot(current, catalog, now); if (allocation) patch.extras = { ...currentExtras, equipment_revenue_allocation: allocation }; }
       const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single(); if (updateError) throw updateError;
       await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt);
       if (["cancelled", "declined"].includes(nextStatus)) await releaseReferralForCancelledBooking(supabase, bookingId);
-      if (nextStatus === "completed") await completeReferralForBooking(supabase, data);
-      if (nextStatus === "issued" || nextStatus === "completed") await notifyPeerAdmin(request, supabaseUrl, bookingId, nextStatus, body);
+      if (nextStatus === "issued") await notifyPeerAdmin(request, supabaseUrl, bookingId, nextStatus, body);
       return json({ booking: safeBooking(data) });
     }
 

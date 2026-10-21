@@ -1563,6 +1563,16 @@ Deno.serve(async (request)=>{
                 booking: safeBooking(current),
                 alreadyApplied: true
             });
+            if (nextStatus === "completed") return json({
+                error: "settlement_required"
+            }, 409);
+            if (nextStatus === "issued") {
+                const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
+                const prepaymentSatisfied = current.prepayment_paid === true || currentExtras?.prepayment_waiver?.active === true;
+                if (!prepaymentSatisfied || current.deposit_paid !== true) return json({
+                    error: "issue_payment_required"
+                }, 409);
+            }
             if (nextStatus === "confirmed" || nextStatus === "waiting_payment") {
                 const reservationAllowed = nextStatus === "confirmed" ? [
                     "pending",
@@ -1604,9 +1614,6 @@ Deno.serve(async (request)=>{
             }
             const allowed = nextStatus === "issued" ? [
                 "confirmed"
-            ] : nextStatus === "completed" ? [
-                "confirmed",
-                "issued"
             ] : [
                 "pending",
                 "waiting_payment",
@@ -1615,7 +1622,6 @@ Deno.serve(async (request)=>{
             ];
             if (![
                 "issued",
-                "completed",
                 "declined",
                 "cancelled"
             ].includes(nextStatus) || !allowed.includes(current.status)) return json({
@@ -1651,15 +1657,6 @@ Deno.serve(async (request)=>{
                 patch.confirmed_at = current.confirmed_at || now;
             }
             if (nextStatus === "issued") patch.issued_at = current.issued_at || now;
-            if (nextStatus === "completed") {
-                patch.completed_at = current.completed_at || now;
-                const currentExtras = current.extras && typeof current.extras === "object" ? current.extras : {};
-                const allocation = equipmentRevenueAllocationSnapshot(current, catalog, now);
-                if (allocation) patch.extras = {
-                    ...currentExtras,
-                    equipment_revenue_allocation: allocation
-                };
-            }
             const { data, error: updateError } = await supabase.from("vacleaner_bookings").update(patch).eq("id", bookingId).select("*").single();
             if (updateError) throw updateError;
             await tagAudit(supabase, bookingId, userData.user.id, `edge:update`, actionStartedAt);
@@ -1667,8 +1664,7 @@ Deno.serve(async (request)=>{
                 "cancelled",
                 "declined"
             ].includes(nextStatus)) await releaseReferralForCancelledBooking(supabase, bookingId);
-            if (nextStatus === "completed") await completeReferralForBooking(supabase, data);
-            if (nextStatus === "issued" || nextStatus === "completed") await notifyPeerAdmin(request, supabaseUrl, bookingId, nextStatus, body);
+            if (nextStatus === "issued") await notifyPeerAdmin(request, supabaseUrl, bookingId, nextStatus, body);
             return json({
                 booking: safeBooking(data)
             });
