@@ -183,7 +183,8 @@ def exercise(browser, server, base, config, checks, width):
         # Reopen the existing prompt via a page reload, then explicitly accept.
         page.evaluate("sessionStorage.removeItem('vac_pwa_update_later')")
         page.reload(wait_until='load')
-        expect(page.locator('.pwa-update-now')).to_be_visible()
+        page.wait_for_function('async () => !!(await navigator.serviceWorker.getRegistration())?.waiting')
+        expect(page.locator('.pwa-update-now')).to_be_visible(timeout=30000)
         with page.expect_navigation(wait_until='domcontentloaded'):
             page.locator('.pwa-update-now').click()
         page.wait_for_function('async () => navigator.serviceWorker.getRegistration().then(reg=>!reg.waiting && reg.active?.state === "activated")')
