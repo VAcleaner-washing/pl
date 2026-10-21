@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.37",
+  "version": "4.3.38",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -48,7 +48,7 @@
     "test:calendar-live": "node scripts/test-calendar-live-consistency.mjs",
     "test:growth-content": "node scripts/test-growth-content.mjs",
     "test:booking-gifts": "node scripts/test-booking-gift-policy.mjs",
-    "test:auth-refresh": "node scripts/test-admin-refresh-singleflight.mjs",
+    "test:auth-refresh": "node scripts/test-admin-refresh-singleflight.mjs && node scripts/test-admin-session-recovery.mjs && node scripts/test-reminder-dispatch.mjs",
     "test:current-contracts": "node scripts/test-current-contracts.mjs",
     "test:ci-pipeline": "node scripts/test-ci-pipeline-contract.mjs",
     "test:e2e": "python scripts/v4312_e2e_runner.py --root dist --artifacts test-results",
@@ -89,6 +89,7 @@
     "test:admin-booking-flex": "python scripts/admin_booking_v4312_visual_qa.py && python scripts/admin_booking_v4316_time_range_qa.py && python scripts/v4312_qa_runner.py scripts/admin_booking_v4319_landscape_qa.py && python scripts/admin_prepayment_waiver_v4319_qa.py && python scripts/admin_upcoming_status_v4320_qa.py && python scripts/admin_booking_v4321_detail_qa.py && python scripts/admin_booking_v4322_finance_polish_qa.py && python scripts/admin_booking_v4323_filter_polish_qa.py && python scripts/admin_booking_v4324_desktop_polish_qa.py && python scripts/admin_booking_v4326_confirmation_message_qa.py && python scripts/admin_booking_v4327_pending_documents_qa.py && python scripts/admin_booking_v4330_home_reset_qa.py",
     "test:admin-entrypoint-finance": "python scripts/admin_entrypoint_finance_qa.py --root dist --artifacts admin-entrypoint-test-results",
     "test:finance-additions": "node scripts/test-v4-3-35-finance-additions.mjs",
-    "test:status-waiver-correction": "node scripts/test-v4-3-36-status-waiver-correction.mjs"
+    "test:status-waiver-correction": "node scripts/test-v4-3-36-status-waiver-correction.mjs",
+    "test:auth-recovery-browser": "python scripts/admin_session_recovery_qa.py"
   }
 }
