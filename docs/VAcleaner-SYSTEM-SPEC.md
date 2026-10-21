@@ -5119,5 +5119,6 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 - `test:mobile-forms` and `test:webkit` load shipped HTML/assets with isolated read-only API fixtures; unexpected business mutations fail the run. No fixture CSS or compatibility DOM is injected.
 - Cross-origin API fixtures supply explicit CORS and no-store headers instead of relying on browser-adapter inference. Public hydration failures retain failed-request diagnostics; assertions are not filtered or relaxed.
+- Each public hydration case uses a fresh page with service workers blocked for routed API isolation. This avoids attributing a departing document's delayed-fetch cancellation to the destination page in WebKit (upstream Playwright #43120). Error-free hydration remains mandatory on every route; actual worker lifecycle remains in its separate network-backed suite.
 - The new checks must fail against build 4341 and pass after the repair. Canonical Static/build and Browser/PWA gates, finance/booking/session regressions and screenshot review remain required.
 - WebKit on Linux and an emulated iPhone/standalone flag are not a physical Safari/iPhone check. Native keyboard, hardware safe areas, installation and push delivery require a real device; existing Chromium worker lifecycle coverage remains required.

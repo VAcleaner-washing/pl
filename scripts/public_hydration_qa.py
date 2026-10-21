@@ -39,7 +39,9 @@ def main() -> int:
             options['executable_path'] = '/usr/bin/chromium'
         browser = getattr(playwright, args.browser).launch(**options)
         for width, slow in [(1440, False), (390, False), (390, True)]:
-            context = browser.new_context(viewport={'width': width, 'height': 844})
+            # This suite tests document hydration with routed API fixtures.
+            # Actual service-worker lifecycle has its own network-backed suite.
+            context = browser.new_context(viewport={'width': width, 'height': 844}, service_workers='block')
             api = make_api_handler(config)
 
             def route_handler(route):
@@ -54,8 +56,12 @@ def main() -> int:
                     route.abort()
 
             context.route('**/*', route_handler)
-            page = context.new_page()
             for route in (routes if not slow else ['/', '/bronuvannia/', '/komplekty/', '/rishennia/textile/']):
+                # A departing document can still start delayed catalog reads.
+                # WebKit reports some replacement-phase cancellations as access-
+                # control page errors without a network request (Playwright #43120).
+                # Use one document per hydration case; do not filter page errors.
+                page = context.new_page()
                 errors = []
                 failed_requests = []
                 def on_error(error):
@@ -86,6 +92,7 @@ def main() -> int:
                 if not result['passed']:
                     page.screenshot(path=str(artifacts / f'failure-{len(results)}.png'))
                 print(f"{'PASS' if result['passed'] else 'FAIL'} {width} slow={slow} {route}", flush=True)
+                page.close()
             context.close()
         browser.close()
     summary = {'browser': args.browser, 'passed': sum(r['passed'] for r in results),
