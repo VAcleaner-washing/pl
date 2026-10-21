@@ -15,15 +15,19 @@ def main():
     parser.add_argument('--root', default='dist')
     parser.add_argument('--artifacts', default='pwa-test-results/startup')
     parser.add_argument('--baseline', action='store_true')
+    parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromium')
     args = parser.parse_args()
     checks = smoke.Checks(Path(args.artifacts).resolve())
     config = json.loads((smoke.PROJECT_ROOT / 'config/vacleaner.json').read_text())
     samples = []
     with pages_server(Path(args.root).resolve()) as base, sync_playwright() as playwright:
-        options = {'headless': True, 'args': ['--no-sandbox']}
-        if os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE'):
-            options['executable_path'] = os.environ['PLAYWRIGHT_CHROMIUM_EXECUTABLE']
-        browser = playwright.chromium.launch(**options)
+        options = {'headless': True}
+        if args.browser == 'chromium':
+            options['args'] = ['--no-sandbox']
+        executable = os.environ.get(f'PLAYWRIGHT_{args.browser.upper()}_EXECUTABLE')
+        if executable:
+            options['executable_path'] = executable
+        browser = getattr(playwright, args.browser).launch(**options)
         for width in [390, 1440]:
             for iteration in range(3):
                 context = browser.new_context(viewport={'width': width, 'height': 1000}, service_workers='block')
@@ -79,7 +83,7 @@ def main():
                     checks.screenshot(page, f'{width}-bookings.png')
                 context.close()
         browser.close()
-    result = {'baseline': args.baseline, 'median_data_ms': statistics.median(s['data_ms'] for s in samples), 'samples': samples, 'passed': checks.passed, 'failed': checks.failed}
+    result = {'browser': args.browser, 'baseline': args.baseline, 'median_data_ms': statistics.median(s['data_ms'] for s in samples), 'samples': samples, 'passed': checks.passed, 'failed': checks.failed}
     checks.artifacts.mkdir(parents=True, exist_ok=True)
     (checks.artifacts / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps({key: value for key, value in result.items() if key != 'samples'}))

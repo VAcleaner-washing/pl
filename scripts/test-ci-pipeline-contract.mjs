@@ -17,8 +17,11 @@ ok('validate uploads one named Pages artifact',workflow.includes('uses: actions/
 ok('browser downloads the validated Pages artifact',workflow.includes('uses: actions/download-artifact@v4')&&workflow.includes('name: github-pages'));
 ok('browser extracts artifact.tar into dist',workflow.includes('tar -xf .pages-artifact/artifact.tar -C dist'));
 ok('browser depends on validate',/browser:[\s\S]*?needs: validate/.test(workflow));
-ok('deploy remains blocked by validate and browser',workflow.includes('needs: [validate, browser]'));
-ok('Python setup exists only in Browser job',(workflow.match(/actions\/setup-python/g)||[]).length===1);
+ok('deploy requires static, Chromium and WebKit gates',workflow.includes('needs: [validate, browser, webkit]'));
+ok('Python setup exists in both browser jobs',(workflow.match(/actions\/setup-python/g)||[]).length===2);
+ok('WebKit tests the validated artifact without rebuilding',/webkit:[\s\S]*?needs: validate[\s\S]*?npm run verify:artifact[\s\S]*?npm run test:webkit/.test(workflow));
+ok('WebKit dependencies are installed explicitly',workflow.includes('python -m playwright install --with-deps webkit'));
+ok('legacy E2E bridge is replaced by real logistics controls',pkg.scripts['test:e2e'].includes('scripts/e2e_smoke.py')&&!pkg.scripts['test:e2e'].includes('v4312_e2e_runner')&&e2e.includes('data-logistics-kind'));
 ok('browser mode never rebuilds dist',!runner.includes("if(mode==='browser') npm('build')")&&!/mode===['\"]browser['\"][^\n]*build/.test(runner));
 ok('browser begins with deploy-artifact verification',runner.includes("npm('verify:artifact')"));
 ok('QA suites are data-driven',runner.includes("config/qa-suites.json")&&Array.isArray(suites.static)&&Array.isArray(suites.browser));

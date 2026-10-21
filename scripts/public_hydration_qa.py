@@ -19,6 +19,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', default='dist')
     parser.add_argument('--artifacts', default='hydration-test-results')
+    parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromium')
     args = parser.parse_args()
     root = Path(args.root).resolve()
     artifacts = Path(args.artifacts).resolve()
@@ -28,13 +29,15 @@ def main() -> int:
     config = json.loads((PROJECT / 'config/vacleaner.json').read_text())
     results = []
     with static_server(root) as base, sync_playwright() as playwright:
-        options = {'headless': True, 'args': ['--no-sandbox']}
-        executable = os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE')
+        options = {'headless': True}
+        if args.browser == 'chromium':
+            options['args'] = ['--no-sandbox']
+        executable = os.environ.get(f'PLAYWRIGHT_{args.browser.upper()}_EXECUTABLE')
         if executable:
             options['executable_path'] = executable
-        elif Path('/usr/bin/chromium').exists():
+        elif args.browser == 'chromium' and Path('/usr/bin/chromium').exists():
             options['executable_path'] = '/usr/bin/chromium'
-        browser = playwright.chromium.launch(**options)
+        browser = getattr(playwright, args.browser).launch(**options)
         for width, slow in [(1440, False), (390, False), (390, True)]:
             context = browser.new_context(viewport={'width': width, 'height': 844})
             api = make_api_handler(config)
@@ -78,7 +81,7 @@ def main() -> int:
                 print(f"{'PASS' if result['passed'] else 'FAIL'} {width} slow={slow} {route}", flush=True)
             context.close()
         browser.close()
-    summary = {'passed': sum(r['passed'] for r in results),
+    summary = {'browser': args.browser, 'passed': sum(r['passed'] for r in results),
                'failed': [r for r in results if not r['passed']], 'results': results}
     (artifacts / 'result.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))
     print(json.dumps({'passed': summary['passed'], 'failed': len(summary['failed'])}))

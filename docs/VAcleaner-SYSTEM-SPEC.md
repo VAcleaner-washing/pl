@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.41
-**Baseline build:** 4341
+**Baseline version:** 4.3.42
+**Baseline build:** 4342
 **Останнє оновлення:** 2026-10-21
 **Власник логіки:** VAcleaner  
 
@@ -1955,7 +1955,7 @@ Runtime compatibility/glass layer не має права інжектити ду
 
 ## CLIENT-004 — мобільні KPI
 
-На 390/430 summary KPI залишається компактним 2×2, а не чотири великі блоки по одному.
+На 390/430 summary KPI залишається компактним 2×2, а не чотири великі блоки по одному. Native mobile layer must preserve that layout in the shipped asset cascade; the primary client action and any final unpaired action occupy a full row.
 
 ## CLIENT-005 — mobile actions
 
@@ -5094,3 +5094,28 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - `test:pwa-startup` covers missed updatefound ordering, immediate installed state, waiting state, duplicate observation, existing-registration offline recovery and no automatic activation.
 - `test:pwa-cache-browser` retains the full first-offline/online/update sequence against real worker lifecycle at 390/1440 px; the update test is not bypassed by resetting the online page.
 - Full canonical Static/build and Browser/PWA gates, finance/session regressions and visual review remain required. Physical Safari and live business mutations are not claimed.
+
+# 98. Change record — v4.3.42 / Mobile forms and WebKit QA
+
+### ADDED
+- FORM-MOBILE-001: shipped mobile modal fields use at least 16 px text at the native mobile breakpoint and the existing phone-landscape bridge. Checkbox/radio controls retain their own appearance.
+- WEBKIT-QA-001: a separate WebKit CI job verifies the same validated Pages artifact as Chromium. Pages deployment requires all three gates: Static/build, Chromium Browser/PWA, and WebKit.
+- Read-only shipped-form regressions cover small/tall/landscape phone viewports, an iPhone browser profile and simulated standalone mode. Public hydration and startup single-flight also run in WebKit.
+
+### CHANGED
+- The mobile finance modal uses four explicit grid rows: header, rental identity, scrollable body and actions. The body ends above the action row; its padding no longer reserves space for an overlaid footer.
+- The promoted Native client card preserves two-by-two KPIs, balanced quick actions, content-sized closed disclosures and readable history rows. Closed read mode does not reserve a disabled save footer.
+- E2E checks exercise the actual independent outbound/return logistics buttons. The old injected fulfillment-select bridge is removed.
+
+### FIXED
+- The financial result can be scrolled fully into view on 844×390 without its lower edge being covered by actions.
+- Legacy Native specificity no longer forces three KPI columns or leaves the last client action in half a row. Generic modal padding no longer inflates closed client disclosures.
+
+### PRESERVED
+- Completed-only client statistics, rental history, client contact/edit/save/navigation, amounts and financial formulas, chemistry and manual charges, prepayment/deposit guards, independent delivery legs and booking payloads.
+- Session recovery, service-worker caching/update consent, authoritative APIs, current prices, Supabase/schema/business data and VA HOME. No backend deployment or live-data writes.
+
+### TESTS
+- `test:mobile-forms` and `test:webkit` load shipped HTML/assets with isolated read-only API fixtures; unexpected business mutations fail the run. No fixture CSS or compatibility DOM is injected.
+- The new checks must fail against build 4341 and pass after the repair. Canonical Static/build and Browser/PWA gates, finance/booking/session regressions and screenshot review remain required.
+- WebKit on Linux and an emulated iPhone/standalone flag are not a physical Safari/iPhone check. Native keyboard, hardware safe areas, installation and push delivery require a real device; existing Chromium worker lifecycle coverage remains required.
