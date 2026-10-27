@@ -5134,6 +5134,9 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 # 99. Change record — v4.3.43 / Client reads on demand
 
+### ADDED
+- Shipped-artifact request and interaction measurements for client disclosures in the mandatory Chromium and WebKit suites.
+
 ### FIXED
 - Opening the client card previously issued four API reads for closed secondary disclosures, including a private-document view. Those reads now start only when the relevant disclosure opens.
 - A disclosure permits one pending load, keeps its successful result within the current card and offers retry after failure. Detached-card responses cannot overwrite another card's SMS controls or download a private preview.
@@ -5147,5 +5150,5 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - It covers closed sections, independent on-demand reads, pending/success deduplication, failed-read retry, fresh card instances and stale responses. The old build must fail the zero-read assertion.
 - Existing Static/build, Browser/PWA, WebKit, booking/finance/session and actual worker-lifecycle gates remain mandatory. Laboratory timings are not physical iPhone or production network measurements.
 
-### SCOPE
+### PRESERVED
 - No backend deployment, schema/price changes, live booking/financial writes or VA HOME changes.
