@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.42",
+  "version": "4.3.43",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -53,7 +53,7 @@
     "test:ci-pipeline": "node scripts/test-ci-pipeline-contract.mjs",
     "test:e2e": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
     "test:mobile-forms": "python scripts/mobile_forms_qa.py --root dist --artifacts pwa-test-results/mobile-forms",
-    "test:webkit": "python scripts/mobile_forms_qa.py --browser webkit --root dist --artifacts webkit-test-results/forms && python scripts/public_hydration_qa.py --browser webkit --root dist --artifacts webkit-test-results/public && python scripts/admin_startup_qa.py --browser webkit --root dist --artifacts webkit-test-results/startup",
+    "test:webkit": "python scripts/mobile_forms_qa.py --browser webkit --root dist --artifacts webkit-test-results/forms && python scripts/public_hydration_qa.py --browser webkit --root dist --artifacts webkit-test-results/public && python scripts/admin_startup_qa.py --browser webkit --root dist --artifacts webkit-test-results/startup && python scripts/admin_read_performance_qa.py --browser webkit --artifacts webkit-test-results/read-performance",
     "test:public-hydration": "python scripts/public_hydration_qa.py --root dist --artifacts hydration-test-results",
     "test:pwa": "python scripts/pwa_visual_qa_runner.py --artifacts pwa-test-results",
     "test:desktop-density": "python scripts/desktop_density_qa.py --artifacts density-test-results",
@@ -97,6 +97,7 @@
     "test:auth-recovery-browser": "python scripts/admin_session_recovery_qa.py",
     "test:pwa-startup": "node scripts/test-pwa-startup.mjs",
     "test:admin-startup-browser": "python scripts/admin_startup_qa.py",
-    "test:pwa-cache-browser": "python scripts/pwa_cache_qa.py"
+    "test:pwa-cache-browser": "python scripts/pwa_cache_qa.py",
+    "test:admin-read-performance": "python scripts/admin_read_performance_qa.py"
   }
 }
