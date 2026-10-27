@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.43
-**Baseline build:** 4343
-**Останнє оновлення:** 2026-10-27
+**Baseline version:** 4.3.44
+**Baseline build:** 4344
+**Останнє оновлення:** 2026-10-28
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -2302,6 +2302,14 @@ Mobile navigation існує у початковому admin HTML і не пов
 Кожен build має узгоджений SW/cache bust.
 
 Старий cache не повинен залишати frontend на попередній логіці після production deploy.
+
+## PWA-007 — idle UI settles
+
+- Presentation observers remain active for real data, modal and viewport changes, but must not sustain DOM writes or animation-frame scans while the admin is idle.
+- Text/labels/alert markup are changed only when their displayed value changes. Upcoming status stays in the approved operational title area; competing enhancement layers must not move it back and forth.
+- Detail-action labels preserve icons and existing click handlers without rewriting the same label on every observation.
+- The shipped-artifact idle suite covers all ten admin views and booking/client/finance modals with synthetic data at current production scale (414 bookings / 322 customers at audit), desktop/mobile and Chromium/WebKit. Counts are fixture sizing, not a second source of business data.
+- Frame/DOM quiescence is a regression contract. Laboratory timings do not represent physical iPhone battery use or production network latency; finance, live refresh, push, offline cache and session semantics stay unchanged.
 
 ---
 
@@ -5152,3 +5160,25 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 ### PRESERVED
 - No backend deployment, schema/price changes, live booking/financial writes or VA HOME changes.
+
+# 100. Change record — v4.3.44 / PWA idle rendering
+
+### ADDED
+- A whole-admin idle/render audit across ten views and detail, finance, client and booking forms using representative synthetic record volumes. It records application animation callbacks, DOM mutations and navigation timing in Chromium and WebKit; unexpected business writes fail the suite.
+
+### CHANGED
+- Canonical release/build `4.3.44 / 4344` supplies a new immutable static/PWA cache identity.
+- Native presentation helpers update text and alert markup only when values actually change. Observers continue to handle newly mounted UI and live data.
+
+### FIXED
+- Continuous idle enhancement work caused by rewriting identical phone numbers, button/slot/SMS labels and alert markup.
+- Conflicting Upcoming helpers repeatedly moved the same status between time and title areas. The approved final title placement now has one owner.
+- Detail finance action normalization no longer removes/recreates text nodes when its approved label is already present.
+
+### PRESERVED
+- Visible layout, wording, icons, status placement, real DOM updates, click/save handlers and exact amounts. No financial or availability formulas, prices, API semantics, Supabase objects or business records are changed.
+- Single-flight startup/live reads, session recovery, explicit worker-update consent, real offline caching, private documents, SMS consent and VA HOME isolation.
+
+### TESTS
+- `test:admin-idle` and its WebKit invocation test the actual shipped assets without fixture CSS. The previous build must expose continual idle work; the candidate must settle after render and react to later changes.
+- Existing Static/build, Browser/PWA, WebKit, finance/booking/session and real-worker lifecycle gates remain mandatory, together with screenshot review and coherent version/build.

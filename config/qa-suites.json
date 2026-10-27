@@ -85,7 +85,8 @@
     "test:admin-startup-browser",
     "test:admin-read-performance",
     "test:pwa-cache-browser",
-    "test:rental-status-guards-browser"
+    "test:rental-status-guards-browser",
+    "test:admin-idle"
   ],
   "currentContracts": [
     {

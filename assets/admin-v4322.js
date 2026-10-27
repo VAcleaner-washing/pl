@@ -15,6 +15,8 @@ function setLeadingLabel(span,label,helper){
 }
 function setButtonLabel(button,label){
   if(!button)return;
+  const current=button.querySelector(':scope > .v4322-action-label');
+  if(current?.textContent===label&&![...button.childNodes].some(node=>node.nodeType===Node.TEXT_NODE))return;
   [...button.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE).forEach(node=>node.remove());
   let target=button.querySelector(':scope > .v4322-action-label');
   if(!target){target=document.createElement('span');target.className='v4322-action-label';button.appendChild(target)}
