@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.42
-**Baseline build:** 4342
-**Останнє оновлення:** 2026-10-21
+**Baseline version:** 4.3.43
+**Baseline build:** 4343
+**Останнє оновлення:** 2026-10-27
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -1972,6 +1972,15 @@ Runtime compatibility/glass layer не має права інжектити ду
 Якщо дані не змінені, мобільний disabled footer `Зберегти` не повинен постійно забирати висоту.
 
 При dirty state save action стає доступною.
+
+## CLIENT-008 — secondary reads on demand
+
+- Contacts, completed-only KPIs and rental history render immediately from the current authoritative in-memory snapshot.
+- Closed client disclosures make no bonus, referral, SMS-history or private-document requests. Their summaries must not claim an API check or consent state before loading; existing document metadata remains visible.
+- Opening Benefits loads promo and referral in parallel; Document loads its private preview; SMS loads consent/history. Existing controls and save payloads remain available.
+- Each disclosure shares its pending load and reuses a successful result only within that card instance. Repeated close/open must not duplicate reads; reopening the card starts fresh on demand. No API data is persisted in service-worker storage or another cache.
+- A failed read exposes an explicit retry and may retry on reopening. Results from a removed card must not update the next card or start a private image download into detached DOM.
+- Client save, consent changes, new-rental prefill and server-side promo/finance authority retain their existing paths.
 
 ## CLIENT-007 — desktop geometry
 
@@ -5122,3 +5131,24 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Each public hydration case uses a fresh page with service workers blocked for routed API isolation. This avoids attributing a departing document's delayed-fetch cancellation to the destination page in WebKit (upstream Playwright #43120). Error-free hydration remains mandatory on every route; actual worker lifecycle remains in its separate network-backed suite.
 - The new checks must fail against build 4341 and pass after the repair. Canonical Static/build and Browser/PWA gates, finance/booking/session regressions and screenshot review remain required.
 - WebKit on Linux and an emulated iPhone/standalone flag are not a physical Safari/iPhone check. Native keyboard, hardware safe areas, installation and push delivery require a real device; existing Chromium worker lifecycle coverage remains required.
+
+# 99. Change record — v4.3.43 / Client reads on demand
+
+### ADDED
+- Shipped-artifact request and interaction measurements for client disclosures in the mandatory Chromium and WebKit suites.
+
+### FIXED
+- Opening the client card previously issued four API reads for closed secondary disclosures, including a private-document view. Those reads now start only when the relevant disclosure opens.
+- A disclosure permits one pending load, keeps its successful result within the current card and offers retry after failure. Detached-card responses cannot overwrite another card's SMS controls or download a private preview.
+
+### CHANGED
+- Canonical release/build: `4.3.43 / 4343`; the existing deterministic stamper provides a fresh PWA/static identity.
+- Closed Benefits/SMS summaries use a neutral label until checked. Document metadata, contact editing, rental navigation, dirty-save controls and financial/business rules are preserved.
+
+### TESTS
+- `test:admin-read-performance` exercises shipped HTML/assets and real navigation in Chromium and WebKit at 390/1440 px in browser and simulated standalone mode. Read-only synthetic fixtures measure startup, view changes and client request counts; unexpected business mutations fail the suite.
+- It covers closed sections, independent on-demand reads, pending/success deduplication, failed-read retry, fresh card instances and stale responses. The old build must fail the zero-read assertion.
+- Existing Static/build, Browser/PWA, WebKit, booking/finance/session and actual worker-lifecycle gates remain mandatory. Laboratory timings are not physical iPhone or production network measurements.
+
+### PRESERVED
+- No backend deployment, schema/price changes, live booking/financial writes or VA HOME changes.
