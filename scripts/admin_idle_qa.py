@@ -51,10 +51,11 @@ def fixtures(config, count, customers, forbidden):
         if '/vacleaner-customer-documents-v1' in request.url and parse_qs(urlsplit(request.url).query).get('action') == ['view']:
             body = {'document': None}
         else:
-            expenses = [{'id': f'qa-expense-{i}', 'spent_on': smoke.iso(-i), 'category': 'fuel', 'amount': 100+i,
+            expenses = [{'id': f'qa-expense-{i}', 'spent_on': smoke.iso(-i), 'category': 'fuel', 'cost_type': 'operating', 'amount': 100+i,
                          'vendor': 'QA', 'note': 'Тестова витрата', 'archived': False} for i in range(9)]
             campaigns = [{'id': f'qa-campaign-{i}', 'name': f'Тестова кампанія {i}', 'code': f'QA-{i}',
-                          'active': True, 'type': 'return', 'benefit_type': 'percent', 'benefit_value': 10} for i in range(3)]
+                          'status': 'active', 'campaign_type': 'return', 'discount_type': 'percent', 'discount_value': 10,
+                          'dormant_days': 180, 'activation_days': 21} for i in range(3)]
             reads = {'list': {'bookings': rows, 'expenses': expenses}, 'calendar': {'days': smoke.calendar_days()},
                      'clients': {'customers': profiles}, 'campaigns': {'campaigns': campaigns},
                      'referrals_expiring': {'rewards': []}, 'audit_log': {'entries': []},
