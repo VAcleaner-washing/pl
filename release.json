@@ -1,6 +1,6 @@
 {
-  "version": "4.3.43",
-  "build": 4343,
-  "releasedAt": "2026-10-27",
-  "label": "VAcleaner v4.3.43 — ON-DEMAND CLIENT READS"
+  "version": "4.3.44",
+  "build": 4344,
+  "releasedAt": "2026-10-28",
+  "label": "VAcleaner v4.3.44 — PWA IDLE RENDERING"
 }

@@ -18,6 +18,7 @@
     return `+${d.slice(0,3)} ${d.slice(3,5)} ${d.slice(5,8)} ${d.slice(8,10)} ${d.slice(10,12)}`;
   };
   const cleanText=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
+  const setText=(node,value)=>{if(node&&node.textContent!==value)node.textContent=value};
   const titleCaseDisplay=value=>{
     const text=String(value||'').trim();
     if(!text||/[a-zа-яіїєґ]/u.test(text))return text;
@@ -94,7 +95,10 @@
       }
       const badge=document.querySelector('#mobileNavBadge');
       const count=(badge?.textContent||'').trim();
-      bell.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>'+(count?`<b>${count}</b>`:'');
+      if(bell.dataset.nativeAlertCount!==count||!bell.querySelector('svg')){
+        bell.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>'+(count?`<b>${count}</b>`:'');
+        bell.dataset.nativeAlertCount=count;
+      }
       bell.hidden=!['upcoming','bookings'].includes(view);
       head.classList.toggle('native-head-has-action',!bell.hidden);
     }
@@ -119,18 +123,17 @@
       }
     });
     document.querySelectorAll('.upcoming-row').forEach(row=>{
-      const time=row.querySelector('.upcoming-time');
-      const status=row.querySelector('.upcoming-title .status');
-      if(time&&status&&!time.contains(status))time.appendChild(status);
+      // The approved operational layout keeps status in .upcoming-title.
+      // Moving it into time here fights restoreUpcomingOperationalLayout().
       const tel=row.querySelector('.upcoming-client-info a');
-      if(tel){tel.classList.add('native-phone');tel.textContent=formatPhone(tel.textContent)}
+      if(tel){tel.classList.add('native-phone');setText(tel,formatPhone(tel.textContent))}
       const stateNode=row.querySelector('.status');
       if(stateNode){
         const cls=[...stateNode.classList].find(c=>['pending','waiting_payment','confirmed','issued','completed','cancelled','declined'].includes(c));
         if(cls)row.dataset.status=cls;
       }
       const open=row.querySelector('[data-up="open"]');
-      if(open)open.textContent='Деталі';
+      setText(open,'Деталі');
       row.classList.add('native-card-ready');
     });
   }
@@ -142,10 +145,10 @@
       const cls=status&&[...status.classList].find(c=>['pending','waiting_payment','confirmed','issued','completed','cancelled','declined'].includes(c));
       if(cls)card.dataset.status=cls;
       const phone=card.querySelector('.booking-person>a');
-      if(phone)phone.textContent=formatPhone(phone.textContent);
+      setText(phone,formatPhone(phone?.textContent));
       card.classList.add('native-booking-card');
     });
-    document.querySelectorAll('.client-row a[href^="tel:"]').forEach(a=>a.textContent=formatPhone(a.textContent));
+    document.querySelectorAll('.client-row a[href^="tel:"]').forEach(a=>setText(a,formatPhone(a.textContent)));
   }
 
   function enhanceNativeViews(){
@@ -153,7 +156,7 @@
     const view=document.documentElement.dataset.adminView||'';
     document.body.dataset.nativeView=view;
     document.querySelectorAll('.campaign-row,.equipment-card,.client-row,.expense-row,.chem-card,.analytics-panel,.day-card,.global-search-card').forEach(el=>el.classList.add('native-surface-ready'));
-    document.querySelectorAll('a[href^="tel:"]').forEach(a=>{const raw=cleanText(a);if((raw.match(/\d/g)||[]).length>=10)a.textContent=formatPhone(raw)});
+    document.querySelectorAll('a[href^="tel:"]').forEach(a=>{const raw=cleanText(a);if((raw.match(/\d/g)||[]).length>=10)setText(a,formatPhone(raw))});
     document.querySelectorAll('.modal-form').forEach(modal=>modal.classList.add('native-full-modal'));
     const editor=document.querySelector('#clientEditor');
     if(editor)editor.classList.add('native-client-editor');
@@ -339,8 +342,8 @@
     // Settings range labels: avoid Cyrillic “З” looking like the digit 3.
     document.querySelectorAll('.settings-slot-editor .slot-editor-row').forEach(row=>{
       const labels=[...row.querySelectorAll(':scope > label > small')];
-      if(labels[0])labels[0].textContent='Початок';
-      if(labels[1])labels[1].textContent='Кінець';
+      setText(labels[0],'Початок');
+      setText(labels[1],'Кінець');
     });
 
     // “Ще” in booking cards opens a root-level action sheet; no stretched/empty details block.
@@ -520,7 +523,7 @@
   }
 
   function shortenSmsStepper(){
-    document.querySelectorAll('.sms-campaign-modal .sms-stepper b[data-short]').forEach(el=>{if(!el.dataset.v43Long)el.dataset.v43Long=el.textContent||'';if(mobile())el.textContent=el.dataset.short||el.textContent});
+    document.querySelectorAll('.sms-campaign-modal .sms-stepper b[data-short]').forEach(el=>{if(!el.dataset.v43Long)el.dataset.v43Long=el.textContent||'';if(mobile()){const label=el.dataset.short||el.textContent;if(el.textContent!==label)el.textContent=label}});
   }
 
   function openFilterSheet(view){
