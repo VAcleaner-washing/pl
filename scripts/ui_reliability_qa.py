@@ -29,7 +29,7 @@ def trap(page, dialog, checks, label):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', default='dist')
-    parser.add_argument('--artifacts', default='ui-reliability-test-results')
+    parser.add_argument('--artifacts', default='pwa-test-results/reliability')
     parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromium')
     args = parser.parse_args()
     checks = smoke.Checks(Path(args.artifacts).resolve())
