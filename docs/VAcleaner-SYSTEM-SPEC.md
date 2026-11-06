@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.44
-**Baseline build:** 4344
-**Останнє оновлення:** 2026-10-28
+**Baseline version:** 4.3.45
+**Baseline build:** 4345
+**Останнє оновлення:** 2026-11-06
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5182,3 +5182,26 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 - `test:admin-idle` and its WebKit invocation test the actual shipped assets without fixture CSS. The previous build must expose continual idle work; the candidate must settle after render and react to later changes.
 - Existing Static/build, Browser/PWA, WebKit, finance/booking/session and real-worker lifecycle gates remain mandatory, together with screenshot review and coherent version/build.
+
+
+# 101. Change record — v4.3.45 / UI reliability
+
+### ADDED
+- A public load-recovery notice with retry and a manager telephone link, plus a shipped-artifact reliability suite for Chromium and WebKit.
+
+### FIXED
+- Competing booking total labels sustaining idle DOM work; repeated Smart Guide catalog reads; stale analytics build; keyboard focus escaping quiz/detail dialogs.
+
+### CHANGED
+- Public booking total label has one owner: booking-hardening presents «Вартість бронювання»; deposit-summary enhancement does not rewrite that label.
+- Smart Guide reuses one in-flight catalog request and its successful result for the document lifetime. Failed/invalid responses retain the bundled catalog, suppress automatic duplicate reads for 10 seconds, and allow a later user-open attempt to retry.
+- Booking analytics derives analytics_build from its stamped script URL.
+- Quiz and admin booking detail dialogs contain keyboard focus, isolate the background and restore the launching focus when closing. Existing nested finance/client/booking modal return paths remain supported.
+- React hydration/enhancement load failures and hydration stalls of 12 seconds expose a keyboard-accessible retry and manager telephone link. A late successful hydration removes a stall-only notice. No enhancement is started before hydration to recover from a failure.
+
+### PRESERVED
+- Prices, settlement, availability, catalog choices, quiz recommendations, promo/referral/SMS rules, backend functions/schema/settings and VA HOME are unchanged. Public analytics remains free of contact/document values. Existing explicit PWA-update consent and offline cache contracts remain required.
+
+### TESTS
+- test:ui-reliability runs shipped public/admin assets against isolated API fixtures: idle booking before/after selection, one catalog read, failure cooldown/retry, analytics build, keyboard containment/return, blocked chunk recovery and failed enhancement recovery.
+- The same suite is part of the WebKit gate; existing static, public hydration, browser/PWA, finance, session and responsive gates remain mandatory.
