@@ -25,7 +25,20 @@
   };
   function productInfo(code){const item=activeCatalog?.products?.[code]||CORE.catalog?.products?.[code];if(!item)return null;const copy=PRODUCT_COPY[code]||{};return{label:copy.label||item.shortLabel||item.label||code,price:Math.max(0,Number(item.weekday)||0),desc:copy.desc||item.description||''}}
   function extraInfo(code){const item=activeCatalog?.extras?.[code]||CORE.catalog?.extras?.[code];if(!item)return null;return{label:EXTRA_LABELS[code]||item.label||code,price:Math.max(0,Number(item.price)||0)}}
-  function refreshCatalog(){return fetch(CATALOG_API,{cache:'no-store'}).then(r=>r.ok?r.json():Promise.reject()).then(data=>{if(data?.catalog?.products&&data?.catalog?.extras)activeCatalog=data.catalog;return activeCatalog}).catch(()=>activeCatalog)}
+  let catalogRequest=null,catalogLoaded=false,catalogRetryAt=0;
+  function refreshCatalog(){
+    if(catalogLoaded||Date.now()<catalogRetryAt)return Promise.resolve(activeCatalog);
+    if(catalogRequest)return catalogRequest;
+    catalogRequest=fetch(CATALOG_API,{cache:'no-store'})
+      .then(r=>r.ok?r.json():Promise.reject(new Error('catalog_unavailable')))
+      .then(data=>{
+        if(!data?.catalog?.products||!data?.catalog?.extras)throw new Error('catalog_invalid');
+        activeCatalog=data.catalog;catalogLoaded=true;return activeCatalog;
+      })
+      .catch(()=>{catalogRetryAt=Date.now()+10000;return activeCatalog})
+      .finally(()=>{catalogRequest=null});
+    return catalogRequest;
+  }
   const EXTRA_EXPLANATION={
     neutralix:{why:'Базове промивання прибирає бруд, але стійкий запах може залишитися глибоко у волокнах.',result:'Призначений для нейтралізації стійкого запаху в текстилі, а не лише для його маскування.'},
     odour_zero:{why:'Звичайне очищення не завжди забирає запах затхлості, диму, їжі чи тварин із поверхні та повітря.',result:'Нейтралізує залишковий запах і робить результат прибирання відчутно свіжішим.'},
@@ -304,19 +317,42 @@
     const p=new URLSearchParams();p.set('from','quiz');p.set('product',r.product);p.set('promo',QUIZ_PROMO);if(selectedExtras.length)p.set('extras',selectedExtras.map(x=>x.code).join(','));
     return `/bronuvannia?${p.toString()}`;
   }
+  let quizReturnFocus=null,quizBackground=[];
+  const quizFocusables=()=>[...modal.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled):not([type="hidden"]),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])')]
+    .filter(el=>el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');
+  function quizKeys(event){
+    if(!modal?.classList.contains('is-open'))return;
+    if(event.key==='Escape'){event.preventDefault();closeQuiz();return}
+    if(event.key!=='Tab')return;
+    const list=quizFocusables(),first=list[0],last=list[list.length-1];
+    if(!first){event.preventDefault();return}
+    if(!modal.contains(document.activeElement)||(event.shiftKey&&document.activeElement===first)||(!event.shiftKey&&document.activeElement===last)){
+      event.preventDefault();(event.shiftKey?last:first).focus();
+    }
+  }
   function openQuiz(){
+    if(!modal?.classList.contains('is-open'))quizReturnFocus=document.activeElement;
     if(!modal){
       modal=document.createElement('div');modal.className='vq-layer';modal.innerHTML=`<section class="vq-dialog" role="dialog" aria-modal="true" aria-labelledby="vq-title"><header class="vq-dialog__header"><button type="button" class="vq-back" aria-label="Назад">‹</button><div class="vq-progress"><span class="vq-progress__meta">Початок · оберіть зони</span><div><i class="vq-progress__bar"></i></div></div><button type="button" class="vq-close" aria-label="Закрити">×</button></header><div class="vq-dialog__body" id="vq-title"></div><div class="vq-dialog__footer"><button type="button" class="vq-next">Далі →</button><div class="vq-result-cta" hidden></div></div></section>`;document.body.appendChild(modal);
       modal.addEventListener('click',e=>{if(e.target===modal)closeQuiz()});
       modal.querySelector('.vq-close').addEventListener('click',closeQuiz);
       modal.querySelector('.vq-back').addEventListener('click',()=>{if(stepIndex>0){stepIndex-=1;render()}});
       modal.querySelector('.vq-next').addEventListener('click',()=>{const q=questions()[stepIndex];if(q&&canContinue(q)){stepIndex+=1;render()}});
-      document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('is-open'))closeQuiz()});
+      document.addEventListener('keydown',quizKeys);
     }
+    if(!quizBackground.length)quizBackground=[...document.body.children].filter(el=>el!==modal).map(el=>{const prior=el.inert;el.inert=true;return[el,prior]});
+    refreshCatalog().then(()=>{if(modal?.classList.contains('is-open')&&stepIndex>=questions().length)render({preserveScroll:true})});
     state=blankState();selectedResultExtras.clear();stepIndex=0;completedKey='';modal.classList.add('is-open');document.documentElement.classList.add('vq-lock');render();fire('cleaning_quiz_started');
-    setTimeout(()=>modal.querySelector('.vq-close')?.focus(),30);
+    setTimeout(()=>{if(modal.classList.contains('is-open'))modal.querySelector('.vq-close')?.focus()},30);
   }
-  function closeQuiz(){if(!modal)return;if(path==='/pidbir'){location.href='/';return;}modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');}
+  function closeQuiz(){
+    if(!modal)return;
+    modal.classList.remove('is-open');document.documentElement.classList.remove('vq-lock');
+    quizBackground.forEach(([el,prior])=>{el.inert=prior});quizBackground=[];
+    if(path==='/pidbir'){location.href='/';return}
+    if(quizReturnFocus?.isConnected)quizReturnFocus.focus({preventScroll:true});
+    quizReturnFocus=null;
+  }
   window.__VAC_OPEN_SMART_GUIDE__=openQuiz;
 
   function injectTeaser(){

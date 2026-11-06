@@ -384,7 +384,7 @@
     setTextIfChanged(prepayment.querySelector('strong'),'200 грн');
     const deposit=ensureDepositSummaryRow(summary,total,'vx-summary-deposit','Залоговий платіж','Сплачуєте при отриманні. Після розрахунку повертаємо залишок.');
     setTextIfChanged(deposit.querySelector('strong'),value?formatMoney(value):'—');
-    setTextIfChanged(summary.querySelector('.booking-summary-total span'),'Вартість оренди');
+    // The booking hardening layer owns the total label.
     let flow=summary.querySelector('.vx-payment-flow');
     if(!flow){flow=document.createElement('div');flow.className='vx-payment-flow';flow.innerHTML='<span><b>Заявка</b><small>200 грн</small></span><i>→</i><span><b>Отримання</b><small>залоговий платіж</small></span><i>→</i><span><b>Повернення</b><small>фінальний розрахунок</small></span>';total.insertAdjacentElement('afterend',flow);}
     const note=summary.querySelector('.vx-summary-deposit-note')||summary.querySelector(':scope > p');
