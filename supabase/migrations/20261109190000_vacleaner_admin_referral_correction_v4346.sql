@@ -152,8 +152,10 @@ begin
       'referral_friend',v_friend_meta,'promo',v_promo,
       'discount',v_discount,'base_before_discount',v_raw),
     base_amount=greatest(0,v_raw-v_amount),
-    total_amount=greatest(0,v_raw-v_amount) +
-      greatest(0,v_booking.extras_amount) + greatest(0,v_booking.delivery_amount),
+    -- Preserve all already recorded non-rental charges (chemistry, manual + грн,
+    -- delivery and extras). Only the rental-discount delta can change total_amount.
+    total_amount=greatest(0,v_booking.total_amount +
+      (greatest(0,v_raw-v_amount) - v_booking.base_amount)),
     updated_at=now()
   where id=p_booking_id
   returning * into v_updated;

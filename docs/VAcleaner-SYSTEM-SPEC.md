@@ -5242,6 +5242,7 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### PRESERVED
 - Fixed −100 грн friend and −150 грн referrer reward (after completed), first-rental-only eligibility, non-stacking discount decision, source and messaging attribution, booking status guards, payments, deposits, delivery, inventory, chemistry, rental prices and VA HOME.
 - Client/customer referral relationship and financial total update must be one transaction; no backfilling or reapplying a previously processed referral record.
+- Попередньо враховані доплати за хімію, додаткові послуги та ручне `+ грн` не зникають під час зміни коду друга; коригується лише сума оренди.
 
 ### TESTS
 - `test:referral-editor` statically guards UI action, authenticated backend, restricted database RPC and all-source-versus-outreach analytics.
