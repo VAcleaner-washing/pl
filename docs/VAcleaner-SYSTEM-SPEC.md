@@ -5224,6 +5224,9 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - test:ui-reliability runs shipped public/admin assets against isolated API fixtures: idle booking before/after selection, one catalog read, failure cooldown/retry, analytics build, keyboard containment/return, blocked chunk recovery and failed enhancement recovery.
 - The same suite is part of the WebKit gate; existing static, public hydration, browser/PWA, finance, session and responsive gates remain mandatory.
 
+
+- **PAGES-CI-001 / Deployment recovery, 2026-11-09:** production run `42670293611` finished all three QA gates successfully but created no `Deploy GitHub Pages` job and ended with workflow `failure`. Deployment condition now evaluates with explicit `always()` and requires `push` on `main` plus `success` from all three validation gates. It never deploys a PR/QA branch or after failed tests. No application code, build, Supabase, business logic or customer data changes.
+
 # 102. Change record — v4.3.46 / Referral edit and truthful analytics
 
 ### ADDED

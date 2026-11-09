@@ -141,7 +141,7 @@ jobs:
 
   deploy:
     name: Deploy GitHub Pages
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.validate.result == 'success' && needs.browser.result == 'success' && needs.webkit.result == 'success' }}
     permissions:
       contents: read
       pages: write
