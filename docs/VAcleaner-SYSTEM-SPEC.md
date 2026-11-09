@@ -5246,3 +5246,4 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 - `test:referral-editor` statically guards UI action, authenticated backend, restricted database RPC and all-source-versus-outreach analytics.
 - Full Static/build, Chromium Browser/PWA and WebKit gates must be green on the validated Pages artifact; production database migration and edge deployment require additional independent verification.
+- WebKit CI runner is pinned to Ubuntu 24.04 (instead of moving `ubuntu-latest`/26.04): Playwright's bundled WPE browser requires ICU 74, absent from the upgraded GitHub Actions image. This is an environment compatibility fix, not a weakening of the browser gate.

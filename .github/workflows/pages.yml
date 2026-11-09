@@ -93,7 +93,7 @@ jobs:
 
   webkit:
     name: WebKit / mobile forms gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: validate
     permissions:
       contents: read
