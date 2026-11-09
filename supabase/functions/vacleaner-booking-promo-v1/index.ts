@@ -40,6 +40,27 @@ const publicPromo=(p:any)=>p?{code:p.code,campaignId:String(p.id),campaignName:S
 Deno.serve(async req=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'method_not_allowed'},405);try{
   const url=Deno.env.get('SUPABASE_URL'),service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),token=(req.headers.get('Authorization')||'').replace(/^Bearer\s+/i,'');if(!url||!service||!token)return json({error:'unauthorized'},401);const db=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}}),{data:u,error:ue}=await db.auth.getUser(token);if(ue||!u.user)return json({error:'unauthorized'},401);const {data:admin,error:ae}=await db.from('vacleaner_admin_users').select('user_id').eq('user_id',u.user.id).maybeSingle();if(ae)throw ae;if(!admin)return json({error:'forbidden'},403);
   const body=await req.json() as any,action=String(body.action||''),bookingId=String(body.bookingId||'');if(!validUuid(bookingId))return json({error:'invalid_booking'},400);const {data:b,error:be}=await db.from('vacleaner_bookings').select('*').eq('id',bookingId).maybeSingle();if(be)throw be;if(!b)return json({error:'invalid_booking'},404);if(!['pending','waiting_payment','confirmed'].includes(String(b.status||'')))return json({error:'invalid_transition'},409);const extras=b.extras&&typeof b.extras==='object'?b.extras:{};
+  if(action==='set_referral'){
+    const code=String(body.referralCode||'').trim().toUpperCase();
+    if(code&& !/^VA-[A-Z0-9]{6,12}$/.test(code))return json({error:'invalid_referral'},400);
+    const {data:result,error:referralError}=await db.rpc('vacleaner_admin_set_booking_referral',{
+      p_booking_id:bookingId,p_code:code
+    });
+    if(referralError){
+      const reason=String(referralError.message||'');
+      const known=['invalid_booking','invalid_transition','invalid_referral','referral_inactive',
+        'self_referral','referral_first_rental_only','referral_already_used',
+        'referral_completed_locked','referral_state_conflict','referral_existing_promo',
+        'referral_existing_discount','referral_existing_reward'];
+      const matched=known.find(value=>reason.includes(value));
+      if(matched)return json({error:matched},409);
+      console.error('vacleaner-booking-promo-v1 set_referral',referralError);
+      return json({error:'service_error'},500);
+    }
+    const {data:saved,error:readError}=await db.from('vacleaner_bookings').select('*').eq('id',bookingId).single();
+    if(readError||!saved)return json({error:'service_error'},500);
+    return json({booking:saved,referral:result});
+  }
   if(action==='status'){const attached=extras?.promo||null,available=attached?null:await availablePromo(db,b);return json({attachedPromo:attached,availablePromo:publicPromo(available)})}
   if(action==='detach'){if(!extras?.promo)return json({booking:b,detached:false});const raw=Math.max(0,Number(extras?.base_before_discount||0)||(Number(b.base_amount||0)+Number(extras?.discount?.amount||0))),state=discountState(raw,extras,null),next={...extras,promo:null,discount:{type:state.type,percent:state.percent,amount:state.amount,source:state.source,reason:state.reason},base_before_discount:raw},total=state.baseAmount+Math.max(0,Number(b.extras_amount||0))+Math.max(0,Number(b.delivery_amount||0));const {error}=await db.rpc('vacleaner_admin_detach_booking_promo',{p_booking_id:bookingId,p_extras:next,p_base_amount:state.baseAmount,p_total_amount:total});if(error)throw error;const {data:saved}=await db.from('vacleaner_bookings').select('*').eq('id',bookingId).single();return json({booking:saved,detached:true})}
   if(action==='attach'){if(extras?.promo)return json({error:'booking_promo_already_attached'},409);const promo=await availablePromo(db,b);if(!promo)return json({error:'promo_unavailable'},409);const raw=Math.max(0,Number(extras?.base_before_discount||b.base_amount||0)),state=discountState(raw,extras,promo);if(state.source!=='promo'||state.amount<=0)return json({error:'promo_not_best_discount'},409);const promoExtra={code:promo.code,campaign_id:String(promo.id),campaign_name:String(promo.name||'Персональний бонус'),campaign_type:String(promo.campaign_type||''),discount_type:promo.discount_type==='fixed'?'fixed':'percent',discount_value:Number(promo.discount_value||0),applied:true},next={...extras,promo:promoExtra,discount:{type:state.type,percent:state.percent,amount:state.amount,source:'promo',reason:''},base_before_discount:raw},total=state.baseAmount+Math.max(0,Number(b.extras_amount||0))+Math.max(0,Number(b.delivery_amount||0));const {error}=await db.rpc('vacleaner_admin_attach_booking_promo',{p_booking_id:bookingId,p_promo_code_id:promo.promoCodeId,p_campaign_id:promo.id,p_customer_phone:normalizePhone(b.customer_phone),p_discount_amount:state.amount,p_base_before_discount:raw,p_extras:next,p_base_amount:state.baseAmount,p_total_amount:total});if(error)return json({error:'promo_unavailable'},409);const {data:saved}=await db.from('vacleaner_bookings').select('*').eq('id',bookingId).single();return json({booking:saved,attached:true,promo:publicPromo(promo)})}
