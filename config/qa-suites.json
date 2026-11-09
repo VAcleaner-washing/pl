@@ -37,6 +37,7 @@
     "test:final-desktop-static",
     "test:admin-labels",
     "test:client-promo-regression",
+    "test:referral-editor",
     "test:calendar-live",
     "test:booking-gifts",
     "test:current-contracts",
