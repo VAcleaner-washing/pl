@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.45",
+  "version": "4.3.46",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -100,6 +100,7 @@
     "test:pwa-cache-browser": "python scripts/pwa_cache_qa.py",
     "test:admin-read-performance": "python scripts/admin_read_performance_qa.py",
     "test:admin-idle": "python scripts/admin_idle_qa.py --standalone",
-    "test:ui-reliability": "python scripts/ui_reliability_qa.py"
+    "test:ui-reliability": "python scripts/ui_reliability_qa.py",
+    "test:referral-editor": "node scripts/test-v4-3-46-referral-editor-analytics.mjs"
   }
 }

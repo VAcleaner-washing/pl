@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.45
-**Baseline build:** 4345
-**Останнє оновлення:** 2026-11-06
+**Baseline version:** 4.3.46
+**Baseline build:** 4346
+**Останнє оновлення:** 2026-11-09
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -29,6 +29,24 @@
 **Правило релізу:** зміна поведінки без оновлення цього документа і regression-тесту — незавершена зміна.
 
 ---
+
+## REF-010 — зміна коду друга в існуючому бронюванні (v4.3.46)
+
+- Авторизований менеджер може додати, скоригувати або прибрати реферальний код без створення дубліката бронювання.
+- Дозволені лише статуси `pending`, `waiting_payment`, `confirmed`. Після видачі або завершення запис блокується.
+- Код належить активному іншому клієнту. Програма тільки для першої оренди: поточне бронювання не враховуємо як попереднє, але всі інші активні або завершені за номером блокують повторне застосування.
+- Записи `vacleaner_referral_uses`, `extras.referral_friend`, застосована знижка та загальна сума мають змінюватися атомарно, через захищений серверний RPC. Повторний виклик того самого коду не створює дубля.
+- Не дозволяємо змішувати referral з іншою промокампанією, вручну заданою знижкою або використаним reward; сума оренди перераховується за канонічною схемою best-of-discount. Доставка, хімія, залоговий платіж, передоплата, source і статус не змінюються.
+- Якщо бонус уже перейшов у статус `completed`, його зв'язок не можна редагувати заднім числом.
+- Менеджерські UI-повідомлення пояснюють причину відмови українською. Дія редагування коду зберігається окремо від загального редагування бронювання.
+
+## REF-011 — фактичні рекомендації та конверсія розсилки (v4.3.46)
+
+- Головні показники «Привели друга», «Referral-бронювання», завершені оренди та їхня виручка рахуються за фактичними `vacleaner_referral_uses` у вибраному періоді, включно з усними рекомендаціями й адміністративними виправленнями.
+- Когортна конверсія надсилань Instagram/Telegram — окрема метрика, прив'язана до останнього підтвердженого надсилання до використання коду.
+- Показувати окремо рекомендації з підтвердженими розсилками **у вибраному періоді** і ті, що не прив'язані до когорти цього періоду (у тому числі коли CRM-запис про розсилку старіший або новий Instagram Direct не відмічений у CRM). Не називати непідтверджені чи позакогортні випадки «органічними», не приписувати їм канал автоматично. Нульова конверсія розсилки не означає нуль фактичних рекомендацій.
+- Виручка реферальних оренд — лише за статусом `completed`; pending/confirmed бронювання у виручці не рахуються. Бонус 150 грн активується за правилами REF-003.
+- Referral attribution не змінює початкове джерело бронювання (`source`) та фінансові правила.
 
 # 1. RELEASE / QA CONTRACT
 
@@ -5205,3 +5223,28 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 - test:ui-reliability runs shipped public/admin assets against isolated API fixtures: idle booking before/after selection, one catalog read, failure cooldown/retry, analytics build, keyboard containment/return, blocked chunk recovery and failed enhancement recovery.
 - The same suite is part of the WebKit gate; existing static, public hydration, browser/PWA, finance, session and responsive gates remain mandatory.
+
+# 102. Change record — v4.3.46 / Referral edit and truthful analytics
+
+### ADDED
+- REF-010: atomic service-role-only admin correction of a friend's referral code on an existing first rental, including attachment, replacement and removal.
+- Explicit «Застосувати код друга» / «Прибрати код» buttons on eligible booking edits and human-readable backend errors.
+
+### CHANGED
+- Conversion from confirmed Instagram/Telegram program invitations remains an outreach-only KPI and funnel.
+- The headline referrer, booking, completed and earned revenue KPIs now count all real referral uses in the selected period, including recommendations without a prior recorded invitation.
+- Release/build 4.3.46 / 4346 and renewed iPhone PWA cache identity.
+
+### FIXED
+- Manager cannot add a legitimate referral code to an already-created booking; referral relationships are no longer only creatable during booking creation.
+- «Привели друга» and booking KPIs previously appeared empty when actual recommendations lacked a prior CRM send event.
+
+### PRESERVED
+- Fixed −100 грн friend and −150 грн referrer reward (after completed), first-rental-only eligibility, non-stacking discount decision, source and messaging attribution, booking status guards, payments, deposits, delivery, inventory, chemistry, rental prices and VA HOME.
+- Client/customer referral relationship and financial total update must be one transaction; no backfilling or reapplying a previously processed referral record.
+- Попередньо враховані доплати за хімію, додаткові послуги та ручне `+ грн` не зникають під час зміни коду друга; коригується лише сума оренди.
+
+### TESTS
+- `test:referral-editor` statically guards UI action, authenticated backend, restricted database RPC and all-source-versus-outreach analytics.
+- Full Static/build, Chromium Browser/PWA and WebKit gates must be green on the validated Pages artifact; production database migration and edge deployment require additional independent verification.
+- WebKit CI runner is pinned to Ubuntu 24.04 (instead of moving `ubuntu-latest`/26.04): Playwright's bundled WPE browser requires ICU 74, absent from the upgraded GitHub Actions image. This is an environment compatibility fix, not a weakening of the browser gate.
