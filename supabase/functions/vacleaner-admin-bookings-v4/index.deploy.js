@@ -1123,6 +1123,112 @@ Deno.serve(async (request)=>{
                 detached: true
             });
         }
+        if (action === "attach_referral") {
+            const bookingId = String(body.bookingId || "");
+            if (!validBookingId(bookingId)) return json({
+                error: "invalid_booking"
+            }, 400);
+            const { data: booking, error: bookingError } = await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).maybeSingle();
+            if (bookingError) throw bookingError;
+            if (!booking) return json({
+                error: "invalid_booking"
+            }, 404);
+            if (![
+                "pending",
+                "waiting_payment",
+                "confirmed"
+            ].includes(String(booking.status || ""))) return json({
+                error: "invalid_transition"
+            }, 409);
+            const currentExtras = booking.extras && typeof booking.extras === "object" ? booking.extras : {};
+            const code = String(body.referralCode || "").trim().toUpperCase();
+            if (!/^VA-[A-Z0-9]{6,12}$/.test(code)) return json({
+                error: "invalid_referral"
+            }, 400);
+            if (currentExtras?.referral_friend?.code) {
+                if (currentExtras.referral_friend.code === code) return json({
+                    booking: safeBooking(booking),
+                    attached: false
+                });
+                return json({
+                    error: "booking_referral_already_attached"
+                }, 409);
+            }
+            if (currentExtras?.promo || currentExtras?.referral_reward?.id) return json({
+                error: "booking_promo_already_attached"
+            }, 409);
+            const referral = await validateFriendReferral(supabase, code, booking.customer_phone, 0, bookingId);
+            if (!referral?.valid) return json({
+                error: referral?.reason || "invalid_referral"
+            }, 409);
+            const rawBase = Math.max(0, Number(currentExtras.base_before_discount) || Number(booking.base_amount || 0) + Number(currentExtras?.discount?.amount || 0));
+            const promo = {
+                ...promoExtraFromCandidate(referral, true),
+                kind: "referral_friend",
+                referrer_phone: referral.referrerPhone
+            };
+            const discount = discountInfo({}, rawBase, {
+                ...currentExtras,
+                promo
+            });
+            if (discount.primarySource !== "promo" || discount.amount <= 0) return json({
+                error: "promo_not_best_discount"
+            }, 409);
+            const extras = {
+                ...currentExtras,
+                promo,
+                referral_friend: {
+                    code: referral.code,
+                    referrer_phone: referral.referrerPhone,
+                    discount_amount: 100
+                },
+                discount: {
+                    type: discount.type,
+                    percent: discount.percent,
+                    amount: discount.amount,
+                    source: discount.source,
+                    primary_source: discount.primarySource,
+                    loyalty_amount: discount.loyaltyAmount,
+                    referral_reward_amount: 0,
+                    reason: ""
+                },
+                base_before_discount: rawBase
+            };
+            const totalAmount = discount.baseAmount + Math.max(0, Number(booking.extras_amount || 0)) + Math.max(0, Number(booking.delivery_amount || 0));
+            const { error: attachError } = await supabase.rpc("vacleaner_admin_attach_booking_referral", {
+                p_booking_id: bookingId,
+                p_referral_code: referral.code,
+                p_expected_updated_at: booking.updated_at,
+                p_extras: extras,
+                p_base_amount: discount.baseAmount,
+                p_total_amount: totalAmount
+            });
+            if (attachError) {
+                const reason = String(attachError.message || "");
+                const known = [
+                    "invalid_transition",
+                    "booking_changed",
+                    "invalid_referral",
+                    "referral_inactive",
+                    "self_referral",
+                    "referral_first_rental_only",
+                    "referral_already_used",
+                    "booking_referral_already_attached",
+                    "booking_promo_already_attached",
+                    "booking_finance_review_required"
+                ].find((value)=>reason.includes(value));
+                return json({
+                    error: known || (String(attachError.code || "") === "23505" ? "referral_already_used" : "service_error")
+                }, 409);
+            }
+            const { data: saved, error: savedError } = await supabase.from("vacleaner_bookings").select("*").eq("id", bookingId).single();
+            if (savedError || !saved) throw savedError || new Error("update_failed");
+            await tagAudit(supabase, bookingId, userData.user.id, "edge:attach_referral", actionStartedAt);
+            return json({
+                booking: safeBooking(saved),
+                attached: true
+            });
+        }
         if (action === "attach_promo") {
             const bookingId = String(body.bookingId || "");
             if (!validBookingId(bookingId)) return json({

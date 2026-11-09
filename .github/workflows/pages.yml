@@ -28,6 +28,8 @@ jobs:
           node-version: 22
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+      - name: Install pinned test dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run canonical static / regression QA
         run: npm run qa:static
       - name: Upload Pages artifact

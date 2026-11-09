@@ -33,6 +33,8 @@ function database(){
     let op='select',payload,one=false,filters=[],executed;
     const q={
       select(){return q},eq(k,v){filters.push(r=>r[k]===v);return q},
+      neq(k,v){filters.push(r=>r[k]!==v);return q},
+      ilike(k,v){filters.push(r=>String(r[k]||'').toLowerCase()===String(v).toLowerCase());return q},
       in(k,v){filters.push(r=>v.includes(r[k]));return q},
       is(k,v){filters.push(r=>(r[k]??null)===v);return q},
       gte(){return q},lte(){return q},gt(){return q},order(){return q},limit(){return q},

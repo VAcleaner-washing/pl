@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.45",
+  "version": "4.3.46",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -53,7 +53,7 @@
     "test:ci-pipeline": "node scripts/test-ci-pipeline-contract.mjs",
     "test:e2e": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
     "test:mobile-forms": "python scripts/mobile_forms_qa.py --root dist --artifacts pwa-test-results/mobile-forms",
-    "test:webkit": "python scripts/mobile_forms_qa.py --browser webkit --root dist --artifacts webkit-test-results/forms && python scripts/public_hydration_qa.py --browser webkit --root dist --artifacts webkit-test-results/public && python scripts/admin_startup_qa.py --browser webkit --root dist --artifacts webkit-test-results/startup && python scripts/admin_read_performance_qa.py --browser webkit --artifacts webkit-test-results/read-performance && python scripts/admin_idle_qa.py --browser webkit --standalone --artifacts webkit-test-results/idle && python scripts/ui_reliability_qa.py --browser webkit --artifacts webkit-test-results/reliability",
+    "test:webkit": "python scripts/mobile_forms_qa.py --browser webkit --root dist --artifacts webkit-test-results/forms && python scripts/public_hydration_qa.py --browser webkit --root dist --artifacts webkit-test-results/public && python scripts/admin_startup_qa.py --browser webkit --root dist --artifacts webkit-test-results/startup && python scripts/admin_read_performance_qa.py --browser webkit --artifacts webkit-test-results/read-performance && python scripts/admin_idle_qa.py --browser webkit --standalone --artifacts webkit-test-results/idle && python scripts/ui_reliability_qa.py --browser webkit --artifacts webkit-test-results/reliability && python scripts/booking_friend_referral_qa.py --browser webkit --artifacts webkit-test-results/friend-referral",
     "test:public-hydration": "python scripts/public_hydration_qa.py --root dist --artifacts hydration-test-results",
     "test:pwa": "python scripts/pwa_visual_qa_runner.py --artifacts pwa-test-results",
     "test:desktop-density": "python scripts/desktop_density_qa.py --artifacts density-test-results",
@@ -100,6 +100,11 @@
     "test:pwa-cache-browser": "python scripts/pwa_cache_qa.py",
     "test:admin-read-performance": "python scripts/admin_read_performance_qa.py",
     "test:admin-idle": "python scripts/admin_idle_qa.py --standalone",
-    "test:ui-reliability": "python scripts/ui_reliability_qa.py"
+    "test:ui-reliability": "python scripts/ui_reliability_qa.py",
+    "test:booking-friend-referral": "node scripts/test-booking-friend-referral.mjs",
+    "test:booking-friend-referral-browser": "python scripts/booking_friend_referral_qa.py"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.16"
   }
 }
