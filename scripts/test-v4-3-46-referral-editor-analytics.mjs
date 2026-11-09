@@ -46,9 +46,9 @@ for(const fragment of [
   "bookings:actualUses.length",
   "completed:actualCompleted.length",
   "${m.outreachReferrers}",
-  "${m.organicReferrers}",
+  "${m.outsideCohortReferrers}",
   "конверсія підтверджених розсилок",
 ]) assert.ok(admin.includes(fragment),'analytics regression: '+fragment);
 
 assert.ok(systemSpec.includes('REF-010'),'new contract must be documented');
-console.log('PASS: guarded admin referral correction and separated outreach/organic metrics');
+console.log('PASS: guarded admin referral correction and separated outreach/cohort-unmatched metrics');
