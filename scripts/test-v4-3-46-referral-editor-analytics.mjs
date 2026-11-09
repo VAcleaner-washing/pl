@@ -41,7 +41,7 @@ for(const fragment of [
 
 for(const fragment of [
   "actualUses=uses.filter(row=>row.status!=='cancelled'&&referralTimestampInBounds(row.created_at,bounds))",
-  "organicReferrers=new Set(",
+  "outsideCohortReferrers=new Set(",
   "outreachReferrers:convertedPhones.size",
   "bookings:actualUses.length",
   "completed:actualCompleted.length",
