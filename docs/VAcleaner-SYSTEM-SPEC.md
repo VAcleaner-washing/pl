@@ -5223,3 +5223,26 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 - test:ui-reliability runs shipped public/admin assets against isolated API fixtures: idle booking before/after selection, one catalog read, failure cooldown/retry, analytics build, keyboard containment/return, blocked chunk recovery and failed enhancement recovery.
 - The same suite is part of the WebKit gate; existing static, public hydration, browser/PWA, finance, session and responsive gates remain mandatory.
+
+# 102. Change record — v4.3.46 / Referral edit and truthful analytics
+
+### ADDED
+- REF-010: atomic service-role-only admin correction of a friend's referral code on an existing first rental, including attachment, replacement and removal.
+- Explicit «Застосувати код друга» / «Прибрати код» buttons on eligible booking edits and human-readable backend errors.
+
+### CHANGED
+- Conversion from confirmed Instagram/Telegram program invitations remains an outreach-only KPI and funnel.
+- The headline referrer, booking, completed and earned revenue KPIs now count all real referral uses in the selected period, including recommendations without a prior recorded invitation.
+- Release/build 4.3.46 / 4346 and renewed iPhone PWA cache identity.
+
+### FIXED
+- Manager cannot add a legitimate referral code to an already-created booking; referral relationships are no longer only creatable during booking creation.
+- «Привели друга» and booking KPIs previously appeared empty when actual recommendations lacked a prior CRM send event.
+
+### PRESERVED
+- Fixed −100 грн friend and −150 грн referrer reward (after completed), first-rental-only eligibility, non-stacking discount decision, source and messaging attribution, booking status guards, payments, deposits, delivery, inventory, chemistry, rental prices and VA HOME.
+- Client/customer referral relationship and financial total update must be one transaction; no backfilling or reapplying a previously processed referral record.
+
+### TESTS
+- `test:referral-editor` statically guards UI action, authenticated backend, restricted database RPC and all-source-versus-outreach analytics.
+- Full Static/build, Chromium Browser/PWA and WebKit gates must be green on the validated Pages artifact; production database migration and edge deployment require additional independent verification.
