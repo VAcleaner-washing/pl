@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.45
-**Baseline build:** 4345
-**Останнє оновлення:** 2026-11-06
+**Baseline version:** 4.3.46
+**Baseline build:** 4346
+**Останнє оновлення:** 2026-11-09
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -1912,6 +1912,17 @@ Desktop modal не може залишати порожню праву коло�
 Двоетапне підтвердження фактичної відправки та referral analytics не змінюються.
 
 ---
+
+## REF-010 — код друга у вже створеній броні
+
+- Для броні без прив’язаного коду у статусах `pending / waiting_payment / confirmed` поле «Код друга» доступне для вводу та має явну дію «Застосувати код».
+- Дія одразу змінює збережену бронь. Інші незбережені поля редактора зберігаються як чернетка; зміна телефону має бути збережена до застосування коду.
+- Поточна бронь виключається лише з перевірки попередніх оренд цього клієнта. Інші активні/завершені оренди, саморекомендація, неактивний код і повторне використання блокують рекомендацію.
+- Прив’язаний код незмінний. Код не додається після видачі або завершення оренди й не замінює вже прив’язане промо/зароблений бонус. Більша чинна знижка не зменшується.
+- Ціна береться зі збереженого snapshot оренди; джерело, дати, доставка, додаткові позиції, отримані передоплата й залог лишаються без змін.
+- Знижка та `vacleaner_referral_uses` записуються транзакційно через service-role-only RPC. Повторне натискання не подвоює знижку; помилка або зміна броні паралельним запитом не залишає частковий запис.
+- Друг отримує чинні −100 грн, власник коду — чинні −150 грн лише після завершення цієї оренди. Ручна знижка не замінює реферальний зв’язок.
+
 
 # 12. CLIENT CARD — CRM HUB
 
@@ -5205,3 +5216,24 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 - test:ui-reliability runs shipped public/admin assets against isolated API fixtures: idle booking before/after selection, one catalog read, failure cooldown/retry, analytics build, keyboard containment/return, blocked chunk recovery and failed enhancement recovery.
 - The same suite is part of the WebKit gate; existing static, public hydration, browser/PWA, finance, session and responsive gates remain mandatory.
+
+
+# 102. Change record — v4.3.46 / friend referral on an existing booking
+
+### ADDED
+- Explicit friend-code attachment in the booking editor and a transactional service-role-only RPC for the financial snapshot plus referral use.
+- HTTP/PostgreSQL migration tests for eligibility, retries, rollback, stale snapshots and permissions; shipped-asset mobile/desktop/WebKit editor tests with synthetic writes only.
+
+### CHANGED
+- Release/build/cache identity is `4.3.46 / 4346`. An unattached friend code is editable before issue, with an explicit immediate-save action.
+
+### FIXED
+- The first rental already being edited no longer incorrectly counts as an earlier rental when adding a recommendation. The editor previously exposed this field as read-only and discarded its value on edit.
+
+### PRESERVED
+- First-rental eligibility, −100/−150/150-day rules, immutable attached code, stronger discounts, payments, deposits, delivery, sources, issued/completed bookings, existing create flow, session, PWA cache and VA HOME.
+- No manual modification of the reported production booking or customer data; the administrator applies the code through the reviewed action.
+
+### TESTS
+- `test:booking-friend-referral` executes the real TypeScript/JavaScript HTTP handlers against the actual new migration in isolated PostgreSQL (PGlite).
+- `test:booking-friend-referral-browser` exercises shipped assets at 320/390/430/768/1440 px; the same suite runs in the mandatory WebKit gate. All existing canonical regression/build/browser/PWA suites remain required.

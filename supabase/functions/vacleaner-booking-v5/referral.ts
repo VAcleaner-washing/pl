@@ -38,7 +38,7 @@ export async function ensureReferralCode(db: any, phoneValue: unknown) {
   throw new Error("referral_code_collision");
 }
 
-export async function validateFriendReferral(db: any, codeValue: unknown, referredPhoneValue: unknown, completedOrders = 0) {
+export async function validateFriendReferral(db: any, codeValue: unknown, referredPhoneValue: unknown, completedOrders = 0, excludeBookingId = "") {
   const code = normalizeReferralCode(codeValue); if (!code) return null;
   const { data: row, error } = await db.from("vacleaner_referral_codes").select("owner_phone,code,active").ilike("code", code).maybeSingle();
   if (error) throw error;
@@ -48,7 +48,9 @@ export async function validateFriendReferral(db: any, codeValue: unknown, referr
   if (row.active !== true) return { ...base, valid: false, reason: "referral_inactive" };
   if (!referredPhone) return { ...base, valid: false, reason: "phone_required" };
   if (!referrerPhone || referrerPhone === referredPhone) return { ...base, valid: false, reason: "self_referral" };
-  const { count: priorBookings, error: priorBookingError } = await db.from("vacleaner_bookings").select("id", { count: "exact", head: true }).eq("customer_phone", referredPhone).in("status", ["pending", "waiting_payment", "confirmed", "issued", "completed"]);
+  let priorQuery = db.from("vacleaner_bookings").select("id", { count: "exact", head: true }).eq("customer_phone", referredPhone).in("status", ["pending", "waiting_payment", "confirmed", "issued", "completed"]);
+  if (excludeBookingId) priorQuery = priorQuery.neq("id", excludeBookingId);
+  const { count: priorBookings, error: priorBookingError } = await priorQuery;
   if (priorBookingError) throw priorBookingError;
   if (Number(priorBookings || 0) > 0 || Number(completedOrders || 0) > 0) return { ...base, valid: false, reason: "referral_first_rental_only" };
   const { count, error: useError } = await db.from("vacleaner_referral_uses").select("id", { count: "exact", head: true }).eq("referred_phone", referredPhone).in("status", ["pending", "completed"]);

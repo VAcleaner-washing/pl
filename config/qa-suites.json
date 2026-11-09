@@ -8,6 +8,7 @@
     "test:growth-content",
     "check:backend",
     "test:backend-logistics",
+    "test:booking-friend-referral",
     "test:deposit-policy",
     "test:stabilization",
     "test:css-architecture",
@@ -87,7 +88,8 @@
     "test:pwa-cache-browser",
     "test:rental-status-guards-browser",
     "test:admin-idle",
-    "test:ui-reliability"
+    "test:ui-reliability",
+    "test:booking-friend-referral-browser"
   ],
   "currentContracts": [
     {
