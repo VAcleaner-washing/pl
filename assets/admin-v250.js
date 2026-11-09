@@ -1040,6 +1040,7 @@ const saveBookingReferral=async(clear=false)=>{
   try{
     const result=await invokeBookingPromo({action:'set_referral',bookingId:b.id,referralCode:code});
     if(result?.booking)Object.assign(b,result.booking);
+    state.referrals.analytics=null;
     closeLayer();await load();render();
     toast(code?'Код друга збережено · суму перераховано':'Рекомендацію прибрано · суму перераховано','success');
   }catch(err){if(applyBookingReferral)applyBookingReferral.disabled=false;if(clearBookingReferral)clearBookingReferral.disabled=false;toast(err.message)}
