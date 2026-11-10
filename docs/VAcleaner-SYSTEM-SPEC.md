@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.46
-**Baseline build:** 4346
-**Останнє оновлення:** 2026-11-09
+**Baseline version:** 4.3.47
+**Baseline build:** 4347
+**Останнє оновлення:** 2026-11-10
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5258,3 +5258,34 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - To diagnose WebKit startup failures in GitHub Actions, install Playwright WebKit and required runtime libraries on the supported Ubuntu 24.04 runner, with an explicit startup smoke step and diagnostic artifact even on failures. Restore the previously green Playwright WebKit cache step and cap install duration at 15 minutes; this avoids an indefinitely stalled dependency download without relaxing the mandatory WebKit QA.
 - Static/build uploads `qa-release-summary.json` as `vacleaner-static-qa-failure` with `if: failure()`, when available, to surface the failing contract. This is evidence collection only and does not bypass a failed gate.
 - Neither diagnostic change edits application behavior, service workers, prices, promotions, customer data or Supabase. Existing release/build stays **4.3.46 / 4346**.
+
+
+# 103. Change record — v4.3.47 / Admin audit R1: reliable state and truthful metrics
+
+### ADDED
+- ADM-RELIABILITY-001: after a committed booking/finance/referral mutation, a failed subsequent read is a read-recovery state, not a failed mutation. The authoritative returned booking is applied locally; a persistent notice explains that changes were saved and its retry performs reads only. Never automatically replay a financial write.
+- ADM-RELIABILITY-002: if the financial calculation was saved but settlement confirmation fails, keep the form, show the saved first phase explicitly, and reconcile against authoritative read data. A completed authoritative booking closes the flow without another settlement write.
+- ADM-RELIABILITY-003: optional campaign/expiring-referral read failures retain the previous successful snapshot with an explicit stale/error notice and retry, rather than fabricating a successful empty state.
+- ADM-RELIABILITY-004: booking customer lookups apply only to the current phone, current request sequence, and connected form. Removed forms dispose document-address and media-query listeners and pending lookup timers.
+
+### CHANGED
+- Settings localStorage contains only server-confirmed delivery/equipment values. Submitted drafts are normalized without persisting and remain editable on failure. No rollback overwrites later confirmed state.
+- Generic admin dialogs derive their accessible name from the mounted heading. Explicit service-worker update waits until the current modal form is saved or closed.
+- Referral editing remains a separate immediate atomic RPC operation. If other form fields have changed, save those first; applying a referral must not silently discard an unrelated booking draft.
+- Financial results keep their existing arithmetic, but label incomplete expense accounting explicitly as based on entered expenses. Weekly copied reports carry the same caveat and actual date range. Unknown/null margins display a dash, not null%.
+
+### FIXED
+- REF-011: actual-period outside-cohort booking count comes directly from that set, not actual bookings minus a different invitation cohort. Late conversions remain part of the invitation cohort but cannot generate negative actual-period counts. Distinct referrers may overlap; categories are not an additive partition.
+- Actual referral period labels use the referral-use creation/application date, not a claimed booking-creation date. Referral revenue remains the completed result of that use-created cohort, independently of completion-period revenue.
+- Missing booking source remains unknown (Не вказано) rather than being assigned to the website, in both analytics and operational labels. Known source semantics remain unchanged.
+- Stale lookup responses can no longer overwrite a different client's name/contact/document fields or download a document for a detached form.
+
+### PRESERVED
+- Rental/deposit/payment/settlement arithmetic, availability/resource rules, prices and delivery tariffs, discounts/loyalty, chemistry, manual charges, RETURN/referral reward rules, source data, SMS consent/send rules, API authorization, private documents and VA HOME isolation.
+- Existing single-flight reads/auth refresh, explicit worker-update consent, no business-response cache, all navigation return paths, UI actions and mandatory release QA gates.
+- No Supabase schema, RPC, Edge deployment or production business data changes. This candidate is prepared on qa/admin-audit-r1; main/deploy are not authorized by its preparation.
+
+### TESTS
+- test:admin-audit-r1 executes shipped helper logic with rejected/successful settings responses, late referral conversions, unknown sources, optional-read errors and committed-save refresh failures.
+- test:admin-audit-r1-browser exercises shipped HTML/assets on local API fixtures at 390/1440: settings failure/retry, campaign read recovery, delayed client A/B responses, committed create followed by read failure and read-only retry. It runs in Chromium and the WebKit gate.
+- All existing financial/status/booking/session tests, canonical static/build, Chromium/PWA and WebKit gates remain required. Physical iPhone validation remains separately necessary before production publication.
