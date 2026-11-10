@@ -63,3 +63,15 @@ Local browser QA validates the same runtime files copied into that private Site.
 See `ADMIN-LAB-ROLLOUT.md` and `ADMIN-IMPROVEMENTS-BACKLOG.csv` for remaining work,
 staging integration, controlled production cutover and retiring the old served UI while
 retaining its recovery archive.
+
+## Clean checkout follow-up
+
+The first GitHub static job exposed a test preparation dependency on an existing local
+`dist/`. The static LAB contract now builds its own canonical prerequisite. Browser and
+WebKit commands also prepare their LAB artifact inside each job from the downloaded
+normal Pages artifact; test-only output is not assumed to cross job boundaries. This
+follow-up changes QA preparation only and preserves every deployed LAB runtime byte.
+
+Fresh local verification after removing both generated artifact directories: static QA
+46/46 passed; browser entry command rebuilt LAB and passed 167/167. All 106 published
+LAB runtime file hashes remain identical. The follow-up does not require a UI redeploy.

@@ -5,6 +5,9 @@ import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
 const root=process.cwd(),out=path.join(root,'lab-test-results/dist');
+// Static QA runs before the pipeline's final build on a clean checkout.
+// This contract owns both artifacts instead of depending on a previous local run.
+execFileSync(process.execPath,['scripts/build-pages.mjs'],{stdio:'inherit'});
 execFileSync(process.execPath,['scripts/build-admin-lab.mjs',out],{stdio:'inherit'});
 assert(!fs.existsSync('dist/sandbox'),'LAB source must not enter the normal artifact');
 assert(!fs.readFileSync('dist/admin/bronuvannia/index.html','utf8').includes('admin-lab'),'Normal entrypoint must not activate LAB');
