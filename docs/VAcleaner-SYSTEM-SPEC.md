@@ -5255,6 +5255,6 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ## PAGES-CI-002 — evidence on failing Static/WebKit gates (2026-11-10)
 
 - The deployment workflow `.github/workflows/pages.yml` runs all existing Static/build, Browser/PWA and WebKit gates before GitHub Pages publication. The `deploy` job remains forbidden for pull requests or unsuccessful QA.
-- To diagnose WebKit startup failures in GitHub Actions, install fresh Playwright WebKit and required runtime libraries on the supported Ubuntu 24.04 runner, test launch with an explicit smoke step, and upload browser-startup diagnostics/artifacts even on test failures.
+- To diagnose WebKit startup failures in GitHub Actions, install Playwright WebKit and required runtime libraries on the supported Ubuntu 24.04 runner, with an explicit startup smoke step and diagnostic artifact even on failures. Restore the previously green Playwright WebKit cache step and cap install duration at 15 minutes; this avoids an indefinitely stalled dependency download without relaxing the mandatory WebKit QA.
 - Static/build uploads `qa-release-summary.json` as `vacleaner-static-qa-failure` with `if: failure()`, when available, to surface the failing contract. This is evidence collection only and does not bypass a failed gate.
 - Neither diagnostic change edits application behavior, service workers, prices, promotions, customer data or Supabase. Existing release/build stays **4.3.46 / 4346**.

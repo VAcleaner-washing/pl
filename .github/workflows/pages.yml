@@ -115,7 +115,13 @@ jobs:
           python-version: '3.13'
           cache: pip
           cache-dependency-path: requirements-ci.txt
-      - name: Install fresh Playwright WebKit and system dependencies
+      - name: Cache Playwright WebKit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-webkit-${{ hashFiles('requirements-ci.txt') }}
+      - name: Install Playwright WebKit and system dependencies
+        timeout-minutes: 15
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
           python -m playwright install --with-deps webkit
