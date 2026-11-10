@@ -43,7 +43,8 @@
     "test:current-contracts",
     "test:ci-pipeline",
     "test:admin-audit-r1",
-    "test:admin-lab"
+    "test:admin-lab",
+    "test:admin-staging-preflight"
   ],
   "browser": [
     "test:public-hydration",

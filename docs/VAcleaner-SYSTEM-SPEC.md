@@ -5384,3 +5384,29 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 
 - Run the unchanged 77-assertion focused suite against official Playwright Chromium as well as WebKit, the actual LAB artifact checks, and independent canonical CI gates. Record the earlier 48/49 Chromium result honestly; a WebKit or local system Chromium pass does not certify another browser build.
+
+
+# 107. Change record — R4 isolated backend preflight (no frontend release)
+
+### ADDED
+
+- Read-only catalog snapshot: 22 tables and 15 SQL functions with original RLS, policies, grants, constraints and indexes; deployed-source parity metadata for six core handlers. No business rows, Auth users, secrets or schedules are copied.
+- A staging-only generator produces an empty-database bootstrap, declared synthetic resources/defaults and byte-identical canonical handlers behind an explicit outbound transport boundary. Production refs and output paths outside staging are refused.
+- A concrete Free-project proposal and integration acceptance matrix in staging/README.md; real Auth/RLS/RPC, persisted read-back and two-device execution are explicitly pending target selection.
+
+### CHANGED
+
+- Canonical Pages excludes staging/; the independent artifact verifier also rejects it. New preflight checks include a deliberately contaminated artifact and verify the final clean artifact.
+
+### FIXED
+
+- Prevents newly introduced staging source, runtime files or credentials from entering a future normal Pages artifact.
+
+### PRESERVED
+
+- Production main/site 4.3.46/4346 and private LAB 4.3.50/4350. No production writes/deploys, financial/status logic changes, real dispatches or copied customer data. No new hosted resources are created before organization selection.
+
+### TESTS
+
+- npm run test:admin-staging-preflight: 17 checks; SQL syntax parsed independently with pglast 7.22. These are preflight checks, not live integration certification.
+- Normal Pages remains 270 files. Local full Supabase startup was blocked by disk ENOSPC; no live Auth/RLS/RPC or persistence pass is claimed.

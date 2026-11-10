@@ -107,6 +107,7 @@
     "build:lab": "node scripts/build-admin-lab.mjs",
     "test:admin-lab": "node scripts/test-admin-lab.mjs",
     "test:admin-lab-browser": "node scripts/build-admin-lab.mjs && python scripts/admin_lab_qa.py",
-    "test:admin-lab-forms": "node scripts/build-admin-lab.mjs && python scripts/admin_lab_forms_qa.py"
+    "test:admin-lab-forms": "node scripts/build-admin-lab.mjs && python scripts/admin_lab_forms_qa.py",
+    "test:admin-staging-preflight": "node scripts/test-admin-staging-preflight.mjs"
   }
 }
