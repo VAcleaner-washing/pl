@@ -41,7 +41,9 @@
     "test:calendar-live",
     "test:booking-gifts",
     "test:current-contracts",
-    "test:ci-pipeline"
+    "test:ci-pipeline",
+    "test:admin-audit-r1",
+    "test:admin-lab"
   ],
   "browser": [
     "test:public-hydration",
@@ -88,7 +90,9 @@
     "test:pwa-cache-browser",
     "test:rental-status-guards-browser",
     "test:admin-idle",
-    "test:ui-reliability"
+    "test:ui-reliability",
+    "test:admin-audit-r1-browser",
+    "test:admin-lab-browser"
   ],
   "currentContracts": [
     {
