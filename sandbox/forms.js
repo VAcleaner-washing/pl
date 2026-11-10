@@ -22,7 +22,7 @@ function hydrate(){
   const value=record(form);
   // Native enhancements add proxy controls after the initial markup. Until the user
   // changes a field those are initialization, not an unsaved draft.
-  if(!value.edited)value.baseline=snapshot(form);
+  if(!value.edited&&!value.interacted)value.baseline=snapshot(form);
   if(busy(form)){
    form.dataset.labSaving='1';status(form);
    for(const field of fields(form))if(!field.inert){field.inert=true;value.frozen.add(field)}
@@ -121,7 +121,7 @@ document.addEventListener('keydown',event=>{
  });
  else{const back=document.querySelector('#layer .detail .back');if(back){event.preventDefault();event.stopImmediatePropagation();back.click()}}
 },true);
-function interaction(event){const form=event.target.closest?.('form');if(form&&form.id!=='authForm'&&event.isTrusted){const value=record(form);if(!value.edited)value.baseline=snapshot(form);value.interacted=true}}
+function interaction(event){const form=event.target.closest?.('form');if(form&&form.id!=='authForm'&&event.isTrusted){const value=record(form);if(!value.edited&&!value.interacted)value.baseline=snapshot(form);value.interacted=true}}
 document.addEventListener('pointerdown',interaction,true);
 document.addEventListener('keydown',interaction,true);
 document.addEventListener('focusin',event=>{if(event.target.matches?.('input,select,textarea'))interaction(event)},true);

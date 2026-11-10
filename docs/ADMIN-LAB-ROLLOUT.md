@@ -14,7 +14,7 @@
 Посилання «Робоча 46» в LAB відкриває наявну адмінку. Це перемикання між
 окремими середовищами: встановлені PWA мають різні origins, назви, іконки та сховища.
 
-## Поточний LAB candidate: 4.3.49 / 4349
+## Поточний LAB candidate: 4.3.50 / 4350
 
 Адреса: https://vacleaner-admin-lab.mrcrazy6336.chatgpt.site/admin/bronuvannia/
 

@@ -1,4 +1,4 @@
-# R3 candidate — 4.3.49 / 4349
+# R3 candidate — 4.3.50 / 4350
 
 Scope: shared form safety/accessibility in the isolated LAB. Production main remains
 4.3.46/4346; the stable branch, checksum manifest and exact Pages archive are retained.
@@ -39,3 +39,11 @@ Limits: real keyboard/safe areas, OS-level dismissal, VoiceOver and private PWA 
 sign-in still require physical iPhone acceptance. beforeunload is best effort. There is
 no automatic draft recovery promise. Live database/RLS/RPC/availability and transactional
 partial/unknown outcomes require the separate staging integration stage.
+
+Chromium CI for 4.3.49 completed 48/49 canonical browser suites; its final extension
+date-field guard assertion failed in official Chromium despite passing in system
+Chromium and WebKit. The reproduction recorded a second trusted focus after the
+changed date but before input/change. That focus must not adopt a new clean baseline.
+4.3.50 freezes automatic snapshot updates after the first trusted form interaction.
+The same existing extension assertion remains unchanged and is rerun against the
+official Playwright Chromium, rather than accepting the system-browser result alone.

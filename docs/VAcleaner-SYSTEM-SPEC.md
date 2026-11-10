@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.49
-**Baseline build:** 4349
+**Baseline version:** 4.3.50
+**Baseline build:** 4350
 **Останнє оновлення:** 2026-11-10
 **Власник логіки:** VAcleaner  
 
@@ -5361,3 +5361,26 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 - Existing static/Chromium/PWA/WebKit contracts plus actual LAB artifact tests and focused form safety tests. Explicitly test a clean checkout, confirmed and rejected saves, repeated open/close, menu cancellation and independent view navigation.
 - Canonical finance/pricing/catalog bytes must match stable46; LAB code remains excluded from normal Pages artifact. Screenshot review includes portrait/landscape iPhone emulation and desktop; this is not physical iPhone approval.
+
+
+# 106. Change record — v4.3.50 / LAB date-field focus baseline
+
+### ADDED
+
+- Reproduction against system Chromium and the official Playwright Chromium: the newer date-input fill path emits a second trusted focus event after the date changes but before its input/change events. The existing extension-form dirty-close assertion catches the lost baseline.
+
+### CHANGED
+
+- LAB pristine snapshots may follow automatic initialization only before the first trusted form interaction. A later focus event or observer hydration cannot adopt an edited date as the clean baseline. Successful acknowledged saves still reset the baseline explicitly.
+
+### FIXED
+
+- A second focus on a date input could overwrite the original pristine snapshot and permit closing an edited extension form without confirmation. Reproduced from Chromium CI job 130075140464; the same existing failing assertion is retained.
+
+### PRESERVED
+
+- Production 4.3.46/4346, financial/status rules, save ownership, LAB isolation and previous private Site versions. No production writes or deployments.
+
+### TESTS
+
+- Run the unchanged 77-assertion focused suite against official Playwright Chromium as well as WebKit, the actual LAB artifact checks, and independent canonical CI gates. Record the earlier 48/49 Chromium result honestly; a WebKit or local system Chromium pass does not certify another browser build.
