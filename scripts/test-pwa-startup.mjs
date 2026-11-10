@@ -9,7 +9,7 @@ async function test(name,run){await run();console.log('PASS',name);passed++}
 function startupHarness(){
   const settings=deferred(),reads=[],listeners=[],timers=new Set();let settingsCalls=0,recalculations=0,renders=0;
   const context={console,Date,JSON,Promise,
-    state:{bookings:[],expenses:[],calendar:[],customers:[],campaigns:[],referrals:{},dataLoaded:false,view:'bookings'},
+    state:{moduleErrors:{},bookings:[],expenses:[],calendar:[],customers:[],campaigns:[],referrals:{},dataLoaded:false,view:'bookings'},
     initialDataLoadPromise:null,fullDataRefreshPromise:null,liveBookingSyncBusy:false,lastLiveBookingFingerprint:'',liveBookingSyncTimer:0,LIVE_BOOKING_SYNC_MS:15000,
     document:{visibilityState:'visible',addEventListener:(...args)=>listeners.push(args)},navigator:{onLine:true},
     window:{setInterval:fn=>{timers.add(fn);return fn},addEventListener:(...args)=>listeners.push(args)},clearInterval:fn=>timers.delete(fn),
@@ -56,7 +56,7 @@ await test('failed initial read preserves last good state and permits a complete
 await test('optional campaign/referral outages retain the established fallback',async()=>{
   const h=startupHarness(),loading=h.loadStartupData();h.settings.ready=true;h.settings.resolve();
   for(const read of h.reads)if(['campaigns','referrals_expiring'].includes(read.body.action))read.reject(new Error('optional outage'));else read.resolve({});
-  await loading;assert.equal(h.context.state.dataLoaded,true);assert.equal(h.context.state.campaigns.length,0);
+  await loading;assert.equal(h.context.state.dataLoaded,true);assert.equal(h.context.state.campaigns.length,0);assert.ok(h.context.state.moduleErrors.campaigns);assert.ok(h.context.state.moduleErrors.referrals);
 });
 
 function registrationHarness({installing=null,waiting=null,offline=false,existing=true,controlled=true}={}){

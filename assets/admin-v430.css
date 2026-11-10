@@ -4332,3 +4332,8 @@ html.native-v28 .finance-form .finance-manual-charge .field{min-width:0}
 html.native-v28 .finance-form .finance-manual-charge .field-help{grid-column:1/-1;margin:0;color:#9da6a7;font-size:11px;line-height:1.4}
 html.native-v28 .finance-form .finance-manual-charge-row strong{color:#efc16b}
 @media(max-width:620px){html.native-v28 .finance-form .finance-manual-charge.fields{grid-template-columns:minmax(0,1fr)}}
+
+/* Admin audit: a shared notice for failed reads and committed saves. */
+.admin-state-notice{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:12px 0;padding:14px 16px;border:1px solid #806637;border-radius:12px;background:#242117;color:#f3e4c7;font-size:14px;line-height:1.45;}
+.admin-state-notice p{margin:4px 0 0;color:#d4c9b6;font-size:13px;}
+.admin-state-notice .btn{min-height:44px;flex-shrink:0;}
