@@ -30,6 +30,14 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Run canonical static / regression QA
         run: npm run qa:static
+      - name: Upload static QA summary on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vacleaner-static-qa-failure
+          path: qa-release-summary.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
