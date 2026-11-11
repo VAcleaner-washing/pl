@@ -114,6 +114,15 @@ def main():
             close(form);expect(page.locator('#labLeaveDialog')).to_be_visible();keep()
             expect(form.locator('[name=name]')).to_have_value('R3 кампанія-чернетка');close(form);discard()
             checks.check(page.evaluate('VA_LAB.getState().campaigns.length')==0,f'{width}: discarded campaign never persists or dispatches')
+            # A navigation reset from the prior click may arrive after the next
+            # action's pointerdown. Release the real timer at precisely that point.
+            page.evaluate("""()=>{const timer=window.setTimeout.bind(window);let held=[];window.qaScrollResetTrace=[];
+              const onDown=event=>{if(event.target.closest('[data-action=issue]')&&held.length){const callbacks=held;held=[];
+                queueMicrotask(()=>{const before=document.querySelector('.main').scrollTop;callbacks.forEach(cb=>cb());
+                  qaScrollResetTrace.push({before,after:document.querySelector('.main').scrollTop,count:callbacks.length});
+                  window.setTimeout=timer;document.removeEventListener('pointerdown',onDown,true)})}};
+              window.setTimeout=(callback,delay,...args)=>{if(delay===60&&String(callback).includes('main.scrollTop=0')){held.push(callback);return 0}return timer(callback,delay,...args)};
+              document.addEventListener('pointerdown',onDown,true)}""")
             navigate(page,'bookings')
 
             # All common modal families retain the actual original field, without writes.
@@ -125,6 +134,11 @@ def main():
                 row='000000000005' if action=='issue' else '000000000007'
                 card=page.locator(f'.booking-card[data-id="00000000-0000-4000-8000-{row}"]')
                 card.locator(f'[data-action="{action}"]').click();form=page.locator('#'+form_id)
+                expect(form).to_be_visible()
+                expect(form.locator('header small')).to_have_text('LAB-005' if action=='issue' else 'LAB-007')
+                if action=='issue':
+                    trace=page.evaluate('qaScrollResetTrace')
+                    checks.check(bool(trace) and all(t['count']>0 and t['before']==t['after'] for t in trace) and (width>900 or trace[0]['before']>0),f'{width}: late navigation reset preserves scroll and the intended issue action')
                 form.locator(f'[name="{field_name}"]').fill(value);close(form)
                 expect(page.locator('#labLeaveDialog')).to_be_visible();keep()
                 expect(form.locator(f'[name="{field_name}"]')).to_have_value(value)

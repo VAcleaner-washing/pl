@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.51
-**Baseline build:** 4351
+**Baseline version:** 4.3.52
+**Baseline build:** 4352
 **Останнє оновлення:** 2026-11-10
 **Власник логіки:** VAcleaner  
 
@@ -5433,3 +5433,26 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 
 - Focused LAB Chromium/WebKit form suite with deterministic late-frame case, actual LAB artifact checks and canonical regression gates. Do not claim physical iPhone or live backend acceptance from these browser results.
+
+
+# 109. Change record — v4.3.52 / user-owned scroll after navigation
+
+### ADDED
+
+- Deterministic late-navigation-reset test: release the original 60ms reset between pointerdown/pointerup on the confirmed booking's Issue button. The original scroll changed from 1934 to 0 and the issue form did not open. The new assertion checks retained scroll, actual form visibility and the expected booking code.
+
+### CHANGED
+
+- Each view-scroll reset has a view/version owner and captures the current trusted user-action revision. Its queued microtask, frames and timer retain their original initial-navigation behavior only while that context is current and no newer pointer/key/wheel interaction has occurred. Three passive capture listeners update one revision counter; no per-form timers/listeners are added.
+
+### FIXED
+
+- Deferred resets could override scrolling performed to reach a booking action and move the target before pointerup. This reproduces the missing issueForm symptom in WebKit CI job 130367322907; the modal focus repair's regression already passed in that run. The previous dirty-close assertions are retained.
+
+### PRESERVED
+
+- Initial navigation returns to the top, including the existing deferred resets needed by layout. New user intent takes precedence over older restoration work. Financial rules, statuses, API payloads and backend handlers remain unchanged. Production stays 4.3.46/4346; R4 hosted target selection is still pending.
+
+### TESTS
+
+- Focused form tests use pinned Playwright 1.61.0 / WebKit 2311 (Ubuntu 24.04 as CI), official Chromium, deterministic focus and scroll cases, actual LAB artifact checks and canonical CI. Syntax/preflight and browser tests do not certify live backend or physical iPhone acceptance.

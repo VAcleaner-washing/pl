@@ -4,7 +4,8 @@ Status: **preflight package ready; hosted target selection pending**. This is no
 a deployed staging backend or a completed integration acceptance.
 
 Production remains 4.3.46 / 4346. The R4 preflight baseline was private browser-local LAB 4.3.50 / 4350;
-4.3.51 / 4351 is the follow-up modal-focus candidate.
+4.3.51 / 4351 contains the modal-focus repair; 4.3.52 / 4352 adds the
+user-owned scroll follow-up.
 No production schema, business rows, Auth users, settings, schedules or functions
 were changed. Production inspection used system catalog and Edge source reads.
 
@@ -113,3 +114,11 @@ times: the frame moved focus to Close between field focus and text insertion.
 disconnected cards. The regression now asserts actual text and focus before the
 unchanged dirty-close assertion; it does not add sleeps, forced clicks or retries.
 This UI repair does not create a hosted backend or certify integration acceptance.
+
+4.3.51 CI confirmed that the autofocus regression passed, then exposed a separate
+missing issueForm action. The existing view-switch reset schedules a final timer
+after 60ms. Releasing that real callback between pointerdown/pointerup moved the
+list from 1934px to zero and prevented the form opening. 4.3.52 retains the initial
+reset sequence while invalidating older callbacks after a new view or trusted
+pointer/key/wheel action. No sleep, retry or forced click is used in the regression.
+The hosted backend remains uncreated until organization selection.
