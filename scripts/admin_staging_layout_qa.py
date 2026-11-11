@@ -57,6 +57,52 @@ def main():
             const r=el.getBoundingClientRect(),s=getComputedStyle(el);
             return{selector,left:r.left,right:r.right,width:r.width,height:r.height,bottom:r.bottom,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,fontSize:s.fontSize,whiteSpace:s.whiteSpace,overflowX:s.overflowX,text:el.textContent.trim().slice(0,100)}
           }))})''',selectors)
+    def compare_navigation(page,reference_page,width):
+        reference_page.set_viewport_size({'width':width,'height':956})
+        selectors=['.mobile-nav','.mobile-nav>button','.mobile-nav>button>svg','.mobile-nav>button>span','.mobile-nav>button>i','.mobile-nav .badge']
+        captures=[]
+        for view in ['upcoming','calendar','more']:
+            for surface in [reference_page,page]:
+                if view=='more':
+                    surface.locator('.mobile-nav .more-nav').click()
+                    expect(surface.locator('.mobile-more-menu')).to_be_visible()
+                else:
+                    surface.locator(f'.mobile-nav [data-mobile-view={view}]').click()
+                    expect(surface.locator('#pageTitle')).to_have_text('Календар' if view=='calendar' else 'Найближчі')
+            for inset in [0,21,34]:
+                for surface in [reference_page,page]:
+                    surface.evaluate("inset=>document.documentElement.style.setProperty('--pwa-safe-bottom',inset+'px')",inset)
+                    surface.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>resolve()))')
+                    # Measure the final component state, not two differently
+                    # timed frames of the inherited More transform transition.
+                    surface.evaluate('''async()=>{
+                      const nav=document.querySelector('.mobile-nav');nav.getBoundingClientRect();
+                      await Promise.all(nav.getAnimations({subtree:true})
+                        .filter(a=>Number.isFinite(a.effect.getComputedTiming().endTime))
+                        .map(a=>a.finished.catch(()=>{})));
+                    }''')
+                expected=geometry(reference_page,selectors);actual=geometry(page,selectors)
+                differences=[]
+                if len(expected['items'])!=len(actual['items']):differences.append({'differentElementCount':[len(expected['items']),len(actual['items'])]})
+                for old,new in zip(expected['items'],actual['items']):
+                    delta={key:round(new[key]-old[key],3) for key in ['left','right','width','height','bottom'] if abs(new[key]-old[key])>1}
+                    if old['selector']!=new['selector'] or old['fontSize']!=new['fontSize'] or delta:
+                        differences.append({'selector':new['selector'],'text':new['text'],'delta':delta,'fontSizes':[old['fontSize'],new['fontSize']]})
+                check(f'{width}/{view}/inset{inset}: navigation controls, glyphs, labels and badge match immutable46',not differences,differences=differences)
+                targets=[item for item in actual['items'] if item['selector']=='.mobile-nav>button']
+                check(f'{width}/{view}/inset{inset}: five touch targets retain at least 44px',len(targets)==5 and all(item['width']>=44 and item['height']>=44 and item['bottom']<=956 for item in targets))
+                captures.append({'view':view,'inset':inset,'reference':expected,'stage':actual})
+                if inset==34:
+                    reference_page.screenshot(path=str(out/f'{width}-nav-{view}-stable46.png'))
+                    page.screenshot(path=str(out/f'{width}-nav-{view}-stage.png'))
+            if view=='more':
+                for surface in [reference_page,page]:
+                    surface.locator('.mobile-nav .more-nav').click()
+                    expect(surface.locator('.mobile-more-menu')).to_have_count(0)
+        for surface in [reference_page,page]:
+            surface.locator('.mobile-nav [data-mobile-view=upcoming]').click()
+            expect(surface.locator('.upcoming-row.native-v25-upcoming').first).to_be_visible()
+        (out/f'{width}-navigation-reference.json').write_text(json.dumps(captures,indent=2,ensure_ascii=False)+'\n')
     with tempfile.TemporaryDirectory(prefix='r4-layout-',dir=ROOT/'staging-ui-test-results') as temp:
         reference=ROOT/'stable-reference-test-results/source/dist'
         assert reference.exists(),'Immutable 46 reference Pages artifact is required'
@@ -84,7 +130,6 @@ def main():
             reference_page.screenshot(path=str(out/'stable46-upcoming.png'),full_page=True)
             reference_height=reference_page.locator('.mobile-nav').bounding_box()['height']
             check('immutable 46 reference has the expected 82px total navigation',abs(reference_height-82)<=1,height=reference_height)
-            ref.close()
             for width in [320,390,440,768,1440]:
                 options={k:v for k,v in pw.devices['iPhone 17 Pro Max'].items() if k!='default_browser_type'} if width<=440 else {}
                 options.update(viewport={'width':width,'height':956},service_workers='block',timezone_id='Europe/Kyiv')
@@ -116,7 +161,12 @@ def main():
                     nav=page.locator('.mobile-nav').bounding_box()
                     controls=page.locator('.mobile-nav button').evaluate_all('els=>els.map(el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom}})')
                     check(f'{width}: navigation matches stable46 total height with one home inset',abs(nav['height']-reference_height)<=1 and abs(nav['y']+nav['height']-956)<=1,height=nav['height'],reference=reference_height)
-                    check(f'{width}: five 44px touch targets stay above the home indicator',len(controls)==5 and all(c['width']>=44 and c['height']>=44 and c['bottom']<=956-34+1 for c in controls),controls=controls)
+                    # The former 34px exclusion also rejects immutable46's 56px
+                    # targets (bottom 936 at height 956). Record that assumption
+                    # explicitly; verify actual controls/glyphs against the same
+                    # stable reference instead of equating shell height with UI.
+                    check(f'{width}: five touch targets retain at least 44px within viewport',len(controls)==5 and all(c['width']>=44 and c['height']>=44 and c['bottom']<=956 for c in controls),controls=controls,formerWholeInsetExclusion=all(c['bottom']<=956-34+1 for c in controls))
+                    compare_navigation(page,reference_page,width)
                 upcoming=geometry(page,['.lab-banner','.lab-banner>div','.lab-banner button','.lab-banner a','.main','.upcoming-row','.upcoming-main','.upcoming-title h3','.upcoming-title .status','.upcoming-client-info strong','.upcoming-actions .btn'])
                 (out/f'{width}-upcoming-geometry.json').write_text(json.dumps(upcoming,indent=2,ensure_ascii=False)+'\n')
                 page.screenshot(path=str(out/f'{width}-upcoming.png'),full_page=True)
@@ -136,7 +186,7 @@ def main():
                     check(f'{width}: detail fields/finance/actions remain fully readable',not bad,overflow=bad)
                 check(f'{width}: no uncaught application error',not errors,errors=errors)
                 context.close()
-            browser.close()
+            ref.close();browser.close()
     check('no unexpected external or mutation request',not unexpected,requests=unexpected)
     summary={'browser':args.browser,'passed':sum(x['passed'] for x in results),'failed':sum(not x['passed'] for x in results),'checks':results,
              'network':'all remote calls fulfilled from synthetic fixture; none forwarded','physicalIphoneZoom':'not emulated','requests':requests}

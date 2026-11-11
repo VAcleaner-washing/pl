@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.56
-**Baseline build:** 4356
+**Baseline version:** 4.3.57
+**Baseline build:** 4357
 **Останнє оновлення:** 2026-11-11
 **Власник логіки:** VAcleaner  
 
@@ -5603,3 +5603,29 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 - Navigation follow-up: the user's stable46/R4 screenshots show the R4 bar raised. Stable CSS has 82px total height; LAB's 82px plus 34px home inset produced 116px. R4 now uses max(82px,48px+inset), a 44px minimum control row and a single home inset. The main scroll pane uses that same shell token; neither transform nor clipping hides the difference.
 - Baseline and fixed remote jobs use the same official Playwright Python 1.61.0 noble image pinned by digest after the first baseline install failed on Azure Ubuntu DNS before tests. The reference46 build is immutable and only receives intercepted synthetic HTTP responses. The original not-run infrastructure failure is retained.
+
+
+# 116. Change record — v4.3.57 / R4 stable46 navigation controls
+
+### ADDED
+
+- Immutable46 comparisons now measure every navigation button, icon, label, center plus and badge at 320/390/440px, in Upcoming/Calendar/More, with simulated bottom insets 0/21/34px. Geometry and synthetic screenshots are preserved for both reference and staging. No external API request is forwarded.
+
+### CHANGED
+
+- Stage owns only the 82px navigation shell token. Internal padding and button sizing inherit the unchanged canonical stable46 cascade, including its 6px top padding and 56px button minimum. The 4px top padding, 8px side padding and 44px minimum introduced in R4 UI56 are removed.
+
+### FIXED
+
+- The owner's physical screenshots showed matching shell borders but controls about 8 CSS pixels higher in UI56. The previous shell-height assertion did not establish matching visual content. The new oracle compares the full component geometry, including Calendar and More.
+
+### PRESERVED
+
+- Production/main46, browser-local LAB54, all business rules, API payloads, server handlers and database rows remain unchanged. UI56 is retained as a saved private Site rollback; only the private R4 presentation is updated.
+- Prior UI56 and its tests/results remain independent evidence. Changes outside staging presentation/QA/spec are coherent version stamps only.
+
+### TESTS
+
+- Static and generated artifact/boundary gates remain mandatory. Capture both unchanged UI56 baseline and UI57 results in the pinned remote Chromium/WebKit environment before private publication.
+- The former assertion that the entire 34px safe inset excludes touch targets also rejects immutable46 itself: the canonical 56px button bottom is 936 in a 956px viewport. That assumption is recorded as formerWholeInsetExclusion, and is superseded by exact reference control/glyph comparisons plus five >=44px targets within the viewport. This corrects the test oracle; native home-indicator interaction remains a physical-device acceptance check.
+- Do not claim physical iPhone equivalence solely from emulation or a matching 82px outer box. No forced clicks, arbitrary waits, browser zoom locks or overflow hiding are introduced.
