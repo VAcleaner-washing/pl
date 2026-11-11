@@ -5509,3 +5509,29 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 - Actual LAB browser QA covers the More touch target and unchanged action path, full waiting-payment label, all 29 slots across groups, unchanged inputs on group navigation/cancel, separate pickup/return inputs, legacy off-grid preservation, reopened selection, keyboard containment/Escape, simulated 34px safe area, short viewport scrolling and persisted times after failed-save/retry/reload.
 - Existing form lifecycle/dirty-close and deployment isolation suites remain unchanged in their expectations. Chromium/WebKit and canonical CI gates are required before private publication. Linux geometry tests do not certify the physical iPhone or outer iOS host chrome.
+
+# 112. R4 operational record — isolated hosted backend (frontend remains v4.3.54)
+
+### ADDED
+
+- Independently created staging project `jdthhqxzfpvosfdxwfem` in the user-selected VA Home organization, eu-west-1. `staging/hosted-r4-receipt.json` records target, migration, deployed bundle hashes and non-secret read-back; `docs/ADMIN-R4-HOSTED-ACCEPTANCE.md` records results and pending gates.
+- Opt-in `scripts/admin_staging_live_qa.py` checks actual Auth/authorization, direct API/RPC denial, persisted rental lifecycle and exact times, concurrency, dropped real responses, settings/customer/expense persistence, private synthetic documents, referrals and separate attribution. Credentials stay outside the repository with mode 0600; production ref is refused.
+
+### CHANGED
+
+- R4 hosted state is now created, replacing the earlier historical target-selection/preflight status. All six canonical handlers and monetary modules are unchanged; exact-target/outbound transport isolation wraps them.
+
+### FIXED
+
+- Corrected two new integration-harness contract mistakes (audit response is entries; customer save requires originalPhone). Original red reports are retained; independent audit read and corrected persistence run are recorded separately. No server validation or assertion requirement was removed to make a run green.
+
+### PRESERVED
+
+- Production/main remains 4.3.46/4346, independently verified by GitHub ref and production release.json. Published LAB remains synthetic-local 4.3.54/4354. No frontend build bump or Site publication is part of this operational checkpoint. No production rows/Auth/functions/schema or provider dispatch were changed.
+- The temporary stage identity provisioner is replaced by version 2 returning permanent HTTP 410; it no longer performs provisioning. Only synthetic .invalid accounts/rows exist in the new stage. Service-role credentials are server-only.
+
+### TESTS
+
+- Hosted Auth 51 assertions; two-manager persisted-state lifecycle, actual concurrent capacity enforcement, explicit retry after proxy-discarded real response, private signed document access and referral reward correction/claim/release were exercised on staging. The detailed record distinguishes original harness failures from corrected read/persistence results and does not label the whole release green.
+- All 22 public tables have RLS. Direct privileged reservation RPC is denied to anon/authenticated roles; canonical pure slot-index helper remains public. Final server read-back: 8 synthetic bookings/8 customers/33 audit rows, 1 referral use/1 reward; zero SMS/push dispatch data or schedules; private document bucket with no objects after cleanup.
+- Connected UI remains closed pending verified public-signup/mail policy and isolated entrypoint. Physical iPhone, remaining server-fault/promo matrices and the previously red WebKit PR gate remain open; server checks do not substitute for them.

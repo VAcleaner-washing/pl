@@ -1,7 +1,11 @@
 # R4 — isolated backend preparation
 
-Status: **preflight package ready; hosted target selection pending**. This is not
-a deployed staging backend or a completed integration acceptance.
+Status: **hosted R4 created; core server checks completed; connected UI acceptance pending**.
+The user selected VA Home on 2026-11-11. The actual isolated target is
+`jdthhqxzfpvosfdxwfem`, `vacleaner-admin-staging-r4`, eu-west-1.
+See [the hosted acceptance record](../docs/ADMIN-R4-HOSTED-ACCEPTANCE.md)
+and [the non-secret receipt](hosted-r4-receipt.json).
+The published LAB remains browser-local 4.3.54/4354; it is not connected to R4.
 
 Production remains 4.3.46 / 4346. The R4 preflight baseline was private browser-local LAB 4.3.50 / 4350;
 4.3.51 / 4351 contains the modal-focus repair; 4.3.52 / 4352 adds the
@@ -9,13 +13,14 @@ user-owned scroll follow-up.
 No production schema, business rows, Auth users, settings, schedules or functions
 were changed. Production inspection used system catalog and Edge source reads.
 
-## Reviewable deployment proposal
+## Deployment scope and recorded authorization
 
-- Organization option: `VA Home` (`knylxccxamntjtqukbhe`). The user must select it.
+- Selected organization: `VA Home` (`knylxccxamntjtqukbhe`), also the organization
+  containing the unchanged production `Va-home` project.
 - New project: `vacleaner-admin-staging-r4`, region `eu-west-1`, independently
   created; never branch/reset/restore/merge the production project.
-- Supabase quoted creation cost: **$0/month** on the Free organization on
-  2026-11-10. No cost confirmation or project creation has been performed.
+- Supabase creation quote: **$0/month**, refreshed on 2026-11-11 before creating
+  exactly one Free project. Future plan changes or usage charges are not implied.
 - Production denylist: `yweluzclearwrazdkahu`.
 - Schema: 22 tables, 15 SQL functions, indexes, constraints, triggers, RLS,
   grants and policies captured from catalog metadata. No production table rows.
@@ -48,7 +53,7 @@ to preserve bigint precision. `platform-auth-functions.json` is only for local
 compatibility preparation; do not replace managed hosted Auth functions.
 `source-parity.json` records actual deployed-source hashes and differences.
 
-## Required execution after target selection
+## Execution sequence and remaining gates
 
 1. Create the fresh Free project in the selected organization. Retain its actual
    ref and API URL, verify it differs from production, and inspect empty tables.
@@ -66,7 +71,11 @@ compatibility preparation; do not replace managed hosted Auth functions.
    Record actual failed scenarios and fix candidates; preflight success alone
    is not approval to migrate production.
 
-## Integration acceptance matrix — NOT RUN
+## Integration acceptance matrix
+
+The table describes the full gate, including pending connected-browser and
+physical-device checks. Actual server results and limitations are recorded in
+the hosted acceptance document; do not interpret every row as completed.
 
 | Scenario | Independent server evidence required |
 |---|---|
@@ -101,9 +110,10 @@ sign-in remain device acceptance gates.
   Downloaded unused test images were removed; no data volumes were deleted.
   Do not label Auth/RLS/RPC, server persistence or two-device checks as passed.
 
-The Supabase `create_project` tool explicitly requires choosing the organization.
-That selection is pending in the conversation. Preparation does not authorize
-a production merge/deploy or use of real business data.
+The organization choice and isolated project creation are now complete.
+This does not authorize a production merge/deploy or use of real business data.
+The initial preflight measurements above remain historical; frontend release
+4.3.54/4354 and hosted provisioning are separately identified.
 
 ## Follow-up CI finding
 
