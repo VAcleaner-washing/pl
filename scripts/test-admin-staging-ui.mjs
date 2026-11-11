@@ -95,6 +95,14 @@ check('generated runtime uses test accounts and all storage goes through the sta
   assert(runtime.includes('vacleaner_website')); // business attribution labels are unchanged
   assert(!runtime.includes('.unregister()'));
 });
+check('manager B keeps the correct displayed actor for alias and direct synthetic email login', () => {
+  const expression = runtime.match(/window\.VA_STAGE_STORAGE\.local\.setItem\(ADMIN_ALIAS_KEY,([^;]+)\);saveSession/)?.[1];
+  assert(expression, 'Generated actor binding must exist');
+  for (const [loginAlias, expected] of [['manager-a','vacleaner'], ['manager-b','annanevidoma'],
+    ['manager-a@vacleaner-r4.invalid','vacleaner'], ['manager-b@vacleaner-r4.invalid','annanevidoma']]) {
+    assert.equal(vm.runInNewContext(expression, {loginAlias}), expected);
+  }
+});
 const sw = read('admin/sw.js');
 check('service worker scope and cache eviction cannot touch LAB caches', () => {
   assert(sw.includes("url.pathname.startsWith('/r4/')"));

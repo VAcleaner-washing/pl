@@ -5554,6 +5554,7 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### FIXED
 
 - Cross-environment storage/cache collisions and accidental production/provider access are prevented in the generated stage artifact. Financial handlers, pricing/status rules and canonical normal-runtime logic are unchanged apart from coherent release stamps.
+- Direct synthetic email login for manager B retains the same displayed actor as the manager-b alias; server authorization still uses the actual authenticated user ID. The generated actor expression is verified for both aliases and both emails.
 
 ### PRESERVED
 

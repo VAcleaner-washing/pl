@@ -47,7 +47,7 @@ for (const file of walk(target)) if (/\.(?:js|html|css|json|webmanifest|svg)$/.t
     value = replaceOne(value, '<h1>Вхід в адмінку</h1><p>Бронювання, календар, клієнти й фінанси в одному місці.</p>',
       '<h1>Вхід у тестову R4</h1><p>Окремий тестовий пароль. Пароль робочої 46 тут не вводьте.</p>');
     value = replaceOne(value, "if(loginAlias==='vacleaner'||loginAlias==='annanevidoma')window.VA_STAGE_STORAGE.local.setItem(ADMIN_ALIAS_KEY,loginAlias);",
-      "window.VA_STAGE_STORAGE.local.setItem(ADMIN_ALIAS_KEY,loginAlias==='manager-b'?'annanevidoma':'vacleaner');");
+      "window.VA_STAGE_STORAGE.local.setItem(ADMIN_ALIAS_KEY,loginAlias==='manager-b'||loginAlias==='manager-b@vacleaner-r4.invalid'?'annanevidoma':'vacleaner');");
     value = replaceOne(value, "{name:'Anna',initial:'A'}:{name:'Vadim',initial:'V'}", "{name:'Тестовий менеджер B',initial:'B'}:{name:'Тестовий менеджер A',initial:'A'}");
   }
   fs.writeFileSync(file, value);
