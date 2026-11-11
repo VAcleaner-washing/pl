@@ -114,7 +114,10 @@ def main():
           return{scroll:rect(scroll),header:rect(head),footer:rect(foot),scrollTop:scroll.scrollTop,scrollHeight:scroll.scrollHeight,clientHeight:scroll.clientHeight};
         }''',[scroll_selector,header_selector,footer_selector])
     def clear_hit(locator):
-        locator.scroll_into_view_if_needed()
+        # Trial performs the browser's normal visibility/stability/hit checks
+        # without activating a control. A raw immediate scroll sample raced the
+        # canonical wizard/view scroll reset and recorded off-viewport points.
+        locator.click(trial=True)
         return locator.evaluate('''el=>{const r=el.getBoundingClientRect(),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2,hit=document.elementFromPoint(x,y);return{clear:hit===el||el.contains(hit),x,y,hit:hit?.className}}''')
     def exercise_scroll_surfaces(page,width):
         page.evaluate("()=>{const s=document.documentElement.style;s.setProperty('--pwa-safe-top','59px');s.setProperty('--pwa-safe-bottom','34px');s.setProperty('--lab-bar','107px')}")
@@ -134,6 +137,14 @@ def main():
         hit=clear_hit(tail);check(f'{width}: last detail action is reachable above the dock',hit['clear'],hit=hit)
         page.screenshot(path=str(out/f'{width}-detail-tail-action.png'))
         (out/f'{width}-detail-scroll-geometry.json').write_text(json.dumps(captures,indent=2)+'\n')
+        page.set_viewport_size({'width':1024,'height':956})
+        page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        restored=page.locator('.detail-top').evaluate("el=>Boolean(el.closest('.detail-shell'))")
+        check(f'{width}: desktop resize restores the original detail header parent',restored)
+        page.set_viewport_size({'width':width,'height':956})
+        page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        contract=scroll_contract(page,owner,'.detail-top','.lab-action-dock')
+        check(f'{width}: returning to mobile restores bounded detail scroll',contract['scroll']['top']>=contract['header']['bottom']-1 and contract['scroll']['bottom']<=contract['footer']['top']+1,geometry=contract)
         page.locator('.detail .back').click();expect(page.locator('.detail')).to_have_count(0)
         page.locator('.mobile-nav [data-mobile-view=calendar]').click()
         expect(page.locator('.day-card')).to_have_count(14)
@@ -154,6 +165,14 @@ def main():
             if step==2:
                 form.locator('[name=customerName]').fill('R4 SCROLL QA · синтетичний')
                 form.locator('[name=customerPhone]').fill('+380000009958')
+                page.set_viewport_size({'width':width,'height':640})
+                page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                short=scroll_contract(page,'.booking-form-scroll','#bookingForm>header','#bookingForm>footer')
+                check(f'{width}: shorter viewport retains separate field/footer rows',short['scroll']['top']>=short['header']['bottom']-1 and short['scroll']['bottom']<=short['footer']['top']+1 and short['footer']['bottom']<=641,geometry=short)
+                hit=clear_hit(tail);check(f'{width}: last customer control stays reachable in shorter viewport',hit['clear'],hit=hit)
+                page.screenshot(path=str(out/f'{width}-booking-short-viewport.png'))
+                page.set_viewport_size({'width':width,'height':956})
+                page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
             if step<4:form.locator('.mobile-booking-next').click()
         form.locator('header [data-close]').click()
         if page.locator('#labLeaveDialog').count():page.locator('#labLeaveDialog [data-lab-discard]').click()
