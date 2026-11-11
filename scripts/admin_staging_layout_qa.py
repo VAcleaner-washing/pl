@@ -6,7 +6,7 @@ Run in the existing remote CI browser environment, not a substitute Sites previe
 import argparse,datetime,json,shutil,tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
-from playwright.sync_api import sync_playwright,expect
+from playwright.sync_api import sync_playwright,expect,TimeoutError as PlaywrightTimeout
 from admin_entrypoint_finance_qa import pages_server
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -18,6 +18,9 @@ def main():
     fixture=json.loads((ROOT/'staging/fixtures/mobile-layout.json').read_text())
     config=json.loads((ROOT/'staging/hosted-r4-client.json').read_text())
     assert fixture['mode']=='synthetic-stage-layout-fixture'
+    calendar_start=datetime.datetime.fromisoformat(fixture['fixedTime']).date()
+    calendar_days=[{'date':(calendar_start+datetime.timedelta(days=i)).isoformat(),
+                    'resources':{key:{'label':key,'capacity':2,'morning':2,'evening':2} for key in ['abir','jimmy','puzzi','sc2']}} for i in range(14)]
     results=[];requests=[];unexpected=[]
     def check(name,passed,**evidence):
         results.append({'name':name,'passed':bool(passed),**evidence})
@@ -41,12 +44,13 @@ def main():
         elif action=='list':body={'bookings':fixture['bookings'],'expenses':[]}
         elif action=='clients':body={'customers':[]}
         elif action=='campaigns':body={'campaigns':[]}
-        elif action=='calendar':body={'days':[]}
+        elif action=='calendar':body={'days':calendar_days}
         elif action=='audit_log':body={'entries':[]}
         elif action=='referrals_expiring':body={'rewards':[]}
         elif action=='referral_analytics':body={'messages':[],'uses':[],'rewards':[],'customers':[],'bookings':[]}
         elif action=='health':body={'reservation':{'healthy':True},'push':{'healthy':False,'configReady':False,'activeSubscriptions':0}}
         elif action=='lookup_customer':body={'customer':None}
+        elif action=='pending_bonus':body={'bonus':None}
         else:
             unexpected.append({'path':url.path,'action':action});return route.abort()
         return route.fulfill(status=200,headers=headers,content_type='application/json',body=json.dumps(body))
@@ -103,6 +107,84 @@ def main():
             surface.locator('.mobile-nav [data-mobile-view=upcoming]').click()
             expect(surface.locator('.upcoming-row.native-v25-upcoming').first).to_be_visible()
         (out/f'{width}-navigation-reference.json').write_text(json.dumps(captures,indent=2,ensure_ascii=False)+'\n')
+    def scroll_contract(page,scroll_selector,header_selector,footer_selector):
+        return page.evaluate('''([scrollSelector,headerSelector,footerSelector])=>{
+          const scroll=document.querySelector(scrollSelector),head=document.querySelector(headerSelector),foot=document.querySelector(footerSelector);
+          const rect=el=>{const r=el.getBoundingClientRect();return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height}};
+          return{scroll:rect(scroll),header:rect(head),footer:rect(foot),scrollTop:scroll.scrollTop,scrollHeight:scroll.scrollHeight,clientHeight:scroll.clientHeight};
+        }''',[scroll_selector,header_selector,footer_selector])
+    def clear_hit(locator):
+        # Trial performs the browser's normal visibility/stability/hit checks
+        # without activating a control. A raw immediate scroll sample raced the
+        # canonical wizard/view scroll reset and recorded off-viewport points.
+        locator.click(trial=True)
+        return locator.evaluate('''el=>{const r=el.getBoundingClientRect(),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2,hit=document.elementFromPoint(x,y);return{clear:hit===el||el.contains(hit),x,y,hit:hit?.className}}''')
+    def exercise_scroll_surfaces(page,width):
+        page.evaluate("()=>{const s=document.documentElement.style;s.setProperty('--pwa-safe-top','59px');s.setProperty('--pwa-safe-bottom','34px');s.setProperty('--lab-bar','107px')}")
+        # Find the real owner rather than assuming .detail itself still scrolls.
+        owner=page.locator('.detail').evaluate('''detail=>{
+          const shell=detail.querySelector('.detail-shell');
+          return ['auto','scroll'].includes(getComputedStyle(shell).overflowY)&&shell.scrollHeight>shell.clientHeight?'.detail-shell':'.detail';
+        }''')
+        captures=[]
+        for position in ['top','middle','bottom']:
+            page.locator(owner).evaluate("(el,where)=>el.scrollTo({top:where==='top'?0:where==='bottom'?el.scrollHeight:Math.min(300,el.scrollHeight-el.clientHeight),behavior:'instant'})",position)
+            page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>resolve()))')
+            contract=scroll_contract(page,owner,'.detail-top','.lab-action-dock');captures.append({'position':position,**contract})
+            check(f'{width}/detail/{position}: scrollport excludes the full header and action dock',contract['scroll']['top']>=contract['header']['bottom']-1 and contract['scroll']['bottom']<=contract['footer']['top']+1,geometry=contract)
+            page.screenshot(path=str(out/f'{width}-detail-scroll-{position}.png'))
+        tail=page.locator('.detail-shell [data-action]:visible').last
+        hit=clear_hit(tail);check(f'{width}: last detail action is reachable above the dock',hit['clear'],hit=hit)
+        page.screenshot(path=str(out/f'{width}-detail-tail-action.png'))
+        (out/f'{width}-detail-scroll-geometry.json').write_text(json.dumps(captures,indent=2)+'\n')
+        page.set_viewport_size({'width':1024,'height':956})
+        page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        restored=page.locator('.detail-top').evaluate("el=>Boolean(el.closest('.detail-shell'))")
+        check(f'{width}: desktop resize restores the original detail header parent',restored)
+        page.set_viewport_size({'width':width,'height':956})
+        before_resize=page.evaluate("()=>({innerWidth,clientWidth:document.documentElement.clientWidth,visualWidth:visualViewport.width,scale:visualViewport.scale,mobile:matchMedia('(max-width:900px)').matches,classes:document.querySelector('.detail').className,headerParent:document.querySelector('.detail-top').parentElement.className})")
+        # Resize delivery is asynchronous in WebKit. Wait for the actual
+        # header projection, rather than treating two rAFs as its completion.
+        # Baseline records a failed condition and continues collecting evidence.
+        try:
+            page.wait_for_function("()=>document.querySelector('.detail-top')?.parentElement===document.querySelector('.detail')")
+        except PlaywrightTimeout:pass
+        contract=scroll_contract(page,owner,'.detail-top','.lab-action-dock')
+        after_resize=page.evaluate("()=>({innerWidth,clientWidth:document.documentElement.clientWidth,visualWidth:visualViewport.width,scale:visualViewport.scale,mobile:matchMedia('(max-width:900px)').matches,classes:document.querySelector('.detail').className,headerParent:document.querySelector('.detail-top').parentElement.className})")
+        check(f'{width}: returning to mobile restores bounded detail scroll',contract['scroll']['top']>=contract['header']['bottom']-1 and contract['scroll']['bottom']<=contract['footer']['top']+1,geometry=contract,before=before_resize,after=after_resize)
+        page.locator('.detail .back').click();expect(page.locator('.detail')).to_have_count(0)
+        page.locator('.mobile-nav [data-mobile-view=calendar]').click()
+        expect(page.locator('.day-card')).to_have_count(14)
+        slot=page.locator('.day-card').last.locator('[data-calendar-slot]:not(:disabled)').last
+        hit=clear_hit(slot);check(f'{width}: last calendar slot is reachable above navigation',hit['clear'],hit=hit)
+        calendar=scroll_contract(page,'.main','.lab-banner','.mobile-nav')
+        check(f'{width}: calendar scrollport excludes banner and bottom navigation',calendar['scroll']['top']>=calendar['header']['bottom']-1 and calendar['scroll']['bottom']<=calendar['footer']['top']+1,geometry=calendar)
+        page.screenshot(path=str(out/f'{width}-calendar-last-slot.png'))
+        selected_date=slot.get_attribute('data-date');slot.click()
+        form=page.locator('#bookingForm');expect(form).to_be_visible();expect(form.locator('[name=startDate]')).to_have_value(selected_date)
+        for step in range(1,5):
+            expect(form).to_have_attribute('data-mobile-step',str(step))
+            contract=scroll_contract(page,'.booking-form-scroll','#bookingForm>header','#bookingForm>footer')
+            check(f'{width}/booking/step{step}: fields scroll between header and footer',contract['scroll']['top']>=contract['header']['bottom']-1 and contract['scroll']['bottom']<=contract['footer']['top']+1,geometry=contract)
+            tail=form.locator(f'[data-mobile-step="{step}"] :is(input:not([type=hidden]),select,textarea,button):visible').last
+            hit=clear_hit(tail);check(f'{width}/booking/step{step}: last control is not covered',hit['clear'],hit=hit)
+            page.screenshot(path=str(out/f'{width}-booking-step{step}-tail.png'))
+            if step==2:
+                form.locator('[name=customerName]').fill('R4 SCROLL QA · синтетичний')
+                form.locator('[name=customerPhone]').fill('+380000009958')
+                page.set_viewport_size({'width':width,'height':640})
+                page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+                short=scroll_contract(page,'.booking-form-scroll','#bookingForm>header','#bookingForm>footer')
+                check(f'{width}: shorter viewport retains separate field/footer rows',short['scroll']['top']>=short['header']['bottom']-1 and short['scroll']['bottom']<=short['footer']['top']+1 and short['footer']['bottom']<=641,geometry=short)
+                hit=clear_hit(tail);check(f'{width}: last customer control stays reachable in shorter viewport',hit['clear'],hit=hit)
+                page.screenshot(path=str(out/f'{width}-booking-short-viewport.png'))
+                page.set_viewport_size({'width':width,'height':956})
+                page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+            if step<4:form.locator('.mobile-booking-next').click()
+        form.locator('header [data-close]').click()
+        if page.locator('#labLeaveDialog').count():page.locator('#labLeaveDialog [data-lab-discard]').click()
+        expect(form).to_have_count(0)
+        check(f'{width}: discarding the form returns to a readable calendar',page.locator('.day-card').count()==14)
     with tempfile.TemporaryDirectory(prefix='r4-layout-',dir=ROOT/'staging-ui-test-results') as temp:
         reference=ROOT/'stable-reference-test-results/source/dist'
         assert reference.exists(),'Immutable 46 reference Pages artifact is required'
@@ -184,6 +266,7 @@ def main():
                 if width<=900:
                     bad=[x for x in detail['items'] if x['left'] < -1 or x['right']>width+1 or x['scrollWidth']>x['clientWidth']+1]
                     check(f'{width}: detail fields/finance/actions remain fully readable',not bad,overflow=bad)
+                    exercise_scroll_surfaces(page,width)
                 check(f'{width}: no uncaught application error',not errors,errors=errors)
                 context.close()
             ref.close();browser.close()
