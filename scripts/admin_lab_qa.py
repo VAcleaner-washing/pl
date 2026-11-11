@@ -75,13 +75,49 @@ def main():
             card=page.locator('.booking-card').first
             compact_height=card.bounding_box()['height']
             checks.check(compact_height<420,f'{width}: compact booking bounded height')
+            if width<=900:
+                # Linux browsers do not expose an iPhone hardware safe area. Inject
+                # the inset token to verify geometry; this is not device acceptance.
+                for inset in [0,34]:
+                    page.evaluate('(v)=>document.documentElement.style.setProperty("--pwa-safe-bottom",v+"px")',inset)
+                    nav=page.locator('.mobile-nav').evaluate('''nav=>{
+                        const rect=nav.getBoundingClientRect();
+                        return {bottom:rect.bottom,height:rect.height,viewport:innerHeight,
+                            buttons:[...nav.querySelectorAll(':scope>button')].map(button=>{
+                                const r=button.getBoundingClientRect();
+                                return {height:r.height,bottom:r.bottom};
+                            })};
+                    }''')
+                    checks.check(abs(nav['bottom']-nav['viewport'])<=1,f'{width}: navigation reaches viewport bottom, simulated inset {inset}')
+                    checks.check(abs(nav['height']-(82+inset))<=1,f'{width}: navigation paints home area exactly once, simulated inset {inset}')
+                    checks.check(all(button['height']>=44 and button['bottom']<=nav['viewport']-inset+1 for button in nav['buttons']),f'{width}: touch controls clear simulated home area {inset}')
+                    if width==440:checks.screenshot(page,f'iphone17-nav-simulated-inset-{inset}.png')
+                page.evaluate('document.documentElement.style.removeProperty("--pwa-safe-bottom")')
             card.locator('.booking-action-more>summary').click()
             if width<=900:cancel=page.locator('.native-v2-action-sheet button').filter(has_text='Скасувати').first
             else:cancel=card.locator('[data-action="cancel"]')
             expect(cancel).to_be_visible()
             page.once('dialog',lambda dialog:dialog.dismiss());cancel.click()
             checks.check(page.evaluate("VA_LAB.getState().bookings[0].status")== 'pending',f'{width}: More exposes cancellation; dismissed confirmation preserves booking')
-            card.locator('.lab-open-detail').click();expect(page.locator('.detail')).to_be_visible()
+            try:
+                card.locator('.lab-open-detail').click();expect(page.locator('.detail')).to_be_visible()
+            except Exception:
+                # Preserve a failed gate instead of guessing from a timeout or
+                # retrying an action whose real cause has not been established.
+                diagnostics=page.evaluate('''()=>{
+                    const button=document.querySelector('.booking-card .lab-open-detail');
+                    const style=button&&getComputedStyle(button);
+                    return {visibility:document.visibilityState,focus:document.hasFocus(),
+                        activeElement:document.activeElement?.outerHTML,
+                        viewport:{width:innerWidth,height:innerHeight,visualHeight:visualViewport?.height},
+                        button:button&&{rect:button.getBoundingClientRect().toJSON(),display:style.display,visibility:style.visibility,disabled:button.disabled},
+                        menus:[...document.querySelectorAll('details[open]')].map(menu=>menu.outerHTML),
+                        animations:document.getAnimations().map(animation=>({state:animation.playState,time:animation.currentTime})),
+                        mainScroll:document.querySelector('.main')?.scrollTop};
+                }''')
+                (checks.artifacts/f'{width}-detail-failure.json').write_text(json.dumps(diagnostics,ensure_ascii=False,indent=2)+'\n')
+                checks.screenshot(page,f'{width}-detail-failure.png')
+                raise
             expect(page.locator('.lab-action-dock button')).to_be_visible()
             dock=page.locator('.lab-action-dock').bounding_box()
             checks.check(dock['y']+dock['height']<=page.viewport_size['height']+1,f'{width}: primary detail action stays within viewport')

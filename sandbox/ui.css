@@ -5,6 +5,12 @@ html[data-admin-lab] .lab-banner{position:fixed;inset:0 0 auto;z-index:10001;min
 html[data-admin-lab] .topbar{top:var(--lab-bar)}
 html[data-admin-lab] .main{top:calc(var(--topbar) + var(--lab-bar))}
 html[data-admin-lab] .sidebar{top:var(--lab-bar)}
+/* One owner for the LAB navigation shell: the home-indicator inset extends its
+   painted height, rather than taking space away from the touch controls. */
+@media(max-width:900px){
+ html[data-admin-lab]{--mobile-nav:82px}
+ html[data-admin-lab] .mobile-nav{height:var(--mobile-nav-shell)!important}
+}
 html[data-admin-lab] .detail,html[data-admin-lab] .modal{top:var(--lab-bar)}
 html[data-admin-lab] .modal{bottom:0!important;height:calc(100dvh - var(--lab-bar))!important;max-height:calc(100dvh - var(--lab-bar))!important;min-height:0!important;padding:12px!important;box-sizing:border-box}
 /* A definite limit is required: max-height:100% is indefinite in the legacy grid

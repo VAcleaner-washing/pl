@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.52
-**Baseline build:** 4352
-**Останнє оновлення:** 2026-11-10
+**Baseline version:** 4.3.53
+**Baseline build:** 4353
+**Останнє оновлення:** 2026-11-11
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5456,3 +5456,27 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### TESTS
 
 - Focused form tests use pinned Playwright 1.61.0 / WebKit 2311 (Ubuntu 24.04 as CI), official Chromium, deterministic focus and scroll cases, actual LAB artifact checks and canonical CI. Syntax/preflight and browser tests do not certify live backend or physical iPhone acceptance.
+
+
+# 110. Change record — v4.3.53 — LAB navigation safe-area geometry
+
+### ADDED
+
+- Simulated safe-area geometry assertions and failure-only Details diagnostics in the LAB artifact suite.
+
+### CHANGED
+
+- LAB navigation shell derives its height from the shared mobile navigation size and bottom safe-area token.
+
+### FIXED
+
+- The LAB mobile navigation uses one shell height: 82px controls area plus the current `--pwa-safe-bottom` inset. Previously the legacy fixed 82px height included a growing bottom padding; with a 34px inset its 56px minimum buttons extended into the reserved home area. The LAB component now owns `--mobile-nav` and derives its painted height from `--mobile-nav-shell`. Normal production CSS is unchanged.
+
+### TESTS
+
+- LAB artifact QA checks a flush viewport edge, painted shell height and minimum 44px controls outside simulated 0px/34px home areas in both engines and all mobile widths. These injected tokens verify layout mathematics, not physical iPhone safe-area reporting.
+- A failed desktop Details click records viewport, document focus/visibility, button bounds/styles, open menus, animations and screenshot without retries, sleeps or forced clicks. The previous 4.3.52 WebKit CI failure at 1024px remains unresolved until the cause is established; local green is not full release acceptance.
+
+### PRESERVED
+
+- The iOS host sheet visible in the user's screenshot owns its own outer chrome. A website cannot certify removal of the host's black home-indicator strip in Linux emulation. Do not remove the safe inset or shift controls over it to hide that strip. Production remains 4.3.46/4346; hosted R4 is not created. No business logic, Supabase data, auth or dispatch changes.
