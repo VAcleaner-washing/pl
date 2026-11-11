@@ -73,6 +73,14 @@ def main():
                 for surface in [reference_page,page]:
                     surface.evaluate("inset=>document.documentElement.style.setProperty('--pwa-safe-bottom',inset+'px')",inset)
                     surface.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>resolve()))')
+                    # Measure the final component state, not two differently
+                    # timed frames of the inherited More transform transition.
+                    surface.evaluate('''async()=>{
+                      const nav=document.querySelector('.mobile-nav');nav.getBoundingClientRect();
+                      await Promise.all(nav.getAnimations({subtree:true})
+                        .filter(a=>Number.isFinite(a.effect.getComputedTiming().endTime))
+                        .map(a=>a.finished.catch(()=>{})));
+                    }''')
                 expected=geometry(reference_page,selectors);actual=geometry(page,selectors)
                 differences=[]
                 if len(expected['items'])!=len(actual['items']):differences.append({'differentElementCount':[len(expected['items']),len(actual['items'])]})
@@ -93,7 +101,7 @@ def main():
                     expect(surface.locator('.mobile-more-menu')).to_have_count(0)
         for surface in [reference_page,page]:
             surface.locator('.mobile-nav [data-mobile-view=upcoming]').click()
-            expect(surface.locator('.upcoming-row').first).to_be_visible()
+            expect(surface.locator('.upcoming-row.native-v25-upcoming').first).to_be_visible()
         (out/f'{width}-navigation-reference.json').write_text(json.dumps(captures,indent=2,ensure_ascii=False)+'\n')
     with tempfile.TemporaryDirectory(prefix='r4-layout-',dir=ROOT/'staging-ui-test-results') as temp:
         reference=ROOT/'stable-reference-test-results/source/dist'
