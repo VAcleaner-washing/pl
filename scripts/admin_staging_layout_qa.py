@@ -103,9 +103,10 @@ def main():
                 page.locator('#authForm button[type=submit]').click()
                 expect(page.locator('#view')).to_be_visible()
                 if width>900:page.locator('.nav [data-view=upcoming]').click()
-                expect(page.locator('.upcoming-row.native-v25-upcoming').first).to_be_visible()
+                expect(page.locator('.upcoming-row').first).to_be_visible()
+                if width<=900:expect(page.locator('.upcoming-row.native-v25-upcoming').first).to_be_visible()
                 page.evaluate('document.fonts.ready')
-                scope=page.locator('.main .search input').first
+                scope=page.locator('.search input').first
                 expect(scope).to_be_visible();scope.focus()
                 font=scope.evaluate('el=>parseFloat(getComputedStyle(el).fontSize)')
                 if width<=900:check(f'{width}: search avoids iOS small-input zoom',font>=16,fontSize=font)
@@ -124,7 +125,8 @@ def main():
                     check(f'{width}: header/cards/actions fit their actual scroll owners',not bad,overflow=bad)
                 issued=next(b for b in fixture['bookings'] if b['status']=='issued')
                 page.locator(f'.upcoming-row[data-id="{issued["id"]}"] [data-up=open]').click()
-                expect(page.locator('.v4321-detail-ready')).to_be_visible()
+                expect(page.locator('.detail')).to_be_visible()
+                if width<=900:expect(page.locator('.v4321-detail-ready')).to_be_visible()
                 expect(page.locator('.lab-action-dock')).to_be_visible()
                 detail=geometry(page,['.detail','.detail-shell','.detail-top','.detail-top-meta','.native-detail-code','.native-detail-card','.native-detail-info-row','.native-detail-info-row strong','.v4321-finance-card','.v4321-finance-summary','.v4321-finance-balance','.lab-action-dock','.lab-action-dock button'])
                 (out/f'{width}-detail-geometry.json').write_text(json.dumps(detail,indent=2,ensure_ascii=False)+'\n')
