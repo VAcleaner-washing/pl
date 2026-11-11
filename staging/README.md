@@ -6,6 +6,9 @@ The user selected VA Home on 2026-11-11. The actual isolated target is
 See [the hosted acceptance record](../docs/ADMIN-R4-HOSTED-ACCEPTANCE.md)
 and [the non-secret receipt](hosted-r4-receipt.json).
 The published LAB remains browser-local 4.3.54/4354; it is not connected to R4.
+The separate UI55 candidate is described in [UI-README.md](UI-README.md).
+Its generated `/r4/` artifact does not replace the existing LAB54 files and is
+not published until the actual Auth policy and private publication gates pass.
 
 Production remains 4.3.46 / 4346. The R4 preflight baseline was private browser-local LAB 4.3.50 / 4350;
 4.3.51 / 4351 contains the modal-focus repair; 4.3.52 / 4352 adds the

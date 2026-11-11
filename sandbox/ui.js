@@ -1,20 +1,28 @@
 /* An opt-in presentation layer. It delegates every business action to the existing UI. */
 (()=>{'use strict';
-if(document.documentElement.dataset.adminLab!=='synthetic')return;
+if(!['synthetic','staging'].includes(document.documentElement.dataset.adminLab))return;
+const hosted=document.documentElement.dataset.adminLab==='staging';
 const text=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
 const el=(tag,className,value)=>{const node=document.createElement(tag);node.className=className;if(value)node.textContent=value;return node};
 const banner=el('aside','lab-banner');banner.setAttribute('aria-label','Тестове середовище');
 banner.innerHTML='<div><b>LAB</b><span>Тестові дані · лише цей пристрій</span></div><button type="button" id="labTools" aria-expanded="false" aria-controls="labToolsPanel">Керування</button><a data-lab-stable href="https://vacleaner.pp.ua/admin/bronuvannia/" target="_blank" rel="noopener noreferrer">Робоча 46 ↗</a>';
+if(hosted)banner.innerHTML='<div><b>R4</b><span role="status">Перевіряємо тестовий доступ…</span></div><button type="button" id="labTools" aria-expanded="false" aria-controls="labToolsPanel">Про R4</button><a data-stage-stable href="https://vacleaner.pp.ua/admin/bronuvannia/" target="_blank" rel="noopener noreferrer">Робоча 46 ↗</a>';
 document.body.append(banner);
 const panel=el('section','lab-tools');panel.id='labToolsPanel';panel.hidden=true;
 panel.innerHTML='<h2>Пісочниця VAcleaner</h2><p>Це синтетичні записи. Не вводьте реальні дані клієнтів чи документи. Наявність техніки й доставки тут демонстраційна; SMS, push, реферальні транзакції та зовнішні контакти заблоковані.</p><label><input type="checkbox" id="labReadError"> Помилка читання API</label><label><input type="checkbox" id="labWriteError"> Помилка збереження API</label><label>Затримка відповіді <select id="labDelay"><option value="0">Без затримки</option><option value="800">800 мс</option><option value="2500">2,5 с</option></select></label><div class="lab-tool-actions"><button type="button" id="labExport">Експорт тестових даних</button><button type="button" id="labReset">Скинути пісочницю</button></div><p>Скидання видалить лише тестові зміни в цьому браузері. Робоча версія й production-база залишаться без змін.</p>';
+if(hosted){
+ panel.innerHTML='<h2>R4 · тестова база</h2><p>Зміни зберігаються на окремому сервері та видимі іншому тестовому менеджеру. Використовуйте тільки вигадані контакти й тестові зображення. Робочі клієнти та фінанси залишаються у версії 46.</p><p>SMS, push, зовнішні повідомлення та адресні інтеграції вимкнені. Недоступна дія показує помилку; успішне надсилання не симулюється.</p><p>Для входу потрібні manager-a або manager-b та окремий тестовий пароль. Пароль робочої версії не підходить.</p><a data-stage-demo href="/admin/bronuvannia/">Відкрити попередній LAB із локальними демоданими</a>';
+ window.VA_STAGE.readiness.then(()=>banner.querySelector('[role="status"]').textContent='Тестові дані · сервер').catch(()=>{banner.querySelector('[role="status"]').textContent='Тестовий вхід закрито';panel.hidden=false;banner.querySelector('#labTools').setAttribute('aria-expanded','true')});
+}
 document.body.append(panel);
 const tools=banner.querySelector('button');tools.onclick=()=>{panel.hidden=!panel.hidden;tools.setAttribute('aria-expanded',String(!panel.hidden))};
+if(!hosted){
 panel.querySelector('#labReadError').onchange=e=>{window.VA_LAB.faults.read=e.target.checked;document.dispatchEvent(new Event('vacleaner:lab-conditions'))};
 panel.querySelector('#labWriteError').onchange=e=>{window.VA_LAB.faults.write=e.target.checked;document.dispatchEvent(new Event('vacleaner:lab-conditions'))};
 panel.querySelector('#labDelay').onchange=e=>window.VA_LAB.faults.delay=Number(e.target.value);
 panel.querySelector('#labReset').onclick=()=>{if(confirm('Видалити всі тестові зміни лише в цій пісочниці й повернути початкові демодані?'))window.VA_LAB.reset()};
 panel.querySelector('#labExport').onclick=()=>{const url=URL.createObjectURL(new Blob([window.VA_LAB.export()],{type:'application/json'})),a=el('a','');a.href=url;a.download='VAcleaner-LAB-test-data.json';a.dataset.labDownload='';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+}
 let compact=localStorage.getItem('vacleaner_lab_compact')!=='0';
 function listUI(){
  const list=document.querySelector('#view .booking-list');if(!list)return;
