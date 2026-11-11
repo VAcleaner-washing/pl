@@ -4,6 +4,7 @@
     minimum and glyph/label placement from the unchanged canonical styles. */
  html[data-admin-lab="staging"]{--mobile-nav-shell:82px}
  html[data-admin-lab="staging"] .mobile-nav{height:var(--mobile-nav-shell)!important}
+ html[data-admin-lab="staging"]:not(.keyboard-open) .main{bottom:var(--mobile-nav-shell)!important;padding-bottom:18px!important;scroll-padding-bottom:18px!important}
  html[data-admin-lab="staging"] :is(.search input,.clients-toolbar select,.finance-ledger-head select,.settings-inline-field input,.delivery-tariff-row input,.settings-origin-row input,.equipment-baseline-row input,.sms-toolbar-field select,.sms-bulk-select,.sms-message-editor textarea),
  html[data-admin-lab="staging"] #authForm input:not([type="checkbox"]){font-size:16px!important}
 
@@ -30,6 +31,23 @@
  html[data-admin-lab="staging"] .v4321-detail-ready .native-detail-code{grid-column:2!important;grid-row:2!important;justify-self:start!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere}
  html[data-admin-lab="staging"] .native-detail-info-row strong{min-width:0;max-width:100%;white-space:normal!important;overflow-wrap:anywhere}
  html[data-admin-lab="staging"] .v4321-finance-summary strong{min-width:0;max-width:100%;white-space:normal!important;overflow-wrap:anywhere;line-height:1.25!important}
+
+ /* Banner owns the top safe area. Header/content/action use separate rows;
+    content is clipped only by its own bounded scrollport, never by controls. */
+ html[data-admin-lab="staging"] .detail.stage-detail-layout{display:grid!important;grid-template-rows:auto minmax(0,1fr) auto!important;top:var(--lab-bar)!important;bottom:0!important;height:auto!important;min-height:0!important;overflow:hidden!important}
+ html[data-admin-lab="staging"] .stage-detail-layout>.detail-top{position:relative!important;top:auto!important;margin:0!important;padding:10px 16px!important;min-height:64px!important;background:#070b0e!important;box-shadow:none!important;border-bottom:1px solid #293237!important;border-radius:0!important}
+ html[data-admin-lab="staging"] .stage-detail-layout>.detail-shell{min-height:0!important;height:auto!important;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch;padding:14px 15px 18px!important;scroll-padding:14px 0 18px}
+ html[data-admin-lab="staging"] .stage-detail-layout>.lab-action-dock{position:relative!important;inset:auto!important;margin:0!important;padding:10px 16px calc(10px + var(--pwa-safe-bottom,0px))!important;box-shadow:none!important}
+
+ /* The booking wizard follows the existing finance form's bounded grid.
+    Footer height is intrinsic, so wrapped labels and safe areas reserve space. */
+ html[data-admin-lab="staging"] .modal:has(#bookingForm){padding:0!important}
+ html[data-admin-lab="staging"] .modal>.modal-card:has(#bookingForm){inset:0!important;height:100%!important;max-height:100%!important;min-height:0!important}
+ html[data-admin-lab="staging"] #bookingForm{height:100%!important;min-height:0!important;grid-template-rows:auto minmax(0,1fr) auto!important}
+ html[data-admin-lab="staging"] #bookingForm>header{position:relative!important;padding-top:14px!important}
+ html[data-admin-lab="staging"] #bookingForm>header .close{top:14px!important}
+ html[data-admin-lab="staging"] #bookingForm>.booking-form-scroll{height:auto!important;min-height:0!important;max-height:none!important;padding-bottom:18px!important;scroll-padding-bottom:18px!important}
+ html[data-admin-lab="staging"] #bookingForm>footer{position:relative!important;inset:auto!important;min-height:0!important;padding:10px 12px calc(10px + var(--pwa-safe-bottom,0px))!important}
 }
 @media(max-width:380px){
  html[data-admin-lab="staging"] .upcoming-row.native-v25-upcoming .upcoming-actions{grid-template-columns:minmax(0,1fr)!important}

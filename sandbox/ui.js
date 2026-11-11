@@ -59,6 +59,17 @@ function detailUI(){
  if(primary&&!detail.querySelector('.lab-action-dock')){
   const dock=el('div','lab-action-dock'),label=el('span','',text(detail.querySelector('.detail-top-meta span'))),button=el('button','btn primary',text(primary));button.type='button';button.onclick=()=>primary.click();dock.append(label,button);detail.append(dock);primary.classList.add('lab-original-primary');
  }
+ // R4 uses real layout rows: keep the original header node/listeners, and
+ // let only the content shell scroll between the header and delegated action.
+ if(hosted){
+  const shell=detail.querySelector(':scope>.detail-shell'),head=detail.querySelector('.detail-top');
+  if(shell&&head&&detail.querySelector(':scope>.lab-action-dock')){
+   const mobile=matchMedia('(max-width:900px)').matches;
+   if(mobile&&head.parentElement===shell)detail.insertBefore(head,shell);
+   else if(!mobile&&head.parentElement===detail)shell.prepend(head);
+   detail.classList.toggle('stage-detail-layout',mobile);
+  }
+ }
  // Existing renderers create this card asynchronously; process it once when ready.
  const finance=detail.querySelector('.v4321-finance-card');
  if(finance&&!finance.dataset.labFinance){
@@ -116,6 +127,7 @@ document.addEventListener('keydown',event=>{
 // by the canonical application. No timers, network polling or duplicate business handlers.
 let queued=false;
 const schedule=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;listUI();detailUI()})};
+if(hosted)matchMedia('(max-width:900px)').addEventListener('change',schedule);
 const observer=new MutationObserver(()=>{timeUI();schedule()});
 observer.observe(document.querySelector('#adminMount'),{childList:true,subtree:true});
 observer.observe(document.querySelector('#layer'),{childList:true,subtree:true});

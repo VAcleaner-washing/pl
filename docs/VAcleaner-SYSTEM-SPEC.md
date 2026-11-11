@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.57
-**Baseline build:** 4357
+**Baseline version:** 4.3.58
+**Baseline build:** 4358
 **Останнє оновлення:** 2026-11-11
 **Власник логіки:** VAcleaner  
 
@@ -5629,3 +5629,33 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Static and generated artifact/boundary gates remain mandatory. Capture both unchanged UI56 baseline and UI57 results in the pinned remote Chromium/WebKit environment before private publication.
 - The former assertion that the entire 34px safe inset excludes touch targets also rejects immutable46 itself: the canonical 56px button bottom is 936 in a 956px viewport. That assumption is recorded as formerWholeInsetExclusion, and is superseded by exact reference control/glyph comparisons plus five >=44px targets within the viewport. This corrects the test oracle; native home-indicator interaction remains a physical-device acceptance check.
 - Do not claim physical iPhone equivalence solely from emulation or a matching 82px outer box. No forced clicks, arbitrary waits, browser zoom locks or overflow hiding are introduced.
+
+
+# 117. Change record — v4.3.58 / R4 bounded detail and booking scroll
+
+### ADDED
+
+- Generated-entrypoint regression covers detail at top/middle/end, actual hit testing of the last secondary action, all four booking wizard steps, and a populated synthetic 14-day calendar including its last selectable slot. Simulated top59/bottom34 safe areas remain explicit emulation limits. External requests are intercepted and never forwarded.
+
+### CHANGED
+
+- Hosted R4 mobile detail is a three-row layout: original header node, independently scrolling content shell, existing delegated primary-action dock. Header listeners and business handlers are retained; desktop restores the header to its original parent when crossing the responsive breakpoint.
+- R4 booking form footer becomes an intrinsic grid row, following the existing finance form pattern. Scrollable fields stop before the footer. The LAB banner owns the top safe area once; form header avoids a second top inset. Existing keyboard viewport sizing is preserved.
+
+### FIXED
+
+- Physical screenshots show content behind the sticky detail title and secondary actions behind the fixed primary dock. Legacy detail padding was overridden by later important canonical styles, so a nominal bottom allowance did not establish reachability. Independent rows reserve actual header/footer height instead of guessing padding.
+- Booking fields no longer scroll underneath an absolutely positioned footer. This is a presentation correction; validation, wizard sequencing and save owners are unchanged.
+
+### PRESERVED
+
+- Main/production46, frozen LAB54, all API payloads, server handlers, pricing/status/payment/referral rules and database data remain unchanged. UI57 saved Site version9 is the rollback. The UI57 navigation controls and exact reference comparisons remain unchanged.
+- Shared source enhancement is guarded by hosted mode; synthetic LAB behavior does not reparent its detail header. No function is removed or replaced to obtain a cleaner layout.
+
+### TESTS
+
+- Preserve an unchanged UI57 baseline and the corrected generated UI58 in the pinned remote Chromium/WebKit jobs. Verify scrollport bounds and actual elementFromPoint hit targets, not just document width or full-page screenshots. No forced clicks, arbitrary sleeps or assertion weakening.
+- Calendar is tested with 14 synthetic days; change calendar styles only if a reproducible overlap remains. Partial cards during a normal scroll are not by themselves proof that their final slots are inaccessible.
+- Static and isolation/artifact gates remain required. Physical iPhone/native keyboard/PWA lifecycle acceptance is distinct from emulation and fixture tests.
+
+- Populated-calendar baseline confirms the main scrollport still extended to viewport bottom under navigation despite compensating bottom padding. Non-keyboard R4 main views now end above the unchanged82px nav and use18px content clearance. Existing keyboard-open rules are preserved. This addresses the scroll boundary; it does not change availability, past-slot semantics or calendar calculations.
