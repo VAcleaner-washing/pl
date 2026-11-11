@@ -88,6 +88,13 @@ check('network/storage boundary loads before canonical application scripts', () 
   assert(html.includes(`connect-src 'self' ${config.origin}`));
   assert(!html.includes('admin-lab-bootstrap.js'));
 });
+check('R4 mobile constraints are release-addressed and retained by the offline shell', () => {
+  const build=JSON.parse(fs.readFileSync('release.json','utf8')).build;
+  assert(html.includes(`/r4/assets/admin-staging-mobile.css?v=${build}`));
+  assert(read('admin/sw.js').includes(`/r4/assets/admin-staging-mobile.css?v=${build}`));
+  assert(html.indexOf('admin-staging-mobile.css')>html.indexOf('admin-lab-forms.css'));
+  assert(!/overflow-x:\s*hidden|user-scalable|maximum-scale/.test(read('assets/admin-staging-mobile.css')));
+});
 const runtime = read('assets/admin-v250.js');
 check('generated runtime uses test accounts and all storage goes through the stage wrapper', () => {
   assert(runtime.includes('manager-a@vacleaner-r4.invalid')); assert(runtime.includes('Вхід у тестову R4'));

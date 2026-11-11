@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.55
-**Baseline build:** 4355
+**Baseline version:** 4.3.56
+**Baseline build:** 4356
 **Останнє оновлення:** 2026-11-11
 **Власник логіки:** VAcleaner  
 
@@ -5574,3 +5574,32 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - It records visual/layout viewport dimensions, scale, computed control fonts, actual scroll widths, critical element bounds and screenshots at 320/390/440/768/1440. The regression covers header/upcoming/detail/finance/action containment and mobile input font size >=16px without suppressing zoom or hiding overflow.
 - Chromium/WebKit automation does not reproduce the physical iOS keyboard's native zoom. Baseline search CSS contains mobile 13.5–14px fonts; auto-zoom is a concrete risk, but its occurrence on the user's device remains to be confirmed. The original screenshot and baseline failures must remain evidence; no blind retry/forced click/sleep is introduced.
 - This checkpoint adds only QA/fixture/workflow/spec; production46, LAB54 and the published R4 UI55 remain unchanged. A later presentation fix requires a coherent new version and focused verification before private publication.
+
+# 115. Change record — v4.3.56 / R4 mobile content and input sizing
+
+### ADDED
+
+- Release-addressed staging-only mobile CSS with offline precache coverage. The existing LAB54 and normal production styles do not load it.
+- A generated-R4 post-login layout regression records actual container overflow, critical element bounds, computed input fonts and viewport metrics in Chromium/WebKit. Remote calls are synthetic fixtures and never forwarded; physical iOS auto-zoom remains a distinct device check.
+
+### CHANGED
+
+- Known small R4 mobile search/select/settings controls and login fields use at least 16px to avoid the native iOS small-input zoom trigger. Existing larger money inputs are preserved. User zoom is not disabled or reset.
+- The R4 banner has a shrinking content column and separate controls. Upcoming titles/statuses/client names and action labels can wrap; narrow phones stack the two existing actions. Detail header puts the full booking code below its title, and long information/money text wraps within existing containers.
+
+### FIXED
+
+- Presentation constraints address the clipped header, upcoming controls and detail content shown in physical iPhone screenshots. No global overflow hiding is added. The screenshot alone does not establish whether persisted browser zoom caused all clipping; the source's 13.5–14px search font and the stronger container checks are recorded separately.
+
+### PRESERVED
+
+- All booking/status/payment/referral/pricing rules, API payloads, server handlers and database rows are unchanged. Stage remains jdthhqxzfpvosfdxwfem; main/production46 and browser-local LAB54 remain untouched. Source changes outside the staging presentation/tooling/QA/spec are coherent version stamps only.
+- Original baseline e80a698 and its CI run remain independent; a separate fix branch prevents cancellation of that evidence. No retry, forced click, sleep increase, assertion weakening or zoom-lock workaround is used.
+
+### TESTS
+
+- Stage boundary/artifact contracts include the new CSS URL/order/precache. The new remote layout suite exercises login, focused search, upcoming and issued detail using the same synthetic snapshots at 320/390/440/768/1440.
+- Capture both baseline and fixed results and inspect screenshots before private publication. Canonical static/browser/PWA gates and the earlier intermittent WebKit TargetClosed finding remain distinct. No connected-server or physical keyboard success is inferred from fixture/emulation tests.
+
+- Navigation follow-up: the user's stable46/R4 screenshots show the R4 bar raised. Stable CSS has 82px total height; LAB's 82px plus 34px home inset produced 116px. R4 now uses max(82px,48px+inset), a 44px minimum control row and a single home inset. The main scroll pane uses that same shell token; neither transform nor clipping hides the difference.
+- Baseline and fixed remote jobs use the same official Playwright Python 1.61.0 noble image pinned by digest after the first baseline install failed on Azure Ubuntu DNS before tests. The reference46 build is immutable and only receives intercepted synthetic HTTP responses. The original not-run infrastructure failure is retained.

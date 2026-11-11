@@ -54,6 +54,7 @@ for (const file of walk(target)) if (/\.(?:js|html|css|json|webmanifest|svg)$/.t
 }
 const asset = (name, value) => fs.writeFileSync(path.join(target, 'assets', name), value);
 asset('admin-staging-bootstrap.js', `window.VA_STAGE_CONFIG=Object.freeze(${JSON.stringify(config)});\n${read('staging/ui/boundary.js')}`);
+asset('admin-staging-mobile.css', read('staging/ui/mobile.css'));
 for (const name of ['ui.js', 'ui.css', 'forms.js', 'forms.css']) {
   const value = read('sandbox/' + name);
   asset('admin-lab-' + name.replace('.', '.'), name.endsWith('.js') ? rewriteStorage(value) : value);
@@ -65,7 +66,7 @@ html = html.replace(/<meta[^>]*http-equiv="Content-Security-Policy"[^>]*>/gi, ''
   .replace('<title>', '<title>R4 STAGING · ').replace(/,maximum-scale=1,user-scalable=no/g, '')
   .replace('href="/favicon.svg"', 'href="/r4/admin/icon-192.png"')
   .replace(/(<meta[^>]*name="apple-mobile-web-app-title"[^>]*content=")[^"]*/, '$1VA R4')
-  .replace('</head>', `<link rel="stylesheet" href="/r4/assets/admin-lab-ui.css?v=${release.build}"><link rel="stylesheet" href="/r4/assets/admin-lab-forms.css?v=${release.build}"></head>`)
+  .replace('</head>', `<link rel="stylesheet" href="/r4/assets/admin-lab-ui.css?v=${release.build}"><link rel="stylesheet" href="/r4/assets/admin-lab-forms.css?v=${release.build}"><link rel="stylesheet" href="/r4/assets/admin-staging-mobile.css?v=${release.build}"></head>`)
   .replace('<body>', `<body><script src="/r4/assets/admin-staging-bootstrap.js?v=${release.build}"></script>`)
   .replace('</body>', `<script defer src="/r4/assets/admin-lab-ui.js?v=${release.build}"></script><script defer src="/r4/assets/admin-lab-forms.js?v=${release.build}"></script></body>`);
 for (const rel of ['admin/bronuvannia/index.html', 'admin/bronuvannia.html']) fs.writeFileSync(path.join(target, rel), html);
@@ -100,7 +101,7 @@ const swFile = path.join(target, 'admin/sw.js');
 let sw = fs.readFileSync(swFile, 'utf8').replaceAll('vacleaner-manager-', 'vacleaner-stage-r4-');
 sw = replaceOne(sw, 'if(url.origin!==self.location.origin)return;', "if(url.origin!==self.location.origin||!url.pathname.startsWith('/r4/'))return;");
 sw = replaceOne(sw, 'keys.filter(key=>key!==CACHE)', "keys.filter(key=>key.startsWith('vacleaner-stage-r4-')&&key!==CACHE)");
-sw = replaceOne(sw, 'const CORE=[', `const CORE=['/r4/assets/admin-staging-bootstrap.js?v=${release.build}','/r4/assets/admin-lab-ui.js?v=${release.build}','/r4/assets/admin-lab-ui.css?v=${release.build}','/r4/assets/admin-lab-forms.js?v=${release.build}','/r4/assets/admin-lab-forms.css?v=${release.build}',`);
+sw = replaceOne(sw, 'const CORE=[', `const CORE=['/r4/assets/admin-staging-mobile.css?v=${release.build}','/r4/assets/admin-staging-bootstrap.js?v=${release.build}','/r4/assets/admin-lab-ui.js?v=${release.build}','/r4/assets/admin-lab-ui.css?v=${release.build}','/r4/assets/admin-lab-forms.js?v=${release.build}','/r4/assets/admin-lab-forms.css?v=${release.build}',`);
 // Notifications are unavailable in stage; a stage worker never handles push or focuses another environment.
 sw = sw.slice(0, sw.indexOf("self.addEventListener('notificationclick'"));
 fs.writeFileSync(swFile, sw);
