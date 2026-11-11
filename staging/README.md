@@ -3,7 +3,8 @@
 Status: **preflight package ready; hosted target selection pending**. This is not
 a deployed staging backend or a completed integration acceptance.
 
-Production remains 4.3.46 / 4346. Private browser-local LAB remains 4.3.50 / 4350.
+Production remains 4.3.46 / 4346. The R4 preflight baseline was private browser-local LAB 4.3.50 / 4350;
+4.3.51 / 4351 is the follow-up modal-focus candidate.
 No production schema, business rows, Auth users, settings, schedules or functions
 were changed. Production inspection used system catalog and Edge source reads.
 
@@ -92,7 +93,8 @@ sign-in remain device acceptance gates.
 - Generated SQL: 506 statements parsed by PostgreSQL parser `pglast==7.22`.
   This validates syntax, not execution or transaction semantics.
 - Normal Pages: 270 files, release 4.3.50/4350; staging files excluded.
-- Full static QA: 47/47 passed. Normal Pages is byte-identical to the 270-file R3 artifact.
+- Full static QA: 47/47 passed. At preflight commit c552791, normal Pages was byte-identical to the 270-file R3 artifact.
+  4.3.51 intentionally adds the documented modal-focus fix and release stamps.
 - Full local Supabase startup failed during image extraction with ENOSPC on the
   environment's 7.9 GiB filesystem. No database or Auth service was started.
   Downloaded unused test images were removed; no data volumes were deleted.
@@ -101,3 +103,13 @@ sign-in remain device acceptance gates.
 The Supabase `create_project` tool explicitly requires choosing the organization.
 That selection is pending in the conversation. Preparation does not authorize
 a production merge/deploy or use of real business data.
+
+## Follow-up CI finding
+
+R4 preflight CI 42906037435 passed static and Chromium; WebKit failed at campaign
+dirty-close. A held initial autofocus frame reproduced an empty input six of six
+times: the frame moved focus to Close between field focus and text insertion.
+4.3.51 respects an already focused control/current native dialog and ignores
+disconnected cards. The regression now asserts actual text and focus before the
+unchanged dirty-close assertion; it does not add sleeps, forced clicks or retries.
+This UI repair does not create a hosted backend or certify integration acceptance.

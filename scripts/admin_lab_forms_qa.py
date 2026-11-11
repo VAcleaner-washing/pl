@@ -98,8 +98,20 @@ def main():
             expect(form.locator('[name=reason]')).to_have_value('R3 тестова причина');close(form);discard()
             expect(correction.locator('.booking-action-more>summary')).to_be_focused()
             checks.check(True,f'{width}: status correction draft never changes the booking without save')
-            navigate(page,'campaigns');page.locator('#newCampaign').click();form=page.locator('#campaignForm')
-            form.locator('[name=name]').fill('R3 кампанія-чернетка');close(form);expect(page.locator('#labLeaveDialog')).to_be_visible();keep()
+            navigate(page,'campaigns')
+            # A late initial-focus frame must not steal the first field input.
+            # Hold only that real callback until focus reaches the name field.
+            page.evaluate("""()=>{const raf=window.requestAnimationFrame.bind(window);let held;
+              const onFocus=event=>{if(event.target.name==='name'&&held){const callback=held;held=null;
+                queueMicrotask(()=>{callback(performance.now());window.requestAnimationFrame=raf;document.removeEventListener('focusin',onFocus,true)})}};
+              window.requestAnimationFrame=callback=>{if(String(callback).includes('const first=focusable()[0]')){held=callback;return 0}return raf(callback)};
+              document.addEventListener('focusin',onFocus,true)}""")
+            page.locator('#newCampaign').click();form=page.locator('#campaignForm')
+            form.locator('[name=name]').fill('R3 кампанія-чернетка')
+            expect(form.locator('[name=name]')).to_have_value('R3 кампанія-чернетка')
+            expect(form.locator('[name=name]')).to_be_focused()
+            checks.check(True,f'{width}: deferred modal autofocus preserves actual input and focus')
+            close(form);expect(page.locator('#labLeaveDialog')).to_be_visible();keep()
             expect(form.locator('[name=name]')).to_have_value('R3 кампанія-чернетка');close(form);discard()
             checks.check(page.evaluate('VA_LAB.getState().campaigns.length')==0,f'{width}: discarded campaign never persists or dispatches')
             navigate(page,'bookings')

@@ -1,6 +1,6 @@
 {
-  "version": "4.3.50",
-  "build": 4350,
-  "releasedAt": "2026-11-10",
-  "label": "VAcleaner v4.3.50 — LAB DRAFT BASELINE GUARD"
+  "version": "4.3.51",
+  "build": 4351,
+  "releasedAt": "2026-11-11",
+  "label": "VAcleaner v4.3.51 — PRESERVE MODAL INPUT FOCUS"
 }

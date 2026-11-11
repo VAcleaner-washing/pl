@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.50
-**Baseline build:** 4350
+**Baseline version:** 4.3.51
+**Baseline build:** 4351
 **Останнє оновлення:** 2026-11-10
 **Власник логіки:** VAcleaner  
 
@@ -5410,3 +5410,26 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 - npm run test:admin-staging-preflight: 17 checks; SQL syntax parsed independently with pglast 7.22. These are preflight checks, not live integration certification.
 - Normal Pages remains 270 files. Local full Supabase startup was blocked by disk ENOSPC; no live Auth/RLS/RPC or persistence pass is claimed.
+
+
+# 108. Change record — v4.3.51 / preserve modal input focus
+
+### ADDED
+
+- A deterministic delayed-frame regression holds the canonical initial-focus callback until a user has focused the campaign name field. The input must keep focus and accept text before dirty-close is checked.
+
+### CHANGED
+
+- Deferred initial modal focus runs only while its card is still connected, no control inside it already owns focus and no native confirmation dialog is open. Normal initial modal focus remains available.
+
+### FIXED
+
+- Initial requestAnimationFrame focus could steal focus between WebKit filling an input and inserting its text. Reproduced six of six times with the delayed frame; the field stayed empty and no dirty warning was expected by actual state. This matches the R4 WebKit CI failure at the campaign guard (job 130144442458). The existing guard assertion is retained and actual field value/focus is asserted earlier.
+
+### PRESERVED
+
+- Financial/status/backend behavior, canonical save owners, production main and deployed 4.3.46/4346. R4 hosted project selection is still pending; no real business records or external dispatch are introduced.
+
+### TESTS
+
+- Focused LAB Chromium/WebKit form suite with deterministic late-frame case, actual LAB artifact checks and canonical regression gates. Do not claim physical iPhone or live backend acceptance from these browser results.
