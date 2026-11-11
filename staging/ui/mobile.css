@@ -1,9 +1,9 @@
 /* R4 owns these responsive constraints; no global overflow clipping or zoom lock. */
 @media(max-width:900px){
- /* Match the stable total shell height: the home area belongs inside the bar. */
- html[data-admin-lab="staging"]{--mobile-nav:48px;--mobile-nav-shell:max(82px,calc(var(--mobile-nav) + var(--pwa-safe-bottom,0px)))}
- html[data-admin-lab="staging"] .mobile-nav{height:var(--mobile-nav-shell)!important;padding:4px max(8px,var(--pwa-safe-right,0px)) var(--pwa-safe-bottom,0px) max(8px,var(--pwa-safe-left,0px))!important}
- html[data-admin-lab="staging"] .mobile-nav button{min-height:44px!important;padding:0 2px!important}
+ /* Own the shell height only. Inherit stable46's padding, 56px button
+    minimum and glyph/label placement from the unchanged canonical styles. */
+ html[data-admin-lab="staging"]{--mobile-nav-shell:82px}
+ html[data-admin-lab="staging"] .mobile-nav{height:var(--mobile-nav-shell)!important}
  html[data-admin-lab="staging"] :is(.search input,.clients-toolbar select,.finance-ledger-head select,.settings-inline-field input,.delivery-tariff-row input,.settings-origin-row input,.equipment-baseline-row input,.sms-toolbar-field select,.sms-bulk-select,.sms-message-editor textarea),
  html[data-admin-lab="staging"] #authForm input:not([type="checkbox"]){font-size:16px!important}
 
