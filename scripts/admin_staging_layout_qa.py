@@ -22,10 +22,11 @@ def main():
     def check(name,passed,**evidence):
         results.append({'name':name,'passed':bool(passed),**evidence})
         print(('PASS' if passed else 'FAIL')+': '+name,flush=True)
-    def api(route):
+    def api(route,stable=False):
         request=route.request;url=urlsplit(request.url)
         if url.hostname in ('127.0.0.1','localhost'):return route.continue_()
-        if url.scheme+'://'+url.netloc!=config['origin']:
+        expected_origin='https://yweluzclearwrazdkahu.supabase.co' if stable else config['origin']
+        if url.scheme+'://'+url.netloc!=expected_origin:
             unexpected.append({'path':url.path,'method':request.method});return route.abort()
         headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization,apikey,content-type','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Cache-Control':'no-store'}
         if request.method=='OPTIONS':return route.fulfill(status=204,headers=headers)
@@ -33,7 +34,7 @@ def main():
         payload=payload or {};action=payload.get('action');requests.append({'path':url.path,'action':action})
         if url.path=='/auth/v1/settings':body={'disable_signup':True}
         elif url.path=='/auth/v1/token':
-            assert payload.get('email')=='manager-a@vacleaner-r4.invalid'
+            assert payload.get('email')==('vahome.aroma@gmail.com' if stable else 'manager-a@vacleaner-r4.invalid')
             body={'access_token':'r4-layout-fixture-token','refresh_token':'r4-layout-fixture-refresh',
                   'expires_in':3600,'token_type':'bearer','user':{'id':'00000000-0000-4000-8000-000000000061','email':'manager-a@vacleaner-r4.invalid'}}
         elif url.path.endswith('/vacleaner-settings'):body=fixture['settings']
@@ -54,13 +55,36 @@ def main():
           viewport:{innerWidth,clientWidth:document.documentElement.clientWidth,visualWidth:visualViewport.width,scale:visualViewport.scale,offsetLeft:visualViewport.offsetLeft},
           items:selectors.flatMap(selector=>[...document.querySelectorAll(selector)].filter(el=>el.getClientRects().length).map(el=>{
             const r=el.getBoundingClientRect(),s=getComputedStyle(el);
-            return{selector,left:r.left,right:r.right,width:r.width,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,fontSize:s.fontSize,whiteSpace:s.whiteSpace,overflowX:s.overflowX,text:el.textContent.trim().slice(0,100)}
+            return{selector,left:r.left,right:r.right,width:r.width,height:r.height,bottom:r.bottom,scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,fontSize:s.fontSize,whiteSpace:s.whiteSpace,overflowX:s.overflowX,text:el.textContent.trim().slice(0,100)}
           }))})''',selectors)
     with tempfile.TemporaryDirectory(prefix='r4-layout-',dir=ROOT/'staging-ui-test-results') as temp:
+        reference=ROOT/'stable-reference-test-results/source/dist'
+        assert reference.exists(),'Immutable 46 reference Pages artifact is required'
+        shutil.copytree(reference,Path(temp),dirs_exist_ok=True)
         shutil.copytree(ROOT/'staging-ui-test-results/dist',Path(temp)/'r4')
         with pages_server(Path(temp)) as base,sync_playwright() as pw:
-            browser=getattr(pw,args.browser).launch(headless=True)
+            opts={'headless':True}
+            if args.browser=='chromium':opts['args']=['--no-sandbox']
+            browser=getattr(pw,args.browser).launch(**opts)
             browser.on('disconnected',lambda:print('BROWSER_DISCONNECTED',flush=True))
+            device={k:v for k,v in pw.devices['iPhone 17 Pro Max'].items() if k!='default_browser_type'}
+            device['viewport']={'width':440,'height':956}
+            ref=browser.new_context(**device,service_workers='block',timezone_id='Europe/Kyiv')
+            ref.add_init_script("Object.defineProperty(navigator,'standalone',{value:true})")
+            ref.route('**/*',lambda route:api(route,True));reference_page=ref.new_page()
+            reference_page.clock.set_fixed_time(datetime.datetime.fromisoformat(fixture['fixedTime']))
+            reference_page.goto(base+'/admin/bronuvannia/')
+            reference_page.locator('#authForm input[name=login]').fill('vacleaner')
+            reference_page.locator('#authForm input[name=password]').fill('r4-layout-fixture-password')
+            reference_page.locator('#authForm button[type=submit]').click()
+            expect(reference_page.locator('.upcoming-row').first).to_be_visible()
+            reference_page.evaluate("document.documentElement.style.setProperty('--pwa-safe-bottom','34px')")
+            nav_reference=geometry(reference_page,['.mobile-nav','.mobile-nav button','.mobile-new-nav i','.mobile-new-nav span'])
+            (out/'stable46-nav-geometry.json').write_text(json.dumps(nav_reference,indent=2)+'\n')
+            reference_page.screenshot(path=str(out/'stable46-upcoming.png'),full_page=True)
+            reference_height=reference_page.locator('.mobile-nav').bounding_box()['height']
+            check('immutable 46 reference has the expected 82px total navigation',abs(reference_height-82)<=1,height=reference_height)
+            ref.close()
             for width in [320,390,440,768,1440]:
                 options={k:v for k,v in pw.devices['iPhone 17 Pro Max'].items() if k!='default_browser_type'} if width<=440 else {}
                 options.update(viewport={'width':width,'height':956},service_workers='block',timezone_id='Europe/Kyiv')
@@ -86,6 +110,12 @@ def main():
                 font=scope.evaluate('el=>parseFloat(getComputedStyle(el).fontSize)')
                 if width<=900:check(f'{width}: search avoids iOS small-input zoom',font>=16,fontSize=font)
                 scope.blur()
+                if width<=440:
+                    page.evaluate("document.documentElement.style.setProperty('--pwa-safe-bottom','34px')")
+                    nav=page.locator('.mobile-nav').bounding_box()
+                    controls=page.locator('.mobile-nav button').evaluate_all('els=>els.map(el=>{const r=el.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom}})')
+                    check(f'{width}: navigation matches stable46 total height with one home inset',abs(nav['height']-reference_height)<=1 and abs(nav['y']+nav['height']-956)<=1,height=nav['height'],reference=reference_height)
+                    check(f'{width}: five 44px touch targets stay above the home indicator',len(controls)==5 and all(c['width']>=44 and c['height']>=44 and c['bottom']<=956-34+1 for c in controls),controls=controls)
                 upcoming=geometry(page,['.lab-banner','.lab-banner>div','.lab-banner button','.lab-banner a','.main','.upcoming-row','.upcoming-main','.upcoming-title h3','.upcoming-title .status','.upcoming-client-info strong','.upcoming-actions .btn'])
                 (out/f'{width}-upcoming-geometry.json').write_text(json.dumps(upcoming,indent=2,ensure_ascii=False)+'\n')
                 page.screenshot(path=str(out/f'{width}-upcoming.png'),full_page=True)
