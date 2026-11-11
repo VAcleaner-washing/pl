@@ -126,3 +126,12 @@ Rollback цієї тестової публікації не змінює produc
 - The 4.3.53 candidate fixes the independently measured LAB navigation shell: height is 82px plus its safe inset. Injected 0px/34px geometry checks are distinct from physical iPhone acceptance. It also saves evidence if the unresolved Details gate fails again.
 - The supplied screenshot shows an iOS host sheet with Close/Share controls; outer host chrome can remain black independently of website CSS. Do not promise to remove it or remove home-indicator protection without device evidence.
 - R4 is a backend-integration stage name, not an application version. Its hosted project is not created; LAB still stores only browser-local synthetic records. The local Docker disk shortage was in the disposable 8 GiB executor, not the phone or production Supabase.
+
+
+### LAB 4.3.54 / 4354 — card and time-picker candidate
+
+- Baseline private LAB 4.3.53 was published as Site version 5 after CI 42989682200 passed all gates. Production remains 4.3.46.
+- User feedback identifies cramped card More, clipped status and an inconvenient/clipped time list. This candidate changes only LAB presentation/interaction, retaining the canonical 29 time buttons and their original handlers.
+- Morning/Day/Evening navigation filters existing choices without writing the form. Current off-grid values remain; selecting a time uses the existing input/change path. Time save/reload is verified against extras, not invented top-level fields.
+- Keyboard ownership, simulated safe insets and short-height scrolling are required checks. Physical iPhone acceptance and the earlier intermittent desktop Details timeout remain separate concerns; a successful later run is not a proven diagnosis.
+- All original business actions remain available. Main, production Supabase and real dispatch are out of scope. Hosted R4 still awaits explicit organization selection.

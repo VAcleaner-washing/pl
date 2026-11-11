@@ -39,7 +39,10 @@ function listUI(){
   if(text(timing))summary.append(el('span','lab-booking-timing'+(timing.classList.contains('danger')?' danger':''),text(timing)));
   summary.append(money);card.querySelector('.booking-row-head').after(summary);
   const open=el('button','btn lab-open-detail','Деталі');open.type='button';open.setAttribute('aria-label',`Деталі ${text(card.querySelector('.booking-identity small'))} · ${name.textContent}`);
-  open.onclick=e=>{e.stopPropagation();card.querySelector('.booking-row-head').click()};card.querySelector('.booking-actions').append(open);
+  open.onclick=e=>{e.stopPropagation();card.querySelector('.booking-row-head').click()};
+  const actions=card.querySelector('.booking-actions'),more=actions.querySelector('.booking-action-more');
+  actions.insertBefore(open,more);
+  const moreIcon=more?.querySelector('summary>span');if(moreIcon)moreIcon.textContent='⋯';
  });
 }
 function detailUI(){
@@ -57,13 +60,58 @@ function detailUI(){
   finance.append(disclosure);
  }
 }
+let timeUIState=null;
+const periodOf=time=>{const hour=Number(String(time).slice(0,2));return hour<12?'morning':hour<17?'day':'evening'};
+function timeUI(){
+ const overlay=document.querySelector('.admin-v4315-time-overlay');if(!overlay)return;
+ const grid=overlay.querySelector('.admin-v4315-time-grid');if(!grid)return;
+ if(!timeUIState){
+  const periods=el('div','lab-time-periods');periods.setAttribute('role','group');periods.setAttribute('aria-label','Період дня');
+  const scroll=overlay.querySelector('.admin-v4315-time-scroll'),heading=overlay.querySelector('.admin-v4315-time-sheet-head strong'),caption=el('small','');
+  const headingGroup=el('div','lab-time-heading');heading.before(headingGroup);headingGroup.append(heading,caption);
+  for(const [value,label] of [['morning','Ранок'],['day','День'],['evening','Вечір']]){
+   const button=el('button','',label);button.type='button';button.dataset.timePeriod=value;
+   button.onclick=()=>{showTimePeriod(value);scroll.scrollTop=0};periods.append(button);
+  }
+  scroll.before(periods);grid.setAttribute('role','group');
+  timeUIState={overlay,grid,periods,caption,first:null};
+  observer.observe(overlay,{attributes:true,attributeFilter:['class']});observer.observe(grid,{childList:true});
+  overlay.addEventListener('click',event=>{
+   if(!event.target.closest('.admin-v4315-time-close,[data-time-sheet-close]'))return;
+   const trigger=document.querySelector('.admin-v4315-time-trigger[aria-expanded="true"]');
+   queueMicrotask(()=>{if(!overlay.classList.contains('is-open')&&trigger?.isConnected)trigger.focus({preventScroll:true})});
+  },true);
+ }
+ if(!overlay.classList.contains('is-open')||timeUIState.first===grid.firstElementChild)return;
+ timeUIState.first=grid.firstElementChild;
+ const selected=grid.querySelector('.is-selected'),current=selected?.dataset.time||'';
+ timeUIState.caption.textContent=current?'Обрано '+current:'';
+ grid.setAttribute('aria-label',overlay.querySelector('.admin-v4315-time-sheet-head strong').textContent);
+ showTimePeriod(periodOf(current));
+}
+function showTimePeriod(period){
+ const {grid,periods}=timeUIState;
+ for(const button of periods.children)button.setAttribute('aria-pressed',String(button.dataset.timePeriod===period));
+ for(const option of grid.children)option.hidden=!option.classList.contains('admin-v4315-current-off-grid')&&periodOf(option.dataset.time)!==period;
+}
+document.addEventListener('keydown',event=>{
+ const overlay=timeUIState?.overlay;if(!overlay?.classList.contains('is-open'))return;
+ if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();overlay.querySelector('.admin-v4315-time-close').click();return}
+ if(event.key!=='Tab')return;
+ event.stopImmediatePropagation();
+ const controls=[...overlay.querySelectorAll('button:not(:disabled)')].filter(button=>!button.hidden&&button.getClientRects().length);
+ const first=controls[0],last=controls.at(-1);if(!first)return;
+ if(event.shiftKey&&(document.activeElement===first||!overlay.contains(document.activeElement))){event.preventDefault();last.focus()}
+ else if(!event.shiftKey&&(document.activeElement===last||!overlay.contains(document.activeElement))){event.preventDefault();first.focus()}
+},true);
 // One scheduled pass per DOM batch. Existing listeners, status guards and saves stay owned
 // by the canonical application. No timers, network polling or duplicate business handlers.
 let queued=false;
 const schedule=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;listUI();detailUI()})};
-const observer=new MutationObserver(schedule);
+const observer=new MutationObserver(()=>{timeUI();schedule()});
 observer.observe(document.querySelector('#adminMount'),{childList:true,subtree:true});
 observer.observe(document.querySelector('#layer'),{childList:true,subtree:true});
+observer.observe(document.body,{childList:true});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden){panel.hidden=true;tools.setAttribute('aria-expanded','false');tools.focus()}});
 schedule();
 })();

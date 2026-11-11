@@ -31,6 +31,63 @@ def lab_server(root):
     finally:server.shutdown();server.server_close();thread.join(timeout=5)
 
 
+def exercise_time_picker(page,form,checks,width):
+    pickup=form.locator('[name="pickupTime"]')
+    trigger=pickup.locator('..').locator('.admin-v4315-time-trigger')
+    overlay=page.locator('.admin-v4315-time-overlay')
+    page.evaluate('document.documentElement.style.setProperty("--pwa-safe-bottom","34px")')
+    initial=pickup.input_value();trigger.click()
+    expect(overlay.locator('.lab-time-periods')).to_be_visible()
+    seen=[]
+    for period,start,end in [('morning',420,690),('day',720,990),('evening',1020,1260)]:
+        overlay.locator(f'[data-time-period="{period}"]').click()
+        options=overlay.locator('.admin-v4315-time-option:not([hidden])')
+        expected=[f'{m//60:02d}:{m%60:02d}' for m in range(start,end+1,30)]
+        expect(options).to_have_count(len(expected))
+        values=options.evaluate_all('buttons=>buttons.map(button=>button.dataset.time)');seen+=values
+        checks.check(values==expected and pickup.input_value()==initial,f'{width}: {period} exposes original choices without changing the form')
+        geometry=overlay.locator('.admin-v4315-time-scroll').evaluate('''scroll=>({
+            scroll:scroll.scrollHeight,client:scroll.clientHeight,viewport:innerHeight,
+            choices:[...scroll.querySelectorAll('button:not([hidden])')].map(button=>button.getBoundingClientRect().toJSON())
+        })''')
+        checks.check(geometry['scroll']<=geometry['client']+1 and all(r['height']>=44 and r['bottom']<=geometry['viewport']-34+1 for r in geometry['choices']),f'{width}: {period} fits without clipped choices above simulated home area')
+        checks.screenshot(page,f'{width}-time-{period}.png')
+    checks.check(len(seen)==len(set(seen))==29 and seen[0]=='07:00' and seen[-1]=='21:00',f'{width}: all 29 original time choices remain reachable')
+    close=overlay.locator('.admin-v4315-time-close');close.focus();page.keyboard.press('Shift+Tab')
+    expect(overlay.locator('.admin-v4315-time-option:not([hidden])').last).to_be_focused()
+    page.keyboard.press('Tab');expect(close).to_be_focused()
+    checks.check(True,f'{width}: time picker contains keyboard focus above the parent modal')
+    overlay.locator('[data-time-period="day"]').click();overlay.locator('[data-time="16:30"]').click()
+    expect(overlay).not_to_be_visible();expect(pickup).to_have_value('16:30');expect(trigger).to_contain_text('16:30')
+    trigger.click();expect(overlay.locator('[data-time-period="day"]')).to_have_attribute('aria-pressed','true')
+    expect(overlay.locator('[data-time="16:30"]')).to_be_visible()
+    page.keyboard.press('Escape');expect(overlay).not_to_be_visible();expect(form).to_be_visible();expect(trigger).to_be_focused()
+    expect(page.locator('#labLeaveDialog')).not_to_be_attached()
+    checks.check(True,f'{width}: chosen time reopens in its group; Escape closes only the picker')
+    pickup.evaluate("input=>{input.value='06:45';input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}))}")
+    trigger.click();expect(overlay.locator('.admin-v4315-current-off-grid')).to_be_visible()
+    close.click();expect(overlay).not_to_be_visible();expect(pickup).to_have_value('06:45')
+    checks.check(True,f'{width}: closing the picker preserves an existing off-grid time')
+    trigger.click();overlay.locator('[data-time="10:30"]').click();expect(pickup).to_have_value('10:30')
+    trigger.click();expect(overlay.locator('.admin-v4315-current-off-grid')).not_to_be_attached()
+    expect(overlay.locator('.lab-time-periods')).to_have_count(1);close.click()
+    if width==440:
+        page.set_viewport_size({'width':440,'height':360});trigger.click()
+        expect(overlay.locator('.admin-v4315-time-option:not([hidden])')).to_have_count(10)
+        last=overlay.locator('.admin-v4315-time-option:not([hidden])').last;last.scroll_into_view_if_needed()
+        bounds=last.bounding_box();heading=overlay.locator('.admin-v4315-time-sheet-head').bounding_box()
+        (checks.artifacts/'short-time-geometry.json').write_text(json.dumps({'last':bounds,'heading':heading,'viewport':page.evaluate('({innerHeight,visualHeight:visualViewport.height})')},indent=2)+'\n')
+        checks.screenshot(page,'short-time-picker.png')
+        checks.check(bounds['y']+bounds['height']<=360-34+1 and heading['y']>=48,f'{width}: short viewport scroll reaches the last choice and keeps the sheet header visible')
+        close.click();page.set_viewport_size({'width':440,'height':956})
+    returned=form.locator('[name="returnTime"]');returned.locator('..').locator('.admin-v4315-time-trigger').click()
+    expect(overlay.locator('.admin-v4315-time-sheet-head strong')).to_have_text('Час повернення')
+    overlay.locator('[data-time-period="evening"]').click();overlay.locator('[data-time="21:00"]').click()
+    expect(returned).to_have_value('21:00');expect(pickup).to_have_value('10:30')
+    checks.check(True,f'{width}: pickup and final return choices update their own canonical inputs')
+    page.evaluate('document.documentElement.style.removeProperty("--pwa-safe-bottom")')
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--browser',choices=['chromium','webkit'],default='chromium')
@@ -75,6 +132,17 @@ def main():
             card=page.locator('.booking-card').first
             compact_height=card.bounding_box()['height']
             checks.check(compact_height<420,f'{width}: compact booking bounded height')
+            more=card.locator('.booking-action-more>summary')
+            expect(more.locator('span')).to_have_text('⋯')
+            more_bounds=more.bounding_box();primary=card.locator('.primary-action').first.bounding_box()
+            checks.check(more_bounds['width']>=48 and more_bounds['height']>=44 and primary['width']>=card.locator('.booking-actions').bounding_box()['width']-1,f'{width}: More has a separate touch target and the primary action has a full row')
+            waiting=page.locator('.booking-card .status.waiting_payment').first
+            if not waiting.count():waiting=page.locator('.booking-card[data-status="waiting_payment"] .status').first
+            if not waiting.count():waiting=page.locator('.booking-card .status').filter(has_text='Очікує').first
+            original=waiting.inner_text();waiting.evaluate("node=>node.textContent='Очікує передоплату'")
+            fits=waiting.evaluate('''node=>{const range=document.createRange();range.selectNodeContents(node);const text=range.getBoundingClientRect(),box=node.getBoundingClientRect();return text.top>=box.top&&text.bottom<=box.bottom+1&&text.left>=box.left&&text.right<=box.right+1}''')
+            checks.check(fits,f'{width}: full waiting-payment label fits its badge')
+            waiting.evaluate('(node,value)=>node.textContent=value',original)
             if width<=900:
                 # Linux browsers do not expose an iPhone hardware safe area. Inject
                 # the inset token to verify geometry; this is not device acceptance.
@@ -134,6 +202,8 @@ def main():
             page.locator('.detail .back').click();expect(page.locator('.detail')).not_to_be_attached()
             page.locator('#labListMode button').filter(has_text='Повністю').click()
             expect(card.locator('.booking-row-body')).to_be_visible()
+            full_more=card.locator('.booking-action-more>summary').bounding_box()
+            checks.check(full_more['width']>=44 and full_more['height']>=44 and not card.locator('.booking-action-more>summary>em').is_visible(),f'{width}: full mode retains an uncluttered accessible More control')
             full_height=card.bounding_box()['height'];density.append({'width':width,'compact_height':compact_height,'full_height':full_height})
             if width<=900:checks.check(compact_height<full_height,f'{width}: compact card reduces height ({compact_height:.0f} vs {full_height:.0f}px)')
             page.reload();page.wait_for_selector('.upcoming-row,.booking-card');navigate(page,'bookings')
@@ -164,6 +234,7 @@ def main():
             page.locator('#mobileNewBooking' if width<901 else '#newBooking').click()
             form=page.locator('#bookingForm')
             form.locator('[name="startDate"]').fill(smoke.iso(10));form.locator('[name="returnDate"]').fill(smoke.iso(11))
+            exercise_time_picker(page,form,checks,width)
             if width<901:form.locator('.mobile-booking-next').click()
             form.locator('[name="customerName"]').fill('LAB збереження')
             form.locator('[name="customerPhone"]').fill('+380000000099')
@@ -180,6 +251,8 @@ def main():
             card=page.locator('.booking-card').filter(has_text='LAB збереження');expect(card).to_have_count(1)
             expect(card).to_contain_text('LAB збереження')
             checks.check(page.evaluate("VA_LAB.getState().bookings.filter(b=>b.customer_name==='LAB збереження').length")==1,f'{width}: retry and reload preserve one saved booking')
+            saved=page.evaluate("VA_LAB.getState().bookings.find(b=>b.customer_name==='LAB збереження')")
+            checks.check(saved['extras']['pickup_time']=='10:30' and saved['extras']['return_time']=='21:00',f'{width}: selected pickup and return times persist through canonical save and reload')
             # Issue/return a seeded confirmed booking through canonical forms.
             card=page.locator('.booking-card[data-id="00000000-0000-4000-8000-000000000005"]')
             card.locator('[data-action="issue"]').click();form=page.locator('#issueForm')

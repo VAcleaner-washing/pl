@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.53
-**Baseline build:** 4353
+**Baseline version:** 4.3.54
+**Baseline build:** 4354
 **Останнє оновлення:** 2026-11-11
 **Власник логіки:** VAcleaner  
 
@@ -5480,3 +5480,32 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 ### PRESERVED
 
 - The iOS host sheet visible in the user's screenshot owns its own outer chrome. A website cannot certify removal of the host's black home-indicator strip in Linux emulation. Do not remove the safe inset or shift controls over it to hide that strip. Production remains 4.3.46/4346; hosted R4 is not created. No business logic, Supabase data, auth or dispatch changes.
+
+
+# 111. Change record — v4.3.54 / LAB card actions and compact time choices
+
+### ADDED
+
+- LAB time picker period navigation: Morning (07:00–11:30), Day (12:00–16:30), Evening (17:00–21:00). The 29 canonical 30-minute choices keep their existing nodes and handlers. Period buttons only filter presentation; they never change input values. The initial group follows the current time. Existing off-grid times remain available and are not rounded or clamped.
+- Picker-local Tab containment and Escape/Close focus return. Escape closes only the time sheet and leaves the parent booking draft open.
+
+### CHANGED
+
+- Compact card primary action owns a full row. Details precedes More in both DOM and visual order. More keeps its original summary/action-sheet handlers and accessible name; the icon-only target is 48x44px. Secondary actions and all original business actions remain reachable.
+- One LAB owner defines action layout; previous duplicated flex overrides are consolidated. Status badges grow with wrapped copy and use 12px type, preventing clipped waiting-payment labels.
+- Time sheet uses a natural-height flex layout capped by the viewport, a fixed header/group selector and a scrollable options area. The bottom padding and scroll-padding preserve the home area, including keyboard-driven scroll in short viewports.
+
+### FIXED
+
+- The former 44px More control squeezed three bullets and a text label. A fixed-height badge clipped longer status copy.
+- The previous time grid required scrolling through all 29 options. Groups fit on ordinary phone viewports; short viewports retain a bounded scroller and accessible final row. The LAB grouping happens in the mutation batch before paint, avoiding a flash of the unfiltered grid.
+
+### PRESERVED
+
+- Canonical time inputs, time selection handlers, 07:00–21:00 range, 30-minute step, rental windows, pricing, statuses and financial calculations are unchanged. Selected times persist through the existing LAB adapter save/reload contract in extras.pickup_time / extras.return_time.
+- Production/main remains 4.3.46/4346. Current published LAB at implementation start is 4.3.53 (Site version 5). Hosted R4 is still not created; no production Supabase or business-data writes, SMS, push or documents.
+
+### TESTS
+
+- Actual LAB browser QA covers the More touch target and unchanged action path, full waiting-payment label, all 29 slots across groups, unchanged inputs on group navigation/cancel, separate pickup/return inputs, legacy off-grid preservation, reopened selection, keyboard containment/Escape, simulated 34px safe area, short viewport scrolling and persisted times after failed-save/retry/reload.
+- Existing form lifecycle/dirty-close and deployment isolation suites remain unchanged in their expectations. Chromium/WebKit and canonical CI gates are required before private publication. Linux geometry tests do not certify the physical iPhone or outer iOS host chrome.
