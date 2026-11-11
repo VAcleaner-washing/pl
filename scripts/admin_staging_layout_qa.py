@@ -88,7 +88,7 @@ def main():
             for width in [320,390,440,768,1440]:
                 options={k:v for k,v in pw.devices['iPhone 17 Pro Max'].items() if k!='default_browser_type'} if width<=440 else {}
                 options.update(viewport={'width':width,'height':956},service_workers='block',timezone_id='Europe/Kyiv')
-                context=browser.new_context(**options);context.route('**/*',api)
+                context=browser.new_context(**options);context.route('**/*',lambda route:api(route))
                 if width<=440:context.add_init_script("Object.defineProperty(navigator,'standalone',{value:true})")
                 page=context.new_page();errors=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
