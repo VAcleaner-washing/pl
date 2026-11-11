@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.54
-**Baseline build:** 4354
+**Baseline version:** 4.3.55
+**Baseline build:** 4355
 **Останнє оновлення:** 2026-11-11
 **Власник логіки:** VAcleaner  
 
@@ -5535,3 +5535,33 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Hosted Auth 51 assertions; two-manager persisted-state lifecycle, actual concurrent capacity enforcement, explicit retry after proxy-discarded real response, private signed document access and referral reward correction/claim/release were exercised on staging. The detailed record distinguishes original harness failures from corrected read/persistence results and does not label the whole release green.
 - All 22 public tables have RLS. Direct privileged reservation RPC is denied to anon/authenticated roles; canonical pure slot-index helper remains public. Final server read-back: 8 synthetic bookings/8 customers/33 audit rows, 1 referral use/1 reward; zero SMS/push dispatch data or schedules; private document bucket with no objects after cleanup.
 - Connected UI remains closed pending verified public-signup/mail policy and isolated entrypoint. Physical iPhone, remaining server-fault/promo matrices and the previously red WebKit PR gate remain open; server checks do not substitute for them.
+
+# 113. Change record — v4.3.55 / isolated R4 hosted UI candidate
+
+### ADDED
+
+- Separate `/r4/admin/bronuvannia/` artifact, built from canonical Pages by `scripts/build-admin-staging-ui.mjs`. `staging/hosted-r4-client.json` contains only the exact new project ref/origin and public publishable key. No password, token, service-role key or server source is shipped.
+- Boundary script loads before canonical application code, pins the exact R4 project and permits only six tested handlers plus password/refresh/local-logout/get-user Auth routes. Browser signup/invite/recover/admin/unknown/provider routes return explicit 503 with delivered:false without a network request. Cross-origin redirects are refused.
+- Every stage-origin request waits for a fresh Auth settings response with disable_signup=true. Rejected/unavailable/unverified settings leave access closed; a saved session cannot bypass this guard. This client boundary supplements unchanged server Auth/RLS/allowlists, not replaces them.
+- Targeted transport/storage/artifact tests are part of canonical static QA. They do not certify connected-browser interactions.
+
+### CHANGED
+
+- Generated stage scripts use prefix-scoped local/session storage while preserving canonical business strings and payload fields. Stage manifest ID/scope, asset paths and service-worker cache are isolated under `/r4/`; eviction only removes earlier stage caches. No foreign worker unregister or stage push handler is retained.
+- LAB presentation/forms also opt into hosted stage mode. Hosted copy explicitly says server data, uses separate test accounts and excludes synthetic reset/export/fault controls. Original synthetic LAB behavior remains available; the published LAB54 files are not replaced by this candidate.
+- Staging login maps manager-a/manager-b to existing synthetic .invalid accounts and labels their profiles as test managers. Production passwords and business identities are not reused.
+
+### FIXED
+
+- Cross-environment storage/cache collisions and accidental production/provider access are prevented in the generated stage artifact. Financial handlers, pricing/status rules and canonical normal-runtime logic are unchanged apart from coherent release stamps.
+
+### PRESERVED
+
+- Production/main 4.3.46/4346 and published browser-local LAB54/4354 remain unchanged. Hosted backend remains the separately recorded canonical version-1 deployment sourced from UI54; this UI candidate does not redeploy it or change its data.
+- Publication of the new stage path requires actual Auth policy read-back and native owner-private Sites deployment. Do not interpret the user's report of toggling a setting as verified server state. At initial follow-up the uncached R4 Auth API still returned disable_signup=false.
+
+### TESTS
+
+- Boundary/artifact tests cover exact target refusal, unchanged foreign storage, prefix-limited clear/enumeration, all six allowed handlers, production/external/provider/direct-REST/Auth-mail route rejection, password/refresh transport, redirect refusal, unverified-policy denial, bootstrap order, generated test-account binding, SW/cache/path/manifest isolation and hosted presentation separation.
+- Original synthetic LAB static/persistence tests and Chromium/WebKit canonical suites remain required. Stage-specific connected-browser and physical iPhone acceptance remain distinct. Managed Sites browser preview is unavailable without cua_repl.js; do not bypass that with an improvised local browser path.
+- Prior checkpoint 3748fa6 push run 43025892948 completed Static, Chromium aggregate and WebKit successfully; Pages deployment skipped. Earlier UI54 PR TargetClosed evidence remains retained; a successful later run does not establish its crash cause or certify this UI55 candidate.

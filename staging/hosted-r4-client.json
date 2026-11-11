@@ -1,0 +1,13 @@
+{
+  "projectRef": "jdthhqxzfpvosfdxwfem",
+  "origin": "https://jdthhqxzfpvosfdxwfem.supabase.co",
+  "publicKey": "sb_publishable_VgRx1TeO2Rg97F4GO15xmQ_2BnJlPiq",
+  "functions": [
+    "vacleaner-admin-bookings-v4",
+    "vacleaner-admin-data-v1",
+    "vacleaner-settings",
+    "vacleaner-extend-rental-v1",
+    "vacleaner-status-correction-v1",
+    "vacleaner-customer-documents-v1"
+  ]
+}

@@ -1,6 +1,6 @@
 /* LAB interaction policy. Existing application handlers remain the only save owners. */
 (()=>{'use strict';
-if(document.documentElement.dataset.adminLab!=='synthetic')return;
+if(!['synthetic','staging'].includes(document.documentElement.dataset.adminLab))return;
 const records=new WeakMap(),ownedInert=new Set();
 let confirmation=null,menuReturnFocus=null,bypass=false,approvedReload=false,sequence=0;
 const forms=(root=document)=>[...root.querySelectorAll('form')].filter(form=>form.id!=='authForm');
