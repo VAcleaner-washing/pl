@@ -6,7 +6,7 @@ Run in the existing remote CI browser environment, not a substitute Sites previe
 import argparse,datetime,json,shutil,tempfile
 from pathlib import Path
 from urllib.parse import urlsplit
-from playwright.sync_api import sync_playwright,expect
+from playwright.sync_api import sync_playwright,expect,TimeoutError as PlaywrightTimeout
 from admin_entrypoint_finance_qa import pages_server
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -142,9 +142,16 @@ def main():
         restored=page.locator('.detail-top').evaluate("el=>Boolean(el.closest('.detail-shell'))")
         check(f'{width}: desktop resize restores the original detail header parent',restored)
         page.set_viewport_size({'width':width,'height':956})
-        page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        before_resize=page.evaluate("()=>({innerWidth,clientWidth:document.documentElement.clientWidth,visualWidth:visualViewport.width,scale:visualViewport.scale,mobile:matchMedia('(max-width:900px)').matches,classes:document.querySelector('.detail').className,headerParent:document.querySelector('.detail-top').parentElement.className})")
+        # Resize delivery is asynchronous in WebKit. Wait for the actual
+        # header projection, rather than treating two rAFs as its completion.
+        # Baseline records a failed condition and continues collecting evidence.
+        try:
+            page.wait_for_function("()=>document.querySelector('.detail-top')?.parentElement===document.querySelector('.detail')")
+        except PlaywrightTimeout:pass
         contract=scroll_contract(page,owner,'.detail-top','.lab-action-dock')
-        check(f'{width}: returning to mobile restores bounded detail scroll',contract['scroll']['top']>=contract['header']['bottom']-1 and contract['scroll']['bottom']<=contract['footer']['top']+1,geometry=contract)
+        after_resize=page.evaluate("()=>({innerWidth,clientWidth:document.documentElement.clientWidth,visualWidth:visualViewport.width,scale:visualViewport.scale,mobile:matchMedia('(max-width:900px)').matches,classes:document.querySelector('.detail').className,headerParent:document.querySelector('.detail-top').parentElement.className})")
+        check(f'{width}: returning to mobile restores bounded detail scroll',contract['scroll']['top']>=contract['header']['bottom']-1 and contract['scroll']['bottom']<=contract['footer']['top']+1,geometry=contract,before=before_resize,after=after_resize)
         page.locator('.detail .back').click();expect(page.locator('.detail')).to_have_count(0)
         page.locator('.mobile-nav [data-mobile-view=calendar]').click()
         expect(page.locator('.day-card')).to_have_count(14)
