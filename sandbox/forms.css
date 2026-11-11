@@ -1,0 +1,27 @@
+html[data-admin-lab]{--form-surface:#111b24;--form-border:#425365;--form-text:#edf2f8;--form-muted:#b3c0cd;--form-focus:#9ac8ff;--form-error:#ffb4ac;--form-radius:10px;--form-gap:12px}
+html[data-admin-lab] :is(.modal-form,.settings-section) .fields{gap:var(--form-gap)!important}
+html[data-admin-lab] :is(.modal-form,.settings-section) .field>span{font-size:13px;line-height:1.45;color:var(--form-muted)}
+html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea):not([type="hidden"],[type="checkbox"],[type="radio"],[type="file"]){min-height:44px;border-radius:var(--form-radius);border-color:var(--form-border);line-height:1.4}
+html[data-admin-lab] :is(.modal-form,.settings-section) :is(button,.btn,summary){min-height:44px}
+html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea,button):focus-visible{outline:3px solid var(--form-focus)!important;outline-offset:2px}
+html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea)[aria-invalid="true"]{border-color:#ff8e88!important;box-shadow:0 0 0 1px #ff8e88!important}
+html[data-admin-lab] .field>.lab-field-error{display:block;font-size:13px!important;font-weight:500;line-height:1.45;color:var(--form-error)!important;letter-spacing:normal;text-transform:none}
+html[data-admin-lab] :is(.modal-form,.settings-section) :is(button,input,select,textarea):disabled{opacity:.6;cursor:default}
+html[data-admin-lab] .modal-form .switch{min-height:44px}
+html[data-admin-lab] form[data-lab-saving] :is(input,select,textarea){opacity:.75;cursor:wait}
+html[data-admin-lab] .lab-save-notice{margin:8px 0 0;padding:8px 10px;border:1px solid #9b793d;border-radius:8px;background:#342b1b;color:#ffe2a7;font-size:13px;line-height:1.45}
+html[data-admin-lab] .lab-fault-recovery{margin-top:8px;min-height:44px;font-size:12px;border:1px solid #6c8bab;color:#c4d8ef;background:#192b3d}
+html[data-admin-lab] .lab-leave-dialog{width:min(420px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;margin:auto;padding:22px;border:1px solid #526b84;border-radius:16px;background:#111b24;color:#edf2f8;box-shadow:0 20px 70px #0008;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html[data-admin-lab] .lab-leave-dialog::backdrop{background:#0009}
+.lab-leave-dialog h2{margin:0 0 10px;font-size:21px;line-height:1.3}.lab-leave-dialog p{margin:0 0 18px;color:#b3c0cd}
+.lab-leave-actions{display:grid;gap:10px}.lab-leave-actions .btn{width:100%;min-height:48px;white-space:normal;line-height:1.4;font-size:14px}
+html[data-admin-lab] .status.confirmed{color:#a3e5bf!important;background:#15372a!important;border-color:#34664c!important}
+html[data-admin-lab] .status.issued{color:#b2d4ff!important;background:#17354e!important;border-color:#41698b!important}
+html[data-admin-lab] .status.waiting_payment{color:#ffe2a7!important;background:#372b18!important;border-color:#8a6e34!important}
+html[data-admin-lab] .status.cancelled{color:#ffb4ac!important;background:#391f23!important;border-color:#815058!important}
+@media(max-width:900px){
+ html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea):not([type="hidden"],[type="checkbox"],[type="radio"],[type="file"]){font-size:16px!important}
+ html[data-admin-lab].keyboard-open:not([data-lab-zooming]){--lab-modal-top:max(var(--lab-bar),var(--keyboard-viewport-top,0px));--lab-modal-height:calc(var(--keyboard-viewport-height,100dvh) - max(0px,calc(var(--lab-bar) - var(--keyboard-viewport-top,0px))))}
+ html[data-admin-lab].keyboard-open:not([data-lab-zooming]) .modal{top:var(--lab-modal-top)!important;height:var(--lab-modal-height)!important;max-height:var(--lab-modal-height)!important}
+ html[data-admin-lab].keyboard-open:not([data-lab-zooming]) .modal>.modal-card{max-height:calc(var(--lab-modal-height) - 24px)!important}
+}

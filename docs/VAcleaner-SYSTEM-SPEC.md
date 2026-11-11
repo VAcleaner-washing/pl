@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.46
-**Baseline build:** 4346
-**Останнє оновлення:** 2026-11-09
+**Baseline version:** 4.3.54
+**Baseline build:** 4354
+**Останнє оновлення:** 2026-11-11
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5258,3 +5258,254 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - To diagnose WebKit startup failures in GitHub Actions, install Playwright WebKit and required runtime libraries on the supported Ubuntu 24.04 runner, with an explicit startup smoke step and diagnostic artifact even on failures. Restore the previously green Playwright WebKit cache step and cap install duration at 15 minutes; this avoids an indefinitely stalled dependency download without relaxing the mandatory WebKit QA.
 - Static/build uploads `qa-release-summary.json` as `vacleaner-static-qa-failure` with `if: failure()`, when available, to surface the failing contract. This is evidence collection only and does not bypass a failed gate.
 - Neither diagnostic change edits application behavior, service workers, prices, promotions, customer data or Supabase. Existing release/build stays **4.3.46 / 4346**.
+
+
+# 103. Change record — v4.3.47 / Admin audit R1: reliable state and truthful metrics
+
+### ADDED
+- ADM-RELIABILITY-001: after a committed booking/finance/referral mutation, a failed subsequent read is a read-recovery state, not a failed mutation. The authoritative returned booking is applied locally; a persistent notice explains that changes were saved and its retry performs reads only. Never automatically replay a financial write.
+- ADM-RELIABILITY-002: if the financial calculation was saved but settlement confirmation fails, keep the form, show the saved first phase explicitly, and reconcile against authoritative read data. A completed authoritative booking closes the flow without another settlement write.
+- ADM-RELIABILITY-003: optional campaign/expiring-referral read failures retain the previous successful snapshot with an explicit stale/error notice and retry, rather than fabricating a successful empty state.
+- ADM-RELIABILITY-004: booking customer lookups apply only to the current phone, current request sequence, and connected form. Removed forms dispose document-address and media-query listeners and pending lookup timers.
+
+### CHANGED
+- Settings localStorage contains only server-confirmed delivery/equipment values. Submitted drafts are normalized without persisting and remain editable on failure. No rollback overwrites later confirmed state.
+- Generic admin dialogs derive their accessible name from the mounted heading. Explicit service-worker update waits until the current modal form is saved or closed.
+- Referral editing remains a separate immediate atomic RPC operation. If other form fields have changed, save those first; applying a referral must not silently discard an unrelated booking draft.
+- Financial results keep their existing arithmetic, but label incomplete expense accounting explicitly as based on entered expenses. Weekly copied reports carry the same caveat and actual date range. Unknown/null margins display a dash, not null%.
+
+### FIXED
+- REF-011: actual-period outside-cohort booking count comes directly from that set, not actual bookings minus a different invitation cohort. Late conversions remain part of the invitation cohort but cannot generate negative actual-period counts. Distinct referrers may overlap; categories are not an additive partition.
+- Actual referral period labels use the referral-use creation/application date, not a claimed booking-creation date. Referral revenue remains the completed result of that use-created cohort, independently of completion-period revenue.
+- Missing booking source remains unknown (Не вказано) rather than being assigned to the website, in both analytics and operational labels. Known source semantics remain unchanged.
+- Stale lookup responses can no longer overwrite a different client's name/contact/document fields or download a document for a detached form.
+
+### PRESERVED
+- Rental/deposit/payment/settlement arithmetic, availability/resource rules, prices and delivery tariffs, discounts/loyalty, chemistry, manual charges, RETURN/referral reward rules, source data, SMS consent/send rules, API authorization, private documents and VA HOME isolation.
+- Existing single-flight reads/auth refresh, explicit worker-update consent, no business-response cache, all navigation return paths, UI actions and mandatory release QA gates.
+- No Supabase schema, RPC, Edge deployment or production business data changes. This candidate is prepared on qa/admin-audit-r1; main/deploy are not authorized by its preparation.
+
+### TESTS
+- test:admin-audit-r1 executes shipped helper logic with rejected/successful settings responses, late referral conversions, unknown sources, optional-read errors and committed-save refresh failures.
+- test:admin-audit-r1-browser exercises shipped HTML/assets on local API fixtures at 390/1440: settings failure/retry, campaign read recovery, delayed client A/B responses, committed create followed by read failure and read-only retry. It runs in Chromium and the WebKit gate.
+- All existing financial/status/booking/session tests, canonical static/build, Chromium/PWA and WebKit gates remain required. Physical iPhone validation remains separately necessary before production publication.
+
+
+# 104. Change record — v4.3.48 / isolated Admin LAB (R2)
+
+- LAB-001: stable production remains v4.3.46/build 4346 at commit `15bf61dc4da4cf63405a25887353e6ec7178dce8`. Branch `stable/v4.3.46-4346` and checksum-verified Pages archive retain the restoration point. Never roll back business records to roll back the frontend.
+- LAB-002: synthetic LAB uses a separate private origin. Its own localStorage, manifest ID/name and `vacleaner-lab-` worker cache cannot access the stable origin. The normal Pages build excludes the whole `sandbox/` source directory and never loads LAB assets.
+- LAB-003: LAB-only builder removes production API origins/keys, enforces same-origin CSP and installs its closed synthetic adapter before the admin runtime. Unsupported API actions fail explicitly. External messages, calls, documents and integrations do not execute. No production backend/schema migrations.
+- LAB-004: test changes persist atomically in browser-local storage before success is returned. Reset/export affect only synthetic records. The permanent LAB banner identifies test data and links to the stable version. Error/latency controls support repeatable retry tests.
+- LAB-005: compact booking list retains status, client, period, received funds, deposit/settlement, pending-document warning and all existing actions. A visible view toggle restores full detail. Detail keeps a primary action reachable at the bottom and discloses the complete ledger. Business action handlers and pure pricing/settlement functions are reused.
+- LAB-006: simulation verifies local UI behavior only. Capacity, geocoding, referral RPCs, campaign dispatch, live auth, database persistence and atomic transactions require separate staging integration verification before production cutover. Unavailable actions must not report fake successful writes or real service health.
+- LAB-007: keep stable and LAB in parallel until explicit acceptance/cutover. Do not merge main, deploy VAcleaner production or delete the old served version during this stage. After cutover retain the immutable archive; retiring a served UI is separate from destroying the recovery point.
+
+### ADDED
+
+- Separate synthetic LAB builder/adapter, private hosting identity, LAB-only component tokens and test controls.
+- Frozen stable Pages archive manifest, safe verification/extraction script and staged rollout/rollback runbook.
+- Closed-network, local persistence, lifecycle, failure/retry, responsive, idle and offline worker regression scenarios.
+
+### CHANGED
+
+- Only LAB loads compact booking presentation, full-view toggle, sticky detail primary action and ledger disclosure.
+- Canonical QA includes LAB contracts and browser checks; production Pages explicitly excludes sandbox sources.
+
+### FIXED
+
+- Prevents shared-origin PWA/cache/data collisions between the stable app and its experimental copy.
+- LAB reports unsupported integrations and quota failures explicitly, without pretending a production write succeeded.
+
+### PRESERVED
+
+- Production remains 4.3.46/build 4346. No main merge, production deploy, customer/finance mutation, database migration or integration dispatch.
+- Canonical financial/status/discount rules and all normal admin business-action handlers; inherited R1 behavior.
+- Existing vanilla JavaScript/CSS architecture and full booking actions. The synthetic adapter is excluded from production.
+
+### TESTS
+
+- `npm run qa:full`, `npm run test:webkit`, `npm run test:admin-lab`; LAB browser tests use its actual adapter without API routing mocks.
+- Stable archive SHA and all 270 file hashes are verified and extracted into an isolated staging directory.
+- Browser emulation is not physical iPhone approval or proof of production backend persistence; those remain transition gates.
+
+
+# 105. Change record — v4.3.49 / LAB form safety and accessibility (R3)
+
+### ADDED
+
+- LAB-only shared form controller protects user-initiated close/navigation against dirty form loss. Confirmation retains the original connected form; accepting discard delegates to the original UI action. No draft is written to production or silently saved.
+- Closing a form while its submitted action is still disabled/in flight is blocked with an explicit status message. A rejected save retains its draft and can be closed/retried deliberately.
+- LAB fields share readable mobile input sizes, focus/error/disabled tokens and accessible inline validation feedback. LAB viewport permits user zoom. Keyboard-accessible summaries, labelled dialogs and background isolation preserve focus.
+
+### CHANGED
+
+- LAB More menus close on action, outside click and Escape, so an aborted cancellation cannot cover Details. This fixes the actual Chromium CI failure in R2 (job 129936212132); it is not hidden with forced clicks or looser assertions.
+- A definite modal height below the LAB banner and viewport-aware layout keep scrollable form bodies separate from their actions.
+- The canonical QA preparation continues to build LAB separately in each job. New form regression scenarios exercise unchanged forms, dirty close/keep/discard, pending/failed saves, field errors, keyboard focus and settings navigation.
+
+### FIXED
+
+- Loss of unsaved LAB booking/client/expense/catalog/settings drafts via close, Escape, backdrop or section navigation.
+- Closed native dropdown cancellation overlay blocking later desktop actions.
+- Mobile zoom restriction and incomplete keyboard access to summary/disclosure controls in LAB.
+- Expense save/archive refresh may render Finances only while that section is still active. A delayed read must not replace a newer settings screen or its draft. Settings success emits a UI-only committed-form event after acknowledgement, never on rejected saves.
+
+### PRESERVED
+
+- Production main and vacleaner.pp.ua remain v4.3.46/build 4346. Its stable branch, archive and manifest are retained. No production Supabase or business-data writes, schema changes, real dispatches, financial formulas or status transition changes.
+- LAB synthetic records, origin, manifest identity and reset/export behavior; R1 reliability and R2 actions. Canonical admin handlers remain the owners of saves and financial/status decisions.
+- Generic browser unload warning is best effort; iOS OS-level dismissal, keyboard/safe-area behavior and VoiceOver still require physical device acceptance. No automatic save or persistent draft recovery is claimed.
+
+### TESTS
+
+- Existing static/Chromium/PWA/WebKit contracts plus actual LAB artifact tests and focused form safety tests. Explicitly test a clean checkout, confirmed and rejected saves, repeated open/close, menu cancellation and independent view navigation.
+- Canonical finance/pricing/catalog bytes must match stable46; LAB code remains excluded from normal Pages artifact. Screenshot review includes portrait/landscape iPhone emulation and desktop; this is not physical iPhone approval.
+
+
+# 106. Change record — v4.3.50 / LAB date-field focus baseline
+
+### ADDED
+
+- Reproduction against system Chromium and the official Playwright Chromium: the newer date-input fill path emits a second trusted focus event after the date changes but before its input/change events. The existing extension-form dirty-close assertion catches the lost baseline.
+
+### CHANGED
+
+- LAB pristine snapshots may follow automatic initialization only before the first trusted form interaction. A later focus event or observer hydration cannot adopt an edited date as the clean baseline. Successful acknowledged saves still reset the baseline explicitly.
+
+### FIXED
+
+- A second focus on a date input could overwrite the original pristine snapshot and permit closing an edited extension form without confirmation. Reproduced from Chromium CI job 130075140464; the same existing failing assertion is retained.
+
+### PRESERVED
+
+- Production 4.3.46/4346, financial/status rules, save ownership, LAB isolation and previous private Site versions. No production writes or deployments.
+
+### TESTS
+
+- Run the unchanged 77-assertion focused suite against official Playwright Chromium as well as WebKit, the actual LAB artifact checks, and independent canonical CI gates. Record the earlier 48/49 Chromium result honestly; a WebKit or local system Chromium pass does not certify another browser build.
+
+
+# 107. Change record — R4 isolated backend preflight (no frontend release)
+
+### ADDED
+
+- Read-only catalog snapshot: 22 tables and 15 SQL functions with original RLS, policies, grants, constraints and indexes; deployed-source parity metadata for six core handlers. No business rows, Auth users, secrets or schedules are copied.
+- A staging-only generator produces an empty-database bootstrap, declared synthetic resources/defaults and byte-identical canonical handlers behind an explicit outbound transport boundary. Production refs and output paths outside staging are refused.
+- A concrete Free-project proposal and integration acceptance matrix in staging/README.md; real Auth/RLS/RPC, persisted read-back and two-device execution are explicitly pending target selection.
+
+### CHANGED
+
+- Canonical Pages excludes staging/; the independent artifact verifier also rejects it. New preflight checks include a deliberately contaminated artifact and verify the final clean artifact.
+
+### FIXED
+
+- Prevents newly introduced staging source, runtime files or credentials from entering a future normal Pages artifact.
+
+### PRESERVED
+
+- Production main/site 4.3.46/4346 and private LAB 4.3.50/4350. No production writes/deploys, financial/status logic changes, real dispatches or copied customer data. No new hosted resources are created before organization selection.
+
+### TESTS
+
+- npm run test:admin-staging-preflight: 17 checks; SQL syntax parsed independently with pglast 7.22. These are preflight checks, not live integration certification.
+- Normal Pages remains 270 files. Local full Supabase startup was blocked by disk ENOSPC; no live Auth/RLS/RPC or persistence pass is claimed.
+
+
+# 108. Change record — v4.3.51 / preserve modal input focus
+
+### ADDED
+
+- A deterministic delayed-frame regression holds the canonical initial-focus callback until a user has focused the campaign name field. The input must keep focus and accept text before dirty-close is checked.
+
+### CHANGED
+
+- Deferred initial modal focus runs only while its card is still connected, no control inside it already owns focus and no native confirmation dialog is open. Normal initial modal focus remains available.
+
+### FIXED
+
+- Initial requestAnimationFrame focus could steal focus between WebKit filling an input and inserting its text. Reproduced six of six times with the delayed frame; the field stayed empty and no dirty warning was expected by actual state. This matches the R4 WebKit CI failure at the campaign guard (job 130144442458). The existing guard assertion is retained and actual field value/focus is asserted earlier.
+
+### PRESERVED
+
+- Financial/status/backend behavior, canonical save owners, production main and deployed 4.3.46/4346. R4 hosted project selection is still pending; no real business records or external dispatch are introduced.
+
+### TESTS
+
+- Focused LAB Chromium/WebKit form suite with deterministic late-frame case, actual LAB artifact checks and canonical regression gates. Do not claim physical iPhone or live backend acceptance from these browser results.
+
+
+# 109. Change record — v4.3.52 / user-owned scroll after navigation
+
+### ADDED
+
+- Deterministic late-navigation-reset test: release the original 60ms reset between pointerdown/pointerup on the confirmed booking's Issue button. The original scroll changed from 1934 to 0 and the issue form did not open. The new assertion checks retained scroll, actual form visibility and the expected booking code.
+
+### CHANGED
+
+- Each view-scroll reset has a view/version owner and captures the current trusted user-action revision. Its queued microtask, frames and timer retain their original initial-navigation behavior only while that context is current and no newer pointer/key/wheel interaction has occurred. Three passive capture listeners update one revision counter; no per-form timers/listeners are added.
+
+### FIXED
+
+- Deferred resets could override scrolling performed to reach a booking action and move the target before pointerup. This reproduces the missing issueForm symptom in WebKit CI job 130367322907; the modal focus repair's regression already passed in that run. The previous dirty-close assertions are retained.
+
+### PRESERVED
+
+- Initial navigation returns to the top, including the existing deferred resets needed by layout. New user intent takes precedence over older restoration work. Financial rules, statuses, API payloads and backend handlers remain unchanged. Production stays 4.3.46/4346; R4 hosted target selection is still pending.
+
+### TESTS
+
+- Focused form tests use pinned Playwright 1.61.0 / WebKit 2311 (Ubuntu 24.04 as CI), official Chromium, deterministic focus and scroll cases, actual LAB artifact checks and canonical CI. Syntax/preflight and browser tests do not certify live backend or physical iPhone acceptance.
+
+
+# 110. Change record — v4.3.53 — LAB navigation safe-area geometry
+
+### ADDED
+
+- Simulated safe-area geometry assertions and failure-only Details diagnostics in the LAB artifact suite.
+
+### CHANGED
+
+- LAB navigation shell derives its height from the shared mobile navigation size and bottom safe-area token.
+
+### FIXED
+
+- The LAB mobile navigation uses one shell height: 82px controls area plus the current `--pwa-safe-bottom` inset. Previously the legacy fixed 82px height included a growing bottom padding; with a 34px inset its 56px minimum buttons extended into the reserved home area. The LAB component now owns `--mobile-nav` and derives its painted height from `--mobile-nav-shell`. Normal production CSS is unchanged.
+
+### TESTS
+
+- LAB artifact QA checks a flush viewport edge, painted shell height and minimum 44px controls outside simulated 0px/34px home areas in both engines and all mobile widths. These injected tokens verify layout mathematics, not physical iPhone safe-area reporting.
+- A failed desktop Details click records viewport, document focus/visibility, button bounds/styles, open menus, animations and screenshot without retries, sleeps or forced clicks. The previous 4.3.52 WebKit CI failure at 1024px remains unresolved until the cause is established; local green is not full release acceptance.
+
+### PRESERVED
+
+- The iOS host sheet visible in the user's screenshot owns its own outer chrome. A website cannot certify removal of the host's black home-indicator strip in Linux emulation. Do not remove the safe inset or shift controls over it to hide that strip. Production remains 4.3.46/4346; hosted R4 is not created. No business logic, Supabase data, auth or dispatch changes.
+
+
+# 111. Change record — v4.3.54 / LAB card actions and compact time choices
+
+### ADDED
+
+- LAB time picker period navigation: Morning (07:00–11:30), Day (12:00–16:30), Evening (17:00–21:00). The 29 canonical 30-minute choices keep their existing nodes and handlers. Period buttons only filter presentation; they never change input values. The initial group follows the current time. Existing off-grid times remain available and are not rounded or clamped.
+- Picker-local Tab containment and Escape/Close focus return. Escape closes only the time sheet and leaves the parent booking draft open.
+
+### CHANGED
+
+- Compact card primary action owns a full row. Details precedes More in both DOM and visual order. More keeps its original summary/action-sheet handlers and accessible name; the icon-only target is 48x44px. Secondary actions and all original business actions remain reachable.
+- One LAB owner defines action layout; previous duplicated flex overrides are consolidated. Status badges grow with wrapped copy and use 12px type, preventing clipped waiting-payment labels.
+- Time sheet uses a natural-height flex layout capped by the viewport, a fixed header/group selector and a scrollable options area. The bottom padding and scroll-padding preserve the home area, including keyboard-driven scroll in short viewports.
+
+### FIXED
+
+- The former 44px More control squeezed three bullets and a text label. A fixed-height badge clipped longer status copy.
+- The previous time grid required scrolling through all 29 options. Groups fit on ordinary phone viewports; short viewports retain a bounded scroller and accessible final row. The LAB grouping happens in the mutation batch before paint, avoiding a flash of the unfiltered grid.
+
+### PRESERVED
+
+- Canonical time inputs, time selection handlers, 07:00–21:00 range, 30-minute step, rental windows, pricing, statuses and financial calculations are unchanged. Selected times persist through the existing LAB adapter save/reload contract in extras.pickup_time / extras.return_time.
+- Production/main remains 4.3.46/4346. Current published LAB at implementation start is 4.3.53 (Site version 5). Hosted R4 is still not created; no production Supabase or business-data writes, SMS, push or documents.
+
+### TESTS
+
+- Actual LAB browser QA covers the More touch target and unchanged action path, full waiting-payment label, all 29 slots across groups, unchanged inputs on group navigation/cancel, separate pickup/return inputs, legacy off-grid preservation, reopened selection, keyboard containment/Escape, simulated 34px safe area, short viewport scrolling and persisted times after failed-save/retry/reload.
+- Existing form lifecycle/dirty-close and deployment isolation suites remain unchanged in their expectations. Chromium/WebKit and canonical CI gates are required before private publication. Linux geometry tests do not certify the physical iPhone or outer iOS host chrome.

@@ -1,0 +1,9 @@
+/supabase/.temp/
+/supabase/.branches/
+/supabase/functions/
+/supabase/migrations/
+/*.generated.sql
+/*.generated.json
+/*.env
+/credentials.json
+/runtime/
