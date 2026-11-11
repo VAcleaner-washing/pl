@@ -2,6 +2,7 @@
 (()=>{'use strict';
 if(!['synthetic','staging'].includes(document.documentElement.dataset.adminLab))return;
 const hosted=document.documentElement.dataset.adminLab==='staging';
+const layoutMedia=hosted?matchMedia('(max-width:900px)'):null;
 const text=node=>String(node?.textContent||'').replace(/\s+/g,' ').trim();
 const el=(tag,className,value)=>{const node=document.createElement(tag);node.className=className;if(value)node.textContent=value;return node};
 const banner=el('aside','lab-banner');banner.setAttribute('aria-label','Тестове середовище');
@@ -64,7 +65,7 @@ function detailUI(){
  if(hosted){
   const shell=detail.querySelector(':scope>.detail-shell'),head=detail.querySelector('.detail-top');
   if(shell&&head&&detail.querySelector(':scope>.lab-action-dock')){
-   const mobile=matchMedia('(max-width:900px)').matches;
+   const mobile=layoutMedia.matches;
    if(mobile&&head.parentElement===shell)detail.insertBefore(head,shell);
    else if(!mobile&&head.parentElement===detail)shell.prepend(head);
    detail.classList.toggle('stage-detail-layout',mobile);
@@ -127,7 +128,12 @@ document.addEventListener('keydown',event=>{
 // by the canonical application. No timers, network polling or duplicate business handlers.
 let queued=false;
 const schedule=()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;listUI();detailUI()})};
-if(hosted)matchMedia('(max-width:900px)').addEventListener('change',schedule);
+if(hosted){
+ // Retain the MediaQueryList and also observe viewport resize. WebKit can
+ // deliver the breakpoint update later than its first responsive style pass.
+ layoutMedia.addEventListener('change',schedule);
+ window.addEventListener('resize',schedule,{passive:true});
+}
 const observer=new MutationObserver(()=>{timeUI();schedule()});
 observer.observe(document.querySelector('#adminMount'),{childList:true,subtree:true});
 observer.observe(document.querySelector('#layer'),{childList:true,subtree:true});

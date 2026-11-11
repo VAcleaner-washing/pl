@@ -5659,3 +5659,5 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Static and isolation/artifact gates remain required. Physical iPhone/native keyboard/PWA lifecycle acceptance is distinct from emulation and fixture tests.
 
 - Populated-calendar baseline confirms the main scrollport still extended to viewport bottom under navigation despite compensating bottom padding. Non-keyboard R4 main views now end above the unchanged82px nav and use18px content clearance. Existing keyboard-open rules are preserved. This addresses the scroll boundary; it does not change availability, past-slot semantics or calendar calculations.
+
+- Responsive regression exposed WebKit returning to mobile CSS before the staged header projection refreshed. R4 retains its MediaQueryList and schedules the same idempotent projection on viewport resize as well as breakpoint change. The strict two-frame geometry check is preserved; no extra time delay or weaker bounds are introduced.
