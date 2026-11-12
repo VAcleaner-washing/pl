@@ -18,6 +18,11 @@ def main():
     fixture=json.loads((ROOT/'staging/fixtures/mobile-layout.json').read_text())
     config=json.loads((ROOT/'staging/hosted-r4-client.json').read_text())
     assert fixture['mode']=='synthetic-stage-layout-fixture'
+    # Complete/cancelled examples are isolated copies used only by HTTP fixtures.
+    issued_fixture=next(b for b in fixture['bookings'] if b['status']=='issued')
+    for suffix,status in [('5901','completed'),('5902','cancelled')]:
+        row=json.loads(json.dumps(issued_fixture));row.update(id='00000000-0000-4000-8000-00000000'+suffix,status=status,customer_name='R4 ACTIONS QA · '+status)
+        fixture['bookings'].append(row)
     calendar_start=datetime.datetime.fromisoformat(fixture['fixedTime']).date()
     calendar_days=[{'date':(calendar_start+datetime.timedelta(days=i)).isoformat(),
                     'resources':{key:{'label':key,'capacity':2,'morning':2,'evening':2} for key in ['abir','jimmy','puzzi','sc2']}} for i in range(14)]
@@ -185,6 +190,56 @@ def main():
         if page.locator('#labLeaveDialog').count():page.locator('#labLeaveDialog [data-lab-discard]').click()
         expect(form).to_have_count(0)
         check(f'{width}: discarding the form returns to a readable calendar',page.locator('.day-card').count()==14)
+    def exercise_booking_actions(page,width):
+        if page.locator('.detail').count():page.locator('.detail .back').click()
+        page.locator('.mobile-nav [data-mobile-view=bookings]' if width<=900 else '.nav [data-view=bookings]').click()
+        expect(page.locator('#labListMode')).to_be_visible()
+        action_sets={'pending':['process','edit','cancel'],'waiting_payment':['process','edit','status','cancel'],
+                     'confirmed':['issue','edit','status','cancel'],'issued':['complete','finance','extend','status','cancel'],
+                     'completed':['finance','referral','status'],'cancelled':['status']}
+        for compact in [False,True]:
+            mode='compact' if compact else 'full'
+            page.locator(f'#labListMode [data-compact="{str(compact).lower()}"]').click()
+            for row in fixture['bookings']:
+                status=row['status'];card=page.locator(f'.booking-card[data-id="{row["id"]}"]')
+                expect(card.locator('.lab-open-detail')).to_be_visible()
+                if width<=900:expect(card).to_have_attribute('data-v22-status',status)
+                actions=card.locator('.booking-actions');details=actions.locator('.lab-open-detail');more=actions.locator('>.booking-action-more')
+                details.click(trial=True)
+                measured=actions.evaluate('''el=>{
+                  const box=n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,scrollWidth:n.scrollWidth,clientWidth:n.clientWidth,text:n.textContent.trim()}};
+                  return{owner:box(el),controls:[...el.querySelectorAll(':scope>.btn,:scope>.booking-action-more>summary')].filter(n=>n.getClientRects().length).map(box),details:box(el.querySelector('.lab-open-detail')),more:el.querySelector(':scope>.booking-action-more')?box(el.querySelector(':scope>.booking-action-more>summary')):null};
+                }''')
+                controls=measured['controls'];bad=[c for c in controls if c['width']<44 or c['height']<44 or c['scrollWidth']>c['clientWidth']+1 or c['x']<measured['owner']['x']-1 or c['right']>measured['owner']['right']+1]
+                check(f'{width}/{mode}/{status}: every card button has readable text and a 44px target',not bad,controls=controls,invalid=bad)
+                if width<=900:
+                    d=measured['details'];m=measured['more']
+                    aligned=abs(d['y']-m['y'])<=1 and abs(d['width']-m['width'])<=1 if m else abs(d['width']-measured['owner']['clientWidth']+float(actions.evaluate('el=>parseFloat(getComputedStyle(el).paddingLeft)+parseFloat(getComputedStyle(el).paddingRight))'))<=2
+                    check(f'{width}/{mode}/{status}: Details has a full utility row or an equal More partner',aligned,geometry=measured)
+                actual=actions.locator('[data-action]').evaluate_all('els=>els.map(el=>el.dataset.action)')
+                check(f'{width}/{mode}/{status}: all canonical business actions remain available',set(actual)==set(action_sets[status]),actions=actual)
+                page.screenshot(path=str(out/f'{width}-{mode}-{status}-card-actions.png'))
+                code=card.locator('.booking-identity small').inner_text().strip()
+                details.click();expect(page.locator('.detail')).to_be_visible();expect(page.locator('.detail')).to_contain_text(code)
+                page.locator('.detail .back').click();expect(page.locator('.detail')).to_have_count(0)
+                check(f'{width}/{mode}/{status}: Details opens the corresponding booking and returns',True)
+                if more.count():
+                    summary=more.locator('summary');summary.click()
+                    if width<=900:
+                        sheet=page.locator('.native-v2-action-sheet-layer');expect(sheet).to_be_visible()
+                        target=sheet.locator('button').filter(has_text='Виправити статус' if status!='pending' else 'Скасувати').first
+                    else:
+                        expect(more).to_have_attribute('open','');target=more.locator('.booking-action-more-items [data-action]').first
+                    reachable=True
+                    try:target.click(trial=True,timeout=5000)
+                    except PlaywrightTimeout:reachable=False
+                    check(f'{width}/{mode}/{status}: More opens reachable canonical actions',reachable)
+                    page.screenshot(path=str(out/f'{width}-{mode}-{status}-more-menu.png'))
+                    page.keyboard.press('Escape')
+                    if width<=900:expect(page.locator('.native-v2-action-sheet-layer')).to_have_count(0)
+                    else:expect(more).not_to_have_attribute('open','')
+                    expect(summary).to_be_focused()
+                    if width<=900:check(f'{width}/{mode}/{status}: More has a visible label', 'Ще' in summary.inner_text())
     with tempfile.TemporaryDirectory(prefix='r4-layout-',dir=ROOT/'staging-ui-test-results') as temp:
         reference=ROOT/'stable-reference-test-results/source/dist'
         assert reference.exists(),'Immutable 46 reference Pages artifact is required'
@@ -267,6 +322,7 @@ def main():
                     bad=[x for x in detail['items'] if x['left'] < -1 or x['right']>width+1 or x['scrollWidth']>x['clientWidth']+1]
                     check(f'{width}: detail fields/finance/actions remain fully readable',not bad,overflow=bad)
                     exercise_scroll_surfaces(page,width)
+                exercise_booking_actions(page,width)
                 check(f'{width}: no uncaught application error',not errors,errors=errors)
                 context.close()
             ref.close();browser.close()
