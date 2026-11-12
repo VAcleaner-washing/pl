@@ -9,6 +9,7 @@ import datetime
 import json
 import shutil
 import tempfile
+import time
 import traceback
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
@@ -25,7 +26,13 @@ def main():
     parser.add_argument('--browser', choices=['chromium', 'webkit'], required=True)
     parser.add_argument('--width', type=int, choices=[440, 1440], required=True)
     parser.add_argument('--artifacts', required=True)
+    parser.add_argument('--phase', choices=['all', 'sections'], default='all',
+                        help='Default retains every acceptance scenario; sections isolates the failed capture sequence')
+    parser.add_argument('--repeat', type=int, default=1,
+                        help='Explicit controlled repetitions in fresh contexts of the same browser process')
     args = parser.parse_args()
+    if args.repeat < 1 or args.repeat > 5:
+        parser.error('--repeat must be between 1 and 5')
     out = Path(args.artifacts).resolve()
     out.mkdir(parents=True, exist_ok=True)
     fixture = json.loads((ROOT / 'staging/fixtures/mobile-layout.json').read_text())
@@ -52,7 +59,58 @@ def main():
                                for key in ['abir', 'jimmy', 'puzzi', 'sc2']}}
                 for i in range(14)]
     results, requests, unexpected = [], [], []
-    flags = {'campaign_fail': False, 'policy_fail_remaining': 0, 'policy_requests': 0}
+    flags = {'campaign_fail': False, 'policy_fail_remaining': 0, 'policy_requests': 0,
+             'waiver_fail': True, 'waiver_confirmed': False, 'waiver_payloads': []}
+    waiver_fixture = next(b for b in fixture['bookings'] if b['status'] == 'waiting_payment')
+
+    def current_bookings():
+        rows = json.loads(json.dumps(fixture['bookings']))
+        if flags['waiver_confirmed']:
+            row = next(b for b in rows if b['id'] == waiver_fixture['id'])
+            row.update(status='confirmed', prepayment_paid=False, prepayment_amount=0)
+            row.setdefault('extras', {})['prepayment_waiver'] = {'active': True}
+        return rows
+    diagnostic_events = []
+    current = {'phase': None, 'iteration': 1, 'screenshot': None,
+               'lastKnownDOM': None, 'crashed': False}
+
+    def resource_snapshot():
+        evidence = {}
+        for name in ['memory.current', 'memory.peak', 'memory.max', 'memory.events']:
+            try:
+                evidence[name] = (Path('/sys/fs/cgroup') / name).read_text().strip()
+            except OSError:
+                evidence[name] = 'unavailable'
+        processes = []
+        try:
+            for directory in Path('/proc').iterdir():
+                if not directory.name.isdigit():
+                    continue
+                try:
+                    fields = dict(line.split(':', 1) for line in
+                                  (directory / 'status').read_text().splitlines() if ':' in line)
+                    rss = int(fields.get('VmRSS', '0 kB').split()[0])
+                    processes.append({'pid': int(directory.name),
+                                      'ppid': int(fields.get('PPid', '0').strip()),
+                                      'name': fields.get('Name', '').strip(), 'rssKiB': rss})
+                except (OSError, ValueError):
+                    continue
+            evidence['largestProcesses'] = sorted(processes,
+                                                  key=lambda row: row['rssKiB'], reverse=True)[:12]
+        except OSError:
+            evidence['largestProcesses'] = 'unavailable'
+        return evidence
+
+    def diagnostic(event, **details):
+        row = {'event': event, 'at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+               'monotonic': time.monotonic(), 'phase': current['phase'],
+               'iteration': current['iteration'], 'screenshot': current['screenshot'],
+               'resources': resource_snapshot(), **details}
+        diagnostic_events.append(row)
+        print('DIAGNOSTIC ' + json.dumps(row, ensure_ascii=False), flush=True)
+
+    def artifact_name(name):
+        return f'repeat{current["iteration"]}-{name}' if args.repeat > 1 else name
 
     def check(name, passed, **evidence):
         results.append({'name': name, 'passed': bool(passed), **evidence})
@@ -92,7 +150,15 @@ def main():
         elif url.path.endswith('/vacleaner-settings'):
             body = fixture['settings'] if req.method == 'GET' else {'error': 'service_error'}
             if req.method != 'GET': status = 503
-        elif action == 'list': body = {'bookings': fixture['bookings'], 'expenses': expenses}
+        elif action == 'list': body = {'bookings': current_bookings(), 'expenses': expenses}
+        elif action == 'confirm_without_prepayment' and url.path.endswith('/vacleaner-prepayment-waiver-v1'):
+            flags['waiver_payloads'].append(payload)
+            if flags['waiver_fail']:
+                body, status = {'error': 'service_error'}, 503
+                flags['waiver_fail'] = False
+            else:
+                flags['waiver_confirmed'] = True
+                body = {'prepaymentWaiver': True, 'booking': next(b for b in current_bookings() if b['id'] == waiver_fixture['id'])}
         elif action == 'calendar': body = {'days': calendar}
         elif action == 'clients': body = {'customers': []}
         elif action == 'campaigns':
@@ -124,7 +190,26 @@ def main():
                              body=json.dumps(body))
 
     def screenshot(page, name):
-        page.screenshot(path=str(out / (name + '.png')))
+        current['screenshot'] = name
+        # This snapshot is captured BEFORE requesting a screenshot, and retained
+        # in Python. A crash handler never asks a dead WebProcess for its DOM.
+        current['lastKnownDOM'] = page.evaluate('''()=>({
+          adminView:document.documentElement.dataset.adminView,
+          readyState:document.readyState,visibility:document.visibilityState,
+          viewport:{width:innerWidth,height:innerHeight},
+          nodes:document.querySelectorAll('*').length,
+          viewChildren:document.querySelector('#view')?.children.length,
+          pageTitle:document.querySelector('#pageTitle')?.textContent,
+          rootScrollWidth:document.documentElement.scrollWidth,
+          mainScrollTop:document.querySelector('.main')?.scrollTop,
+          activeAnimations:document.getAnimations().map(a=>({state:a.playState,
+             duration:a.effect?.getComputedTiming().duration})),
+          fontsStatus:document.fonts.status
+        })''')
+        diagnostic('before-screenshot', lastKnownDOM=current['lastKnownDOM'])
+        page.screenshot(path=str(out / (artifact_name(name) + '.png')))
+        diagnostic('after-screenshot', lastKnownDOM=current['lastKnownDOM'])
+        current['screenshot'] = None
 
     def surface(page, name, selector='#view'):
         expect(page.locator(selector)).to_be_visible()
@@ -159,7 +244,9 @@ def main():
         names = ['upcoming', 'bookings', 'calendar', 'equipment', 'clients',
                  'campaigns', 'finances', 'analytics', 'chemistry', 'settings']
         for name in names:
+            diagnostic('before-navigation', targetView=name)
             navigate(page, name)
+            diagnostic('after-navigation', targetView=name)
             surface(page, 'section-' + name)
         check('all ten current admin sections are reachable through real navigation', True)
 
@@ -370,16 +457,63 @@ def main():
               flags['policy_requests'] == 2, policyRequests=flags['policy_requests'])
         screenshot(page, 'policy-recovered')
 
+    def waiver(page):
+        navigate(page, 'bookings')
+        card = page.locator(f'.booking-card[data-id="{waiver_fixture["id"]}"]')
+        card.locator('[data-action=process]').click()
+        form = page.locator('#processForm')
+        expect(form).to_be_visible()
+        form.locator('[name=contacted]').check()
+        form.locator('[name=confirmationSent]').check()
+        if form.get_attribute('data-documents-required') == '1':
+            form.locator('[name=documentNumber]').fill('R4-QA-6092')
+            form.locator('[name=identityVerified]').check()
+        form.locator('[name=prepaymentWaived]').check()
+        confirm = form.locator('#confirmProcess')
+        expect(confirm).to_be_enabled()
+        expect(confirm).to_have_text('Підтвердити без 200 грн')
+        confirm.click()
+        expect(form.locator('.prepayment-waiver-status')).to_contain_text(
+            'Не вдалося підтвердити без передоплати. Спробуйте ще раз.')
+        expect(confirm).to_be_enabled()
+        expect(form.locator('[name=prepaymentWaived]')).to_be_checked()
+        check('waiver rejection preserves explicit choice and allows a deliberate retry',
+              len(flags['waiver_payloads']) == 1 and not flags['waiver_confirmed'])
+        check('waiver actual UI payload reaches its exact isolated canonical route',
+              flags['waiver_payloads'][0]['contacted'] is True and
+              flags['waiver_payloads'][0]['confirmationSent'] is True and
+              flags['waiver_payloads'][0]['bookingCode'] == waiver_fixture['booking_code'])
+        unexpected_dialogs = []
+        def dialog_handler(dialog):
+            unexpected_dialogs.append(dialog.type)
+            dialog.dismiss()
+        page.on('dialog', dialog_handler)
+        confirm.click()
+        expect(form).to_have_count(0)
+        navigate(page, 'bookings')
+        confirmed = page.locator(f'.booking-card[data-id="{waiver_fixture["id"]}"]')
+        expect(confirmed.locator('.status')).to_contain_text('Підтверджена')
+        check('acknowledged waiver reloads into authoritative confirmed state without an unsaved/busy warning',
+              not unexpected_dialogs and len(flags['waiver_payloads']) == 2,
+              dialogs=unexpected_dialogs)
+        screenshot(page, 'waiver-confirmed-without-fake200')
+
     phases = [('policy-recovery', policy_recovery), ('sections', sections), ('clients', clients), ('referral', referral),
               ('catalog', catalog), ('finance', finance), ('analytics', analytics),
-              ('campaigns', campaigns), ('settings', settings), ('booking-time', booking_time)]
+              ('campaigns', campaigns), ('settings', settings), ('booking-time', booking_time), ('waiver', waiver)]
+    selected_phases = phases if args.phase == 'all' else [phase for phase in phases if phase[0] == args.phase]
+    runs = [(iteration, name, run) for iteration in range(1, args.repeat + 1)
+            for name, run in selected_phases]
     with tempfile.TemporaryDirectory(prefix='r4-screens-', dir=ROOT / 'staging-ui-test-results') as temp:
         shutil.copytree(ROOT / 'staging-ui-test-results/dist', Path(temp) / 'r4')
         with pages_server(Path(temp)) as base, sync_playwright() as pw:
             options = {'headless': True}
             if args.browser == 'chromium': options['args'] = ['--no-sandbox']
             browser = getattr(pw, args.browser).launch(**options)
-            for name, run in phases:
+            for iteration, name, run in runs:
+                current.update(phase=name, iteration=iteration, screenshot=None,
+                               lastKnownDOM=None, crashed=False)
+                diagnostic('before-phase')
                 flags['campaign_fail'] = name == 'campaigns'
                 flags['policy_fail_remaining'] = 1 if name == 'policy-recovery' else 0
                 flags['policy_requests'] = 0
@@ -388,6 +522,7 @@ def main():
                 device.update(viewport={'width': args.width, 'height': 956},
                               service_workers='block', timezone_id='Europe/Kyiv')
                 context = browser.new_context(**device)
+                context.tracing.start(screenshots=True, snapshots=True, sources=True)
                 context.route('**/*', api)
                 context.add_init_script('''(() => {
                   window.__screenResizeListeners=new Set();
@@ -400,9 +535,14 @@ def main():
                 page = context.new_page()
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
-                page.on('crash', lambda: print('PAGE_CRASH ' + name, flush=True))
+                def on_crash():
+                    current['crashed'] = True
+                    print('PAGE_CRASH ' + name, flush=True)
+                    diagnostic('page-crash', lastKnownDOM=current['lastKnownDOM'])
+                page.on('crash', on_crash)
                 page.clock.set_fixed_time(datetime.datetime.fromisoformat(fixture['fixedTime']))
                 print('PHASE: ' + name, flush=True)
+                scenario_failed = False
                 try:
                     page.goto(base + '/r4/admin/bronuvannia/')
                     expect(page.locator('#authForm')).to_be_visible()
@@ -416,22 +556,39 @@ def main():
                     expect(page.locator('html')).to_have_attribute('data-admin-lab', 'staging')
                     run(page)
                 except Exception as error:
+                    scenario_failed = True
                     check(name + ': scenario completed', False, error=str(error), trace=traceback.format_exc())
-                    try: screenshot(page, name + '-failure')
-                    except Exception: pass
+                    diagnostic('scenario-failure', error=str(error),
+                               lastKnownDOM=current['lastKnownDOM'])
+                    if not current['crashed'] and not page.is_closed():
+                        try: screenshot(page, name + '-failure')
+                        except Exception as capture_error:
+                            diagnostic('failure-screenshot-unavailable', error=str(capture_error))
                 finally:
                     check(name + ': no uncaught application errors', not errors, errors=errors)
+                    try:
+                        if scenario_failed or name == 'sections':
+                            trace_path = out / (artifact_name(name) + '-trace.zip')
+                            context.tracing.stop(path=str(trace_path))
+                            diagnostic('trace-saved', artifact=trace_path.name)
+                        else:
+                            context.tracing.stop()
+                    except Exception as trace_error:
+                        diagnostic('trace-unavailable', error=str(trace_error))
                     context.close()
+                    diagnostic('after-phase', crashed=current['crashed'])
             browser.close()
     check('all external requests were intercepted; no unexpected API or provider request',
           not unexpected, unexpected=unexpected)
-    summary = {'browser': args.browser, 'width': args.width,
+    summary = {'browser': args.browser, 'width': args.width, 'phase': args.phase,
+               'repeat': args.repeat,
                'passed': sum(row['passed'] for row in results),
                'failed': sum(not row['passed'] for row in results), 'checks': results,
                'requests': requests, 'fixtureRevenue': expected_revenue,
                'network': 'No remote request forwarded; synthetic fixture only',
                'liveWrites': False, 'physicalIphone': False}
     (out / 'result.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2) + '\n')
+    (out / 'diagnostics.json').write_text(json.dumps(diagnostic_events, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({k: summary[k] for k in ['browser', 'width', 'passed', 'failed']}), flush=True)
     return int(bool(summary['failed']))
 

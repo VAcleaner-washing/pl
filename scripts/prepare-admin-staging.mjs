@@ -84,7 +84,7 @@ for(const [key,value] of Object.entries({catalog:config.catalog,deposit_rules:co
 fs.mkdirSync(output,{recursive:true});
 fs.writeFileSync(path.join(output,'bootstrap.generated.sql'),sql.join('\n\n')+'\n');
 
-const functions=['vacleaner-admin-bookings-v4','vacleaner-settings','vacleaner-admin-data-v1','vacleaner-extend-rental-v1','vacleaner-status-correction-v1','vacleaner-customer-documents-v1'];
+const functions=['vacleaner-admin-bookings-v4','vacleaner-settings','vacleaner-admin-data-v1','vacleaner-extend-rental-v1','vacleaner-status-correction-v1','vacleaner-customer-documents-v1','vacleaner-prepayment-waiver-v1'];
 const blocked=['vacleaner-push','vacleaner-sms-v2','vacleaner-reminders-v1','vacleaner-campaigns-v1','vacleaner-address-v1'];
 const manifest={mode:'staging',projectRef,catalogSha256:sha(fs.readFileSync(catalogPath)),functions:{},blockedIntegrations:blocked};
 for(const name of functions){

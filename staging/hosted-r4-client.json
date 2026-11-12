@@ -8,6 +8,7 @@
     "vacleaner-settings",
     "vacleaner-extend-rental-v1",
     "vacleaner-status-correction-v1",
-    "vacleaner-customer-documents-v1"
+    "vacleaner-customer-documents-v1",
+    "vacleaner-prepayment-waiver-v1"
   ]
 }

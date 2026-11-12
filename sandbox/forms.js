@@ -126,7 +126,7 @@ document.addEventListener('pointerdown',interaction,true);
 document.addEventListener('keydown',interaction,true);
 document.addEventListener('focusin',event=>{if(event.target.matches?.('input,select,textarea'))interaction(event)},true);
 document.addEventListener('submit',event=>{if(event.target instanceof HTMLFormElement&&event.target.id!=='authForm')record(event.target).submitted=true},true);
-document.addEventListener('vacleaner:form-saved',event=>{if(event.target instanceof HTMLFormElement){const value=record(event.target);value.baseline=snapshot(event.target);value.edited=false}},true);
+document.addEventListener('vacleaner:form-saved',event=>{if(event.target instanceof HTMLFormElement){const value=record(event.target);value.baseline=snapshot(event.target);value.edited=false;value.submitted=false;value.clicked=null;hydrate()}},true);
 function errorText(field){const v=field.validity;if(v.valueMissing)return'Заповніть це поле.';if(v.rangeUnderflow)return`Мінімальне значення — ${field.min}.`;if(v.rangeOverflow)return`Максимальне значення — ${field.max}.`;return'Перевірте формат і значення поля.'}
 function validate(field){
  if(!field.willValidate)return;
