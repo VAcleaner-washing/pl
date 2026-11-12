@@ -1,0 +1,81 @@
+name: WebKit runtime and capture isolation
+on:
+  push:
+    branches: ['audit/r4-webkit-engine-isolation']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    name: Native Python${{ matrix.python }} / ${{ matrix.capture }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.12', '3.13']
+        capture: [immediate, settled]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install the original canonical WebKit runtime
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-ci.txt
+          python -m playwright install --with-deps webkit
+      - name: Build immutable UI60 artifacts
+        run: |
+          npm run build
+          npm run build:staging-ui
+      - name: Run both controlled suites once and retain every failure
+        env:
+          DEBUG: pw:browser
+        run: |
+          result=0
+          python scripts/admin_webkit_stability_qa.py --suite audit --capture ${{ matrix.capture }} --browser webkit --artifacts diagnostic-test-results/native-${{ matrix.python }}-${{ matrix.capture }}/audit || result=1
+          python scripts/admin_webkit_stability_qa.py --suite screens --width 1440 --capture ${{ matrix.capture }} --browser webkit --artifacts diagnostic-test-results/native-${{ matrix.python }}-${{ matrix.capture }}/screens || result=1
+          exit "$result"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: webkit-native-${{ matrix.python }}-${{ matrix.capture }}
+          path: diagnostic-test-results
+          retention-days: 14
+  pinned:
+    name: Pinned Noble / ${{ matrix.capture }}
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        capture: [immediate, settled]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install client for pinned official browser image
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
+      - name: Build the same immutable UI60 artifacts
+        run: |
+          npm run build
+          npm run build:staging-ui
+      - name: Run the identical controlled suites once
+        env:
+          DEBUG: pw:browser
+        run: |
+          result=0
+          python scripts/admin_webkit_stability_qa.py --suite audit --capture ${{ matrix.capture }} --browser webkit --artifacts diagnostic-test-results/pinned-${{ matrix.capture }}/audit || result=1
+          python scripts/admin_webkit_stability_qa.py --suite screens --width 1440 --capture ${{ matrix.capture }} --browser webkit --artifacts diagnostic-test-results/pinned-${{ matrix.capture }}/screens || result=1
+          exit "$result"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: webkit-pinned-${{ matrix.capture }}
+          path: diagnostic-test-results
+          retention-days: 14
