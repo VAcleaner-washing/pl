@@ -22,6 +22,7 @@ def main():
     issued_fixture=next(b for b in fixture['bookings'] if b['status']=='issued')
     for suffix,status in [('5901','completed'),('5902','cancelled')]:
         row=json.loads(json.dumps(issued_fixture));row.update(id='00000000-0000-4000-8000-00000000'+suffix,status=status,customer_name='R4 ACTIONS QA · '+status)
+        if status=='completed':row['completed_at']=fixture['fixedTime']
         fixture['bookings'].append(row)
     calendar_start=datetime.datetime.fromisoformat(fixture['fixedTime']).date()
     calendar_days=[{'date':(calendar_start+datetime.timedelta(days=i)).isoformat(),
@@ -197,10 +198,21 @@ def main():
         action_sets={'pending':['process','edit','cancel'],'waiting_payment':['process','edit','status','cancel'],
                      'confirmed':['issue','edit','status','cancel'],'issued':['complete','finance','extend','status','cancel'],
                      'completed':['finance','referral','status'],'cancelled':['status']}
+        def choose_filter(key):
+            if width<=900:
+                page.locator('.native-search-options').click()
+                sheet=page.locator('.v43-filter-sheet');expect(sheet).to_be_visible()
+                sheet.locator('.native-v2-sheet-action').filter(has_text={'all':'Усі','completed':'Повернені','cancelled':'Скасовані'}[key]).click()
+                expect(sheet).to_have_count(0)
+            else:page.locator(f'.booking-toolbar [data-filter="{key}"]').click()
+            expect(page.locator('#labListMode')).to_be_visible()
         for compact in [False,True]:
             mode='compact' if compact else 'full'
+            choose_filter('all');current_filter='all'
             page.locator(f'#labListMode [data-compact="{str(compact).lower()}"]').click()
             for row in fixture['bookings']:
+                target_filter=row['status'] if row['status'] in ['completed','cancelled'] else 'all'
+                if target_filter!=current_filter:choose_filter(target_filter);current_filter=target_filter
                 status=row['status'];card=page.locator(f'.booking-card[data-id="{row["id"]}"]')
                 expect(card.locator('.lab-open-detail')).to_be_visible()
                 if width<=900:expect(card).to_have_attribute('data-v22-status',status)
