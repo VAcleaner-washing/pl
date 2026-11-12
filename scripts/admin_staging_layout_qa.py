@@ -208,13 +208,14 @@ def main():
                 details.click(trial=True)
                 measured=actions.evaluate('''el=>{
                   const box=n=>{const r=n.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom,scrollWidth:n.scrollWidth,clientWidth:n.clientWidth,text:n.textContent.trim()}};
-                  return{owner:box(el),controls:[...el.querySelectorAll(':scope>.btn,:scope>.booking-action-more>summary')].filter(n=>n.getClientRects().length).map(box),details:box(el.querySelector('.lab-open-detail')),more:el.querySelector(':scope>.booking-action-more')?box(el.querySelector(':scope>.booking-action-more>summary')):null};
+                  const style=getComputedStyle(el);
+                  return{owner:{...box(el),contentWidth:el.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight)},controls:[...el.querySelectorAll(':scope>.btn,:scope>.booking-action-more>summary')].filter(n=>n.getClientRects().length).map(box),details:box(el.querySelector('.lab-open-detail')),more:el.querySelector(':scope>.booking-action-more')?box(el.querySelector(':scope>.booking-action-more>summary')):null};
                 }''')
                 controls=measured['controls'];bad=[c for c in controls if c['width']<44 or c['height']<44 or c['scrollWidth']>c['clientWidth']+1 or c['x']<measured['owner']['x']-1 or c['right']>measured['owner']['right']+1]
                 check(f'{width}/{mode}/{status}: every card button has readable text and a 44px target',not bad,controls=controls,invalid=bad)
                 if width<=900:
                     d=measured['details'];m=measured['more']
-                    aligned=abs(d['y']-m['y'])<=1 and abs(d['width']-m['width'])<=1 if m else abs(d['width']-measured['owner']['clientWidth']+float(actions.evaluate('el=>parseFloat(getComputedStyle(el).paddingLeft)+parseFloat(getComputedStyle(el).paddingRight))'))<=2
+                    aligned=(abs(d['y']-m['y'])<=1 and abs(d['width']-m['width'])<=1) if m else abs(d['width']-measured['owner']['contentWidth'])<=1
                     check(f'{width}/{mode}/{status}: Details has a full utility row or an equal More partner',aligned,geometry=measured)
                 actual=actions.locator('[data-action]').evaluate_all('els=>els.map(el=>el.dataset.action)')
                 check(f'{width}/{mode}/{status}: all canonical business actions remain available',set(actual)==set(action_sets[status]),actions=actual)
