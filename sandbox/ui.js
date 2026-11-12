@@ -52,6 +52,10 @@ function listUI(){
   const actions=card.querySelector('.booking-actions'),more=actions.querySelector('.booking-action-more');
   actions.insertBefore(open,more);
   const moreIcon=more?.querySelector('summary>span');if(moreIcon)moreIcon.textContent='⋯';
+  if(hosted){
+   actions.dataset.stageSecondary=String([...actions.children].filter(node=>node.matches('.btn:not(.primary-action):not(.lab-open-detail)')).length);
+   actions.dataset.stageMore=String(Boolean(more));
+  }
  });
 }
 function detailUI(){

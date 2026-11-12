@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.58
-**Baseline build:** 4358
-**Останнє оновлення:** 2026-11-11
+**Baseline version:** 4.3.59
+**Baseline build:** 4359
+**Останнє оновлення:** 2026-11-12
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5661,3 +5661,31 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Populated-calendar baseline confirms the main scrollport still extended to viewport bottom under navigation despite compensating bottom padding. Non-keyboard R4 main views now end above the unchanged82px nav and use18px content clearance. Existing keyboard-open rules are preserved. This addresses the scroll boundary; it does not change availability, past-slot semantics or calendar calculations.
 
 - Responsive regression exposed WebKit returning to mobile CSS before the staged header projection refreshed. R4 retains its MediaQueryList and schedules the same idempotent projection on viewport resize as well as breakpoint change. Strict geometry bounds remain unchanged. A later QA checkpoint records viewport/media/header state before and after awaiting the actual asynchronous responsive projection; two requestAnimationFrame callbacks alone do not establish resize delivery in WebKit. No unconditional sleep is used.
+
+
+# 118. Change record — v4.3.59 / R4 consistent booking actions
+
+### ADDED
+
+- Read-only action regression covers all six statuses in Full/Compact modes at320/390/440/768/1440. Synthetic completed/cancelled examples are derived only in the HTTP fixture process; no records are created on any server. It verifies readable/touchable controls, canonical action preservation, correct Details navigation and reachable More actions with Escape/focus return.
+
+### CHANGED
+
+- Hosted R4 marks actual context-action count and More presence as presentation metadata, avoiding complex sibling selectors. Mobile cards use one two-column action grid. The canonical primary action spans the row. Context actions retain their labels/handlers; a lone context action uses the full row. Details and visibly labelled More share equal-width positions. Without More, Details uses the full width.
+- Card action controls have a consistent48px minimum, wrapping labels,12px radius and visible keyboard focus. Per-card bottom safe-area padding is replaced by normal card spacing; the main navigation shell remains the sole bottom inset owner.
+- Desktop layout is preserved. Its baseline menu actions were reachable, so no speculative overflow override is included.
+
+### FIXED
+
+- The inserted Details control could occupy the legacy issued-card44px third column, moving More into a separate row. Pending cards could likewise leave a large isolated More button. The staging-only grid overrides both legacy full/compact rules as one component; no action is removed or moved into a different business workflow.
+
+### PRESERVED
+
+- Production/main46, LAB54, previous R4UI58 saved Site version10, backend/API/financial/status/referral/pricing rules and database rows remain unchanged. UI58 navigation/scroll/booking-form corrections are retained. Outside presentation/QA/spec, changes are coherent release stamps only.
+
+### TESTS
+
+- Preserve the UI58 baseline and compare the same generated-entrypoint fixture suite in remote Chromium/WebKit before private publication. Trial actions check browser reachability without activating mutations; Details and menu open/close use normal clicks. No forced click, arbitrary delay or weaker geometry tolerance.
+- Keep the existing navigation, detail-scroll, four-step wizard, short-viewport and responsive-return checks. Physical iPhone/native keyboard/PWA lifecycle acceptance remains distinct from emulation.
+
+- The original UI59 monolithic WebKit run43167453059 passed all iPhone cases, then emitted PAGE_CRASH/TargetClosed at768 after several browser contexts. Its cause is unresolved. The same suite now also runs per viewport in fresh CI jobs, with unchanged assertions and cgroup memory diagnostics. Both full-session browser cases are retained in the matrix; no failure is retried or suppressed. Focused component results do not certify the unresolved long-session case.
