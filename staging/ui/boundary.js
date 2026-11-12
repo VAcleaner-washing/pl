@@ -25,15 +25,33 @@
   const functions = new Set(config.functions);
   const failure = () => new Response(JSON.stringify({error: 'R4: ця інтеграція вимкнена; нічого не надіслано', delivered: false}),
     {status: 503, headers: {'Content-Type': 'application/json', 'Cache-Control': 'no-store'}});
-  const readiness = nativeFetch(`${config.origin}/auth/v1/settings`, {
-    headers: {apikey: config.publicKey}, cache: 'no-store', redirect: 'error',
-  }).then(async response => {
-    if (!response.ok || (await response.json()).disable_signup !== true) throw new Error('signup_policy_not_verified');
-    return true;
-  });
-  // Retain the rejected readiness promise for guarded requests without an unhandled rejection.
-  readiness.catch(() => {});
-  window.VA_STAGE = Object.freeze({projectRef: config.projectRef, readiness});
+  let readiness, readinessInFlight = null, ready = false;
+  const reportReadiness = value => {
+    window.dispatchEvent?.(new CustomEvent('vacleaner:stage-readiness', {detail: {ready: value}}));
+  };
+  function ensureReadiness() {
+    if (ready) return readiness;
+    if (readinessInFlight) return readinessInFlight;
+    const request = Promise.resolve().then(() => nativeFetch(`${config.origin}/auth/v1/settings`, {
+      headers: {apikey: config.publicKey}, cache: 'no-store', redirect: 'error',
+    })).then(async response => {
+      if (!response.ok || (await response.json()).disable_signup !== true) throw new Error('signup_policy_not_verified');
+      ready = true;
+      reportReadiness(true);
+      return true;
+    });
+    readiness = readinessInFlight = request;
+    // A failed launch check must not permanently close an otherwise valid stage
+    // after connectivity returns. The next allowed request revalidates policy;
+    // overlapping requests share one check and never bypass a failed result.
+    request.then(() => { readinessInFlight = null; }, () => {
+      readinessInFlight = null;
+      reportReadiness(false);
+    });
+    return request;
+  }
+  ensureReadiness();
+  window.VA_STAGE = Object.freeze({projectRef: config.projectRef, get readiness() { return readiness; }});
   window.fetch = async (input, options = {}) => {
     const url = new URL(typeof input === 'string' || input instanceof URL ? String(input) : input.url, location.href);
     const method = String(options.method || input?.method || 'GET').toUpperCase();
@@ -47,7 +65,7 @@
       const user = url.pathname === '/auth/v1/user' && method === 'GET';
       if (!(endpoint && functions.has(endpoint) && (method === 'POST' || endpoint === 'vacleaner-settings' && method === 'GET')) &&
           !token && !logout && !user) return failure();
-      try { await readiness; }
+      try { await ensureReadiness(); }
       catch { throw new Error('R4: тестовий вхід закрито — налаштування реєстрації ще не підтверджені.'); }
     } else return failure();
     return nativeFetch(input, {...options, redirect: 'error'});

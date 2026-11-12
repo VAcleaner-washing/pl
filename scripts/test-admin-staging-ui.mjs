@@ -80,7 +80,10 @@ check('session refresh remains available', () => assert(stage.calls.at(-1).url.i
 const closed = install(false);
 await assert.rejects(closed.window.VA_STAGE.readiness, /signup_policy_not_verified/);
 await assert.rejects(closed.window.fetch(`${config.origin}/functions/v1/vacleaner-admin-bookings-v4`, {method: 'POST'}), /тестовий вхід закрито/);
-check('unverified signup policy blocks requests before any business call', () => assert.equal(closed.calls.length, 1));
+check('unverified signup policy is rechecked without allowing any business call', () => {
+  assert.equal(closed.calls.length, 2);
+  assert(closed.calls.every(call => call.url === `${config.origin}/auth/v1/settings`));
+});
 const read = rel => fs.readFileSync(path.join(target, rel), 'utf8');
 const html = read('admin/bronuvannia/index.html');
 check('network/storage boundary loads before canonical application scripts', () => {

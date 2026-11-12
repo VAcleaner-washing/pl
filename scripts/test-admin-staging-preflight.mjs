@@ -35,8 +35,8 @@ try{
   assert(inserts.every(name=>['vacleaner_stage.identity','public.vacleaner_inventory','public.vacleaner_settings'].includes(name)));
  });
  const manifest=JSON.parse(fs.readFileSync(path.join(output,'manifest.generated.json'),'utf8'));
- check('all 6 handlers, auth checks and pure financial modules are copied unchanged',()=>{
-  assert.equal(Object.keys(manifest.functions).length,6);
+ check('all 7 handlers, auth checks and pure financial modules are copied unchanged',()=>{
+  assert.equal(Object.keys(manifest.functions).length,7);
   for(const [name,files] of Object.entries(manifest.functions))for(const [file,digest] of Object.entries(files)){
    const original=fs.readFileSync(path.join(root,'supabase/functions',name,file));
    const copied=fs.readFileSync(path.join(output,'supabase/functions',name,file==='index.ts'?'canonical.ts':file));

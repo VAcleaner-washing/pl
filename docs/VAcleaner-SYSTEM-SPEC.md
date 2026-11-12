@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.59
-**Baseline build:** 4359
+**Baseline version:** 4.3.60
+**Baseline build:** 4360
 **Останнє оновлення:** 2026-11-12
 **Власник логіки:** VAcleaner  
 
@@ -5689,3 +5689,41 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Keep the existing navigation, detail-scroll, four-step wizard, short-viewport and responsive-return checks. Physical iPhone/native keyboard/PWA lifecycle acceptance remains distinct from emulation.
 
 - The original UI59 monolithic WebKit run43167453059 passed all iPhone cases, then emitted PAGE_CRASH/TargetClosed at768 after several browser contexts. Its cause is unresolved. The same suite now also runs per viewport in fresh CI jobs, with unchanged assertions and cgroup memory diagnostics. Both full-session browser cases are retained in the matrix; no failure is retried or suppressed. Focused component results do not certify the unresolved long-session case.
+
+# 119. Change record — v4.3.60 / R4 recovery and full verification
+
+### ADDED
+
+- Generated-R4 screen acceptance in remote Chromium/WebKit at 440 and 1440 CSS pixels: all ten sections, secondary client reads, referral sharing, catalog editors, finance/analytics periods, campaign forms, settings tabs, exact-time picker and explicit unavailable integrations. All remote responses are isolated synthetic HTTP fixtures, never forwarded.
+- Behavioral regressions for failed-startup policy recovery, settings listener lifecycle, readable rejected-settings errors and zero-revenue margin labels. The existing full multi-viewport layout sessions remain a separate gate against immutable46.
+
+### CHANGED
+
+- A failed stage startup policy check is retried by the next allowed request. Concurrent callers share a single in-flight check. Only a successful exact-project policy response with boolean disable_signup=true permits stage transport. The test banner reflects recovery without reloading.
+- Settings overflow cues use one global resize handler that queries the current rail, rather than retaining one detached rail closure per settings render. Catalog, slots and deposit save failures reuse the existing human-readable settings error mapper.
+
+### FIXED
+
+- Offline launch no longer leaves stage transport permanently blocked after connectivity returns. The fail-closed authorization and integration boundary are preserved.
+- Repeated settings visits no longer accumulate resize handlers. A legitimate zero-revenue rental with known costs retains the financial result and omits the undefined percentage from its short label.
+
+### PRESERVED
+
+- Production/main46, published LAB54, previous R4UI59 and stable46 backup remain available. No production backend/schema/business data/provider dispatch is part of this work. Financial formulas, status transitions, pricing, discounts and referral business rules are unchanged.
+- Campaign conversion attribution, report timezone consistency and rental-allocation edge cases found by read-only oracles are documented separately; they are not silently changed in a UI verification patch. This stage build is not a production release candidate.
+
+### TESTS
+
+- Negative baselines reproduce permanently rejected readiness, 20 retained settings resize callbacks after 20 mounts, raw settings error codes and the literal null% label. Corrected source is checked by the corresponding behavioral tests.
+- Remote browser gates must use the generated /r4/ artifact and retain failures/screenshots. Canonical static/build/browser/WebKit gates remain required. API lifecycle verification uses only uniquely namespaced synthetic records on the exact stage project; it is recorded independently from fixture UI evidence.
+- Browser control is unavailable in the current managed Site session. No substitute local preview/browser is started. Remote browser emulation, live API persistence and physical iPhone/PWA acceptance remain distinct evidence categories; an all-green fixture run does not certify the unavailable connected UI/device checks.
+
+### R4 waiver acceptance and retained renderer failure
+
+- The owner's blocked “Підтвердити без 200 грн” report exposed an incomplete test-environment dependency: the UI offered the canonical action, but the stage client function set and prepared Edge handlers omitted vacleaner-prepayment-waiver-v1. Add exactly this canonical route, not a wildcard or provider bypass. The deployed stage handler is byte-identical to production46, wrapped in the existing exact-stage/outbound-isolation module; its existing privileged SQL function/grants need no changes. Production functions and financial rules are untouched.
+- Acknowledged waiver confirmation announces the existing form-saved event before its reload. LAB/R4 form policy clears submitted/clicked pending state only on that acknowledgement, so the successful reload is not rejected as a busy or unsaved form. Rejected writes retain the draft and retry controls. Generated-R4 UI tests submit this exact action, reject the first attempt, then verify the authoritative confirmed read after success without a beforeunload dialog or fake200 payment.
+- New live stage waiver checks cover missing/invalid/outsider authorization, both managers, contact/terms/identity/document guards, confirmed state and zero prepayment read by managerB, idempotency and issuance only after an actual synthetic deposit. The first auxiliary test wrongly omitted the deposit precondition; its failed assertion and successful cleanup are retained, the deposit guard remains intact, and the corrected explicit-precondition case passes40checks. Synthetic waiver reservations are cancelled after verification; the owner's reported booking is not mutated.
+- First full-screen run43183289829 on source4be5c7b has three screen jobs54/54 and both layout sessions459/459, but WebKit1440 has a WebProcess crash while capturing chemistry (52pass/1fail). No cause or fix is assumed. Preserve that red result. The common harness now retains before/after capture DOM/resource snapshots, crash context and traces; a separate comparison runs the same ten-section capture sequence three times on immutable UI59 and first UI60, recording every failure rather than retrying to obtain green.
+- Controlled comparison43218211345 completed three section/capture iterations on both immutable products without a crash (37checks each); this does not resolve the intermittent failure. Its workflow remains available through manual dispatch, rather than replaying an unrelated baseline comparison for every subsequent test edit. The first connected fixture waiver test passed on both mobile engines but exposed a desktop test readiness race after the successful reload; wait for the actual mounted navigation before selecting the view, keeping the status/no-dialog/payload assertions intact.
+- Canonical WebKit run43218928533 reached the LAB expense-pending test but observed the dirty-form leave dialog after its fixed700ms rejection delay. The pending request must remain pending until the pending-state assertions finish: hold that exact synthetic expense fetch with an explicit release gate, then release it through the original failing adapter and keep the rejection/draft/retry assertions. No production delay, form guard or error handling is relaxed; this makes the two tested states deterministic rather than extending a timeout.
+- Keep both dedicated Chromium/WebKit LAB form-policy jobs alongside the generated R4 screen/layout jobs, so busy/rejected/acknowledged draft semantics are independently verified without depending on an elapsed-time assumption. Frozen published LAB54 remains untouched; these jobs build their own isolated artifact.

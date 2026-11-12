@@ -163,10 +163,29 @@ def main():
             expect(invalid).to_be_visible();expect(form.locator('.lab-field-error').first).to_be_visible()
             checks.check(bool(invalid.get_attribute('aria-describedby')),f'{width}: invalid native fields have persistent accessible feedback')
             form.locator('[name=amount]').fill('123');form.locator('[name=note]').fill('R3 synthetic expense')
-            page.evaluate('()=>{VA_LAB.faults.write=true;VA_LAB.faults.delay=700}')
+            # Hold the actual synthetic expense request until this test releases
+            # it. A fixed 700ms delay could expire while WebKit scrolls/stabilizes
+            # the close button, turning the pending-state check into a dirty-form
+            # check. Keep both states and all their original assertions distinct.
+            page.evaluate('''()=>{
+              VA_LAB.faults.write=true;VA_LAB.faults.delay=0;
+              const original=window.fetch.bind(window);let claimed=false,release;
+              const gate=new Promise(resolve=>release=resolve);
+              window.__qaExpenseRequestHeld=false;
+              window.__qaReleaseExpense=()=>{release();window.fetch=original};
+              window.fetch=async(input,options={})=>{
+                let action;try{action=JSON.parse(options.body||'{}').action}catch{}
+                if(!claimed&&String(input).includes('/sandbox-api/')&&action==='save_expense'){
+                  claimed=true;window.__qaExpenseRequestHeld=true;await gate;
+                }
+                return original(input,options);
+              };
+            }''')
             form.locator('[type=submit]').click();expect(form).to_have_attribute('data-lab-saving','1')
+            page.wait_for_function('window.__qaExpenseRequestHeld===true')
             checks.check(form.locator('[name=amount]').evaluate('node=>node.inert&&!node.disabled'),f'{width}: pending fields freeze without changing FormData inclusion')
             close(form);expect(page.locator('#labLeaveDialog')).not_to_be_attached();expect(form.locator('[data-lab-save-notice]')).to_be_visible()
+            page.evaluate('window.__qaReleaseExpense()')
             expect(form.locator('[type=submit]')).to_be_enabled();expect(form).not_to_have_attribute('data-lab-saving','1')
             expect(form.locator('[name=amount]')).to_have_value('123')
             close(form);expect(page.locator('#labLeaveDialog')).to_be_visible();keep()

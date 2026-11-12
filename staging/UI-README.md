@@ -23,8 +23,10 @@ still false, so no connected UI access was opened. The client also checks this
 policy before every authenticated stage transport can proceed through readiness.
 It does not treat an unverified setting as success or simulate a saved booking.
 
-Six canonical handlers remain enabled. Provider dispatch, address service,
-unprepared promo/waiver/integration endpoints and Auth signup/invite/recovery
+Seven canonical handlers are enabled, including the unchanged prepayment-waiver
+handler used by “Підтвердити без 200 грн”. Its existing privileged SQL function
+retains its grants and validation. Provider dispatch, address service,
+unprepared promo/integration endpoints and Auth signup/invite/recovery
 flows fail visibly. These disabled integrations must be completed and accepted
 separately before production rollout; this is a test preview, not all-screen
 integration acceptance. The server continues to authorize through Auth getUser,

@@ -45,7 +45,11 @@
     "test:admin-audit-r1",
     "test:admin-lab",
     "test:admin-staging-preflight",
-    "test:admin-staging-ui"
+    "test:admin-staging-ui",
+    "test:admin-staging-readiness",
+    "test:settings-tabs-lifecycle",
+    "test:admin-settings-errors",
+    "test:admin-margin-label"
   ],
   "browser": [
     "test:public-hydration",
