@@ -1,10 +1,5 @@
 name: R4 render comparison diagnostic
 on:
-  push:
-    branches: ['qa/admin-r4-full-verification']
-    paths:
-      - 'scripts/admin_staging_screens_qa.py'
-      - '.github/workflows/admin-r4-render-diagnostic.yml'
   workflow_dispatch:
 permissions:
   contents: read

@@ -490,6 +490,11 @@ def main():
         page.on('dialog', dialog_handler)
         confirm.click()
         expect(form).to_have_count(0)
+        # Acknowledged confirmation reloads the page. A disappeared old form
+        # precedes the next mount; wait for the real navigation before its
+        # desktop/mobile visibility branch, rather than racing that mount.
+        navigation = '.mobile-nav [data-mobile-view=bookings]' if args.width == 440 else '.nav [data-view=bookings]'
+        expect(page.locator(navigation)).to_be_visible()
         navigate(page, 'bookings')
         confirmed = page.locator(f'.booking-card[data-id="{waiver_fixture["id"]}"]')
         expect(confirmed.locator('.status')).to_contain_text('Підтверджена')
