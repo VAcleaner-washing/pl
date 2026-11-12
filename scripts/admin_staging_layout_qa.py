@@ -13,7 +13,8 @@ ROOT=Path(__file__).resolve().parents[1]
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--browser',choices=['chromium','webkit'],required=True)
-    parser.add_argument('--artifacts',required=True);args=parser.parse_args()
+    parser.add_argument('--artifacts',required=True)
+    parser.add_argument('--width',type=int,choices=[320,390,440,768,1440]);args=parser.parse_args()
     out=Path(args.artifacts);out.mkdir(parents=True,exist_ok=True)
     fixture=json.loads((ROOT/'staging/fixtures/mobile-layout.json').read_text())
     config=json.loads((ROOT/'staging/hosted-r4-client.json').read_text())
@@ -28,6 +29,12 @@ def main():
     calendar_days=[{'date':(calendar_start+datetime.timedelta(days=i)).isoformat(),
                     'resources':{key:{'label':key,'capacity':2,'morning':2,'evening':2} for key in ['abir','jimmy','puzzi','sc2']}} for i in range(14)]
     results=[];requests=[];unexpected=[]
+    def resource_snapshot():
+        values={}
+        for name in ['memory.current','memory.peak','memory.events']:
+            try:values[name]=(Path('/sys/fs/cgroup')/name).read_text().strip()
+            except OSError:values[name]='unavailable'
+        return values
     def check(name,passed,**evidence):
         results.append({'name':name,'passed':bool(passed),**evidence})
         print(('PASS' if passed else 'FAIL')+': '+name,flush=True)
@@ -280,14 +287,15 @@ def main():
             reference_page.screenshot(path=str(out/'stable46-upcoming.png'),full_page=True)
             reference_height=reference_page.locator('.mobile-nav').bounding_box()['height']
             check('immutable 46 reference has the expected 82px total navigation',abs(reference_height-82)<=1,height=reference_height)
-            for width in [320,390,440,768,1440]:
+            for width in ([args.width] if args.width else [320,390,440,768,1440]):
+                print(json.dumps({'width':width,'phase':'before_context','resources':resource_snapshot()}),flush=True)
                 options={k:v for k,v in pw.devices['iPhone 17 Pro Max'].items() if k!='default_browser_type'} if width<=440 else {}
                 options.update(viewport={'width':width,'height':956},service_workers='block',timezone_id='Europe/Kyiv')
                 context=browser.new_context(**options);context.route('**/*',lambda route:api(route))
                 if width<=440:context.add_init_script("Object.defineProperty(navigator,'standalone',{value:true})")
                 page=context.new_page();errors=[]
                 page.on('pageerror',lambda e:errors.append(str(e)))
-                page.on('crash',lambda:print('PAGE_CRASH',flush=True))
+                page.on('crash',lambda:print('PAGE_CRASH '+json.dumps({'width':width,'resources':resource_snapshot()}),flush=True))
                 page.clock.set_fixed_time(datetime.datetime.fromisoformat(fixture['fixedTime']))
                 page.goto(base+'/r4/admin/bronuvannia/')
                 expect(page.locator('#authForm')).to_be_visible()
@@ -340,7 +348,7 @@ def main():
                 context.close()
             ref.close();browser.close()
     check('no unexpected external or mutation request',not unexpected,requests=unexpected)
-    summary={'browser':args.browser,'passed':sum(x['passed'] for x in results),'failed':sum(not x['passed'] for x in results),'checks':results,
+    summary={'browser':args.browser,'width':args.width or 'session','passed':sum(x['passed'] for x in results),'failed':sum(not x['passed'] for x in results),'checks':results,
              'network':'all remote calls fulfilled from synthetic fixture; none forwarded','physicalIphoneZoom':'not emulated','requests':requests}
     (out/'result.json').write_text(json.dumps(summary,indent=2,ensure_ascii=False)+'\n')
     print(json.dumps({'browser':args.browser,'passed':summary['passed'],'failed':summary['failed']}))
