@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.59",
+  "version": "4.3.60",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -110,6 +110,10 @@
     "test:admin-lab-forms": "node scripts/build-admin-lab.mjs && python scripts/admin_lab_forms_qa.py",
     "test:admin-staging-preflight": "node scripts/test-admin-staging-preflight.mjs",
     "build:staging-ui": "node scripts/build-admin-staging-ui.mjs",
-    "test:admin-staging-ui": "node scripts/test-admin-staging-ui.mjs"
+    "test:admin-staging-ui": "node scripts/test-admin-staging-ui.mjs",
+    "test:admin-staging-readiness": "node scripts/test-admin-staging-readiness.mjs",
+    "test:settings-tabs-lifecycle": "node scripts/test-settings-tabs-lifecycle.mjs",
+    "test:admin-settings-errors": "node scripts/test-admin-settings-errors.mjs",
+    "test:admin-margin-label": "node scripts/test-admin-margin-label.mjs"
   }
 }
