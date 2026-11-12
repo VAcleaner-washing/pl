@@ -5671,9 +5671,9 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 ### CHANGED
 
-- Hosted R4 mobile cards use one two-column action grid. The canonical primary action spans the row. Context actions retain their labels/handlers; a lone context action uses the full row. Details and visibly labelled More share equal-width positions. Without More, Details uses the full width.
+- Hosted R4 marks actual context-action count and More presence as presentation metadata, avoiding complex sibling selectors. Mobile cards use one two-column action grid. The canonical primary action spans the row. Context actions retain their labels/handlers; a lone context action uses the full row. Details and visibly labelled More share equal-width positions. Without More, Details uses the full width.
 - Card action controls have a consistent48px minimum, wrapping labels,12px radius and visible keyboard focus. Per-card bottom safe-area padding is replaced by normal card spacing; the main navigation shell remains the sole bottom inset owner.
-- Desktop card overflow is released only while its native More dropdown is open, so its actions remain reachable without changing the desktop action layout.
+- Desktop layout is preserved. Its baseline menu actions were reachable, so no speculative overflow override is included.
 
 ### FIXED
 
@@ -5687,3 +5687,5 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 
 - Preserve the UI58 baseline and compare the same generated-entrypoint fixture suite in remote Chromium/WebKit before private publication. Trial actions check browser reachability without activating mutations; Details and menu open/close use normal clicks. No forced click, arbitrary delay or weaker geometry tolerance.
 - Keep the existing navigation, detail-scroll, four-step wizard, short-viewport and responsive-return checks. Physical iPhone/native keyboard/PWA lifecycle acceptance remains distinct from emulation.
+
+- The original UI59 monolithic WebKit run43167453059 passed all iPhone cases, then emitted PAGE_CRASH/TargetClosed at768 after several browser contexts. Its cause is unresolved. The same suite now also runs per viewport in fresh CI jobs, with unchanged assertions and cgroup memory diagnostics. Both full-session browser cases are retained in the matrix; no failure is retried or suppressed. Focused component results do not certify the unresolved long-session case.
