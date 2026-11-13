@@ -90,6 +90,9 @@ class ConnectedRun:
         if isinstance(value, list):
             return [self.redact(item) for item in value]
         if isinstance(value, str):
+            # Playwright may append the whole page accessibility tree to an
+            # assertion. Keep its locator evidence, never unrelated stage rows.
+            value = value.split('\nAria snapshot:', 1)[0]
             for secret in self.secrets:
                 if secret:
                     value = value.replace(secret, '[redacted]')
@@ -256,7 +259,10 @@ class ConnectedRun:
         return context, page
 
     def ready(self, page):
-        expect(page.locator('#adminMount .app')).to_be_visible()
+        # Mobile uses display:contents; the wrapper has no visible box in
+        # WebKit while its actual main and navigation remain visible.
+        expect(page.locator('#adminMount .app')).to_be_attached()
+        expect(page.locator('#adminMount main')).to_be_visible()
         nav = '.mobile-nav [data-mobile-view=bookings]' if self.args.browser == 'webkit' else '.nav [data-view=bookings]'
         expect(page.locator(nav)).to_be_visible()
 
@@ -307,6 +313,11 @@ class ConnectedRun:
         # Never capture an authentication form, even though passwords are masked.
         if page.locator('#authForm').is_visible():
             return
+        search = page.locator('#globalSearch')
+        cards = page.locator('.booking-card')
+        if (search.count() != 1 or search.input_value() != self.name or cards.count() == 0 or
+                any(self.name not in card.inner_text() for card in cards.all())):
+            return
         page.screenshot(path=str(self.out / (name + '.png')))
 
     def pick_time(self, page, form, field, value):
@@ -353,11 +364,16 @@ class ConnectedRun:
         self.check('other manager sees committed waiting booking before retry',
                    row['status'] == 'waiting_payment' and not row['prepayment_paid'])
         self.initial_base = float(row['base_amount'])
-        self.check('initial one-day pickup has no fake payment or extra charges',
+        self.check('initial one-day pickup preserves nominal terms without recording a payment',
                    self.initial_base > 0 and float(row['total_amount']) == self.initial_base and
-                   float(row.get('prepayment_amount') or 0) == 0)
+                   row['prepayment_paid'] is False and float(row['prepayment_amount']) == 200 and
+                   row['deposit_paid'] is False and float(row['deposit_amount']) == 1000)
         card_b = self.card(page_b, booking_id, refresh=True)
         expect(card_b.locator('.status')).to_contain_text('Очікує')
+        received = card_b.locator('.lab-booking-money>span').first
+        expect(received).to_contain_text('Отримано')
+        self.check('other manager actual UI displays zero received before any payment',
+                   int(re.sub(r'\D', '', received.inner_text())) == 0)
         self.check('manager B actual UI refresh displays the committed booking before A retries', True)
         submit.click(); expect(form).to_have_count(0, timeout=45000)
         self.check('deliberate UI retry reused the original create request ID',

@@ -213,6 +213,7 @@ def main():
                 else:
                     page.locator('.booking-form-scroll').hover()
                     page.mouse.wheel(0,1200)
+                page.wait_for_function('window.__qaTrustedIntent!==null')
                 intent=page.evaluate('window.__qaTrustedIntent')
                 check(f'{width}: focus regression uses a trusted user action',bool(intent) and intent['trusted'] and intent['type']==event_type,intent=intent)
                 check(f'{width}: phone remains focused during newer user intent',form.locator('[name=customerPhone]').evaluate('element=>document.activeElement===element'))
