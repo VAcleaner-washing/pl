@@ -4,6 +4,7 @@ import json
 import os
 import socket
 import threading
+import time
 from contextlib import contextmanager
 from functools import partial
 from http.server import ThreadingHTTPServer
@@ -11,8 +12,104 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from playwright.sync_api import sync_playwright, expect
 import e2e_smoke as smoke
-from admin_idle_qa import navigate
+from admin_idle_qa import navigate as navigate_without_diagnostics
 from admin_entrypoint_finance_qa import PagesHandler
+
+
+def host_diagnostics():
+    result={}
+    for name,path in {
+        'memoryCurrent':'/sys/fs/cgroup/memory.current',
+        'memoryPeak':'/sys/fs/cgroup/memory.peak',
+        'memoryEvents':'/sys/fs/cgroup/memory.events',
+        'processStatus':'/proc/self/status',
+    }.items():
+        try:result[name]=Path(path).read_text()
+        except OSError as error:result[name]={'error':str(error)}
+    return result
+
+
+def capture_lab_failure(page,view,error):
+    evidence=getattr(page,'_vac_lab_diagnostics',None)
+    if not evidence or evidence.get('captured'):return
+    evidence['captured']=True
+    checks,width=evidence['checks'],evidence['width']
+    checks.artifacts.mkdir(parents=True,exist_ok=True)
+    result={'width':width,'view':view,'error':str(error),'capturedAt':time.time(),
+            'events':list(evidence['events']),'host':host_diagnostics(),
+            'pageClosed':page.is_closed()}
+    # A failure may be a stalled renderer. Bound DOM polling and screenshot
+    # collection independently, and never replace or retry the original error.
+    try:
+        handle=page.wait_for_function('''()=>{
+          const describe=node=>{if(!node)return null;const style=getComputedStyle(node),rect=node.getBoundingClientRect();return {
+            tag:node.tagName,id:node.id,classes:node.className,rect:rect.toJSON(),
+            connected:node.isConnected,disabled:node.disabled,inert:node.inert,
+            display:style.display,visibility:style.visibility,pointerEvents:style.pointerEvents,
+            opacity:style.opacity,transform:style.transform,animationName:style.animationName,
+            inertAncestor:node.closest('[inert]')?.outerHTML.slice(0,800),
+            hiddenAncestor:node.closest('[hidden]')?.outerHTML.slice(0,800),
+            hit:document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2)?.outerHTML.slice(0,800)};};
+          return {readyState:document.readyState,visibility:document.visibilityState,focus:document.hasFocus(),
+            adminView:document.documentElement.dataset.adminView,
+            activeElement:document.activeElement?.outerHTML.slice(0,1600),
+            htmlClasses:document.documentElement.className,bodyClasses:document.body.className,
+            viewport:{width:innerWidth,height:innerHeight,visualWidth:visualViewport?.width,visualHeight:visualViewport?.height},
+            navigation:[...document.querySelectorAll('.nav [data-view],.mobile-nav [data-mobile-view]')].map(describe),
+            layers:document.querySelector('#layer')?.innerHTML.slice(0,12000),
+            animations:document.getAnimations().map(animation=>({state:animation.playState,time:animation.currentTime,
+              target:animation.effect?.target?.outerHTML.slice(0,800),timing:animation.effect?.getComputedTiming()})),
+            resources:{count:performance.getEntriesByType('resource').length,
+              last:performance.getEntriesByType('resource').slice(-12).map(entry=>({name:entry.name,type:entry.initiatorType,duration:entry.duration,bytes:entry.transferSize}))}};
+        }''',timeout=3000,polling=100)
+        result['dom']=handle.json_value()
+        handle.dispose()
+    except Exception as diagnostic_error:result['domError']=str(diagnostic_error)
+    try:page.screenshot(path=str(checks.artifacts/f'{width}-navigation-failure.png'),timeout=3000)
+    except Exception as diagnostic_error:result['screenshotError']=str(diagnostic_error)
+    (checks.artifacts/f'{width}-navigation-failure.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+
+
+def navigate(page,view):
+    try:return navigate_without_diagnostics(page,view)
+    except Exception as error:
+        try:capture_lab_failure(page,view,error)
+        except Exception as diagnostic_error:print('LAB_NAV_DIAGNOSTICS_FAILED',str(diagnostic_error),flush=True)
+        raise
+
+
+@contextmanager
+def lab_width_diagnostics(context,checks,width,browser_events):
+    context.tracing.start(screenshots=True,snapshots=True,sources=True)
+    page=context.new_page()
+    events=[]
+    evidence={'width':width,'checks':checks,'events':events,'captured':False}
+    page._vac_lab_diagnostics=evidence
+    page.on('crash',lambda:events.append({'type':'page-crash','time':time.time()}))
+    page.on('close',lambda:events.append({'type':'page-close','time':time.time(),'cleanup':evidence.get('cleanup',False)}))
+    failed=False
+    try:yield page
+    except Exception as error:
+        failed=True
+        try:capture_lab_failure(page,'width-session',error)
+        except Exception as diagnostic_error:print('LAB_WIDTH_DIAGNOSTICS_FAILED',str(diagnostic_error),flush=True)
+        raise
+    finally:
+        checks.artifacts.mkdir(parents=True,exist_ok=True)
+        cleanup_errors=[]
+        try:context.tracing.stop(path=str(checks.artifacts/f'{width}-trace.zip'))
+        except Exception as diagnostic_error:
+            cleanup_errors.append(str(diagnostic_error))
+            events.append({'type':'trace-save-error','error':str(diagnostic_error)})
+        evidence['cleanup']=True
+        try:context.close()
+        except Exception as diagnostic_error:
+            cleanup_errors.append(str(diagnostic_error))
+            events.append({'type':'context-close-error','error':str(diagnostic_error)})
+        (checks.artifacts/f'{width}-session-events.json').write_text(json.dumps({
+            'width':width,'events':events,'browserEvents':browser_events,'host':host_diagnostics(),
+        },ensure_ascii=False,indent=2)+'\n')
+        if cleanup_errors and not failed:raise RuntimeError('LAB diagnostics cleanup failed: '+'; '.join(cleanup_errors))
 
 
 @contextmanager
@@ -102,6 +199,8 @@ def main():
         if args.browser=='chromium':options['args']=['--no-sandbox']
         if exe:=os.environ.get('PLAYWRIGHT_'+args.browser.upper()+'_EXECUTABLE'):options['executable_path']=exe
         browser=getattr(pw,args.browser).launch(**options)
+        browser_events=[]
+        browser.on('disconnected',lambda:browser_events.append({'type':'browser-disconnected','time':time.time()}))
         def context_for(width,workers='block'):
             if width==440:
                 device={k:v for k,v in pw.devices['iPhone 17 Pro Max'].items() if k!='default_browser_type'}
@@ -114,119 +213,119 @@ def main():
         widths=[440] if args.iphone_only else [320,390,430,440,768,1024,1280,1440,1648]
         for width in widths:
             context=context_for(width)
-            page=context.new_page();errors=[];external=[];api_network=[]
-            page.on('pageerror',lambda error:errors.append(str(error)))
-            def request(req):
-                if urlsplit(req.url).scheme in ['http','https'] and not req.url.startswith(base):external.append(req.url)
-                if '/sandbox-api/' in req.url:api_network.append(req.url)
-            page.on('request',request)
-            page.goto(base+'/admin/bronuvannia/')
-            page.wait_for_selector('#view .upcoming-row,#view .booking-card')
-            expect(page.locator('.lab-banner')).to_be_visible()
-            for view in ['upcoming','bookings','calendar','equipment','clients','campaigns','finances','analytics','chemistry','settings']:
-                navigate(page,view);page.wait_for_timeout(120)
-                checks.check(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),f'{width}: {view} no document overflow')
-                if width in [320,390,430,440,768,1440]:checks.screenshot(page,f'{width}-{view}.png')
-            navigate(page,'bookings')
-            expect(page.locator('.booking-list')).to_have_class('booking-list lab-compact')
-            card=page.locator('.booking-card').first
-            compact_height=card.bounding_box()['height']
-            checks.check(compact_height<420,f'{width}: compact booking bounded height')
-            more=card.locator('.booking-action-more>summary')
-            expect(more.locator('span')).to_have_text('⋯')
-            more_bounds=more.bounding_box();primary=card.locator('.primary-action').first.bounding_box()
-            checks.check(more_bounds['width']>=48 and more_bounds['height']>=44 and primary['width']>=card.locator('.booking-actions').bounding_box()['width']-1,f'{width}: More has a separate touch target and the primary action has a full row')
-            waiting=page.locator('.booking-card .status.waiting_payment').first
-            if not waiting.count():waiting=page.locator('.booking-card[data-status="waiting_payment"] .status').first
-            if not waiting.count():waiting=page.locator('.booking-card .status').filter(has_text='Очікує').first
-            original=waiting.inner_text();waiting.evaluate("node=>node.textContent='Очікує передоплату'")
-            fits=waiting.evaluate('''node=>{const range=document.createRange();range.selectNodeContents(node);const text=range.getBoundingClientRect(),box=node.getBoundingClientRect();return text.top>=box.top&&text.bottom<=box.bottom+1&&text.left>=box.left&&text.right<=box.right+1}''')
-            checks.check(fits,f'{width}: full waiting-payment label fits its badge')
-            waiting.evaluate('(node,value)=>node.textContent=value',original)
-            if width<=900:
-                # Linux browsers do not expose an iPhone hardware safe area. Inject
-                # the inset token to verify geometry; this is not device acceptance.
-                for inset in [0,34]:
-                    page.evaluate('(v)=>document.documentElement.style.setProperty("--pwa-safe-bottom",v+"px")',inset)
-                    nav=page.locator('.mobile-nav').evaluate('''nav=>{
-                        const rect=nav.getBoundingClientRect();
-                        return {bottom:rect.bottom,height:rect.height,viewport:innerHeight,
-                            buttons:[...nav.querySelectorAll(':scope>button')].map(button=>{
-                                const r=button.getBoundingClientRect();
-                                return {height:r.height,bottom:r.bottom};
-                            })};
+            with lab_width_diagnostics(context,checks,width,browser_events) as page:
+                errors=[];external=[];api_network=[]
+                page.on('pageerror',lambda error:errors.append(str(error)))
+                def request(req):
+                    if urlsplit(req.url).scheme in ['http','https'] and not req.url.startswith(base):external.append(req.url)
+                    if '/sandbox-api/' in req.url:api_network.append(req.url)
+                page.on('request',request)
+                page.goto(base+'/admin/bronuvannia/')
+                page.wait_for_selector('#view .upcoming-row,#view .booking-card')
+                expect(page.locator('.lab-banner')).to_be_visible()
+                for view in ['upcoming','bookings','calendar','equipment','clients','campaigns','finances','analytics','chemistry','settings']:
+                    navigate(page,view);page.wait_for_timeout(120)
+                    checks.check(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),f'{width}: {view} no document overflow')
+                    if width in [320,390,430,440,768,1440]:checks.screenshot(page,f'{width}-{view}.png')
+                navigate(page,'bookings')
+                expect(page.locator('.booking-list')).to_have_class('booking-list lab-compact')
+                card=page.locator('.booking-card').first
+                compact_height=card.bounding_box()['height']
+                checks.check(compact_height<420,f'{width}: compact booking bounded height')
+                more=card.locator('.booking-action-more>summary')
+                expect(more.locator('span')).to_have_text('⋯')
+                more_bounds=more.bounding_box();primary=card.locator('.primary-action').first.bounding_box()
+                checks.check(more_bounds['width']>=48 and more_bounds['height']>=44 and primary['width']>=card.locator('.booking-actions').bounding_box()['width']-1,f'{width}: More has a separate touch target and the primary action has a full row')
+                waiting=page.locator('.booking-card .status.waiting_payment').first
+                if not waiting.count():waiting=page.locator('.booking-card[data-status="waiting_payment"] .status').first
+                if not waiting.count():waiting=page.locator('.booking-card .status').filter(has_text='Очікує').first
+                original=waiting.inner_text();waiting.evaluate("node=>node.textContent='Очікує передоплату'")
+                fits=waiting.evaluate('''node=>{const range=document.createRange();range.selectNodeContents(node);const text=range.getBoundingClientRect(),box=node.getBoundingClientRect();return text.top>=box.top&&text.bottom<=box.bottom+1&&text.left>=box.left&&text.right<=box.right+1}''')
+                checks.check(fits,f'{width}: full waiting-payment label fits its badge')
+                waiting.evaluate('(node,value)=>node.textContent=value',original)
+                if width<=900:
+                    # Linux browsers do not expose an iPhone hardware safe area. Inject
+                    # the inset token to verify geometry; this is not device acceptance.
+                    for inset in [0,34]:
+                        page.evaluate('(v)=>document.documentElement.style.setProperty("--pwa-safe-bottom",v+"px")',inset)
+                        nav=page.locator('.mobile-nav').evaluate('''nav=>{
+                            const rect=nav.getBoundingClientRect();
+                            return {bottom:rect.bottom,height:rect.height,viewport:innerHeight,
+                                buttons:[...nav.querySelectorAll(':scope>button')].map(button=>{
+                                    const r=button.getBoundingClientRect();
+                                    return {height:r.height,bottom:r.bottom};
+                                })};
+                        }''')
+                        checks.check(abs(nav['bottom']-nav['viewport'])<=1,f'{width}: navigation reaches viewport bottom, simulated inset {inset}')
+                        checks.check(abs(nav['height']-(82+inset))<=1,f'{width}: navigation paints home area exactly once, simulated inset {inset}')
+                        checks.check(all(button['height']>=44 and button['bottom']<=nav['viewport']-inset+1 for button in nav['buttons']),f'{width}: touch controls clear simulated home area {inset}')
+                        if width==440:checks.screenshot(page,f'iphone17-nav-simulated-inset-{inset}.png')
+                    page.evaluate('document.documentElement.style.removeProperty("--pwa-safe-bottom")')
+                card.locator('.booking-action-more>summary').click()
+                if width<=900:cancel=page.locator('.native-v2-action-sheet button').filter(has_text='Скасувати').first
+                else:cancel=card.locator('[data-action="cancel"]')
+                expect(cancel).to_be_visible()
+                page.once('dialog',lambda dialog:dialog.dismiss());cancel.click()
+                checks.check(page.evaluate("VA_LAB.getState().bookings[0].status")== 'pending',f'{width}: More exposes cancellation; dismissed confirmation preserves booking')
+                try:
+                    card.locator('.lab-open-detail').click();expect(page.locator('.detail')).to_be_visible()
+                except Exception:
+                    # Preserve a failed gate instead of guessing from a timeout or
+                    # retrying an action whose real cause has not been established.
+                    diagnostics=page.evaluate('''()=>{
+                        const button=document.querySelector('.booking-card .lab-open-detail');
+                        const style=button&&getComputedStyle(button);
+                        return {visibility:document.visibilityState,focus:document.hasFocus(),
+                            activeElement:document.activeElement?.outerHTML,
+                            viewport:{width:innerWidth,height:innerHeight,visualHeight:visualViewport?.height},
+                            button:button&&{rect:button.getBoundingClientRect().toJSON(),display:style.display,visibility:style.visibility,disabled:button.disabled},
+                            menus:[...document.querySelectorAll('details[open]')].map(menu=>menu.outerHTML),
+                            animations:document.getAnimations().map(animation=>({state:animation.playState,time:animation.currentTime})),
+                            mainScroll:document.querySelector('.main')?.scrollTop};
                     }''')
-                    checks.check(abs(nav['bottom']-nav['viewport'])<=1,f'{width}: navigation reaches viewport bottom, simulated inset {inset}')
-                    checks.check(abs(nav['height']-(82+inset))<=1,f'{width}: navigation paints home area exactly once, simulated inset {inset}')
-                    checks.check(all(button['height']>=44 and button['bottom']<=nav['viewport']-inset+1 for button in nav['buttons']),f'{width}: touch controls clear simulated home area {inset}')
-                    if width==440:checks.screenshot(page,f'iphone17-nav-simulated-inset-{inset}.png')
-                page.evaluate('document.documentElement.style.removeProperty("--pwa-safe-bottom")')
-            card.locator('.booking-action-more>summary').click()
-            if width<=900:cancel=page.locator('.native-v2-action-sheet button').filter(has_text='Скасувати').first
-            else:cancel=card.locator('[data-action="cancel"]')
-            expect(cancel).to_be_visible()
-            page.once('dialog',lambda dialog:dialog.dismiss());cancel.click()
-            checks.check(page.evaluate("VA_LAB.getState().bookings[0].status")== 'pending',f'{width}: More exposes cancellation; dismissed confirmation preserves booking')
-            try:
-                card.locator('.lab-open-detail').click();expect(page.locator('.detail')).to_be_visible()
-            except Exception:
-                # Preserve a failed gate instead of guessing from a timeout or
-                # retrying an action whose real cause has not been established.
-                diagnostics=page.evaluate('''()=>{
-                    const button=document.querySelector('.booking-card .lab-open-detail');
-                    const style=button&&getComputedStyle(button);
-                    return {visibility:document.visibilityState,focus:document.hasFocus(),
-                        activeElement:document.activeElement?.outerHTML,
-                        viewport:{width:innerWidth,height:innerHeight,visualHeight:visualViewport?.height},
-                        button:button&&{rect:button.getBoundingClientRect().toJSON(),display:style.display,visibility:style.visibility,disabled:button.disabled},
-                        menus:[...document.querySelectorAll('details[open]')].map(menu=>menu.outerHTML),
-                        animations:document.getAnimations().map(animation=>({state:animation.playState,time:animation.currentTime})),
-                        mainScroll:document.querySelector('.main')?.scrollTop};
-                }''')
-                (checks.artifacts/f'{width}-detail-failure.json').write_text(json.dumps(diagnostics,ensure_ascii=False,indent=2)+'\n')
-                checks.screenshot(page,f'{width}-detail-failure.png')
-                raise
-            expect(page.locator('.lab-action-dock button')).to_be_visible()
-            dock=page.locator('.lab-action-dock').bounding_box()
-            checks.check(dock['y']+dock['height']<=page.viewport_size['height']+1,f'{width}: primary detail action stays within viewport')
-            if width<=900:
-                expect(page.locator('.lab-ledger')).to_have_count(1)
-                expect(page.locator('.lab-ledger')).to_be_visible()
-                page.locator('.lab-ledger summary').click();expect(page.locator('.lab-ledger .charged')).to_be_visible()
-                page.locator('.lab-ledger summary').click()
-            page.evaluate("window.__labIdle=0;window.__labObserver=new MutationObserver(records=>window.__labIdle+=records.length);__labObserver.observe(document.querySelector('#layer'),{subtree:true,childList:true})")
-            page.wait_for_timeout(600)
-            idle=page.evaluate('window.__labObserver.disconnect();window.__labIdle')
-            checks.check(idle<30,f'{width}: detail DOM settles at idle ({idle} changes/600ms)')
-            if width in [320,390,430,440,768,1440]:checks.screenshot(page,f'{width}-detail.png')
-            page.locator('.detail .back').click();expect(page.locator('.detail')).not_to_be_attached()
-            page.locator('#labListMode button').filter(has_text='Повністю').click()
-            expect(card.locator('.booking-row-body')).to_be_visible()
-            full_more=card.locator('.booking-action-more>summary').bounding_box()
-            checks.check(full_more['width']>=44 and full_more['height']>=44 and not card.locator('.booking-action-more>summary>em').is_visible(),f'{width}: full mode retains an uncluttered accessible More control')
-            full_height=card.bounding_box()['height'];density.append({'width':width,'compact_height':compact_height,'full_height':full_height})
-            if width<=900:checks.check(compact_height<full_height,f'{width}: compact card reduces height ({compact_height:.0f} vs {full_height:.0f}px)')
-            page.reload();page.wait_for_selector('.upcoming-row,.booking-card');navigate(page,'bookings')
-            expect(page.locator('.booking-list')).not_to_have_class('booking-list lab-compact')
-            page.locator('#labListMode button').filter(has_text='Стисло').click()
-            checks.check(not external and not api_network,f'{width}: zero external/API network requests without mocked routing')
-            checks.check(not errors,f'{width}: no uncaught JS errors: {errors}')
-            if width==440:
-                page.set_viewport_size({'width':956,'height':440});navigate(page,'bookings')
-                page.locator('.booking-card .lab-open-detail').first.click()
+                    (checks.artifacts/f'{width}-detail-failure.json').write_text(json.dumps(diagnostics,ensure_ascii=False,indent=2)+'\n')
+                    checks.screenshot(page,f'{width}-detail-failure.png')
+                    raise
                 expect(page.locator('.lab-action-dock button')).to_be_visible()
-                rect=page.locator('.lab-action-dock').bounding_box()
-                checks.check(rect['y']+rect['height']<=441,'iPhone landscape: detail primary action fits short viewport')
-                checks.screenshot(page,'iphone17-landscape-detail.png')
-                page.locator('.detail .back').click()
-                page.locator('#newBooking:visible,#mobileNewBooking:visible').first.click()
-                form=page.locator('#bookingForm');expect(form).to_be_visible()
-                checks.check(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'iPhone landscape: booking form has no document overflow')
-                footer=form.locator('footer').bounding_box()
-                checks.check(footer['y']>=48 and footer['y']+footer['height']<=441,'iPhone landscape: booking footer clears LAB header and screen bottom')
-                checks.screenshot(page,'iphone17-landscape-form.png')
-                form.locator('[data-close]:visible').first.click()
-            context.close()
+                dock=page.locator('.lab-action-dock').bounding_box()
+                checks.check(dock['y']+dock['height']<=page.viewport_size['height']+1,f'{width}: primary detail action stays within viewport')
+                if width<=900:
+                    expect(page.locator('.lab-ledger')).to_have_count(1)
+                    expect(page.locator('.lab-ledger')).to_be_visible()
+                    page.locator('.lab-ledger summary').click();expect(page.locator('.lab-ledger .charged')).to_be_visible()
+                    page.locator('.lab-ledger summary').click()
+                page.evaluate("window.__labIdle=0;window.__labObserver=new MutationObserver(records=>window.__labIdle+=records.length);__labObserver.observe(document.querySelector('#layer'),{subtree:true,childList:true})")
+                page.wait_for_timeout(600)
+                idle=page.evaluate('window.__labObserver.disconnect();window.__labIdle')
+                checks.check(idle<30,f'{width}: detail DOM settles at idle ({idle} changes/600ms)')
+                if width in [320,390,430,440,768,1440]:checks.screenshot(page,f'{width}-detail.png')
+                page.locator('.detail .back').click();expect(page.locator('.detail')).not_to_be_attached()
+                page.locator('#labListMode button').filter(has_text='Повністю').click()
+                expect(card.locator('.booking-row-body')).to_be_visible()
+                full_more=card.locator('.booking-action-more>summary').bounding_box()
+                checks.check(full_more['width']>=44 and full_more['height']>=44 and not card.locator('.booking-action-more>summary>em').is_visible(),f'{width}: full mode retains an uncluttered accessible More control')
+                full_height=card.bounding_box()['height'];density.append({'width':width,'compact_height':compact_height,'full_height':full_height})
+                if width<=900:checks.check(compact_height<full_height,f'{width}: compact card reduces height ({compact_height:.0f} vs {full_height:.0f}px)')
+                page.reload();page.wait_for_selector('.upcoming-row,.booking-card');navigate(page,'bookings')
+                expect(page.locator('.booking-list')).not_to_have_class('booking-list lab-compact')
+                page.locator('#labListMode button').filter(has_text='Стисло').click()
+                checks.check(not external and not api_network,f'{width}: zero external/API network requests without mocked routing')
+                checks.check(not errors,f'{width}: no uncaught JS errors: {errors}')
+                if width==440:
+                    page.set_viewport_size({'width':956,'height':440});navigate(page,'bookings')
+                    page.locator('.booking-card .lab-open-detail').first.click()
+                    expect(page.locator('.lab-action-dock button')).to_be_visible()
+                    rect=page.locator('.lab-action-dock').bounding_box()
+                    checks.check(rect['y']+rect['height']<=441,'iPhone landscape: detail primary action fits short viewport')
+                    checks.screenshot(page,'iphone17-landscape-detail.png')
+                    page.locator('.detail .back').click()
+                    page.locator('#newBooking:visible,#mobileNewBooking:visible').first.click()
+                    form=page.locator('#bookingForm');expect(form).to_be_visible()
+                    checks.check(page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),'iPhone landscape: booking form has no document overflow')
+                    footer=form.locator('footer').bounding_box()
+                    checks.check(footer['y']>=48 and footer['y']+footer['height']<=441,'iPhone landscape: booking footer clears LAB header and screen bottom')
+                    checks.screenshot(page,'iphone17-landscape-form.png')
+                    form.locator('[data-close]:visible').first.click()
         # Real clicks on the LAB adapter: rejected save keeps draft, retry persists, reload reads it.
         for width in ([440] if args.iphone_only else [390,440,1440]):
             context=context_for(width)

@@ -13,7 +13,8 @@ permissions:
   id-token: write
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  # Preserve a running acceptance result when a diagnostic follow-up is pushed.
+  cancel-in-progress: false
 
 jobs:
   validate:
