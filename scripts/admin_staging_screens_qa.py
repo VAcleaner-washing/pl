@@ -61,6 +61,7 @@ def main():
     results, requests, unexpected = [], [], []
     flags = {'campaign_fail': False, 'policy_fail_remaining': 0, 'policy_requests': 0,
              'waiver_fail': True, 'waiver_confirmed': False, 'waiver_payloads': []}
+    held_profile_routes = []
     waiver_fixture = next(b for b in fixture['bookings'] if b['status'] == 'waiting_payment')
 
     def current_bookings():
@@ -174,7 +175,14 @@ def main():
                                 'activeRewards': [], 'referrals': [], 'rewards': [],
                                 'profile': {'instagram': 'r4_synthetic',
                                             'preferred_contact': 'instagram'}}}
-        elif action == 'lookup_customer': body = {'customer': None}
+        elif action == 'lookup_customer':
+            if current['phase'] == 'profile-race':
+                # Leave this one genuine HTTP fixture request pending until the
+                # administrator has interacted with the actual process form.
+                held_profile_routes.append({'route': route, 'headers': headers,
+                                            'phone': payload.get('phone')})
+                return
+            body = {'customer': None}
         elif action == 'audit_log': body = {'entries': []}
         elif action == 'health':
             body = {'reservation': {'healthy': True},
@@ -503,9 +511,96 @@ def main():
               dialogs=unexpected_dialogs)
         screenshot(page, 'waiver-confirmed-without-fake200')
 
+    def profile_race(page):
+        navigate(page, 'bookings')
+        row = next(b for b in fixture['bookings'] if b['status'] == 'pending')
+        card = page.locator(f'.booking-card[data-id="{row["id"]}"]')
+        customer = {'name': 'R61 SERVER PROFILE', 'address': 'R61 server address',
+                    'documentType': 'ID-картка', 'documentNumber': 'SERVER-R61-1234',
+                    'documentVerifiedAt': fixture['fixedTime'], 'hasDocument': True,
+                    'isRepeatCustomer': True, 'completedOrders': 2}
+
+        def open_pending():
+            with page.expect_request(lambda request: request.method == 'POST' and
+                                     request.post_data_json and
+                                     request.post_data_json.get('action') == 'lookup_customer'):
+                card.locator('[data-action=process]').click()
+            form = page.locator('#processForm')
+            expect(form).to_be_visible()
+            expect(form.locator('#documentProfileState')).to_contain_text('Перевіряємо історію')
+            return form
+
+        def release_profile():
+            assert len(held_profile_routes) == 1, 'Exactly one actual profile request must be held'
+            held = held_profile_routes.pop()
+            assert held['phone'] == row['customer_phone']
+            held['route'].fulfill(status=200, headers=held['headers'],
+                                  content_type='application/json',
+                                  body=json.dumps({'customer': customer}))
+
+        form = open_pending()
+        manual = {'customerName': 'R61 HAND TYPED NAME',
+                  'customerAddress': 'R61 hand typed address',
+                  'documentNumber': 'MANUAL-R61-9876'}
+        for name, value in manual.items():
+            form.locator(f'[name={name}]').fill(value)
+        form.locator('[name=documentType]').select_option(label='Водійське посвідчення')
+        # Record an intentional unchecked state, rather than merely observing
+        # the checkbox's original default before the delayed server response.
+        form.locator('[name=identityVerified]').check()
+        form.locator('[name=identityVerified]').uncheck()
+        release_profile()
+        expect(form.locator('#documentProfileState')).to_contain_text('Ваші ручні зміни збережено')
+        for name, value in manual.items():
+            expect(form.locator(f'[name={name}]')).to_have_value(value)
+        expect(form.locator('[name=documentType]')).to_have_value('Водійське посвідчення')
+        expect(form.locator('[name=identityVerified]')).not_to_be_checked()
+        expect(form).to_have_attribute('data-documents-required', '0')
+        check('late process profile preserves all five manually edited fields including unchecked identity', True)
+        close(page, form, discard=True)
+
+        form = open_pending()
+        release_profile()
+        expect(form.locator('#documentProfileState')).to_contain_text('Документи є в базі')
+        for name, key in [('customerName', 'name'), ('customerAddress', 'address'),
+                          ('documentType', 'documentType'), ('documentNumber', 'documentNumber')]:
+            expect(form.locator(f'[name={name}]')).to_have_value(customer[key])
+        expect(form.locator('[name=identityVerified]')).to_be_checked()
+        expect(form).to_have_attribute('data-documents-required', '0')
+        check('untouched process fields still autofill from the actual delayed profile response', True)
+        form.locator('[name=customerPhone]').fill('+380000009961')
+        expect(form.locator('#documentProfileState')).to_contain_text('Потрібна перевірка клієнта')
+        expect(form.locator('[name=identityVerified]')).not_to_be_checked()
+        expect(form).to_have_attribute('data-documents-required', '1')
+        check('changing phone after autofill clears only unedited identity authority and requests manual verification', True)
+        close(page, form, discard=True)
+
+        form = open_pending()
+        form.locator('[name=customerPhone]').fill('+380000009962')
+        form.locator('[name=customerName]').fill('R61 NEW PHONE MANUAL NAME')
+        # Observe the actual response-driven status mutation. This avoids a
+        # pre-existing error label satisfying the assertion before delivery.
+        form.locator('#documentProfileState').evaluate('''node=>{
+          window.__r61ProfileMutations=0;
+          window.__r61ProfileObserver=new MutationObserver(()=>window.__r61ProfileMutations++);
+          window.__r61ProfileObserver.observe(node,{childList:true,subtree:true});
+        }''')
+        release_profile()
+        page.wait_for_function('()=>window.__r61ProfileMutations>0')
+        page.evaluate('window.__r61ProfileObserver.disconnect()')
+        expect(form.locator('#documentProfileState')).to_contain_text('Потрібна перевірка клієнта')
+        expect(form.locator('[name=customerName]')).to_have_value('R61 NEW PHONE MANUAL NAME')
+        expect(form.locator('[name=documentNumber]')).to_have_value('')
+        expect(form.locator('[name=identityVerified]')).not_to_be_checked()
+        expect(form).to_have_attribute('data-documents-required', '1')
+        check('late response for the previous phone cannot supply identity or overwrite the current process client', True)
+        close(page, form, discard=True)
+        check('every deliberately held process profile request was explicitly delivered', not held_profile_routes)
+
     phases = [('policy-recovery', policy_recovery), ('sections', sections), ('clients', clients), ('referral', referral),
               ('catalog', catalog), ('finance', finance), ('analytics', analytics),
-              ('campaigns', campaigns), ('settings', settings), ('booking-time', booking_time), ('waiver', waiver)]
+              ('campaigns', campaigns), ('settings', settings), ('booking-time', booking_time), ('waiver', waiver),
+              ('profile-race', profile_race)]
     selected_phases = phases if args.phase == 'all' else [phase for phase in phases if phase[0] == args.phase]
     runs = [(iteration, name, run) for iteration in range(1, args.repeat + 1)
             for name, run in selected_phases]

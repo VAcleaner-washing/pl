@@ -280,7 +280,9 @@ class ConnectedRun:
             expect(sheet).to_have_count(0)
         else:
             page.locator(f'.booking-toolbar [data-filter="{status}"]').click()
-        page.locator('#globalSearch').fill(self.name)
+        # This is the real global search, which replaces cards with grouped
+        # search-result rows. Stay in the actual booking list for its actions.
+        expect(page.locator('#globalSearch')).to_have_value('')
 
     def card(self, page, booking_id, status='all', refresh=False):
         if refresh:
@@ -289,7 +291,7 @@ class ConnectedRun:
         card = page.locator(f'.booking-card[data-id="{booking_id}"]')
         expect(card).to_be_visible()
         expect(card).to_contain_text(self.name)
-        expect(page.locator('.booking-card')).to_have_count(1)
+        expect(card).to_have_count(1)
         return card
 
     def api(self, role, body):
@@ -313,12 +315,11 @@ class ConnectedRun:
         # Never capture an authentication form, even though passwords are masked.
         if page.locator('#authForm').is_visible():
             return
-        search = page.locator('#globalSearch')
-        cards = page.locator('.booking-card')
-        if (search.count() != 1 or search.input_value() != self.name or cards.count() == 0 or
-                any(self.name not in card.inner_text() for card in cards.all())):
+        cards = page.locator('.booking-card').filter(has_text=self.name)
+        if cards.count() != 1 or cards.get_attribute('data-id') not in self.owned:
             return
-        page.screenshot(path=str(self.out / (name + '.png')))
+        # Capture only our synthetic card, never surrounding existing rows.
+        cards.screenshot(path=str(self.out / (name + '.png')))
 
     def pick_time(self, page, form, field, value):
         control = form.locator(f'[name="{field}"]')
@@ -405,6 +406,9 @@ class ConnectedRun:
     def lifecycle(self, page_a, page_b, booking_id):
         self.card(page_a, booking_id).locator('[data-action=process]').click()
         form = page_a.locator('#processForm'); expect(form).to_be_visible()
+        # Use the actual completed profile lookup for this deterministic
+        # lifecycle. Separate race regression covers edits made in flight.
+        expect(form.locator('#documentProfileState.loading')).to_have_count(0)
         form.locator('[name=contacted]').check()
         form.locator('[name=confirmationSent]').check()
         if form.get_attribute('data-documents-required') == '1':

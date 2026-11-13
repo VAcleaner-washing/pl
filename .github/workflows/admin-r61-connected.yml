@@ -28,12 +28,12 @@ jobs:
       - name: Verify the approved QA61 product source
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git merge-base --is-ancestor b3cb9188042ae65a89dcc88e5a20b9c7c45b32d3 HEAD
+          git merge-base --is-ancestor 4cfc1ba41756eecfd1798f3786e58f2c66fbd867 HEAD
           python - <<'PY'
           import json,subprocess
           from pathlib import Path
           allowed={'.github/workflows/admin-r61-connected.yml'}
-          changed=set(subprocess.check_output(['git','diff','--name-only','b3cb9188042ae65a89dcc88e5a20b9c7c45b32d3','HEAD'],text=True).splitlines())
+          changed=set(subprocess.check_output(['git','diff','--name-only','4cfc1ba41756eecfd1798f3786e58f2c66fbd867','HEAD'],text=True).splitlines())
           assert changed<=allowed,'Product source differs from approved QA61'
           release=json.loads(Path('release.json').read_text())
           assert release['version']=='4.3.61' and release['build']==4361

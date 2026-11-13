@@ -54,7 +54,8 @@
     "test:allocation-reconciliation",
     "test:focus-intent",
     "test:campaign-metrics",
-    "test:ci-identity-boundary"
+    "test:ci-identity-boundary",
+    "test:process-profile-race"
   ],
   "browser": [
     "test:public-hydration",
