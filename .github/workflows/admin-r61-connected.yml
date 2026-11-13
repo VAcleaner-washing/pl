@@ -21,12 +21,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - name: Verify the approved QA61 product source
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git merge-base --is-ancestor bd0ed4f559aa8188b553a77a4b9875d1267bbf3c HEAD
           python - <<'PY'
           import json,subprocess
