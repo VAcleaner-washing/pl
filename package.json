@@ -121,6 +121,7 @@
     "test:campaign-metrics": "node scripts/test-campaign-metric-attribution.mjs",
     "test:ci-identity-boundary": "node scripts/test-admin-ci-identity-boundary.mjs",
     "build:release-candidate": "node scripts/build-admin-release-candidate.mjs",
-    "test:release-candidate": "node scripts/test-admin-release-candidate.mjs"
+    "test:release-candidate": "node scripts/test-admin-release-candidate.mjs",
+    "test:process-profile-race": "node scripts/test-admin-process-profile-race.mjs"
   }
 }
