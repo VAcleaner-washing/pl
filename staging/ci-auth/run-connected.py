@@ -18,8 +18,12 @@ def workload_token():
         raise RuntimeError('unexpected_identity_issuer_request')
     url+=('&' if parsed.query else '?')+urllib.parse.urlencode({'audience':BROKER})
     request=urllib.request.Request(url,headers={'Authorization':'Bearer '+os.environ['ACTIONS_ID_TOKEN_REQUEST_TOKEN']})
-    with opener.open(request,timeout=30) as response:
-        token=json.load(response).get('value')
+    try:
+        with opener.open(request,timeout=30) as response:
+            token=json.load(response).get('value')
+    except urllib.error.HTTPError as error:
+        error.ci_phase='oidc_token'
+        raise
     if not isinstance(token,str) or token.count('.')!=2:raise RuntimeError('missing_identity_token')
     return token
 
@@ -28,8 +32,21 @@ def action(name):
     key=json.loads((ROOT/'staging/hosted-r4-client.json').read_text())['publicKey']
     request=urllib.request.Request(BROKER,data=json.dumps({'action':name}).encode(),method='POST',
         headers={'Authorization':'Bearer '+token,'apikey':key,'Content-Type':'application/json'})
-    with opener.open(request,timeout=60) as response:body=json.load(response)
+    try:
+        with opener.open(request,timeout=60) as response:body=json.load(response)
+    except urllib.error.HTTPError as error:
+        error.ci_phase='broker_'+name
+        raise
     return body
+
+def safe_error(error,phase):
+    # Export only a controlled phase and numeric status, never the HTTPError
+    # string (which includes URLs), response body, headers or request context.
+    phases={'broker_ready','oidc_token','broker_provision','identity_check',
+            'chromium','webkit','broker_cleanup'}
+    recorded_phase=getattr(error,'ci_phase',phase)
+    return {'type':type(error).__name__,'phase':recorded_phase if recorded_phase in phases else 'unknown',
+            'httpStatus':error.code if isinstance(error,urllib.error.HTTPError) else None}
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--artifacts',required=True);args=parser.parse_args()
@@ -37,7 +54,7 @@ def main():
     out=Path(args.artifacts).resolve();out.mkdir(parents=True,exist_ok=True)
     run_id=os.environ['GITHUB_RUN_ID']
     results={'runId':run_id,'engines':{},'cleanup':None,'error':None,'credentialsWrittenToArtifacts':False}
-    configured=False
+    configured=False;phase='broker_ready'
     try:
         # The owner deploys a config pinned to this run after its ID is known.
         # This polls readiness only; it never retries a provisioning mutation.
@@ -49,11 +66,13 @@ def main():
             if ready:break
             if time.monotonic()>=deadline:raise RuntimeError('pinned_broker_not_ready')
             time.sleep(3)
-        config=action('provision')
+        phase='broker_provision';config=action('provision')
+        phase='identity_check'
         if config.get('projectRef')!=PROJECT or config.get('origin')!=ORIGIN or config.get('runId')!=run_id:
             raise RuntimeError('ci_stage_identity_mismatch')
         configured=True
         for engine in ['chromium','webkit']:
+            phase=engine
             runtime_env=os.environ.copy();runtime_env.pop('DEBUG',None)
             runtime_env['VA_R61_CONNECTED_CONFIG']=json.dumps(config)
             completed=subprocess.run([sys.executable,str(ROOT/'scripts/admin_staging_connected_qa.py'),
@@ -62,8 +81,9 @@ def main():
         del config
     except Exception as error:
         # No exception bodies, response URLs, credentials or request headers.
-        results['error']=type(error).__name__
-        print('Connected-stage setup/test failed: '+type(error).__name__,flush=True)
+        summary=safe_error(error,phase)
+        results['error']=summary['type'];results['errorPhase']=summary['phase'];results['httpStatus']=summary['httpStatus']
+        print('Connected-stage setup/test failed: '+json.dumps(summary),flush=True)
     finally:
         try:
             cleaned=action('cleanup') # New short-lived OIDC token for cleanup.
@@ -72,8 +92,9 @@ def main():
                 raise RuntimeError('unexpected_cleanup_result')
             results['cleanup']={'removedTemporaryUsers':count,'providerMessages':cleaned.get('providerMessages')}
         except Exception as error:
-            results['cleanup']={'error':type(error).__name__}
-            print('Temporary-identity cleanup needs owner review: '+type(error).__name__,flush=True)
+            summary=safe_error(error,'broker_cleanup')
+            results['cleanup']={'error':summary['type'],'phase':summary['phase'],'httpStatus':summary['httpStatus']}
+            print('Temporary-identity cleanup needs owner review: '+json.dumps(summary),flush=True)
         (out/'driver-result.json').write_text(json.dumps(results,indent=2)+'\n')
     success=(results['error'] is None and len(results['engines'])==2 and
              all(value['exitCode']==0 for value in results['engines'].values()) and

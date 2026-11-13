@@ -65,7 +65,7 @@ Deno.serve(async request=>{
       const {data,error}=previous?await db.auth.admin.updateUserById(previous.id,{password,email_confirm:true}):
         await db.auth.admin.createUser({email,password,email_confirm:true,app_metadata:{vacleaner_ci:ownership()}});
       if(error||!data.user?.id)throw Error('ci_user_create_failed');
-      const {error:roleError}=await db.from('admin_users').upsert({user_id:data.user.id});
+      const {error:roleError}=await db.from('admin_users').upsert({user_id:data.user.id,email});
       if(roleError)throw Error('ci_user_role_failed');
       accounts.push({email,password});
     }

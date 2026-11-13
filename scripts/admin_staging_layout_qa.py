@@ -203,11 +203,22 @@ def main():
                 page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
                 short=scroll_contract(page,'.booking-form-scroll','#bookingForm>header','#bookingForm>footer')
                 check(f'{width}: shorter viewport retains separate field/footer rows',short['scroll']['top']>=short['header']['bottom']-1 and short['scroll']['bottom']<=short['footer']['top']+1 and short['footer']['bottom']<=641,geometry=short)
-                page.locator('.booking-form-scroll').hover()
-                page.mouse.wheel(0,1200)
+                # Mobile WebKit does not implement the wheel protocol. Exercise
+                # another real trusted action while the same phone stays focused;
+                # clear_hit still performs the original reachability measurement.
+                event_type='keydown' if args.browser=='webkit' else 'wheel'
+                page.evaluate('''type=>{window.__qaTrustedIntent=null;
+                  document.addEventListener(type,event=>{window.__qaTrustedIntent={trusted:event.isTrusted,type:event.type}}, {once:true});}''',event_type)
+                if args.browser=='webkit':page.keyboard.press('PageDown')
+                else:
+                    page.locator('.booking-form-scroll').hover()
+                    page.mouse.wheel(0,1200)
+                intent=page.evaluate('window.__qaTrustedIntent')
+                check(f'{width}: focus regression uses a trusted user action',bool(intent) and intent['trusted'] and intent['type']==event_type,intent=intent)
+                check(f'{width}: phone remains focused during newer user intent',form.locator('[name=customerPhone]').evaluate('element=>document.activeElement===element'))
                 released=[]
                 hit=clear_hit(tail,lambda:released.append(page.evaluate('window.__qaReleaseOldFocus()')))
-                check(f'{width}: delayed phone focus cannot override a newer trusted scroll',bool(released) and released[0]>0,heldCallbacks=released)
+                check(f'{width}: delayed phone focus remains exercised after newer user intent',bool(released) and released[0]>0,heldCallbacks=released)
                 check(f'{width}: last customer control stays reachable in shorter viewport',hit['clear'],hit=hit)
                 page.screenshot(path=str(out/f'{width}-booking-short-viewport.png'))
                 page.set_viewport_size({'width':width,'height':956})

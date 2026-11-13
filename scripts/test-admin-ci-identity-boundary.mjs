@@ -43,7 +43,7 @@ function handler(overrides={}){
     async deleteUser(id){calls.push('delete');assert.notEqual(id,'owner');users.splice(users.findIndex(u=>u.id===id),1);return{error:null}},
   };
   const db={auth:{admin},from(table){assert.equal(table,'admin_users');return{
-    async upsert(row){roles.add(row.user_id);return{error:null}},
+    async upsert(row){assert.equal(row.email,users.find(user=>user.id===row.user_id)?.email,'admin_users.email is NOT NULL in the actual stage schema');roles.add(row.user_id);return{error:null}},
     delete(){return{async eq(field,id){assert.equal(field,'user_id');assert.notEqual(id,'owner');roles.delete(id);return{error:null}}}},
   }}};
   let serve,clients=0,clientOptions;

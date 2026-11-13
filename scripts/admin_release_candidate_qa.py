@@ -143,8 +143,42 @@ def main():
             check('normal login uses canonical aliases and no test banner or transport', True)
             if args.width == 440:
                 page.evaluate("()=>{document.documentElement.style.setProperty('--pwa-safe-top','59px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px')}")
-                rect = page.locator('.main').bounding_box()
-                check('normal mobile main begins at its safe area without a reserved test-header gap', 58 <= rect['y'] <= 60, geometry=rect)
+                chrome = page.evaluate('''()=>{
+                  const link=document.querySelector('link[href*="/assets/admin-operations.css"]'),
+                    main=document.querySelector('.main'),title=document.querySelector('#pageTitle');
+                  if(!link||!main||!title)throw Error('Normal chrome comparison controls missing');
+                  const measure=()=>{const m=main.getBoundingClientRect(),t=title.getBoundingClientRect(),s=getComputedStyle(main);
+                    return{mainTop:m.top,mainHeight:m.height,paddingTop:parseFloat(s.paddingTop),
+                      titleTop:t.top,titleBottom:t.bottom,scrollTop:main.scrollTop}};
+                  const disabled=link.disabled,inline=main.style.getPropertyValue('padding-top'),
+                    priority=main.style.getPropertyPriority('padding-top');
+                  let canonical,candidate,withReservedGap,restored;
+                  try{
+                    // The approved normal PWA can own its safe area through
+                    // inner padding while its scroll owner begins at y=0.
+                    // Compare first visible content with the same canonical
+                    // chrome, rather than requiring a different scroll owner.
+                    link.disabled=true;canonical=measure();
+                    link.disabled=disabled;candidate=measure();
+                    main.style.setProperty('padding-top',(candidate.paddingTop+48)+'px','important');
+                    withReservedGap=measure();
+                  }finally{
+                    if(inline)main.style.setProperty('padding-top',inline,priority);else main.style.removeProperty('padding-top');
+                    link.disabled=disabled;restored=measure();
+                  }
+                  return{safeTop:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pwa-safe-top')),
+                    canonical,candidate,withReservedGap,restored};
+                }''')
+                expected = chrome['canonical']['titleTop']
+                check('normal mobile visible content keeps canonical safe-area spacing without a reserved test-header gap',
+                      chrome['safeTop'] == 59 and expected >= 59 and
+                      abs(chrome['candidate']['titleTop'] - expected) <= 1 and
+                      abs(chrome['restored']['titleTop'] - expected) <= 1,
+                      geometry=chrome)
+                check('the same visible-content check rejects an injected48px reserved header gap',
+                      chrome['withReservedGap']['titleTop'] - chrome['candidate']['titleTop'] >= 47 and
+                      abs(chrome['withReservedGap']['titleTop'] - expected) > 1,
+                      geometry=chrome)
                 nav = page.locator('.mobile-nav').bounding_box()
                 targets = page.locator('.mobile-nav>button').evaluate_all('els=>els.map(el=>el.getBoundingClientRect().toJSON())')
                 check('five navigation targets remain reachable above the viewport edge', len(targets) == 5 and all(t['height'] >= 44 and t['width'] >= 44 and t['bottom'] <= 957 for t in targets) and abs(nav['y'] + nav['height'] - 956) <= 1, targets=targets)
@@ -166,7 +200,28 @@ def main():
                   return {detail:rect('.detail'),head:rect('.detail-top'),back:rect('.detail-top .back'),
                     scroll:rect('.detail-shell'),dock:rect('.lab-action-dock')};}''')
                 check('normal detail header owns safe top once and content excludes its action dock', boxes['detail']['top'] == 0 and boxes['back']['top'] >= 59 and boxes['scroll']['top'] >= boxes['head']['bottom'] - 1 and boxes['scroll']['bottom'] <= boxes['dock']['top'] + 1, geometry=boxes)
-            expect(page.locator('.lab-ledger')).to_be_visible()
+            if args.width == 440:
+                expect(page.locator('.lab-ledger')).to_be_visible()
+                expect(page.locator('.lab-ledger>summary')).to_have_text('Склад розрахунку')
+                check('mobile detail retains its financial ledger disclosure', True)
+            else:
+                # The canonical desktop detail has an expanded finance panel;
+                # the v4321 card/disclosure is a mobile presentation component.
+                finance = page.locator('.detail .finance-panel')
+                expect(finance).to_be_visible()
+                for label in ['Передоплата за бронювання', 'Залог', 'Отримано разом', 'Оренда',
+                              'Доставка', 'Разом витрати', 'Фінальний розрахунок']:
+                    expect(finance).to_contain_text(label)
+                selected = next(row for row in fixture['bookings'] if row['id'] == first.get_attribute('data-id'))
+                expected_received = (selected.get('prepayment_amount', 0) if selected.get('prepayment_paid') else 0) + (
+                    selected.get('deposit_amount', 0) if selected.get('deposit_paid') else 0)
+                clean = lambda value: ''.join(char for char in value if char.isdigit() or char == '-')
+                received = finance.locator('.money-row.received-total>strong').inner_text()
+                total = finance.locator('.money-row.expenses-total>strong').inner_text()
+                check('desktop retains expanded canonical finance rows and exact fixture totals',
+                      clean(received) == str(expected_received) and clean(total) == str(selected['total_amount']),
+                      received=received, total=total, expectedReceived=expected_received,
+                      expectedTotal=selected['total_amount'])
             capture(page, 'normal-detail')
             page.locator('.detail .back').click()
             expect(page.locator('.detail')).to_have_count(0)
