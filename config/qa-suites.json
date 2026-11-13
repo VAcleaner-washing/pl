@@ -49,7 +49,12 @@
     "test:admin-staging-readiness",
     "test:settings-tabs-lifecycle",
     "test:admin-settings-errors",
-    "test:admin-margin-label"
+    "test:admin-margin-label",
+    "test:report-dates",
+    "test:allocation-reconciliation",
+    "test:focus-intent",
+    "test:campaign-metrics",
+    "test:ci-identity-boundary"
   ],
   "browser": [
     "test:public-hydration",

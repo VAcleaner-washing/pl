@@ -126,11 +126,13 @@ def main():
           const rect=el=>{const r=el.getBoundingClientRect();return{top:r.top,bottom:r.bottom,left:r.left,right:r.right,height:r.height}};
           return{scroll:rect(scroll),header:rect(head),footer:rect(foot),scrollTop:scroll.scrollTop,scrollHeight:scroll.scrollHeight,clientHeight:scroll.clientHeight};
         }''',[scroll_selector,header_selector,footer_selector])
-    def clear_hit(locator):
+    def clear_hit(locator,before_measure=None):
         # Trial performs the browser's normal visibility/stability/hit checks
         # without activating a control. A raw immediate scroll sample raced the
         # canonical wizard/view scroll reset and recorded off-viewport points.
         locator.click(trial=True)
+        if before_measure:
+            before_measure()
         return locator.evaluate('''el=>{const r=el.getBoundingClientRect(),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2,hit=document.elementFromPoint(x,y);return{clear:hit===el||el.contains(hit),x,y,hit:hit?.className}}''')
     def exercise_scroll_surfaces(page,width):
         page.evaluate("()=>{const s=document.documentElement.style;s.setProperty('--pwa-safe-top','59px');s.setProperty('--pwa-safe-bottom','34px');s.setProperty('--lab-bar','107px')}")
@@ -183,13 +185,30 @@ def main():
             hit=clear_hit(tail);check(f'{width}/booking/step{step}: last control is not covered',hit['clear'],hit=hit)
             page.screenshot(path=str(out/f'{width}-booking-step{step}-tail.png'))
             if step==2:
+                # Hold only the real delayed keyboard-focus callback. Release it
+                # after a newer trusted scroll gesture and the normal trial
+                # action, reproducing the old focus/scroll race deterministically.
+                page.evaluate('''()=>{
+                  const timer=window.setTimeout.bind(window),pending=[];
+                  window.__qaReleaseOldFocus=()=>{window.setTimeout=timer;
+                    const count=pending.length;pending.splice(0).forEach(callback=>callback());return count;};
+                  window.setTimeout=(callback,delay,...args)=>{
+                    if(delay===90&&String(callback).includes('keepFocusedControlVisible')){pending.push(callback);return 0}
+                    return timer(callback,delay,...args);
+                  };
+                }''')
                 form.locator('[name=customerName]').fill('R4 SCROLL QA · синтетичний')
                 form.locator('[name=customerPhone]').fill('+380000009958')
                 page.set_viewport_size({'width':width,'height':640})
                 page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
                 short=scroll_contract(page,'.booking-form-scroll','#bookingForm>header','#bookingForm>footer')
                 check(f'{width}: shorter viewport retains separate field/footer rows',short['scroll']['top']>=short['header']['bottom']-1 and short['scroll']['bottom']<=short['footer']['top']+1 and short['footer']['bottom']<=641,geometry=short)
-                hit=clear_hit(tail);check(f'{width}: last customer control stays reachable in shorter viewport',hit['clear'],hit=hit)
+                page.locator('.booking-form-scroll').hover()
+                page.mouse.wheel(0,1200)
+                released=[]
+                hit=clear_hit(tail,lambda:released.append(page.evaluate('window.__qaReleaseOldFocus()')))
+                check(f'{width}: delayed phone focus cannot override a newer trusted scroll',bool(released) and released[0]>0,heldCallbacks=released)
+                check(f'{width}: last customer control stays reachable in shorter viewport',hit['clear'],hit=hit)
                 page.screenshot(path=str(out/f'{width}-booking-short-viewport.png'))
                 page.set_viewport_size({'width':width,'height':956})
                 page.evaluate('()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')

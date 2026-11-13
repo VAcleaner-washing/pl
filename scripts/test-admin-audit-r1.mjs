@@ -27,7 +27,7 @@ assert.equal(stored.delivery.local,250);assert.equal(stored.equipment.puzzi.unit
 serverOk=true;await settings.saveGlobalDeliveryPricing({local:999});await settings.saveGlobalEquipmentBaselines({puzzi:{qty:2,unitCost:99999}});
 assert.equal(stored.delivery.local,350);assert.equal(stored.equipment.puzzi.unitCost,27000);
 
-const analytics=context({state:{referrals:{analytics:{messages:[{kind:'program_invite',customer_phone:'a',sent_at:'2026-11-02T12:00:00Z',channel:'instagram'}],uses:[{status:'completed',created_at:'2026-12-02T12:00:00Z',referrer_phone:'a',booking_id:'one'}],bookings:[{id:'one',total_amount:700}],customers:[],rewards:[]}}},normalizePhone:v=>v},['referralTimestampInBounds','referralAnalyticsMetrics','analyticsSourceKey','analyticsSourceLabel','sourcePerformance']);
+const analytics=context({state:{referrals:{analytics:{messages:[{kind:'program_invite',customer_phone:'a',sent_at:'2026-11-02T12:00:00Z',channel:'instagram'}],uses:[{status:'completed',created_at:'2026-12-02T12:00:00Z',referrer_phone:'a',booking_id:'one'}],bookings:[{id:'one',total_amount:700}],customers:[],rewards:[]}}},normalizePhone:v=>v},['reportDateIso','reportDateMoment','referralTimestampInBounds','referralAnalyticsMetrics','analyticsSourceKey','analyticsSourceLabel','sourcePerformance']);
 const bounds={start:new Date('2026-11-01T00:00:00Z'),end:new Date('2026-12-01T00:00:00Z')};
 let metrics=analytics.referralAnalyticsMetrics(bounds);
 assert.equal(metrics.bookings,0);assert.equal(metrics.outreachBookings,1);assert.equal(metrics.outsideCohortBookings,0);

@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.60",
+  "version": "4.3.61",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -114,6 +114,13 @@
     "test:admin-staging-readiness": "node scripts/test-admin-staging-readiness.mjs",
     "test:settings-tabs-lifecycle": "node scripts/test-settings-tabs-lifecycle.mjs",
     "test:admin-settings-errors": "node scripts/test-admin-settings-errors.mjs",
-    "test:admin-margin-label": "node scripts/test-admin-margin-label.mjs"
+    "test:admin-margin-label": "node scripts/test-admin-margin-label.mjs",
+    "test:report-dates": "node scripts/test-admin-report-dates.mjs",
+    "test:allocation-reconciliation": "node scripts/test-admin-allocation-reconciliation.mjs",
+    "test:focus-intent": "node scripts/test-admin-focus-scroll-guard.mjs",
+    "test:campaign-metrics": "node scripts/test-campaign-metric-attribution.mjs",
+    "test:ci-identity-boundary": "node scripts/test-admin-ci-identity-boundary.mjs",
+    "build:release-candidate": "node scripts/build-admin-release-candidate.mjs",
+    "test:release-candidate": "node scripts/test-admin-release-candidate.mjs"
   }
 }

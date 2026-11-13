@@ -103,6 +103,9 @@ jobs:
     name: WebKit / mobile forms gate
     runs-on: ubuntu-24.04
     needs: validate
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      options: --ipc=host
     permissions:
       contents: read
     steps:
@@ -110,26 +113,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-          cache: pip
-          cache-dependency-path: requirements-ci.txt
-      - name: Cache Playwright WebKit
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-webkit-${{ hashFiles('requirements-ci.txt') }}
-      - name: Install Playwright WebKit and system dependencies
+      - name: Install client for the pinned official WebKit runtime
         timeout-minutes: 15
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
-          python -m playwright install --with-deps webkit
+          python -m playwright --version
       - name: Diagnose WebKit browser startup
         run: |
           mkdir -p webkit-test-results
           python - <<'PY' 2>&1 | tee webkit-test-results/browser-startup.log
+          import platform
           from playwright.sync_api import sync_playwright
+          print('Pinned runtime Python:', platform.python_version())
           with sync_playwright() as p:
               browser = p.webkit.launch(headless=True)
               page = browser.new_page()
@@ -150,6 +145,8 @@ jobs:
       - name: Verify the deployed artifact
         run: npm run verify:artifact
       - name: Run WebKit mobile, public and startup QA
+        env:
+          DEBUG: pw:browser
         run: npm run test:webkit
       - name: Upload WebKit evidence
         if: always()
