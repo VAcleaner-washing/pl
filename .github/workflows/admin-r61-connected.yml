@@ -1,0 +1,61 @@
+name: R61 connected stage acceptance
+on:
+  push:
+    branches: ['audit/r61-connected-ui']
+permissions:
+  contents: read
+concurrency:
+  group: r61-connected-stage
+  cancel-in-progress: false
+jobs:
+  connected:
+    name: Real isolated UI / Chromium then WebKit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify the approved QA61 product source
+        run: |
+          git merge-base --is-ancestor bd0ed4f559aa8188b553a77a4b9875d1267bbf3c HEAD
+          python - <<'PY'
+          import json,subprocess
+          from pathlib import Path
+          allowed={'.github/workflows/admin-r61-connected.yml'}
+          changed=set(subprocess.check_output(['git','diff','--name-only','bd0ed4f559aa8188b553a77a4b9875d1267bbf3c','HEAD'],text=True).splitlines())
+          assert changed<=allowed,'Product source differs from approved QA61'
+          release=json.loads(Path('release.json').read_text())
+          assert release['version']=='4.3.61' and release['build']==4361
+          config=json.loads(Path('staging/hosted-r4-client.json').read_text())
+          assert config['projectRef']=='jdthhqxzfpvosfdxwfem'
+          assert config['origin']=='https://jdthhqxzfpvosfdxwfem.supabase.co'
+          PY
+      - name: Install client for the pinned official browser runtime
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
+      - name: Build and verify the actual generated R4 artifact
+        run: |
+          npm run build
+          npm run verify:artifact
+          npm run build:staging-ui
+      - name: Run real connected UI with short-lived workload identities
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: python staging/ci-auth/run-connected.py --artifacts connected-ui-test-results
+      - name: Retain sanitized results and synthetic screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r61-connected-${{ github.run_id }}
+          path: connected-ui-test-results
+          if-no-files-found: warn
+          retention-days: 14
