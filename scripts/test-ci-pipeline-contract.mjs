@@ -18,9 +18,9 @@ ok('browser downloads the validated Pages artifact',workflow.includes('uses: act
 ok('browser extracts artifact.tar into dist',workflow.includes('tar -xf .pages-artifact/artifact.tar -C dist'));
 ok('browser depends on validate',/browser:[\s\S]*?needs: validate/.test(workflow));
 ok('deploy requires static, Chromium and WebKit gates',workflow.includes('needs: [validate, browser, webkit]'));
-ok('Python setup exists in both browser jobs',(workflow.match(/actions\/setup-python/g)||[]).length===2);
+ok('Chromium sets Python explicitly and WebKit uses its pinned official runtime',(workflow.match(/actions\/setup-python/g)||[]).length===1&&/webkit:[\s\S]*?container:[\s\S]*?mcr\.microsoft\.com\/playwright\/python:v1\.61\.0-noble@sha256:[a-f0-9]{64}/.test(workflow));
 ok('WebKit tests the validated artifact without rebuilding',/webkit:[\s\S]*?needs: validate[\s\S]*?npm run verify:artifact[\s\S]*?npm run test:webkit/.test(workflow));
-ok('WebKit dependencies are installed explicitly',workflow.includes('python -m playwright install --with-deps webkit'));
+ok('WebKit client is pinned to the matching official image and startup is verified',workflow.includes('python -m pip install --disable-pip-version-check -r requirements-ci.txt')&&workflow.includes('Pinned runtime Python:')&&workflow.includes('browser = p.webkit.launch(headless=True)'));
 ok('legacy E2E bridge is replaced by real logistics controls',pkg.scripts['test:e2e'].includes('scripts/e2e_smoke.py')&&!pkg.scripts['test:e2e'].includes('v4312_e2e_runner')&&e2e.includes('data-logistics-kind'));
 ok('browser mode never rebuilds dist',!runner.includes("if(mode==='browser') npm('build')")&&!/mode===['\"]browser['\"][^\n]*build/.test(runner));
 ok('browser begins with deploy-artifact verification',runner.includes("npm('verify:artifact')"));

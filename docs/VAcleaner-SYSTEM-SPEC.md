@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.60
-**Baseline build:** 4360
-**Останнє оновлення:** 2026-11-12
+**Baseline version:** 4.3.61
+**Baseline build:** 4361
+**Останнє оновлення:** 2026-11-13
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5727,3 +5727,46 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Controlled comparison43218211345 completed three section/capture iterations on both immutable products without a crash (37checks each); this does not resolve the intermittent failure. Its workflow remains available through manual dispatch, rather than replaying an unrelated baseline comparison for every subsequent test edit. The first connected fixture waiver test passed on both mobile engines but exposed a desktop test readiness race after the successful reload; wait for the actual mounted navigation before selecting the view, keeping the status/no-dialog/payload assertions intact.
 - Canonical WebKit run43218928533 reached the LAB expense-pending test but observed the dirty-form leave dialog after its fixed700ms rejection delay. The pending request must remain pending until the pending-state assertions finish: hold that exact synthetic expense fetch with an explicit release gate, then release it through the original failing adapter and keep the rejection/draft/retry assertions. No production delay, form guard or error handling is relaxed; this makes the two tested states deterministic rather than extending a timeout.
 - Keep both dedicated Chromium/WebKit LAB form-policy jobs alongside the generated R4 screen/layout jobs, so busy/rejected/acknowledged draft semantics are independently verified without depending on an elapsed-time assumption. Frozen published LAB54 remains untouched; these jobs build their own isolated artifact.
+
+# 120. Change record — v4.3.61 / report contracts and release-candidate preparation
+
+### ADDED
+
+- Separate normal-path candidate builder compiles reviewed presentation/form-policy assets from the R4 sources into a canonical `/admin/` artifact. It preserves production API/Auth/storage/manifest/worker identity, every business JS byte and the public site; no R4 artifact/origin swapping. Test banner/tools/readiness/adapter and their reserved space are excluded. New assets are precached. This is a review/fixture-QA artifact, not authorization to install it on the private LAB origin or deploy production.
+- Focus-intent, report-calendar, allocation reconciliation and campaign-attribution behavioral tests preserve negative baselines. Candidate static/remote browser acceptance remains distinct from R4 and from physical iPhone testing.
+- A CI-only connected-stage harness performs actual UI logins and real stage persistence using two temporary `.invalid` managers. Its short-lived identity broker is restricted to the exact stage project and one signed GitHub OIDC issuer/audience/repository/actor/ref/SHA/run/workflow context. No public signup, owner passwords, service key exposure or mail/provider dispatch. Default config fails closed; provision creates only its own confirmed test identities, cleanup removes only their roles/users, and the deployed broker must be disabled after the run. Credentials remain in CI process memory; no trace/HAR/storage-state/secret artifacts.
+
+### CHANGED
+
+- MET02: day-based reports use Europe/Kyiv calendar dates for event timestamps, preserving ISO date-only and naive Kyiv rental/expense wall dates. Finance, Analytics, weekly reports, CRM and referral period filtering share that calendar. Current period controls use Kyiv today; 7/30-day subtraction uses calendar days through DST. Operational booking instants and monetary amounts are unchanged.
+- MET03: a stored equipment allocation is accepted only when finite nonnegative integer amounts agree with the rental pool, optional recorded rental amount and known resources, including a zero pool. Present invalid snapshots are excluded with visible booking-code discrepancies; missing legacy snapshots remain explicitly labelled estimates. No historical records are rewritten. Estimated rounding cannot allocate more than the remaining rental pool.
+- MET04: campaign conversion is distinct qualified converted phones divided by distinct eligible cohort phones. Repeated uses do not increase converted customer count. SMS cohort retains submitted/sent/delivered recipients; any SMS dispatch prevents silently falling back to assigned codes. Otherwise lifetime assigned-client cohorts include historical inactive codes and are labelled assignment, not activation.
+- MET05: attributed use must follow the available immutable dispatch.sent_at anchor or code-created assignment anchor, campaign start, and precede actual campaign/code expiry. Issuance cutoff does not invalidate already issued bonuses. No arbitrary new attribution window. Missing timestamps or incomplete source rows produce null conversion plus reason/coverage metadata. Dispatch-start timing does not prove per-recipient delivery/causality. Actual redemption/revenue/discount and referral business rules stay unchanged.
+
+### FIXED
+
+- A delayed keyboard focus callback still measures the viewport, but does not override a later trusted wheel/pointer/key action. The existing trusted-action counter gates only stale automatic scrolling. No focus clearing, keyboard disablement, forced click or timeout extension.
+- The short-viewport browser regression holds the actual old focus callback, performs a real trusted scroll, and releases the callback before the original strict hit measurement. This reproduces the relevant ordering explicitly instead of relying on timer speed.
+- Campaign labels explain unique customers and incomplete metrics; older backend responses are marked as requiring server-definition update instead of silently receiving new semantics.
+
+### PRESERVED
+
+- Production/main46 and real business data, published private R4UI60/Site12 and its rollback points remain unchanged during preparation. No production deployment is included in this change. Pricing, discounts, deposits, prepayment, status/settlement and resource-availability rules are unchanged.
+- All report-data changes are read-only calculations/coverage. Stage backend deployment requires reviewed source parity and actual stage readback. Provider integrations remain blocked; no fabricated production records or outgoing messages are used for acceptance.
+
+### TESTS
+
+- Report dates: actual Finance/trend/weekly/referral functions under Kyiv/UTC/NewYork/Tokyo/Kiritimati with midnight/month/year/DST boundaries. Allocation: exact conservation, zero pools, invalid snapshots, legacy estimates and visible warnings. Focus: no-new-intent assistance and newer trusted/untrusted interaction cases.
+- Campaign metrics: actual HTTP handler plus pure helper, duplicate uses/phones, pre-dispatch uses, expired/issued codes, unknown times, capped query rows and unchanged amount fields/Auth/non-read branches. Exact-count coverage uses the same data queries; arrays are not silently treated as full.
+- A separate immutable UI60 runtime diagnostic compares native Python3.12/3.13 and pinned official WebKit, immediate and finite-animation-settled captures. Original assertions/captures/failures are retained; no reruns-to-green or disabling render features. The cause of earlier TargetClosed/capture failures is not assumed.
+- Canonical static/build/Chromium/WebKit, generated-R4 screen/form/layout, normal-candidate browser and connected-stage acceptance must be reported separately. A physical iPhone/native PWA is unavailable in the managed session; Linux emulation is not device certification.
+
+- Controlled immutable-UI60 diagnostic43281790145 passed all six runtime/timing variants once. This does not establish the cause of historical sporadic renderer failures. Canonical WebKit now uses the immutable official Playwright1.61.0 Noble image for a reproducible supported runtime; original suites/assertions and every failed result remain retained.
+
+- First candidate browser run exposed two harness assumptions: normal mobile chrome owns safe-top through padding while its scroll owner starts at0, and desktop keeps its expanded canonical finance panel. Acceptance now compares actual first-content spacing with canonical chrome and proves that an injected48px gap is rejected; desktop verifies labels and exact fixture totals while mobile keeps its ledger checks. Mobile WebKit uses a supported real trusted keyboard action instead of unsupported wheel protocol, retains phone focus and the original strict tail-hit measurement. First failed runs remain recorded.
+
+- The first connected CI attempts failed in test setup: official-container checkout ownership, then a temporary-role insert missing the actual NOT NULL email column. Exact-checkout safe.directory and complete temporary role payload fix these without changing public signup or application authorization. The role mock now enforces the real schema, preserving the failing baseline. Running canonical acceptance is retained when a diagnostic follow-up is pushed instead of being cancelled.
+
+- Follow-up acceptance waits for actual trusted input delivery before measuring its metadata. Connected checks require the real visible main/navigation rather than the mobile display:contents wrapper, distinguish unpaid nominal200/1000 terms from actual received money, and redact unrelated ARIA tree/screenshot content. Application code and business rules are unchanged by these harness corrections.
+
+- Late customer-profile responses in process booking now autofill only untouched identity/contact fields. Manual names, addresses, document type/number, cleared values and explicit verification changes remain intact. Original-phone history is not applied to a changed phone; the UI requires manual verification, and detached forms cannot update the current modal. Existing repeat/document policy is preserved for the same phone. A visible note explains preserved manual edits. Actual openProcessBooking deferred-response VM regression passes14/14 versus4/14 on immutable old source; generated-R4 browser acceptance also holds/releases the actual profile request.
