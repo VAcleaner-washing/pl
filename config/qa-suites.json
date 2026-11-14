@@ -56,7 +56,8 @@
     "test:campaign-metrics",
     "test:ci-identity-boundary",
     "test:process-profile-race",
-    "test:stable-4346"
+    "test:stable-4346",
+    "test:pwa-worker-wait"
   ],
   "browser": [
     "test:public-hydration",

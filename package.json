@@ -125,6 +125,7 @@
     "test:process-profile-race": "node scripts/test-admin-process-profile-race.mjs",
     "verify:production-artifact": "node scripts/verify-admin-production-release.mjs",
     "test:production-promotion": "node scripts/test-admin-production-release.mjs",
-    "test:stable-4346": "node scripts/test-stable-4346.mjs"
+    "test:stable-4346": "node scripts/test-stable-4346.mjs",
+    "test:pwa-worker-wait": "node scripts/test-pwa-worker-wait.mjs"
   }
 }

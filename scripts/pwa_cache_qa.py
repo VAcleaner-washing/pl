@@ -160,6 +160,69 @@ def set_transport(context, server, browser_name, disconnected):
         context.set_offline(disconnected)
 
 
+WORKER_MONITOR_JS = r'''({phase,build})=>{
+  const previous=window.__vacPwaWorkerMonitor;
+  if(previous){previous.cancelled=true;cancelAnimationFrame(previous.frame)}
+  const state={phase,build,pending:false,ready:false,error:null,last:null,cancelled:false,frame:null};
+  window.__vacPwaWorkerMonitor=state;
+  const describe=worker=>worker?{scriptURL:worker.scriptURL,state:worker.state}:null;
+  const probe=async()=>{
+    if(state.cancelled)return;
+    state.pending=true;
+    try{
+      const registration=await navigator.serviceWorker.getRegistration('/admin/');
+      const keys=await caches.keys(),key='vacleaner-manager-'+build;
+      const urls=[...document.querySelectorAll('script[src^="/assets/"],link[href^="/assets/"]')].map(node=>node.src||node.href);
+      const missing=[];
+      if(keys.includes(key)){
+        const cache=await caches.open(key);
+        for(const url of urls)if(!await cache.match(url))missing.push(url);
+      }else missing.push(...urls);
+      const controller=describe(navigator.serviceWorker.controller),active=describe(registration?.active);
+      const installing=describe(registration?.installing),waiting=describe(registration?.waiting);
+      const olderCaches=keys.filter(value=>value.startsWith('vacleaner-manager-')&&value!==key);
+      const scope=registration?.scope;
+      const ownsController=Boolean(controller&&active&&scope===location.origin+'/admin/'&&controller.state==='activated'&&active.state==='activated'&&controller.scriptURL===active.scriptURL&&new URL(controller.scriptURL).origin===location.origin&&new URL(controller.scriptURL).pathname==='/admin/sw.js');
+      const complete=ownsController&&keys.includes(key)&&olderCaches.length===0&&urls.length>=35&&missing.length===0&&urls.every(url=>new URL(url).search==='?v='+build);
+      const ready=phase==='waiting'?waiting?.state==='installed':phase==='settled'?complete&&!installing&&!waiting:complete;
+      const snapshot={phase,build,scope,controller,active,installing,waiting,cacheKeys:keys,olderCaches,requiredAssets:urls.length,missing,ready:Boolean(ready)};
+      if(state.cancelled)return;
+      state.last=snapshot;state.ready=snapshot.ready;
+    }catch(error){if(!state.cancelled)state.error=String(error)}
+    finally{state.pending=false}
+    if(!state.cancelled&&!state.ready&&!state.error)state.frame=requestAnimationFrame(probe);
+  };
+  probe();
+}'''
+
+WORKER_FLAG_JS = r'''()=>{
+  const state=window.__vacPwaWorkerMonitor;
+  if(state?.error)throw new Error(state.error);
+  return state?.ready===true;
+}'''
+
+
+def wait_worker_state(page, phase, build):
+    # Playwright's waitForFunction tests predicate truthiness before awaiting its
+    # result. An async predicate therefore accepts Promise<false> immediately.
+    # Run the awaited probe separately and poll only this synchronous bool flag.
+    page.evaluate(WORKER_MONITOR_JS, {'phase': phase, 'build': build})
+    try:
+        page.wait_for_function(WORKER_FLAG_JS, timeout=30000)
+        return page.evaluate('()=>window.__vacPwaWorkerMonitor.last')
+    except Exception as error:
+        try:
+            snapshot = page.evaluate('()=>window.__vacPwaWorkerMonitor.last')
+        except Exception as diagnostic_error:
+            snapshot = {'diagnosticError': str(diagnostic_error)}
+        raise RuntimeError('Worker readiness deadline: ' + json.dumps(snapshot)) from error
+    finally:
+        try:
+            page.evaluate('()=>{const state=window.__vacPwaWorkerMonitor;if(state){state.cancelled=true;cancelAnimationFrame(state.frame)}}')
+        except Exception:
+            pass
+
+
 def exercise(browser, server, base, config, checks, width, browser_name='chromium', devices=None):
     context = browser.new_context(**context_options(width, devices))
     context.add_init_script(FETCH_PROXY)
@@ -183,7 +246,7 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         page.evaluate('()=>{' + smoke.session_script() + '}')
         page.goto(base + '/admin/bronuvannia/', wait_until='domcontentloaded')
         page.wait_for_selector('#pageTitle')
-        page.wait_for_function('async () => !!(await navigator.serviceWorker.getRegistration())?.active')
+        wait_worker_state(page, 'ready', server.build)
         page.wait_for_function('() => !!navigator.serviceWorker.controller')
         coverage = page.evaluate('''async()=>{
           const required=[...document.querySelectorAll('script[src^="/assets/"],link[href^="/assets/"]')].map(el=>el.src||el.href);
@@ -245,7 +308,7 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         # A changed worker installs and waits; the active controller remains old.
         server.next_build = server.build + 1
         page.evaluate('navigator.serviceWorker.getRegistration().then(reg=>reg.update())')
-        page.wait_for_function('async () => navigator.serviceWorker.getRegistration().then(reg=>!!reg.waiting)', timeout=30000)
+        wait_worker_state(page, 'waiting', server.next_build)
         # Worker installation and the recovering page bootstrap settle independently.
         expect(page.locator('.pwa-update-prompt')).to_be_visible(timeout=30000)
         checks.check(page.evaluate('navigator.serviceWorker.getRegistration().then(reg=>reg.active !== reg.waiting && !!reg.waiting)'), label + ': update waits while current app remains active')
@@ -263,11 +326,11 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         # Reopen the existing prompt via a page reload, then explicitly accept.
         page.evaluate("sessionStorage.removeItem('vac_pwa_update_later')")
         page.reload(wait_until='load')
-        page.wait_for_function('async () => !!(await navigator.serviceWorker.getRegistration())?.waiting')
+        wait_worker_state(page, 'waiting', server.next_build)
         expect(page.locator('.pwa-update-now')).to_be_visible(timeout=30000)
         with page.expect_navigation(wait_until='domcontentloaded'):
             page.locator('.pwa-update-now').click()
-        page.wait_for_function('async () => navigator.serviceWorker.getRegistration().then(reg=>!reg.waiting && reg.active?.state === "activated")')
+        wait_worker_state(page, 'settled', server.next_build)
         checks.check(True, label + ': explicit update activates and reloads')
         checks.check(page.evaluate('''build=>[...document.querySelectorAll('script[src^="/assets/"],link[href^="/assets/"]')].every(el=>new URL(el.src||el.href).searchParams.get('v')===String(build))''', server.next_build), label + ': updated HTML references only the next build')
         checks.check(not errors, label + ': no runtime errors ' + repr(errors))
@@ -315,11 +378,7 @@ def exercise_release_migration(browser, server, base, candidate_root, stable_roo
     def ready(build, operations):
         expect(page.locator('#pageTitle')).to_be_visible()
         expect(page.locator('#view .booking-card,#view .upcoming-row').first).to_be_visible()
-        page.wait_for_function('''async build=>{
-          const registration=await navigator.serviceWorker.getRegistration('/admin/');
-          return !!navigator.serviceWorker.controller&&registration?.active?.state==='activated'&&
-            (await caches.keys()).includes('vacleaner-manager-'+build);
-        }''', arg=build)
+        readiness = wait_worker_state(page, 'ready', build)
         snapshot = page.evaluate('''async()=>{
           const urls=[...document.querySelectorAll('script[src^="/assets/"],link[href^="/assets/"]')].map(node=>node.src||node.href);
           const cacheUrls=[];for(const key of await caches.keys())for(const request of await(await caches.open(key)).keys())cacheUrls.push(request.url);
@@ -341,14 +400,14 @@ def exercise_release_migration(browser, server, base, candidate_root, stable_roo
         actual_hash = hashlib.sha256(body.encode()).hexdigest()
         expected_hash = hashlib.sha256((server.root / 'admin/sw.js').read_bytes()).hexdigest()
         checks.check(actual_hash == expected_hash, label + ': HTTP serves exact reviewed worker bytes ' + str(build))
-        worker_reads.append({'build': build, 'httpWorkerSha256': actual_hash, 'expectedWorkerSha256': expected_hash})
+        worker_reads.append({'build': build, 'httpWorkerSha256': actual_hash, 'expectedWorkerSha256': expected_hash, 'readiness': readiness})
         checks.screenshot(page, label + '-build-' + str(build) + '.png')
 
     def transition(target, build):
         server.root = target
         server.build = build
         page.evaluate('navigator.serviceWorker.getRegistration("/admin/").then(registration=>registration.update())')
-        page.wait_for_function('async()=>!!(await navigator.serviceWorker.getRegistration("/admin/"))?.waiting')
+        wait_worker_state(page, 'waiting', build)
         expect(page.locator('.pwa-update-prompt')).to_be_visible()
         checks.check(True, label + ': actual worker ' + str(build) + ' waits for explicit activation')
         mobile = page.locator('#mobileNewBooking')
