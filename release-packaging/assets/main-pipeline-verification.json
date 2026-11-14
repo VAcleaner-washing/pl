@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "repository": "VAcleaner-washing/pl",
+  "workflowRunId": 43607449279,
+  "workflowUrl": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279",
+  "sourceSha": "76b83bad27c8a61bd9dccd7422d4342fe9633ea1",
+  "sourceEvent": "push",
+  "sourceBranch": "main",
+  "createdAt": "2026-11-14T14:56:17Z",
+  "completedAt": "2026-11-14T15:10:05Z",
+  "conclusion": "success",
+  "allJobsSucceeded": true,
+  "jobCount": 8,
+  "release": {
+    "version": "4.3.61",
+    "build": 4361,
+    "files": 273,
+    "artifactTreeSha256": "b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4"
+  },
+  "deploy": {
+    "jobId": 132488689481,
+    "artifactName": "production-pages",
+    "artifactId": 14119006400,
+    "pagesBuildVersion": "76b83bad27c8a61bd9dccd7422d4342fe9633ea1",
+    "reportedSuccessAt": "2026-11-14T15:10:02.8927297Z",
+    "jobCompletedAt": "2026-11-14T15:10:04Z",
+    "uploadedArtifactZipSha256": "3a397bbcb8d05677ed8cb3d3497a6cb3d8e81c42564bf50ab3d87e834ed98b1e"
+  },
+  "qa": {
+    "staticSuites": {
+      "passed": 61,
+      "failed": 0
+    },
+    "candidateBuilder": {
+      "passed": 19,
+      "failed": 0
+    },
+    "promotionGuards": {
+      "passed": 7,
+      "failed": 0
+    },
+    "canonicalChromiumGroups": {
+      "passed": 49,
+      "failed": 0
+    },
+    "canonicalWebKitSuites": [
+      {
+        "name": "forms",
+        "passed": 411
+      },
+      {
+        "name": "public-hydration",
+        "passed": 62
+      },
+      {
+        "name": "startup",
+        "passed": 30
+      },
+      {
+        "name": "reads",
+        "passed": 60
+      },
+      {
+        "name": "idle",
+        "passed": 118
+      },
+      {
+        "name": "reliability",
+        "passed": 46
+      },
+      {
+        "name": "audit",
+        "passed": 24
+      },
+      {
+        "name": "LAB",
+        "passed": 262
+      },
+      {
+        "name": "LAB-forms",
+        "passed": 83
+      }
+    ],
+    "exactArtifactOperations": [
+      {
+        "browser": "chromium",
+        "width": 440,
+        "jobId": 132485187236,
+        "operations": 21,
+        "forms": 431,
+        "publicHydration": 62,
+        "startup": 30,
+        "pwa": 40,
+        "failed": 0
+      },
+      {
+        "browser": "webkit",
+        "width": 440,
+        "jobId": 132485187307,
+        "operations": 21,
+        "forms": 431,
+        "publicHydration": 62,
+        "startup": 30,
+        "pwa": 40,
+        "failed": 0
+      },
+      {
+        "browser": "chromium",
+        "width": 1440,
+        "jobId": 132485187285,
+        "operations": 17,
+        "failed": 0
+      },
+      {
+        "browser": "webkit",
+        "width": 1440,
+        "jobId": 132485187263,
+        "operations": 17,
+        "failed": 0
+      }
+    ],
+    "workerUpgradeRollback": {
+      "builds": [
+        4346,
+        4361,
+        4346
+      ],
+      "browsers": [
+        "chromium",
+        "webkit"
+      ],
+      "stableSource": "15bf61dc4da4cf63405a25887353e6ec7178dce8",
+      "stableFiles": 270,
+      "allStableHashesMatch": true,
+      "sessionPreserved": true,
+      "draftPreserved": true,
+      "explicitActivation": true,
+      "productionWrites": 0
+    }
+  },
+  "limitations": [
+    "Browser tests use intercepted fixtures and isolated HTTP origins; these do not claim an authorized production manager session.",
+    "No physical iPhone/iOS Safari standalone PWA certification.",
+    "This receipt proves successful main pipeline and deployment; separate live-frontend HTTP evidence proves actual origin bytes.",
+    "Historical WebKit TargetClosed root cause remains unresolved; independent-viewport process isolation does not claim an app fix."
+  ],
+  "logEvidence": [
+    {
+      "jobId": 132485059658,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132485059658",
+      "lines": [
+        "2026-11-14T14:56:41.1142099Z TOTAL 61 · PASS 61 · FAIL 0",
+        "2026-11-14T14:56:41.7514643Z {\"mode\":\"reviewed-normal-production-artifact\",\"version\":\"4.3.61\",\"build\":4361,\"files\":273,\"artifactTreeSha256\":\"b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4\"}"
+      ]
+    },
+    {
+      "jobId": 132485187223,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132485187223",
+      "lines": [
+        "2026-11-14T14:57:56.1379623Z {\"browser\": \"webkit\", \"engineVersion\": \"26.5\", \"passed\": 411, \"failed\": [], \"physicalDevice\": false, \"liveWrites\": false, \"status\": \"passed\"}",
+        "2026-11-14T14:58:56.8123920Z {\"passed\": 62, \"failed\": 0}",
+        "2026-11-14T14:59:12.3215024Z {\"browser\": \"webkit\", \"baseline\": false, \"median_data_ms\": 811.0, \"passed\": 30, \"failed\": []}",
+        "2026-11-14T15:00:10.7730647Z {\"browser\": \"webkit\", \"baseline\": false, \"samples\": [{\"label\": \"390-browser\", \"startup_ms\": 991, \"calendar_ms\": 190, \"clients_ms\": 259, \"bookings_ms\": 221, \"closed_client_reads\": []}, {\"label\": \"390-pwa\", \"startup_ms\": 638, \"calendar_ms\": 90, \"clients_ms\": 174, \"bookings_ms\": 222, \"closed_client_reads\": []}, {\"label\": \"1440-browser\", \"startup_ms\": 764, \"calendar_ms\": 155, \"clients_ms\": 530, \"bookings_ms\": 127, \"closed_client_reads\": []}, {\"label\": \"1440-pwa\", \"startup_ms\": 1062, \"calendar_ms\": 93, \"clients_ms\": 152, \"bookings_ms\": 110, \"closed_client_reads\": []}], \"passed\": 60, \"failed\": []}",
+        "2026-11-14T15:01:06.9872191Z {\"passed\": 118, \"failed\": []}",
+        "2026-11-14T15:01:43.4795441Z {\"passed\": 46, \"failed\": []}",
+        "2026-11-14T15:04:15.4676699Z {\"passed\": 262, \"failed\": [], \"density\": [{\"width\": 320, \"compact_height\": 342.328125, \"full_height\": 780.46875}, {\"width\": 390, \"compact_height\": 319.328125, \"full_height\": 716.828125}, {\"width\": 430, \"compact_height\": 319.328125, \"full_height\": 716.828125}, {\"width\": 440, \"compact_height\": 319.328125, \"full_height\": 716.828125}, {\"width\": 768, \"compact_height\": 319.328125, \"full_height\": 723.03125}, {\"width\": 1024, \"compact_height\": 301.984375, \"full_height\": 604.140625}, {\"width\": 1280, \"compact_height\": 299.734375, \"full_height\": 396.90625}, {\"width\": 1440, \"compact_height\": 299.109375, \"full_height\": 400.09375}, {\"width\": 1648, \"compact_height\": 301.015625, \"full_height\": 397.71875}]}",
+        "2026-11-14T15:05:21.8078676Z {\"browser\": \"webkit\", \"passed\": 83, \"failed\": []}"
+      ]
+    },
+    {
+      "jobId": 132485187236,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132485187236",
+      "lines": [
+        "2026-11-14T14:57:21.0147116Z {\"mode\":\"reviewed-normal-production-artifact\",\"version\":\"4.3.61\",\"build\":4361,\"files\":273,\"artifactTreeSha256\":\"b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4\"}",
+        "2026-11-14T14:57:29.4394038Z {\"browser\": \"chromium\", \"width\": 440, \"passed\": 21, \"failed\": 0}",
+        "2026-11-14T14:57:58.2461153Z {\"browser\": \"chromium\", \"engineVersion\": \"149.0.7827.55\", \"passed\": 431, \"failed\": [], \"physicalDevice\": false, \"liveWrites\": false, \"status\": \"passed\"}",
+        "2026-11-14T14:58:55.0719601Z {\"passed\": 62, \"failed\": 0}",
+        "2026-11-14T14:59:10.2043233Z {\"browser\": \"chromium\", \"baseline\": false, \"median_data_ms\": 847.5, \"passed\": 30, \"failed\": []}",
+        "2026-11-14T14:59:26.1946819Z {\"browser\": \"chromium\", \"widths\": [440], \"passed\": 40, \"failed\": [], \"stableArtifact\": {\"commit\": \"15bf61dc4da4cf63405a25887353e6ec7178dce8\", \"files\": 270, \"allFileHashesMatch\": true}, \"productionWrites\": 0, \"physicalDevice\": false, \"network\": \"API fixtures served on the same local HTTP origin; external page requests aborted\"}"
+      ]
+    },
+    {
+      "jobId": 132485187244,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132485187244",
+      "lines": [
+        "2026-11-14T14:59:05.2904104Z {\"passed\": 62, \"failed\": 0}",
+        "2026-11-14T15:02:17.5947609Z {\"browser\": \"chromium\", \"engineVersion\": \"149.0.7827.55\", \"passed\": 411, \"failed\": [], \"physicalDevice\": false, \"liveWrites\": false, \"status\": \"passed\"}",
+        "2026-11-14T15:05:01.2486212Z {\"passed\": 46, \"failed\": 0, \"failures\": []}",
+        "2026-11-14T15:05:41.9826836Z {\"browser\": \"chromium\", \"baseline\": false, \"median_data_ms\": 832.0, \"passed\": 30, \"failed\": []}",
+        "2026-11-14T15:06:10.3367049Z {\"browser\": \"chromium\", \"baseline\": false, \"samples\": [{\"label\": \"390-browser\", \"startup_ms\": 987, \"calendar_ms\": 47, \"clients_ms\": 38, \"bookings_ms\": 42, \"closed_client_reads\": []}, {\"label\": \"390-pwa\", \"startup_ms\": 921, \"calendar_ms\": 53, \"clients_ms\": 37, \"bookings_ms\": 44, \"closed_client_reads\": []}, {\"label\": \"1440-browser\", \"startup_ms\": 469, \"calendar_ms\": 34, \"clients_ms\": 38, \"bookings_ms\": 36, \"closed_client_reads\": []}, {\"label\": \"1440-pwa\", \"startup_ms\": 468, \"calendar_ms\": 42, \"clients_ms\": 42, \"bookings_ms\": 48, \"closed_client_reads\": []}], \"passed\": 60, \"failed\": []}",
+        "2026-11-14T15:06:19.9834607Z {\"browser\": \"chromium\", \"widths\": [390, 1440], \"passed\": 36, \"failed\": [], \"stableArtifact\": null, \"productionWrites\": 0, \"physicalDevice\": false, \"network\": \"API fixtures served on the same local HTTP origin; external page requests aborted\"}",
+        "2026-11-14T15:07:16.5885691Z {\"passed\": 118, \"failed\": []}",
+        "2026-11-14T15:08:01.6785646Z {\"passed\": 46, \"failed\": []}",
+        "2026-11-14T15:09:19.0110642Z {\"passed\": 262, \"failed\": [], \"density\": [{\"width\": 320, \"compact_height\": 319.328125, \"full_height\": 780.34375}, {\"width\": 390, \"compact_height\": 319.328125, \"full_height\": 716.703125}, {\"width\": 430, \"compact_height\": 319.328125, \"full_height\": 716.703125}, {\"width\": 440, \"compact_height\": 319.328125, \"full_height\": 717.703125}, {\"width\": 768, \"compact_height\": 319.328125, \"full_height\": 722.90625}, {\"width\": 1024, \"compact_height\": 293.453125, \"full_height\": 613.921875}, {\"width\": 1280, \"compact_height\": 297.671875, \"full_height\": 409.09375}, {\"width\": 1440, \"compact_height\": 302.921875, \"full_height\": 409.09375}, {\"width\": 1648, \"compact_height\": 293.453125, \"full_height\": 411.09375}]}",
+        "2026-11-14T15:09:41.2068727Z {\"browser\": \"chromium\", \"passed\": 83, \"failed\": []}",
+        "2026-11-14T15:09:41.2383563Z TOTAL 49 · PASS 49 · FAIL 0"
+      ]
+    },
+    {
+      "jobId": 132485187263,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132485187263",
+      "lines": [
+        "2026-11-14T14:57:26.1441413Z {\"mode\":\"reviewed-normal-production-artifact\",\"version\":\"4.3.61\",\"build\":4361,\"files\":273,\"artifactTreeSha256\":\"b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4\"}",
+        "2026-11-14T14:58:07.8551705Z {\"browser\": \"webkit\", \"width\": 1440, \"passed\": 17, \"failed\": 0}"
+      ]
+    },
+    {
+      "jobId": 132485187285,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132485187285",
+      "lines": [
+        "2026-11-14T14:57:30.7204606Z {\"mode\":\"reviewed-normal-production-artifact\",\"version\":\"4.3.61\",\"build\":4361,\"files\":273,\"artifactTreeSha256\":\"b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4\"}",
+        "2026-11-14T14:57:39.1041898Z {\"browser\": \"chromium\", \"width\": 1440, \"passed\": 17, \"failed\": 0}"
+      ]
+    },
+    {
+      "jobId": 132485187307,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132485187307",
+      "lines": [
+        "2026-11-14T14:57:22.2577631Z {\"mode\":\"reviewed-normal-production-artifact\",\"version\":\"4.3.61\",\"build\":4361,\"files\":273,\"artifactTreeSha256\":\"b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4\"}",
+        "2026-11-14T14:58:14.1123616Z {\"browser\": \"webkit\", \"width\": 440, \"passed\": 21, \"failed\": 0}",
+        "2026-11-14T14:59:05.7745460Z {\"browser\": \"webkit\", \"engineVersion\": \"26.5\", \"passed\": 431, \"failed\": [], \"physicalDevice\": false, \"liveWrites\": false, \"status\": \"passed\"}",
+        "2026-11-14T15:00:18.6451084Z {\"passed\": 62, \"failed\": 0}",
+        "2026-11-14T15:00:36.1479388Z {\"browser\": \"webkit\", \"baseline\": false, \"median_data_ms\": 818.5, \"passed\": 30, \"failed\": []}",
+        "2026-11-14T15:00:53.9862927Z {\"browser\": \"webkit\", \"widths\": [440], \"passed\": 40, \"failed\": [], \"stableArtifact\": {\"commit\": \"15bf61dc4da4cf63405a25887353e6ec7178dce8\", \"files\": 270, \"allFileHashesMatch\": true}, \"productionWrites\": 0, \"physicalDevice\": false, \"network\": \"API fixtures served on the same local HTTP origin; external page requests aborted\"}"
+      ]
+    },
+    {
+      "jobId": 132488689481,
+      "url": "https://github.com/VAcleaner-washing/pl/actions/runs/43607449279/job/132488689481",
+      "lines": [
+        "2026-11-14T15:09:56.2293087Z   artifact_name: production-pages",
+        "2026-11-14T15:09:56.8716330Z \t\"artifact_id\": 14119006400,",
+        "2026-11-14T15:09:56.8717165Z \t\"pages_build_version\": \"76b83bad27c8a61bd9dccd7422d4342fe9633ea1\",",
+        "2026-11-14T15:10:02.8927297Z Reported success!"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "checkedAt": "2026-11-14T18:37:59.578134+00:00",
+  "scope": "Read-only HTTP routing/body verification after actual successful production deployment",
+  "release": "4.3.61/4361",
+  "businessDataRequests": 0,
+  "checks": [
+    {
+      "requestedPath": "abir-wd8.html",
+      "redirects": [
+        {
+          "url": "https://vacleaner.pp.ua/abir-wd8.html?release_verify=4361",
+          "status": 301,
+          "location": "https://vacleaner.pp.ua/rishennia/windows/?release_verify=4361",
+          "resolvedLocation": "https://vacleaner.pp.ua/rishennia/windows/?release_verify=4361",
+          "server": "envoy"
+        }
+      ],
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/windows/?release_verify=4361",
+      "status": 200,
+      "bytes": 32025,
+      "sha256": "aa4c12f6ac203a29c70cda8596e120129d158d8ab0535f03d22d708868a2565a",
+      "exactMatchingArtifactPaths": [
+        "rishennia/windows/index.html"
+      ],
+      "corroboratingResponseMetadataFrom": "served-diff/receipt.json",
+      "corroboratingResponseMetadata": {
+        "server": "envoy",
+        "cf-ray": "a5a8201ae92247af-DFW",
+        "cf-cache-status": "DYNAMIC",
+        "cache-control": "max-age=600",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "requestedPath": "jimmy-jv35.html",
+      "redirects": [
+        {
+          "url": "https://vacleaner.pp.ua/jimmy-jv35.html?release_verify=4361",
+          "status": 301,
+          "location": "https://vacleaner.pp.ua/rishennia/mattress/?release_verify=4361",
+          "resolvedLocation": "https://vacleaner.pp.ua/rishennia/mattress/?release_verify=4361",
+          "server": "envoy"
+        }
+      ],
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/mattress/?release_verify=4361",
+      "status": 200,
+      "bytes": 33226,
+      "sha256": "a1dad177763413dc17f98c971005c29d778e75c3cf965aa07fbe00281d9357f0",
+      "exactMatchingArtifactPaths": [
+        "rishennia/mattress/index.html"
+      ],
+      "corroboratingResponseMetadataFrom": "served-diff/receipt.json",
+      "corroboratingResponseMetadata": {
+        "server": "envoy",
+        "cf-ray": "a5a8201c0a57abd2-DFW",
+        "cf-cache-status": "DYNAMIC",
+        "cache-control": "max-age=600",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "requestedPath": "karcher-puzzi.html",
+      "redirects": [
+        {
+          "url": "https://vacleaner.pp.ua/karcher-puzzi.html?release_verify=4361",
+          "status": 301,
+          "location": "https://vacleaner.pp.ua/rishennia/textile/?release_verify=4361",
+          "resolvedLocation": "https://vacleaner.pp.ua/rishennia/textile/?release_verify=4361",
+          "server": "envoy"
+        }
+      ],
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/textile/?release_verify=4361",
+      "status": 200,
+      "bytes": 33847,
+      "sha256": "01b144b679d3cff3647c26fba1de49527f802746e0faa30bed43667f3ee9fe11",
+      "exactMatchingArtifactPaths": [
+        "rishennia/textile/index.html"
+      ],
+      "corroboratingResponseMetadataFrom": "served-diff/receipt.json",
+      "corroboratingResponseMetadata": {
+        "server": "envoy",
+        "cf-ray": "a5a8201d1aee47af-DFW",
+        "cf-cache-status": "DYNAMIC",
+        "cache-control": "max-age=600",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "requestedPath": "karcher-sc2.html",
+      "redirects": [
+        {
+          "url": "https://vacleaner.pp.ua/karcher-sc2.html?release_verify=4361",
+          "status": 301,
+          "location": "https://vacleaner.pp.ua/rishennia/steam/?release_verify=4361",
+          "resolvedLocation": "https://vacleaner.pp.ua/rishennia/steam/?release_verify=4361",
+          "server": "envoy"
+        }
+      ],
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/steam/?release_verify=4361",
+      "status": 200,
+      "bytes": 32263,
+      "sha256": "9fdf1e4edcad2de5240722727e75ffb61266e9e7eb9601d2531fcc4669bd915d",
+      "exactMatchingArtifactPaths": [
+        "rishennia/steam/index.html"
+      ],
+      "corroboratingResponseMetadataFrom": "served-diff/receipt.json",
+      "corroboratingResponseMetadata": {
+        "server": "envoy",
+        "cf-ray": "a5a8201e0e6b2e1e-DFW",
+        "cf-cache-status": "DYNAMIC",
+        "cache-control": "max-age=600",
+        "content-type": "text/html; charset=utf-8"
+      }
+    },
+    {
+      "requestedPath": "robots.txt",
+      "redirects": [],
+      "finalUrl": "https://vacleaner.pp.ua/robots.txt?release_verify=4361",
+      "status": 200,
+      "bytes": 2745,
+      "sha256": "49ce2a9f8ba0b7ed36f0acf40be06b195ca7a9a7a228252e4aa8088f220f226f",
+      "exactMatchingArtifactPaths": [],
+      "reviewedBytes": 69,
+      "reviewedSha256": "5ae5eb27c1dc56d6adab5a56b6a3a0540eefe589cadacc179c3fbef12c6aff8f",
+      "reviewedBodyPreservedExactlyAsSuffix": true,
+      "exactReviewedContentOffset": 2676,
+      "managedContentMarkerPresent": true,
+      "prefixBytes": 2676,
+      "corroboratingResponseMetadataFrom": "served-diff/receipt.json",
+      "corroboratingResponseMetadata": {
+        "server": "envoy",
+        "cf-ray": "a5a8201e9edc2e1e-DFW",
+        "cf-cache-status": "EXPIRED",
+        "cache-control": "max-age=14400",
+        "content-type": "text/plain; charset=utf-8"
+      }
+    }
+  ],
+  "allFourLegacyRedirectTargetsMatchReviewedArtifact": true,
+  "robotsReviewedBodyExactSuffix": true,
+  "originalCompleteTreeHashResult": "268/273 exact same-path bodies; 4 redirect responses match canonical bodies; robots has Cloudflare managed prefix. Do not report273/273 exact byte matches."
+}

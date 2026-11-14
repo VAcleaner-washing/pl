@@ -1,0 +1,38 @@
+{
+  "VAcleaner-v4.3.61-build4361-production.zip": {
+    "sha256": "97d5c7145bd4ddb45101ea07bc77b7ec33693d8294dd39e3eb022e4133127145",
+    "bytes": 4812661
+  },
+  "VAcleaner-v4.3.46-build4346-pages.zip": {
+    "sha256": "1d895a2bbde6c45054816d407ff12d58ca01a666de56f80715a2d681349b6d6e",
+    "bytes": 4800493
+  },
+  "VAcleaner-v4.3.61-backend-code-rollback.zip": {
+    "sha256": "2eb80b07ef0fbdf0dae2b1461f3ba7e5b87ebc1414e5b123928bea764200d395",
+    "bytes": 16055
+  },
+  "SHA256SUMS.txt": {
+    "sha256": "1dadfef735902c5bacc54eabb7c15a32d565450171f5fd90bdbe2eb7976c2139",
+    "bytes": 791
+  },
+  "RELEASE.md": {
+    "sha256": "4581b8deaab10d242dc89946704f2c0d42e7046807618e2802f97c863803b9d6",
+    "bytes": 4700
+  },
+  "main-pipeline-verification.json": {
+    "sha256": "28cc501d7ded4fd9d65e075a76b3f59d198b87b1752f93554426ff793b909ee8",
+    "bytes": 13476
+  },
+  "frontend-after.json": {
+    "sha256": "610aa53de8b9b814b69b800a27218c55a71233f64675102b476920614d8df1ce",
+    "bytes": 113673
+  },
+  "live-host-routing-verification.json": {
+    "sha256": "d1d1c0e4a08b6124932179ffa88b84f1dff5011b8cc1a597d92be99282747d7a",
+    "bytes": 5594
+  },
+  "live-worker-manifest-verification.json": {
+    "sha256": "52db612527896dc1db5613e20eed2a8cea338bd1e375c2270fb4781d5078fde5",
+    "bytes": 1272
+  }
+}

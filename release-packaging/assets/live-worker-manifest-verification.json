@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-11-14T18:37:06.273034+00:00",
+  "scope": "Live production release, canonical worker old/new URLs, manifest; GET only",
+  "businessDataRequests": 0,
+  "checks": [
+    {
+      "path": "admin/sw.js?v=4346",
+      "status": 200,
+      "sha256": "0cde3688d865baafb7bd83ba3b2c8776394d1841374d7149a080f4522289fbef",
+      "expectedSha256": "0cde3688d865baafb7bd83ba3b2c8776394d1841374d7149a080f4522289fbef",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4361",
+      "status": 200,
+      "sha256": "0cde3688d865baafb7bd83ba3b2c8776394d1841374d7149a080f4522289fbef",
+      "expectedSha256": "0cde3688d865baafb7bd83ba3b2c8776394d1841374d7149a080f4522289fbef",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/manifest.webmanifest",
+      "status": 200,
+      "sha256": "1e02a74aab94fa1aad3d61a63c35e98a4447bd5cb22f39175e664faa348b783e",
+      "expectedSha256": "1e02a74aab94fa1aad3d61a63c35e98a4447bd5cb22f39175e664faa348b783e",
+      "hashMatch": true
+    },
+    {
+      "path": "release.json",
+      "status": 200,
+      "sha256": "b8c53c31c98e7942d5dbfe83aea268095392c4d84fbd5ec57eaf4987eeb78965",
+      "expectedSha256": "b8c53c31c98e7942d5dbfe83aea268095392c4d84fbd5ec57eaf4987eeb78965",
+      "hashMatch": true
+    }
+  ]
+}
