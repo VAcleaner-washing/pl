@@ -3,7 +3,7 @@
 **Статус:** нормативний документ продукту.  
 **Baseline version:** 4.3.61
 **Baseline build:** 4361
-**Останнє оновлення:** 2026-11-13
+**Останнє оновлення:** 2026-11-14
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5770,3 +5770,14 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Follow-up acceptance waits for actual trusted input delivery before measuring its metadata. Connected checks require the real visible main/navigation rather than the mobile display:contents wrapper, distinguish unpaid nominal200/1000 terms from actual received money, and redact unrelated ARIA tree/screenshot content. Application code and business rules are unchanged by these harness corrections.
 
 - Late customer-profile responses in process booking now autofill only untouched identity/contact fields. Manual names, addresses, document type/number, cleared values and explicit verification changes remain intact. Original-phone history is not applied to a changed phone; the UI requires manual verification, and detached forms cannot update the current modal. Existing repeat/document policy is preserved for the same phone. A visible note explains preserved manual edits. Actual openProcessBooking deferred-response VM regression passes14/14 versus4/14 on immutable old source; generated-R4 browser acceptance also holds/releases the actual profile request.
+
+### Production promotion — 2026-11-14
+
+- The owner explicitly authorized the production release on14November. Keep4.3.61/build4361 and the exact reviewed normal artifact; its13November metadata records the prepared build, while the actual publication timestamp is recorded in deployment evidence. The private R4 remains isolated and available.
+- The canonical270-file artifact remains the baseline for existing broad regression/LAB suites. Production deployment must explicitly select the separate reviewed273-file `production-pages` artifact, including its three generic operational assets and worker CORE additions. Merely merging the QA branch or uploading canonical `dist` does not promote the reviewed UI.
+- A pinned full artifact digest and per-file verification reject stale, altered, staged, missing or extra served files. The public site, original production API/Auth/storage/manifest/worker identity, pricing, discounts and status/settlement rules are preserved. No test banner, sandbox transport or CI identity broker belongs in the production frontend.
+- Production depends on canonical static/Chromium/WebKit gates and four exact-production-artifact normal UI jobs. Actual-artifact mobile forms, public hydration, startup and real worker/offline/update tests run separately from fixture/LAB layers. The46to61androllback46worker checks use only isolated HTTP/API fixtures; business/Auth responses are never cached or fabricated offline. Linux/browser checks do not certify a physical iPhone.
+- The canonical reporting handler/helper deploys separately from frontend packaging, with existing `verify_jwt=false`, auth.getUser and server admin allowlist unchanged. It remains compatible with frontend46 during rollout. Keep the actual production v18 source as the backend rollback; never deploy the stage isolation wrapper. No SQL migration or real business-data mutation is part of this release.
+- Use one squash release commit in main only after the PR gates pass. Main's actual deployment gates must also pass. Confirm the live release, full production artifact hashes, manifest/worker assets and version coherence after publication. Retain the stable46frontend archive, actual backend rollback and privateR4rollback points until an explicit later retirement decision.
+
+- Stable46 recovery has its own reviewed manual workflow, because the normal production receipt correctly rejects a46tree. PRs verify the immutable15bfsource using its original stamp/build and all270pinned hashes; they never restore. An actual frontend restore requires main, workflow_dispatch, exact case-sensitive ROLLBACK-4346 confirmation and restore_4346 mode, successful verification, and the Pages environment. Defaultverify_only is read-only. No backend/data/provider operation is part of this workflow. Manual artifact recovery may intentionally differ from main's latest61source; record the deployed stable source15bf and release46, rather than assuming main proves the live version.

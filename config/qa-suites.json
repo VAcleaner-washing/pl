@@ -55,7 +55,8 @@
     "test:focus-intent",
     "test:campaign-metrics",
     "test:ci-identity-boundary",
-    "test:process-profile-race"
+    "test:process-profile-race",
+    "test:stable-4346"
   ],
   "browser": [
     "test:public-hydration",

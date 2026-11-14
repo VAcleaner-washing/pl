@@ -13,14 +13,26 @@ const pythonSources=fs.readdirSync('scripts').filter(name=>name.endsWith('.py'))
 const checks=[];
 const ok=(label,value)=>checks.push({label,ok:Boolean(value)});
 
-ok('validate uploads one named Pages artifact',workflow.includes('uses: actions/upload-pages-artifact@v3')&&workflow.includes('name: github-pages'));
+ok('canonical regression artifact remains separate from the production artifact',/name: github-pages\n\s+path: dist/.test(workflow)&&/name: production-pages\n\s+path: release-candidate-test-results\/dist/.test(workflow));
 ok('browser downloads the validated Pages artifact',workflow.includes('uses: actions/download-artifact@v4')&&workflow.includes('name: github-pages'));
 ok('browser extracts artifact.tar into dist',workflow.includes('tar -xf .pages-artifact/artifact.tar -C dist'));
 ok('browser depends on validate',/browser:[\s\S]*?needs: validate/.test(workflow));
-ok('deploy requires static, Chromium and WebKit gates',workflow.includes('needs: [validate, browser, webkit]'));
+ok('deploy requires static, canonical Chromium/WebKit and production operations gates',workflow.includes('needs: [validate, browser, webkit, operations]')&&workflow.includes("needs.operations.result == 'success'"));
 ok('Chromium sets Python explicitly and WebKit uses its pinned official runtime',(workflow.match(/actions\/setup-python/g)||[]).length===1&&/webkit:[\s\S]*?container:[\s\S]*?mcr\.microsoft\.com\/playwright\/python:v1\.61\.0-noble@sha256:[a-f0-9]{64}/.test(workflow));
 ok('WebKit tests the validated artifact without rebuilding',/webkit:[\s\S]*?needs: validate[\s\S]*?npm run verify:artifact[\s\S]*?npm run test:webkit/.test(workflow));
 ok('WebKit client is pinned to the matching official image and startup is verified',workflow.includes('python -m pip install --disable-pip-version-check -r requirements-ci.txt')&&workflow.includes('Pinned runtime Python:')&&workflow.includes('browser = p.webkit.launch(headless=True)'));
+const operations=workflow.split('\n  operations:\n')[1]?.split('\n  deploy:\n')[0]||'';
+const deploy=workflow.split('\n  deploy:\n')[1]||'';
+ok('production build is verified against the reviewed receipt before upload',workflow.indexOf('npm run test:release-candidate')<workflow.indexOf('name: production-pages')&&workflow.indexOf('npm run verify:production-artifact')<workflow.indexOf('name: production-pages')&&workflow.includes('npm run test:production-promotion'));
+ok('production acceptance covers both engines and both target widths',operations.includes('browser: [chromium, webkit]')&&operations.includes('width: [440, 1440]')&&operations.includes('fail-fast: false'));
+const operationsSteps=operations.split(/(?=^      - )/m);
+const stableBuildStep=step=>/^\s+working-directory: stable-reference-test-results\/source\s*$/m.test(step);
+ok('production acceptance downloads the deployed archive and never rebuilds it',operations.includes('name: production-pages')&&operations.includes('tar -xf .pages-artifact/artifact.tar -C release-candidate-test-results/dist')&&operations.includes('npm run verify:production-artifact')&&!operationsSteps.some(step=>/npm run (?:build|stamp|test:release-candidate)|node scripts\/build/.test(step)&&!stableBuildStep(step)));
+ok('the separate immutable46 reference uses its original stamp and build',operationsSteps.some(step=>stableBuildStep(step)&&step.includes('npm run stamp')&&step.includes('node scripts/build-pages.mjs')));
+ok('production acceptance uses the pinned official runtime and isolated network harness',operations.includes('python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69')&&operations.includes('python scripts/admin_release_candidate_qa.py --browser ${{ matrix.browser }} --width ${{ matrix.width }}'));
+ok('both production mobile engines also test actual forms, public hydration and startup', ['mobile_forms_qa.py','public_hydration_qa.py','admin_startup_qa.py'].every(file=>new RegExp('if: matrix\\.width == 440\\n\\s+run: python scripts/'+file.replaceAll('.','\\.')+' --browser \\$\\{\\{ matrix\\.browser \\}\\} --root release-candidate-test-results/dist').test(operations)));
+ok('both production mobile engines test the real worker against immutable stable46',operations.includes('ref: 15bf61dc4da4cf63405a25887353e6ec7178dce8')&&operations.includes('python scripts/pwa_cache_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width 440')&&operations.includes('--stable-root stable-reference-test-results/source/dist'));
+ok('production deploy selects only the reviewed artifact and stays main-push-only',deploy.includes('artifact_name: production-pages')&&deploy.includes("github.event_name == 'push'")&&deploy.includes("github.ref == 'refs/heads/main'"));
 ok('legacy E2E bridge is replaced by real logistics controls',pkg.scripts['test:e2e'].includes('scripts/e2e_smoke.py')&&!pkg.scripts['test:e2e'].includes('v4312_e2e_runner')&&e2e.includes('data-logistics-kind'));
 ok('browser mode never rebuilds dist',!runner.includes("if(mode==='browser') npm('build')")&&!/mode===['\"]browser['\"][^\n]*build/.test(runner));
 ok('browser begins with deploy-artifact verification',runner.includes("npm('verify:artifact')"));

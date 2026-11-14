@@ -122,6 +122,9 @@
     "test:ci-identity-boundary": "node scripts/test-admin-ci-identity-boundary.mjs",
     "build:release-candidate": "node scripts/build-admin-release-candidate.mjs",
     "test:release-candidate": "node scripts/test-admin-release-candidate.mjs",
-    "test:process-profile-race": "node scripts/test-admin-process-profile-race.mjs"
+    "test:process-profile-race": "node scripts/test-admin-process-profile-race.mjs",
+    "verify:production-artifact": "node scripts/verify-admin-production-release.mjs",
+    "test:production-promotion": "node scripts/test-admin-production-release.mjs",
+    "test:stable-4346": "node scripts/test-stable-4346.mjs"
   }
 }
