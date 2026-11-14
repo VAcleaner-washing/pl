@@ -34,7 +34,7 @@ else{
   }
 }
 
-for(const rel of ['package.json','requirements-ci.txt','scripts','config','supabase','docs','.github']){
+for(const rel of ['package.json','requirements-ci.txt','scripts','config','supabase','sandbox','staging','docs','.github']){
   if(fs.existsSync(path.join(artifactRoot,rel)))errors.push(`development path leaked into Pages artifact: ${rel}`);
 }
 const leakedTop=fs.readdirSync(artifactRoot).filter(name=>

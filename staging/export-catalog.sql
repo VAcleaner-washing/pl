@@ -1,0 +1,20 @@
+with tables as (
+ select c.oid,c.relname,c.relrowsecurity,c.relforcerowsecurity from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind in ('r','p') and (c.relname like 'vacleaner_%' or c.relname='admin_users')
+), funcs as (
+ select p.* from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and (p.proname like '%vacleaner%' or p.oid in(select tgfoid from pg_trigger where tgrelid in(select oid from tables) and not tgisinternal))
+)
+select jsonb_build_object(
+ 'captured_at',now(),'postgres_version',current_setting('server_version'),
+ 'tables',(select jsonb_agg(jsonb_build_object('name',t.relname,'rls',t.relrowsecurity,'force_rls',t.relforcerowsecurity,
+ 'columns',(select jsonb_agg(jsonb_build_object('name',a.attname,'type',format_type(a.atttypid,a.atttypmod),'not_null',a.attnotnull,'identity',a.attidentity,'generated',a.attgenerated,'default',pg_get_expr(d.adbin,d.adrelid)) order by a.attnum) from pg_attribute a left join pg_attrdef d on d.adrelid=a.attrelid and d.adnum=a.attnum where a.attrelid=t.oid and a.attnum>0 and not a.attisdropped),
+ 'constraints',(select coalesce(jsonb_agg(jsonb_build_object('name',c.conname,'type',c.contype,'definition',pg_get_constraintdef(c.oid,true)) order by c.conname),'[]'::jsonb) from pg_constraint c where c.conrelid=t.oid),
+ 'indexes',(select coalesce(jsonb_agg(jsonb_build_object('name',ic.relname,'definition',pg_get_indexdef(i.indexrelid),'constraint_backed',exists(select 1 from pg_constraint c where c.conindid=i.indexrelid)) order by ic.relname),'[]'::jsonb) from pg_index i join pg_class ic on ic.oid=i.indexrelid where i.indrelid=t.oid),
+ 'policies',(select coalesce(jsonb_agg(jsonb_build_object('name',p.policyname,'permissive',p.permissive,'roles',p.roles,'command',p.cmd,'using',p.qual,'check',p.with_check) order by p.policyname),'[]'::jsonb) from pg_policies p where p.schemaname='public' and p.tablename=t.relname),
+ 'triggers',(select coalesce(jsonb_agg(jsonb_build_object('name',g.tgname,'definition',pg_get_triggerdef(g.oid,true),'function',p.proname,'enabled',g.tgenabled) order by g.tgname),'[]'::jsonb) from pg_trigger g join pg_proc p on p.oid=g.tgfoid where g.tgrelid=t.oid and not g.tgisinternal),
+ 'grants',(select coalesce(jsonb_agg(jsonb_build_object('role',r.grantee,'privilege',r.privilege_type) order by r.grantee,r.privilege_type),'[]'::jsonb) from information_schema.role_table_grants r where r.table_schema='public' and r.table_name=t.relname and r.grantee in ('anon','authenticated','service_role'))
+ ) order by t.relname) from tables t),
+ 'functions',(select jsonb_agg(jsonb_build_object('name',p.proname,'identity_args',pg_get_function_identity_arguments(p.oid),'definition',pg_get_functiondef(p.oid),'acl',p.proacl,'grants',(select jsonb_agg(jsonb_build_object('role',case when a.grantee=0 then 'PUBLIC' else pg_get_userbyid(a.grantee) end,'privilege',a.privilege_type)) from aclexplode(coalesce(p.proacl,acldefault('f',p.proowner))) a)) order by p.proname) from funcs p),
+ 'enums',(select coalesce(jsonb_agg(jsonb_build_object('name',t.typname,'values',(select jsonb_agg(e.enumlabel order by e.enumsortorder) from pg_enum e where e.enumtypid=t.oid)) order by t.typname),'[]'::jsonb) from pg_type t join pg_namespace n on n.oid=t.typnamespace where n.nspname='public' and t.typtype='e' and t.oid in(select a.atttypid from pg_attribute a where a.attrelid in(select oid from tables))),
+ 'sequences',(select coalesce(jsonb_agg(jsonb_build_object('name',c.relname,'type',format_type(s.seqtypid,null),'start',s.seqstart,'increment',s.seqincrement,'min',s.seqmin::text,'max',s.seqmax::text,'cache',s.seqcache,'cycle',s.seqcycle) order by c.relname),'[]'::jsonb) from pg_sequence s join pg_class c on c.oid=s.seqrelid join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname like 'vacleaner_%'),
+ 'extensions',(select jsonb_agg(jsonb_build_object('name',e.extname,'schema',n.nspname,'version',e.extversion) order by e.extname) from pg_extension e join pg_namespace n on n.oid=e.extnamespace)
+) as catalog;

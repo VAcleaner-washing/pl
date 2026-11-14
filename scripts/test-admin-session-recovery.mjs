@@ -12,6 +12,7 @@ function harness(fetcher,initial={access_token:'old-access',refresh_token:'refre
   const calls=[];
   const context={console,Response,Headers,Date,atob,setTimeout,navigator:{onLine:true,locks:options.locks},window:{},SUPABASE:'https://auth.example',KEY:'public-test-key',refreshPromise:null,
     SETTINGS_API:'https://api.example/settings',DOCUMENT_API:'https://api.example/documents',PUSH_API:'https://api.example/push',
+    getDeliveryPricing:()=>({local:250}),normalizeDeliveryPricingLocal:v=>v,getEquipmentBaselines:()=>({puzzi:{qty:2,unitCost:0}}),normalizeEquipmentBaselines:v=>v,
     saveCatalogLocal:()=>{},saveSlots:()=>{},saveDepositRulesLocal:()=>{},saveDeliveryPricingLocal:v=>v,saveEquipmentBaselinesLocal:v=>v,
     currentAdminAlias:()=> 'vacleaner',pushDeviceId:()=> 'fixture-device',normalizePhone:phone=>phone,validateDocumentFile:()=>'',documentMime:()=> 'image/jpeg',
     getSession:()=>storage.session,sessionPersistent:()=>true,saveSession:next=>{storage.session=next},

@@ -1,0 +1,51 @@
+name: R4 render comparison diagnostic
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  comparison:
+    name: WebKit capture / ${{ matrix.product.name }}
+    runs-on: ubuntu-24.04
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        product:
+          - name: baseline59
+            sha: 2996a04d5c91c46f4edeb7fa891b82532a55f702
+          - name: candidate60-first
+            sha: 4be5c7b1eba89941a4990cbffdee9a2986d1ef3b
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.product.sha }}
+          path: comparison-product
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install the client for the pinned official browser image
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
+      - name: Build the pinned product independently of the common diagnostic harness
+        working-directory: comparison-product
+        run: |
+          npm run build
+          npm run build:staging-ui
+      - name: Mount the exact comparison artifact
+        run: |
+          mkdir -p staging-ui-test-results
+          cp -a comparison-product/staging-ui-test-results/dist staging-ui-test-results/dist
+      - name: Run three controlled capture sequences without retrying a failure
+        env:
+          DEBUG: pw:browser
+        run: python scripts/admin_staging_screens_qa.py --browser webkit --width 1440 --phase sections --repeat 3 --artifacts staging-ui-test-results/render-${{ matrix.product.name }}
+      - name: Preserve all diagnostic runs, traces and resource samples
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: r4-render-${{ matrix.product.name }}
+          path: staging-ui-test-results/render-${{ matrix.product.name }}
+          retention-days: 14

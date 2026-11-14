@@ -9,7 +9,7 @@ async function test(name,run){await run();console.log('PASS',name);passed++}
 function startupHarness(){
   const settings=deferred(),reads=[],listeners=[],timers=new Set();let settingsCalls=0,recalculations=0,renders=0;
   const context={console,Date,JSON,Promise,
-    state:{bookings:[],expenses:[],calendar:[],customers:[],campaigns:[],referrals:{},dataLoaded:false,view:'bookings'},
+    state:{moduleErrors:{},bookings:[],expenses:[],calendar:[],customers:[],campaigns:[],referrals:{},dataLoaded:false,view:'bookings'},
     initialDataLoadPromise:null,fullDataRefreshPromise:null,liveBookingSyncBusy:false,lastLiveBookingFingerprint:'',liveBookingSyncTimer:0,LIVE_BOOKING_SYNC_MS:15000,
     document:{visibilityState:'visible',addEventListener:(...args)=>listeners.push(args)},navigator:{onLine:true},
     window:{setInterval:fn=>{timers.add(fn);return fn},addEventListener:(...args)=>listeners.push(args)},clearInterval:fn=>timers.delete(fn),
@@ -56,17 +56,17 @@ await test('failed initial read preserves last good state and permits a complete
 await test('optional campaign/referral outages retain the established fallback',async()=>{
   const h=startupHarness(),loading=h.loadStartupData();h.settings.ready=true;h.settings.resolve();
   for(const read of h.reads)if(['campaigns','referrals_expiring'].includes(read.body.action))read.reject(new Error('optional outage'));else read.resolve({});
-  await loading;assert.equal(h.context.state.dataLoaded,true);assert.equal(h.context.state.campaigns.length,0);
+  await loading;assert.equal(h.context.state.dataLoaded,true);assert.equal(h.context.state.campaigns.length,0);assert.ok(h.context.state.moduleErrors.campaigns);assert.ok(h.context.state.moduleErrors.referrals);
 });
 
 function registrationHarness({installing=null,waiting=null,offline=false,existing=true,controlled=true}={}){
   const events={},online=[],prompts=[],warnings=[];let updates=0,activation=0;
-  const registration={scope:'https://fixture.local/admin/',installing,waiting,addEventListener:(name,fn)=>{events[name]=fn},update:async()=>{updates++;if(offline)throw new TypeError('offline')}};
-  const context={console:{warn:(...args)=>warnings.push(args)},location:{origin:'https://fixture.local'},pwaRegistration:null,
+  const registration={scope:'https://fixture.local/admin/',active:{state:'activated',scriptURL:'https://fixture.local/admin/sw.js?v=4346'},installing,waiting,addEventListener:(name,fn)=>{events[name]=fn},update:async()=>{updates++;if(offline)throw new TypeError('offline')}};
+  const context={console:{warn:(...args)=>warnings.push(args)},URL,location:{origin:'https://fixture.local'},pwaRegistration:null,
     navigator:{serviceWorker:{controller:controlled?{}:null,getRegistrations:async()=>existing?[registration]:[],register:async()=>{if(offline)throw new TypeError('offline');return registration},addEventListener:()=>{}}},
     document:{visibilityState:'visible',addEventListener:()=>{}},window:{addEventListener:(name,fn)=>{if(name==='online')online.push(fn)}},showPwaUpdatePrompt:worker=>prompts.push(worker)};
   vm.createContext(context);vm.runInContext(source.match(/^async function registerPwa\(.*$/m)[0]+';globalThis.run=registerPwa;',context);
-  const worker=(state='installing')=>({state,listeners:[],addEventListener(name,fn){if(name==='statechange')this.listeners.push(fn)},postMessage(){activation++},emit(){for(const fn of this.listeners)fn()}});
+  const worker=(state='installing')=>({state,scriptURL:'https://fixture.local/admin/sw.js?v=4346',listeners:[],addEventListener(name,fn){if(name==='statechange')this.listeners.push(fn)},postMessage(){activation++},emit(){for(const fn of this.listeners)fn()}});
   return{run:context.run,registration,events,online,prompts,warnings,worker,get updates(){return updates},get activation(){return activation},set offline(value){offline=value}};
 }
 await test('registration observes a worker whose updatefound event already fired',async()=>{
@@ -91,7 +91,7 @@ await test('future updatefound events observe each worker only once',async()=>{
   h.events.updatefound();h.events.updatefound();assert.equal(worker.listeners.length,1);
   worker.state='installed';worker.emit();assert.equal(h.prompts.length,1);assert.equal(h.activation,0);
 });
-await test('offline registration failure keeps existing admin lifecycle and online retry',async()=>{
+await test('offline canonical update keeps existing admin lifecycle and online retry',async()=>{
   const h=registrationHarness({offline:true}),worker=h.worker();h.registration.installing=worker;
   await h.run();assert.equal(h.online.length,1);assert.equal(h.updates,1);
   h.offline=false;h.online[0]();await Promise.resolve();assert.equal(h.updates,2);

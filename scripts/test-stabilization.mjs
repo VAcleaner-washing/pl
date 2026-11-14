@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import vm from 'node:vm';
 
 const read=p=>fs.readFileSync(new URL(`../${p}`,import.meta.url),'utf8');
 const admin=read('assets/admin-v250.js');
@@ -184,8 +185,14 @@ has(admin,"processNote.includes('З клієнтом зв’язались')",'s
 has(admin,"processNote.includes('Умови оренди та сума залогового платежу надіслані')",'saved conditions-sent state is restored from the server-side booking note');
 has(admin,'function utilizationFor(bounds)','analytics calculates utilization from occupied half-day slots');
 has(admin,'function repeatMetrics(bounds)','analytics distinguishes new and repeat completed rentals');
-has(admin,"if(String(b?.status||'')==='completed'&&completedAt)",'analytics period prefers actual completed_at for completed rentals');
-has(admin,"const rentalDate=String(b?.return_date||b?.start_date||'')",'analytics keeps planned rental date as fallback when completed_at is absent');
+const reporting=vm.createContext({Date,Intl});
+for(const name of ['localDateIso','reportDateIso','reportDateMoment','bookingMoment']){
+  const start=admin.indexOf(`function ${name}(`),end=admin.indexOf('\nfunction ',start+1);
+  assert(start>=0&&end>start,`report function ${name} exists`);
+  vm.runInContext(admin.slice(start,end),reporting);
+}
+ok(reporting.localDateIso(reporting.bookingMoment({status:'completed',completed_at:'2026-10-31T22:30:00Z',return_date:'2026-10-01'}))==='2026-11-01','analytics period prefers actual completed_at in the Kyiv calendar');
+ok(reporting.localDateIso(reporting.bookingMoment({status:'completed',return_date:'2026-10-01',start_date:'2026-09-30'}))==='2026-10-01','analytics keeps planned rental date as fallback when completed_at is absent');
 has(admin,'Сплячі 180+ днів','sleeping client segment is visible');
 has(admin,'id="clientSegment"','clients can be filtered by repeat/sleeping segment');
 has(admin,'SLEEPING_CUSTOMER_DAYS=180','sleeping customer threshold is six months / 180 days');

@@ -1,0 +1,120 @@
+{
+  "productionRef": "yweluzclearwrazdkahu",
+  "captureMode": "read-only source/metadata; no business rows",
+  "canonicalSourceCommit": "4c2637fcd8e345bb6fd34f7d0ab40d08ecea8f22",
+  "files": [
+    {
+      "function": "vacleaner-admin-bookings-v4",
+      "version": 12,
+      "file": "index.ts",
+      "same": true,
+      "liveSha256": "f0ec634f9ab126c1e851291f16873bc4b6a182c6258cdc3474d1fa116d23c467",
+      "localSha256": "f0ec634f9ab126c1e851291f16873bc4b6a182c6258cdc3474d1fa116d23c467"
+    },
+    {
+      "function": "vacleaner-admin-bookings-v4",
+      "version": 12,
+      "file": "config.ts",
+      "same": false,
+      "liveSha256": "70bfad61cdc8de3cb8b02b29d4976880d9c7e51d2755871c41dad96b73f7d41c",
+      "localSha256": "e96bbe44c036876818d04f4bc7845b0804b055a715e69d9335e9d3919587d700"
+    },
+    {
+      "function": "vacleaner-admin-bookings-v4",
+      "version": 12,
+      "file": "settlement.mjs",
+      "same": true,
+      "liveSha256": "f7a12d5b333a3cbb5142481b85a04cad562588d4eb40e58b687f450d2764e6d5",
+      "localSha256": "f7a12d5b333a3cbb5142481b85a04cad562588d4eb40e58b687f450d2764e6d5"
+    },
+    {
+      "function": "vacleaner-admin-bookings-v4",
+      "version": 12,
+      "file": "pricing.mjs",
+      "same": true,
+      "liveSha256": "a5c20ca40ccc03d70b963096a1458ab21c739b17ebe2d6b69a39fa9a5d531ab4",
+      "localSha256": "a5c20ca40ccc03d70b963096a1458ab21c739b17ebe2d6b69a39fa9a5d531ab4"
+    },
+    {
+      "function": "vacleaner-admin-bookings-v4",
+      "version": 12,
+      "file": "referral.ts",
+      "same": true,
+      "liveSha256": "b43363adce7f860a4c8bdfa354b9417dcfefa54d653eac988f108420aace6991",
+      "localSha256": "b43363adce7f860a4c8bdfa354b9417dcfefa54d653eac988f108420aace6991"
+    },
+    {
+      "function": "vacleaner-settings",
+      "version": 21,
+      "file": "index.ts",
+      "same": true,
+      "liveSha256": "624e699b75736ea3135e6daf3f42567b967ab5a2ef4c3a952fc00a6047bcc613",
+      "localSha256": "624e699b75736ea3135e6daf3f42567b967ab5a2ef4c3a952fc00a6047bcc613"
+    },
+    {
+      "function": "vacleaner-settings",
+      "version": 21,
+      "file": "config.ts",
+      "same": false,
+      "liveSha256": "7933db0c7aee54560c63888c2998f2c90a3ee8f813666eb80df2c36020a7460d",
+      "localSha256": "e96bbe44c036876818d04f4bc7845b0804b055a715e69d9335e9d3919587d700"
+    },
+    {
+      "function": "vacleaner-admin-data-v1",
+      "version": 18,
+      "file": "index.ts",
+      "same": true,
+      "liveSha256": "12f38149c0c58e9362c21881e087c131941239c0f6741b77fa0418d25d722c46",
+      "localSha256": "12f38149c0c58e9362c21881e087c131941239c0f6741b77fa0418d25d722c46"
+    },
+    {
+      "function": "vacleaner-extend-rental-v1",
+      "version": 7,
+      "file": "index.ts",
+      "same": false,
+      "liveSha256": "f3aac1b4ed452132597921fe756b564fd44248207bf8a594bf32adf40ec06858",
+      "localSha256": "8b16084b77af302aca16bc9efb12e732b6099cfeb6e43fca811cea6118256002"
+    },
+    {
+      "function": "vacleaner-extend-rental-v1",
+      "version": 7,
+      "file": "config.ts",
+      "same": false,
+      "liveSha256": "7933db0c7aee54560c63888c2998f2c90a3ee8f813666eb80df2c36020a7460d",
+      "localSha256": "e96bbe44c036876818d04f4bc7845b0804b055a715e69d9335e9d3919587d700"
+    },
+    {
+      "function": "vacleaner-extend-rental-v1",
+      "version": 7,
+      "file": "pricing.mjs",
+      "same": true,
+      "liveSha256": "a5c20ca40ccc03d70b963096a1458ab21c739b17ebe2d6b69a39fa9a5d531ab4",
+      "localSha256": "a5c20ca40ccc03d70b963096a1458ab21c739b17ebe2d6b69a39fa9a5d531ab4"
+    },
+    {
+      "function": "vacleaner-extend-rental-v1",
+      "version": 7,
+      "file": "settlement.mjs",
+      "same": true,
+      "liveSha256": "f7a12d5b333a3cbb5142481b85a04cad562588d4eb40e58b687f450d2764e6d5",
+      "localSha256": "f7a12d5b333a3cbb5142481b85a04cad562588d4eb40e58b687f450d2764e6d5"
+    },
+    {
+      "function": "vacleaner-status-correction-v1",
+      "version": 8,
+      "file": "index.ts",
+      "same": true,
+      "liveSha256": "9303aa8661d621390f39c5e3785665e76965f119db1b856fea1b60ac45e2ac84",
+      "localSha256": "9303aa8661d621390f39c5e3785665e76965f119db1b856fea1b60ac45e2ac84"
+    },
+    {
+      "function": "vacleaner-customer-documents-v1",
+      "version": 5,
+      "file": "index.ts",
+      "same": false,
+      "liveSha256": "d86877f91afb02541bcafa3aa21272d8c926690c0569ed1d89ccbdeee1cda4ff",
+      "localSha256": "b9ce83daaa37ca587f221a0692bde45de6a15e8f57248ba4a934214a137a97d7"
+    }
+  ],
+  "differences": "Three generated config release labels are 4.3.37 in deployed functions vs 4.3.50 in source; config content hash is identical. The extension entrypoint has one unused cleanInt declaration in source. No functional difference is assumed without staging execution. The customer-documents source differs only in trailing whitespace (unified diff has zero changed lines)."
+}

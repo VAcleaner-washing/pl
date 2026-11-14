@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd(),dist=path.join(root,'dist');
 fs.rmSync(dist,{recursive:true,force:true});
-const excludedTop=new Set(['.git','.github','.githooks','docs','.venv','.pw-browsers','.pages-artifact','node_modules','config','scripts','supabase','dist','test-results','playwright-report','__pycache__']);
+const excludedTop=new Set(['.git','.github','.githooks','docs','.venv','.pw-browsers','.pages-artifact','node_modules','config','scripts','supabase','sandbox','staging','dist','test-results','playwright-report','__pycache__']);
 const excludedRoot=new Set(['package.json','requirements-ci.txt','qa-release-summary.json','manifest.webmanifest','favicon-16-preview.png','favicon-16x16.png','favicon-32x32.png','favicon-64x64.png']);
 const isGeneratedTop=name=>name.startsWith('tmp-')||name.endsWith('-results')||name.endsWith('-test-results');
 const excludedDeployPaths=new Set([

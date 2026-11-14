@@ -1,0 +1,95 @@
+name: Verify or restore stable VAcleaner 4346
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/rollback-4346.yml
+      - scripts/verify-stable-4346.mjs
+      - scripts/test-stable-4346.mjs
+      - docs/stable-4346-manifest.json
+      - docs/VAcleaner-rollback-4346.md
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Verify the stable artifact, or explicitly restore it
+        type: choice
+        options:
+          - verify_only
+          - restore_4346
+        default: verify_only
+        required: true
+      confirmation:
+        description: Restore only — enter exactly ROLLBACK-4346
+        type: string
+        default: ''
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Build and verify exact stable 4346 artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out current verification code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate the exact manual restore request before preparing artifacts
+        env:
+          ROLLBACK_MODE: ${{ inputs.mode || 'verify_only' }}
+          ROLLBACK_CONFIRMATION: ${{ inputs.confirmation }}
+        run: node scripts/verify-stable-4346.mjs --check-request
+      - name: Check out the immutable stable 46 source
+        uses: actions/checkout@v4
+        with:
+          repository: VAcleaner-washing/pl
+          ref: 15bf61dc4da4cf63405a25887353e6ec7178dce8
+          path: stable-reference-test-results/source
+          persist-credentials: false
+      - name: Verify pinned source and build its original Pages artifact
+        working-directory: stable-reference-test-results/source
+        run: |
+          test "$(git rev-parse HEAD)" = "15bf61dc4da4cf63405a25887353e6ec7178dce8"
+          npm run stamp
+          node scripts/build-pages.mjs
+      - name: Verify all 270 stable files and release identity
+        run: node scripts/verify-stable-4346.mjs --root stable-reference-test-results/source/dist
+      - name: Upload verified rollback Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: rollback-pages-4346
+          path: stable-reference-test-results/source/dist
+
+  deploy:
+    name: Restore verified frontend 4346
+    needs: prepare
+    if: >-
+      github.repository == 'VAcleaner-washing/pl' &&
+      github.ref == 'refs/heads/main' &&
+      github.event_name == 'workflow_dispatch' &&
+      inputs.mode == 'restore_4346' &&
+      inputs.confirmation == 'ROLLBACK-4346' &&
+      needs.prepare.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy only the verified stable Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          artifact_name: rollback-pages-4346

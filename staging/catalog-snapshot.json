@@ -1,0 +1,4716 @@
+{
+  "enums": [],
+  "tables": [
+    {
+      "rls": true,
+      "name": "admin_users",
+      "grants": [
+        {
+          "role": "authenticated",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "admin_users_email_key",
+          "definition": "CREATE UNIQUE INDEX admin_users_email_key ON public.admin_users USING btree (email)",
+          "constraint_backed": true
+        },
+        {
+          "name": "admin_users_pkey",
+          "definition": "CREATE UNIQUE INDEX admin_users_pkey ON public.admin_users USING btree (user_id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "Admins can read admin allowlist",
+          "check": null,
+          "roles": [
+            "authenticated"
+          ],
+          "using": "(user_id = ( SELECT auth.uid() AS uid))",
+          "command": "SELECT",
+          "permissive": "PERMISSIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "admin_users_email_key",
+          "type": "u",
+          "definition": "UNIQUE (email)"
+        },
+        {
+          "name": "admin_users_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (user_id)"
+        },
+        {
+          "name": "admin_users_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_address_cache",
+      "grants": [
+        {
+          "role": "anon",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "anon",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "anon",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "anon",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "anon",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "anon",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "anon",
+          "privilege": "UPDATE"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "UPDATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "query_key",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "query_text",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "suggestions",
+          "type": "jsonb",
+          "default": "'[]'::jsonb",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "default": "'photon'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "hit_count",
+          "type": "bigint",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_address_cache_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_address_cache_pkey ON public.vacleaner_address_cache USING btree (query_key)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_address_cache_updated_at_idx",
+          "definition": "CREATE INDEX vacleaner_address_cache_updated_at_idx ON public.vacleaner_address_cache USING btree (updated_at DESC)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_address_cache_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (query_key)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_admin_users",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_admin_users_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_admin_users_pkey ON public.vacleaner_admin_users USING btree (user_id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_admin_users_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (user_id)"
+        },
+        {
+          "name": "vacleaner_admin_users_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_booking_audit",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "default": null,
+          "identity": "a",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "booking_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "changed_fields",
+          "type": "text[]",
+          "default": "'{}'::text[]",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "old_values",
+          "type": "jsonb",
+          "default": "'{}'::jsonb",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "new_values",
+          "type": "jsonb",
+          "default": "'{}'::jsonb",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "actor_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "default": "'database'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_booking_audit_booking_created_idx",
+          "definition": "CREATE INDEX vacleaner_booking_audit_booking_created_idx ON public.vacleaner_booking_audit USING btree (booking_id, created_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_booking_audit_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_booking_audit_pkey ON public.vacleaner_booking_audit USING btree (id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_booking_audit_booking_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (booking_id) REFERENCES vacleaner_bookings(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_booking_audit_event_type_check",
+          "type": "c",
+          "definition": "CHECK (event_type = ANY (ARRAY['created'::text, 'updated'::text]))"
+        },
+        {
+          "name": "vacleaner_booking_audit_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_booking_resources",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "resource_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "default": "1",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_booking_resources_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_booking_resources_pkey ON public.vacleaner_booking_resources USING btree (booking_id, resource_code)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_booking_resources_resource_idx",
+          "definition": "CREATE INDEX vacleaner_booking_resources_resource_idx ON public.vacleaner_booking_resources USING btree (resource_code, booking_id)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_booking_resources_booking_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (booking_id) REFERENCES vacleaner_bookings(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_booking_resources_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (booking_id, resource_code)"
+        },
+        {
+          "name": "vacleaner_booking_resources_quantity_check",
+          "type": "c",
+          "definition": "CHECK (quantity > 0)"
+        },
+        {
+          "name": "vacleaner_booking_resources_resource_code_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (resource_code) REFERENCES vacleaner_inventory(resource_code)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_bookings",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "booking_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "product_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "product_label",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "return_date",
+          "type": "date",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "start_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "end_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "pickup_window",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "return_window",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "rental_days",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "fulfillment",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_name",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_telegram",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "customer_comment",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "extras",
+          "type": "jsonb",
+          "default": "'[]'::jsonb",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "base_amount",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "extras_amount",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "delivery_amount",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "total_amount",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "prepayment_amount",
+          "type": "integer",
+          "default": "200",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'pending'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "default": "'vacleaner_website'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "ip_hash",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "admin_note",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "confirmed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "fulfillment_address",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "prepayment_paid",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "prepayment_paid_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "deposit_amount",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "deposit_paid",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "hold_expires_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "issued_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "issue_payment_amount",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "issue_payment_paid",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "issue_payment_paid_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "deposit_paid_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "deposit_returned",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "deposit_returned_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "return_payment_amount",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "return_payment_paid",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "return_payment_paid_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "customer_instagram",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "preferred_contact",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "fulfillment_address_detail",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "client_request_id",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_bookings_booking_code_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_bookings_booking_code_key ON public.vacleaner_bookings USING btree (booking_code)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_bookings_client_request_id_uidx",
+          "definition": "CREATE UNIQUE INDEX vacleaner_bookings_client_request_id_uidx ON public.vacleaner_bookings USING btree (client_request_id) WHERE (client_request_id IS NOT NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_bookings_hold_idx",
+          "definition": "CREATE INDEX vacleaner_bookings_hold_idx ON public.vacleaner_bookings USING btree (hold_expires_at) WHERE (status = 'waiting_payment'::text)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_bookings_period_idx",
+          "definition": "CREATE INDEX vacleaner_bookings_period_idx ON public.vacleaner_bookings USING btree (status, start_at, end_at)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_bookings_phone_idx",
+          "definition": "CREATE INDEX vacleaner_bookings_phone_idx ON public.vacleaner_bookings USING btree (customer_phone, created_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_bookings_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_bookings_pkey ON public.vacleaner_bookings USING btree (id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_bookings_status_deposit_idx",
+          "definition": "CREATE INDEX vacleaner_bookings_status_deposit_idx ON public.vacleaner_bookings USING btree (status, deposit_paid, deposit_returned)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [
+        {
+          "name": "vacleaner_block_public_admin_bundle_v1",
+          "enabled": "O",
+          "function": "vacleaner_block_public_admin_bundle_v1",
+          "definition": "CREATE TRIGGER vacleaner_block_public_admin_bundle_v1 BEFORE INSERT OR UPDATE OF product_code, source ON vacleaner_bookings FOR EACH ROW EXECUTE FUNCTION vacleaner_block_public_admin_bundle_v1()"
+        },
+        {
+          "name": "vacleaner_booking_audit_trigger",
+          "enabled": "O",
+          "function": "vacleaner_log_booking_change",
+          "definition": "CREATE TRIGGER vacleaner_booking_audit_trigger AFTER INSERT OR UPDATE ON vacleaner_bookings FOR EACH ROW EXECUTE FUNCTION vacleaner_log_booking_change()"
+        },
+        {
+          "name": "vacleaner_preserve_best_promo_discount_trg",
+          "enabled": "O",
+          "function": "vacleaner_preserve_best_promo_discount",
+          "definition": "CREATE TRIGGER vacleaner_preserve_best_promo_discount_trg BEFORE UPDATE ON vacleaner_bookings FOR EACH ROW EXECUTE FUNCTION vacleaner_preserve_best_promo_discount()"
+        }
+      ],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_bookings_admin_note_check",
+          "type": "c",
+          "definition": "CHECK (admin_note IS NULL OR char_length(admin_note) <= 800)"
+        },
+        {
+          "name": "vacleaner_bookings_base_amount_check",
+          "type": "c",
+          "definition": "CHECK (base_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_booking_code_key",
+          "type": "u",
+          "definition": "UNIQUE (booking_code)"
+        },
+        {
+          "name": "vacleaner_bookings_check1",
+          "type": "c",
+          "definition": "CHECK (end_at > start_at)"
+        },
+        {
+          "name": "vacleaner_bookings_customer_comment_check",
+          "type": "c",
+          "definition": "CHECK (customer_comment IS NULL OR char_length(customer_comment) <= 800)"
+        },
+        {
+          "name": "vacleaner_bookings_customer_name_check",
+          "type": "c",
+          "definition": "CHECK (char_length(customer_name) >= 2 AND char_length(customer_name) <= 80)"
+        },
+        {
+          "name": "vacleaner_bookings_customer_phone_check",
+          "type": "c",
+          "definition": "CHECK (char_length(customer_phone) >= 10 AND char_length(customer_phone) <= 20)"
+        },
+        {
+          "name": "vacleaner_bookings_delivery_amount_check",
+          "type": "c",
+          "definition": "CHECK (delivery_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_deposit_amount_check",
+          "type": "c",
+          "definition": "CHECK (deposit_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_deposit_amount_nonnegative",
+          "type": "c",
+          "definition": "CHECK (deposit_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_extras_amount_check",
+          "type": "c",
+          "definition": "CHECK (extras_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_fulfillment_address_check",
+          "type": "c",
+          "definition": "CHECK (fulfillment_address IS NULL OR char_length(fulfillment_address) <= 180)"
+        },
+        {
+          "name": "vacleaner_bookings_fulfillment_check",
+          "type": "c",
+          "definition": "CHECK (fulfillment = ANY (ARRAY['pickup'::text, 'delivery'::text]))"
+        },
+        {
+          "name": "vacleaner_bookings_issue_payment_amount_nonnegative",
+          "type": "c",
+          "definition": "CHECK (issue_payment_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_pickup_window_check",
+          "type": "c",
+          "definition": "CHECK (pickup_window = ANY (ARRAY['morning'::text, 'evening'::text]))"
+        },
+        {
+          "name": "vacleaner_bookings_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_bookings_preferred_contact_check",
+          "type": "c",
+          "definition": "CHECK (preferred_contact IS NULL OR (preferred_contact = ANY (ARRAY['phone'::text, 'telegram'::text, 'instagram'::text])))"
+        },
+        {
+          "name": "vacleaner_bookings_prepayment_amount_check",
+          "type": "c",
+          "definition": "CHECK (prepayment_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_rental_days_check",
+          "type": "c",
+          "definition": "CHECK (rental_days >= 1 AND rental_days <= 14)"
+        },
+        {
+          "name": "vacleaner_bookings_return_date_check",
+          "type": "c",
+          "definition": "CHECK (return_date >= start_date)"
+        },
+        {
+          "name": "vacleaner_bookings_return_payment_amount_nonnegative",
+          "type": "c",
+          "definition": "CHECK (return_payment_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_bookings_return_window_check",
+          "type": "c",
+          "definition": "CHECK (return_window = ANY (ARRAY['morning'::text, 'evening'::text]))"
+        },
+        {
+          "name": "vacleaner_bookings_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['pending'::text, 'waiting_payment'::text, 'confirmed'::text, 'issued'::text, 'declined'::text, 'cancelled'::text, 'completed'::text]))"
+        },
+        {
+          "name": "vacleaner_bookings_total_amount_check",
+          "type": "c",
+          "definition": "CHECK (total_amount >= 0)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_campaigns",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "campaign_type",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'active'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "discount_type",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "discount_value",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "dormant_days",
+          "type": "integer",
+          "default": "180",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "allowed_product_codes",
+          "type": "text[]",
+          "default": "'{}'::text[]",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "allowed_weekdays",
+          "type": "smallint[]",
+          "default": "'{}'::smallint[]",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "min_completed_orders",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "starts_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "ends_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "usage_limit_total",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "usage_limit_per_customer",
+          "type": "integer",
+          "default": "1",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "issuance_ends_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_campaigns_issuance_ends_idx",
+          "definition": "CREATE INDEX vacleaner_campaigns_issuance_ends_idx ON public.vacleaner_campaigns USING btree (campaign_type, issuance_ends_at) WHERE (campaign_type = ANY (ARRAY['return'::text, 'personal'::text]))",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_campaigns_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_campaigns_pkey ON public.vacleaner_campaigns USING btree (id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "vacleaner_campaigns_client_deny",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "PERMISSIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_campaigns_campaign_type_check",
+          "type": "c",
+          "definition": "CHECK (campaign_type = ANY (ARRAY['return'::text, 'weekday'::text, 'product'::text, 'personal'::text, 'quiz'::text]))"
+        },
+        {
+          "name": "vacleaner_campaigns_check",
+          "type": "c",
+          "definition": "CHECK (ends_at IS NULL OR ends_at > starts_at)"
+        },
+        {
+          "name": "vacleaner_campaigns_discount_type_check",
+          "type": "c",
+          "definition": "CHECK (discount_type = ANY (ARRAY['percent'::text, 'fixed'::text]))"
+        },
+        {
+          "name": "vacleaner_campaigns_discount_value_check",
+          "type": "c",
+          "definition": "CHECK (discount_value > 0)"
+        },
+        {
+          "name": "vacleaner_campaigns_dormant_days_check",
+          "type": "c",
+          "definition": "CHECK (dormant_days >= 0 AND dormant_days <= 730)"
+        },
+        {
+          "name": "vacleaner_campaigns_min_completed_orders_check",
+          "type": "c",
+          "definition": "CHECK (min_completed_orders >= 0 AND min_completed_orders <= 10000)"
+        },
+        {
+          "name": "vacleaner_campaigns_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_campaigns_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['active'::text, 'paused'::text, 'ended'::text]))"
+        },
+        {
+          "name": "vacleaner_campaigns_usage_limit_per_customer_check",
+          "type": "c",
+          "definition": "CHECK (usage_limit_per_customer >= 1 AND usage_limit_per_customer <= 100)"
+        },
+        {
+          "name": "vacleaner_campaigns_usage_limit_total_check",
+          "type": "c",
+          "definition": "CHECK (usage_limit_total IS NULL OR usage_limit_total > 0)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_customers",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "default": "''::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "telegram",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "address",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "document_type",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "document_number",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "document_verified_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "document_updated_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "document_photo_path",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "document_photo_name",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "document_photo_mime",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "document_photo_uploaded_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "marketing_sms_consent",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "marketing_sms_consent_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "marketing_sms_consent_source",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "marketing_sms_opted_out_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "instagram",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "preferred_contact",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "referral_sent_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "referral_sent_channel",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "address_detail",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_customers_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_customers_pkey ON public.vacleaner_customers USING btree (phone)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_customers_sms_consent_idx",
+          "definition": "CREATE INDEX vacleaner_customers_sms_consent_idx ON public.vacleaner_customers USING btree (marketing_sms_consent, marketing_sms_opted_out_at)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_customers_updated_idx",
+          "definition": "CREATE INDEX vacleaner_customers_updated_idx ON public.vacleaner_customers USING btree (updated_at DESC)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_customers_document_type",
+          "type": "c",
+          "definition": "CHECK (document_type IS NULL OR (document_type = ANY (ARRAY['Паспорт'::text, 'ID-картка'::text, 'Водійське посвідчення'::text])))"
+        },
+        {
+          "name": "vacleaner_customers_phone_format",
+          "type": "c",
+          "definition": "CHECK (phone ~ '^\\+380[0-9]{9}$'::text)"
+        },
+        {
+          "name": "vacleaner_customers_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (phone)"
+        },
+        {
+          "name": "vacleaner_customers_preferred_contact_check",
+          "type": "c",
+          "definition": "CHECK (preferred_contact IS NULL OR (preferred_contact = ANY (ARRAY['phone'::text, 'telegram'::text, 'instagram'::text])))"
+        },
+        {
+          "name": "vacleaner_customers_referral_sent_channel_check",
+          "type": "c",
+          "definition": "CHECK (referral_sent_channel IS NULL OR (referral_sent_channel = ANY (ARRAY['telegram'::text, 'instagram'::text])))"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_expenses",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "spent_on",
+          "type": "date",
+          "default": "CURRENT_DATE",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "amount",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "category",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "cost_type",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "vendor",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "note",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_by",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "archived_by",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_expenses_active_category_idx",
+          "definition": "CREATE INDEX vacleaner_expenses_active_category_idx ON public.vacleaner_expenses USING btree (category, spent_on DESC) WHERE (archived_at IS NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_expenses_active_date_idx",
+          "definition": "CREATE INDEX vacleaner_expenses_active_date_idx ON public.vacleaner_expenses USING btree (spent_on DESC, created_at DESC) WHERE (archived_at IS NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_expenses_archived_by_idx",
+          "definition": "CREATE INDEX vacleaner_expenses_archived_by_idx ON public.vacleaner_expenses USING btree (archived_by) WHERE (archived_by IS NOT NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_expenses_created_by_idx",
+          "definition": "CREATE INDEX vacleaner_expenses_created_by_idx ON public.vacleaner_expenses USING btree (created_by)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_expenses_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_expenses_pkey ON public.vacleaner_expenses USING btree (id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_expenses_updated_by_idx",
+          "definition": "CREATE INDEX vacleaner_expenses_updated_by_idx ON public.vacleaner_expenses USING btree (updated_by)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "vacleaner_expenses_client_deny",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "PERMISSIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_expenses_amount_check",
+          "type": "c",
+          "definition": "CHECK (amount >= 1 AND amount <= 10000000)"
+        },
+        {
+          "name": "vacleaner_expenses_archived_by_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (archived_by) REFERENCES auth.users(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_expenses_category_check",
+          "type": "c",
+          "definition": "CHECK (category = ANY (ARRAY['chemistry'::text, 'consumables'::text, 'repair'::text, 'delivery'::text, 'advertising'::text, 'fees'::text, 'utilities'::text, 'other'::text, 'equipment'::text, 'improvement'::text]))"
+        },
+        {
+          "name": "vacleaner_expenses_check",
+          "type": "c",
+          "definition": "CHECK ((category = ANY (ARRAY['equipment'::text, 'improvement'::text])) AND cost_type = 'investment'::text OR (category <> ALL (ARRAY['equipment'::text, 'improvement'::text])) AND cost_type = 'operating'::text)"
+        },
+        {
+          "name": "vacleaner_expenses_check1",
+          "type": "c",
+          "definition": "CHECK (archived_at IS NULL AND archived_by IS NULL OR archived_at IS NOT NULL AND archived_by IS NOT NULL)"
+        },
+        {
+          "name": "vacleaner_expenses_cost_type_check",
+          "type": "c",
+          "definition": "CHECK (cost_type = ANY (ARRAY['operating'::text, 'investment'::text]))"
+        },
+        {
+          "name": "vacleaner_expenses_created_by_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (created_by) REFERENCES auth.users(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_expenses_note_check",
+          "type": "c",
+          "definition": "CHECK (note IS NULL OR char_length(note) <= 500)"
+        },
+        {
+          "name": "vacleaner_expenses_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_expenses_updated_by_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (updated_by) REFERENCES auth.users(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_expenses_vendor_check",
+          "type": "c",
+          "definition": "CHECK (vendor IS NULL OR char_length(vendor) <= 120)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_inventory",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "resource_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "label",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "capacity",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "true",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_inventory_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_inventory_pkey ON public.vacleaner_inventory USING btree (resource_code)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_inventory_capacity_check",
+          "type": "c",
+          "definition": "CHECK (capacity > 0)"
+        },
+        {
+          "name": "vacleaner_inventory_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (resource_code)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_notification_dispatch_claims",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "event_key",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "event_type",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "locked_until",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "delivered_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_notification_dispatch_claims_booking_idx",
+          "definition": "CREATE INDEX vacleaner_notification_dispatch_claims_booking_idx ON public.vacleaner_notification_dispatch_claims USING btree (booking_id, event_type)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_notification_dispatch_claims_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_notification_dispatch_claims_pkey ON public.vacleaner_notification_dispatch_claims USING btree (event_key)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_notification_dispatch_claims_booking_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (booking_id) REFERENCES vacleaner_bookings(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_notification_dispatch_claims_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (event_key)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_promo_codes",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "campaign_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "true",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "usage_limit",
+          "type": "integer",
+          "default": "1",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "activated_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "activation_source",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "activation_dispatch_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "activated_by",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_promo_codes_activation_idx",
+          "definition": "CREATE INDEX vacleaner_promo_codes_activation_idx ON public.vacleaner_promo_codes USING btree (campaign_id, activated_at DESC) WHERE (activated_at IS NOT NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_promo_codes_campaign_idx",
+          "definition": "CREATE INDEX vacleaner_promo_codes_campaign_idx ON public.vacleaner_promo_codes USING btree (campaign_id)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_promo_codes_code_upper_uidx",
+          "definition": "CREATE UNIQUE INDEX vacleaner_promo_codes_code_upper_uidx ON public.vacleaner_promo_codes USING btree (upper(code))",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_promo_codes_phone_idx",
+          "definition": "CREATE INDEX vacleaner_promo_codes_phone_idx ON public.vacleaner_promo_codes USING btree (customer_phone) WHERE (customer_phone IS NOT NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_promo_codes_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_promo_codes_pkey ON public.vacleaner_promo_codes USING btree (id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "vacleaner_promo_codes_client_deny",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "PERMISSIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_promo_codes_activation_dispatch_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (activation_dispatch_id) REFERENCES vacleaner_sms_dispatches(id) ON DELETE SET NULL"
+        },
+        {
+          "name": "vacleaner_promo_codes_campaign_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (campaign_id) REFERENCES vacleaner_campaigns(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_promo_codes_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_promo_codes_usage_limit_check",
+          "type": "c",
+          "definition": "CHECK (usage_limit >= 1 AND usage_limit <= 10000)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_promo_redemptions",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "campaign_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "promo_code_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "discount_amount",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "base_before_discount",
+          "type": "integer",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_promo_redemptions_booking_id_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_promo_redemptions_booking_id_key ON public.vacleaner_promo_redemptions USING btree (booking_id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_promo_redemptions_campaign_idx",
+          "definition": "CREATE INDEX vacleaner_promo_redemptions_campaign_idx ON public.vacleaner_promo_redemptions USING btree (campaign_id, created_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_promo_redemptions_phone_idx",
+          "definition": "CREATE INDEX vacleaner_promo_redemptions_phone_idx ON public.vacleaner_promo_redemptions USING btree (customer_phone, created_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_promo_redemptions_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_promo_redemptions_pkey ON public.vacleaner_promo_redemptions USING btree (id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "vacleaner_promo_redemptions_client_deny",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "PERMISSIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_promo_redemptions_base_before_discount_check",
+          "type": "c",
+          "definition": "CHECK (base_before_discount >= 0)"
+        },
+        {
+          "name": "vacleaner_promo_redemptions_booking_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (booking_id) REFERENCES vacleaner_bookings(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_promo_redemptions_booking_id_key",
+          "type": "u",
+          "definition": "UNIQUE (booking_id)"
+        },
+        {
+          "name": "vacleaner_promo_redemptions_campaign_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (campaign_id) REFERENCES vacleaner_campaigns(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_promo_redemptions_discount_amount_check",
+          "type": "c",
+          "definition": "CHECK (discount_amount >= 0)"
+        },
+        {
+          "name": "vacleaner_promo_redemptions_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_promo_redemptions_promo_code_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (promo_code_id) REFERENCES vacleaner_promo_codes(id) ON DELETE RESTRICT"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_push_config",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "singleton",
+          "type": "boolean",
+          "default": "true",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "vapid_public_key",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "vapid_private_key",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_push_config_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_push_config_pkey ON public.vacleaner_push_config USING btree (singleton)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_push_config_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (singleton)"
+        },
+        {
+          "name": "vacleaner_push_config_singleton_check",
+          "type": "c",
+          "definition": "CHECK (singleton)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_push_subscriptions",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "user_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "endpoint",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "p256dh",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "auth_key",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "device_label",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "user_agent",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "true",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "last_success_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "last_failure_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "device_id",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "admin_alias",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_push_subscriptions_active_idx",
+          "definition": "CREATE INDEX vacleaner_push_subscriptions_active_idx ON public.vacleaner_push_subscriptions USING btree (active, user_id)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_push_subscriptions_active_user_device_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_push_subscriptions_active_user_device_key ON public.vacleaner_push_subscriptions USING btree (user_id, device_id) WHERE ((active = true) AND (device_id IS NOT NULL))",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_push_subscriptions_admin_alias_active_idx",
+          "definition": "CREATE INDEX vacleaner_push_subscriptions_admin_alias_active_idx ON public.vacleaner_push_subscriptions USING btree (user_id, admin_alias, active, updated_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_push_subscriptions_endpoint_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_push_subscriptions_endpoint_key ON public.vacleaner_push_subscriptions USING btree (endpoint)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_push_subscriptions_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_push_subscriptions_pkey ON public.vacleaner_push_subscriptions USING btree (id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_push_subscriptions_user_active_idx",
+          "definition": "CREATE INDEX vacleaner_push_subscriptions_user_active_idx ON public.vacleaner_push_subscriptions USING btree (user_id, active, updated_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_push_subscriptions_user_idx",
+          "definition": "CREATE INDEX vacleaner_push_subscriptions_user_idx ON public.vacleaner_push_subscriptions USING btree (user_id)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_push_subscriptions_admin_alias_check",
+          "type": "c",
+          "definition": "CHECK (admin_alias IS NULL OR (admin_alias = ANY (ARRAY['vacleaner'::text, 'annanevidoma'::text])))"
+        },
+        {
+          "name": "vacleaner_push_subscriptions_auth_key_check",
+          "type": "c",
+          "definition": "CHECK (char_length(auth_key) >= 8 AND char_length(auth_key) <= 128)"
+        },
+        {
+          "name": "vacleaner_push_subscriptions_device_id_check",
+          "type": "c",
+          "definition": "CHECK (device_id IS NULL OR char_length(device_id) >= 8 AND char_length(device_id) <= 128)"
+        },
+        {
+          "name": "vacleaner_push_subscriptions_endpoint_check",
+          "type": "c",
+          "definition": "CHECK (char_length(endpoint) >= 24 AND char_length(endpoint) <= 2048)"
+        },
+        {
+          "name": "vacleaner_push_subscriptions_endpoint_key",
+          "type": "u",
+          "definition": "UNIQUE (endpoint)"
+        },
+        {
+          "name": "vacleaner_push_subscriptions_p256dh_check",
+          "type": "c",
+          "definition": "CHECK (char_length(p256dh) >= 24 AND char_length(p256dh) <= 256)"
+        },
+        {
+          "name": "vacleaner_push_subscriptions_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_push_subscriptions_user_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_referral_codes",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "owner_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "true",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_referral_codes_code_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_codes_code_key ON public.vacleaner_referral_codes USING btree (code)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_referral_codes_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_codes_pkey ON public.vacleaner_referral_codes USING btree (owner_phone)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_referral_codes_code_check",
+          "type": "c",
+          "definition": "CHECK (code ~ '^VA-[A-Z0-9]{6,12}$'::text)"
+        },
+        {
+          "name": "vacleaner_referral_codes_code_key",
+          "type": "u",
+          "definition": "UNIQUE (code)"
+        },
+        {
+          "name": "vacleaner_referral_codes_owner_phone_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (owner_phone) REFERENCES vacleaner_customers(phone) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_referral_codes_phone_check",
+          "type": "c",
+          "definition": "CHECK (owner_phone ~ '^\\+380[0-9]{9}$'::text)"
+        },
+        {
+          "name": "vacleaner_referral_codes_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (owner_phone)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_referral_messages",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "kind",
+          "type": "text",
+          "default": "'program_invite'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "channel",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "reward_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "sent_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_referral_messages_kind_sent_idx",
+          "definition": "CREATE INDEX vacleaner_referral_messages_kind_sent_idx ON public.vacleaner_referral_messages USING btree (kind, sent_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_referral_messages_phone_sent_idx",
+          "definition": "CREATE INDEX vacleaner_referral_messages_phone_sent_idx ON public.vacleaner_referral_messages USING btree (customer_phone, sent_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_referral_messages_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_messages_pkey ON public.vacleaner_referral_messages USING btree (id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_referral_messages_reward_idx",
+          "definition": "CREATE INDEX vacleaner_referral_messages_reward_idx ON public.vacleaner_referral_messages USING btree (reward_id) WHERE (reward_id IS NOT NULL)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_referral_messages_channel_check",
+          "type": "c",
+          "definition": "CHECK (channel = ANY (ARRAY['instagram'::text, 'telegram'::text]))"
+        },
+        {
+          "name": "vacleaner_referral_messages_customer_phone_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (customer_phone) REFERENCES vacleaner_customers(phone) ON UPDATE CASCADE ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_referral_messages_kind_check",
+          "type": "c",
+          "definition": "CHECK (kind = ANY (ARRAY['program_invite'::text, 'reward_reminder'::text]))"
+        },
+        {
+          "name": "vacleaner_referral_messages_phone_check",
+          "type": "c",
+          "definition": "CHECK (customer_phone ~ '^[+]380[0-9]{9}$'::text)"
+        },
+        {
+          "name": "vacleaner_referral_messages_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_referral_messages_reward_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (reward_id) REFERENCES vacleaner_referral_rewards(id) ON DELETE SET NULL"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_referral_rewards",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "referrer_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "referred_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "source_booking_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "amount",
+          "type": "integer",
+          "default": "150",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'active'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "activated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "expires_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "used_booking_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "used_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "reminded_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_referral_rewards_available_idx",
+          "definition": "CREATE INDEX vacleaner_referral_rewards_available_idx ON public.vacleaner_referral_rewards USING btree (referrer_phone, expires_at) WHERE (status = 'active'::text)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_referral_rewards_expiring_idx",
+          "definition": "CREATE INDEX vacleaner_referral_rewards_expiring_idx ON public.vacleaner_referral_rewards USING btree (expires_at, reminded_at) WHERE (status = 'active'::text)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_referral_rewards_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_rewards_pkey ON public.vacleaner_referral_rewards USING btree (id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_referral_rewards_referred_phone_idx",
+          "definition": "CREATE INDEX vacleaner_referral_rewards_referred_phone_idx ON public.vacleaner_referral_rewards USING btree (referred_phone)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_referral_rewards_source_booking_id_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_rewards_source_booking_id_key ON public.vacleaner_referral_rewards USING btree (source_booking_id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_referral_rewards_used_booking_id_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_rewards_used_booking_id_key ON public.vacleaner_referral_rewards USING btree (used_booking_id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_referral_reward_expiry_check",
+          "type": "c",
+          "definition": "CHECK (expires_at > activated_at)"
+        },
+        {
+          "name": "vacleaner_referral_rewards_amount_check",
+          "type": "c",
+          "definition": "CHECK (amount = 150)"
+        },
+        {
+          "name": "vacleaner_referral_rewards_no_self_check",
+          "type": "c",
+          "definition": "CHECK (referrer_phone <> referred_phone)"
+        },
+        {
+          "name": "vacleaner_referral_rewards_phone_check",
+          "type": "c",
+          "definition": "CHECK (referred_phone ~ '^\\+380[0-9]{9}$'::text)"
+        },
+        {
+          "name": "vacleaner_referral_rewards_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_referral_rewards_referred_phone_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (referred_phone) REFERENCES vacleaner_customers(phone) ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_referral_rewards_referrer_phone_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (referrer_phone) REFERENCES vacleaner_customers(phone) ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_referral_rewards_source_booking_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (source_booking_id) REFERENCES vacleaner_bookings(id) ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_referral_rewards_source_booking_id_key",
+          "type": "u",
+          "definition": "UNIQUE (source_booking_id)"
+        },
+        {
+          "name": "vacleaner_referral_rewards_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['active'::text, 'used'::text, 'expired'::text, 'cancelled'::text]))"
+        },
+        {
+          "name": "vacleaner_referral_rewards_used_booking_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (used_booking_id) REFERENCES vacleaner_bookings(id) ON DELETE SET NULL"
+        },
+        {
+          "name": "vacleaner_referral_rewards_used_booking_id_key",
+          "type": "u",
+          "definition": "UNIQUE (used_booking_id)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_referral_uses",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "referral_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "referrer_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "referred_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "booking_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "friend_discount_amount",
+          "type": "integer",
+          "default": "100",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'pending'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "cancelled_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_referral_uses_active_friend_uidx",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_uses_active_friend_uidx ON public.vacleaner_referral_uses USING btree (referred_phone) WHERE (status = ANY (ARRAY['pending'::text, 'completed'::text]))",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_referral_uses_booking_id_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_uses_booking_id_key ON public.vacleaner_referral_uses USING btree (booking_id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_referral_uses_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_referral_uses_pkey ON public.vacleaner_referral_uses USING btree (id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_referral_uses_referrer_idx",
+          "definition": "CREATE INDEX vacleaner_referral_uses_referrer_idx ON public.vacleaner_referral_uses USING btree (referrer_phone, status, created_at DESC)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_referral_no_self_check",
+          "type": "c",
+          "definition": "CHECK (referrer_phone <> referred_phone)"
+        },
+        {
+          "name": "vacleaner_referral_uses_booking_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (booking_id) REFERENCES vacleaner_bookings(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_referral_uses_booking_id_key",
+          "type": "u",
+          "definition": "UNIQUE (booking_id)"
+        },
+        {
+          "name": "vacleaner_referral_uses_friend_discount_amount_check",
+          "type": "c",
+          "definition": "CHECK (friend_discount_amount = 100)"
+        },
+        {
+          "name": "vacleaner_referral_uses_phone_check",
+          "type": "c",
+          "definition": "CHECK (referred_phone ~ '^\\+380[0-9]{9}$'::text)"
+        },
+        {
+          "name": "vacleaner_referral_uses_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_referral_uses_referred_phone_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (referred_phone) REFERENCES vacleaner_customers(phone) ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_referral_uses_referrer_phone_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (referrer_phone) REFERENCES vacleaner_customers(phone) ON UPDATE CASCADE ON DELETE RESTRICT"
+        },
+        {
+          "name": "vacleaner_referral_uses_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['pending'::text, 'completed'::text, 'cancelled'::text]))"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_settings",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "key",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "value",
+          "type": "jsonb",
+          "default": "'{}'::jsonb",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_settings_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_settings_pkey ON public.vacleaner_settings USING btree (key)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "VAcleaner deny direct client access",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "RESTRICTIVE"
+        }
+      ],
+      "triggers": [
+        {
+          "name": "vacleaner_keep_admin_bundle_v1",
+          "enabled": "O",
+          "function": "vacleaner_keep_admin_bundle_v1",
+          "definition": "CREATE TRIGGER vacleaner_keep_admin_bundle_v1 BEFORE UPDATE OF value ON vacleaner_settings FOR EACH ROW WHEN (old.key = 'catalog'::text) EXECUTE FUNCTION vacleaner_keep_admin_bundle_v1()"
+        }
+      ],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_settings_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (key)"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_sms_dispatch_recipients",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "dispatch_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_phone",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "customer_name",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "consent_basis",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'queued'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "status_explain",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "money_spent",
+          "type": "numeric(12,4)",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "promo_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "promo_link",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "sendpulse_campaign_id",
+          "type": "bigint",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_sms_dispatch_recipient_dispatch_id_customer_phone_key",
+          "definition": "CREATE UNIQUE INDEX vacleaner_sms_dispatch_recipient_dispatch_id_customer_phone_key ON public.vacleaner_sms_dispatch_recipients USING btree (dispatch_id, customer_phone)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_sms_dispatch_recipients_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_sms_dispatch_recipients_pkey ON public.vacleaner_sms_dispatch_recipients USING btree (id)",
+          "constraint_backed": true
+        },
+        {
+          "name": "vacleaner_sms_dispatch_recipients_sendpulse_campaign_idx",
+          "definition": "CREATE INDEX vacleaner_sms_dispatch_recipients_sendpulse_campaign_idx ON public.vacleaner_sms_dispatch_recipients USING btree (sendpulse_campaign_id) WHERE (sendpulse_campaign_id IS NOT NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_sms_recipients_dispatch_idx",
+          "definition": "CREATE INDEX vacleaner_sms_recipients_dispatch_idx ON public.vacleaner_sms_dispatch_recipients USING btree (dispatch_id, status)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_sms_recipients_phone_idx",
+          "definition": "CREATE INDEX vacleaner_sms_recipients_phone_idx ON public.vacleaner_sms_dispatch_recipients USING btree (customer_phone, created_at DESC)",
+          "constraint_backed": false
+        }
+      ],
+      "policies": [
+        {
+          "name": "vacleaner_sms_recipients_client_deny",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "PERMISSIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_sms_dispatch_recipient_dispatch_id_customer_phone_key",
+          "type": "u",
+          "definition": "UNIQUE (dispatch_id, customer_phone)"
+        },
+        {
+          "name": "vacleaner_sms_dispatch_recipients_consent_basis_check",
+          "type": "c",
+          "definition": "CHECK (consent_basis = ANY (ARRAY['explicit'::text, 'legacy_admin_attested'::text]))"
+        },
+        {
+          "name": "vacleaner_sms_dispatch_recipients_dispatch_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (dispatch_id) REFERENCES vacleaner_sms_dispatches(id) ON DELETE CASCADE"
+        },
+        {
+          "name": "vacleaner_sms_dispatch_recipients_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_sms_dispatch_recipients_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['queued'::text, 'submitted'::text, 'sent'::text, 'delivered'::text, 'not_delivered'::text, 'failed'::text]))"
+        }
+      ]
+    },
+    {
+      "rls": true,
+      "name": "vacleaner_sms_dispatches",
+      "grants": [
+        {
+          "role": "service_role",
+          "privilege": "DELETE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "INSERT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "REFERENCES"
+        },
+        {
+          "role": "service_role",
+          "privilege": "SELECT"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRIGGER"
+        },
+        {
+          "role": "service_role",
+          "privilege": "TRUNCATE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "UPDATE"
+        }
+      ],
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid",
+          "default": "gen_random_uuid()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "campaign_id",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "sender",
+          "type": "text",
+          "default": "'VACLEANER'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "route",
+          "type": "text",
+          "default": "'national'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "audience_segment",
+          "type": "text",
+          "default": "'sleeping'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "message_body",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "message_parts",
+          "type": "smallint",
+          "default": "1",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "status",
+          "type": "text",
+          "default": "'draft'::text",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "sendpulse_campaign_id",
+          "type": "bigint",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "audience_count",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "explicit_consent_count",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "legacy_count",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "sent_count",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "delivered_count",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "not_delivered_count",
+          "type": "integer",
+          "default": "0",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "legacy_attestation",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "total_cost",
+          "type": "numeric(12,4)",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "currency",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "error_code",
+          "type": "text",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_by",
+          "type": "uuid",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "default": "now()",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        },
+        {
+          "name": "sent_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "last_synced_at",
+          "type": "timestamp with time zone",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "sendpulse_addressbook_id",
+          "type": "bigint",
+          "default": null,
+          "identity": "",
+          "not_null": false,
+          "generated": ""
+        },
+        {
+          "name": "personalized",
+          "type": "boolean",
+          "default": "false",
+          "identity": "",
+          "not_null": true,
+          "generated": ""
+        }
+      ],
+      "indexes": [
+        {
+          "name": "vacleaner_sms_dispatches_campaign_idx",
+          "definition": "CREATE INDEX vacleaner_sms_dispatches_campaign_idx ON public.vacleaner_sms_dispatches USING btree (campaign_id, created_at DESC) WHERE (campaign_id IS NOT NULL)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_sms_dispatches_created_idx",
+          "definition": "CREATE INDEX vacleaner_sms_dispatches_created_idx ON public.vacleaner_sms_dispatches USING btree (created_at DESC)",
+          "constraint_backed": false
+        },
+        {
+          "name": "vacleaner_sms_dispatches_pkey",
+          "definition": "CREATE UNIQUE INDEX vacleaner_sms_dispatches_pkey ON public.vacleaner_sms_dispatches USING btree (id)",
+          "constraint_backed": true
+        }
+      ],
+      "policies": [
+        {
+          "name": "vacleaner_sms_dispatches_client_deny",
+          "check": "false",
+          "roles": [
+            "anon",
+            "authenticated"
+          ],
+          "using": "false",
+          "command": "ALL",
+          "permissive": "PERMISSIVE"
+        }
+      ],
+      "triggers": [],
+      "force_rls": false,
+      "constraints": [
+        {
+          "name": "vacleaner_sms_dispatches_audience_count_check",
+          "type": "c",
+          "definition": "CHECK (audience_count >= 0)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_campaign_id_fkey",
+          "type": "f",
+          "definition": "FOREIGN KEY (campaign_id) REFERENCES vacleaner_campaigns(id) ON DELETE SET NULL"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_delivered_count_check",
+          "type": "c",
+          "definition": "CHECK (delivered_count >= 0)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_explicit_consent_count_check",
+          "type": "c",
+          "definition": "CHECK (explicit_consent_count >= 0)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_legacy_count_check",
+          "type": "c",
+          "definition": "CHECK (legacy_count >= 0)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_message_body_check",
+          "type": "c",
+          "definition": "CHECK (char_length(message_body) >= 1 AND char_length(message_body) <= 402)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_message_parts_check",
+          "type": "c",
+          "definition": "CHECK (message_parts >= 1 AND message_parts <= 6)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_not_delivered_count_check",
+          "type": "c",
+          "definition": "CHECK (not_delivered_count >= 0)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_pkey",
+          "type": "p",
+          "definition": "PRIMARY KEY (id)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_route_check",
+          "type": "c",
+          "definition": "CHECK (route = ANY (ARRAY['national'::text, 'international'::text]))"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_sent_count_check",
+          "type": "c",
+          "definition": "CHECK (sent_count >= 0)"
+        },
+        {
+          "name": "vacleaner_sms_dispatches_status_check",
+          "type": "c",
+          "definition": "CHECK (status = ANY (ARRAY['draft'::text, 'submitted'::text, 'sent'::text, 'partial'::text, 'failed'::text]))"
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_admin_attach_booking_promo",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_admin_attach_booking_promo(p_booking_id uuid, p_promo_code_id uuid, p_campaign_id uuid, p_customer_phone text, p_discount_amount integer, p_base_before_discount integer, p_extras jsonb, p_base_amount integer, p_total_amount integer)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nbegin\n  perform 1 from public.vacleaner_bookings where id = p_booking_id for update;\n  if not found then raise exception 'booking_not_found'; end if;\n  if exists (select 1 from public.vacleaner_promo_redemptions where booking_id = p_booking_id) then\n    raise exception 'booking_promo_already_attached';\n  end if;\n\n  perform public.vacleaner_redeem_promo(\n    p_promo_code_id,\n    p_campaign_id,\n    p_booking_id,\n    p_customer_phone,\n    p_discount_amount,\n    p_base_before_discount\n  );\n\n  update public.vacleaner_bookings\n  set extras = p_extras,\n      base_amount = greatest(0, p_base_amount),\n      total_amount = greatest(0, p_total_amount),\n      updated_at = now()\n  where id = p_booking_id;\nend;\n$function$\n",
+      "identity_args": "p_booking_id uuid, p_promo_code_id uuid, p_campaign_id uuid, p_customer_phone text, p_discount_amount integer, p_base_before_discount integer, p_extras jsonb, p_base_amount integer, p_total_amount integer"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_admin_detach_booking_promo",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_admin_detach_booking_promo(p_booking_id uuid, p_extras jsonb, p_base_amount integer, p_total_amount integer)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n  v_redemption public.vacleaner_promo_redemptions%rowtype;\n  v_code public.vacleaner_promo_codes%rowtype;\nbegin\n  perform 1 from public.vacleaner_bookings where id = p_booking_id for update;\n  if not found then raise exception 'booking_not_found'; end if;\n\n  select * into v_redemption\n  from public.vacleaner_promo_redemptions\n  where booking_id = p_booking_id\n  order by created_at desc\n  limit 1\n  for update;\n\n  perform set_config('vacleaner.allow_promo_detach','1',true);\n\n  update public.vacleaner_bookings\n  set extras = p_extras,\n      base_amount = greatest(0, p_base_amount),\n      total_amount = greatest(0, p_total_amount),\n      updated_at = now()\n  where id = p_booking_id;\n\n  if v_redemption.id is not null then\n    delete from public.vacleaner_promo_redemptions where id = v_redemption.id;\n    select * into v_code from public.vacleaner_promo_codes where id = v_redemption.promo_code_id for update;\n    if v_code.id is not null and v_code.activated_at is null then\n      update public.vacleaner_promo_codes\n      set active = false,\n          expires_at = null,\n          activation_source = null,\n          activation_dispatch_id = null,\n          activated_by = null\n      where id = v_code.id;\n    end if;\n  end if;\nend;\n$function$\n",
+      "identity_args": "p_booking_id uuid, p_extras jsonb, p_base_amount integer, p_total_amount integer"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_admin_set_booking_referral",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_admin_set_booking_referral(p_booking_id uuid, p_code text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_booking public.vacleaner_bookings%rowtype;\n  v_owner public.vacleaner_referral_codes%rowtype;\n  v_use public.vacleaner_referral_uses%rowtype;\n  v_extras jsonb;\n  v_existing text;\n  v_code text;\n  v_raw integer;\n  v_percent integer;\n  v_loyalty integer;\n  v_friend integer;\n  v_amount integer;\n  v_source text;\n  v_type text;\n  v_promo jsonb;\n  v_friend_meta jsonb;\n  v_discount jsonb;\n  v_updated public.vacleaner_bookings%rowtype;\nbegin\n  select * into v_booking from public.vacleaner_bookings\n  where id=p_booking_id for update;\n  if not found then raise exception 'invalid_booking'; end if;\n  if v_booking.status not in ('pending','waiting_payment','confirmed') then\n    raise exception 'invalid_transition';\n  end if;\n\n  v_extras := coalesce(v_booking.extras,'{}'::jsonb);\n  v_existing := upper(coalesce(v_extras->'referral_friend'->>'code',''));\n  v_code := upper(btrim(coalesce(p_code,'')));\n  if v_code<>'' and v_code !~ '^VA-[A-Z0-9]{6,12}$' then\n    raise exception 'invalid_referral';\n  end if;\n\n  select * into v_use from public.vacleaner_referral_uses\n  where booking_id=p_booking_id for update;\n  if found and v_use.status='completed' then\n    raise exception 'referral_completed_locked';\n  end if;\n  if v_use.id is not null and v_use.status='pending'\n     and v_existing<>'' and v_existing<>upper(v_use.referral_code) then\n    raise exception 'referral_state_conflict';\n  end if;\n  if v_existing=v_code and ((v_code='' and v_use.id is null) or\n      (v_code<>'' and v_use.status='pending' and upper(v_use.referral_code)=v_code)) then\n    return jsonb_build_object('booking_id',v_booking.id,'changed',false,'code',nullif(v_code,''));\n  end if;\n\n  if coalesce(v_extras->'promo','null'::jsonb)<>'null'::jsonb and (\n    v_existing='' or\n    coalesce(v_extras->'promo'->>'campaign_type','') <> 'referral'\n  ) then\n    raise exception 'referral_existing_promo';\n  end if;\n  if coalesce(v_extras->'manual_discount'->>'type','none')<>'none' or\n     coalesce(v_extras->'discount'->>'primary_source',v_extras->'discount'->>'source','none')='manual' then\n    raise exception 'referral_existing_discount';\n  end if;\n  if coalesce(v_extras->'referral_reward'->>'applied','false')='true' then\n    raise exception 'referral_existing_reward';\n  end if;\n  if exists(select 1 from public.vacleaner_promo_redemptions where booking_id=p_booking_id) then\n    raise exception 'referral_existing_promo';\n  end if;\n\n  v_raw := greatest(0,coalesce(\n    (v_extras->>'base_before_discount')::integer,\n    v_booking.base_amount + coalesce((v_extras->'discount'->>'amount')::integer,0)\n  ));\n  v_percent := coalesce((v_extras->'loyalty'->>'percent')::integer,0);\n  if v_percent not in (0,5,10) then v_percent:=0; end if;\n  v_loyalty := least(v_raw,round(v_raw*v_percent/100.0)::integer);\n  v_friend := least(v_raw,100);\n\n  if v_code<>'' then\n    select * into v_owner from public.vacleaner_referral_codes\n    where upper(code)=v_code and active=true for share;\n    if not found then raise exception 'referral_inactive'; end if;\n    if v_owner.owner_phone=v_booking.customer_phone then\n      raise exception 'self_referral';\n    end if;\n    if exists (\n      select 1 from public.vacleaner_bookings b\n      where b.customer_phone=v_booking.customer_phone and b.id<>p_booking_id\n        and b.status in ('pending','waiting_payment','confirmed','issued','completed')\n    ) then raise exception 'referral_first_rental_only'; end if;\n    if exists (\n      select 1 from public.vacleaner_referral_uses u\n      where u.referred_phone=v_booking.customer_phone and u.booking_id<>p_booking_id\n        and u.status in ('pending','completed')\n    ) then raise exception 'referral_already_used'; end if;\n    v_friend_meta:=jsonb_build_object(\n      'code',v_owner.code,'referrer_phone',v_owner.owner_phone,'discount_amount',100);\n  else\n    v_friend_meta:='null'::jsonb;\n  end if;\n\n  if v_code<>'' and v_friend>v_loyalty then\n    v_amount:=v_friend; v_source:='promo'; v_type:='fixed';\n    v_promo:=jsonb_build_object(\n      'code',v_owner.code,'campaign_id','','campaign_name','Приведи друга',\n      'campaign_type','referral','kind','referral_friend',\n      'referrer_phone',v_owner.owner_phone,\n      'discount_type','fixed','discount_value',100,'applied',true);\n  else\n    v_amount:=v_loyalty;\n    v_source:=case when v_loyalty>0 then 'loyalty' else 'none' end;\n    v_type:=case when v_loyalty>0 then 'percent' else 'none' end;\n    v_promo:='null'::jsonb;\n  end if;\n  v_discount:=jsonb_build_object(\n    'type',v_type,'percent',case when v_source='loyalty' then v_percent else 0 end,\n    'amount',v_amount,'source',v_source,'primary_source',v_source,\n    'loyalty_amount',v_loyalty,'referral_reward_amount',0,'reason','');\n\n  -- Must atomically update both the relationship and the booking totals.\n  -- Skip the legacy promo-preservation trigger only within this transaction.\n  perform pg_catalog.set_config('vacleaner.allow_promo_detach','1',true);\n  if v_code='' then\n    if v_use.id is not null and v_use.status='pending' then\n      update public.vacleaner_referral_uses set status='cancelled',\n        cancelled_at=now() where id=v_use.id;\n    end if;\n  elsif v_use.id is not null then\n    if v_use.status not in ('pending','cancelled') then\n      raise exception 'referral_completed_locked';\n    end if;\n    update public.vacleaner_referral_uses set\n      referral_code=v_owner.code, referrer_phone=v_owner.owner_phone,\n      referred_phone=v_booking.customer_phone, friend_discount_amount=100,\n      status='pending', cancelled_at=null, completed_at=null\n    where id=v_use.id;\n  else\n    insert into public.vacleaner_referral_uses(\n      referral_code,referrer_phone,referred_phone,booking_id,friend_discount_amount,status\n    ) values (\n      v_owner.code,v_owner.owner_phone,v_booking.customer_phone,p_booking_id,100,'pending'\n    );\n  end if;\n\n  update public.vacleaner_bookings set\n    extras=v_extras || jsonb_build_object(\n      'referral_friend',v_friend_meta,'promo',v_promo,\n      'discount',v_discount,'base_before_discount',v_raw),\n    base_amount=greatest(0,v_raw-v_amount),\n    -- Preserve all already recorded non-rental charges (chemistry, manual + грн,\n    -- delivery and extras). Only the rental-discount delta can change total_amount.\n    total_amount=greatest(0,v_booking.total_amount +\n      (greatest(0,v_raw-v_amount) - v_booking.base_amount)),\n    updated_at=now()\n  where id=p_booking_id\n  returning * into v_updated;\n\n  return jsonb_build_object('booking_id',v_updated.id,\n    'changed',true,'code',nullif(v_code,''),\n    'discount_amount',v_amount,'total_amount',v_updated.total_amount);\nexception\n  when unique_violation then raise exception 'referral_already_used';\nend;\n$function$\n",
+      "identity_args": "p_booking_id uuid, p_code text"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_apply_reservation",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_apply_reservation(p_booking_id uuid, p_start_date date, p_return_date date, p_pickup_window text, p_return_window text, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_rental_days integer, p_resources jsonb, p_target_status text, p_hold_expires_at timestamp with time zone DEFAULT NULL::timestamp with time zone)\n RETURNS vacleaner_bookings\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_booking public.vacleaner_bookings%rowtype;\n  v_start_slot bigint;\n  v_end_slot bigint;\n  v_resource record;\n  v_capacity integer;\n  v_reserved integer;\n  v_slot bigint;\n  v_now timestamptz := pg_catalog.now();\nbegin\n  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext('vacleaner-slot-reservation-v1'));\n\n  select * into v_booking\n    from public.vacleaner_bookings\n   where id = p_booking_id\n   for update;\n  if not found then raise exception 'booking_not_found'; end if;\n\n  if p_target_status not in ('pending','waiting_payment','confirmed','issued') then\n    raise exception 'invalid_target_status';\n  end if;\n  if p_pickup_window not in ('morning','evening') or p_return_window not in ('morning','evening') then\n    raise exception 'invalid_window';\n  end if;\n  if p_return_date < p_start_date or p_rental_days < 1 or p_rental_days > 14 or p_end_at <= p_start_at then\n    raise exception 'invalid_rental_period';\n  end if;\n  if p_resources is null or jsonb_typeof(p_resources) <> 'array' or jsonb_array_length(p_resources) < 1 then\n    raise exception 'invalid_resources';\n  end if;\n  if p_target_status = 'waiting_payment' and p_hold_expires_at is null then\n    raise exception 'invalid_hold';\n  end if;\n\n  v_start_slot := public.vacleaner_slot_index(p_start_date, p_pickup_window);\n  v_end_slot := public.vacleaner_slot_index(p_return_date, p_return_window);\n  if v_start_slot is null or v_end_slot is null or v_end_slot <= v_start_slot then\n    raise exception 'invalid_rental_period';\n  end if;\n\n  if p_target_status <> 'pending' then\n    for v_resource in\n      select r.resource_code, sum(r.quantity)::integer as quantity\n        from jsonb_to_recordset(p_resources) as r(resource_code text, quantity integer)\n       where r.resource_code is not null and r.quantity > 0\n       group by r.resource_code\n    loop\n      select i.capacity into v_capacity\n        from public.vacleaner_inventory i\n       where i.resource_code = v_resource.resource_code\n         and i.active = true\n       for share;\n      if v_capacity is null then raise exception 'inventory_missing:%', v_resource.resource_code; end if;\n\n      for v_slot in select * from pg_catalog.generate_series(v_start_slot, v_end_slot - 1)\n      loop\n        select coalesce(sum(br.quantity),0)::integer\n          into v_reserved\n          from public.vacleaner_booking_resources br\n          join public.vacleaner_bookings b on b.id = br.booking_id\n         where br.resource_code = v_resource.resource_code\n           and b.id <> p_booking_id\n           and (\n             b.status in ('confirmed','issued')\n             or (b.status = 'waiting_payment' and b.hold_expires_at > v_now)\n           )\n           and public.vacleaner_slot_index(b.start_date,b.pickup_window) <= v_slot\n           and public.vacleaner_slot_index(b.return_date,b.return_window) > v_slot;\n\n        if v_reserved + v_resource.quantity > v_capacity then\n          raise exception 'inventory_conflict:%:%', v_resource.resource_code, v_slot;\n        end if;\n      end loop;\n    end loop;\n  end if;\n\n  update public.vacleaner_bookings\n     set start_date = p_start_date,\n         return_date = p_return_date,\n         pickup_window = p_pickup_window,\n         return_window = p_return_window,\n         start_at = p_start_at,\n         end_at = p_end_at,\n         rental_days = p_rental_days,\n         status = p_target_status,\n         hold_expires_at = case when p_target_status = 'waiting_payment' then p_hold_expires_at else null end,\n         prepayment_paid = case when p_target_status = 'confirmed' then true else prepayment_paid end,\n         prepayment_paid_at = case when p_target_status = 'confirmed' then coalesce(prepayment_paid_at,v_now) else prepayment_paid_at end,\n         confirmed_at = case when p_target_status = 'confirmed' then coalesce(confirmed_at,v_now) else confirmed_at end,\n         issued_at = case when p_target_status = 'issued' then coalesce(issued_at,v_now) else issued_at end,\n         updated_at = v_now\n   where id = p_booking_id\n   returning * into v_booking;\n\n  delete from public.vacleaner_booking_resources where booking_id = p_booking_id;\n  insert into public.vacleaner_booking_resources(booking_id,resource_code,quantity)\n  select p_booking_id, r.resource_code, sum(r.quantity)::integer\n    from jsonb_to_recordset(p_resources) as r(resource_code text, quantity integer)\n   where r.resource_code is not null and r.quantity > 0\n   group by r.resource_code;\n\n  return v_booking;\nend;\n$function$\n",
+      "identity_args": "p_booking_id uuid, p_start_date date, p_return_date date, p_pickup_window text, p_return_window text, p_start_at timestamp with time zone, p_end_at timestamp with time zone, p_rental_days integer, p_resources jsonb, p_target_status text, p_hold_expires_at timestamp with time zone"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_block_public_admin_bundle_v1",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_block_public_admin_bundle_v1()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\nbegin\n  if new.product_code = 'puzzi_jimmy_abir' and new.source = 'vacleaner_website' then\n    raise exception 'admin_only_product' using errcode = 'P0001';\n  end if;\n  return new;\nend;\n$function$\n",
+      "identity_args": ""
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_claim_notification_dispatch",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_claim_notification_dispatch(p_event_key text, p_booking_id uuid, p_event_type text, p_lease_seconds integer DEFAULT 120)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n  touched integer := 0;\n  safe_lease integer := greatest(30, least(coalesce(p_lease_seconds, 120), 600));\nbegin\n  if coalesce(btrim(p_event_key), '') = '' or length(p_event_key) > 180 then\n    return false;\n  end if;\n  insert into public.vacleaner_notification_dispatch_claims(event_key, booking_id, event_type, locked_until, delivered_at, updated_at)\n  values (p_event_key, p_booking_id, left(coalesce(p_event_type, 'unknown'), 40), now() + make_interval(secs => safe_lease), null, now())\n  on conflict (event_key) do update\n    set booking_id = excluded.booking_id,\n        event_type = excluded.event_type,\n        locked_until = excluded.locked_until,\n        updated_at = now()\n    where vacleaner_notification_dispatch_claims.delivered_at is null\n      and vacleaner_notification_dispatch_claims.locked_until <= now();\n  get diagnostics touched = row_count;\n  return touched > 0;\nend;\n$function$\n",
+      "identity_args": "p_event_key text, p_booking_id uuid, p_event_type text, p_lease_seconds integer"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_confirm_booking",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_confirm_booking(p_booking_id uuid)\n RETURNS vacleaner_bookings\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_booking public.vacleaner_bookings%rowtype;\n  v_resources jsonb;\nbegin\n  select * into v_booking from public.vacleaner_bookings where id=p_booking_id;\n  if not found then raise exception 'booking_not_found'; end if;\n  if v_booking.status = 'confirmed' then return v_booking; end if;\n  if v_booking.status not in ('pending','waiting_payment') then raise exception 'booking_not_pending'; end if;\n\n  select coalesce(jsonb_agg(jsonb_build_object('resource_code',br.resource_code,'quantity',br.quantity)),'[]'::jsonb)\n    into v_resources\n    from public.vacleaner_booking_resources br\n   where br.booking_id=p_booking_id;\n\n  return public.vacleaner_apply_reservation(\n    p_booking_id,\n    v_booking.start_date,\n    v_booking.return_date,\n    v_booking.pickup_window,\n    v_booking.return_window,\n    v_booking.start_at,\n    v_booking.end_at,\n    v_booking.rental_days,\n    v_resources,\n    'confirmed',\n    null\n  );\nend;\n$function$\n",
+      "identity_args": "p_booking_id uuid"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_confirm_without_prepayment_v1",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_confirm_without_prepayment_v1(p_booking_id uuid, p_extras jsonb, p_customer_name text DEFAULT NULL::text, p_customer_phone text DEFAULT NULL::text)\n RETURNS vacleaner_bookings\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_booking public.vacleaner_bookings%rowtype;\n  v_resources jsonb;\n  v_now timestamptz := pg_catalog.now();\n  v_hold timestamptz := pg_catalog.now() + interval '5 minutes';\nbegin\n  select * into v_booking\n    from public.vacleaner_bookings\n   where id = p_booking_id\n   for update;\n  if not found then raise exception 'booking_not_found'; end if;\n\n  if v_booking.status = 'confirmed'\n     and coalesce((v_booking.extras->'prepayment_waiver'->>'active')::boolean,false) then\n    return v_booking;\n  end if;\n  if v_booking.status not in ('pending','waiting_payment') then\n    raise exception 'invalid_transition';\n  end if;\n\n  select coalesce(\n    jsonb_agg(jsonb_build_object('resource_code',br.resource_code,'quantity',br.quantity)),\n    '[]'::jsonb\n  ) into v_resources\n  from public.vacleaner_booking_resources br\n  where br.booking_id = p_booking_id;\n\n  if jsonb_array_length(v_resources) < 1 then\n    raise exception 'invalid_resources';\n  end if;\n\n  perform public.vacleaner_apply_reservation(\n    p_booking_id,\n    v_booking.start_date,\n    v_booking.return_date,\n    v_booking.pickup_window,\n    v_booking.return_window,\n    v_booking.start_at,\n    v_booking.end_at,\n    v_booking.rental_days,\n    v_resources,\n    'waiting_payment',\n    v_hold\n  );\n\n  update public.vacleaner_bookings\n     set status = 'confirmed',\n         hold_expires_at = null,\n         prepayment_paid = false,\n         prepayment_amount = 0,\n         prepayment_paid_at = null,\n         confirmed_at = coalesce(confirmed_at,v_now),\n         extras = coalesce(p_extras,extras,'{}'::jsonb),\n         customer_name = coalesce(nullif(pg_catalog.btrim(p_customer_name),''),customer_name),\n         customer_phone = coalesce(nullif(pg_catalog.btrim(p_customer_phone),''),customer_phone),\n         updated_at = v_now\n   where id = p_booking_id\n   returning * into v_booking;\n\n  return v_booking;\nend;\n$function$\n",
+      "identity_args": "p_booking_id uuid, p_extras jsonb, p_customer_name text, p_customer_phone text"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_finish_notification_dispatch",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_finish_notification_dispatch(p_event_key text, p_delivered boolean)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\nbegin\n  if p_delivered then\n    update public.vacleaner_notification_dispatch_claims\n       set delivered_at = coalesce(delivered_at, now()), locked_until = now(), updated_at = now()\n     where event_key = p_event_key;\n  else\n    update public.vacleaner_notification_dispatch_claims\n       set locked_until = now() - interval '1 second', updated_at = now()\n     where event_key = p_event_key and delivered_at is null;\n  end if;\nend;\n$function$\n",
+      "identity_args": "p_event_key text, p_delivered boolean"
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_keep_admin_bundle_v1",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_keep_admin_bundle_v1()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  old_bundle jsonb;\n  puzzi_jimmy_weekday numeric;\n  puzzi_jimmy_weekend numeric;\n  abir_weekday numeric;\n  abir_weekend numeric;\nbegin\n  if new.key <> 'catalog' then\n    return new;\n  end if;\n\n  old_bundle := old.value::jsonb #> '{products,puzzi_jimmy_abir}';\n  if old_bundle is null then\n    return new;\n  end if;\n\n  puzzi_jimmy_weekday := coalesce((new.value::jsonb #>> '{products,puzzi_jimmy,weekday}')::numeric, 1050);\n  puzzi_jimmy_weekend := coalesce((new.value::jsonb #>> '{products,puzzi_jimmy,weekend}')::numeric, 1150);\n  abir_weekday := coalesce((new.value::jsonb #>> '{products,abir,weekday}')::numeric, 800);\n  abir_weekend := coalesce((new.value::jsonb #>> '{products,abir,weekend}')::numeric, 900);\n\n  old_bundle := jsonb_set(old_bundle, '{weekday}', to_jsonb((puzzi_jimmy_weekday + abir_weekday)::numeric), true);\n  old_bundle := jsonb_set(old_bundle, '{weekend}', to_jsonb((puzzi_jimmy_weekend + abir_weekend)::numeric), true);\n  new.value := jsonb_set(new.value::jsonb, '{products,puzzi_jimmy_abir}', old_bundle, true);\n  return new;\nend;\n$function$\n",
+      "identity_args": ""
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_log_booking_change",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_log_booking_change()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\ndeclare\n  watched constant text[] := array[\n    'status','prepayment_amount','prepayment_paid',\n    'issue_payment_amount','issue_payment_paid',\n    'return_payment_amount','return_payment_paid',\n    'deposit_amount','deposit_paid','deposit_returned',\n    'base_amount','extras_amount','delivery_amount','total_amount','extras'\n  ];\n  before_values jsonb := '{}'::jsonb;\n  after_values jsonb := '{}'::jsonb;\n  fields text[] := '{}';\n  field_name text;\nbegin\n  after_values := jsonb_build_object(\n    'status', new.status,\n    'prepayment_amount', new.prepayment_amount,\n    'prepayment_paid', new.prepayment_paid,\n    'issue_payment_amount', new.issue_payment_amount,\n    'issue_payment_paid', new.issue_payment_paid,\n    'return_payment_amount', new.return_payment_amount,\n    'return_payment_paid', new.return_payment_paid,\n    'deposit_amount', new.deposit_amount,\n    'deposit_paid', new.deposit_paid,\n    'deposit_returned', new.deposit_returned,\n    'base_amount', new.base_amount,\n    'extras_amount', new.extras_amount,\n    'delivery_amount', new.delivery_amount,\n    'total_amount', new.total_amount,\n    'extras', new.extras\n  );\n\n  if tg_op = 'INSERT' then\n    insert into public.vacleaner_booking_audit (\n      booking_id, booking_code, event_type, changed_fields, old_values, new_values, source\n    ) values (\n      new.id, new.booking_code, 'created', watched, '{}'::jsonb, after_values, 'database'\n    );\n    return new;\n  end if;\n\n  before_values := jsonb_build_object(\n    'status', old.status,\n    'prepayment_amount', old.prepayment_amount,\n    'prepayment_paid', old.prepayment_paid,\n    'issue_payment_amount', old.issue_payment_amount,\n    'issue_payment_paid', old.issue_payment_paid,\n    'return_payment_amount', old.return_payment_amount,\n    'return_payment_paid', old.return_payment_paid,\n    'deposit_amount', old.deposit_amount,\n    'deposit_paid', old.deposit_paid,\n    'deposit_returned', old.deposit_returned,\n    'base_amount', old.base_amount,\n    'extras_amount', old.extras_amount,\n    'delivery_amount', old.delivery_amount,\n    'total_amount', old.total_amount,\n    'extras', old.extras\n  );\n\n  foreach field_name in array watched loop\n    if before_values -> field_name is distinct from after_values -> field_name then\n      fields := array_append(fields, field_name);\n    end if;\n  end loop;\n\n  if coalesce(array_length(fields, 1), 0) > 0 then\n    insert into public.vacleaner_booking_audit (\n      booking_id, booking_code, event_type, changed_fields, old_values, new_values, source\n    ) values (\n      new.id, new.booking_code, 'updated', fields, before_values, after_values, 'database'\n    );\n  end if;\n  return new;\nend;\n$function$\n",
+      "identity_args": ""
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_operational_health",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_operational_health()\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_definition text := '';\n  v_lock boolean := false;\n  v_half_open boolean := false;\n  v_capacity_block boolean := false;\n  v_pending_non_reserving boolean := false;\nbegin\n  select pg_catalog.pg_get_functiondef(p.oid)\n    into v_definition\n    from pg_catalog.pg_proc p\n    join pg_catalog.pg_namespace n on n.oid = p.pronamespace\n   where n.nspname = 'public'\n     and p.proname = 'vacleaner_apply_reservation'\n   order by p.oid desc\n   limit 1;\n\n  if coalesce(v_definition,'') <> '' then\n    v_lock := pg_catalog.strpos(v_definition, 'pg_advisory_xact_lock') > 0;\n    v_half_open := pg_catalog.strpos(v_definition, 'vacleaner_slot_index(b.return_date,b.return_window) > v_slot') > 0;\n    v_capacity_block := pg_catalog.strpos(v_definition, 'v_reserved + v_resource.quantity > v_capacity') > 0\n      and pg_catalog.strpos(v_definition, 'inventory_conflict') > 0;\n    v_pending_non_reserving := pg_catalog.strpos(v_definition, 'p_target_status <> ''pending''') > 0;\n  end if;\n\n  return pg_catalog.jsonb_build_object(\n    'authority', 'vacleaner_apply_reservation',\n    'version', 1,\n    'functionPresent', coalesce(v_definition,'') <> '',\n    'transactionLock', v_lock,\n    'halfOpenSlots', v_half_open,\n    'capacityHardBlock', v_capacity_block,\n    'pendingDoesNotReserve', v_pending_non_reserving,\n    'healthy', v_lock and v_half_open and v_capacity_block and v_pending_non_reserving\n  );\nend;\n$function$\n",
+      "identity_args": ""
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_preserve_best_promo_discount",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_preserve_best_promo_discount()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_promo jsonb;\n  v_discount jsonb;\n  v_raw integer;\n  v_promo_value integer;\n  v_promo_amount integer;\n  v_loyalty_percent integer;\n  v_loyalty_amount integer;\n  v_type text;\nbegin\n  if coalesce(current_setting('vacleaner.allow_promo_detach', true),'') = '1' then\n    return new;\n  end if;\n\n  v_promo := old.extras -> 'promo';\n  if coalesce(old.extras -> 'discount' ->> 'source','') <> 'promo'\n     or coalesce(v_promo ->> 'applied','false') <> 'true' then\n    return new;\n  end if;\n  if coalesce(new.extras -> 'discount' ->> 'source','') = 'manual' then\n    return new;\n  end if;\n\n  v_raw := greatest(0, coalesce((new.extras ->> 'base_before_discount')::integer,(old.extras ->> 'base_before_discount')::integer,new.base_amount,0));\n  v_promo_value := greatest(0, coalesce((v_promo ->> 'discount_value')::integer,0));\n  v_type := coalesce(v_promo ->> 'discount_type','percent');\n  v_promo_amount := least(v_raw, case when v_type='fixed' then v_promo_value else round(v_raw * least(100,v_promo_value) / 100.0)::integer end);\n  v_loyalty_percent := greatest(0, least(10, coalesce((new.extras -> 'loyalty' ->> 'percent')::integer,0)));\n  v_loyalty_amount := round(v_raw * v_loyalty_percent / 100.0)::integer;\n\n  if v_promo_amount > v_loyalty_amount then\n    v_discount := jsonb_build_object('source','promo','percent',case when v_type='percent' then v_promo_value else 0 end,'amount',v_promo_amount);\n    new.extras := jsonb_set(jsonb_set(new.extras,'{promo}',v_promo,true),'{discount}',v_discount,true);\n    new.base_amount := greatest(0,v_raw-v_promo_amount);\n    new.total_amount := new.base_amount + coalesce(new.extras_amount,0) + coalesce(new.delivery_amount,0);\n  end if;\n  return new;\nend;\n$function$\n",
+      "identity_args": ""
+    },
+    {
+      "acl": [
+        "postgres=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_redeem_promo",
+      "grants": [
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_redeem_promo(p_promo_code_id uuid, p_campaign_id uuid, p_booking_id uuid, p_customer_phone text, p_discount_amount integer, p_base_before_discount integer)\n RETURNS vacleaner_promo_redemptions\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\ndeclare\n  v_code public.vacleaner_promo_codes%rowtype;\n  v_campaign public.vacleaner_campaigns%rowtype;\n  v_total integer;\n  v_customer integer;\n  v_result public.vacleaner_promo_redemptions%rowtype;\nbegin\n  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext('vacleaner-promo:' || p_promo_code_id::text));\n  select * into v_code from public.vacleaner_promo_codes where id=p_promo_code_id for update;\n  if not found or v_code.campaign_id<>p_campaign_id or not v_code.active then raise exception 'promo_unavailable'; end if;\n  select * into v_campaign from public.vacleaner_campaigns where id=p_campaign_id for update;\n  if not found or v_campaign.status<>'active' then raise exception 'promo_unavailable'; end if;\n  if v_campaign.starts_at>pg_catalog.now() or (v_campaign.ends_at is not null and v_campaign.ends_at<=pg_catalog.now()) then raise exception 'promo_expired'; end if;\n  if v_code.expires_at is not null and v_code.expires_at<=pg_catalog.now() then raise exception 'promo_expired'; end if;\n  if v_code.customer_phone is not null and v_code.customer_phone<>p_customer_phone then raise exception 'promo_customer_mismatch'; end if;\n\n  select count(*)::integer into v_total from public.vacleaner_promo_redemptions where promo_code_id=p_promo_code_id;\n  if v_total>=v_code.usage_limit then raise exception 'promo_limit_reached'; end if;\n  if v_campaign.usage_limit_total is not null then\n    select count(*)::integer into v_total from public.vacleaner_promo_redemptions where campaign_id=p_campaign_id;\n    if v_total>=v_campaign.usage_limit_total then raise exception 'promo_limit_reached'; end if;\n  end if;\n  select count(*)::integer into v_customer from public.vacleaner_promo_redemptions where campaign_id=p_campaign_id and customer_phone=p_customer_phone;\n  if v_customer>=v_campaign.usage_limit_per_customer then raise exception 'promo_customer_limit'; end if;\n\n  insert into public.vacleaner_promo_redemptions(campaign_id,promo_code_id,booking_id,customer_phone,discount_amount,base_before_discount)\n  values(p_campaign_id,p_promo_code_id,p_booking_id,p_customer_phone,p_discount_amount,p_base_before_discount)\n  returning * into v_result;\n  return v_result;\nend;\n$function$\n",
+      "identity_args": "p_promo_code_id uuid, p_campaign_id uuid, p_booking_id uuid, p_customer_phone text, p_discount_amount integer, p_base_before_discount integer"
+    },
+    {
+      "acl": [
+        "=X/postgres",
+        "postgres=X/postgres",
+        "anon=X/postgres",
+        "authenticated=X/postgres",
+        "service_role=X/postgres"
+      ],
+      "name": "vacleaner_slot_index",
+      "grants": [
+        {
+          "role": "PUBLIC",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "postgres",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "anon",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "authenticated",
+          "privilege": "EXECUTE"
+        },
+        {
+          "role": "service_role",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "definition": "CREATE OR REPLACE FUNCTION public.vacleaner_slot_index(p_date date, p_window text)\n RETURNS bigint\n LANGUAGE sql\n IMMUTABLE STRICT\n SET search_path TO ''\nAS $function$\n  select case p_window\n    when 'morning' then ((p_date - date '2000-01-01')::bigint * 2)\n    when 'evening' then ((p_date - date '2000-01-01')::bigint * 2 + 1)\n    else null\n  end;\n$function$\n",
+      "identity_args": "p_date date, p_window text"
+    }
+  ],
+  "sequences": [
+    {
+      "max": "9223372036854775807",
+      "min": "1",
+      "name": "vacleaner_booking_audit_id_seq",
+      "type": "bigint",
+      "cache": 1,
+      "cycle": false,
+      "start": 1,
+      "increment": 1
+    }
+  ],
+  "extensions": [
+    {
+      "name": "http",
+      "schema": "extensions",
+      "version": "1.6"
+    },
+    {
+      "name": "pg_cron",
+      "schema": "pg_catalog",
+      "version": "1.6.4"
+    },
+    {
+      "name": "pg_net",
+      "schema": "public",
+      "version": "0.20.4"
+    },
+    {
+      "name": "pg_stat_statements",
+      "schema": "extensions",
+      "version": "1.11"
+    },
+    {
+      "name": "pgcrypto",
+      "schema": "extensions",
+      "version": "1.3"
+    },
+    {
+      "name": "plpgsql",
+      "schema": "pg_catalog",
+      "version": "1.0"
+    },
+    {
+      "name": "supabase_vault",
+      "schema": "vault",
+      "version": "0.3.1"
+    },
+    {
+      "name": "uuid-ossp",
+      "schema": "extensions",
+      "version": "1.1"
+    }
+  ],
+  "captured_at": "2026-11-10T20:57:37.623544+00:00",
+  "postgres_version": "17.6"
+}

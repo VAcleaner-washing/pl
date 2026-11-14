@@ -67,6 +67,25 @@ def readable_fields(form, checks, label):
     checks.check(not small, f'{label}: readable form fields {small}')
 
 
+def close_edited_form(page, form, checks, label):
+    operations = page.locator('html').get_attribute('data-admin-ui') == 'operations'
+    form.locator('header [data-close]').click()
+    if operations:
+        # The reviewed operations UI protects an edited form. Exercise its real
+        # keep/discard controls rather than bypassing the guard to close a fixture.
+        dialog = page.locator('#labLeaveDialog')
+        expect(dialog).to_be_visible()
+        expect(form).to_be_attached()
+        dialog.locator('[data-lab-keep]').click()
+        expect(dialog).not_to_be_attached()
+        expect(form).to_be_visible()
+        form.locator('header [data-close]').click()
+        expect(dialog).to_be_visible()
+        dialog.locator('[data-lab-discard]').click()
+        checks.check(True, label+': edited form requires explicit discard and supports continued editing')
+    expect(form).not_to_be_attached()
+
+
 def booking_form(page, checks, label):
     page.locator('#mobileNewBooking:visible,#newBooking:visible').first.click()
     form = page.locator('#bookingForm')
@@ -98,8 +117,7 @@ def booking_form(page, checks, label):
     readable_fields(form, checks, label+'/delivery')
     checks.check(smoke.no_horizontal_overflow(page), label+': booking has no horizontal overflow')
     checks.screenshot(page, label+'-booking-payment.png')
-    form.locator('header [data-close]').click()
-    expect(form).not_to_be_attached()
+    close_edited_form(page, form, checks, label+'/rental')
 
 
 def client_card(page, checks, label, width):
@@ -135,8 +153,7 @@ def client_card(page, checks, label, width):
     expect(form.locator('footer')).to_be_visible()
     checks.check(form.locator('footer').evaluate('''el=>{const r=el.getBoundingClientRect();
       return r.top>=0&&r.bottom<=innerHeight+1}'''), label+': editing footer remains reachable')
-    form.locator('header [data-close]').click()
-    expect(form).not_to_be_attached()
+    close_edited_form(page, form, checks, label+'/client')
 
 
 def main():
@@ -172,6 +189,14 @@ def main():
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 try:
                     page.goto(base+'/admin/bronuvannia/#bookings', wait_until='networkidle')
+                    if page.locator('html').get_attribute('data-admin-ui') == 'operations':
+                        # Full-view finance assertions stay intact; select it using
+                        # the same visible preference control as the administrator.
+                        bookings_tab = page.locator('.mobile-nav [data-mobile-view="bookings"]')
+                        if bookings_tab.is_visible():
+                            bookings_tab.click()
+                        page.locator('#labListMode [data-compact="false"]').click()
+                        expect(page.locator('#labListMode [data-compact="false"]')).to_have_attribute('aria-pressed', 'true')
                     finance_exercise(page, checks, label)
                     booking_form(page, checks, label)
                     client_card(page, checks, label, width)

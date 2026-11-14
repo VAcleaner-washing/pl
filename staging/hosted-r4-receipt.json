@@ -1,0 +1,81 @@
+{
+  "recordedAt": "2026-11-11",
+  "mode": "isolated-hosted-staging",
+  "project": {
+    "ref": "jdthhqxzfpvosfdxwfem",
+    "name": "vacleaner-admin-staging-r4",
+    "organizationId": "knylxccxamntjtqukbhe",
+    "organizationName": "VA Home",
+    "region": "eu-west-1",
+    "postgresVersion": "17.11",
+    "creationQuoteUsdPerMonth": 0
+  },
+  "productionDeniedRef": "yweluzclearwrazdkahu",
+  "productionVerified": {
+    "version": "4.3.46",
+    "build": 4346,
+    "mainCommit": "15bf61dc4da4cf63405a25887353e6ec7178dce8"
+  },
+  "frontendSource": {
+    "version": "4.3.54",
+    "build": 4354,
+    "commit": "92431cc4be7771d8fac9c7d645dc151c799e5b75",
+    "tree": "86dfc2403882a8803b1c15d584044eef18ea5ab5",
+    "publishedLabMode": "isolated-synthetic",
+    "connectedToHostedStage": false
+  },
+  "schema": {
+    "migrationVersion": "20261111121941",
+    "migrationName": "vacleaner_r4_isolated_schema",
+    "bootstrapSqlSha256": "fcd631a5046d83f9cd311c9f0707eadd8e87cab3b8124cd434d555557554eb2b",
+    "publicTables": 22,
+    "tablesWithRls": 22,
+    "canonicalSqlFunctions": 15,
+    "syntheticInventoryRows": 4,
+    "inventoryCapacityPerResource": 2,
+    "syntheticSettingsRows": 4
+  },
+  "functions": {
+    "vacleaner-settings": {"version": 1, "verifyJwtAtGateway": false, "bundleSha256": "6f94e461d8e1bac5d3753f741922817fd73fa1284d6ce7e0827243caf4cab2af"},
+    "vacleaner-admin-data-v1": {"version": 1, "verifyJwtAtGateway": false, "bundleSha256": "e6aabc7b233fc4c5b3bb9f0746cd16d1d4052861727f8a13566f68e87fb2743e"},
+    "vacleaner-extend-rental-v1": {"version": 1, "verifyJwtAtGateway": false, "bundleSha256": "90383bef97901072a901e1a52fa5abc7bab981dc3874f69de6c3b37fb85c3d06"},
+    "vacleaner-status-correction-v1": {"version": 1, "verifyJwtAtGateway": false, "bundleSha256": "a2448580a67a060ac484b3f45a7cae89bcb0d8b463ffb744c246f7fdb4648aa0"},
+    "vacleaner-customer-documents-v1": {"version": 1, "verifyJwtAtGateway": false, "bundleSha256": "ce1f74f3526f6c994bb4c95cbf3f80f9a240f64e38274c3eaff71a886862b947"},
+    "vacleaner-admin-bookings-v4": {"version": 1, "verifyJwtAtGateway": false, "bundleSha256": "96dcfa2e571287ac868ceb0ab3fd123b06392c752387675beecc69c797d7d4aa"}
+  },
+  "authentication": {
+    "syntheticManagers": 2,
+    "syntheticOrdinaryUsers": 1,
+    "emailsUseInvalidDomain": true,
+    "temporaryProvisionerVersion": 2,
+    "temporaryProvisionerHttpStatus": 410,
+    "credentialsInRepository": false,
+    "signupDisabledAtLastProbe": false
+  },
+  "databaseReadback": {
+    "at": "2026-11-11T12:56:32.737122+00:00",
+    "syntheticBookings": 8,
+    "allBookingsSynthetic": true,
+    "clientRequestIdsUnique": true,
+    "syntheticCustomers": 8,
+    "auditEntries": 33,
+    "campaigns": 1,
+    "referralUses": 1,
+    "referralRewards": 1,
+    "smsDispatches": 0,
+    "smsRecipients": 0,
+    "pushSubscriptions": 0,
+    "pushConfigRows": 0,
+    "notificationClaims": 0,
+    "cronSchemaExists": false,
+    "documentBucketPublic": false,
+    "storedDocumentObjectsAfterCleanup": 0
+  },
+  "acceptance": {
+    "coreServerScenarios": "verified; see detailed record for original harness failures",
+    "connectedUi": "not opened",
+    "physicalIphone": "not tested",
+    "fullReleaseGreen": false,
+    "productionRolloutAuthorized": false
+  }
+}
