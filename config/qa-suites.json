@@ -57,7 +57,8 @@
     "test:ci-identity-boundary",
     "test:process-profile-race",
     "test:stable-4346",
-    "test:pwa-worker-wait"
+    "test:pwa-worker-wait",
+    "test:pwa-registration-reuse"
   ],
   "browser": [
     "test:public-hydration",

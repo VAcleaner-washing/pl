@@ -1,14 +1,23 @@
 {
   "version": "4.3.61",
   "build": 4361,
-  "applicationSourceCommit": "4cfc1ba41756eecfd1798f3786e58f2c66fbd867",
+  "reviewMode": "production-pwa-fix-revalidation",
+  "baselineApplicationSourceCommit": "4cfc1ba41756eecfd1798f3786e58f2c66fbd867",
+  "applicationFixes": [
+    {
+      "path": "assets/admin-v250.js",
+      "sha256": "de4271a0b39af73bee2bff2ad95f0deb1d8a1847ee71d78b9e0068265a8b01fc",
+      "reason": "Reuse an existing canonical admin service-worker registration across build URLs; avoid a redundant waiting worker after activation without forcing activation."
+    }
+  ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "e0826aed0b8f4b283823ddf159c44a58a246cc542047430983f7090ec3189391",
+  "artifactTreeSha256": "b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "b0b05f62195f26b07f73f6a481be660cbb0940b24d8f9a70bd3efa76e8a6f376",
-  "reviewRuns": {
+  "reviewArchiveSha256": "97d5c7145bd4ddb45101ea07bc77b7ec33693d8294dd39e3eb022e4133127145",
+  "baselineReviewRuns": {
     "canonical": 43429348543,
     "normalCandidate": 43429348689
   },
+  "releaseGatePolicy": "All configured canonical, WebKit, operations and actual-worker gates must pass on the final publishing commit; baseline runs do not certify this fix.",
   "privateLabOrR4OriginInstallation": "prohibited"
 }

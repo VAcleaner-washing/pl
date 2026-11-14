@@ -126,6 +126,7 @@
     "verify:production-artifact": "node scripts/verify-admin-production-release.mjs",
     "test:production-promotion": "node scripts/test-admin-production-release.mjs",
     "test:stable-4346": "node scripts/test-stable-4346.mjs",
-    "test:pwa-worker-wait": "node scripts/test-pwa-worker-wait.mjs"
+    "test:pwa-worker-wait": "node scripts/test-pwa-worker-wait.mjs",
+    "test:pwa-registration-reuse": "node scripts/test-pwa-registration-reuse.mjs"
   }
 }
