@@ -13,7 +13,8 @@ permissions:
   id-token: write
 concurrency:
   group: pages-${{ github.ref }}
-  cancel-in-progress: true
+  # Preserve a running acceptance result when a diagnostic follow-up is pushed.
+  cancel-in-progress: false
 
 jobs:
   validate:
@@ -30,6 +31,11 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Run canonical static / regression QA
         run: npm run qa:static
+      - name: Build and verify the reviewed normal production artifact
+        run: |
+          npm run test:release-candidate
+          npm run verify:production-artifact
+          npm run test:production-promotion
       - name: Upload static QA summary on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -38,11 +44,25 @@ jobs:
           path: qa-release-summary.json
           if-no-files-found: warn
           retention-days: 14
-      - name: Upload Pages artifact
+      - name: Upload canonical regression artifact
         uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages
           path: dist
+      - name: Upload reviewed production Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          name: production-pages
+          path: release-candidate-test-results/dist
+      - name: Upload production artifact provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: vacleaner-production-artifact-provenance
+          path: |
+            release-candidate-test-results/manifest.json
+            config/admin-production-release.json
+          if-no-files-found: error
+          retention-days: 14
 
   browser:
     name: Browser QA aggregate gate
@@ -103,6 +123,9 @@ jobs:
     name: WebKit / mobile forms gate
     runs-on: ubuntu-24.04
     needs: validate
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      options: --ipc=host
     permissions:
       contents: read
     steps:
@@ -110,26 +133,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-          cache: pip
-          cache-dependency-path: requirements-ci.txt
-      - name: Cache Playwright WebKit
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-webkit-${{ hashFiles('requirements-ci.txt') }}
-      - name: Install Playwright WebKit and system dependencies
+      - name: Install client for the pinned official WebKit runtime
         timeout-minutes: 15
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
-          python -m playwright install --with-deps webkit
+          python -m playwright --version
       - name: Diagnose WebKit browser startup
         run: |
           mkdir -p webkit-test-results
           python - <<'PY' 2>&1 | tee webkit-test-results/browser-startup.log
+          import platform
           from playwright.sync_api import sync_playwright
+          print('Pinned runtime Python:', platform.python_version())
           with sync_playwright() as p:
               browser = p.webkit.launch(headless=True)
               page = browser.new_page()
@@ -150,6 +165,8 @@ jobs:
       - name: Verify the deployed artifact
         run: npm run verify:artifact
       - name: Run WebKit mobile, public and startup QA
+        env:
+          DEBUG: pw:browser
         run: npm run test:webkit
       - name: Upload WebKit evidence
         if: always()
@@ -160,9 +177,79 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  operations:
+    name: Production operations / ${{ matrix.browser }} / ${{ matrix.width }}
+    runs-on: ubuntu-24.04
+    needs: validate
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+        width: [440, 1440]
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      options: --ipc=host
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install client for the pinned official browser runtime
+        timeout-minutes: 15
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
+      - name: Download reviewed production Pages artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-pages
+          path: .pages-artifact
+      - name: Extract the exact production artifact without rebuilding
+        run: |
+          test ! -e release-candidate-test-results/dist
+          mkdir -p release-candidate-test-results/dist
+          tar -xf .pages-artifact/artifact.tar -C release-candidate-test-results/dist
+      - name: Verify the reviewed production artifact receipt
+        run: npm run verify:production-artifact
+      - name: Test normal operations with all remote traffic intercepted
+        run: python scripts/admin_release_candidate_qa.py --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-${{ matrix.width }}
+      - name: Test shipped mobile forms on the production artifact
+        if: matrix.width == 440
+        run: python scripts/mobile_forms_qa.py --browser ${{ matrix.browser }} --root release-candidate-test-results/dist --artifacts operations-test-results/${{ matrix.browser }}-forms
+      - name: Test shipped public hydration on the production artifact
+        if: matrix.width == 440
+        run: python scripts/public_hydration_qa.py --browser ${{ matrix.browser }} --root release-candidate-test-results/dist --artifacts operations-test-results/${{ matrix.browser }}-public
+      - name: Test shipped admin startup on the production artifact
+        if: matrix.width == 440
+        run: python scripts/admin_startup_qa.py --browser ${{ matrix.browser }} --root release-candidate-test-results/dist --artifacts operations-test-results/${{ matrix.browser }}-startup
+      - name: Check out the immutable stable 4.3.46 worker reference
+        if: matrix.width == 440
+        uses: actions/checkout@v4
+        with:
+          ref: 15bf61dc4da4cf63405a25887353e6ec7178dce8
+          path: stable-reference-test-results/source
+          persist-credentials: false
+      - name: Build the immutable stable reference for worker update and rollback QA
+        if: matrix.width == 440
+        working-directory: stable-reference-test-results/source
+        run: |
+          npm run stamp
+          node scripts/build-pages.mjs
+      - name: Test actual production worker offline, update and rollback
+        if: matrix.width == 440
+        run: python scripts/pwa_cache_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width 440 --artifacts operations-test-results/${{ matrix.browser }}-pwa --stable-root stable-reference-test-results/source/dist
+      - name: Upload production operations evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vacleaner-operations-${{ matrix.browser }}-${{ matrix.width }}
+          path: operations-test-results
+          if-no-files-found: warn
+          retention-days: 14
+
   deploy:
     name: Deploy GitHub Pages
-    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.validate.result == 'success' && needs.browser.result == 'success' && needs.webkit.result == 'success' }}
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.validate.result == 'success' && needs.browser.result == 'success' && needs.webkit.result == 'success' && needs.operations.result == 'success' }}
     permissions:
       contents: read
       pages: write
@@ -171,8 +258,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: [validate, browser, webkit]
+    needs: [validate, browser, webkit, operations]
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          artifact_name: production-pages

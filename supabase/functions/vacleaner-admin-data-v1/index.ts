@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.112.0";
+import { campaignConversionMetrics, campaignQueryCoverage } from "./campaign-metrics.mjs";
 
 const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS"};
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{...cors,"Content-Type":"application/json; charset=utf-8"}});
@@ -97,23 +98,26 @@ Deno.serve(async request=>{
       });
     }
     if(action==="campaigns"){
-      const [{data:campaigns,error:campaignError},{data:codes,error:codesError},{data:redemptions,error:redemptionError},{data:dispatches,error:dispatchError}]=await Promise.all([
-        db.from("vacleaner_campaigns").select("*").order("created_at",{ascending:false}).limit(100),
-        db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,created_at,activated_at,activation_source,activation_dispatch_id").order("created_at",{ascending:false}).limit(1500),
-        db.from("vacleaner_promo_redemptions").select("id,campaign_id,promo_code_id,booking_id,customer_phone,discount_amount,base_before_discount,created_at").order("created_at",{ascending:false}).limit(3000),
-        db.from("vacleaner_sms_dispatches").select("id,campaign_id").not("campaign_id","is",null).order("created_at",{ascending:false}).limit(5000),
+      const [{data:campaigns,error:campaignError,count:campaignCount},{data:codes,error:codesError,count:codeCount},{data:redemptions,error:redemptionError,count:redemptionCount},{data:dispatches,error:dispatchError,count:dispatchCount}]=await Promise.all([
+        db.from("vacleaner_campaigns").select("*",{count:"exact"}).order("created_at",{ascending:false}).limit(100),
+        db.from("vacleaner_promo_codes").select("id,campaign_id,code,customer_phone,active,expires_at,usage_limit,created_at,activated_at,activation_source,activation_dispatch_id",{count:"exact"}).order("created_at",{ascending:false}).limit(1500),
+        db.from("vacleaner_promo_redemptions").select("id,campaign_id,promo_code_id,booking_id,customer_phone,discount_amount,base_before_discount,created_at",{count:"exact"}).order("created_at",{ascending:false}).limit(3000),
+        db.from("vacleaner_sms_dispatches").select("id,campaign_id,sent_at,status",{count:"exact"}).not("campaign_id","is",null).order("created_at",{ascending:false}).limit(5000),
       ]);
       if(campaignError||codesError||redemptionError||dispatchError)throw campaignError||codesError||redemptionError||dispatchError;
-      const dispatchCampaign=new Map<string,string>(),dispatchCountByCampaign=new Map<string,number>();
-      for(const row of dispatches||[]){const campaignId=String((row as any).campaign_id||"");if(!campaignId)continue;dispatchCampaign.set(String((row as any).id),campaignId);dispatchCountByCampaign.set(campaignId,(dispatchCountByCampaign.get(campaignId)||0)+1)}
-      const dispatchIds=[...dispatchCampaign.keys()];let smsRecipients:any[]=[];
-      if(dispatchIds.length){const {data:rows,error}=await db.from("vacleaner_sms_dispatch_recipients").select("dispatch_id,customer_phone,status").in("dispatch_id",dispatchIds).in("status",["submitted","sent","delivered"]).limit(20000);if(error)throw error;smsRecipients=rows||[]}
-      const smsPhonesByCampaign=new Map<string,Set<string>>();
-      for(const row of smsRecipients){const campaignId=dispatchCampaign.get(String(row.dispatch_id||"")),phone=normalizePhone(row.customer_phone);if(!campaignId||!phone)continue;let phones=smsPhonesByCampaign.get(campaignId);if(!phones){phones=new Set<string>();smsPhonesByCampaign.set(campaignId,phones)}phones.add(phone)}
-      const bookingIds=[...new Set((redemptions||[]).map((r:any)=>r.booking_id).filter(Boolean))];let bookingMap=new Map<string,any>();
-      if(bookingIds.length){const {data:rows,error}=await db.from("vacleaner_bookings").select("id,total_amount,status").in("id",bookingIds);if(error)throw error;bookingMap=new Map((rows||[]).map((r:any)=>[r.id,r]))}
-      const enriched=(campaigns||[]).map((campaign:any)=>{const assigned=(codes||[]).filter((c:any)=>c.campaign_id===campaign.id),activeAssigned=assigned.filter((c:any)=>c.active===true),activated=assigned.filter((c:any)=>Boolean(c.activated_at)),smsLinkActivated=activated.filter((c:any)=>String(c.activation_source||"")==="sms_link"),adminActivated=activated.filter((c:any)=>String(c.activation_source||"")==="admin"),targetPhone=String(campaign.campaign_type||"")==="personal"?(assigned.map((c:any)=>normalizePhone(c.customer_phone)).find(Boolean)||""):"",personalAssigned=activeAssigned.filter((c:any)=>normalizePhone(c.customer_phone)).length,used=(redemptions||[]).filter((r:any)=>r.campaign_id===campaign.id),completedUses=used.filter((r:any)=>bookingMap.get(r.booking_id)?.status==='completed'),revenue=completedUses.reduce((sum:number,r:any)=>sum+Number(bookingMap.get(r.booking_id)?.total_amount||0),0),discountGiven=used.reduce((sum:number,r:any)=>sum+Number(r.discount_amount||0),0),smsPhones=smsPhonesByCampaign.get(campaign.id)||new Set<string>(),hasSmsDispatch=(dispatchCountByCampaign.get(campaign.id)||0)>0,smsUsed=used.filter((r:any)=>smsPhones.has(normalizePhone(r.customer_phone))),conversionBase=hasSmsDispatch?smsPhones.size:personalAssigned,conversionUses=hasSmsDispatch?smsUsed.length:used.length;return{...campaign,targetPhone,assignedCodes:activeAssigned.length,activatedCount:activated.length,smsLinkActivatedCount:smsLinkActivated.length,adminActivatedCount:adminActivated.length,audienceSize:hasSmsDispatch?smsPhones.size:personalAssigned,smsRecipientCount:smsPhones.size,smsUsedCount:smsUsed.length,conversionBasis:hasSmsDispatch?"sms":"codes",conversionBase,conversionUses,usedCount:used.length,completedUses:completedUses.length,conversion:conversionBase?Math.round(conversionUses/conversionBase*100):null,revenue,discountGiven,codes:activeAssigned.slice(0,500)}});
-      return json({campaigns:enriched});
+      const dispatchIds=(dispatches||[]).map((row:any)=>String(row.id));let smsRecipients:any[]=[],recipientCount:number|null=0;
+      if(dispatchIds.length){const {data:rows,error,count}=await db.from("vacleaner_sms_dispatch_recipients").select("dispatch_id,customer_phone,status",{count:"exact"}).in("dispatch_id",dispatchIds).in("status",["submitted","sent","delivered"]).limit(20000);if(error)throw error;smsRecipients=rows||[];recipientCount=count}
+      const bookingIds=[...new Set((redemptions||[]).map((r:any)=>r.booking_id).filter(Boolean))];let bookingMap=new Map<string,any>(),bookingRows:any[]=[],bookingCount:number|null=0;
+      if(bookingIds.length){const {data:rows,error,count}=await db.from("vacleaner_bookings").select("id,total_amount,status",{count:"exact"}).in("id",bookingIds);if(error)throw error;bookingRows=rows||[];bookingCount=count;bookingMap=new Map(bookingRows.map((r:any)=>[r.id,r]))}
+      const coverage={campaigns:campaignQueryCoverage(campaigns,campaignCount),codes:campaignQueryCoverage(codes,codeCount),redemptions:campaignQueryCoverage(redemptions,redemptionCount),dispatches:campaignQueryCoverage(dispatches,dispatchCount),recipients:campaignQueryCoverage(smsRecipients,recipientCount),bookings:campaignQueryCoverage(bookingRows,bookingCount)};
+      const conversionRowsComplete=[coverage.codes,coverage.redemptions,coverage.dispatches,coverage.recipients].every(row=>row.complete);
+      const metricsCoverage={...coverage,complete:Object.values(coverage).every(row=>row.complete)&&bookingRows.length===bookingIds.length};
+      const enriched=(campaigns||[]).map((campaign:any)=>{
+        const assigned=(codes||[]).filter((c:any)=>c.campaign_id===campaign.id),activeAssigned=assigned.filter((c:any)=>c.active===true),activated=assigned.filter((c:any)=>Boolean(c.activated_at)),smsLinkActivated=activated.filter((c:any)=>String(c.activation_source||"")==="sms_link"),adminActivated=activated.filter((c:any)=>String(c.activation_source||"")==="admin"),targetPhone=String(campaign.campaign_type||"")==="personal"?(assigned.map((c:any)=>normalizePhone(c.customer_phone)).find(Boolean)||""):"",used=(redemptions||[]).filter((r:any)=>r.campaign_id===campaign.id),completedUses=used.filter((r:any)=>bookingMap.get(r.booking_id)?.status==='completed'),revenue=completedUses.reduce((sum:number,r:any)=>sum+Number(bookingMap.get(r.booking_id)?.total_amount||0),0),discountGiven=used.reduce((sum:number,r:any)=>sum+Number(r.discount_amount||0),0);
+        const conversionMetrics=campaignConversionMetrics(campaign,{codes:assigned,redemptions:used,dispatches:dispatches||[],recipients:smsRecipients,coverageComplete:conversionRowsComplete});
+        return{...campaign,targetPhone,assignedCodes:activeAssigned.length,activatedCount:activated.length,smsLinkActivatedCount:smsLinkActivated.length,adminActivatedCount:adminActivated.length,...conversionMetrics,usedCount:used.length,completedUses:completedUses.length,revenue,discountGiven,codes:activeAssigned.slice(0,500),metricsCoverage};
+      });
+      return json({campaigns:enriched,coverage:metricsCoverage});
     }
     if(action==="create_campaign"){
       const campaignType=String(body.campaignType||"").toLowerCase(),discountType=body.discountType==="fixed"?"fixed":"percent",discountValue=Math.max(1,Math.min(discountType==="percent"?100:10000,Math.round(Number(body.discountValue)||0))),days=Math.max(1,Math.min(90,Math.round(Number(body.durationDays)||14))),dormantDays=Math.max(1,Math.min(730,Math.round(Number(body.dormantDays)||180))),minCompletedOrders=Math.max(0,Math.min(100,Math.round(Number(body.minCompletedOrders)||0)));

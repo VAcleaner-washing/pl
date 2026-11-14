@@ -41,7 +41,22 @@
     "test:calendar-live",
     "test:booking-gifts",
     "test:current-contracts",
-    "test:ci-pipeline"
+    "test:ci-pipeline",
+    "test:admin-audit-r1",
+    "test:admin-lab",
+    "test:admin-staging-preflight",
+    "test:admin-staging-ui",
+    "test:admin-staging-readiness",
+    "test:settings-tabs-lifecycle",
+    "test:admin-settings-errors",
+    "test:admin-margin-label",
+    "test:report-dates",
+    "test:allocation-reconciliation",
+    "test:focus-intent",
+    "test:campaign-metrics",
+    "test:ci-identity-boundary",
+    "test:process-profile-race",
+    "test:stable-4346"
   ],
   "browser": [
     "test:public-hydration",
@@ -88,7 +103,10 @@
     "test:pwa-cache-browser",
     "test:rental-status-guards-browser",
     "test:admin-idle",
-    "test:ui-reliability"
+    "test:ui-reliability",
+    "test:admin-audit-r1-browser",
+    "test:admin-lab-browser",
+    "test:admin-lab-forms"
   ],
   "currentContracts": [
     {

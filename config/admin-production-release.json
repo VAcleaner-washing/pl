@@ -1,0 +1,14 @@
+{
+  "version": "4.3.61",
+  "build": 4361,
+  "applicationSourceCommit": "4cfc1ba41756eecfd1798f3786e58f2c66fbd867",
+  "artifactFiles": 273,
+  "artifactTreeSha256": "e0826aed0b8f4b283823ddf159c44a58a246cc542047430983f7090ec3189391",
+  "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
+  "reviewArchiveSha256": "b0b05f62195f26b07f73f6a481be660cbb0940b24d8f9a70bd3efa76e8a6f376",
+  "reviewRuns": {
+    "canonical": 43429348543,
+    "normalCandidate": 43429348689
+  },
+  "privateLabOrR4OriginInstallation": "prohibited"
+}

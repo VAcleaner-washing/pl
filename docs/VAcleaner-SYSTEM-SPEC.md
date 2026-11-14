@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.46
-**Baseline build:** 4346
-**Останнє оновлення:** 2026-11-09
+**Baseline version:** 4.3.61
+**Baseline build:** 4361
+**Останнє оновлення:** 2026-11-14
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5258,3 +5258,526 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - To diagnose WebKit startup failures in GitHub Actions, install Playwright WebKit and required runtime libraries on the supported Ubuntu 24.04 runner, with an explicit startup smoke step and diagnostic artifact even on failures. Restore the previously green Playwright WebKit cache step and cap install duration at 15 minutes; this avoids an indefinitely stalled dependency download without relaxing the mandatory WebKit QA.
 - Static/build uploads `qa-release-summary.json` as `vacleaner-static-qa-failure` with `if: failure()`, when available, to surface the failing contract. This is evidence collection only and does not bypass a failed gate.
 - Neither diagnostic change edits application behavior, service workers, prices, promotions, customer data or Supabase. Existing release/build stays **4.3.46 / 4346**.
+
+
+# 103. Change record — v4.3.47 / Admin audit R1: reliable state and truthful metrics
+
+### ADDED
+- ADM-RELIABILITY-001: after a committed booking/finance/referral mutation, a failed subsequent read is a read-recovery state, not a failed mutation. The authoritative returned booking is applied locally; a persistent notice explains that changes were saved and its retry performs reads only. Never automatically replay a financial write.
+- ADM-RELIABILITY-002: if the financial calculation was saved but settlement confirmation fails, keep the form, show the saved first phase explicitly, and reconcile against authoritative read data. A completed authoritative booking closes the flow without another settlement write.
+- ADM-RELIABILITY-003: optional campaign/expiring-referral read failures retain the previous successful snapshot with an explicit stale/error notice and retry, rather than fabricating a successful empty state.
+- ADM-RELIABILITY-004: booking customer lookups apply only to the current phone, current request sequence, and connected form. Removed forms dispose document-address and media-query listeners and pending lookup timers.
+
+### CHANGED
+- Settings localStorage contains only server-confirmed delivery/equipment values. Submitted drafts are normalized without persisting and remain editable on failure. No rollback overwrites later confirmed state.
+- Generic admin dialogs derive their accessible name from the mounted heading. Explicit service-worker update waits until the current modal form is saved or closed.
+- Referral editing remains a separate immediate atomic RPC operation. If other form fields have changed, save those first; applying a referral must not silently discard an unrelated booking draft.
+- Financial results keep their existing arithmetic, but label incomplete expense accounting explicitly as based on entered expenses. Weekly copied reports carry the same caveat and actual date range. Unknown/null margins display a dash, not null%.
+
+### FIXED
+- REF-011: actual-period outside-cohort booking count comes directly from that set, not actual bookings minus a different invitation cohort. Late conversions remain part of the invitation cohort but cannot generate negative actual-period counts. Distinct referrers may overlap; categories are not an additive partition.
+- Actual referral period labels use the referral-use creation/application date, not a claimed booking-creation date. Referral revenue remains the completed result of that use-created cohort, independently of completion-period revenue.
+- Missing booking source remains unknown (Не вказано) rather than being assigned to the website, in both analytics and operational labels. Known source semantics remain unchanged.
+- Stale lookup responses can no longer overwrite a different client's name/contact/document fields or download a document for a detached form.
+
+### PRESERVED
+- Rental/deposit/payment/settlement arithmetic, availability/resource rules, prices and delivery tariffs, discounts/loyalty, chemistry, manual charges, RETURN/referral reward rules, source data, SMS consent/send rules, API authorization, private documents and VA HOME isolation.
+- Existing single-flight reads/auth refresh, explicit worker-update consent, no business-response cache, all navigation return paths, UI actions and mandatory release QA gates.
+- No Supabase schema, RPC, Edge deployment or production business data changes. This candidate is prepared on qa/admin-audit-r1; main/deploy are not authorized by its preparation.
+
+### TESTS
+- test:admin-audit-r1 executes shipped helper logic with rejected/successful settings responses, late referral conversions, unknown sources, optional-read errors and committed-save refresh failures.
+- test:admin-audit-r1-browser exercises shipped HTML/assets on local API fixtures at 390/1440: settings failure/retry, campaign read recovery, delayed client A/B responses, committed create followed by read failure and read-only retry. It runs in Chromium and the WebKit gate.
+- All existing financial/status/booking/session tests, canonical static/build, Chromium/PWA and WebKit gates remain required. Physical iPhone validation remains separately necessary before production publication.
+
+
+# 104. Change record — v4.3.48 / isolated Admin LAB (R2)
+
+- LAB-001: stable production remains v4.3.46/build 4346 at commit `15bf61dc4da4cf63405a25887353e6ec7178dce8`. Branch `stable/v4.3.46-4346` and checksum-verified Pages archive retain the restoration point. Never roll back business records to roll back the frontend.
+- LAB-002: synthetic LAB uses a separate private origin. Its own localStorage, manifest ID/name and `vacleaner-lab-` worker cache cannot access the stable origin. The normal Pages build excludes the whole `sandbox/` source directory and never loads LAB assets.
+- LAB-003: LAB-only builder removes production API origins/keys, enforces same-origin CSP and installs its closed synthetic adapter before the admin runtime. Unsupported API actions fail explicitly. External messages, calls, documents and integrations do not execute. No production backend/schema migrations.
+- LAB-004: test changes persist atomically in browser-local storage before success is returned. Reset/export affect only synthetic records. The permanent LAB banner identifies test data and links to the stable version. Error/latency controls support repeatable retry tests.
+- LAB-005: compact booking list retains status, client, period, received funds, deposit/settlement, pending-document warning and all existing actions. A visible view toggle restores full detail. Detail keeps a primary action reachable at the bottom and discloses the complete ledger. Business action handlers and pure pricing/settlement functions are reused.
+- LAB-006: simulation verifies local UI behavior only. Capacity, geocoding, referral RPCs, campaign dispatch, live auth, database persistence and atomic transactions require separate staging integration verification before production cutover. Unavailable actions must not report fake successful writes or real service health.
+- LAB-007: keep stable and LAB in parallel until explicit acceptance/cutover. Do not merge main, deploy VAcleaner production or delete the old served version during this stage. After cutover retain the immutable archive; retiring a served UI is separate from destroying the recovery point.
+
+### ADDED
+
+- Separate synthetic LAB builder/adapter, private hosting identity, LAB-only component tokens and test controls.
+- Frozen stable Pages archive manifest, safe verification/extraction script and staged rollout/rollback runbook.
+- Closed-network, local persistence, lifecycle, failure/retry, responsive, idle and offline worker regression scenarios.
+
+### CHANGED
+
+- Only LAB loads compact booking presentation, full-view toggle, sticky detail primary action and ledger disclosure.
+- Canonical QA includes LAB contracts and browser checks; production Pages explicitly excludes sandbox sources.
+
+### FIXED
+
+- Prevents shared-origin PWA/cache/data collisions between the stable app and its experimental copy.
+- LAB reports unsupported integrations and quota failures explicitly, without pretending a production write succeeded.
+
+### PRESERVED
+
+- Production remains 4.3.46/build 4346. No main merge, production deploy, customer/finance mutation, database migration or integration dispatch.
+- Canonical financial/status/discount rules and all normal admin business-action handlers; inherited R1 behavior.
+- Existing vanilla JavaScript/CSS architecture and full booking actions. The synthetic adapter is excluded from production.
+
+### TESTS
+
+- `npm run qa:full`, `npm run test:webkit`, `npm run test:admin-lab`; LAB browser tests use its actual adapter without API routing mocks.
+- Stable archive SHA and all 270 file hashes are verified and extracted into an isolated staging directory.
+- Browser emulation is not physical iPhone approval or proof of production backend persistence; those remain transition gates.
+
+
+# 105. Change record — v4.3.49 / LAB form safety and accessibility (R3)
+
+### ADDED
+
+- LAB-only shared form controller protects user-initiated close/navigation against dirty form loss. Confirmation retains the original connected form; accepting discard delegates to the original UI action. No draft is written to production or silently saved.
+- Closing a form while its submitted action is still disabled/in flight is blocked with an explicit status message. A rejected save retains its draft and can be closed/retried deliberately.
+- LAB fields share readable mobile input sizes, focus/error/disabled tokens and accessible inline validation feedback. LAB viewport permits user zoom. Keyboard-accessible summaries, labelled dialogs and background isolation preserve focus.
+
+### CHANGED
+
+- LAB More menus close on action, outside click and Escape, so an aborted cancellation cannot cover Details. This fixes the actual Chromium CI failure in R2 (job 129936212132); it is not hidden with forced clicks or looser assertions.
+- A definite modal height below the LAB banner and viewport-aware layout keep scrollable form bodies separate from their actions.
+- The canonical QA preparation continues to build LAB separately in each job. New form regression scenarios exercise unchanged forms, dirty close/keep/discard, pending/failed saves, field errors, keyboard focus and settings navigation.
+
+### FIXED
+
+- Loss of unsaved LAB booking/client/expense/catalog/settings drafts via close, Escape, backdrop or section navigation.
+- Closed native dropdown cancellation overlay blocking later desktop actions.
+- Mobile zoom restriction and incomplete keyboard access to summary/disclosure controls in LAB.
+- Expense save/archive refresh may render Finances only while that section is still active. A delayed read must not replace a newer settings screen or its draft. Settings success emits a UI-only committed-form event after acknowledgement, never on rejected saves.
+
+### PRESERVED
+
+- Production main and vacleaner.pp.ua remain v4.3.46/build 4346. Its stable branch, archive and manifest are retained. No production Supabase or business-data writes, schema changes, real dispatches, financial formulas or status transition changes.
+- LAB synthetic records, origin, manifest identity and reset/export behavior; R1 reliability and R2 actions. Canonical admin handlers remain the owners of saves and financial/status decisions.
+- Generic browser unload warning is best effort; iOS OS-level dismissal, keyboard/safe-area behavior and VoiceOver still require physical device acceptance. No automatic save or persistent draft recovery is claimed.
+
+### TESTS
+
+- Existing static/Chromium/PWA/WebKit contracts plus actual LAB artifact tests and focused form safety tests. Explicitly test a clean checkout, confirmed and rejected saves, repeated open/close, menu cancellation and independent view navigation.
+- Canonical finance/pricing/catalog bytes must match stable46; LAB code remains excluded from normal Pages artifact. Screenshot review includes portrait/landscape iPhone emulation and desktop; this is not physical iPhone approval.
+
+
+# 106. Change record — v4.3.50 / LAB date-field focus baseline
+
+### ADDED
+
+- Reproduction against system Chromium and the official Playwright Chromium: the newer date-input fill path emits a second trusted focus event after the date changes but before its input/change events. The existing extension-form dirty-close assertion catches the lost baseline.
+
+### CHANGED
+
+- LAB pristine snapshots may follow automatic initialization only before the first trusted form interaction. A later focus event or observer hydration cannot adopt an edited date as the clean baseline. Successful acknowledged saves still reset the baseline explicitly.
+
+### FIXED
+
+- A second focus on a date input could overwrite the original pristine snapshot and permit closing an edited extension form without confirmation. Reproduced from Chromium CI job 130075140464; the same existing failing assertion is retained.
+
+### PRESERVED
+
+- Production 4.3.46/4346, financial/status rules, save ownership, LAB isolation and previous private Site versions. No production writes or deployments.
+
+### TESTS
+
+- Run the unchanged 77-assertion focused suite against official Playwright Chromium as well as WebKit, the actual LAB artifact checks, and independent canonical CI gates. Record the earlier 48/49 Chromium result honestly; a WebKit or local system Chromium pass does not certify another browser build.
+
+
+# 107. Change record — R4 isolated backend preflight (no frontend release)
+
+### ADDED
+
+- Read-only catalog snapshot: 22 tables and 15 SQL functions with original RLS, policies, grants, constraints and indexes; deployed-source parity metadata for six core handlers. No business rows, Auth users, secrets or schedules are copied.
+- A staging-only generator produces an empty-database bootstrap, declared synthetic resources/defaults and byte-identical canonical handlers behind an explicit outbound transport boundary. Production refs and output paths outside staging are refused.
+- A concrete Free-project proposal and integration acceptance matrix in staging/README.md; real Auth/RLS/RPC, persisted read-back and two-device execution are explicitly pending target selection.
+
+### CHANGED
+
+- Canonical Pages excludes staging/; the independent artifact verifier also rejects it. New preflight checks include a deliberately contaminated artifact and verify the final clean artifact.
+
+### FIXED
+
+- Prevents newly introduced staging source, runtime files or credentials from entering a future normal Pages artifact.
+
+### PRESERVED
+
+- Production main/site 4.3.46/4346 and private LAB 4.3.50/4350. No production writes/deploys, financial/status logic changes, real dispatches or copied customer data. No new hosted resources are created before organization selection.
+
+### TESTS
+
+- npm run test:admin-staging-preflight: 17 checks; SQL syntax parsed independently with pglast 7.22. These are preflight checks, not live integration certification.
+- Normal Pages remains 270 files. Local full Supabase startup was blocked by disk ENOSPC; no live Auth/RLS/RPC or persistence pass is claimed.
+
+
+# 108. Change record — v4.3.51 / preserve modal input focus
+
+### ADDED
+
+- A deterministic delayed-frame regression holds the canonical initial-focus callback until a user has focused the campaign name field. The input must keep focus and accept text before dirty-close is checked.
+
+### CHANGED
+
+- Deferred initial modal focus runs only while its card is still connected, no control inside it already owns focus and no native confirmation dialog is open. Normal initial modal focus remains available.
+
+### FIXED
+
+- Initial requestAnimationFrame focus could steal focus between WebKit filling an input and inserting its text. Reproduced six of six times with the delayed frame; the field stayed empty and no dirty warning was expected by actual state. This matches the R4 WebKit CI failure at the campaign guard (job 130144442458). The existing guard assertion is retained and actual field value/focus is asserted earlier.
+
+### PRESERVED
+
+- Financial/status/backend behavior, canonical save owners, production main and deployed 4.3.46/4346. R4 hosted project selection is still pending; no real business records or external dispatch are introduced.
+
+### TESTS
+
+- Focused LAB Chromium/WebKit form suite with deterministic late-frame case, actual LAB artifact checks and canonical regression gates. Do not claim physical iPhone or live backend acceptance from these browser results.
+
+
+# 109. Change record — v4.3.52 / user-owned scroll after navigation
+
+### ADDED
+
+- Deterministic late-navigation-reset test: release the original 60ms reset between pointerdown/pointerup on the confirmed booking's Issue button. The original scroll changed from 1934 to 0 and the issue form did not open. The new assertion checks retained scroll, actual form visibility and the expected booking code.
+
+### CHANGED
+
+- Each view-scroll reset has a view/version owner and captures the current trusted user-action revision. Its queued microtask, frames and timer retain their original initial-navigation behavior only while that context is current and no newer pointer/key/wheel interaction has occurred. Three passive capture listeners update one revision counter; no per-form timers/listeners are added.
+
+### FIXED
+
+- Deferred resets could override scrolling performed to reach a booking action and move the target before pointerup. This reproduces the missing issueForm symptom in WebKit CI job 130367322907; the modal focus repair's regression already passed in that run. The previous dirty-close assertions are retained.
+
+### PRESERVED
+
+- Initial navigation returns to the top, including the existing deferred resets needed by layout. New user intent takes precedence over older restoration work. Financial rules, statuses, API payloads and backend handlers remain unchanged. Production stays 4.3.46/4346; R4 hosted target selection is still pending.
+
+### TESTS
+
+- Focused form tests use pinned Playwright 1.61.0 / WebKit 2311 (Ubuntu 24.04 as CI), official Chromium, deterministic focus and scroll cases, actual LAB artifact checks and canonical CI. Syntax/preflight and browser tests do not certify live backend or physical iPhone acceptance.
+
+
+# 110. Change record — v4.3.53 — LAB navigation safe-area geometry
+
+### ADDED
+
+- Simulated safe-area geometry assertions and failure-only Details diagnostics in the LAB artifact suite.
+
+### CHANGED
+
+- LAB navigation shell derives its height from the shared mobile navigation size and bottom safe-area token.
+
+### FIXED
+
+- The LAB mobile navigation uses one shell height: 82px controls area plus the current `--pwa-safe-bottom` inset. Previously the legacy fixed 82px height included a growing bottom padding; with a 34px inset its 56px minimum buttons extended into the reserved home area. The LAB component now owns `--mobile-nav` and derives its painted height from `--mobile-nav-shell`. Normal production CSS is unchanged.
+
+### TESTS
+
+- LAB artifact QA checks a flush viewport edge, painted shell height and minimum 44px controls outside simulated 0px/34px home areas in both engines and all mobile widths. These injected tokens verify layout mathematics, not physical iPhone safe-area reporting.
+- A failed desktop Details click records viewport, document focus/visibility, button bounds/styles, open menus, animations and screenshot without retries, sleeps or forced clicks. The previous 4.3.52 WebKit CI failure at 1024px remains unresolved until the cause is established; local green is not full release acceptance.
+
+### PRESERVED
+
+- The iOS host sheet visible in the user's screenshot owns its own outer chrome. A website cannot certify removal of the host's black home-indicator strip in Linux emulation. Do not remove the safe inset or shift controls over it to hide that strip. Production remains 4.3.46/4346; hosted R4 is not created. No business logic, Supabase data, auth or dispatch changes.
+
+
+# 111. Change record — v4.3.54 / LAB card actions and compact time choices
+
+### ADDED
+
+- LAB time picker period navigation: Morning (07:00–11:30), Day (12:00–16:30), Evening (17:00–21:00). The 29 canonical 30-minute choices keep their existing nodes and handlers. Period buttons only filter presentation; they never change input values. The initial group follows the current time. Existing off-grid times remain available and are not rounded or clamped.
+- Picker-local Tab containment and Escape/Close focus return. Escape closes only the time sheet and leaves the parent booking draft open.
+
+### CHANGED
+
+- Compact card primary action owns a full row. Details precedes More in both DOM and visual order. More keeps its original summary/action-sheet handlers and accessible name; the icon-only target is 48x44px. Secondary actions and all original business actions remain reachable.
+- One LAB owner defines action layout; previous duplicated flex overrides are consolidated. Status badges grow with wrapped copy and use 12px type, preventing clipped waiting-payment labels.
+- Time sheet uses a natural-height flex layout capped by the viewport, a fixed header/group selector and a scrollable options area. The bottom padding and scroll-padding preserve the home area, including keyboard-driven scroll in short viewports.
+
+### FIXED
+
+- The former 44px More control squeezed three bullets and a text label. A fixed-height badge clipped longer status copy.
+- The previous time grid required scrolling through all 29 options. Groups fit on ordinary phone viewports; short viewports retain a bounded scroller and accessible final row. The LAB grouping happens in the mutation batch before paint, avoiding a flash of the unfiltered grid.
+
+### PRESERVED
+
+- Canonical time inputs, time selection handlers, 07:00–21:00 range, 30-minute step, rental windows, pricing, statuses and financial calculations are unchanged. Selected times persist through the existing LAB adapter save/reload contract in extras.pickup_time / extras.return_time.
+- Production/main remains 4.3.46/4346. Current published LAB at implementation start is 4.3.53 (Site version 5). Hosted R4 is still not created; no production Supabase or business-data writes, SMS, push or documents.
+
+### TESTS
+
+- Actual LAB browser QA covers the More touch target and unchanged action path, full waiting-payment label, all 29 slots across groups, unchanged inputs on group navigation/cancel, separate pickup/return inputs, legacy off-grid preservation, reopened selection, keyboard containment/Escape, simulated 34px safe area, short viewport scrolling and persisted times after failed-save/retry/reload.
+- Existing form lifecycle/dirty-close and deployment isolation suites remain unchanged in their expectations. Chromium/WebKit and canonical CI gates are required before private publication. Linux geometry tests do not certify the physical iPhone or outer iOS host chrome.
+
+# 112. R4 operational record — isolated hosted backend (frontend remains v4.3.54)
+
+### ADDED
+
+- Independently created staging project `jdthhqxzfpvosfdxwfem` in the user-selected VA Home organization, eu-west-1. `staging/hosted-r4-receipt.json` records target, migration, deployed bundle hashes and non-secret read-back; `docs/ADMIN-R4-HOSTED-ACCEPTANCE.md` records results and pending gates.
+- Opt-in `scripts/admin_staging_live_qa.py` checks actual Auth/authorization, direct API/RPC denial, persisted rental lifecycle and exact times, concurrency, dropped real responses, settings/customer/expense persistence, private synthetic documents, referrals and separate attribution. Credentials stay outside the repository with mode 0600; production ref is refused.
+
+### CHANGED
+
+- R4 hosted state is now created, replacing the earlier historical target-selection/preflight status. All six canonical handlers and monetary modules are unchanged; exact-target/outbound transport isolation wraps them.
+
+### FIXED
+
+- Corrected two new integration-harness contract mistakes (audit response is entries; customer save requires originalPhone). Original red reports are retained; independent audit read and corrected persistence run are recorded separately. No server validation or assertion requirement was removed to make a run green.
+
+### PRESERVED
+
+- Production/main remains 4.3.46/4346, independently verified by GitHub ref and production release.json. Published LAB remains synthetic-local 4.3.54/4354. No frontend build bump or Site publication is part of this operational checkpoint. No production rows/Auth/functions/schema or provider dispatch were changed.
+- The temporary stage identity provisioner is replaced by version 2 returning permanent HTTP 410; it no longer performs provisioning. Only synthetic .invalid accounts/rows exist in the new stage. Service-role credentials are server-only.
+
+### TESTS
+
+- Hosted Auth 51 assertions; two-manager persisted-state lifecycle, actual concurrent capacity enforcement, explicit retry after proxy-discarded real response, private signed document access and referral reward correction/claim/release were exercised on staging. The detailed record distinguishes original harness failures from corrected read/persistence results and does not label the whole release green.
+- All 22 public tables have RLS. Direct privileged reservation RPC is denied to anon/authenticated roles; canonical pure slot-index helper remains public. Final server read-back: 8 synthetic bookings/8 customers/33 audit rows, 1 referral use/1 reward; zero SMS/push dispatch data or schedules; private document bucket with no objects after cleanup.
+- Connected UI remains closed pending verified public-signup/mail policy and isolated entrypoint. Physical iPhone, remaining server-fault/promo matrices and the previously red WebKit PR gate remain open; server checks do not substitute for them.
+
+# 113. Change record — v4.3.55 / isolated R4 hosted UI candidate
+
+### ADDED
+
+- Separate `/r4/admin/bronuvannia/` artifact, built from canonical Pages by `scripts/build-admin-staging-ui.mjs`. `staging/hosted-r4-client.json` contains only the exact new project ref/origin and public publishable key. No password, token, service-role key or server source is shipped.
+- Boundary script loads before canonical application code, pins the exact R4 project and permits only six tested handlers plus password/refresh/local-logout/get-user Auth routes. Browser signup/invite/recover/admin/unknown/provider routes return explicit 503 with delivered:false without a network request. Cross-origin redirects are refused.
+- Every stage-origin request waits for a fresh Auth settings response with disable_signup=true. Rejected/unavailable/unverified settings leave access closed; a saved session cannot bypass this guard. This client boundary supplements unchanged server Auth/RLS/allowlists, not replaces them.
+- Targeted transport/storage/artifact tests are part of canonical static QA. They do not certify connected-browser interactions.
+
+### CHANGED
+
+- Generated stage scripts use prefix-scoped local/session storage while preserving canonical business strings and payload fields. Stage manifest ID/scope, asset paths and service-worker cache are isolated under `/r4/`; eviction only removes earlier stage caches. No foreign worker unregister or stage push handler is retained.
+- LAB presentation/forms also opt into hosted stage mode. Hosted copy explicitly says server data, uses separate test accounts and excludes synthetic reset/export/fault controls. Original synthetic LAB behavior remains available; the published LAB54 files are not replaced by this candidate.
+- Staging login maps manager-a/manager-b to existing synthetic .invalid accounts and labels their profiles as test managers. Production passwords and business identities are not reused.
+
+### FIXED
+
+- Cross-environment storage/cache collisions and accidental production/provider access are prevented in the generated stage artifact. Financial handlers, pricing/status rules and canonical normal-runtime logic are unchanged apart from coherent release stamps.
+- Direct synthetic email login for manager B retains the same displayed actor as the manager-b alias; server authorization still uses the actual authenticated user ID. The generated actor expression is verified for both aliases and both emails.
+
+### PRESERVED
+
+- Production/main 4.3.46/4346 and published browser-local LAB54/4354 remain unchanged. Hosted backend remains the separately recorded canonical version-1 deployment sourced from UI54; this UI candidate does not redeploy it or change its data.
+- Publication of the new stage path requires actual Auth policy read-back and native owner-private Sites deployment. Do not interpret the user's report of toggling a setting as verified server state. At initial follow-up the uncached R4 Auth API still returned disable_signup=false.
+
+### TESTS
+
+- Boundary/artifact tests cover exact target refusal, unchanged foreign storage, prefix-limited clear/enumeration, all six allowed handlers, production/external/provider/direct-REST/Auth-mail route rejection, password/refresh transport, redirect refusal, unverified-policy denial, bootstrap order, generated test-account binding, SW/cache/path/manifest isolation and hosted presentation separation.
+- Original synthetic LAB static/persistence tests and Chromium/WebKit canonical suites remain required. Stage-specific connected-browser and physical iPhone acceptance remain distinct. Managed Sites browser preview is unavailable without cua_repl.js; do not bypass that with an improvised local browser path.
+- Prior checkpoint 3748fa6 push run 43025892948 completed Static, Chromium aggregate and WebKit successfully; Pages deployment skipped. Earlier UI54 PR TargetClosed evidence remains retained; a successful later run does not establish its crash cause or certify this UI55 candidate.
+
+# 114. R4 mobile viewport investigation — baseline UI55
+
+- Physical iPhone screenshots show the R4 header, upcoming actions and detail/finance content clipped at the right edge. Existing document-overflow-only checks cannot certify child scroll owners when horizontal overflow is hidden.
+- New remote CI renders the actual generated `/r4/` artifact after UI login, using four explicitly synthetic stage snapshots and mocked HTTP. No real Auth credentials or user tokens are exported; every external request is intercepted, and unknown/mutation requests fail.
+- It records visual/layout viewport dimensions, scale, computed control fonts, actual scroll widths, critical element bounds and screenshots at 320/390/440/768/1440. The regression covers header/upcoming/detail/finance/action containment and mobile input font size >=16px without suppressing zoom or hiding overflow.
+- Chromium/WebKit automation does not reproduce the physical iOS keyboard's native zoom. Baseline search CSS contains mobile 13.5–14px fonts; auto-zoom is a concrete risk, but its occurrence on the user's device remains to be confirmed. The original screenshot and baseline failures must remain evidence; no blind retry/forced click/sleep is introduced.
+- This checkpoint adds only QA/fixture/workflow/spec; production46, LAB54 and the published R4 UI55 remain unchanged. A later presentation fix requires a coherent new version and focused verification before private publication.
+
+# 115. Change record — v4.3.56 / R4 mobile content and input sizing
+
+### ADDED
+
+- Release-addressed staging-only mobile CSS with offline precache coverage. The existing LAB54 and normal production styles do not load it.
+- A generated-R4 post-login layout regression records actual container overflow, critical element bounds, computed input fonts and viewport metrics in Chromium/WebKit. Remote calls are synthetic fixtures and never forwarded; physical iOS auto-zoom remains a distinct device check.
+
+### CHANGED
+
+- Known small R4 mobile search/select/settings controls and login fields use at least 16px to avoid the native iOS small-input zoom trigger. Existing larger money inputs are preserved. User zoom is not disabled or reset.
+- The R4 banner has a shrinking content column and separate controls. Upcoming titles/statuses/client names and action labels can wrap; narrow phones stack the two existing actions. Detail header puts the full booking code below its title, and long information/money text wraps within existing containers.
+
+### FIXED
+
+- Presentation constraints address the clipped header, upcoming controls and detail content shown in physical iPhone screenshots. No global overflow hiding is added. The screenshot alone does not establish whether persisted browser zoom caused all clipping; the source's 13.5–14px search font and the stronger container checks are recorded separately.
+
+### PRESERVED
+
+- All booking/status/payment/referral/pricing rules, API payloads, server handlers and database rows are unchanged. Stage remains jdthhqxzfpvosfdxwfem; main/production46 and browser-local LAB54 remain untouched. Source changes outside the staging presentation/tooling/QA/spec are coherent version stamps only.
+- Original baseline e80a698 and its CI run remain independent; a separate fix branch prevents cancellation of that evidence. No retry, forced click, sleep increase, assertion weakening or zoom-lock workaround is used.
+
+### TESTS
+
+- Stage boundary/artifact contracts include the new CSS URL/order/precache. The new remote layout suite exercises login, focused search, upcoming and issued detail using the same synthetic snapshots at 320/390/440/768/1440.
+- Capture both baseline and fixed results and inspect screenshots before private publication. Canonical static/browser/PWA gates and the earlier intermittent WebKit TargetClosed finding remain distinct. No connected-server or physical keyboard success is inferred from fixture/emulation tests.
+
+- Navigation follow-up: the user's stable46/R4 screenshots show the R4 bar raised. Stable CSS has 82px total height; LAB's 82px plus 34px home inset produced 116px. R4 now uses max(82px,48px+inset), a 44px minimum control row and a single home inset. The main scroll pane uses that same shell token; neither transform nor clipping hides the difference.
+- Baseline and fixed remote jobs use the same official Playwright Python 1.61.0 noble image pinned by digest after the first baseline install failed on Azure Ubuntu DNS before tests. The reference46 build is immutable and only receives intercepted synthetic HTTP responses. The original not-run infrastructure failure is retained.
+
+
+# 116. Change record — v4.3.57 / R4 stable46 navigation controls
+
+### ADDED
+
+- Immutable46 comparisons now measure every navigation button, icon, label, center plus and badge at 320/390/440px, in Upcoming/Calendar/More, with simulated bottom insets 0/21/34px. Geometry and synthetic screenshots are preserved for both reference and staging. No external API request is forwarded.
+
+### CHANGED
+
+- Stage owns only the 82px navigation shell token. Internal padding and button sizing inherit the unchanged canonical stable46 cascade, including its 6px top padding and 56px button minimum. The 4px top padding, 8px side padding and 44px minimum introduced in R4 UI56 are removed.
+
+### FIXED
+
+- The owner's physical screenshots showed matching shell borders but controls about 8 CSS pixels higher in UI56. The previous shell-height assertion did not establish matching visual content. The new oracle compares the full component geometry, including Calendar and More.
+
+### PRESERVED
+
+- Production/main46, browser-local LAB54, all business rules, API payloads, server handlers and database rows remain unchanged. UI56 is retained as a saved private Site rollback; only the private R4 presentation is updated.
+- Prior UI56 and its tests/results remain independent evidence. Changes outside staging presentation/QA/spec are coherent version stamps only.
+
+### TESTS
+
+- Static and generated artifact/boundary gates remain mandatory. Capture both unchanged UI56 baseline and UI57 results in the pinned remote Chromium/WebKit environment before private publication.
+- The former assertion that the entire 34px safe inset excludes touch targets also rejects immutable46 itself: the canonical 56px button bottom is 936 in a 956px viewport. That assumption is recorded as formerWholeInsetExclusion, and is superseded by exact reference control/glyph comparisons plus five >=44px targets within the viewport. This corrects the test oracle; native home-indicator interaction remains a physical-device acceptance check.
+- Do not claim physical iPhone equivalence solely from emulation or a matching 82px outer box. No forced clicks, arbitrary waits, browser zoom locks or overflow hiding are introduced.
+
+
+# 117. Change record — v4.3.58 / R4 bounded detail and booking scroll
+
+### ADDED
+
+- Generated-entrypoint regression covers detail at top/middle/end, actual hit testing of the last secondary action, all four booking wizard steps, and a populated synthetic 14-day calendar including its last selectable slot. Simulated top59/bottom34 safe areas remain explicit emulation limits. External requests are intercepted and never forwarded.
+
+### CHANGED
+
+- Hosted R4 mobile detail is a three-row layout: original header node, independently scrolling content shell, existing delegated primary-action dock. Header listeners and business handlers are retained; desktop restores the header to its original parent when crossing the responsive breakpoint.
+- R4 booking form footer becomes an intrinsic grid row, following the existing finance form pattern. Scrollable fields stop before the footer. The LAB banner owns the top safe area once; form header avoids a second top inset. Existing keyboard viewport sizing is preserved.
+
+### FIXED
+
+- Physical screenshots show content behind the sticky detail title and secondary actions behind the fixed primary dock. Legacy detail padding was overridden by later important canonical styles, so a nominal bottom allowance did not establish reachability. Independent rows reserve actual header/footer height instead of guessing padding.
+- Booking fields no longer scroll underneath an absolutely positioned footer. This is a presentation correction; validation, wizard sequencing and save owners are unchanged.
+
+### PRESERVED
+
+- Main/production46, frozen LAB54, all API payloads, server handlers, pricing/status/payment/referral rules and database data remain unchanged. UI57 saved Site version9 is the rollback. The UI57 navigation controls and exact reference comparisons remain unchanged.
+- Shared source enhancement is guarded by hosted mode; synthetic LAB behavior does not reparent its detail header. No function is removed or replaced to obtain a cleaner layout.
+
+### TESTS
+
+- Preserve an unchanged UI57 baseline and the corrected generated UI58 in the pinned remote Chromium/WebKit jobs. Verify scrollport bounds and actual elementFromPoint hit targets, not just document width or full-page screenshots. No forced clicks, arbitrary sleeps or assertion weakening.
+- Calendar is tested with 14 synthetic days; change calendar styles only if a reproducible overlap remains. Partial cards during a normal scroll are not by themselves proof that their final slots are inaccessible.
+- Static and isolation/artifact gates remain required. Physical iPhone/native keyboard/PWA lifecycle acceptance is distinct from emulation and fixture tests.
+
+- Populated-calendar baseline confirms the main scrollport still extended to viewport bottom under navigation despite compensating bottom padding. Non-keyboard R4 main views now end above the unchanged82px nav and use18px content clearance. Existing keyboard-open rules are preserved. This addresses the scroll boundary; it does not change availability, past-slot semantics or calendar calculations.
+
+- Responsive regression exposed WebKit returning to mobile CSS before the staged header projection refreshed. R4 retains its MediaQueryList and schedules the same idempotent projection on viewport resize as well as breakpoint change. Strict geometry bounds remain unchanged. A later QA checkpoint records viewport/media/header state before and after awaiting the actual asynchronous responsive projection; two requestAnimationFrame callbacks alone do not establish resize delivery in WebKit. No unconditional sleep is used.
+
+
+# 118. Change record — v4.3.59 / R4 consistent booking actions
+
+### ADDED
+
+- Read-only action regression covers all six statuses in Full/Compact modes at320/390/440/768/1440. Synthetic completed/cancelled examples are derived only in the HTTP fixture process; no records are created on any server. It verifies readable/touchable controls, canonical action preservation, correct Details navigation and reachable More actions with Escape/focus return.
+
+### CHANGED
+
+- Hosted R4 marks actual context-action count and More presence as presentation metadata, avoiding complex sibling selectors. Mobile cards use one two-column action grid. The canonical primary action spans the row. Context actions retain their labels/handlers; a lone context action uses the full row. Details and visibly labelled More share equal-width positions. Without More, Details uses the full width.
+- Card action controls have a consistent48px minimum, wrapping labels,12px radius and visible keyboard focus. Per-card bottom safe-area padding is replaced by normal card spacing; the main navigation shell remains the sole bottom inset owner.
+- Desktop layout is preserved. Its baseline menu actions were reachable, so no speculative overflow override is included.
+
+### FIXED
+
+- The inserted Details control could occupy the legacy issued-card44px third column, moving More into a separate row. Pending cards could likewise leave a large isolated More button. The staging-only grid overrides both legacy full/compact rules as one component; no action is removed or moved into a different business workflow.
+
+### PRESERVED
+
+- Production/main46, LAB54, previous R4UI58 saved Site version10, backend/API/financial/status/referral/pricing rules and database rows remain unchanged. UI58 navigation/scroll/booking-form corrections are retained. Outside presentation/QA/spec, changes are coherent release stamps only.
+
+### TESTS
+
+- Preserve the UI58 baseline and compare the same generated-entrypoint fixture suite in remote Chromium/WebKit before private publication. Trial actions check browser reachability without activating mutations; Details and menu open/close use normal clicks. No forced click, arbitrary delay or weaker geometry tolerance.
+- Keep the existing navigation, detail-scroll, four-step wizard, short-viewport and responsive-return checks. Physical iPhone/native keyboard/PWA lifecycle acceptance remains distinct from emulation.
+
+- The original UI59 monolithic WebKit run43167453059 passed all iPhone cases, then emitted PAGE_CRASH/TargetClosed at768 after several browser contexts. Its cause is unresolved. The same suite now also runs per viewport in fresh CI jobs, with unchanged assertions and cgroup memory diagnostics. Both full-session browser cases are retained in the matrix; no failure is retried or suppressed. Focused component results do not certify the unresolved long-session case.
+
+# 119. Change record — v4.3.60 / R4 recovery and full verification
+
+### ADDED
+
+- Generated-R4 screen acceptance in remote Chromium/WebKit at 440 and 1440 CSS pixels: all ten sections, secondary client reads, referral sharing, catalog editors, finance/analytics periods, campaign forms, settings tabs, exact-time picker and explicit unavailable integrations. All remote responses are isolated synthetic HTTP fixtures, never forwarded.
+- Behavioral regressions for failed-startup policy recovery, settings listener lifecycle, readable rejected-settings errors and zero-revenue margin labels. The existing full multi-viewport layout sessions remain a separate gate against immutable46.
+
+### CHANGED
+
+- A failed stage startup policy check is retried by the next allowed request. Concurrent callers share a single in-flight check. Only a successful exact-project policy response with boolean disable_signup=true permits stage transport. The test banner reflects recovery without reloading.
+- Settings overflow cues use one global resize handler that queries the current rail, rather than retaining one detached rail closure per settings render. Catalog, slots and deposit save failures reuse the existing human-readable settings error mapper.
+
+### FIXED
+
+- Offline launch no longer leaves stage transport permanently blocked after connectivity returns. The fail-closed authorization and integration boundary are preserved.
+- Repeated settings visits no longer accumulate resize handlers. A legitimate zero-revenue rental with known costs retains the financial result and omits the undefined percentage from its short label.
+
+### PRESERVED
+
+- Production/main46, published LAB54, previous R4UI59 and stable46 backup remain available. No production backend/schema/business data/provider dispatch is part of this work. Financial formulas, status transitions, pricing, discounts and referral business rules are unchanged.
+- Campaign conversion attribution, report timezone consistency and rental-allocation edge cases found by read-only oracles are documented separately; they are not silently changed in a UI verification patch. This stage build is not a production release candidate.
+
+### TESTS
+
+- Negative baselines reproduce permanently rejected readiness, 20 retained settings resize callbacks after 20 mounts, raw settings error codes and the literal null% label. Corrected source is checked by the corresponding behavioral tests.
+- Remote browser gates must use the generated /r4/ artifact and retain failures/screenshots. Canonical static/build/browser/WebKit gates remain required. API lifecycle verification uses only uniquely namespaced synthetic records on the exact stage project; it is recorded independently from fixture UI evidence.
+- Browser control is unavailable in the current managed Site session. No substitute local preview/browser is started. Remote browser emulation, live API persistence and physical iPhone/PWA acceptance remain distinct evidence categories; an all-green fixture run does not certify the unavailable connected UI/device checks.
+
+### R4 waiver acceptance and retained renderer failure
+
+- The owner's blocked “Підтвердити без 200 грн” report exposed an incomplete test-environment dependency: the UI offered the canonical action, but the stage client function set and prepared Edge handlers omitted vacleaner-prepayment-waiver-v1. Add exactly this canonical route, not a wildcard or provider bypass. The deployed stage handler is byte-identical to production46, wrapped in the existing exact-stage/outbound-isolation module; its existing privileged SQL function/grants need no changes. Production functions and financial rules are untouched.
+- Acknowledged waiver confirmation announces the existing form-saved event before its reload. LAB/R4 form policy clears submitted/clicked pending state only on that acknowledgement, so the successful reload is not rejected as a busy or unsaved form. Rejected writes retain the draft and retry controls. Generated-R4 UI tests submit this exact action, reject the first attempt, then verify the authoritative confirmed read after success without a beforeunload dialog or fake200 payment.
+- New live stage waiver checks cover missing/invalid/outsider authorization, both managers, contact/terms/identity/document guards, confirmed state and zero prepayment read by managerB, idempotency and issuance only after an actual synthetic deposit. The first auxiliary test wrongly omitted the deposit precondition; its failed assertion and successful cleanup are retained, the deposit guard remains intact, and the corrected explicit-precondition case passes40checks. Synthetic waiver reservations are cancelled after verification; the owner's reported booking is not mutated.
+- First full-screen run43183289829 on source4be5c7b has three screen jobs54/54 and both layout sessions459/459, but WebKit1440 has a WebProcess crash while capturing chemistry (52pass/1fail). No cause or fix is assumed. Preserve that red result. The common harness now retains before/after capture DOM/resource snapshots, crash context and traces; a separate comparison runs the same ten-section capture sequence three times on immutable UI59 and first UI60, recording every failure rather than retrying to obtain green.
+- Controlled comparison43218211345 completed three section/capture iterations on both immutable products without a crash (37checks each); this does not resolve the intermittent failure. Its workflow remains available through manual dispatch, rather than replaying an unrelated baseline comparison for every subsequent test edit. The first connected fixture waiver test passed on both mobile engines but exposed a desktop test readiness race after the successful reload; wait for the actual mounted navigation before selecting the view, keeping the status/no-dialog/payload assertions intact.
+- Canonical WebKit run43218928533 reached the LAB expense-pending test but observed the dirty-form leave dialog after its fixed700ms rejection delay. The pending request must remain pending until the pending-state assertions finish: hold that exact synthetic expense fetch with an explicit release gate, then release it through the original failing adapter and keep the rejection/draft/retry assertions. No production delay, form guard or error handling is relaxed; this makes the two tested states deterministic rather than extending a timeout.
+- Keep both dedicated Chromium/WebKit LAB form-policy jobs alongside the generated R4 screen/layout jobs, so busy/rejected/acknowledged draft semantics are independently verified without depending on an elapsed-time assumption. Frozen published LAB54 remains untouched; these jobs build their own isolated artifact.
+
+# 120. Change record — v4.3.61 / report contracts and release-candidate preparation
+
+### ADDED
+
+- Separate normal-path candidate builder compiles reviewed presentation/form-policy assets from the R4 sources into a canonical `/admin/` artifact. It preserves production API/Auth/storage/manifest/worker identity, every business JS byte and the public site; no R4 artifact/origin swapping. Test banner/tools/readiness/adapter and their reserved space are excluded. New assets are precached. This is a review/fixture-QA artifact, not authorization to install it on the private LAB origin or deploy production.
+- Focus-intent, report-calendar, allocation reconciliation and campaign-attribution behavioral tests preserve negative baselines. Candidate static/remote browser acceptance remains distinct from R4 and from physical iPhone testing.
+- A CI-only connected-stage harness performs actual UI logins and real stage persistence using two temporary `.invalid` managers. Its short-lived identity broker is restricted to the exact stage project and one signed GitHub OIDC issuer/audience/repository/actor/ref/SHA/run/workflow context. No public signup, owner passwords, service key exposure or mail/provider dispatch. Default config fails closed; provision creates only its own confirmed test identities, cleanup removes only their roles/users, and the deployed broker must be disabled after the run. Credentials remain in CI process memory; no trace/HAR/storage-state/secret artifacts.
+
+### CHANGED
+
+- MET02: day-based reports use Europe/Kyiv calendar dates for event timestamps, preserving ISO date-only and naive Kyiv rental/expense wall dates. Finance, Analytics, weekly reports, CRM and referral period filtering share that calendar. Current period controls use Kyiv today; 7/30-day subtraction uses calendar days through DST. Operational booking instants and monetary amounts are unchanged.
+- MET03: a stored equipment allocation is accepted only when finite nonnegative integer amounts agree with the rental pool, optional recorded rental amount and known resources, including a zero pool. Present invalid snapshots are excluded with visible booking-code discrepancies; missing legacy snapshots remain explicitly labelled estimates. No historical records are rewritten. Estimated rounding cannot allocate more than the remaining rental pool.
+- MET04: campaign conversion is distinct qualified converted phones divided by distinct eligible cohort phones. Repeated uses do not increase converted customer count. SMS cohort retains submitted/sent/delivered recipients; any SMS dispatch prevents silently falling back to assigned codes. Otherwise lifetime assigned-client cohorts include historical inactive codes and are labelled assignment, not activation.
+- MET05: attributed use must follow the available immutable dispatch.sent_at anchor or code-created assignment anchor, campaign start, and precede actual campaign/code expiry. Issuance cutoff does not invalidate already issued bonuses. No arbitrary new attribution window. Missing timestamps or incomplete source rows produce null conversion plus reason/coverage metadata. Dispatch-start timing does not prove per-recipient delivery/causality. Actual redemption/revenue/discount and referral business rules stay unchanged.
+
+### FIXED
+
+- A delayed keyboard focus callback still measures the viewport, but does not override a later trusted wheel/pointer/key action. The existing trusted-action counter gates only stale automatic scrolling. No focus clearing, keyboard disablement, forced click or timeout extension.
+- The short-viewport browser regression holds the actual old focus callback, performs a real trusted scroll, and releases the callback before the original strict hit measurement. This reproduces the relevant ordering explicitly instead of relying on timer speed.
+- Campaign labels explain unique customers and incomplete metrics; older backend responses are marked as requiring server-definition update instead of silently receiving new semantics.
+
+### PRESERVED
+
+- Production/main46 and real business data, published private R4UI60/Site12 and its rollback points remain unchanged during preparation. No production deployment is included in this change. Pricing, discounts, deposits, prepayment, status/settlement and resource-availability rules are unchanged.
+- All report-data changes are read-only calculations/coverage. Stage backend deployment requires reviewed source parity and actual stage readback. Provider integrations remain blocked; no fabricated production records or outgoing messages are used for acceptance.
+
+### TESTS
+
+- Report dates: actual Finance/trend/weekly/referral functions under Kyiv/UTC/NewYork/Tokyo/Kiritimati with midnight/month/year/DST boundaries. Allocation: exact conservation, zero pools, invalid snapshots, legacy estimates and visible warnings. Focus: no-new-intent assistance and newer trusted/untrusted interaction cases.
+- Campaign metrics: actual HTTP handler plus pure helper, duplicate uses/phones, pre-dispatch uses, expired/issued codes, unknown times, capped query rows and unchanged amount fields/Auth/non-read branches. Exact-count coverage uses the same data queries; arrays are not silently treated as full.
+- A separate immutable UI60 runtime diagnostic compares native Python3.12/3.13 and pinned official WebKit, immediate and finite-animation-settled captures. Original assertions/captures/failures are retained; no reruns-to-green or disabling render features. The cause of earlier TargetClosed/capture failures is not assumed.
+- Canonical static/build/Chromium/WebKit, generated-R4 screen/form/layout, normal-candidate browser and connected-stage acceptance must be reported separately. A physical iPhone/native PWA is unavailable in the managed session; Linux emulation is not device certification.
+
+- Controlled immutable-UI60 diagnostic43281790145 passed all six runtime/timing variants once. This does not establish the cause of historical sporadic renderer failures. Canonical WebKit now uses the immutable official Playwright1.61.0 Noble image for a reproducible supported runtime; original suites/assertions and every failed result remain retained.
+
+- First candidate browser run exposed two harness assumptions: normal mobile chrome owns safe-top through padding while its scroll owner starts at0, and desktop keeps its expanded canonical finance panel. Acceptance now compares actual first-content spacing with canonical chrome and proves that an injected48px gap is rejected; desktop verifies labels and exact fixture totals while mobile keeps its ledger checks. Mobile WebKit uses a supported real trusted keyboard action instead of unsupported wheel protocol, retains phone focus and the original strict tail-hit measurement. First failed runs remain recorded.
+
+- The first connected CI attempts failed in test setup: official-container checkout ownership, then a temporary-role insert missing the actual NOT NULL email column. Exact-checkout safe.directory and complete temporary role payload fix these without changing public signup or application authorization. The role mock now enforces the real schema, preserving the failing baseline. Running canonical acceptance is retained when a diagnostic follow-up is pushed instead of being cancelled.
+
+- Follow-up acceptance waits for actual trusted input delivery before measuring its metadata. Connected checks require the real visible main/navigation rather than the mobile display:contents wrapper, distinguish unpaid nominal200/1000 terms from actual received money, and redact unrelated ARIA tree/screenshot content. Application code and business rules are unchanged by these harness corrections.
+
+- Late customer-profile responses in process booking now autofill only untouched identity/contact fields. Manual names, addresses, document type/number, cleared values and explicit verification changes remain intact. Original-phone history is not applied to a changed phone; the UI requires manual verification, and detached forms cannot update the current modal. Existing repeat/document policy is preserved for the same phone. A visible note explains preserved manual edits. Actual openProcessBooking deferred-response VM regression passes14/14 versus4/14 on immutable old source; generated-R4 browser acceptance also holds/releases the actual profile request.
+
+### Production promotion — 2026-11-14
+
+- The owner explicitly authorized the production release on14November. Keep4.3.61/build4361 and the exact reviewed normal artifact; its13November metadata records the prepared build, while the actual publication timestamp is recorded in deployment evidence. The private R4 remains isolated and available.
+- The canonical270-file artifact remains the baseline for existing broad regression/LAB suites. Production deployment must explicitly select the separate reviewed273-file `production-pages` artifact, including its three generic operational assets and worker CORE additions. Merely merging the QA branch or uploading canonical `dist` does not promote the reviewed UI.
+- A pinned full artifact digest and per-file verification reject stale, altered, staged, missing or extra served files. The public site, original production API/Auth/storage/manifest/worker identity, pricing, discounts and status/settlement rules are preserved. No test banner, sandbox transport or CI identity broker belongs in the production frontend.
+- Production depends on canonical static/Chromium/WebKit gates and four exact-production-artifact normal UI jobs. Actual-artifact mobile forms, public hydration, startup and real worker/offline/update tests run separately from fixture/LAB layers. The46to61androllback46worker checks use only isolated HTTP/API fixtures; business/Auth responses are never cached or fabricated offline. Linux/browser checks do not certify a physical iPhone.
+- The canonical reporting handler/helper deploys separately from frontend packaging, with existing `verify_jwt=false`, auth.getUser and server admin allowlist unchanged. It remains compatible with frontend46 during rollout. Keep the actual production v18 source as the backend rollback; never deploy the stage isolation wrapper. No SQL migration or real business-data mutation is part of this release.
+- Use one squash release commit in main only after the PR gates pass. Main's actual deployment gates must also pass. Confirm the live release, full production artifact hashes, manifest/worker assets and version coherence after publication. Retain the stable46frontend archive, actual backend rollback and privateR4rollback points until an explicit later retirement decision.
+
+- Stable46 recovery has its own reviewed manual workflow, because the normal production receipt correctly rejects a46tree. PRs verify the immutable15bfsource using its original stamp/build and all270pinned hashes; they never restore. An actual frontend restore requires main, workflow_dispatch, exact case-sensitive ROLLBACK-4346 confirmation and restore_4346 mode, successful verification, and the Pages environment. Defaultverify_only is read-only. No backend/data/provider operation is part of this workflow. Manual artifact recovery may intentionally differ from main's latest61source; record the deployed stable source15bf and release46, rather than assuming main proves the live version.
