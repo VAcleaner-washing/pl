@@ -310,27 +310,37 @@ function historicalRouteVariants(value){
   if(normalized&&!/^полтава\b/iu.test(normalized)&&!/^розсошенці\b/iu.test(normalized)&&!/^щербані\b/iu.test(normalized)&&!/^горбанівка\b/iu.test(normalized))variants.push(`Полтава, ${normalized}`);
   return [...new Set(variants.flatMap(addressVariants).map(v=>String(v||'').trim()).filter(Boolean))];
 }
-async function resolveRouteForAddress(value){
+async function historicalRouteRequest(body,{signal}={}){
+  const abortError=()=>{const error=new Error('Розрахунок маршруту зупинено.');error.name='AbortError';error.code='delivery_route_aborted';return error};
+  if(signal?.aborted)throw abortError();
+  const controller=new AbortController();let timer=0,rejectAbort;
+  const aborted=new Promise((_,reject)=>{rejectAbort=reject}),abort=()=>{rejectAbort(abortError());controller.abort()};
+  signal?.addEventListener('abort',abort,{once:true});
+  const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>{const error=new Error('Сервіс маршруту відповідає надто довго. Спробуйте пізніше.');error.code='delivery_route_timeout';reject(error);controller.abort()},12000)});
+  try{return await Promise.race([Promise.resolve().then(()=>{if(controller.signal.aborted)throw abortError();return fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify(body),signal:controller.signal})}).then(async response=>({ok:response.ok,data:response.ok?await response.json():null})),timeout,aborted])}
+  finally{clearTimeout(timer);signal?.removeEventListener('abort',abort)}
+}
+async function resolveRouteForAddress(value,{signal,reportErrors=false}={}){
   const raw=normalizeHistoricalRouteAddress(value);
   if(!raw||!hasHouseNumber(raw))return null;
   try{
     let suggestions=[];
     for(const candidate of historicalRouteVariants(raw)){
-      const res=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({q:candidate})});
+      const res=await historicalRouteRequest({q:candidate},{signal});
       if(!res.ok)continue;
-      const data=await res.json();
+      const data=res.data;
       suggestions=Array.isArray(data.suggestions)?data.suggestions:[];
       const exact=suggestions.find(item=>item?.houseNumber&&!item?.approximateCoordinates);
       if(exact){suggestions=[exact,...suggestions.filter(item=>item!==exact)];break}
     }
     const item=suggestions.find(item=>item?.houseNumber&&!item?.approximateCoordinates);
     if(!item)return null;
-    const quoteRes=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':APIKEY},body:JSON.stringify({action:'quote',lat:item.lat,lon:item.lon})});
+    const quoteRes=await historicalRouteRequest({action:'quote',lat:item.lat,lon:item.lon},{signal});
     if(!quoteRes.ok)return null;
-    const quote=await quoteRes.json(),routeKm=Number(quote.routeKm),pricingDistanceKm=Number(quote.pricingDistanceKm);
+    const quote=quoteRes.data,routeKm=Number(quote.routeKm),pricingDistanceKm=Number(quote.pricingDistanceKm);
     if(!Number.isFinite(routeKm)||routeKm<=0)return null;
     return{routeKm,pricingDistanceKm:Number.isFinite(pricingDistanceKm)?pricingDistanceKm:null,distanceSource:String(quote.distanceSource||''),address:String(item.address||raw)};
-  }catch{return null}
+  }catch(error){if(reportErrors)throw error;return null}
 }
 function installGlobals(){
   window.__VAC_DELIVERY_ADDRESS__=(fallback='')=>compose(activePublic,fallback);

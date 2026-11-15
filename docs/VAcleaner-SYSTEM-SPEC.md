@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.61
-**Baseline build:** 4361
-**Останнє оновлення:** 2026-11-14
+**Baseline version:** 4.3.62
+**Baseline build:** 4362
+**Останнє оновлення:** 2026-11-15
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5786,3 +5786,44 @@ The isolated 503 at 2026-10-19 19:00:13 UTC has gateway error `SUPABASE_EDGE_RUN
 - Independent390/1440 audit cases use separate browser processes with all original assertions retained. Full-session idle, reliability and LAB suites remain mandatory. Failure lifecycle/resource/DOM/trace evidence is retained; this is test-process isolation, not a claimed fix for an unproven product/browser crash.
 
 - Correct worker readiness polling exposed a real duplicate-update defect before production61was published: after a new worker activates through the old version-addressed script URL, re-registering another URL for identical worker bytes can install a second waiting worker. Reuse an existing canonical same-origin/admin registration across versions and call update(); create a registration only when no usable canonical worker exists. Preserve explicit update activation, draft protection, offline recovery and existing Auth/storage. The production artifact pin is re-reviewed after this narrow PWA fix; the earlier e082/b0b review artifacts remain superseded evidence rather than current release approval.
+
+
+## Change record — v4.3.62
+
+### ADDED
+
+- Read-only booking detail freshness notices, recoverable delivery-route progress and explicit ambiguous-write reconciliation.
+- Focused actual-function and browser regression checks for detail refresh, UI feedback, business calendar time, composite field focus, booking steps and route request recovery.
+
+### CHANGED
+
+Candidate4.3.62/build4362 prepares the following approved UI corrections:
+
+- Owner confirmed on 2026-11-15 that two-finger pinch zoom in installed PWA must remain blocked. Preserve lockStandaloneZoom, the production viewport policy and regression coverage. Do not classify the approved behavior as a defect. Text, controls and financial values must remain readable at the agreed scale.
+- Read-only booking detail must revalidate authoritative booking data after focus/visibility/pageshow and periodic live sync. An open dirty/busy form must keep its draft and save owner; a response arriving after navigation, session change or form opening must not overwrite it. A missing booking or failed read must show a truthful, recoverable notice without pretending current financial/status data is fresh. Preserve scroll/focus and read-only navigation.
+- The operational calendar uses Europe/Kyiv for its current day and clock even when the administrator device uses another timezone. Existing configured slot ends, strict end-minute comparison, backend reservation checks, rental dates and all financial/status rules remain unchanged. Calendar card/slot bounds must fit the actual content width in portrait and landscape; root overflow alone is insufficient QA.
+- Referral share must report the resolved clipboard result honestly, expose copyable fallback text on denial, keep native handoff within the user gesture and retain separate manual confirmation of actual sending. No automatic provider send or attribution mutation is added.
+- Mobile More navigation owns one cleanup/focus lifecycle for toggle, Escape, outside interaction, navigation and modal replacement. Settings tabs have associated panels and keyboard navigation. Time triggers identify pickup/return and current time. Async login errors are announced. Booking status names/data stay canonical with consistent visual semantics across breakpoints.
+- Shared form focus styling belongs to the entire composite input/unit wrapper. Inner input outlines must not be clipped into a second vertical blue stripe; retain a visible normal caret and keyboard focus. This applies to fuel prices/consumption and all equivalent Settings fields without changing values, input modes or save payloads.
+- Booking steps1–4 retain their numbered active/completed states without inherited decorative connector/pseudo lines or an extra border below the stepper.
+- Delivery-route refresh must have bounded visible progress, a recoverable end state and honest handling of an ambiguous save response. Preserve acknowledged progress and authoritative readback; never blindly duplicate a mutation after a lost response. Fuel/distance pricing formulas and server payload semantics are unchanged.
+- Prepare and verify this candidate separately from main. Production61, the verified stable46 rollback, original Supabase project and real business rows remain untouched during implementation. Any eventual production publication requires the configured release gates, exact reviewed artifact and actual postdeploy readback.
+
+### FIXED
+
+- Open detail no longer silently excludes authoritative resume reads; asynchronous responses cannot replace a later form, booking or session, and body-mounted action sheets remain protected.
+- Clipboard-denied feedback, departed-modal async callbacks, mobile More cleanup/focus and canonical status propagation through the mobile enhancers.
+- Landscape calendar card containment, contextual time labels, Settings tabs and login announcements.
+- Owner-reported clipped inner-input focus outline and inherited booking-step connector/border decoration.
+- Route refresh unbounded waiting and rerendered busy buttons; confirmed route-only metadata is preserved without overwriting financial fields.
+
+### PRESERVED
+
+- Owner-required pinch zoom blocking, canonical price/discount/deposit/prepayment/status/settlement rules, backend authorization and original production Supabase.
+- Explicit provider-send confirmation, dirty-form drafts, prior stable46 recovery and private R4 isolation. No SQL migration or production business-data write is part of candidate preparation.
+
+### TESTS
+
+- Actual-function regressions: test-admin-calendar-business-clock.mjs, test-admin-detail-live-refresh.mjs, test-admin-ui-feedback.mjs, test-admin-time-trigger-labels.mjs and test-admin-route-refresh-pending.mjs, plus the existing startup and current-contract suites.
+- Exact-artifact browser checks: admin_detail_live_refresh_qa.py, admin_ui_feedback_qa.py, admin_calendar_controls_qa.py, admin_settings_focus_stepper_qa.py and admin_route_refresh_qa.py. Remote endpoints are intercepted; they do not certify native iPhone behavior or production writes.
+- Canonical static/browser/WebKit, normal-artifact mobile forms and actual-worker46→candidate→46 gates remain required before publication.

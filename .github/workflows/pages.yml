@@ -213,6 +213,19 @@ jobs:
         run: npm run verify:production-artifact
       - name: Test normal operations with all remote traffic intercepted
         run: python scripts/admin_release_candidate_qa.py --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-${{ matrix.width }}
+      - name: Verify current feedback and read-only detail freshness
+        run: |
+          python scripts/admin_ui_feedback_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-feedback-${{ matrix.width }}
+          python scripts/admin_detail_live_refresh_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-detail-${{ matrix.width }}
+      - name: Verify narrow and landscape calendar containment and Settings focus
+        if: matrix.width == 440
+        run: |
+          python scripts/admin_calendar_controls_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --widths 320,440,956 --artifacts operations-test-results/${{ matrix.browser }}-calendar-controls
+          python scripts/admin_settings_focus_stepper_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-settings-focus
+          python scripts/admin_route_refresh_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-route-refresh
+      - name: Verify desktop calendar, status and contextual time controls
+        if: matrix.width == 1440
+        run: python scripts/admin_calendar_controls_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --widths 1440 --artifacts operations-test-results/${{ matrix.browser }}-calendar-controls-desktop
       - name: Test shipped mobile forms on the production artifact
         if: matrix.width == 440
         run: python scripts/mobile_forms_qa.py --browser ${{ matrix.browser }} --root release-candidate-test-results/dist --artifacts operations-test-results/${{ matrix.browser }}-forms

@@ -6,7 +6,7 @@ const checks=[
  ['read-first contacts',js.includes('client-contact-read')&&js.includes('clientContactEdit')],
  ['no referral quick action',!js.slice(js.indexOf('function openClientCard('),js.indexOf('function localDateIso',js.indexOf('function openClientCard('))).includes('client-referral-quick')],
  ['referral program stays accessible inside benefits',js.includes('clientOpenReferralDetails')&&js.includes('Переглянути програму')],
- ['benefits referral disclosure',js.includes('Бонуси й referral')&&js.includes('clientPromoInfo')&&js.includes('clientReferralInfo')],
+ ['benefits referral disclosure',js.includes('Бонуси та рекомендації')&&js.includes('clientPromoInfo')&&js.includes('clientReferralInfo')],
  ['document disclosure',js.includes('details class="modal-section client-secondary-section client-document-section"')],
  ['sms disclosure',js.includes('details class="modal-section client-secondary-section client-sms-section"')],
  ['history limited',js.includes('rentals.slice(0,3)')&&js.includes('clientHistoryMore')],

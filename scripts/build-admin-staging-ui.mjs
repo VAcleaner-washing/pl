@@ -42,8 +42,8 @@ for (const file of walk(target)) if (/\.(?:js|html|css|json|webmanifest|svg)$/.t
     value = replaceOne(value,
       "function adminLoginEmail(value){const login=String(value||'').trim().toLowerCase();if(login==='vacleaner'||login==='annanevidoma')return 'vahome.aroma@gmail.com';return login}",
       "function adminLoginEmail(value){const login=String(value||'').trim().toLowerCase();return({'manager-a':'manager-a@vacleaner-r4.invalid','manager-b':'manager-b@vacleaner-r4.invalid'})[login]||login}");
-    value = replaceOne(value, 'name="login" value="vacleaner"', 'name="login" value="manager-a" autocomplete="username"');
-    value = replaceOne(value, 'name="password" type="password" required', 'name="password" type="password" autocomplete="current-password" required');
+    value = replaceOne(value, 'name="login" value="vacleaner"', 'name="login" value="manager-a"');
+    if ((value.match(/<input\b(?=[^>]*\bname="password")(?=[^>]*\btype="password")(?=[^>]*\bautocomplete="current-password")(?=[^>]*\brequired(?:\s|>))[^>]*>/g)||[]).length !== 1) throw new Error('Canonical password autocomplete integration point drift');
     value = replaceOne(value, '<h1>Вхід в адмінку</h1><p>Бронювання, календар, клієнти й фінанси в одному місці.</p>',
       '<h1>Вхід у тестову R4</h1><p>Окремий тестовий пароль. Пароль робочої 46 тут не вводьте.</p>');
     value = replaceOne(value, "if(loginAlias==='vacleaner'||loginAlias==='annanevidoma')window.VA_STAGE_STORAGE.local.setItem(ADMIN_ALIAS_KEY,loginAlias);",

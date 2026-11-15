@@ -4,6 +4,11 @@ html[data-admin-lab] :is(.modal-form,.settings-section) .field>span{font-size:13
 html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea):not([type="hidden"],[type="checkbox"],[type="radio"],[type="file"]){min-height:44px;border-radius:var(--form-radius);border-color:var(--form-border);line-height:1.4}
 html[data-admin-lab] :is(.modal-form,.settings-section) :is(button,.btn,summary){min-height:44px}
 html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea,button):focus-visible{outline:3px solid var(--form-focus)!important;outline-offset:2px}
+/* Composite settings fields own one focus ring around input and unit together.
+   An outline on the inner input is clipped by the capsule's overflow and looks
+   like a second blue caret beside its unit in Safari. Keep the real caret. */
+html[data-admin-lab] :is(.settings-inline-field>div,.delivery-tariff-row label,.settings-origin-row>div,.settings-form-grid label>div,.equipment-baseline-row label>div):focus-within{outline:2px solid var(--form-focus)!important;outline-offset:0;border-color:var(--form-focus)!important}
+html[data-admin-lab] :is(.settings-inline-field>div,.delivery-tariff-row label,.settings-origin-row>div,.settings-form-grid label>div,.equipment-baseline-row label>div)>input:focus-visible{outline:0!important;box-shadow:none!important}
 html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea)[aria-invalid="true"]{border-color:#ff8e88!important;box-shadow:0 0 0 1px #ff8e88!important}
 html[data-admin-lab] .field>.lab-field-error{display:block;font-size:13px!important;font-weight:500;line-height:1.45;color:var(--form-error)!important;letter-spacing:normal;text-transform:none}
 html[data-admin-lab] :is(.modal-form,.settings-section) :is(button,input,select,textarea):disabled{opacity:.6;cursor:default}
@@ -20,6 +25,10 @@ html[data-admin-lab] .status.issued{color:#b2d4ff!important;background:#17354e!i
 html[data-admin-lab] .status.waiting_payment{color:#ffe2a7!important;background:#372b18!important;border-color:#8a6e34!important}
 html[data-admin-lab] .status.cancelled{color:#ffb4ac!important;background:#391f23!important;border-color:#815058!important}
 @media(max-width:900px){
+ /* The numbered booking steps are four independent circles. Remove legacy
+    connector/underline decoration without changing their active-step state. */
+ html[data-admin-lab] .booking-form>header .mobile-booking-progress{position:relative!important;top:auto!important;margin:9px 0 0!important;padding:0!important;border:0!important;box-shadow:none!important;background:transparent!important}
+ html[data-admin-lab] .booking-form>header .mobile-booking-progress::before,html[data-admin-lab] .booking-form>header .mobile-booking-progress::after{content:none!important;display:none!important}
  html[data-admin-lab] :is(.modal-form,.settings-section) :is(input,select,textarea):not([type="hidden"],[type="checkbox"],[type="radio"],[type="file"]){font-size:16px!important}
  html[data-admin-lab].keyboard-open:not([data-lab-zooming]){--lab-modal-top:max(var(--lab-bar),var(--keyboard-viewport-top,0px));--lab-modal-height:calc(var(--keyboard-viewport-height,100dvh) - max(0px,calc(var(--lab-bar) - var(--keyboard-viewport-top,0px))))}
  html[data-admin-lab].keyboard-open:not([data-lab-zooming]) .modal{top:var(--lab-modal-top)!important;height:var(--lab-modal-height)!important;max-height:var(--lab-modal-height)!important}

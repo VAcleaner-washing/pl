@@ -7105,3 +7105,37 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 #bookingForm .admin-logistics-toggle button.active{border-color:rgba(224,190,120,.72);background:rgba(224,190,120,.13);box-shadow:inset 0 0 0 1px rgba(224,190,120,.16)}
 #bookingForm .admin-logistics-note{grid-column:1/-1;margin:0;padding:0 2px}
 @media(max-width:680px){#bookingForm .admin-logistics-grid{grid-template-columns:1fr}#bookingForm .admin-logistics-note{grid-column:auto}}
+
+/* v4.3.62 — calendar columns follow available content, including a desktop sidebar. */
+@media(min-width:901px){
+  .calendar-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,352px),1fr))}
+  .calendar-grid>.day-card{min-width:0;overflow:visible}
+  .day-card .day-labels,.day-card .day-row{grid-template-columns:minmax(76px,1.15fr) repeat(2,minmax(0,1fr));width:100%;min-width:0}
+  .day-card .day-labels>*,.day-card .day-row>*{min-width:0;max-width:100%}
+  .day-card .day-row>.slot{width:100%;padding-inline:4px;white-space:normal;overflow-wrap:anywhere}
+}
+
+/* One status language for canonical desktop and the existing mobile detail. */
+.hero-status[data-status]{border:1px solid transparent}
+.hero-status[data-status="pending"]{color:#79b5ff;border-color:rgba(121,181,255,.5);background:rgba(52,101,160,.12)}
+.hero-status[data-status="waiting_payment"]{color:#efbd61;border-color:rgba(239,189,97,.5);background:rgba(151,103,24,.12)}
+.hero-status[data-status="confirmed"],.hero-status[data-status="issued"]{color:#5ce09e;border-color:rgba(92,224,158,.5);background:rgba(25,119,78,.12)}
+.hero-status[data-status="completed"]{color:#a8b0b4;border-color:rgba(168,176,180,.4);background:rgba(94,104,109,.11)}
+.hero-status[data-status="cancelled"],.hero-status[data-status="declined"]{color:#ef817b;border-color:rgba(239,129,123,.48);background:rgba(144,55,51,.11)}
+.detail-top:has(.live-detail-notice){flex-wrap:wrap}
+.detail-top .live-detail-notice{grid-column:1/-1;flex-basis:100%;width:100%;min-width:0;white-space:normal}
+.delivery-route-status{flex-basis:100%;width:100%;margin:6px 0 0;font-size:13px;line-height:1.45}
+:is(.route-refresh-note,.delivery-route-partial,.delivery-route-missing):has(.delivery-route-status){flex-wrap:wrap}
+.route-refresh-note:has(.delivery-route-status){flex-wrap:wrap}
+.delivery-route-status{flex-basis:100%;width:100%;min-width:0;margin:6px 0 0;font-size:13px;line-height:1.45;white-space:normal}
+
+/* Campaign actions keep their compact layout with complete 44px touch areas. */
+.campaign-workspace .campaign-head-actions .btn,
+.campaign-workspace .campaign-actions .btn,
+.campaign-more-menu button{min-height:44px;height:auto}
+.campaign-more{width:44px;min-width:44px}
+.campaign-more>summary{width:44px;height:44px;min-width:44px;min-height:44px}
+.campaign-more-menu{top:50px}
+@media(max-width:760px){
+  .campaign-workspace .campaign-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+}
