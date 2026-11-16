@@ -101,13 +101,15 @@ def booking_fulfillment_case(page, width, evidence):
         expect(page.locator('#booking-contact textarea')).to_have_value('Лише локальна перевірка відновлення')
 
     def wait_for_draft(mode):
-        page.wait_for_function("""({key, mode, start, finish}) => {
+        page.wait_for_function("""({key, mode, start, finish, requireStep}) => {
             const draft = JSON.parse(sessionStorage.getItem(key) || 'null');
             return draft?.fulfillment === mode && draft.product === 'puzzi_jimmy'
                 && draft.controls?.['date-0']?.value === start && draft.controls?.['date-1']?.value === finish
                 && draft.controls?.phone?.value === '+380951111111'
-                && draft.controls?.comment?.value === 'Лише локальна перевірка відновлення';
-        }""", arg={'key': DRAFT_KEY, 'mode': mode, 'start': start, 'finish': finish})
+                && draft.controls?.comment?.value === 'Лише локальна перевірка відновлення'
+                && (!requireStep || draft.step === 2
+                    && Number(document.querySelector('.booking-form')?.dataset.vxActiveStep) === 2);
+        }""", arg={'key': DRAFT_KEY, 'mode': mode, 'start': start, 'finish': finish, 'requireStep': mobile})
 
     def reload_draft(mode):
         wait_for_draft(mode)
