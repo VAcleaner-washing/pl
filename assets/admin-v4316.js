@@ -62,6 +62,7 @@
     const value = validTime(input.value) ? input.value : '08:00';
     const valueNode = trigger.querySelector('.admin-v4315-time-value');
     if (valueNode) valueNode.textContent = value;
+    trigger.setAttribute('aria-label', `${contextTitle(input)}, ${value}`);
   }
 
   function makeOption(time, current, offGrid = false) {

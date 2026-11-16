@@ -66,6 +66,8 @@ function detailUI(){
  if(primary&&!detail.querySelector('.lab-action-dock')){
   const dock=el('div','lab-action-dock'),label=el('span','',text(detail.querySelector('.detail-top-meta span'))),button=el('button','btn primary',text(primary));button.type='button';button.onclick=()=>primary.click();dock.append(label,button);detail.append(dock);primary.classList.add('lab-original-primary');
  }
+ const dockButton=detail.querySelector('.lab-action-dock button');
+ if(primary&&dockButton){const disabled=primary.disabled||detail.dataset.liveDetailStale==='true';if(dockButton.disabled!==disabled)dockButton.disabled=disabled}
  // R4 uses real layout rows: keep the original header node/listeners, and
  // let only the content shell scroll between the header and delegated action.
  if(hosted){
@@ -142,7 +144,7 @@ if(hosted){
 }
 const observer=new MutationObserver(()=>{timeUI();schedule()});
 observer.observe(document.querySelector('#adminMount'),{childList:true,subtree:true});
-observer.observe(document.querySelector('#layer'),{childList:true,subtree:true});
+observer.observe(document.querySelector('#layer'),{childList:true,subtree:true,attributes:true,attributeFilter:['disabled']});
 observer.observe(document.body,{childList:true});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!panel.hidden){panel.hidden=true;tools.setAttribute('aria-expanded','false');tools.focus()}});
 schedule();

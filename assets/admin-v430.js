@@ -179,7 +179,7 @@
       if(name==='Vadim')name='Вадим';
       const card=document.createElement('button');
       card.type='button';
-      card.className='native-profile-card';
+      card.className='native-profile-card';card.setAttribute('role','menuitem');card.tabIndex=-1;
       card.innerHTML=`<i>VA</i><span><b>${name}</b><small>Адміністратор</small></span><em>›</em>`;
       card.onclick=()=>document.querySelector('[data-more-view="settings"]')?.click();
       const grid=menu.querySelector('.mobile-more-grid');
@@ -188,7 +188,7 @@
     if(!menu.querySelector('.native-data-refresh')){
       const refresh=document.createElement('button');
       refresh.type='button';
-      refresh.className='native-data-refresh';
+      refresh.className='native-data-refresh';refresh.setAttribute('role','menuitem');refresh.tabIndex=-1;
       refresh.setAttribute('aria-label','Оновити дані');
       refresh.innerHTML='<i aria-hidden="true">↻</i><span><b>Оновити дані</b><small>Автоматично кожні 15 с</small></span>';
       refresh.onclick=async()=>{
@@ -240,7 +240,7 @@
     const hero=detail.querySelector('.detail-hero');
     const heroStatus=detail.querySelector('.hero-status');
     const statusText=cleanText(heroStatus).replace(/^✓\s*/,'').toLowerCase();
-    const statusClass=statusText.includes('видана')?'issued':statusText.includes('повернен')?'completed':statusText.includes('очікує')?'waiting_payment':statusText.includes('нова')?'pending':statusText.includes('скас')?'cancelled':'confirmed';
+    const canonicalStatus=String(heroStatus?.dataset.status||''),statusClass=['pending','waiting_payment','confirmed','issued','completed','cancelled','declined'].includes(canonicalStatus)?canonicalStatus:statusText.includes('видана')?'issued':statusText.includes('повернен')?'completed':statusText.includes('очікує')?'waiting_payment':statusText.includes('нова')?'pending':statusText.includes('скас')?'cancelled':statusText.includes('відхилен')?'declined':'confirmed';
     const flow=detail.querySelector('.flow');
     if(flow)flow.classList.add('native-detail-flow');
     const grid=detail.querySelector('.detail-grid');

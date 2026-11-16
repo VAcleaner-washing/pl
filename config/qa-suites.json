@@ -58,7 +58,12 @@
     "test:process-profile-race",
     "test:stable-4346",
     "test:pwa-worker-wait",
-    "test:pwa-registration-reuse"
+    "test:pwa-registration-reuse",
+    "test:calendar-business-clock",
+    "test:detail-live-refresh",
+    "test:ui-feedback",
+    "test:time-trigger-labels",
+    "test:route-refresh-pending"
   ],
   "browser": [
     "test:public-hydration",

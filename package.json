@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.61",
+  "version": "4.3.62",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -127,6 +127,11 @@
     "test:production-promotion": "node scripts/test-admin-production-release.mjs",
     "test:stable-4346": "node scripts/test-stable-4346.mjs",
     "test:pwa-worker-wait": "node scripts/test-pwa-worker-wait.mjs",
-    "test:pwa-registration-reuse": "node scripts/test-pwa-registration-reuse.mjs"
+    "test:pwa-registration-reuse": "node scripts/test-pwa-registration-reuse.mjs",
+    "test:calendar-business-clock": "node scripts/test-admin-calendar-business-clock.mjs",
+    "test:detail-live-refresh": "node scripts/test-admin-detail-live-refresh.mjs",
+    "test:ui-feedback": "node scripts/test-admin-ui-feedback.mjs",
+    "test:time-trigger-labels": "node scripts/test-admin-time-trigger-labels.mjs",
+    "test:route-refresh-pending": "node scripts/test-admin-route-refresh-pending.mjs"
   }
 }

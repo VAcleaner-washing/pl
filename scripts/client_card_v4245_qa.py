@@ -45,7 +45,7 @@ with sync_playwright() as p:
                 check(len(action_widths)<3 or max(action_widths[:-1])-min(action_widths[:-1])<4,f'{label}: paired primary actions use equal fill')
             check(not form.locator('.client-contact-edit-fields').is_visible(),f'{label}: edit fields hidden by default')
             titles=[x.strip() for x in form.locator('details.client-secondary-section>summary b').all_text_contents()]
-            check(titles==['Бонуси й referral','Документ','SMS'],f'{label}: secondary information is progressive disclosure')
+            check(titles==['Бонуси та рекомендації','Документ','SMS'],f'{label}: secondary information is progressive disclosure')
             check(all(not form.locator('details.client-secondary-section').nth(i).evaluate('e=>e.open') for i in range(form.locator('details.client-secondary-section').count())),f'{label}: secondary sections closed by default')
             if label=='desktop-1440':
                 grid=form.locator('.client-card-grid-v245').evaluate("e=>getComputedStyle(e).gridTemplateColumns")

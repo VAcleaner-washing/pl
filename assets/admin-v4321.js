@@ -98,9 +98,10 @@ function buildHistory(detail){
   });
 }
 function styleStatus(detail,nativeCard){
-  const status=String(nativeCard.dataset.status||'confirmed');
-  detail.dataset.v4321Status=status;
   const pill=detail.querySelector('.hero-status');
+  const canonicalStatus=String(pill?.dataset.status||''),status=['pending','waiting_payment','confirmed','issued','completed','cancelled','declined'].includes(canonicalStatus)?canonicalStatus:String(nativeCard.dataset.status||'confirmed');
+  detail.dataset.v4321Status=status;
+  nativeCard.dataset.status=status;
   if(!pill)return;
   const text=clean(pill).replace(/^✓\s*/,'');
   if(text&&pill.textContent!==text)pill.textContent=text;
@@ -110,7 +111,8 @@ function styleStatus(detail,nativeCard){
     waiting_payment:['#efbd61','rgba(239,189,97,.5)','rgba(151,103,24,.12)'],
     pending:['#79b5ff','rgba(121,181,255,.5)','rgba(52,101,160,.12)'],
     completed:['#a8b0b4','rgba(168,176,180,.4)','rgba(94,104,109,.11)'],
-    cancelled:['#ef817b','rgba(239,129,123,.48)','rgba(144,55,51,.11)']
+    cancelled:['#ef817b','rgba(239,129,123,.48)','rgba(144,55,51,.11)'],
+    declined:['#ef817b','rgba(239,129,123,.48)','rgba(144,55,51,.11)']
   }[status]||['#5ce09e','rgba(92,224,158,.5)','rgba(25,119,78,.12)'];
   pill.style.setProperty('color',palette[0],'important');
   pill.style.setProperty('border-color',palette[1],'important');

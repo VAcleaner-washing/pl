@@ -11,15 +11,15 @@ function startupHarness(){
   const context={console,Date,JSON,Promise,
     state:{moduleErrors:{},bookings:[],expenses:[],calendar:[],customers:[],campaigns:[],referrals:{},dataLoaded:false,view:'bookings'},
     initialDataLoadPromise:null,fullDataRefreshPromise:null,liveBookingSyncBusy:false,lastLiveBookingFingerprint:'',liveBookingSyncTimer:0,LIVE_BOOKING_SYNC_MS:15000,
-    document:{visibilityState:'visible',addEventListener:(...args)=>listeners.push(args)},navigator:{onLine:true},
+    document:{visibilityState:'visible',querySelector:()=>null,addEventListener:(...args)=>listeners.push(args)},navigator:{onLine:true},
     window:{setInterval:fn=>{timers.add(fn);return fn},addEventListener:(...args)=>listeners.push(args)},clearInterval:fn=>timers.delete(fn),
-    $:()=>null,getSession:()=>({access_token:'fixture'}),todayIso:()=> '2026-10-21',
+    $:()=>null,getSession:()=>({access_token:'fixture'}),todayIso:()=> '2026-10-21',calendarBusinessClock:()=>({date:'2026-10-22',minutes:30}),
     loadGlobalSlots:()=>{settingsCalls++;return settings.promise},
     recalcCalendarSlots:days=>{assert.equal(settings.ready,true,'settings must settle before calendar calculation');recalculations++;return days},renderBadges:()=>{},renderAfterLiveSync:()=>{renders++},renderLoadError:()=>{},toast:()=>{}};
   context.invokeData=context.invoke=body=>{const result=deferred();reads.push({body,...result});return result.promise};
   vm.createContext(context);
   const initial=source.slice(source.indexOf('async function load('),source.indexOf('let referralAnalyticsPromise='));
-  const live=source.slice(source.indexOf('async function syncBookingsLive('),source.indexOf('const ico='));
+  const live=source.slice(source.indexOf('const liveDetailNotices='),source.indexOf('const ico='));
   const fingerprint=source.match(/^function liveBookingFingerprint.*$/m)[0];
   vm.runInContext(`${initial}\n${fingerprint}\n${live}\nglobalThis.api={loadStartupData,syncBookingsLive,startLiveBookingSync};`,context);
   return{...context.api,context,settings,reads,listeners,timers,get settingsCalls(){return settingsCalls},get recalculations(){return recalculations},get renders(){return renders},complete(){settings.ready=true;settings.resolve();for(const read of reads)read.resolve({bookings:[{id:'fixture',status:'confirmed'}],expenses:[{amount:10}],days:[{date:'2026-10-21'}],customers:[{id:'customer'}],campaigns:[],rewards:[]})}};
@@ -28,6 +28,7 @@ function startupHarness(){
 await test('settings and all five reads begin together; repeated startup joins one promise',async()=>{
   const h=startupHarness(),first=h.loadStartupData();
   assert.equal(h.reads.length,5);assert.equal(h.settingsCalls,1);assert.equal(h.loadStartupData(),first);
+  assert.equal(h.reads.find(read=>read.body.action==='calendar').body.from,'2026-10-22','calendar loading uses the business day even when the general device day differs');
   for(const read of h.reads)read.resolve({bookings:[{id:'fixture'}],days:[]});
   await Promise.resolve();await Promise.resolve();assert.equal(h.context.state.dataLoaded,false);
   h.settings.ready=true;h.settings.resolve();await first;

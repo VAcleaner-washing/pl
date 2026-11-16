@@ -1,23 +1,53 @@
 {
-  "version": "4.3.61",
-  "build": 4361,
-  "reviewMode": "production-pwa-fix-revalidation",
-  "baselineApplicationSourceCommit": "4cfc1ba41756eecfd1798f3786e58f2c66fbd867",
+  "version": "4.3.62",
+  "build": 4362,
+  "reviewMode": "frontend-read-freshness-mobile-controls-revalidation",
+  "baselineApplicationSourceCommit": "76b83bad27c8a61bd9dccd7422d4342fe9633ea1",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "de4271a0b39af73bee2bff2ad95f0deb1d8a1847ee71d78b9e0068265a8b01fc",
-      "reason": "Reuse an existing canonical admin service-worker registration across build URLs; avoid a redundant waiting worker after activation without forcing activation."
+      "sha256": "925cf67019e57b1a5efbcb9956e1e36c31cc17045aea5b10bafa4d15758506b8",
+      "reason": "Read-only detail freshness, protected async ownership, canonical status/labels, Kyiv calendar clock and bounded route recovery; business formulas preserved."
+    },
+    {
+      "path": "assets/admin-v250.css",
+      "sha256": "bf645fe38cc783f7de472dac9c92ee8d926691e63e64a054d22563aef3227983",
+      "reason": "Calendar card containment, semantic status, safe notices and touch targets."
+    },
+    {
+      "path": "assets/admin-v430.js",
+      "sha256": "03d3aca1a4519cc7f220c2f194f428aa9fd5b712416cf9c49dc4d06fad24091e",
+      "reason": "Menu keyboard actions and canonical mobile status propagation."
+    },
+    {
+      "path": "assets/admin-v4316.js",
+      "sha256": "38d782f81b5fab7a2c24d82dbd7ed19e621a42ca8bfdb352bfe7621caa4224d1",
+      "reason": "Context-rich time trigger names."
+    },
+    {
+      "path": "assets/admin-v4321.js",
+      "sha256": "0a6f7b616d48fd12e502017a11f3d3eeacbdc2afc0eef9c8742c2386be74f966",
+      "reason": "Canonical mobile status palette including declined."
+    },
+    {
+      "path": "assets/address-autocomplete.js",
+      "sha256": "877126f0bf690616bd5679c06303ac9c8c9d344a8115b58d17a93aaa9fc51ccf",
+      "reason": "Bounded historical route requests with abort propagation."
+    },
+    {
+      "path": "sandbox/ui.js",
+      "sha256": "eca6c245f030feaf285a06db2c8bded5d5c2bb6d58ae4cbb4360c1fb8b7122d0",
+      "reason": "Delegated detail action follows canonical disabled/stale state through asynchronous creation, recreation and successful read recovery."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "b53be1c5e112cf70358ce8d575ffd6d88964d1d943ecc189e6acc1696cad76d4",
+  "artifactTreeSha256": "24aabedb22bb71199e3409becf2f85d0e116d93c4221cc7958886a62d87afea1",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "97d5c7145bd4ddb45101ea07bc77b7ec33693d8294dd39e3eb022e4133127145",
+  "reviewArchiveSha256": "73430f9009c66528bcce3d6dacfb8c58526c718f7174c7b0193c433909d47852",
   "baselineReviewRuns": {
-    "canonical": 43429348543,
-    "normalCandidate": 43429348689
+    "production61": 43607449279
   },
   "releaseGatePolicy": "All configured canonical, WebKit, operations and actual-worker gates must pass on the final publishing commit; baseline runs do not certify this fix.",
-  "privateLabOrR4OriginInstallation": "prohibited"
+  "privateLabOrR4OriginInstallation": "prohibited",
+  "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner."
 }
