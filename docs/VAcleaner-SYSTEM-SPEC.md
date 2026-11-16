@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.62
-**Baseline build:** 4362
-**Останнє оновлення:** 2026-11-15
+**Baseline version:** 4.3.63
+**Baseline build:** 4363
+**Останнє оновлення:** 2026-11-16
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -834,6 +834,8 @@ Draft включає щонайменше:
 
 Після успішного booking draft очищається.
 
+Автозбереження не може перезаписати збережену чернетку порожнім станом ініціалізації до першої спроби відновлення. Поточне явне введення користувача має пріоритет над відкладеним replay старої чернетки; програмні події відновлення не вважаються новою взаємодією користувача.
+
 ## PUBBOOK-004 — крок 2 / дати і слоти
 
 Слоти:
@@ -870,6 +872,8 @@ Availability перевіряється по фактичних `resources`, а 
 
 - Самовивіз · Полтава · 0 грн;
 - Доставка.
+
+На новій формі спосіб отримання початково не обрано. Static HTML і hydrated React state мають однаково показувати обидві кнопки без виділення, доки клієнт не натисне «Самовивіз» або «Доставка». Одне лише підсвічування не є вибором. Після натискання виділено рівно один варіант, а перехід до контактів відповідає справжньому стану форми та перевірці адреси. Збережений у draft вибір відновлюється через канонічну дію форми; schema/TTL і пріоритет external preset не змінюються.
 
 Для самовивозу точну точку отримання не публікуємо автоматично; менеджер повідомляє її при опрацюванні заявки.
 
@@ -5828,3 +5832,32 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 - Actual-function regressions: test-admin-calendar-business-clock.mjs, test-admin-detail-live-refresh.mjs, test-admin-ui-feedback.mjs, test-admin-time-trigger-labels.mjs and test-admin-route-refresh-pending.mjs, plus the existing startup and current-contract suites.
 - Exact-artifact browser checks: admin_detail_live_refresh_qa.py, admin_ui_feedback_qa.py, admin_calendar_controls_qa.py, admin_settings_focus_stepper_qa.py and admin_route_refresh_qa.py. Remote endpoints are intercepted; they do not certify native iPhone behavior or production writes.
 - Canonical static/browser/WebKit, normal-artifact mobile forms and actual-worker46→candidate→46 gates remain required before publication.
+
+## Change record — v4.3.63
+
+### ADDED
+
+- Public fulfillment regression coverage for exported markup, hydrated state, first delivery selection, address validation, pickup advancement and real pickup/delivery draft restoration on mobile, desktop and delayed JavaScript.
+- Actual-function draft-bootstrap timing regressions include the frozen62 autosave counterexample, startup write protection, deferred replay and current-input ownership.
+
+### CHANGED
+
+- PUBBOOK-006 explicitly records the existing empty initial fulfillment state. Both exported choice buttons start unselected, matching the retained React form. The static hydration normalizer preserves this parity on every build.
+
+### FIXED
+
+- Public booking step3 no longer shows pickup selected while the actual form still requires a choice. Initial HTML's stale selected class also no longer creates two highlighted options on the first delivery selection or pollutes draft collection/restoration.
+- Startup autosave no longer erases a stored draft before delayed restoration. A current trusted edit cancels pending/deferred replay so that older values cannot overwrite newly entered data.
+
+### PRESERVED
+
+- Explicit pickup/delivery choice, delivery address requirements, prices, deposits, availability, discounts, backend payloads and creation validation.
+- Existing draft schema2/TTL/external preset priority and all entered customer/date/address fields. Old draft intent cannot be inferred retrospectively from its previously stored fulfillment value; no drafts are cleared or rewritten by a migration.
+- All admin/PWA behavior, owner-required pinch blocking, original production Supabase, backend and stable recovery archives. Production4.3.62 is not changed by candidate preparation.
+
+### TESTS
+
+- scripts/public_hydration_qa.py keeps its full default public-route coverage and includes actual booking fulfillment/CTA/draft checks in desktop, mobile and delayed-JavaScript cases. --booking-only is a focused local mode and does not replace the required full CI suite.
+- scripts/test-public-booking-draft-bootstrap.mjs exercises actual bootstrap/save/restore functions with controlled timers and no external API calls.
+- Frozen production62 artifact reproduces the mismatch; fixed artifact must pass while all external traffic remains intercepted and no booking creation is requested.
+- Canonical static/browser/WebKit and exact normal-artifact operations gates remain required before publication.
