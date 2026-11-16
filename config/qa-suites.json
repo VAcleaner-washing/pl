@@ -63,7 +63,8 @@
     "test:detail-live-refresh",
     "test:ui-feedback",
     "test:time-trigger-labels",
-    "test:route-refresh-pending"
+    "test:route-refresh-pending",
+    "test:public-draft-bootstrap"
   ],
   "browser": [
     "test:public-hydration",

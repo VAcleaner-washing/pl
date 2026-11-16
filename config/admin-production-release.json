@@ -1,51 +1,31 @@
 {
-  "version": "4.3.62",
-  "build": 4362,
-  "reviewMode": "frontend-read-freshness-mobile-controls-revalidation",
-  "baselineApplicationSourceCommit": "76b83bad27c8a61bd9dccd7422d4342fe9633ea1",
+  "version": "4.3.63",
+  "build": 4363,
+  "reviewMode": "public-fulfillment-and-draft-bootstrap",
+  "baselineApplicationSourceCommit": "c180af6e4043386960f6f57cccceee1170ceab9f",
   "applicationFixes": [
     {
-      "path": "assets/admin-v250.js",
-      "sha256": "925cf67019e57b1a5efbcb9956e1e36c31cc17045aea5b10bafa4d15758506b8",
-      "reason": "Read-only detail freshness, protected async ownership, canonical status/labels, Kyiv calendar clock and bounded route recovery; business formulas preserved."
+      "path": "bronuvannia/index.html",
+      "sha256": "4378d68c5ef540972661b4e2a29b40c9a6041b78b9c0cb90fd42f7bb831d476c",
+      "reason": "Initial fulfillment buttons match the existing empty React state; selection only follows an explicit choice."
     },
     {
-      "path": "assets/admin-v250.css",
-      "sha256": "bf645fe38cc783f7de472dac9c92ee8d926691e63e64a054d22563aef3227983",
-      "reason": "Calendar card containment, semantic status, safe notices and touch targets."
+      "path": "assets/booking-hardening-v4144.js",
+      "sha256": "2edac54c5e41680ec39cbd8bba3f473d555760a406e3e0069ac5fbbf9b8c8b0b",
+      "reason": "Protect draft data from startup autosave and preserve current trusted input over deferred replay."
     },
     {
-      "path": "assets/admin-v430.js",
-      "sha256": "03d3aca1a4519cc7f220c2f194f428aa9fd5b712416cf9c49dc4d06fad24091e",
-      "reason": "Menu keyboard actions and canonical mobile status propagation."
-    },
-    {
-      "path": "assets/admin-v4316.js",
-      "sha256": "38d782f81b5fab7a2c24d82dbd7ed19e621a42ca8bfdb352bfe7621caa4224d1",
-      "reason": "Context-rich time trigger names."
-    },
-    {
-      "path": "assets/admin-v4321.js",
-      "sha256": "0a6f7b616d48fd12e502017a11f3d3eeacbdc2afc0eef9c8742c2386be74f966",
-      "reason": "Canonical mobile status palette including declined."
-    },
-    {
-      "path": "assets/address-autocomplete.js",
-      "sha256": "877126f0bf690616bd5679c06303ac9c8c9d344a8115b58d17a93aaa9fc51ccf",
-      "reason": "Bounded historical route requests with abort propagation."
-    },
-    {
-      "path": "sandbox/ui.js",
-      "sha256": "eca6c245f030feaf285a06db2c8bded5d5c2bb6d58ae4cbb4360c1fb8b7122d0",
-      "reason": "Delegated detail action follows canonical disabled/stale state through asynchronous creation, recreation and successful read recovery."
+      "path": "scripts/sync-public-hydration.mjs",
+      "sha256": "d46aaed45c6b910a2653866d1a6620ed67c31eecf54ca18a4c26e655cf9b5a77",
+      "reason": "Keep exported fulfillment markup aligned with the retained client state on every build."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "24aabedb22bb71199e3409becf2f85d0e116d93c4221cc7958886a62d87afea1",
+  "artifactTreeSha256": "b352e02782f86b9f650ea484a518f0fd5cc247e2ef24a98b244ef84089a18ece",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "73430f9009c66528bcce3d6dacfb8c58526c718f7174c7b0193c433909d47852",
+  "reviewArchiveSha256": "a87cce96a494eea0c8c2fee65cbcd91ff059c8653dd1e81e6118128a2eccf45f",
   "baselineReviewRuns": {
-    "production61": 43607449279
+    "production62": 43874287227
   },
   "releaseGatePolicy": "All configured canonical, WebKit, operations and actual-worker gates must pass on the final publishing commit; baseline runs do not certify this fix.",
   "privateLabOrR4OriginInstallation": "prohibited",

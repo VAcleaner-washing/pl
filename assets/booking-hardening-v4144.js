@@ -49,10 +49,11 @@ function collect(){
   const fulfillment=$('#booking-extras .booking-choice-row button.is-selected,#booking-extras .booking-choice-row button[aria-pressed="true"]');
   return {schema:2,savedAt:Date.now(),product:selectedProduct(),task:$('#booking-products')?.dataset.vxSmartTask||'',fulfillment:norm(fulfillment?.textContent).startsWith('Доставка')?'delivery':norm(fulfillment?.textContent).startsWith('Самовивіз')?'pickup':'',controls,step:Number(form.dataset.vxActiveStep||0)};
 }
-function save(){try{const d=collect();if(d)sessionStorage.setItem(KEY,JSON.stringify(d))}catch{}}
+function save(){if(initialRestorePending||restoring)return;try{const d=collect();if(d)sessionStorage.setItem(KEY,JSON.stringify(d))}catch{}}
 function read(){try{const d=JSON.parse(sessionStorage.getItem(KEY)||'null');if(!d||d.schema!==2||Date.now()-Number(d.savedAt||0)>TTL){sessionStorage.removeItem(KEY);return null}return d}catch{return null}}
 function clear(){try{sessionStorage.removeItem(KEY)}catch{}}
-let restoring=false;
+let restoring=false,initialRestorePending=true,initialRestoreCancelled=false;
+function respectCurrentInteraction(event){if((initialRestorePending||restoring)&&event.isTrusted){initialRestorePending=false;initialRestoreCancelled=true;restoring=false}}
 function applyControl(key,state){
   const form=$('.booking-form');if(!form)return false;
   const el=$$('input,select,textarea',form).find(x=>controlKey(x)===key);
@@ -68,6 +69,8 @@ function applyControl(key,state){
   return true;
 }
 function restore(){
+  if(initialRestoreCancelled)return;
+  initialRestorePending=false;
   if(hasExternalPreset())return;
   const d=read();if(!d)return;
   restoring=true;
@@ -83,6 +86,7 @@ function restore(){
   }
   let attempts=0;
   const replay=()=>{
+    if(initialRestoreCancelled){restoring=false;return}
     attempts++;
     let missing=0;
     for(const [k,v] of Object.entries(d.controls||{}))if(!applyControl(k,v))missing++;
@@ -98,11 +102,12 @@ function restore(){
   setTimeout(replay,120);
 }
 let saveTimer=0;
-function scheduleSave(){if(restoring)return;clearTimeout(saveTimer);saveTimer=setTimeout(save,180)}
+function scheduleSave(){if(initialRestorePending||restoring)return;clearTimeout(saveTimer);saveTimer=setTimeout(save,180)}
 function bindPersistence(){
   const form=$('.booking-form');if(!form||form.dataset.vxDraftBound)return;
   form.dataset.vxDraftBound='1';
-  form.addEventListener('input',scheduleSave,true);form.addEventListener('change',scheduleSave,true);form.addEventListener('click',e=>{if(e.target.closest('button'))setTimeout(scheduleSave,30)},true);
+  const onEdit=event=>{respectCurrentInteraction(event);scheduleSave()};
+  form.addEventListener('input',onEdit,true);form.addEventListener('change',onEdit,true);form.addEventListener('click',e=>{respectCurrentInteraction(e);if(e.target.closest('button'))setTimeout(scheduleSave,30)},true);
   const observer=new MutationObserver(()=>scheduleSave());observer.observe(form,{subtree:true,attributes:true,attributeFilter:['aria-pressed','class','data-vx-active-step'],childList:true});
   const successObserver=new MutationObserver(()=>{if(document.querySelector('.booking-success'))clear()});successObserver.observe(document.body,{childList:true,subtree:true});
 }

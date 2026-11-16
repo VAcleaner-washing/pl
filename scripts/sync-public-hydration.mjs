@@ -145,6 +145,12 @@ for(const file of files(root).filter(file=>file.endsWith('.html'))){
   html=html.replace(/class="v21-action-note">[^<]*/g,'class="v21-action-note">Не знаєте, що обрати? Пройдіть короткий підбір — сайт сам запропонує техніку й засоби під вашу задачу.');
   if(path.relative(root,file)==='bronuvannia/index.html'){
     html=html.replace(/<small>(Будні · [^<]*)<\/small>/g,(_,price)=>`<small>${price.replace(/(\d) (?=\d{3}\b)/g,'$1\u00a0')}</small>`);
+    // The retained React form starts with empty fulfillment and waits for an
+    // explicit choice. Hydration does not repair a stale server class, which
+    // also makes draft collection mistake the visual default for a real choice.
+    const fulfillmentRow=html.match(/<div class="booking-choice-row">[\s\S]*?<\/div>/);
+    if(!fulfillmentRow||(fulfillmentRow[0].match(/<button\b/g)||[]).length!==2)throw new Error('Initial fulfillment choice markup drifted');
+    html=html.replace(fulfillmentRow[0],fulfillmentRow[0].replace(/(<button\b[^>]*\bclass=")([^"]*)(")/g,(_,before,classes,after)=>before+classes.split(/\s+/).filter(name=>name&&name!=='is-selected').join(' ')+after));
     const extras=JSON.parse(read('config/vacleaner.json')).catalog.extras;
     const codes=new Map(Object.entries(extras).flatMap(([code,item])=>[item.label,...(item.aliases||[])].map(label=>[label,code])));
     html=html.replace(/<label([^>]*)>([\s\S]*?<\/label>)/g,(full,attrs,body)=>{
