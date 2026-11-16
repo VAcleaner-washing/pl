@@ -1,0 +1,96 @@
+{
+  "checkedAt": "2026-11-16T13:38:45.474731+00:00",
+  "scope": "Live static production files, including immutable46 and previous61 retained worker script URLs",
+  "businessDataRequests": 0,
+  "checks": [
+    {
+      "path": "admin/sw.js",
+      "status": 200,
+      "sha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "expectedSha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4346",
+      "status": 200,
+      "sha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "expectedSha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4361",
+      "status": 200,
+      "sha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "expectedSha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4362",
+      "status": 200,
+      "sha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "expectedSha256": "9be3601aa9c74bb6d619c8368f14cc045f27eaf4fc03ac077640311ad9ee83bd",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/manifest.webmanifest",
+      "status": 200,
+      "sha256": "1e02a74aab94fa1aad3d61a63c35e98a4447bd5cb22f39175e664faa348b783e",
+      "expectedSha256": "1e02a74aab94fa1aad3d61a63c35e98a4447bd5cb22f39175e664faa348b783e",
+      "hashMatch": true
+    },
+    {
+      "path": "release.json",
+      "status": 200,
+      "sha256": "c905a062bb274f4abff742889eebb4d746439a860f73dda479ee755880fa6d3f",
+      "expectedSha256": "c905a062bb274f4abff742889eebb4d746439a860f73dda479ee755880fa6d3f",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/bronuvannia/",
+      "status": 200,
+      "sha256": "ba7dc01ab5e0678b6dafeb299bbda97c7c4bc0f35fa7701df94c0a2b0a8ee168",
+      "expectedSha256": "ba7dc01ab5e0678b6dafeb299bbda97c7c4bc0f35fa7701df94c0a2b0a8ee168",
+      "hashMatch": true
+    }
+  ],
+  "canonicalIdentity": {
+    "normalOperationsUi": true,
+    "originalProductionSupabase": true,
+    "noTestTransportOrBanner": true
+  },
+  "manifest": {
+    "name": "VAcleaner Manager",
+    "short_name": "VAcleaner",
+    "description": "\u0410\u0434\u043c\u0456\u043d\u043a\u0430 \u0431\u0440\u043e\u043d\u044e\u0432\u0430\u043d\u044c \u0456 \u043e\u043f\u0435\u0440\u0430\u0446\u0456\u0439 VAcleaner",
+    "start_url": "/admin/bronuvannia/",
+    "scope": "/admin/",
+    "display": "standalone",
+    "background_color": "#070b0e",
+    "theme_color": "#070b0e",
+    "icons": [
+      {
+        "src": "/admin/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/admin/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "id": "/admin/",
+    "display_override": [
+      "standalone",
+      "minimal-ui"
+    ],
+    "categories": [
+      "business",
+      "productivity"
+    ],
+    "lang": "uk",
+    "dir": "ltr"
+  },
+  "allHashMatched": true,
+  "allIdentityChecksPassed": true
+}

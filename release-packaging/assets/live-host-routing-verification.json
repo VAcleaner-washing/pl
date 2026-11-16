@@ -1,0 +1,106 @@
+{
+  "checkedAt": "2026-11-16T13:38:53.829379+00:00",
+  "scope": "Read-only hosting routing/body reconciliation after actual62deploy",
+  "release": "4.3.62/4362",
+  "samePathHashMatched": 268,
+  "hostingTransforms": 5,
+  "unexplainedDifferences": 0,
+  "checks": [
+    {
+      "path": "abir-wd8.html",
+      "status": 200,
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/windows/?release_verify=4362",
+      "redirects": [
+        {
+          "status": 301,
+          "from": "https://vacleaner.pp.ua/abir-wd8.html?release_verify=4362",
+          "to": "https://vacleaner.pp.ua/rishennia/windows/?release_verify=4362"
+        }
+      ],
+      "cacheControl": "max-age=600",
+      "bytes": 32025,
+      "sha256": "8ac788d7b4c4c2b9082f64684115817177a8a92449d6d1e5162facc5adc4bebc",
+      "expectedSha256": "db63075acf5b2626931d89b941a468ace5ec3ea0b1ec098659f81c73e283124a",
+      "samePathHashMatch": false,
+      "accepted": true,
+      "classification": "host redirect with exact canonical body",
+      "matchingArtifactPath": "rishennia/windows/index.html"
+    },
+    {
+      "path": "jimmy-jv35.html",
+      "status": 200,
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/mattress/?release_verify=4362",
+      "redirects": [
+        {
+          "status": 301,
+          "from": "https://vacleaner.pp.ua/jimmy-jv35.html?release_verify=4362",
+          "to": "https://vacleaner.pp.ua/rishennia/mattress/?release_verify=4362"
+        }
+      ],
+      "cacheControl": "max-age=600",
+      "bytes": 33226,
+      "sha256": "d743dc12d31f05264b284eb9ff4842665b09b99185e21777e1746313c0aee2de",
+      "expectedSha256": "d58217ab1e0a6a50f7d1d885cbfe54dfc5243e3ee26009d16198f67ef0f22d25",
+      "samePathHashMatch": false,
+      "accepted": true,
+      "classification": "host redirect with exact canonical body",
+      "matchingArtifactPath": "rishennia/mattress/index.html"
+    },
+    {
+      "path": "karcher-puzzi.html",
+      "status": 200,
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/textile/?release_verify=4362",
+      "redirects": [
+        {
+          "status": 301,
+          "from": "https://vacleaner.pp.ua/karcher-puzzi.html?release_verify=4362",
+          "to": "https://vacleaner.pp.ua/rishennia/textile/?release_verify=4362"
+        }
+      ],
+      "cacheControl": "max-age=600",
+      "bytes": 33847,
+      "sha256": "fbdac5f503bfb0bbfab5fa1eaf94c56ce050ed3370a2aa7aaa4542c3e9a70bfe",
+      "expectedSha256": "58f27a871bd37ae7561b4519ddc24909a9d512fec7f663899d44276c7cadc65e",
+      "samePathHashMatch": false,
+      "accepted": true,
+      "classification": "host redirect with exact canonical body",
+      "matchingArtifactPath": "rishennia/textile/index.html"
+    },
+    {
+      "path": "karcher-sc2.html",
+      "status": 200,
+      "finalUrl": "https://vacleaner.pp.ua/rishennia/steam/?release_verify=4362",
+      "redirects": [
+        {
+          "status": 301,
+          "from": "https://vacleaner.pp.ua/karcher-sc2.html?release_verify=4362",
+          "to": "https://vacleaner.pp.ua/rishennia/steam/?release_verify=4362"
+        }
+      ],
+      "cacheControl": "max-age=600",
+      "bytes": 32263,
+      "sha256": "b899d80cdf35e9c2f17d36890bf0e6024911786d057fefb915f6fa6e33000a8f",
+      "expectedSha256": "a6b341b5946542dc100652e320721aa0b602638aa5011cee6dcb9c53028d4f5c",
+      "samePathHashMatch": false,
+      "accepted": true,
+      "classification": "host redirect with exact canonical body",
+      "matchingArtifactPath": "rishennia/steam/index.html"
+    },
+    {
+      "path": "robots.txt",
+      "status": 200,
+      "finalUrl": "https://vacleaner.pp.ua/robots.txt?release_verify=4362",
+      "redirects": [],
+      "cacheControl": "max-age=14400",
+      "bytes": 2745,
+      "sha256": "49ce2a9f8ba0b7ed36f0acf40be06b195ca7a9a7a228252e4aa8088f220f226f",
+      "expectedSha256": "5ae5eb27c1dc56d6adab5a56b6a3a0540eefe589cadacc179c3fbef12c6aff8f",
+      "samePathHashMatch": false,
+      "accepted": true,
+      "classification": "Cloudflare managed prefix; exact artifact suffix",
+      "prefixBytes": 2676,
+      "prefixSha256": "3073d1e371afb3271c7666148766fedc5145f7d8440f7114062db79b7bd58add"
+    }
+  ],
+  "businessDataRequests": 0
+}

@@ -1,0 +1,247 @@
+{
+  "checkedAt": "2026-11-16 13:38:11 UTC",
+  "runId": 43874287227,
+  "mainCommit": "c180af6e4043386960f6f57cccceee1170ceab9f",
+  "reviewedPrHead": "1cd9ff828714b844d5d809d31e7f0d9ed96e5ec2",
+  "gitTree": "db527cbb770b1f52ab3149912d6380266d8a51c5",
+  "mainAndReviewedHeadTreeIdentical": true,
+  "runAttempt": 2,
+  "allEightEffectiveJobsSuccessful": true,
+  "effectiveJobs": [
+    {
+      "id": 133331730363,
+      "name": "Static / build gate",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:17:05Z",
+      "completed_at": "2026-11-16T13:17:40Z"
+    },
+    {
+      "id": 133331704919,
+      "name": "Browser QA aggregate gate",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:17:44Z",
+      "completed_at": "2026-11-16T13:31:56Z"
+    },
+    {
+      "id": 133331642958,
+      "name": "Production operations / webkit / 440",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:32:32Z",
+      "completed_at": "2026-11-16T13:37:07Z"
+    },
+    {
+      "id": 133331644665,
+      "name": "Production operations / chromium / 440",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:17:45Z",
+      "completed_at": "2026-11-16T13:20:37Z"
+    },
+    {
+      "id": 133331708818,
+      "name": "WebKit / mobile forms gate",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:17:44Z",
+      "completed_at": "2026-11-16T13:28:22Z"
+    },
+    {
+      "id": 133331701123,
+      "name": "Production operations / webkit / 1440",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:17:44Z",
+      "completed_at": "2026-11-16T13:19:05Z"
+    },
+    {
+      "id": 133331646627,
+      "name": "Production operations / chromium / 1440",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:17:44Z",
+      "completed_at": "2026-11-16T13:18:45Z"
+    },
+    {
+      "id": 133334256517,
+      "name": "Deploy GitHub Pages",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-11-16T13:37:13Z",
+      "completed_at": "2026-11-16T13:37:31Z"
+    }
+  ],
+  "productionArtifact": {
+    "id": 14228544078,
+    "name": "production-pages",
+    "files": 273,
+    "treeSha256": "24aabedb22bb71199e3409becf2f85d0e116d93c4221cc7958886a62d87afea1"
+  },
+  "actualDeployment": {
+    "jobId": 133334256517,
+    "completedAt": "2026-11-16T13:37:31Z",
+    "conclusion": "success"
+  },
+  "controlledRerun": {
+    "previousFailedJob": 133323498618,
+    "replacementJob": 133331642958,
+    "testCodeChanged": false,
+    "deadlineChanged": false,
+    "additionalBlindRetries": 0,
+    "firstFailureRetained": true,
+    "rootCause": "Unproven immutable46 WebKit activating deadline; exact-code rerun passed"
+  },
+  "businessDataMutations": 0,
+  "firstAttemptWorkerFailure": {
+    "runId": 43874287227,
+    "commit": "c180af6e4043386960f6f57cccceee1170ceab9f",
+    "jobId": 133323498618,
+    "jobConclusion": "failure",
+    "artifactTreeSha256": "24aabedb22bb71199e3409becf2f85d0e116d93c4221cc7958886a62d87afea1",
+    "failedStep": "Test actual production worker offline, update and rollback",
+    "workerPassed": 32,
+    "workerFailed": 1,
+    "failureMessage": "440-46-candidate-46: Worker readiness deadline: {\"phase\": \"ready\", \"build\": 4346, \"scope\": \"http://127.0.0.1:36997/admin/\", \"controller\": {\"scriptURL\": \"http://127.0.0.1:36997/admin/sw.js?v=4346\", \"state\": \"activating\"}, \"active\": {\"scriptURL\": \"http://127.0.0.1:36997/admin/sw.js?v=4346\", \"state\": \"activating\"}, \"installing\": null, \"waiting\": null, \"cacheKeys\": [\"vacleaner-manager-4346\"], \"olderCaches\": [], \"requiredAssets\": 35, \"missing\": [], \"ready\": false}",
+    "readinessSnapshot": {
+      "phase": "ready",
+      "build": 4346,
+      "scope": "http://127.0.0.1:36997/admin/",
+      "controller": {
+        "scriptURL": "http://127.0.0.1:36997/admin/sw.js?v=4346",
+        "state": "activating"
+      },
+      "active": {
+        "scriptURL": "http://127.0.0.1:36997/admin/sw.js?v=4346",
+        "state": "activating"
+      },
+      "installing": null,
+      "waiting": null,
+      "cacheKeys": [
+        "vacleaner-manager-4346"
+      ],
+      "olderCaches": [],
+      "requiredAssets": 35,
+      "missing": [],
+      "ready": false
+    },
+    "strictReadinessDeadlineMs": 30000,
+    "timeline": [
+      {
+        "callId": "call@390",
+        "event": "initial stable46 ready poll",
+        "startMs": 5837.942,
+        "endMs": 5949.967,
+        "durationMs": 112.025,
+        "error": null
+      },
+      {
+        "callId": "call@408",
+        "event": "candidate62 waiting poll",
+        "startMs": 6212.415,
+        "endMs": 6326.565,
+        "durationMs": 114.15,
+        "error": null
+      },
+      {
+        "callId": "call@440",
+        "event": "explicit candidate62 activation click",
+        "startMs": 6762.629,
+        "endMs": 7148.578,
+        "durationMs": 385.949,
+        "error": null
+      },
+      {
+        "callId": "call@462",
+        "event": "candidate62 ready poll",
+        "startMs": 7352.428,
+        "endMs": 7366.827,
+        "durationMs": 14.399,
+        "error": null
+      },
+      {
+        "callId": "call@478",
+        "event": "stable46 rollback waiting poll",
+        "startMs": 7693.833,
+        "endMs": 7716.21,
+        "durationMs": 22.377,
+        "error": null
+      },
+      {
+        "callId": "call@518",
+        "event": "explicit stable46 rollback activation click",
+        "startMs": 8936.744,
+        "endMs": 9029.755,
+        "durationMs": 93.011,
+        "error": null
+      },
+      {
+        "callId": "call@538",
+        "event": "install final stable46 readiness monitor",
+        "startMs": 9182.292,
+        "endMs": 9188.235,
+        "durationMs": 5.943,
+        "error": null
+      },
+      {
+        "callId": "call@540",
+        "event": "final stable46 ready poll",
+        "startMs": 9191.275,
+        "endMs": 39194.425,
+        "durationMs": 30003.15,
+        "error": "Timeout 30000ms exceeded."
+      },
+      {
+        "callId": "call@542",
+        "event": "read failed readiness snapshot",
+        "startMs": 39198.689,
+        "endMs": 39200.847,
+        "durationMs": 2.158,
+        "error": null
+      }
+    ],
+    "observations": {
+      "initialStable46Ready": true,
+      "candidate62UpgradeReady": true,
+      "all35RollbackAssetsPrecached": true,
+      "onlyStable46CacheRemains": true,
+      "noWaitingOrInstallingWorker": true,
+      "controllerAndActiveBothActivating": true,
+      "normalStablePageApiListReadsContinueAtTraceMs": [
+        24094.9,
+        39095.7
+      ],
+      "monitorNotResetByFurtherNavigation": true,
+      "activateHandlerExactlyMatchesImmutable46": true,
+      "activateHandlerSha256": "460f36d0092fc418ada74eb31aaf4f2daaf68f178c155db743815c9f89381660"
+    },
+    "classification": "Observed strict rollback lifecycle deadline in isolated Linux WebKit; not a proven candidate regression or asset/cache mismatch. Cannot distinguish pending clients.claim() from stale WebKit worker-state wrappers with this trace.",
+    "recommendation": "One controlled rerun of only the failed job at the same commit and exact artifact is justified to test intermittence. Preserve this failure, keep all assertions/deadlines unchanged, and investigate further if it repeats.",
+    "comparison": {
+      "sameArtifactPrRun": 43825199474,
+      "prWebkit440WorkerPassed": 40,
+      "mainChromium440WorkerPassed": 40
+    },
+    "artifact": {
+      "id": 14229960960,
+      "path": "/workspace/va-4362-evidence/publication/main-operations/main-webkit-440-failed.zip",
+      "sha256": "2d345d06006fee7754428169f653407724733e921713e838d8e568d69ab7c010"
+    },
+    "productionWrites": 0,
+    "physicalDeviceTested": false,
+    "sourceEdited": false,
+    "testsRerun": false
+  },
+  "finalMobileWorkerChecks": {
+    "chromium": {
+      "passed": 40,
+      "failed": 0
+    },
+    "webkit": {
+      "passed": 40,
+      "failed": 0
+    }
+  },
+  "retainedSuccessfulJobs": "Only failed WebKit440 job was explicitly rerun; GitHub assigns new attempt IDs to reused successful jobs and retains their original completion times."
+}
