@@ -1,0 +1,67 @@
+{
+  "checkedAt": "2026-11-16T20:47:23.575959+00:00",
+  "release": {
+    "version": "4.3.63",
+    "build": 4363,
+    "releasedAt": "2026-11-16",
+    "label": "VAcleaner v4.3.63 — PUBLIC FULFILLMENT SELECTION"
+  },
+  "checks": [
+    {
+      "path": "release.json",
+      "httpStatus": 200,
+      "artifactPath": "release.json",
+      "sha256": "afc3cf5b68129b4d57f8a1fe5d8cbe25e084b9e1f2d5042d35443f03bf1496b5",
+      "matchesReviewedBytes": true
+    },
+    {
+      "path": "bronuvannia/",
+      "httpStatus": 200,
+      "artifactPath": "bronuvannia/index.html",
+      "sha256": "4378d68c5ef540972661b4e2a29b40c9a6041b78b9c0cb90fd42f7bb831d476c",
+      "matchesReviewedBytes": true
+    },
+    {
+      "path": "assets/booking-hardening-v4144.js?v=4363",
+      "httpStatus": 200,
+      "artifactPath": "assets/booking-hardening-v4144.js",
+      "sha256": "2edac54c5e41680ec39cbd8bba3f473d555760a406e3e0069ac5fbbf9b8c8b0b",
+      "matchesReviewedBytes": true
+    },
+    {
+      "path": "assets/public-hydration.js?v=4363",
+      "httpStatus": 200,
+      "artifactPath": "assets/public-hydration.js",
+      "sha256": "7f8c1aeb7564b197967c653e9aab3b0cf99a8bb5153ece0749363dfdf738c515",
+      "matchesReviewedBytes": true
+    },
+    {
+      "path": "_next/static/chunks/146ntlcv_t6~w-v4041.js",
+      "httpStatus": 200,
+      "artifactPath": "_next/static/chunks/146ntlcv_t6~w-v4041.js",
+      "sha256": "8f4ea8ad3f9c350af4f3e7964b4aa0bb7a6ec8808e24b29440d89bcdf765f381",
+      "matchesReviewedBytes": true
+    }
+  ],
+  "initialFulfillmentButtons": [
+    {
+      "class": "",
+      "type": "button"
+    },
+    {
+      "class": "",
+      "type": "button"
+    }
+  ],
+  "stateChecks": {
+    "oneFulfillmentRow": true,
+    "twoChoices": true,
+    "noFalseInitialSelection": true,
+    "release63": true
+  },
+  "passed": true,
+  "scope": "Static GET and exported HTML only; complete interactive behavior is covered by both-engine CI63/63 on these exact bytes.",
+  "businessDataRequests": 0,
+  "businessDataWrites": 0,
+  "physicalIphoneTested": false
+}

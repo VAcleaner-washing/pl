@@ -1,0 +1,119 @@
+{
+  "mainCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
+  "run": 43948184720,
+  "attempt": 2,
+  "status": "completed",
+  "conclusion": "success",
+  "workflowUpdatedAt": "2026-11-16T20:45:13Z",
+  "allEightJobsPassed": true,
+  "ownerAuthorization": "Спочатку публікуєм потім доробить пва",
+  "reviewedPr": {
+    "number": 72,
+    "head": "1535dd8e26269112385955ea2546ee88ea20a163",
+    "run": 43931798662,
+    "allSevenJobsPassed": true
+  },
+  "gitTree": "faca1d8d91fca4bb1104fbb138d68e47de56d57d",
+  "identicalReviewedSourceTree": true,
+  "jobs": [
+    {
+      "id": 133593392414,
+      "name": "WebKit / mobile forms gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133593393010,
+      "name": "Production operations / webkit / 440",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133593395078,
+      "name": "Browser QA aggregate gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133593396323,
+      "name": "Production operations / webkit / 1440",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133593396733,
+      "name": "Production operations / chromium / 440",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133593482393,
+      "name": "Production operations / chromium / 1440",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133593495611,
+      "name": "Static / build gate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 133599977492,
+      "name": "Deploy GitHub Pages",
+      "status": "completed",
+      "conclusion": "success"
+    }
+  ],
+  "suiteTotals": {
+    "static": 67,
+    "canonicalChromium": 49,
+    "canonicalWebkit": 9,
+    "exactArtifactOperations": 4,
+    "publicHydrationEachEngine": 63,
+    "mobileWorkerEachEngine": 40,
+    "draftFunctionTiming": 9,
+    "candidateBoundary": 19,
+    "promotionGuards": 7
+  },
+  "artifact": {
+    "id": 14265946616,
+    "name": "production-pages",
+    "sha256": "6b852c10d45ca798e8c84bc0e9a97bd787bfa9f47871b57538da1a13d3a65ef7",
+    "treeSha256": "b352e02782f86b9f650ea484a518f0fd5cc247e2ef24a98b244ef84089a18ece",
+    "files": 273
+  },
+  "archiveSha256": "a87cce96a494eea0c8c2fee65cbcd91ff059c8653dd1e81e6118128a2eccf45f",
+  "controlledRerun": {
+    "actualAttempts": 1,
+    "failedJobsOnly": true,
+    "successfulJobsReused": 5,
+    "sourceOrArtifactChanges": 0,
+    "assertionsOrTimeoutChanges": 0,
+    "earlierRequestRejectedWhileRunActive": true,
+    "firstFailure": {
+      "job": 133583640650,
+      "artifact": 14266826048,
+      "artifactSha256": "f65c55cb6878f0cdf6dbe36f7c78d8df0b239bde4e72f756078445dee541a3db",
+      "publicResult": "62pass/1fail; all captured choice/draft assertions passed; an access-control page error failed the case",
+      "error": "/yweluzclearwrazdkahu.supabase.co/functions/v1/vacleaner-booking-v5 due to access control checks.",
+      "cause": "unproven",
+      "finalPublicPassed": 63,
+      "finalWorkerPassed": 40
+    },
+    "secondFailure": {
+      "job": 133583640727,
+      "artifact": 14267126519,
+      "artifactSha256": "d2d851041460dda07330ee03d34ccbe8d2de2a0f77fa96d5c9862cdafc5899b8",
+      "publicPassed": 63,
+      "passedSuitesBeforeFailure": 8,
+      "error": "TargetClosedError at admin_lab_forms_qa.py:204 while clicking deliveryFeeForm submit",
+      "cause": "unproven",
+      "finalCanonicalSuitesPassed": 9,
+      "finalLabFormsPassed": 83
+    }
+  },
+  "businessDataWrites": 0,
+  "backendDeployments": 0,
+  "physicalIphoneTested": false
+}

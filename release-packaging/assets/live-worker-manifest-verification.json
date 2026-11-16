@@ -1,0 +1,103 @@
+{
+  "checkedAt": "2026-11-16T20:47:23.255239+00:00",
+  "scope": "Live static production files, including immutable46 and previous61/62 retained worker script URLs",
+  "businessDataRequests": 0,
+  "checks": [
+    {
+      "path": "admin/sw.js",
+      "status": 200,
+      "sha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "expectedSha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4346",
+      "status": 200,
+      "sha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "expectedSha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4361",
+      "status": 200,
+      "sha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "expectedSha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4362",
+      "status": 200,
+      "sha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "expectedSha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/sw.js?v=4363",
+      "status": 200,
+      "sha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "expectedSha256": "3446b592391293afe377a7eaed4281ff471c28e4b5a8b1af8d1126008d4b0617",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/manifest.webmanifest",
+      "status": 200,
+      "sha256": "1e02a74aab94fa1aad3d61a63c35e98a4447bd5cb22f39175e664faa348b783e",
+      "expectedSha256": "1e02a74aab94fa1aad3d61a63c35e98a4447bd5cb22f39175e664faa348b783e",
+      "hashMatch": true
+    },
+    {
+      "path": "release.json",
+      "status": 200,
+      "sha256": "afc3cf5b68129b4d57f8a1fe5d8cbe25e084b9e1f2d5042d35443f03bf1496b5",
+      "expectedSha256": "afc3cf5b68129b4d57f8a1fe5d8cbe25e084b9e1f2d5042d35443f03bf1496b5",
+      "hashMatch": true
+    },
+    {
+      "path": "admin/bronuvannia/",
+      "status": 200,
+      "sha256": "bb435926b55b9e825e917b43ac2b3937e18a233ce6bc1c3bb052b33a49509bd4",
+      "expectedSha256": "bb435926b55b9e825e917b43ac2b3937e18a233ce6bc1c3bb052b33a49509bd4",
+      "hashMatch": true
+    }
+  ],
+  "canonicalIdentity": {
+    "normalOperationsUi": true,
+    "originalProductionSupabase": true,
+    "noTestTransportOrBanner": true
+  },
+  "manifest": {
+    "name": "VAcleaner Manager",
+    "short_name": "VAcleaner",
+    "description": "\u0410\u0434\u043c\u0456\u043d\u043a\u0430 \u0431\u0440\u043e\u043d\u044e\u0432\u0430\u043d\u044c \u0456 \u043e\u043f\u0435\u0440\u0430\u0446\u0456\u0439 VAcleaner",
+    "start_url": "/admin/bronuvannia/",
+    "scope": "/admin/",
+    "display": "standalone",
+    "background_color": "#070b0e",
+    "theme_color": "#070b0e",
+    "icons": [
+      {
+        "src": "/admin/icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/admin/icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "id": "/admin/",
+    "display_override": [
+      "standalone",
+      "minimal-ui"
+    ],
+    "categories": [
+      "business",
+      "productivity"
+    ],
+    "lang": "uk",
+    "dir": "ltr"
+  },
+  "allHashMatched": true,
+  "allIdentityChecksPassed": true
+}
