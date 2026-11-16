@@ -33,12 +33,17 @@
       "path": "assets/address-autocomplete.js",
       "sha256": "877126f0bf690616bd5679c06303ac9c8c9d344a8115b58d17a93aaa9fc51ccf",
       "reason": "Bounded historical route requests with abort propagation."
+    },
+    {
+      "path": "sandbox/ui.js",
+      "sha256": "eca6c245f030feaf285a06db2c8bded5d5c2bb6d58ae4cbb4360c1fb8b7122d0",
+      "reason": "Delegated detail action follows canonical disabled/stale state through asynchronous creation, recreation and successful read recovery."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "9bc4a16613ab825de12c35c1850abdc783cdc8c267587406742a1452d4c40903",
+  "artifactTreeSha256": "24aabedb22bb71199e3409becf2f85d0e116d93c4221cc7958886a62d87afea1",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "4a9af4bcc125f1998b3d58fdaf477273dbb8700a342ec154f67e9abc93bda3cc",
+  "reviewArchiveSha256": "73430f9009c66528bcce3d6dacfb8c58526c718f7174c7b0193c433909d47852",
   "baselineReviewRuns": {
     "production61": 43607449279
   },

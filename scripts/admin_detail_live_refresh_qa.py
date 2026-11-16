@@ -99,7 +99,13 @@ def main():
             check('read failure announces stale data while keeping Back usable',
                   notice.get_attribute('role') == 'status' and page.locator('.detail .back').is_enabled())
             buttons = page.locator('.detail [data-action],.detail .lab-action-dock button')
+            expect(page.locator('.detail [data-action]:enabled,.detail .lab-action-dock button:enabled')).to_have_count(0)
             check('stale business actions are blocked until a successful read', all(buttons.nth(i).is_disabled() for i in range(buttons.count())))
+            dock = page.locator('.detail .lab-action-dock button')
+            page.locator('.detail .lab-action-dock').evaluate('node=>node.remove()')
+            expect(dock).to_have_count(1)
+            expect(dock).to_be_disabled()
+            check('a recreated delegated action inherits the stale protection', True)
             geometry = page.locator('.detail').evaluate('''detail=>{
               const r=s=>detail.querySelector(s)?.getBoundingClientRect().toJSON();
               return{head:r('.detail-top'),scroll:r('.detail-shell'),notice:r('[data-live-detail-notice]'),
@@ -112,6 +118,8 @@ def main():
             notice.locator('button').click()
             expect(notice).to_have_count(0)
             check('an explicit successful retry removes the stale notice', True)
+            expect(dock).to_be_enabled()
+            check('successful retry restores the delegated action availability', True)
 
             # Begin a real delayed fixture read, then navigate to a changed draft.
             flags['hold'] = True
@@ -148,7 +156,7 @@ def main():
             browser.close()
     result = {'browser': args.browser, 'width': args.width, 'checks': checks,
               'passed': sum(check['passed'] for check in checks),
-              'failed': sum(not check['passed'] for check in checks) + int(bool(failure)),
+              'failed': sum(not check['passed'] for check in checks) + int(bool(failure) and all(check['passed'] for check in checks)),
               'exception': failure, 'runtimeErrors': errors, 'forbiddenActions': forbidden,
               'externalRequests': external, 'productionWrites': 0, 'physicalIphoneTested': False}
     (out / 'result.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')

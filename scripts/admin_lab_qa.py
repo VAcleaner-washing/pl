@@ -373,28 +373,30 @@ def main():
             context.close()
         # Worker cache and browser-local data survive a short connection loss.
         context=browser.new_context(viewport={'width':430,'height':932})
-        page=context.new_page();page.goto(base+'/admin/bronuvannia/');page.wait_for_selector('.upcoming-row,.booking-card')
-        page.evaluate('navigator.serviceWorker.ready')
-        page.reload();page.wait_for_function('()=>navigator.serviceWorker.controller!==null')
-        checks.check(page.evaluate('(name)=>caches.keys().then(keys=>keys.includes(name))',cache_name),'LAB-specific service worker cache installed')
-        # Playwright's Linux WebKit offline override rejects navigation internally before
-        # its worker can respond. Drop real HTTP sockets there, preserving SW dispatch.
-        # Chromium additionally exercises navigator.onLine=false via the browser setting.
-        if args.browser=='webkit':transport['disconnect']=True
-        else:context.set_offline(True)
-        page.reload();page.wait_for_selector('.upcoming-row,.booking-card')
-        checks.check(page.locator('.lab-banner').is_visible(),'Transport loss launch retains LAB identity and local records')
-        page.locator('#mobileNewBooking').click();form=page.locator('#bookingForm')
-        form.locator('[name=startDate]').fill(smoke.iso(8));form.locator('header [data-close]').click()
-        expect(page.locator('#labLeaveDialog')).to_be_visible()
-        page.locator('#labLeaveDialog [data-lab-keep]').click()
-        expect(form.locator('[name=startDate]')).to_have_value(smoke.iso(8))
-        form.locator('header [data-close]').click();page.locator('#labLeaveDialog [data-lab-discard]').click()
-        expect(form).not_to_be_attached()
-        checks.check(True,'Offline cached form safety retains the actual draft')
-        transport['disconnect']=False;context.set_offline(False);page.reload();page.wait_for_selector('.upcoming-row,.booking-card')
-        checks.check(page.evaluate('VA_LAB.getState().bookings.length')==12,'Reconnect keeps seeded browser-local state')
-        context.close()
+        with lab_width_diagnostics(context,checks,'offline-430',browser_events) as page:
+            page.goto(base+'/admin/bronuvannia/');page.wait_for_selector('.upcoming-row,.booking-card')
+            page.evaluate('navigator.serviceWorker.ready')
+            page.reload();page.wait_for_function('()=>navigator.serviceWorker.controller!==null')
+            checks.check(page.evaluate('(name)=>caches.keys().then(keys=>keys.includes(name))',cache_name),'LAB-specific service worker cache installed')
+            # Playwright's Linux WebKit offline override rejects navigation internally before
+            # its worker can respond. Drop real HTTP sockets there, preserving SW dispatch.
+            # Chromium additionally exercises navigator.onLine=false via the browser setting.
+            if args.browser=='webkit':transport['disconnect']=True
+            else:context.set_offline(True)
+            page.reload();page.wait_for_selector('.upcoming-row,.booking-card')
+            checks.check(page.locator('.lab-banner').is_visible(),'Transport loss launch retains LAB identity and local records')
+            page.locator('#mobileNewBooking').click();form=page.locator('#bookingForm')
+            form.locator('[name=startDate]').fill(smoke.iso(8));form.locator('header [data-close]').click()
+            expect(page.locator('#labLeaveDialog')).to_be_visible()
+            page.locator('#labLeaveDialog [data-lab-keep]').click()
+            expect(page.locator('#labLeaveDialog')).not_to_be_attached()
+            expect(form.locator('[name=startDate]')).to_have_value(smoke.iso(8))
+            page._vac_lab_diagnostics['events'].append({'type':'offline-draft-retained-before-second-close','time':time.time()})
+            form.locator('header [data-close]').click();page.locator('#labLeaveDialog [data-lab-discard]').click()
+            expect(form).not_to_be_attached()
+            checks.check(True,'Offline cached form safety retains the actual draft')
+            transport['disconnect']=False;context.set_offline(False);page.reload();page.wait_for_selector('.upcoming-row,.booking-card')
+            checks.check(page.evaluate('VA_LAB.getState().bookings.length')==12,'Reconnect keeps seeded browser-local state')
         browser.close()
     result={'passed':checks.passed,'failed':checks.failed,'density':density}
     checks.artifacts.mkdir(parents=True,exist_ok=True)

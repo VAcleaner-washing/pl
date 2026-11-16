@@ -8,6 +8,7 @@ This candidate corrects verified frontend defects from the 4.3.61 audit and the 
 - Booking steps 1–4 retain their active states without the inherited connector lines or lower decorative border.
 - Delivery-route refresh has visible progress, bounded requests and a recoverable button. An unknown save result offers a canonical read before another mutation. A late route acknowledgement cannot replace a demonstrably newer route. Fuel, price, deposit and status formulas are preserved.
 - An open read-only booking detail receives authoritative updates after resume and live sync. Failed reads show a retry notice and suspend mutation controls; dirty forms and action sheets keep their owners and drafts.
+- Delegated detail buttons mirror canonical disabled/stale state even when mobile rendering creates or recreates them later. Successful retry restores availability. This closes the mobile WebKit defect found in the first candidate CI run.
 - Calendar cards contain every slot in narrow and landscape layouts. The calendar's current day and past-slot clock use Europe/Kyiv.
 - Clipboard feedback reflects actual success or denial, with selectable fallback text. More navigation cleans up listeners and restores focus. Settings tabs, time controls and authentication errors have meaningful accessible names and states.
 - Canonical booking status semantics remain consistent through the mobile presentation enhancers. Client benefit labels use the current Ukrainian wording.
