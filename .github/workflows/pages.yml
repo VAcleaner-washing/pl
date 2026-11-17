@@ -33,6 +33,33 @@ jobs:
           tar -xf .pages-artifact/artifact.tar -C dist
           npm run verify:artifact
           node scripts/build-admin-lab.mjs
+      - name: Capture read-only form-event diagnostics on the isolated LAB
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('lab-test-results/dist/assets/admin-lab-forms.js');s=p.read_text()
+          marker='const dirty=form=>record(form).edited&&record(form).baseline!==snapshot(form);'
+          probe="""
+          window.__vacFormGuardEvents=[];
+          for(const type of ['pointerdown','focusin','input','change','click'])document.addEventListener(type,event=>{
+            const form=event.target.closest?.('form');if(form?.id!=='issueForm')return;
+            const field=event.target, trusted=event.isTrusted;
+            queueMicrotask(()=>{const value=records.get(form);window.__vacFormGuardEvents.push({type,trusted,name:field.name,fieldType:field.type,fieldValue:field.value,defaultValue:field.defaultValue,active:document.activeElement?.name,baseline:value?.baseline,current:snapshot(form),edited:value?.edited,interacted:value?.interacted})});
+          },true);
+          """
+          assert s.count(marker)==1;p.write_text(s.replace(marker,marker+probe))
+          p=Path('scripts/admin_lab_forms_qa.py');s=p.read_text()
+          old="                expect(page.locator('#labLeaveDialog')).to_be_visible();keep()"
+          start=s.index('# All common modal families');at=s.index(old,start)
+          new="""                try:expect(page.locator('#labLeaveDialog')).to_be_visible()
+                          except Exception:
+                              print('FORM_GUARD_EVENTS '+json.dumps(page.evaluate('()=>window.__vacFormGuardEvents'),ensure_ascii=False),flush=True)
+                              raise
+                          keep()"""
+          # Keep Python indentation at the original loop depth.
+          new=new.replace('\n                          ','\n                ')
+          p.write_text(s[:at]+s[at:].replace(old,new,1))
+          PY
       - name: Run all original strict form and Escape assertions
         run: python scripts/admin_lab_forms_qa.py --browser webkit --artifacts forms-diagnostic-test-results
       - uses: actions/upload-artifact@v4
