@@ -5931,3 +5931,7 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 
 ### TESTS
 - test:equipment-fleet, SQL/revoke/RLS/runtime, WebKit, Chromium і Static.
+
+
+### Browser QA runtime provisioning (2026-11-17)
+The aggregate browser QA workflow installs both Chromium and WebKit, because catalog-scroll and other cross-browser checks invoke WebKit from the aggregate gate. The browser cache key covers both runtimes. This is a CI-only correction; production booking behavior is unchanged.
