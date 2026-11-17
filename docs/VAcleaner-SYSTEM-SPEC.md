@@ -5902,3 +5902,10 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 - Regression also checks a visibly painted Back icon and Close bounds/overlap with the title and Back, in addition to coordinate equality and actual return actions.
 - Route smoke and CRM regressions inspect the arrow's accessible name and exercise the shared Back control. Existing safe-area and short-desktop SMS density limits remain unchanged.
 - The full existing static/browser/WebKit/worker gates remain required. Physical iPhone behavior is not certified by emulation.
+
+### CI runtime follow-up for v4.3.64
+
+- A repeat main run recorded a native WebKit page crash during the LAB viewport sweep. Preserve that failed run and all diagnostics; do not treat it as an application assertion failure or bypass the release gates.
+- Evaluate matching Playwright 1.65.1 and the digest-pinned official Python image against the previous 1.61.0 runtime on unchanged 63/64 sources. Each controlled pair runs the existing public and LAB suites twice, with failures retained and no browser features disabled.
+- The runtime candidate changes CI requirements, the official image and its identity guard only. Every existing application assertion, timeout, canonical suite, exact-artifact operation gate and main-only deploy condition remains required. No delivered application file or release pin changes.
+- This QA-only follow-up retains version 4.3.64 / build 4364 and the reviewed 273-file artifact. Publication still requires all gates on the final main commit and actual live readback.
