@@ -8,6 +8,10 @@ jobs:
   strict-form-diagnostic:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [original, real-pointer]
     container:
       image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
       options: --ipc=host
@@ -42,9 +46,9 @@ jobs:
           probe="""
           window.__vacFormGuardEvents=[];
           for(const type of ['pointerdown','focusin','input','change','click'])document.addEventListener(type,event=>{
-            const form=event.target.closest?.('form');if(form?.id!=='issueForm')return;
+            const form=event.target.closest?.('form');if(!['issueForm','financeForm','extendRentalForm'].includes(form?.id))return;
             const field=event.target, trusted=event.isTrusted;
-            queueMicrotask(()=>{const value=records.get(form);window.__vacFormGuardEvents.push({type,trusted,name:field.name,fieldType:field.type,fieldValue:field.value,defaultValue:field.defaultValue,active:document.activeElement?.name,baseline:value?.baseline,current:snapshot(form),edited:value?.edited,interacted:value?.interacted})});
+            queueMicrotask(()=>{const value=records.get(form);window.__vacFormGuardEvents.push({formId:form.id,type,trusted,name:field.name,fieldType:field.type,fieldValue:field.value,defaultValue:field.defaultValue,active:document.activeElement?.name,baseline:value?.baseline,current:snapshot(form),edited:value?.edited,interacted:value?.interacted})});
           },true);
           """
           assert s.count(marker)==1;p.write_text(s.replace(marker,marker+probe))
@@ -60,12 +64,22 @@ jobs:
           new=new.replace('\n                          ','\n                ')
           p.write_text(s[:at]+s[at:].replace(old,new,1))
           PY
+      - name: Compare a real field pointer action before the same fill
+        if: matrix.variant == 'real-pointer'
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/admin_lab_forms_qa.py');s=p.read_text()
+          old='                form.locator(f\'[name="{field_name}"]\').fill(value);close(form)'
+          new='                field=form.locator(f\'[name="{field_name}"]\');field.click();field.fill(value);close(form)'
+          assert s.count(old)==1;p.write_text(s.replace(old,new))
+          PY
       - name: Run all original strict form and Escape assertions
         run: python scripts/admin_lab_forms_qa.py --browser webkit --artifacts forms-diagnostic-test-results
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: strict-webkit-4367-form-evidence
+          name: strict-webkit-4367-form-evidence-${{ matrix.variant }}
           path: forms-diagnostic-test-results
           if-no-files-found: warn
           retention-days: 14
