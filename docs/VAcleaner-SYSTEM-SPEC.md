@@ -6008,3 +6008,7 @@ The aggregate browser QA workflow installs both Chromium and WebKit, because cat
 - After a lost mutation response the UI reads authoritative fleet state. If that read also fails, the error remains visible and the retained intent UUID is reused on retry. Successful acknowledgement clears it.
 - Isolated SQL and actual UI tests cover a committed addition with lost response, failed refresh and retry. No existing booking or financial RPC is changed.
 - Fleet requests use the existing 15-second UI deadline. Entering or refreshing the equipment workspace re-reads stock; mutation controls wait for its authoritative refresh. Unknown mutation outcomes are shown as unconfirmed, never as proof that nothing changed.
+
+
+### Integrated release WebKit gate diagnostics (2026-11-17)
+The WebKit mobile forms CI step is bounded to 20 minutes and uses unbuffered Python output, so a stuck worker or browser check surfaces a specific diagnostic and terminates rather than occupying the release gate indefinitely. The mandatory gate remains enabled and cannot be skipped for production promotion.
