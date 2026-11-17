@@ -47,6 +47,21 @@ from public.vacleaner_inventory i
 cross join lateral pg_catalog.generate_series(1,i.capacity) n
 on conflict(resource_code,unit_number) do nothing;
 
+-- Repair recorded 2026-11-17: there are physically 2 Jimmy units, but only 1
+-- serviceable. Live rental capacity was safely lowered to 1 under the booking
+-- advisory lock. Keep the second broken unit in the physical registry.
+-- This is conditional: if Jimmy was already restored to capacity 2, the normal
+-- seed above creates both ready and this block changes nothing.
+insert into public.vacleaner_equipment_units(resource_code,unit_number,status,note)
+select 'jimmy',2,'repair','Несправний Jimmy; виведено з оренди 17.11.2026'
+where exists(select 1 from public.vacleaner_inventory
+             where resource_code='jimmy' and active=true and capacity=1)
+  and (select count(*) from public.vacleaner_equipment_units
+       where resource_code='jimmy' and status='ready')=1
+  and not exists(select 1 from public.vacleaner_equipment_units
+                 where resource_code='jimmy' and unit_number=2)
+on conflict(resource_code,unit_number) do nothing;
+
 -- Shared mutex with vacleaner_apply_reservation prevents inventory changes racing booking creation.
 create or replace function public.vacleaner_admin_set_equipment_unit_status(
   p_unit_id uuid, p_status text, p_note text, p_actor_id uuid
