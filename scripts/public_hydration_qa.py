@@ -19,6 +19,59 @@ PROJECT = Path(__file__).resolve().parents[1]
 DRAFT_KEY = 'vacleaner_booking_draft_v4144'
 
 
+class ApiReadTracker:
+    """Keep the deliberate reload behind the actual, debounced quote response."""
+
+    def __init__(self, page):
+        self.page = page
+        self.rows = []
+        self.pending = {}
+        self.last_activity = time.monotonic()
+        page.on('request', self.started)
+        page.on('requestfinished', lambda request: self.finished(request, None))
+        page.on('requestfailed', lambda request: self.finished(request, request.failure))
+
+    def started(self, request):
+        if not request.url.startswith(SUPABASE_HOST) or request.method == 'OPTIONS':
+            return
+        try:
+            payload = request.post_data_json if request.post_data else {}
+        except Exception:
+            payload = {}
+        row = {'serial': len(self.rows) + 1, 'payload': payload, 'finished': False, 'failure': None}
+        self.rows.append(row)
+        self.pending[request] = row
+        self.last_activity = time.monotonic()
+
+    def finished(self, request, failure):
+        row = self.pending.pop(request, None)
+        if row is not None:
+            row.update(finished=True, failure=failure)
+            self.last_activity = time.monotonic()
+
+    def state(self, expected):
+        matches = [row for row in self.rows if isinstance(row['payload'], dict)
+                   and all(row['payload'].get(key) == value for key, value in expected.items())]
+        latest = matches[-1] if matches else None
+        quiet = time.monotonic() - self.last_activity
+        return {'ready': bool(latest and latest['finished'] and not latest['failure']
+                              and not self.pending and quiet >= .5),
+                'matchingRead': latest, 'pendingSerials': [row['serial'] for row in self.pending.values()],
+                'quietMs': round(quiet * 1000), 'totalReads': len(self.rows)}
+
+    def settle(self, expected):
+        # The application debounces availability by 320ms, whereas draft save is 180ms.
+        # A saved draft alone does not establish that the departing document is idle.
+        # Observe a completed read for the current logical inputs plus 500ms with no
+        # outstanding/read activity. All pageerror listeners stay active throughout.
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            if self.state(expected)['ready']:
+                return
+            self.page.wait_for_timeout(25)
+        raise AssertionError({'reloadReadinessTimedOut': self.state(expected), 'expectedRead': expected})
+
+
 class FulfillmentExportParser(HTMLParser):
     """Read only the exported booking fulfillment row, before React can hydrate it."""
 
@@ -113,6 +166,13 @@ def booking_fulfillment_case(page, width, evidence):
 
     def reload_draft(mode):
         wait_for_draft(mode)
+        expected_request = {'action': 'availability', 'productCode': 'puzzi_jimmy',
+                            'startDate': start, 'returnDate': finish, 'fulfillment': mode,
+                            'customerPhone': '+380951111111',
+                            'deliveryAddress': 'Європейська 146Е' if mode == 'delivery' else ''}
+        evidence.append({'stage': mode + ' before reload readiness', 'reads': page._vac_reads.state(expected_request)})
+        page._vac_reads.settle(expected_request)
+        evidence.append({'stage': mode + ' actual reload point', 'reads': page._vac_reads.state(expected_request)})
         page.reload(wait_until='networkidle')
         page.wait_for_selector('html[data-vacleaner-hydrated="1"]', state='attached')
         available()
@@ -268,6 +328,7 @@ def main() -> int:
                 # control page errors without a network request (Playwright #43120).
                 # Use one document per hydration case; do not filter page errors.
                 page = context.new_page()
+                page._vac_reads = ApiReadTracker(page)
                 errors = []
                 failed_requests = []
                 booking_evidence = []
