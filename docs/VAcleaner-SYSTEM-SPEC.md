@@ -5902,3 +5902,32 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 - Regression also checks a visibly painted Back icon and Close bounds/overlap with the title and Back, in addition to coordinate equality and actual return actions.
 - Route smoke and CRM regressions inspect the arrow's accessible name and exercise the shared Back control. Existing safe-area and short-desktop SMS density limits remain unchanged.
 - The full existing static/browser/WebKit/worker gates remain required. Physical iPhone behavior is not certified by emulation.
+
+
+## FLEET-001 — фізичні одиниці техніки та доступність (candidate v4.3.66)
+
+- Головний розділ «Техніка» містить «Парк і стан», «Тарифи», «Вартість і окупність». Існуючі тарифи й форми редагування цін залишаються доступними; фінансова вкладка веде у наявні налаштування початкової вартості, не дублює їх.
+- Фізичні одиниці обліковуються окремо у vacleaner_equipment_units зі стабільними ID, порядковим номером і станом ready / repair / retired. Історію статусів зберігає vacleaner_equipment_unit_events.
+- Кількість у vacleaner_inventory.capacity — тільки кількість справних одиниць (ready). Фінансове поле equipment_baselines залишається історичною закупівельною вартістю, воно не керує місткістю.
+- Переведення справної одиниці у «Ремонт» або «Списана» атомарно зменшує capacity; повернення у «Справна» — збільшує. Нуль доступних одиниць дозволений і блокує бронювання, в тому числі в комплектах.
+- Спільне блокування vacleaner-slot-reservation-v1 з vacleaner_apply_reservation і перевірка пікового одночасного попиту не допускають перебронювання при зменшенні capacity. При накладенні підтверджених/виданих або активних hold-заявок операція відхиляється до вирішення конфлікту.
+- Оператор після автентифікації в admin_users використовує окрему Edge Function vacleaner-equipment-admin-v1. Тільки service_role має прямий доступ до таблиць та RPC, ані anon, ані authenticated — ні.
+- Додавання фізичної одиниці збільшує доступну кількість, але не змінює історичні фінансові вкладення автоматично.
+- Перший імпорт створює одиниці за чинною складською місткістю. Несправні одиниці потрібно явно позначити repair. Міграція не змінює історичні клієнтські бронювання або фінансові рядки.
+- Існуюча єдина навігація «Назад» v4.3.64, календар, тарифи, SMS, застави, реферали й розрахунки залишаються недоторканними.
+- Production тільки після окремих SQL/RLS/Edge перевірок, Static, Chromium/PWA, WebKit і підтвердженого Pages SUCCESS.
+
+### ADDED
+- Поштучний стан парку, журнал змін і ізольований адміністративний API.
+
+### CHANGED
+- Розділ «Техніка» має три підрозділи без дублювання бізнес-джерел.
+
+### FIXED
+- Відсутність механізму вимкнути несправний Jimmy із доступності бронювань.
+
+### PRESERVED
+- Історична вартість, клієнти, платежі, статуси, календарні правила та комбінації техніки.
+
+### TESTS
+- test:equipment-fleet, SQL/revoke/RLS/runtime, WebKit, Chromium і Static.
