@@ -5902,3 +5902,31 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 - Regression also checks a visibly painted Back icon and Close bounds/overlap with the title and Back, in addition to coordinate equality and actual return actions.
 - Route smoke and CRM regressions inspect the arrow's accessible name and exercise the shared Back control. Existing safe-area and short-desktop SMS density limits remain unchanged.
 - The full existing static/browser/WebKit/worker gates remain required. Physical iPhone behavior is not certified by emulation.
+
+
+## CAT-SCROLL-001 — каталожні ціни у мобільній PWA (candidate 4.3.65)
+
+- Модальне вікно «Техніка → Редагувати ціни» є трирядковим grid: фіксований header, внутрішній незалежний scroll, фіксований footer. Відсутність скролу до «Пакетик хімії Puzzi» — UX-дефект, а не очікувана поведінка.
+- На iOS/standalone останнє поле можна прокрутити **над** кнопками «Скасувати»/«Зберегти ціни», включно зі зменшеним visual viewport після відкриття клавіатури. Нижня панель не перекриває ціни.
+- Єдиний back-control із кандидатного v4.3.64 лишається в лівому верхньому куті із safe area, існуючими parent routes, dirty/pending guard та без втрати введених значень.
+- На PWA WebKit перевіряти геометрію останнього поля на 320, 390, 440px та landscape 956px; якщо scroll заблокований, реліз заборонений.
+- Зміна CSS не торкається тарифів, замовлень, Supabase, збережених знижок чи доступності техніки.
+
+### ADDED
+- WebKit/Chromium перевірка досяжності останньої ціни та поведінки після зміни висоти екрана.
+
+### CHANGED
+- .catalog-form отримує відокремлений scroll-контейнер, зберігаючи header/footer.
+
+### FIXED
+- Зникає перекриття останньої ціни нижніми кнопками.
+
+### PRESERVED
+- Усі чинні ціни, каталожні форми, єдина Back-навігація 4.3.64, логіка збереження та системні контракти.
+
+### TESTS
+- test:catalog-scroll-visual, Chromium/PWA, WebKit, Static і release proof; production тільки після зелених результатів.
+
+
+### Browser QA runtime provisioning (2026-11-17)
+The aggregate browser QA workflow installs both Chromium and WebKit, because catalog-scroll and other cross-browser checks invoke WebKit from the aggregate gate. The browser cache key covers both runtimes. This is a CI-only correction; production booking behavior is unchanged.

@@ -215,7 +215,22 @@ def main():
                 expect(page.locator('#smsMessage')).to_have_value('Тестовий текст, не відправляти')
                 page.locator('#smsPrimary').click()
                 page.locator('[name=smsRoute][value=international]').check()
-                page.locator('#smsPrimary').click()
+                preflight_button=page.locator('#smsPrimary')
+                preflight_state=preflight_button.evaluate("""el => {
+                    const r=el.getBoundingClientRect(),p=el.closest('.sms-campaign-modal');
+                    return {disabled:el.disabled,hidden:el.hidden,rect:{x:r.x,y:r.y,width:r.width,height:r.height},
+                        label:el.textContent,route:p.querySelector('[name=smsRoute]:checked')?.value,
+                        activeStep:[...p.querySelectorAll('[data-sms-panel].active')].map(x=>x.dataset.smsPanel),
+                        selected:p.querySelector('#smsSelectedCount')?.textContent,
+                        css:{display:getComputedStyle(el).display,visibility:getComputedStyle(el).visibility,
+                        position:getComputedStyle(el).position,transition:getComputedStyle(el).transition},
+                        atCenter:(()=>{const x=r.x+r.width/2,y=r.y+r.height/2;return document.elementFromPoint(x,y)?.outerHTML?.slice(0,150)})()};
+                }""")
+                print('SMS_PRIMARY_PREFLIGHT '+label+' '+json.dumps(preflight_state,ensure_ascii=False),flush=True)
+                check(f'{label}: SMS preflight button is enabled when route and recipient are selected',
+                      bool(not preflight_state['disabled'] and preflight_state['route']=='international' and preflight_state['activeStep']==['2']),
+                      state=preflight_state)
+                preflight_button.click()
                 back('sms3', '.sms-workspace-header').click()
                 expect(page.locator('[data-sms-panel="2"]')).to_have_class(re.compile(r'\bactive\b'))
                 page.locator('#smsHistoryOpen').click()
