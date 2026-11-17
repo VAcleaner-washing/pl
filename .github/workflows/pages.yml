@@ -166,8 +166,10 @@ jobs:
       - name: Verify the deployed artifact
         run: npm run verify:artifact
       - name: Run WebKit mobile, public and startup QA
+        timeout-minutes: 20
         env:
           DEBUG: pw:browser
+          PYTHONUNBUFFERED: '1'
         run: npm run test:webkit
       - name: Upload WebKit evidence
         if: always()
