@@ -82,8 +82,11 @@ def navigate(page, view):
         if not nav.is_visible():
             page.locator('.mobile-nav .more-nav').click()
             nav = page.locator(f'.mobile-more-menu [data-more-view="{view}"]')
-    nav.click()
-    page.wait_for_function('(v)=>document.documentElement.dataset.adminView===v', arg=view)
+    # A stalled WebKit renderer must fail promptly with the original click error,
+    # so the LAB wrapper can capture its DOM, cgroup and trace evidence instead
+    # of masking a broken navigation with an unbounded wait.
+    nav.click(timeout=8000)
+    page.wait_for_function('(v)=>document.documentElement.dataset.adminView===v', arg=view, timeout=8000)
 
 
 def main():
