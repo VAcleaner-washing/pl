@@ -78,6 +78,10 @@ def main():
                 adds=[x for x in calls if x['action']=='add_unit']
                 assert len(adds)==2 and adds[0]['requestId']==adds[1]['requestId'],adds
                 assert model['inventory'][0]['capacity']==3
+                idle.navigate(page,'bookings')
+                model['issued']['jimmy']=2
+                idle.navigate(page,'equipment')
+                expect(page.locator('.equipment-fleet-availability')).to_have_text('Вільно 1')
                 page.reload();page.wait_for_selector('.booking-card,.upcoming-row')
                 idle.navigate(page,'equipment');page.wait_for_selector('.equipment-fleet-unit')
                 expect(repair).to_have_value('ready')

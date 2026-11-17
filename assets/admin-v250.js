@@ -490,7 +490,7 @@ function renderSearchReturnControl(){const context=state.searchReturnContext,hea
 function renderViewReturnControl(){const context=state.viewReturnContext,head=$('.page-head');head?.querySelector('.view-return-control')?.remove();if(!context?.label||typeof context.action!=='function'||!head||state.searchReturnContext)return;const btn=document.createElement('button');btn.type='button';btn.className='btn view-return-control';btn.textContent=`← ${context.label}`;btn.onclick=()=>{const action=context.action;state.viewReturnContext=null;action()};head.appendChild(btn)}
 function syncSearchContext(){const app=$('.app'),search=$('#globalSearch'),label=search?.closest('.search');app?.classList.remove('no-global-search');if(label)label.setAttribute('aria-hidden','false');if(search){search.disabled=false;search.placeholder=state.view==='clients'?'Пошук по всій адмінці: клієнт, телефон, промокод…':'Пошук по всій адмінці: ім’я, телефон, код, витрата…'}}
 function switchView(v,{clearSearch=false,preserveSearchReturn=false,preserveViewReturn=false}={}){closeMobileMore({restoreFocus:false});if(clearSearch)clearGlobalSearch();if(!preserveSearchReturn)state.searchReturnContext=null;if(!preserveViewReturn)state.viewReturnContext=null;state.view=v;state.listScroll=0;if(v==='calendar'&&state.calendar.length)state.calendar=recalcCalendarSlots(state.calendar,state.bookings);$$('.nav button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));syncMobileNavActive();const mc=$('#mobileCompact');if(mc)mc.classList.toggle('is-hidden',v!=='bookings');resetViewScroll();render();resetViewScroll()}
-function render(){const v=state.view;document.documentElement.dataset.adminView=v;syncSearchContext();if(state.lastError&&!state.dataLoaded){renderLoadError(state.lastError);return}const globalQuery=($('#globalSearch')?.value||'').trim();if(globalQuery){setHead('Пошук','Швидкий пошук по бронюваннях, клієнтах, витратах і кампаніях');renderGlobalSearch(globalQuery);if(pendingBookingId)requestAnimationFrame(openPendingBooking);return}if(v==='bookings'){setHead('Бронювання','Усі заявки та керування орендою');renderBookings()}if(v==='calendar'){setHead('Календар','Доступність техніки по днях і часових слотах');renderCalendar()}if(v==='upcoming'){setHead('Найближчі','Видачі, доставки та повернення, які потребують уваги');renderUpcoming()}if(v==='equipment'){setHead('Техніка','Уся техніка, комплекти й актуальні ціни');renderEquipment()}if(v==='clients'){setHead('Клієнти','Історія оренд, контакти та повторні замовлення');renderClients()}if(v==='campaigns'){setHead('Кампанії','Повернення клієнтів, промокоди та результати');renderCampaigns()}if(v==='finances'){setHead('Фінанси','Операційні витрати, інвестиції та внесені дані');renderFinances()}if(v==='analytics'){setHead('Аналітика','Прибуток, виручка, завантаження та попит');renderAnalytics()}if(v==='chemistry'){setHead('Хімія','Контроль використання пакетиків і бонусів за сторіс');renderChemistry()}if(v==='settings'){setHead('Налаштування','Оренда, доставка, техніка, сповіщення та стан системи');renderSettings()}renderSearchReturnControl();renderViewReturnControl();if(pendingBookingId)requestAnimationFrame(openPendingBooking)}
+function render(){const v=state.view;document.documentElement.dataset.adminView=v;syncSearchContext();if(state.lastError&&!state.dataLoaded){renderLoadError(state.lastError);return}const globalQuery=($('#globalSearch')?.value||'').trim();if(globalQuery){setHead('Пошук','Швидкий пошук по бронюваннях, клієнтах, витратах і кампаніях');renderGlobalSearch(globalQuery);if(pendingBookingId)requestAnimationFrame(openPendingBooking);return}if(v==='bookings'){setHead('Бронювання','Усі заявки та керування орендою');renderBookings()}if(v==='calendar'){setHead('Календар','Доступність техніки по днях і часових слотах');renderCalendar()}if(v==='upcoming'){setHead('Найближчі','Видачі, доставки та повернення, які потребують уваги');renderUpcoming()}if(v==='equipment'){setHead('Техніка','Уся техніка, комплекти й актуальні ціни');renderEquipment(true)}if(v==='clients'){setHead('Клієнти','Історія оренд, контакти та повторні замовлення');renderClients()}if(v==='campaigns'){setHead('Кампанії','Повернення клієнтів, промокоди та результати');renderCampaigns()}if(v==='finances'){setHead('Фінанси','Операційні витрати, інвестиції та внесені дані');renderFinances()}if(v==='analytics'){setHead('Аналітика','Прибуток, виручка, завантаження та попит');renderAnalytics()}if(v==='chemistry'){setHead('Хімія','Контроль використання пакетиків і бонусів за сторіс');renderChemistry()}if(v==='settings'){setHead('Налаштування','Оренда, доставка, техніка, сповіщення та стан системи');renderSettings()}renderSearchReturnControl();renderViewReturnControl();if(pendingBookingId)requestAnimationFrame(openPendingBooking)}
 // The operational list sorts by the NEXT manager action, not the historical rental start.
 // Issued equipment needs a return; confirmed/awaiting equipment needs a pickup.
 // Local YYYY-MM-DD + HH:mm deliberately avoids UTC shifting the business queue.
@@ -550,6 +550,7 @@ function bindUpcoming(){$$('.upcoming-row').forEach(row=>{const b=state.bookings
 
 const FLEET_SECTION_STORAGE='vac_admin_equipment_section';
 const EQUIPMENT_SECTION_NAMES={fleet:'Парк і стан',pricing:'Тарифи',finance:'Вартість і окупність'};
+const FLEET_UNCONFIRMED='Результат зміни не підтверджено. Оновіть парк перед повторною спробою.';
 let fleetState={tab:localStorage.getItem(FLEET_SECTION_STORAGE)||'pricing',data:null,error:'',loading:false};
 if(!EQUIPMENT_SECTION_NAMES[fleetState.tab])fleetState.tab='pricing';
 function equipmentSectionTabs(){
@@ -565,7 +566,7 @@ function equipmentFleetPanel(){
   const statusLabel={ready:'Справна',repair:'Ремонт',retired:'Списана'};
   const statusOptions=unit=>Object.entries(statusLabel).map(([code,label])=>
     `<option value="${code}" ${unit.status===code?'selected':''}>${label}</option>`).join('');
-  return `<div class="equipment-fleet-intro"><div><strong>Фізичні одиниці</strong><p>Стан техніки керує доступністю на сайті. Закупівельні витрати тут не змінюються.</p></div><button type="button" class="btn" id="fleetRefresh">Оновити</button></div>
+  return `<div class="equipment-fleet-intro"><div><strong>Фізичні одиниці</strong><p>Стан техніки керує доступністю на сайті. Закупівельні витрати тут не змінюються.</p></div><button type="button" class="btn" id="fleetRefresh" ${fleetState.loading||fleetState.mutating?'disabled':''}>${fleetState.loading?'Оновлюємо…':'Оновити'}</button></div>
   <div class="equipment-fleet-grid">${rows.map(row=>{
     const fleetUnits=units.filter(u=>u.resource_code===row.resource_code);
     const repairing=fleetUnits.filter(u=>u.status==='repair').length;
@@ -592,7 +593,7 @@ async function loadEquipmentFleet(){
   fleetState.loading=true;fleetState.error='';
   if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment();
   try{
-    const result=await invokeAt(EQUIPMENT_API,{action:'list'});
+    const result=await withUiTimeout(invokeAt(EQUIPMENT_API,{action:'list'}));
     fleetState.data={inventory:result.inventory||[],units:result.units||[],issued:result.issued||{}};
   }catch(error){fleetState.error=error?.message||'Не вдалося отримати складські дані';fleetState.data=null}
   finally{fleetState.loading=false;if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment();}
@@ -601,8 +602,7 @@ function bindEquipmentWorkspace(){
   document.querySelectorAll('[data-eq-tab]').forEach(btn=>btn.onclick=()=>{
     fleetState.tab=btn.dataset.eqTab;
     localStorage.setItem(FLEET_SECTION_STORAGE,fleetState.tab);
-    renderEquipment();
-    if(fleetState.tab==='fleet'&&!fleetState.data&&!fleetState.loading&&!fleetState.error)void loadEquipmentFleet();
+    renderEquipment(true);
   });
   const retry=$('#fleetRetry')||$('#fleetRefresh');
   if(retry)retry.onclick=()=>loadEquipmentFleet();
@@ -612,7 +612,7 @@ function bindEquipmentWorkspace(){
     switchView('settings');
   };
   document.querySelectorAll('[data-eq-unit]').forEach(select=>select.onchange=async()=>{
-    if(fleetState.mutating)return;
+    if(fleetState.mutating||fleetState.loading)return;
     const unit=fleetState.data?.units?.find(x=>x.id===select.dataset.eqUnit);
     if(!unit||unit.status===select.value)return;
     const status=select.value;
@@ -623,41 +623,44 @@ function bindEquipmentWorkspace(){
     fleetState.mutating=true;
     document.querySelectorAll('[data-eq-unit],[data-eq-add]').forEach(control=>control.disabled=true);
     try{
-      await invokeAt(EQUIPMENT_API,{action:'set_status',unitId:unit.id,status,note});
+      await withUiTimeout(invokeAt(EQUIPMENT_API,{action:'set_status',unitId:unit.id,status,note}));
       await loadEquipmentFleet();
       toast('Стан техніки збережено. Доступність перерахована.','success');
     }catch(error){
-      const reason=String(error.message||'');
-      toast(reason.includes('equipment_reserved_overlap')?'Є накладення чинних бронювань. Спочатку перенеси їх.':reason);
+      await loadEquipmentFleet();
+      const current=fleetState.data?.units.find(row=>row.id===unit.id);
+      const reason=error.status===0||error.status>=500?FLEET_UNCONFIRMED:String(error.message||'');
+      toast(current?.status===status?'Стан підтверджено повторним читанням.':reason.includes('equipment_reserved_overlap')?'Є накладення чинних бронювань. Спочатку перенеси їх.':reason);
       if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment();
     }
     finally{fleetState.mutating=false;if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment()}
   });
   document.querySelectorAll('[data-eq-add]').forEach(btn=>btn.onclick=async()=>{
-    if(fleetState.mutating)return;
+    if(fleetState.mutating||fleetState.loading)return;
     const code=btn.dataset.eqAdd;
     if(!confirm('Додати нову фізичну одиницю '+code+'? Це збільшить кількість доступної техніки, але не змінить бухгалтерські вкладення.'))return;
     const requestKey='vac_equipment_add_request_'+code,requestId=localStorage.getItem(requestKey)||crypto.randomUUID();
     localStorage.setItem(requestKey,requestId);
     fleetState.mutating=true;
     document.querySelectorAll('[data-eq-unit],[data-eq-add]').forEach(control=>control.disabled=true);
-    try{await invokeAt(EQUIPMENT_API,{action:'add_unit',resourceCode:code,requestId,note:'Додано через адмінку'});localStorage.removeItem(requestKey);await loadEquipmentFleet();toast('Одиницю додано до парку','success')}
+    try{await withUiTimeout(invokeAt(EQUIPMENT_API,{action:'add_unit',resourceCode:code,requestId,note:'Додано через адмінку'}));localStorage.removeItem(requestKey);await loadEquipmentFleet();toast('Одиницю додано до парку','success')}
     catch(error){
       await loadEquipmentFleet();
       if(fleetState.data?.units.some(unit=>unit.id===requestId)){localStorage.removeItem(requestKey);toast('Одиницю додано. Стан підтверджено повторним читанням.','success')}
-      else{btn.disabled=false;toast(error.message)}
+      else{btn.disabled=false;toast(error.status===0||error.status>=500?FLEET_UNCONFIRMED:error.message)}
     }
     finally{fleetState.mutating=false;if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment()}
   });
   if(fleetState.tab==='fleet'&&!fleetState.data&&!fleetState.loading&&!fleetState.error)void loadEquipmentFleet();
 }
 
-function renderEquipment(){
+function renderEquipment(refresh=false){
 const c=getCatalog();
 const imageSet=code=>CORE.productImages(code);
 $('#view').innerHTML=`<div class="catalog-toolbar"><div><h2>Техніка та комплекти</h2><p>Ціни беруться з єдиного каталогу. В адмінці показуємо короткі робочі назви техніки.</p></div><button class="btn primary" id="editPrices" ${fleetState.tab==='pricing'?'':'hidden'}>Редагувати ціни</button></div>${equipmentSectionTabs()}<section id="equipmentFleetHost" ${fleetState.tab==='fleet'?'':'hidden'}>${equipmentFleetPanel()}</section><section id="equipmentFinanceHost" ${fleetState.tab==='finance'?'':'hidden'}>${equipmentFinancePanel()}</section><div class="equipment-grid" id="equipmentPricingHost" ${fleetState.tab==='pricing'?'':'hidden'}>${Object.entries(c.products).map(([code,item])=>{const meta=CORE.productMeta(code)||{},set=imageSet(code);return `<article class="card equipment-card ${set.length>1?'kit-card':''}"><div class="equipment-image equipment-image-${Math.min(set.length,4)} product-${safeToken(code)}">${set.map((src,i)=>`<img src="${src}" alt="${item.label}${set.length>1?` · фото ${i+1}`:''}" loading="lazy">`).join('')}</div><div class="equipment-body"><small>${meta.category||'Комплект'}</small><h3>${h(adminProductLabel(code,item.label))}</h3><p>${meta.description||'Готовий комплект техніки.'}</p><div class="price-grid"><div><small>Будні</small><strong>${money(item.weekday)}</strong></div><div><small>Вихідні</small><strong>${money(item.weekend)}</strong></div>${item.saturdaySunday?`<div><small>Сб + Нд</small><strong>${money(item.saturdaySunday)}</strong></div>`:''}</div></div></article>`}).join('')}</div>`;
 $('#editPrices').onclick=openCatalogEditor;
-bindEquipmentWorkspace()
+bindEquipmentWorkspace();
+if(refresh&&fleetState.tab==='fleet'&&!fleetState.loading&&!fleetState.mutating)void loadEquipmentFleet();
 }
 function priceField(label,name,value){return `<label class="catalog-price-field"><span>${label}</span><div class="catalog-price-control"><input type="number" inputmode="numeric" name="${name}" value="${value}" min="0" step="50"><em>грн</em></div></label>`}
 function openCatalogEditor(){const c=getCatalog(),productRows=Object.entries(c.products).map(([k,x])=>`<article class="catalog-item"><div class="catalog-item-copy"><strong>${h(adminProductLabel(k,x.label))}</strong><span>${x.saturdaySunday!==undefined?'Окремий тариф на повні вихідні':'Оренда на одну добу'}</span></div><div class="catalog-price-grid">${priceField('Будні',k+'_weekday',x.weekday)}${priceField('Вихідні',k+'_weekend',x.weekend)}${x.saturdaySunday!==undefined?priceField('Сб + Нд',k+'_ss',x.saturdaySunday):''}</div></article>`).join(''),activeExtras=Object.entries(c.extras).filter(([,x])=>x.active!==false),extraRows=activeExtras.map(([k,x])=>`<article class="catalog-item catalog-item-extra"><div class="catalog-item-copy"><strong>${x.label}</strong><span>Додаткова позиція до замовлення</span></div><div class="catalog-price-grid">${priceField('Ціна','extra_'+k,x.price)}</div></article>`).join('');modal(`<form class="modal-form catalog-form" id="catalogForm"><header><div><small>Каталог</small><h2>Редагувати ціни</h2><p>Зміни одразу застосуються в адмінці та на сайті.</p></div><button class="close" type="button" data-close>×</button></header><div class="catalog-scroll"><section class="catalog-section"><div class="catalog-section-head"><div><span>01</span><div><h3>Техніка та комплекти</h3><p>${Object.keys(c.products).length} позицій</p></div></div></div><div class="catalog-items">${productRows}</div></section><section class="catalog-section"><div class="catalog-section-head"><div><span>02</span><div><h3>Хімія та засоби</h3><p>Додаткові позиції й витратні матеріали</p></div></div></div><div class="catalog-items">${extraRows}<article class="catalog-item catalog-item-extra"><div class="catalog-item-copy"><strong>Пакетик хімії Puzzi</strong><span>Оплата за фактично використану кількість</span></div><div class="catalog-price-grid">${priceField('Ціна','packet',c.puzziPacketPrice||50)}</div></article></div></section></div><footer><button class="btn" type="button" data-close>Скасувати</button><button class="btn primary" type="submit">Зберегти ціни</button></footer></form>`);const f=$('#catalogForm');f.onsubmit=async e=>{e.preventDefault();const fd=new FormData(f),next=structuredClone(c);Object.keys(next.products).forEach(k=>{next.products[k].weekday=Number(fd.get(k+'_weekday'));next.products[k].weekend=Number(fd.get(k+'_weekend'));if(next.products[k].saturdaySunday!==undefined)next.products[k].saturdaySunday=Number(fd.get(k+'_ss'))});activeExtras.forEach(([k])=>next.extras[k].price=Number(fd.get('extra_'+k)));next.puzziPacketPrice=Number(fd.get('packet'));const btn=f.querySelector('[type=submit]');btn.disabled=true;try{await saveGlobalCatalog(next);closeLayer();renderEquipment();toast('Ціни оновлено на сайті й в адмінці')}catch(err){btn.disabled=false;toast(err.message)}}}

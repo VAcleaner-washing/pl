@@ -6007,3 +6007,4 @@ The aggregate browser QA workflow installs both Chromium and WebKit, because cat
 - Each add-unit intent owns a persistent client UUID that becomes the unit ID. The service-only RPC serializes creation and returns the existing unit for the same intent; retries cannot increase capacity or duplicate its event. Missing request IDs are rejected.
 - After a lost mutation response the UI reads authoritative fleet state. If that read also fails, the error remains visible and the retained intent UUID is reused on retry. Successful acknowledgement clears it.
 - Isolated SQL and actual UI tests cover a committed addition with lost response, failed refresh and retry. No existing booking or financial RPC is changed.
+- Fleet requests use the existing 15-second UI deadline. Entering or refreshing the equipment workspace re-reads stock; mutation controls wait for its authoritative refresh. Unknown mutation outcomes are shown as unconfirmed, never as proof that nothing changed.
