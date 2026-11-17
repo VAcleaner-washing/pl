@@ -14,7 +14,7 @@ const check=(label,test)=>{assert.ok(test,label);checks.push(label);console.log(
 for(const k of [
   'create table if not exists public.vacleaner_equipment_units',
   'create table if not exists public.vacleaner_equipment_unit_events',
-  'status in (\\'ready\\',\\'repair\\',\\'retired\\')',
+  "status in ('ready','repair','retired')",
   'alter table public.vacleaner_equipment_units enable row level security',
   'revoke all on public.vacleaner_equipment_units from public,anon,authenticated',
   'service_role',
@@ -22,7 +22,7 @@ for(const k of [
   'public.vacleaner_booking_resources',
   'equipment_reserved_overlap',
   'v_current_ready<>v_inventory.capacity',
-  'status=\\'issued\\'',
+  "status='issued'",
   "capacity >= 0",
 ])check('migration safety '+k,sql.includes(k));
 check('repair state and physical cost never coupled',!sql.includes('equipment_baselines') || sql.includes('NEVER edited'));
