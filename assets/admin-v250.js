@@ -591,7 +591,7 @@ async function loadEquipmentFleet(){
   finally{fleetState.loading=false;if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment();}
 }
 function bindEquipmentWorkspace(){
-  $('[data-eq-tab]').forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll('[data-eq-tab]').forEach(btn=>btn.onclick=()=>{
     fleetState.tab=btn.dataset.eqTab;
     localStorage.setItem(FLEET_SECTION_STORAGE,fleetState.tab);
     renderEquipment();
@@ -604,7 +604,7 @@ function bindEquipmentWorkspace(){
     localStorage.setItem('vac_admin_settings_tab','equipment');
     switchView('settings');
   };
-  $('[data-eq-unit]').forEach(select=>select.onchange=async()=>{
+  document.querySelectorAll('[data-eq-unit]').forEach(select=>select.onchange=async()=>{
     const unit=fleetState.data?.units?.find(x=>x.id===select.dataset.eqUnit);
     if(!unit||unit.status===select.value)return;
     const status=select.value;
@@ -623,7 +623,7 @@ function bindEquipmentWorkspace(){
       renderEquipment();
     }
   });
-  $('[data-eq-add]').forEach(btn=>btn.onclick=async()=>{
+  document.querySelectorAll('[data-eq-add]').forEach(btn=>btn.onclick=async()=>{
     const code=btn.dataset.eqAdd;
     if(!confirm('Додати нову фізичну одиницю '+code+'? Це збільшить кількість доступної техніки, але не змінить бухгалтерські вкладення.'))return;
     btn.disabled=true;
