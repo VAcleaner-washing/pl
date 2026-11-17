@@ -92,10 +92,10 @@ begin
     );
     with active as (
       select
-        pg_catalog.greatest(
+        greatest(
           public.vacleaner_slot_index(b.start_date,b.pickup_window),v_now_slot
         ) as start_slot,
-        case when b.status='issued' then pg_catalog.greatest(
+        case when b.status='issued' then greatest(
           public.vacleaner_slot_index(b.return_date,b.return_window),v_now_slot+1
         ) else public.vacleaner_slot_index(b.return_date,b.return_window) end as end_slot,
         br.quantity as quantity
