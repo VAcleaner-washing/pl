@@ -21,7 +21,7 @@ function bookingDocumentsPending(booking){const direct=booking?.extras?.processi
 const PWA_BUILD='4364',PWA_UPDATE_FALLBACK_MS=8000;let pwaRegistration=null,pwaWaitingWorker=null,pwaReloading=false,pwaUpdateRequested=false,pwaUpdateFallbackTimer=0,pendingBookingId='';
 const LIVE_BOOKING_SYNC_MS=15000;let liveBookingSyncTimer=0,liveBookingSyncBusy=false,lastLiveBookingFingerprint='';
 
-const SUPABASE='https://yweluzclearwrazdkahu.supabase.co',API=SUPABASE+'/functions/v1/vacleaner-admin-bookings-v4',EXTEND_API=SUPABASE+'/functions/v1/vacleaner-extend-rental-v1',DATA_API=SUPABASE+'/functions/v1/vacleaner-admin-data-v1',CAMPAIGN_API=SUPABASE+'/functions/v1/vacleaner-campaigns-v1',SMS_API=SUPABASE+'/functions/v1/vacleaner-sms-v2',SMS_AUDIT_API=SUPABASE+'/functions/v1/vacleaner-sms-audit-v1',STATUS_API=SUPABASE+'/functions/v1/vacleaner-status-correction-v1',DOCUMENT_API=SUPABASE+'/functions/v1/vacleaner-customer-documents-v1',SETTINGS_API=SUPABASE+'/functions/v1/vacleaner-settings',BOOKING_PROMO_API=SUPABASE+'/functions/v1/vacleaner-booking-promo-v1',KEY='sb_publishable_-UdAKDf5jzIP6N9rBp927g_VhyJKeog';
+const SUPABASE='https://yweluzclearwrazdkahu.supabase.co',API=SUPABASE+'/functions/v1/vacleaner-admin-bookings-v4',EXTEND_API=SUPABASE+'/functions/v1/vacleaner-extend-rental-v1',DATA_API=SUPABASE+'/functions/v1/vacleaner-admin-data-v1',CAMPAIGN_API=SUPABASE+'/functions/v1/vacleaner-campaigns-v1',SMS_API=SUPABASE+'/functions/v1/vacleaner-sms-v2',SMS_AUDIT_API=SUPABASE+'/functions/v1/vacleaner-sms-audit-v1',STATUS_API=SUPABASE+'/functions/v1/vacleaner-status-correction-v1',DOCUMENT_API=SUPABASE+'/functions/v1/vacleaner-customer-documents-v1',SETTINGS_API=SUPABASE+'/functions/v1/vacleaner-settings',BOOKING_PROMO_API=SUPABASE+'/functions/v1/vacleaner-booking-promo-v1',EQUIPMENT_API=SUPABASE+'/functions/v1/vacleaner-equipment-admin-v1',KEY='sb_publishable_-UdAKDf5jzIP6N9rBp927g_VhyJKeog';
 const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
 const SCREEN_BACK_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m7-7-7 7 7 7"/></svg>';
 function setupScreenHeader(header,existing=null){
@@ -540,11 +540,105 @@ function renderUpcoming(){
 function upcomingRow(e){const b=e.b,isIssue=e.kind==='issue',documentsPending=isIssue&&bookingDocumentsPending(b),delivery=b.fulfillment==='delivery',action=isIssue?(b.status==='waiting_payment'?'confirm':'issue'):'complete',actionLabel=isIssue?(b.status==='waiting_payment'?'Підтвердити оплату':'Видати техніку'):'Прийняти повернення',extras=getSelectedExtras(b),extraSum=extrasTotal(b),extraText=extrasHeaderInline(b),gifts=bookingGiftLines(b),giftText=gifts.join(' · '),phone=normalizePhone(b.customer_phone),urgency=e.urgency||'future',urgencyLabel=e.diff<0?'Прострочено':e.diff===0?'Сьогодні':e.diff===1?'Завтра':'',settlement=isIssue?null:settlementStage(b,calc(b)),moneyLabel=isIssue?'Бронювання':settlement?.className==='refund'?'Попередньо повернути':settlement?.className==='due'?'Попередньо доплатити':'Попередній баланс',moneyValue=isIssue?money(b.prepayment_paid?b.prepayment_amount||200:0):settlement?.amountLabel||'0 грн';return`<article class="upcoming-row ${safeToken(e.kind)} ${urgency}" data-id="${h(b.id)}"><div class="upcoming-time"><i>${isIssue?'↑':'↓'}</i><strong>${h(e.time)}</strong><span>${isIssue?'Видача':'Повернення'}</span>${urgencyLabel?`<em class="schedule-badge ${urgency}">${urgencyLabel}</em>`:''}</div><div class="upcoming-main"><div class="upcoming-title"><h3>${h(adminProductLabel(b.product_code,b.product_label))}</h3><span class="status ${safeToken(b.status)}">${h(statusText[b.status]||b.status)}</span></div>${extras.length?`<div class="upcoming-extra"><i aria-hidden="true">+</i><span>${h(extraText)}</span></div>`:''}<div class="upcoming-client-info"><strong>${h(b.customer_name)}</strong><a href="tel:${h(phone)}" aria-label="Подзвонити клієнту ${h(b.customer_name)}">${h(b.customer_phone)}</a></div><small class="upcoming-handoff ${isIssue?(delivery?'delivery':'pickup'):'return'}">${isIssue?(delivery?`<i class="upcoming-delivery-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 7.5h10v8h-10z"/><path d="M13.5 10h3.2l2.8 3v2.5h-6z"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/><path d="M8.5 17.5h7"/></svg></i><span class="upcoming-handoff-copy">Доставка · ${b.fulfillment_address?routeLink(b.fulfillment_address,'delivery-route-link upcoming-route-link'):'адресу не вказано'}</span>`:'Самовивіз · Полтава'):'Очікується повернення техніки'}</small>${documentsPending?`<button class="upcoming-doc-warning" type="button" data-up="documents">⚠ Документи не отримані · додати</button>`:''}${gifts.length?`<div class="upcoming-gift">🎁 ${h(giftText)}</div>`:''}</div><div class="upcoming-side"><div class="upcoming-money ${!isIssue?settlement?.className||'neutral':''}"><small>${h(moneyLabel)}</small><strong>${h(moneyValue)}</strong>${extras.length&&isIssue?`<em>+ ${money(extraSum)}</em>`:''}</div><div class="upcoming-actions"><button class="btn subtle" data-up="open">Відкрити</button><button class="btn ${isIssue?'primary':'green'}" data-up="${action}">${actionLabel}</button></div></div></article>`}
 
 function bindUpcoming(){$$('.upcoming-row').forEach(row=>{const b=state.bookings.find(x=>x.id===row.dataset.id);$$('[data-up]',row).forEach(btn=>btn.onclick=e=>{e.stopPropagation();const a=btn.dataset.up;if(a==='open')openDetail(b);else handleAction(b,a)})})}
+
+const FLEET_SECTION_STORAGE='vac_admin_equipment_section';
+const EQUIPMENT_SECTION_NAMES={fleet:'Парк і стан',pricing:'Тарифи',finance:'Вартість і окупність'};
+let fleetState={tab:localStorage.getItem(FLEET_SECTION_STORAGE)||'pricing',data:null,error:'',loading:false};
+if(!EQUIPMENT_SECTION_NAMES[fleetState.tab])fleetState.tab='pricing';
+function equipmentSectionTabs(){
+  return `<nav class="equipment-section-tabs" role="tablist" aria-label="Розділи техніки">${Object.entries(EQUIPMENT_SECTION_NAMES).map(([key,label])=>
+    `<button type="button" role="tab" data-eq-tab="${key}" aria-selected="${fleetState.tab===key}" class="${fleetState.tab===key?'active':''}">${label}</button>`).join('')}</nav>`;
+}
+function equipmentFleetPanel(){
+  if(fleetState.loading&&!fleetState.data)return '<div class="equipment-fleet-placeholder" role="status">Завантаження стану техніки…</div>';
+  if(fleetState.error)return `<div class="equipment-fleet-placeholder" role="alert"><strong>Парк техніки не оновлено</strong><p>${h(fleetState.error)}</p><button type="button" class="btn" id="fleetRetry">Повторити</button></div>`;
+  if(!fleetState.data)return '<div class="equipment-fleet-placeholder" role="status">Завантаження парку техніки…</div>';
+  const rows=fleetState.data.inventory||[],units=fleetState.data.units||[],issued=fleetState.data.issued||{};
+  if(!rows.length)return '<div class="equipment-fleet-placeholder">У складському обліку немає обладнання.</div>';
+  const statusLabel={ready:'Справна',repair:'Ремонт',retired:'Списана'};
+  const statusOptions=unit=>Object.entries(statusLabel).map(([code,label])=>
+    `<option value="${code}" ${unit.status===code?'selected':''}>${label}</option>`).join('');
+  return `<div class="equipment-fleet-intro"><div><strong>Фізичні одиниці</strong><p>Стан техніки керує доступністю на сайті. Закупівельні витрати тут не змінюються.</p></div><button type="button" class="btn" id="fleetRefresh">Оновити</button></div>
+  <div class="equipment-fleet-grid">${rows.map(row=>{
+    const fleetUnits=units.filter(u=>u.resource_code===row.resource_code);
+    const repairing=fleetUnits.filter(u=>u.status==='repair').length;
+    const retired=fleetUnits.filter(u=>u.status==='retired').length;
+    const active=Number(row.capacity||0),out=Number(issued[row.resource_code]||0),free=Math.max(0,active-out);
+    const mismatch=fleetUnits.filter(u=>u.status==='ready').length!==active;
+    return `<article class="equipment-fleet-card"><header><div><small>Склад · ${h(row.resource_code)}</small><h3>${h(row.label)}</h3></div><span class="equipment-fleet-availability ${free===0?'unavailable':''}">${free===0?'Немає вільних':'Вільно '+free}</span></header>
+    <div class="equipment-fleet-stats"><span>Усього <b>${fleetUnits.length}</b></span><span>Справні <b>${active}</b></span><span>В оренді <b>${out}</b></span><span>Ремонт <b>${repairing}</b></span><span>Списано <b>${retired}</b></span></div>
+    ${mismatch?'<p class="equipment-fleet-warning">Не збігається складська місткість. Редагування заблоковане до перевірки.</p>':''}
+    <div class="equipment-fleet-unit-list">${fleetUnits.map(unit=>
+      `<label class="equipment-fleet-unit"><span><strong>Одиниця №${unit.unit_number}</strong><small>${h(unit.note||'Без примітки')}</small></span><select data-eq-unit="${h(unit.id)}" aria-label="${h(row.label)} №${unit.unit_number}, стан" ${mismatch?'disabled':''}>${statusOptions(unit)}</select></label>`).join('')}</div>
+    <footer><button type="button" class="btn" data-eq-add="${h(row.resource_code)}">+ Додати одиницю</button><small>Вільно зараз: справні мінус видані. Точні слоти — у календарі.</small></footer>
+    </article>`;
+  }).join('')}</div>`;
+}
+function equipmentFinancePanel(){
+  const baseline=getEquipmentBaselines();
+  const labels={puzzi:'Kärcher Puzzi 8/1',sc2:'Kärcher SC 2',jimmy:'Jimmy JV35',abir:'ABIR WD8'};
+  const total=Object.values(baseline).reduce((sum,row)=>sum+Number(row.total||0),0);
+  return `<section class="equipment-finance-summary"><h3>Закупівельна вартість парку</h3><strong>${money(total)}</strong><p>Початкові вкладення, а не поточна кількість справних одиниць. Ремонт не зменшує історичну закупівельну вартість.</p><div>${Object.entries(labels).map(([key,label])=>`<span><small>${label}</small><b>${Number(baseline[key]?.qty||0)} шт · ${money(Number(baseline[key]?.total||0))}</b></span>`).join('')}</div><button type="button" class="btn primary" id="fleetOpenFinancialSettings">Налаштування початкової вартості</button></section>`;
+}
+async function loadEquipmentFleet(){
+  if(fleetState.loading)return;
+  fleetState.loading=true;fleetState.error='';
+  if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment();
+  try{
+    const result=await invokeAt(EQUIPMENT_API,{action:'list'});
+    fleetState.data={inventory:result.inventory||[],units:result.units||[],issued:result.issued||{}};
+  }catch(error){fleetState.error=error?.message||'Не вдалося отримати складські дані';fleetState.data=null}
+  finally{fleetState.loading=false;if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment();}
+}
+function bindEquipmentWorkspace(){
+  $('[data-eq-tab]').forEach(btn=>btn.onclick=()=>{
+    fleetState.tab=btn.dataset.eqTab;
+    localStorage.setItem(FLEET_SECTION_STORAGE,fleetState.tab);
+    renderEquipment();
+    if(fleetState.tab==='fleet'&&!fleetState.data&&!fleetState.loading&&!fleetState.error)void loadEquipmentFleet();
+  });
+  const retry=$('#fleetRetry')||$('#fleetRefresh');
+  if(retry)retry.onclick=()=>loadEquipmentFleet();
+  const finance=$('#fleetOpenFinancialSettings');
+  if(finance)finance.onclick=()=>{
+    localStorage.setItem('vac_admin_settings_tab','equipment');
+    switchView('settings');
+  };
+  $('[data-eq-unit]').forEach(select=>select.onchange=async()=>{
+    const unit=fleetState.data?.units?.find(x=>x.id===select.dataset.eqUnit);
+    if(!unit||unit.status===select.value)return;
+    const status=select.value;
+    const labels={ready:'повернути в роботу',repair:'відправити в ремонт',retired:'списати'};
+    if(!confirm('Одиниця №'+unit.unit_number+': '+labels[status]+'? Стан вплине на доступність усіх комплектів.')){renderEquipment();return;}
+    const note=status==='repair'?prompt('Опиши несправність (необов’язково)',unit.note||''):'';
+    if(note===null){renderEquipment();return;}
+    select.disabled=true;
+    try{
+      await invokeAt(EQUIPMENT_API,{action:'set_status',unitId:unit.id,status,note});
+      await loadEquipmentFleet();
+      toast('Стан техніки збережено. Доступність перерахована.','success');
+    }catch(error){
+      const reason=String(error.message||'');
+      toast(reason.includes('equipment_reserved_overlap')?'Є накладення чинних бронювань. Спочатку перенеси їх.':reason);
+      renderEquipment();
+    }
+  });
+  $('[data-eq-add]').forEach(btn=>btn.onclick=async()=>{
+    const code=btn.dataset.eqAdd;
+    if(!confirm('Додати нову фізичну одиницю '+code+'? Це збільшить кількість доступної техніки, але не змінить бухгалтерські вкладення.'))return;
+    btn.disabled=true;
+    try{await invokeAt(EQUIPMENT_API,{action:'add_unit',resourceCode:code,note:'Додано через адмінку'});await loadEquipmentFleet();toast('Одиницю додано до парку','success')}
+    catch(error){btn.disabled=false;toast(error.message)}
+  });
+  if(fleetState.tab==='fleet'&&!fleetState.data&&!fleetState.loading&&!fleetState.error)void loadEquipmentFleet();
+}
+
 function renderEquipment(){
 const c=getCatalog();
 const imageSet=code=>CORE.productImages(code);
-$('#view').innerHTML=`<div class="catalog-toolbar"><div><h2>Техніка та комплекти</h2><p>Ціни беруться з єдиного каталогу. В адмінці показуємо короткі робочі назви техніки.</p></div><button class="btn primary" id="editPrices">Редагувати ціни</button></div><div class="equipment-grid">${Object.entries(c.products).map(([code,item])=>{const meta=CORE.productMeta(code)||{},set=imageSet(code);return `<article class="card equipment-card ${set.length>1?'kit-card':''}"><div class="equipment-image equipment-image-${Math.min(set.length,4)} product-${safeToken(code)}">${set.map((src,i)=>`<img src="${src}" alt="${item.label}${set.length>1?` · фото ${i+1}`:''}" loading="lazy">`).join('')}</div><div class="equipment-body"><small>${meta.category||'Комплект'}</small><h3>${h(adminProductLabel(code,item.label))}</h3><p>${meta.description||'Готовий комплект техніки.'}</p><div class="price-grid"><div><small>Будні</small><strong>${money(item.weekday)}</strong></div><div><small>Вихідні</small><strong>${money(item.weekend)}</strong></div>${item.saturdaySunday?`<div><small>Сб + Нд</small><strong>${money(item.saturdaySunday)}</strong></div>`:''}</div></div></article>`}).join('')}</div>`;
-$('#editPrices').onclick=openCatalogEditor
+$('#view').innerHTML=`<div class="catalog-toolbar"><div><h2>Техніка та комплекти</h2><p>Ціни беруться з єдиного каталогу. В адмінці показуємо короткі робочі назви техніки.</p></div><button class="btn primary" id="editPrices">Редагувати ціни</button></div>${equipmentSectionTabs()}<section id="equipmentFleetHost" ${fleetState.tab==='fleet'?'':'hidden'}>${equipmentFleetPanel()}</section><section id="equipmentFinanceHost" ${fleetState.tab==='finance'?'':'hidden'}>${equipmentFinancePanel()}</section><div class="equipment-grid" id="equipmentPricingHost" ${fleetState.tab==='pricing'?'':'hidden'}>${Object.entries(c.products).map(([code,item])=>{const meta=CORE.productMeta(code)||{},set=imageSet(code);return `<article class="card equipment-card ${set.length>1?'kit-card':''}"><div class="equipment-image equipment-image-${Math.min(set.length,4)} product-${safeToken(code)}">${set.map((src,i)=>`<img src="${src}" alt="${item.label}${set.length>1?` · фото ${i+1}`:''}" loading="lazy">`).join('')}</div><div class="equipment-body"><small>${meta.category||'Комплект'}</small><h3>${h(adminProductLabel(code,item.label))}</h3><p>${meta.description||'Готовий комплект техніки.'}</p><div class="price-grid"><div><small>Будні</small><strong>${money(item.weekday)}</strong></div><div><small>Вихідні</small><strong>${money(item.weekend)}</strong></div>${item.saturdaySunday?`<div><small>Сб + Нд</small><strong>${money(item.saturdaySunday)}</strong></div>`:''}</div></div></article>`}).join('')}</div>`;
+$('#editPrices').onclick=openCatalogEditor;
+bindEquipmentWorkspace()
 }
 function priceField(label,name,value){return `<label class="catalog-price-field"><span>${label}</span><div class="catalog-price-control"><input type="number" inputmode="numeric" name="${name}" value="${value}" min="0" step="50"><em>грн</em></div></label>`}
 function openCatalogEditor(){const c=getCatalog(),productRows=Object.entries(c.products).map(([k,x])=>`<article class="catalog-item"><div class="catalog-item-copy"><strong>${h(adminProductLabel(k,x.label))}</strong><span>${x.saturdaySunday!==undefined?'Окремий тариф на повні вихідні':'Оренда на одну добу'}</span></div><div class="catalog-price-grid">${priceField('Будні',k+'_weekday',x.weekday)}${priceField('Вихідні',k+'_weekend',x.weekend)}${x.saturdaySunday!==undefined?priceField('Сб + Нд',k+'_ss',x.saturdaySunday):''}</div></article>`).join(''),activeExtras=Object.entries(c.extras).filter(([,x])=>x.active!==false),extraRows=activeExtras.map(([k,x])=>`<article class="catalog-item catalog-item-extra"><div class="catalog-item-copy"><strong>${x.label}</strong><span>Додаткова позиція до замовлення</span></div><div class="catalog-price-grid">${priceField('Ціна','extra_'+k,x.price)}</div></article>`).join('');modal(`<form class="modal-form catalog-form" id="catalogForm"><header><div><small>Каталог</small><h2>Редагувати ціни</h2><p>Зміни одразу застосуються в адмінці та на сайті.</p></div><button class="close" type="button" data-close>×</button></header><div class="catalog-scroll"><section class="catalog-section"><div class="catalog-section-head"><div><span>01</span><div><h3>Техніка та комплекти</h3><p>${Object.keys(c.products).length} позицій</p></div></div></div><div class="catalog-items">${productRows}</div></section><section class="catalog-section"><div class="catalog-section-head"><div><span>02</span><div><h3>Хімія та засоби</h3><p>Додаткові позиції й витратні матеріали</p></div></div></div><div class="catalog-items">${extraRows}<article class="catalog-item catalog-item-extra"><div class="catalog-item-copy"><strong>Пакетик хімії Puzzi</strong><span>Оплата за фактично використану кількість</span></div><div class="catalog-price-grid">${priceField('Ціна','packet',c.puzziPacketPrice||50)}</div></article></div></section></div><footer><button class="btn" type="button" data-close>Скасувати</button><button class="btn primary" type="submit">Зберегти ціни</button></footer></form>`);const f=$('#catalogForm');f.onsubmit=async e=>{e.preventDefault();const fd=new FormData(f),next=structuredClone(c);Object.keys(next.products).forEach(k=>{next.products[k].weekday=Number(fd.get(k+'_weekday'));next.products[k].weekend=Number(fd.get(k+'_weekend'));if(next.products[k].saturdaySunday!==undefined)next.products[k].saturdaySunday=Number(fd.get(k+'_ss'))});activeExtras.forEach(([k])=>next.extras[k].price=Number(fd.get('extra_'+k)));next.puzziPacketPrice=Number(fd.get('packet'));const btn=f.querySelector('[type=submit]');btn.disabled=true;try{await saveGlobalCatalog(next);closeLayer();renderEquipment();toast('Ціни оновлено на сайті й в адмінці')}catch(err){btn.disabled=false;toast(err.message)}}}
