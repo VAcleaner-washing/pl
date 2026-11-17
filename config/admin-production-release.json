@@ -6,7 +6,7 @@
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "0c3e8b33323d24de0f20f9cfa1072ed125c187705fba028807784c1f10391eba",
+      "sha256": "fb3f307e7625a283c9dcecdc696e8e8f640ef1facc6d946bd41560f104f759a8",
       "reason": "Shared Back navigation, next-action booking order, authenticated per-unit fleet workspace; prices and financial calculation owners preserved."
     },
     {
@@ -31,9 +31,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "d11fd52ec9c21b04107ca6f9d8f0c79af8c88f7d0226be7285997ab90771a7ac",
+  "artifactTreeSha256": "85044172d20a92d55797be8eee9f4f2a998f111f36667a1a4520b16969913abf",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "3c24614c9261e20bbbc3091ba1b76f0efcb10ef48152a830969f35e0c41bf324",
+  "reviewArchiveSha256": "f7ee74c0282fe6ea45d3edabb1f25168cd652781e9b2c4dcebf283172fe5e8dc",
   "baselineReviewRuns": {
     "production63": 43948184720
   },

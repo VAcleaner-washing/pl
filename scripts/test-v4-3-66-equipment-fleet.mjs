@@ -70,4 +70,14 @@ check('Jimmy has safe free 0',fleet.includes('Немає вільних'));
 check('unit statuses are editable individually',fleet.includes('data-eq-unit=')&&fleet.includes('value="repair" selected'));
 check('three tabs rendered',tabs.includes('data-eq-tab="fleet"')&&tabs.includes('data-eq-tab="pricing"')&&tabs.includes('data-eq-tab="finance"'));
 check('financial original fleet investment preserved',finance.includes('75')&&finance.includes('шт'));
+
+
+// Zero ready units is now a valid state. Calendar must not call 0/0 free.
+const calendarContext=vm.createContext({calendarSlotPast:()=>false});
+vm.runInContext(extract('availabilityClass')+'\n'+extract('calendarSlotHtml'),calendarContext);
+const emptyCalendar=calendarContext.calendarSlotHtml('2035-01-01','jimmy','morning',0,0);
+check('zero-capacity calendar slot is disabled and explicitly unavailable',emptyCalendar.includes('disabled')&&emptyCalendar.includes('Недоступно')&&!emptyCalendar.includes('Вільно'));
+check('reserved positive capacity keeps its busy label',calendarContext.calendarSlotHtml('2035-01-01','jimmy','morning',0,2).includes('Зайнято'));
+check('available positive capacity keeps its free label',calendarContext.calendarSlotHtml('2035-01-01','jimmy','morning',2,2).includes('Вільно'));
+
 console.log(JSON.stringify({passed:checks.length,failed:0}));
