@@ -195,6 +195,10 @@ def main():
             first.locator('.lab-open-detail').click()
             expect(page.locator('.detail')).to_be_visible()
             if args.width == 440:
+                # Shared presentation attaches its dock/layout on the next frame.
+                # Require the actual completed component before measuring it;
+                # the geometry and application-error assertions remain unchanged.
+                expect(page.locator('.detail.operations-detail-layout .lab-action-dock')).to_be_visible()
                 boxes = page.evaluate('''()=>{
                   const rect=s=>document.querySelector(s).getBoundingClientRect().toJSON();
                   return {detail:rect('.detail'),head:rect('.detail-top'),back:rect('.detail-top .back'),
