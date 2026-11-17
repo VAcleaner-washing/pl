@@ -7124,6 +7124,21 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 .hero-status[data-status="cancelled"],.hero-status[data-status="declined"]{color:#ef817b;border-color:rgba(239,129,123,.48);background:rgba(144,55,51,.11)}
 .detail-top:has(.live-detail-notice){flex-wrap:wrap}
 .detail-top .live-detail-notice{grid-column:1/-1;flex-basis:100%;width:100%;min-width:0;white-space:normal}
+.delivery-route-status{flex-basis:100%;width:100%;margin:6px 0 0;font-size:13px;line-height:1.45}
+:is(.route-refresh-note,.delivery-route-partial,.delivery-route-missing):has(.delivery-route-status){flex-wrap:wrap}
+.route-refresh-note:has(.delivery-route-status){flex-wrap:wrap}
+.delivery-route-status{flex-basis:100%;width:100%;min-width:0;margin:6px 0 0;font-size:13px;line-height:1.45;white-space:normal}
+
+/* Campaign actions keep their compact layout with complete 44px touch areas. */
+.campaign-workspace .campaign-head-actions .btn,
+.campaign-workspace .campaign-actions .btn,
+.campaign-more-menu button{min-height:44px;height:auto}
+.campaign-more{width:44px;min-width:44px}
+.campaign-more>summary{width:44px;height:44px;min-width:44px;min-height:44px}
+.campaign-more-menu{top:50px}
+@media(max-width:760px){
+  .campaign-workspace .campaign-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+}
 
 /* v4.3.64 — shared screen navigation; legacy headers opt out explicitly. */
 #layer .modal .modal-card header.admin-screen-header{

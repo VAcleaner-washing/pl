@@ -11,7 +11,7 @@
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "d43895de5204192754d662cd0c7410e9622e90fc2e96f6b23d1dceae8fdca3c3",
+      "sha256": "9ce56be62aca745f96541b38cfda9599dcb26569ef3674d2dcc7788b6aa1bcb1",
       "reason": "One44px Back icon and top-left safe-area anchor across screen headers."
     },
     {
@@ -31,9 +31,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "3011e0de0ed2ebbe294caaa48a4eb1b8c615244ad0f549003f53351d004ff896",
+  "artifactTreeSha256": "74964fc2dec88f13731ded5390d41d1688bb8e504c861c6cda82d67fd599904f",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "ebd75d914b1e09c37644813f26ca24df7850ad9dc98813a15ea7651fad98e6f6",
+  "reviewArchiveSha256": "7411d3ea367d435d6f98955ef1f135b62173ff8bb9746b1a8715618998615315",
   "baselineReviewRuns": {
     "production63": 43948184720
   },
