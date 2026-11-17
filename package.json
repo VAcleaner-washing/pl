@@ -138,7 +138,7 @@
     "test:catalog-scroll-visual": "python scripts/admin_catalog_scroll_qa.py --root dist --browser webkit --artifacts catalog-scroll-test-results",
     "test:equipment-fleet": "node scripts/test-v4-3-66-equipment-fleet.mjs && node scripts/test-equipment-edge-runtime.mjs",
     "test:booking-next-action": "node scripts/test-v4-3-67-booking-next-action-order.mjs",
-    "test:booking-next-action-browser": "python scripts/admin_booking_next_action_qa.py --root dist --browser chromium --artifacts booking-queue-qa-results/chromium && python scripts/admin_booking_next_action_qa.py --root dist --browser webkit --artifacts booking-queue-qa-results/webkit",
+    "test:booking-next-action-browser": "node scripts/build-admin-release-candidate.mjs && python scripts/admin_booking_next_action_qa.py --root release-candidate-test-results/dist --browser chromium --artifacts booking-queue-qa-results/chromium && python scripts/admin_booking_next_action_qa.py --root release-candidate-test-results/dist --browser webkit --artifacts booking-queue-qa-results/webkit",
     "test:equipment-fleet-browser": "python scripts/admin_equipment_fleet_qa.py --root dist --browser chromium --artifacts equipment-fleet-test-results/chromium"
   }
 }
