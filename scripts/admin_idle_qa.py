@@ -80,7 +80,12 @@ def navigate(page, view):
     if not nav.is_visible():
         nav = page.locator(f'.mobile-nav [data-mobile-view="{view}"]')
         if not nav.is_visible():
-            page.locator('.mobile-nav .more-nav').click()
+            more = page.locator('.mobile-nav .more-nav')
+            more.click(timeout=8000)
+            page.wait_for_function(
+                '()=>document.documentElement.classList.contains("mobile-more-open")',
+                timeout=8000,
+            )
             nav = page.locator(f'.mobile-more-menu [data-more-view="{view}"]')
     # A stalled WebKit renderer must fail promptly with the original click error,
     # so the LAB wrapper can capture its DOM, cgroup and trace evidence instead
