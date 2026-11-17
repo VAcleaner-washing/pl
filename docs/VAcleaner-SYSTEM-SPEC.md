@@ -2410,6 +2410,18 @@ Modal має:
 
 ---
 
+## BOOK-QUEUE-001 — сортування бронювань за найближчою реальною дією (candidate v4.3.67)
+
+- Основний список «Бронювання» (у звичайному й компактному вигляді) сортується за **часом наступної операції**, а не за історичним початком оренди.
+- Для `confirmed` та `waiting_payment` наступна планова дія — **видача** (`start_date + extras.pickup_time` або чинний часовий слот).
+- Для `issued` наступна планова дія — **повернення** (`return_date + extras.return_time` або чинний часовий слот).
+- Події в одній групі терміновості розміщуються у зростанні локальної дати й часу Полтави/України (ISO date + HH:mm); не порівнювати збережений `start_at` для вже виданого обладнання, бо це минула подія.
+- Існуючий пріоритет прострочених дій і необроблених заявок `pending` **зберігається**; нові заявки залишаються перед звичайними запланованими видачами/поверненнями. Між двома pending більш нова заявка йде вище.
+- Під час однакової дати/часу порядок стабільний за `booking_code`, без хаотичних перестановок після оновлення.
+- Фільтри статусів, пошук, дати, суми, статуси, prepayment, календар і розділ «Найближчі» не змінюються. Завершені та повернені записи залишаються відсортованими за фактичною датою завершення у зворотному порядку.
+- Приклад з production-скріну 17.11.2026: **VAC-261117-28D0A (видача сьогодні 18:00)** має йти **перед VAC-261117-246AC (повернення завтра 08:30)**, хоча остання оренда почалася раніше.
+- Гейт: `test:booking-next-action` перевіряє screenshot-fixture, обидва типи операцій, часові значення, прострочення, pending, status filters, completed і стабільність. Додатково `test:booking-next-action-browser` перевіряє реальний DOM PWA на 390/440 px у повному та компактному режимах Chromium/WebKit без серверних записів.
+
 # 20. CALENDAR / UPCOMING
 
 ## CAL-001 — календар
@@ -5902,3 +5914,7 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 - Regression also checks a visibly painted Back icon and Close bounds/overlap with the title and Back, in addition to coordinate equality and actual return actions.
 - Route smoke and CRM regressions inspect the arrow's accessible name and exercise the shared Back control. Existing safe-area and short-desktop SMS density limits remain unchanged.
 - The full existing static/browser/WebKit/worker gates remain required. Physical iPhone behavior is not certified by emulation.
+
+
+### Browser QA runtime provisioning (2026-11-17)
+The aggregate browser QA workflow installs both Chromium and WebKit, because catalog-scroll and other cross-browser checks invoke WebKit from the aggregate gate. The browser cache key covers both runtimes. This is a CI-only correction; production booking behavior is unchanged.
