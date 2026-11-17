@@ -5888,6 +5888,7 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 
 - Inconsistent navigation positions: booking detail at left, nested client at right, wizard only in footer.
 - New header exit controls participate in the current dirty/pending protection; internal step return is distinguished from leaving a form.
+- Shared Back retains the exact parent-route accessible name. The sticky detail header stays below the mobile safe area after a long scroll, and SMS keeps its compact desktop header.
 
 ### PRESERVED
 
@@ -5899,4 +5900,5 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 
 - scripts/admin_back_navigation_qa.py runs against the exact supplied normal artifact with intercepted read-only fixtures in canonical Chromium, pinned WebKit and all4production-artifact operation jobs.
 - Regression also checks a visibly painted Back icon and Close bounds/overlap with the title and Back, in addition to coordinate equality and actual return actions.
+- Route smoke and CRM regressions inspect the arrow's accessible name and exercise the shared Back control. Existing safe-area and short-desktop SMS density limits remain unchanged.
 - The full existing static/browser/WebKit/worker gates remain required. Physical iPhone behavior is not certified by emulation.

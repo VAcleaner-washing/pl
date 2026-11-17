@@ -10,4 +10,8 @@ Regression coverage uses the exact supplied normal artifact with intercepted rea
 
 Prepared from verified production4.3.63 commit e76f8a133032eb09ac739d12b49711729101e0a7. Production remains4.3.63 until a separate publication decision. Financial formulas, statuses, availability, API payloads, public booking/draft fixes, owner-required pinch blocking and recovery archives are preserved. No backend deploy or production data changes are part of this candidate.
 
-Local final validation:536/536 navigation/visible-icon/Close-bounds checks on the pinned273-file candidate; canonical static67/67, candidate boundary19/19 and promotion guards7/7. Legacy rules opt out of the shared header explicitly; the existing base CSS budget stays at5with no added!important declarations. Full remote gates remain pending before readiness.
+Back retains the exact parent-route accessible name. After long detail scrolling the header remains below the mobile safe area; the SMS desktop header retains its existing density limits.
+
+The candidate must pass navigation, visible-icon, Close-bounds, sticky safe-area and parent-route checks on the pinned273-file artifact, plus canonical static, candidate-boundary and promotion guards. Legacy rules opt out of the shared header explicitly; the existing base CSS budget stays at5with no added!important declarations. Full remote gates remain required before readiness.
+
+Local validation of the final candidate:541navigation checks,1017PWA checks,22search-return checks and the full existing Glass CRM suite passed. Canonical static67/67, candidate boundary19/19 and promotion guards7/7 passed. Existing SMS density/safe-area assertions were retained; route tests now inspect the icon control's accessible name and click the shared Back control.

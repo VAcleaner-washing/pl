@@ -6,12 +6,12 @@
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "77c86e829dd9d6623ebedd1c9f8bc1054fc61eec78db2cd4b4e436243c1be091",
+      "sha256": "1fc897c74397150642f1b63f8fdfdb90fd86cbc2ac2918dc30393d5e4649729f",
       "reason": "Shared header Back control; existing parent callbacks, wizard steps and SMS one-level return remain the action owners."
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "9ce56be62aca745f96541b38cfda9599dcb26569ef3674d2dcc7788b6aa1bcb1",
+      "sha256": "ccc96a6311c91d7e37556dbc1e51d34539f17db03b726a1d41f197ae6c6aa5b6",
       "reason": "One44px Back icon and top-left safe-area anchor across screen headers."
     },
     {
@@ -31,9 +31,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "74964fc2dec88f13731ded5390d41d1688bb8e504c861c6cda82d67fd599904f",
+  "artifactTreeSha256": "4eddf98465e5fb5e5b6be92ac6f9dd54ba75f05ccddd479bcd83914a99f1baac",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "7411d3ea367d435d6f98955ef1f135b62173ff8bb9746b1a8715618998615315",
+  "reviewArchiveSha256": "f51e049e789652c5ca4407e299fb3e523d182abbd79ee3cdd8d5e116f35e68d8",
   "baselineReviewRuns": {
     "production63": 43948184720
   },

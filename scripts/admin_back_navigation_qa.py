@@ -84,6 +84,9 @@ def main():
                 paint=button.evaluate("el=>({opacity:getComputedStyle(el).opacity,svgOpacity:getComputedStyle(el.querySelector('svg')).opacity,stroke:getComputedStyle(el.querySelector('path')).stroke,strokeWidth:getComputedStyle(el.querySelector('path')).strokeWidth,html:el.innerHTML})")
                 check(f'{label}/{screen}: Back icon is visibly painted',float(paint['opacity'])>0 and float(paint['svgOpacity'])>0 and paint['stroke'] not in ('none','transparent','rgba(0, 0, 0, 0)'),paint=paint)
                 assert button.get_attribute('aria-label')
+                route_label = {'client': 'До бронювання', 'returned-client': 'До бронювання', 'booking1': 'До картки клієнта', 'booking-exit': 'До картки клієнта', 'referral': 'До картки клієнта'}.get(screen)
+                if route_label:
+                    assert route_label in button.get_attribute('aria-label'), {'screen': screen, 'expectedRoute': route_label}
                 box, head = button.bounding_box(), header.bounding_box()
                 check(f'{label}/{screen}: accessible44px Back stays in header', box['width'] >= 44 and box['height'] >= 44 and box['y'] >= head['y'] - 1 and box['y'] + box['height'] <= head['y'] + head['height'] + 1, button=box, header=head)
                 if width <= 900:
@@ -120,6 +123,10 @@ def main():
                 if width <= 900:
                     expect(page.locator('.operations-detail-layout>.detail-top')).to_be_visible()
                 back('detail', '.detail-top')
+                page.locator('.detail').evaluate('el=>el.scrollTop=el.scrollHeight')
+                scrolled_back = page.locator('.detail-top .admin-screen-back').bounding_box()
+                check(f'{label}: Back remains below the safe area after long detail scroll', scrolled_back['y'] >= (59 if width <= 900 else 0) and scrolled_back['y'] + scrolled_back['height'] <= page.viewport_size['height'], button=scrolled_back)
+                page.locator('.detail').evaluate('el=>el.scrollTop=0')
                 page.locator('[data-native-detail-client]:visible strong').click() if width <= 900 else page.locator('.detail [data-client-card]').click()
                 expect(page.locator('#clientEditor')).to_be_visible()
                 back('client', '#clientEditor>header')
