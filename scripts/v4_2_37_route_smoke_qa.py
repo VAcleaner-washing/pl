@@ -25,10 +25,10 @@ def run(browser,width,standalone):
         booking=page.locator('[data-search-booking]').first
         check(booking.count()>0,f'{tag}: global search exposes a booking')
         booking.click(); page.wait_for_selector('.detail')
-        check('До пошуку' in page.locator('.detail .back').inner_text(),f'{tag}: search booking detail labels exact return route')
+        check('До пошуку' in (page.locator('.detail .back').get_attribute('aria-label') or ''),f'{tag}: search booking detail labels exact return route')
         # Deep path: search -> booking -> client -> new booking -> client -> booking -> search.
         page.locator('[data-client-card]').click(); page.wait_for_selector('#clientEditor')
-        check(page.locator('.client-header-close').inner_text().strip()=='←' and 'До бронювання' in (page.locator('.client-header-close').get_attribute('aria-label') or ''),f'{tag}: client opened from booking exposes an explicit route back')
+        check(page.locator('#clientEditor>header .admin-screen-back').is_visible() and 'До бронювання' in (page.locator('#clientEditor>header .admin-screen-back').get_attribute('aria-label') or ''),f'{tag}: client opened from booking exposes an explicit route back')
         page.locator('#clientCreateBooking').click(); page.wait_for_selector('#bookingForm')
         # A waiting service-worker prompt is already present in the fixture. While work is active it must be deferred.
         prompts=page.locator('.pwa-update-prompt')
@@ -36,8 +36,8 @@ def run(browser,width,standalone):
         check(deferred,f'{tag}: update prompt defers while new-booking modal is active')
         page.locator('.booking-cancel').click(); page.wait_for_selector('#clientEditor')
         check(page.locator('#clientEditor').count()==1,f'{tag}: cancelling new booking returns to client card')
-        page.locator('.client-header-close').click(); page.wait_for_selector('.detail')
-        check(page.locator('.detail').count()==1,f'{tag}: closing client returns to booking detail')
+        page.locator('#clientEditor>header .admin-screen-back').click(); page.wait_for_selector('.detail')
+        check(page.locator('.detail').count()==1,f'{tag}: client Back returns to booking detail')
         page.locator('.detail .back').click(); page.wait_for_selector('[data-search-booking]')
         check(search.input_value()=='Анна',f'{tag}: final Back restores exact search query')
         # Once back at the root view the deferred update notice may safely reappear above navigation.
@@ -49,8 +49,8 @@ def run(browser,width,standalone):
         client=page.locator('[data-search-client]').first
         check(client.count()>0,f'{tag}: global search exposes a client')
         client.click(); page.wait_for_selector('#clientEditor')
-        check(page.locator('.client-header-close').inner_text().strip()=='←' and 'До пошуку' in (page.locator('.client-header-close').get_attribute('aria-label') or ''),f'{tag}: search client exposes explicit Back to search')
-        page.locator('.client-header-close').click(); page.wait_for_selector('[data-search-client]')
+        check(page.locator('#clientEditor>header .admin-screen-back').is_visible() and 'До пошуку' in (page.locator('#clientEditor>header .admin-screen-back').get_attribute('aria-label') or ''),f'{tag}: search client exposes explicit Back to search')
+        page.locator('#clientEditor>header .admin-screen-back').click(); page.wait_for_selector('[data-search-client]')
         check(search.input_value()=='Анна',f'{tag}: client Back preserves search query')
     finally:
         page.close()

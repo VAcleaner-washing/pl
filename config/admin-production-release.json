@@ -1,31 +1,41 @@
 {
-  "version": "4.3.63",
-  "build": 4363,
-  "reviewMode": "public-fulfillment-and-draft-bootstrap",
-  "baselineApplicationSourceCommit": "c180af6e4043386960f6f57cccceee1170ceab9f",
+  "version": "4.3.64",
+  "build": 4364,
+  "reviewMode": "consistent-back-navigation",
+  "baselineApplicationSourceCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
   "applicationFixes": [
     {
-      "path": "bronuvannia/index.html",
-      "sha256": "4378d68c5ef540972661b4e2a29b40c9a6041b78b9c0cb90fd42f7bb831d476c",
-      "reason": "Initial fulfillment buttons match the existing empty React state; selection only follows an explicit choice."
+      "path": "assets/admin-v250.js",
+      "sha256": "1fc897c74397150642f1b63f8fdfdb90fd86cbc2ac2918dc30393d5e4649729f",
+      "reason": "Shared header Back control; existing parent callbacks, wizard steps and SMS one-level return remain the action owners."
     },
     {
-      "path": "assets/booking-hardening-v4144.js",
-      "sha256": "2edac54c5e41680ec39cbd8bba3f473d555760a406e3e0069ac5fbbf9b8c8b0b",
-      "reason": "Protect draft data from startup autosave and preserve current trusted input over deferred replay."
+      "path": "assets/admin-v250.css",
+      "sha256": "ccc96a6311c91d7e37556dbc1e51d34539f17db03b726a1d41f197ae6c6aa5b6",
+      "reason": "One44px Back icon and top-left safe-area anchor across screen headers."
     },
     {
-      "path": "scripts/sync-public-hydration.mjs",
-      "sha256": "d46aaed45c6b910a2653866d1a6620ed67c31eecf54ca18a4c26e655cf9b5a77",
-      "reason": "Keep exported fulfillment markup aligned with the retained client state on every build."
+      "path": "sandbox/forms.js",
+      "sha256": "34095dff0f5db4e8b3e9f62b3e5b8d113550585bd56743e01c9e17365935c146",
+      "reason": "Include new screen-exit Back in the existing dirty/pending policy; internal step Back retains the form."
+    },
+    {
+      "path": "assets/admin-v430.css",
+      "sha256": "1cde95f77d15568bda13b8f65ee4cd58d420dcd453c1944b73d2e2a0dc5e22fe",
+      "reason": "Legacy header/Back rules explicitly exclude the shared component; no new specificity overrides."
+    },
+    {
+      "path": "assets/admin-v4321.css",
+      "sha256": "70648a190266fde8b8f5d9a9d34b5ce50c16571de4bef0be2d85d5072fa38f65",
+      "reason": "Legacy booking-detail header rules explicitly exclude the shared component."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "b352e02782f86b9f650ea484a518f0fd5cc247e2ef24a98b244ef84089a18ece",
+  "artifactTreeSha256": "4eddf98465e5fb5e5b6be92ac6f9dd54ba75f05ccddd479bcd83914a99f1baac",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "a87cce96a494eea0c8c2fee65cbcd91ff059c8653dd1e81e6118128a2eccf45f",
+  "reviewArchiveSha256": "f51e049e789652c5ca4407e299fb3e523d182abbd79ee3cdd8d5e116f35e68d8",
   "baselineReviewRuns": {
-    "production62": 43874287227
+    "production63": 43948184720
   },
   "releaseGatePolicy": "All configured canonical, WebKit, operations and actual-worker gates must pass on the final publishing commit; baseline runs do not certify this fix.",
   "privateLabOrR4OriginInstallation": "prohibited",

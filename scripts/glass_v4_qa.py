@@ -43,7 +43,7 @@ with sync_playwright() as p:
    nav_to_booking=page.locator('#clientOpenActiveBooking,#clientOpenLastBooking').first
    if nav_to_booking.count():
     nav_to_booking.click();page.wait_for_selector('.detail');page.wait_for_timeout(60)
-    check('До картки' in page.locator('.detail .back').inner_text(),f'{w}: booking opened from client keeps an explicit return path')
+    check('До картки' in (page.locator('.detail .back').get_attribute('aria-label') or ''),f'{w}: booking opened from client keeps an explicit return path')
     page.locator('.detail .back').click();page.wait_for_selector('#clientEditor');page.wait_for_timeout(60)
     check(page.locator('#clientEditor').count()==1,f'{w}: detail back restores the client card instead of losing CRM context')
   page.locator('#clientEditor [data-close]').first.click();page.wait_for_timeout(50)
