@@ -114,7 +114,8 @@
     "test:ui-reliability",
     "test:admin-audit-r1-browser",
     "test:admin-lab-browser",
-    "test:admin-lab-forms"
+    "test:admin-lab-forms",
+    "test:admin-back-navigation"
   ],
   "currentContracts": [
     {

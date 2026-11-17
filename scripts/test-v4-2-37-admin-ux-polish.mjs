@@ -16,7 +16,7 @@ ck('campaign search result exposes a return control',js.includes('state.searchRe
 ck('detail keeps full client parent options',js.includes('detailReturnClientOptions')&&js.includes('returnClientOptions:options'));
 ck('client profile removes the permanent nested next-action card',!js.slice(js.indexOf('function openClientCard('),js.indexOf('function localDateIso',js.indexOf('function openClientCard('))).includes('bindClientNextAction('));
 ck('client save preserves parent route',js.includes('openClientCard(refreshed,options)'));
-ck('nested client header exposes a real Back control without wasting mobile footer height',js.includes('class="close client-header-close"')&&js.includes("options.returnTo?'←':'×'")&&js.includes("options.returnTo?options.backLabel||'Назад':'Закрити'"));
+ck('nested client uses shared header Back, explicit Close and the same parent route',js.includes('setupModalScreenBack(card)')&&js.includes('class="close client-header-close" type="button" data-close aria-label="Закрити"')&&js.includes('openClientCard(client,{returnTo:()=>openDetail(b'));
 ck('client Instagram uses safe launcher instead of target blank',js.includes('data-client-instagram')&&js.includes("openInstagramContact(client.instagram)"));
 ck('process Instagram uses safe launcher',js.includes("sendInstagram.onclick=e=>{e.preventDefault();openInstagramContact(contactProfile.instagram)"));
 ck('settings rail exposes overflow cues',js.includes("rail.classList.toggle('has-more-right'")&&css.includes('.settings-tabs.has-more-right'));

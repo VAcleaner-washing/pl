@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.63
-**Baseline build:** 4363
+**Baseline version:** 4.3.64
+**Baseline build:** 4364
 **Останнє оновлення:** 2026-11-16
 **Власник логіки:** VAcleaner  
 
@@ -1558,6 +1558,15 @@ Canonical приклади:
 - `Картка клієнта → Приведи друга → ×/Назад → Картка клієнта`;
 - `Картка клієнта → Нова оренда → ×/Назад → Картка клієнта`;
 - `Картка клієнта → Остання оренда → ← До картки клієнта`.
+
+## NAV-006 — одна позиція для повернення
+
+Повноекранні деталі та форми мають спільну кнопку `Назад` зліва вгорі: однакова іконка, touch target щонайменше44×44px, доступна назва та узгоджений відступ від safe area. Кнопка залишається в шапці поза scroll-body. На кореневих розділах з основною навігацією штучне повернення не додається.
+
+- У бронюванні кроки2–4 повертають на попередній крок, зберігаючи дані. На кроці1 повернення залишає форму через поточний dirty/pending guard.
+- Вкладені картки зберігають NAV-004/005: клієнт, referral та нова оренда повертаються до точного батьківського контексту.
+- SMS має ту саму позицію `Назад`: одержувачі розсилки → журнал → попередній SMS-крок. Текст, аудиторія та маршрут зберігаються при внутрішньому поверненні. Повернення не виконує preflight, надсилання або синхронізацію провайдера.
+- Закриття через `×`, `Escape`, backdrop та footer діє через наявні обробники. Новий header-control також входить у dirty/pending policy. Перехід між кроками не є виходом з форми.
 
 ---
 
@@ -5861,3 +5870,33 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 - scripts/test-public-booking-draft-bootstrap.mjs exercises actual bootstrap/save/restore functions with controlled timers and no external API calls.
 - Frozen production62 artifact reproduces the mismatch; fixed artifact must pass while all external traffic remains intercepted and no booking creation is requested.
 - Canonical static/browser/WebKit and exact normal-artifact operations gates remain required before publication.
+
+## Change record — v4.3.64
+
+### ADDED
+
+- NAV-006: shared header Back with one icon,44px touch target and safe-area anchor across details and modal forms.
+- Browser coverage for all4wizard steps, nested parent chains, dirty exit, referral, finance/extension/process/issue/expense forms, campaigns and SMS drill-down on320/390/440portrait,956landscape and1440desktop.
+
+### CHANGED
+
+- Booking header Back returns one step while retaining inputs; at step1 it exits through the existing form guard.
+- SMS header Back returns recipients → journal → prior SMS step, retaining text, audience and route without sending or preflight.
+- Nested client uses shared Back at left and an explicit Close at right. Existing return callbacks retain the exact parent chain.
+
+### FIXED
+
+- Inconsistent navigation positions: booking detail at left, nested client at right, wizard only in footer.
+- New header exit controls participate in the current dirty/pending protection; internal step return is distinguished from leaving a form.
+
+### PRESERVED
+
+- Financial formulas, availability, discounts, statuses, API payloads, public fulfillment/draft fixes and source attribution.
+- Owner-required pinch blocking, backend, original production identity and all recovery archives. Candidate preparation does not change production4.3.63.
+- Existing Escape/backdrop/cancel/save behavior and lifecycle disposal. No new global listeners or observers.
+
+### TESTS
+
+- scripts/admin_back_navigation_qa.py runs against the exact supplied normal artifact with intercepted read-only fixtures in canonical Chromium, pinned WebKit and all4production-artifact operation jobs.
+- Regression also checks a visibly painted Back icon and Close bounds/overlap with the title and Back, in addition to coordinate equality and actual return actions.
+- The full existing static/browser/WebKit/worker gates remain required. Physical iPhone behavior is not certified by emulation.

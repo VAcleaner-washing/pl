@@ -95,7 +95,7 @@ document.addEventListener('click',event=>{
  if(form&&event.isTrusted)record(form).interacted=true;
  if(form&&button.matches('[type="submit"],#saveProcess,#confirmProcess,#archiveExpense,#resetSlots,#resetDeposits'))record(form).clicked=button;
  let selected=null,reload=false;
- if(button.matches('[data-close],[data-layer-back],.modal-backdrop,.detail .back'))selected=forms(document.querySelector('#layer'));
+ if(button.matches('[data-close],[data-layer-back],[data-screen-back=layer],.modal-backdrop,.detail .back'))selected=forms(document.querySelector('#layer'));
  else if(button.matches('[data-view],[data-mobile-view],[data-more-view],[data-settings-open-finances],#logout'))selected=forms();
  else if(button.matches('#newBooking,#mobileNewBooking'))selected=forms();
  else if(button.matches('#resetSlots,#resetDeposits'))selected=form?[form]:[];

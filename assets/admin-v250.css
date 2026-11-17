@@ -7124,18 +7124,40 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 .hero-status[data-status="cancelled"],.hero-status[data-status="declined"]{color:#ef817b;border-color:rgba(239,129,123,.48);background:rgba(144,55,51,.11)}
 .detail-top:has(.live-detail-notice){flex-wrap:wrap}
 .detail-top .live-detail-notice{grid-column:1/-1;flex-basis:100%;width:100%;min-width:0;white-space:normal}
-.delivery-route-status{flex-basis:100%;width:100%;margin:6px 0 0;font-size:13px;line-height:1.45}
-:is(.route-refresh-note,.delivery-route-partial,.delivery-route-missing):has(.delivery-route-status){flex-wrap:wrap}
-.route-refresh-note:has(.delivery-route-status){flex-wrap:wrap}
-.delivery-route-status{flex-basis:100%;width:100%;min-width:0;margin:6px 0 0;font-size:13px;line-height:1.45;white-space:normal}
 
-/* Campaign actions keep their compact layout with complete 44px touch areas. */
-.campaign-workspace .campaign-head-actions .btn,
-.campaign-workspace .campaign-actions .btn,
-.campaign-more-menu button{min-height:44px;height:auto}
-.campaign-more{width:44px;min-width:44px}
-.campaign-more>summary{width:44px;height:44px;min-width:44px;min-height:44px}
-.campaign-more-menu{top:50px}
-@media(max-width:760px){
-  .campaign-workspace .campaign-actions{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px}
+/* v4.3.64 — shared screen navigation; legacy headers opt out explicitly. */
+#layer .modal .modal-card header.admin-screen-header{
+  position:relative;
+  min-block-size:calc(72px + var(--pwa-safe-top,0px));
+  padding:calc(14px + var(--pwa-safe-top,0px)) 64px 14px 72px;
 }
+#layer .sms-campaign-modal>header.admin-screen-header .sms-heading{padding-inline-start:60px}
+#layer .admin-screen-back{
+  position:absolute;
+  left:16px;
+  right:auto;
+  top:calc(10px + var(--pwa-safe-top,0px));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  min-width:44px;
+  height:44px;
+  min-height:44px;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--text);
+  font-size:0;
+  cursor:pointer;
+}
+#layer .admin-screen-back::before{content:none}
+#layer .admin-screen-back svg{width:24px;height:24px;fill:none;stroke:var(--text);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+#layer .admin-screen-back:active{opacity:.75}
+#layer .admin-screen-back:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#layer .detail .detail-top .admin-screen-back{position:static;align-self:start;left:auto;top:auto}
+#layer .detail-top.admin-screen-header{position:sticky;top:0;display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:start;min-height:48px;margin:0 0 12px;padding:0;border:0;border-radius:0;background:var(--bg,#070b0e)}
+html.keyboard-open #layer .modal .admin-screen-header{min-block-size:64px}
+html.keyboard-open #layer .modal .admin-screen-back{top:10px}

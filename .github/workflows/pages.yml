@@ -217,6 +217,8 @@ jobs:
         run: |
           python scripts/admin_ui_feedback_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-feedback-${{ matrix.width }}
           python scripts/admin_detail_live_refresh_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-detail-${{ matrix.width }}
+      - name: Verify consistent Back navigation on the exact production artifact
+        run: python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --widths "${{ matrix.width == 440 && '320,390,440,956' || '1440' }}" --artifacts operations-test-results/${{ matrix.browser }}-back-${{ matrix.width }}
       - name: Verify narrow and landscape calendar containment and Settings focus
         if: matrix.width == 440
         run: |

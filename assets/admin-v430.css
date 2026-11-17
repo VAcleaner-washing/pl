@@ -347,7 +347,7 @@ html.native-test{
   /* Booking detail: less dashboard, more native stacked screen. */
   html.native-test .detail{background:var(--nt-bg)}
   html.native-test .detail-shell{padding-right:12px;padding-left:12px}
-  html.native-test .detail-top{
+  html.native-test .detail-top:not(.admin-screen-header){
     min-height:54px;
     margin-bottom:10px;
     padding:6px 2px;
@@ -358,7 +358,7 @@ html.native-test{
     backdrop-filter:blur(14px);
     -webkit-backdrop-filter:blur(14px);
   }
-  html.native-test .detail-top .back{
+  html.native-test .detail-top .back:not(.admin-screen-back){
     min-height:42px;
     padding:0 8px;
     border:0;
@@ -621,9 +621,9 @@ html.native-test{
   html.native-test .mobile-more-logout{min-height:54px;margin-top:16px;border-radius:14px}
 
   html.native-test .detail-shell{padding:calc(8px + var(--pwa-safe-top)) 14px calc(98px + var(--pwa-safe-bottom))}
-  html.native-test .detail-top{display:grid;grid-template-columns:42px minmax(0,1fr) 28px;align-items:center;min-height:46px;margin:0 0 12px;padding:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
-  html.native-test .detail-top .back{width:42px;min-width:42px;overflow:hidden;white-space:nowrap;font-size:0;padding:0}
-  html.native-test .detail-top .back::before{content:'←';font-size:28px;font-weight:300;color:#f0efeb}
+  html.native-test .detail-top:not(.admin-screen-header){display:grid;grid-template-columns:42px minmax(0,1fr) 28px;align-items:center;min-height:46px;margin:0 0 12px;padding:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none}
+  html.native-test .detail-top .back:not(.admin-screen-back){width:42px;min-width:42px;overflow:hidden;white-space:nowrap;font-size:0;padding:0}
+  html.native-test .detail-top .back:not(.admin-screen-back)::before{content:'←';font-size:28px;font-weight:300;color:#f0efeb}
   html.native-test .detail-top-meta{grid-column:2;display:block;text-align:center}
   html.native-test .detail-top-meta span{display:block;font-size:15px;font-weight:680;color:#efeee9}
   html.native-test .detail-top-meta small{display:none}
@@ -714,7 +714,7 @@ html.native-test{
 
   /* Approved booking detail: one readable card + status rail; original data stays in DOM beneath it. */
   html.native-test .detail-shell{padding:calc(20px + var(--pwa-safe-top)) 16px calc(92px + var(--pwa-safe-bottom))!important;background:#070b0e!important}
-  html.native-test .detail-top{grid-template-columns:44px minmax(0,1fr) auto!important;gap:8px!important;min-height:52px!important;margin-bottom:18px!important}
+  html.native-test .detail-top:not(.admin-screen-header){grid-template-columns:44px minmax(0,1fr) auto!important;gap:8px!important;min-height:52px!important;margin-bottom:18px!important}
   html.native-test .detail-top-meta{text-align:left!important}
   html.native-test .detail-top-meta span{font-size:20px!important;font-weight:690!important;color:#f0efeb!important}
   html.native-test .detail-top::after{display:none!important}
@@ -1077,7 +1077,7 @@ html.native-test{
     position:fixed!important;inset:0!important;width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0!important;
     border:0!important;border-radius:0!important;background:#080c0f!important;box-shadow:none!important;overflow:hidden!important;
   }
-  html.native-test .modal-form>header{
+  html.native-test .modal-form>header:not(.admin-screen-header){
     position:relative!important;z-index:4!important;min-height:calc(72px + var(--pwa-safe-top))!important;padding:calc(18px + var(--pwa-safe-top)) 54px 14px 16px!important;
     border-bottom:1px solid var(--nt-stroke-soft)!important;background:#080c0f!important;
   }
@@ -2271,7 +2271,7 @@ html.native-test{
 
   /* Detail: restore operational parity without bringing back visual bulk. */
   /* Sticky detail header stays opaque while content scrolls underneath. */
-  html.native-v23 .detail-top{
+  html.native-v23 .detail-top:not(.admin-screen-header){
     background:rgba(7,11,14,.985)!important;
     box-shadow:0 10px 20px rgba(7,11,14,.96)!important;
   }
