@@ -20,7 +20,7 @@ ok('browser depends on validate',/browser:[\s\S]*?needs: validate/.test(workflow
 ok('deploy requires static, canonical Chromium/WebKit and production operations gates',workflow.includes('needs: [validate, browser, webkit, operations]')&&workflow.includes("needs.operations.result == 'success'"));
 ok('Chromium sets Python explicitly and WebKit uses its pinned official runtime',(workflow.match(/actions\/setup-python/g)||[]).length===1&&/webkit:[\s\S]*?container:[\s\S]*?mcr\.microsoft\.com\/playwright\/python:v1\.65\.1-noble@sha256:[a-f0-9]{64}/.test(workflow));
 ok('official runtime client matches the immutable container pin',read('requirements-ci.txt').trim()==='playwright==1.65.1'&&workflow.includes('python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409'));
-ok('WebKit tests the validated artifact without rebuilding',/webkit:[\s\S]*?needs: validate[\s\S]*?npm run verify:artifact[\s\S]*?npm run test:webkit/.test(workflow));
+ok('WebKit tests the validated artifact without rebuilding',/webkit:[\s\S]*?needs: \[validate, browser\][\s\S]*?npm run verify:artifact[\s\S]*?npm run test:webkit/.test(workflow));
 ok('WebKit client is pinned to the matching official image and startup is verified',workflow.includes('python -m pip install --disable-pip-version-check -r requirements-ci.txt')&&workflow.includes('Pinned runtime Python:')&&workflow.includes('browser = p.webkit.launch(headless=True)'));
 const operations=workflow.split('\n  operations:\n')[1]?.split('\n  deploy:\n')[0]||'';
 const deploy=workflow.split('\n  deploy:\n')[1]||'';

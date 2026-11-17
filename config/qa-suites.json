@@ -119,7 +119,8 @@
     "test:admin-lab-forms",
     "test:admin-back-navigation",
     "test:catalog-scroll-visual",
-    "test:booking-next-action-browser"
+    "test:booking-next-action-browser",
+    "test:equipment-fleet-browser"
   ],
   "currentContracts": [
     {

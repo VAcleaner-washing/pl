@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.64
-**Baseline build:** 4364
-**Останнє оновлення:** 2026-11-16
+**Baseline version:** 4.3.67
+**Baseline build:** 4367
+**Останнє оновлення:** 2026-11-17
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -5979,3 +5979,26 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 
 ### Browser QA runtime provisioning (2026-11-17)
 The aggregate browser QA workflow installs both Chromium and WebKit, because catalog-scroll and other cross-browser checks invoke WebKit from the aggregate gate. The browser cache key covers both runtimes. This is a CI-only correction; production booking behavior is unchanged.
+
+
+## Change record — v4.3.67
+
+### ADDED
+- Integrated PR #74–77 release: per-unit equipment state, protected fleet API and next-action booking order.
+
+### CHANGED
+- Matching pinned Playwright client/container, real API-read synchronization before deliberate draft reload; catalog body scrolls above its footer.
+- Issued bookings sort by return date/time; unissued bookings sort by pickup date/time, retaining urgency, new-request and completed-history rules.
+
+### FIXED
+- CI contract recognizes the explicit validated artifact dependency chain. Catalog final fields remain reachable at mobile sizes.
+- Null and malformed fleet requests fail explicitly before privileged mutations.
+
+### PRESERVED
+- PR #73 shared Back navigation, stable46 recovery, production63 recovery, original Supabase, payments, prices, referral and financial calculations. Owner-required pinch zoom blocking remains.
+- Fleet migration imports current capacity without changing bookings, customer rows or financial settings; old frontend remains compatible.
+
+### TESTS
+- All canonical static/browser, pinned WebKit and exact production artifact operation/worker gates remain mandatory.
+- qa-equipment-fleet-staging.sql requires isolated stage identity and rolls back every fixture; checks grants, atomic conflicts, adjacent slots, active/expired holds, overdue returns, actual booking RPC at zero capacity and shared mutex.
+- Production publication requires actual Pages deploy and live artifact/version verification; PR merge alone is not deployment.

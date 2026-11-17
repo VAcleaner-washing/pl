@@ -1,18 +1,18 @@
 {
-  "version": "4.3.64",
-  "build": 4364,
-  "reviewMode": "consistent-back-navigation-and-catalog-scroll",
+  "version": "4.3.67",
+  "build": 4367,
+  "reviewMode": "integrated-pr74-77-release",
   "baselineApplicationSourceCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "1fc897c74397150642f1b63f8fdfdb90fd86cbc2ac2918dc30393d5e4649729f",
-      "reason": "Shared header Back control; existing parent callbacks, wizard steps and SMS one-level return remain the action owners."
+      "sha256": "1cb1cadffbf5cdb59f3eb0f06b35c0a1d17e57602672c4d98ff6c86abbbdd2ef",
+      "reason": "Shared Back navigation, next-action booking order, authenticated per-unit fleet workspace; prices and financial calculation owners preserved."
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "6f41d4c0acaec6d03fcf941de3aedd1b46cb1801ea43c27a72ec5a02755af340",
-      "reason": "Shared Back anchor retained; catalog editor has independently scrollable iOS body above sticky action bar, with regression coverage."
+      "sha256": "b85f937a6b3506e9e941e63abf8006f80e90a4753806850d646ee7ad87d81867",
+      "reason": "Consistent Back anchor, scrollable catalog editor and bounded fleet tabs with explicit hidden-state styling."
     },
     {
       "path": "sandbox/forms.js",
@@ -21,7 +21,7 @@
     },
     {
       "path": "assets/admin-v430.css",
-      "sha256": "1cde95f77d15568bda13b8f65ee4cd58d420dcd453c1944b73d2e2a0dc5e22fe",
+      "sha256": "4962912946c7dceba0e9ca1ce0399e682f4a55b57245296212aeb737c6dfc460",
       "reason": "Legacy header/Back rules explicitly exclude the shared component; no new specificity overrides."
     },
     {
@@ -31,13 +31,29 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "8e08b86821060e9e3b02f8f5f47959835f9d22c8e9292edc91583c824e88e237",
+  "artifactTreeSha256": "9a72bafa7fc90c4bafa77fc0ce17c1f2e0837dd8e58e01285c745ecc1de49a34",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "f51e049e789652c5ca4407e299fb3e523d182abbd79ee3cdd8d5e116f35e68d8",
+  "reviewArchiveSha256": "6b3a7c2df22f7bd22d481f6cd4eabd9b56f4fce561b3bd2672fb7d33fced6ca4",
   "baselineReviewRuns": {
     "production63": 43948184720
   },
   "releaseGatePolicy": "All configured canonical, WebKit, operations and actual-worker gates must pass on the final publishing commit; baseline runs do not certify this fix.",
   "privateLabOrR4OriginInstallation": "prohibited",
-  "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner."
+  "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner.",
+  "integratedPullRequests": [
+    74,
+    75,
+    76,
+    77
+  ],
+  "backendFixes": [
+    {
+      "path": "supabase/migrations/20261117090000_vacleaner_equipment_units_v4366.sql",
+      "sha256": "8844eb48af276a9e2d4034e7eafa11ab97847496cb524400c8d9de4e8d51e41d"
+    },
+    {
+      "path": "supabase/functions/vacleaner-equipment-admin-v1/index.ts",
+      "sha256": "662a29f782cb2c0ecc62f076802e8f1b92e54fbd503aafd57a097a79bcb92e97"
+    }
+  ]
 }

@@ -79,7 +79,7 @@ declare
   v_now_slot bigint;
   v_note text := pg_catalog.left(pg_catalog.btrim(coalesce(p_note,'')),300);
 begin
-  if p_unit_id is null or p_actor_id is null or p_status not in ('ready','repair','retired') then
+  if p_unit_id is null or p_actor_id is null or p_status is null or p_status not in ('ready','repair','retired') then
     raise exception 'invalid_equipment_change';
   end if;
   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext('vacleaner-slot-reservation-v1'));
@@ -160,7 +160,7 @@ declare
   v_ready integer;
   v_note text := pg_catalog.left(pg_catalog.btrim(coalesce(p_note,'')),300);
 begin
-  if p_actor_id is null or p_resource_code not in ('puzzi','sc2','jimmy','abir') then
+  if p_actor_id is null or p_resource_code is null or p_resource_code not in ('puzzi','sc2','jimmy','abir') then
     raise exception 'invalid_equipment_change';
   end if;
   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext('vacleaner-slot-reservation-v1'));

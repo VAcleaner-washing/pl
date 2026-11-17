@@ -32,7 +32,9 @@ Deno.serve(async request=>{
   const {data:admin,error:adminError}=await db.from("admin_users")
     .select("user_id").eq("user_id",userData.user.id).maybeSingle();
   if(adminError||!admin)return json({error:"forbidden"},403);
-  const body=await request.json().catch(()=>({})) as Record<string,unknown>;
+  const input:unknown=await request.json().catch(()=>null);
+  if(!input||typeof input!=="object"||Array.isArray(input))return json({error:"invalid_equipment_change"},400);
+  const body=input as Record<string,unknown>;
   const action=String(body.action||"");
   if(action==="list"){
     const [fleet,units,issued]=await Promise.all([
