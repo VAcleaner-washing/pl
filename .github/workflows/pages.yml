@@ -122,7 +122,8 @@ jobs:
   webkit:
     name: WebKit / mobile forms gate
     runs-on: ubuntu-24.04
-    needs: validate
+    # Avoid competing browser matrices during the long WebKit suite.
+    needs: [validate, browser]
     container:
       image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
       options: --ipc=host
