@@ -64,7 +64,8 @@
     "test:ui-feedback",
     "test:time-trigger-labels",
     "test:route-refresh-pending",
-    "test:public-draft-bootstrap"
+    "test:public-draft-bootstrap",
+    "test:equipment-fleet"
   ],
   "browser": [
     "test:public-hydration",

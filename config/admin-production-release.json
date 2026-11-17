@@ -1,7 +1,7 @@
 {
   "version": "4.3.64",
   "build": 4364,
-  "reviewMode": "consistent-back-navigation",
+  "reviewMode": "equipment-fleet-candidate-ci-validation",
   "baselineApplicationSourceCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
   "applicationFixes": [
     {
@@ -31,13 +31,14 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "4eddf98465e5fb5e5b6be92ac6f9dd54ba75f05ccddd479bcd83914a99f1baac",
+  "artifactTreeSha256": "64fb2f2f4bdb8e375f24acb695a823ad11550528a329e0e5f5a6d7b21b4405da",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
   "reviewArchiveSha256": "f51e049e789652c5ca4407e299fb3e523d182abbd79ee3cdd8d5e116f35e68d8",
   "baselineReviewRuns": {
     "production63": 43948184720
   },
-  "releaseGatePolicy": "All configured canonical, WebKit, operations and actual-worker gates must pass on the final publishing commit; baseline runs do not certify this fix.",
+  "releaseGatePolicy": "Candidate CI validates reproducible artifact bytes and all configured gates; no production deployment before equipment migration, API and full regression approval.",
   "privateLabOrR4OriginInstallation": "prohibited",
-  "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner."
+  "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner.",
+  "candidateReviewNote": "Artifact SHA-256 obtained from GitHub static/build gate job 133983694216 on PR #76. This receipt enables CI review of the candidate, not production approval."
 }

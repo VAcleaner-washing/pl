@@ -134,6 +134,7 @@
     "test:time-trigger-labels": "node scripts/test-admin-time-trigger-labels.mjs",
     "test:route-refresh-pending": "node scripts/test-admin-route-refresh-pending.mjs",
     "test:public-draft-bootstrap": "node scripts/test-public-booking-draft-bootstrap.mjs",
-    "test:admin-back-navigation": "node scripts/build-admin-release-candidate.mjs && python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser chromium --artifacts pwa-test-results/back-navigation"
+    "test:admin-back-navigation": "node scripts/build-admin-release-candidate.mjs && python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser chromium --artifacts pwa-test-results/back-navigation",
+    "test:equipment-fleet": "node scripts/test-v4-3-66-equipment-fleet.mjs"
   }
 }
