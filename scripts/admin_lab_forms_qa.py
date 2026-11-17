@@ -139,7 +139,15 @@ def main():
                 if action=='issue':
                     trace=page.evaluate('qaScrollResetTrace')
                     checks.check(bool(trace) and all(t['count']>0 and t['before']==t['after'] for t in trace) and (width>900 or trace[0]['before']>0),f'{width}: late navigation reset preserves scroll and the intended issue action')
-                form.locator(f'[name="{field_name}"]').fill(value);close(form)
+                field=form.locator(f'[name="{field_name}"]')
+                if action=='extend':
+                    # A date equal to the existing return date is not a dirty draft.
+                    # Choose a distinct valid date to exercise the real leave guard.
+                    original=field.input_value()
+                    if original==value:
+                        from datetime import date, timedelta
+                        value=(date.fromisoformat(original)+timedelta(days=1)).isoformat()
+                field.fill(value);close(form)
                 expect(page.locator('#labLeaveDialog')).to_be_visible();keep()
                 expect(form.locator(f'[name="{field_name}"]')).to_have_value(value)
                 close(form);discard();checks.check(True,f'{width}: {form_id} keeps and discards without saving')
