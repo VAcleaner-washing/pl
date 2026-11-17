@@ -77,9 +77,9 @@ def fixtures(config, count, customers, forbidden):
 
 def navigate(page, view):
     nav = page.locator(f'.nav [data-view="{view}"]')
-    if not nav.is_visible():
+    if not nav.is_visible(timeout=3000):
         nav = page.locator(f'.mobile-nav [data-mobile-view="{view}"]')
-        if not nav.is_visible():
+        if not nav.is_visible(timeout=3000):
             more = page.locator('.mobile-nav .more-nav')
             more.click(timeout=8000)
             page.wait_for_function(
