@@ -218,6 +218,10 @@ jobs:
         run: |
           python scripts/admin_ui_feedback_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-feedback-${{ matrix.width }}
           python scripts/admin_detail_live_refresh_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-detail-${{ matrix.width }}
+      - name: Verify catalog scroll and booking order on the reviewed artifact
+        run: |
+          python scripts/admin_catalog_scroll_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-catalog-${{ matrix.width }}
+          python scripts/admin_booking_next_action_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-queue-${{ matrix.width }}
       - name: Verify fleet state, rejected mutations and reload on the reviewed artifact
         run: python scripts/admin_equipment_fleet_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-fleet-${{ matrix.width }}
       - name: Verify consistent Back navigation on the exact production artifact

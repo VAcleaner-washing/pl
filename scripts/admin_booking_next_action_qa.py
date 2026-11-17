@@ -48,14 +48,20 @@ def main():
                 page.goto(base+'/admin/bronuvannia/',wait_until='domcontentloaded')
                 page.wait_for_selector('#view .booking-card,#view .upcoming-row')
                 idle.navigate(page,'bookings')
+                operations=page.locator('html').get_attribute('data-admin-ui')=='operations'
+                if operations:
+                    page.locator('#labListMode [data-compact=false]').click()
                 ids=lambda:page.locator('.booking-list .booking-card').evaluate_all('nodes=>nodes.map(n=>n.dataset.id)')
                 expected=[rows[1]['id'],rows[0]['id']]
                 expect(page.locator('.booking-list .booking-card')).to_have_count(2)
                 assert ids()==expected,f'{width}px default order: {ids()} expected {expected}'
                 assert 'Видача сьогодні' in page.locator('.booking-card').first.inner_text()
                 assert 'Повернення завтра' in page.locator('.booking-card').nth(1).inner_text()
-                page.locator('#mobileCompact').click()
-                assert 'compact' in (page.locator('.booking-list').get_attribute('class') or '')
+                if operations:
+                    page.locator('#labListMode [data-compact=true]').click()
+                else:
+                    page.locator('#mobileCompact').click()
+                assert ('lab-compact' if operations else 'compact') in (page.locator('.booking-list').get_attribute('class') or '')
                 assert ids()==expected,f'{width}px compact order: {ids()} expected {expected}'
                 page.screenshot(path=str(artifact/f'{args.browser}-{width}-next-action.png'),full_page=True)
                 assert not errors,errors
