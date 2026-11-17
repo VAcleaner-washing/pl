@@ -51,6 +51,7 @@ jobs:
         run: |
           cp scripts/admin_lab_qa.py scripts/public_hydration_qa.py scripts/e2e_smoke.py scripts/admin_idle_qa.py scripts/admin_entrypoint_finance_qa.py app-reference/scripts/
           cd app-reference
+          node scripts/build-pages.mjs
           node scripts/build-admin-lab.mjs
           mkdir -p diagnostic-results/public1 diagnostic-results/lab1 diagnostic-results/public2 diagnostic-results/lab2
           python - <<'PY'
