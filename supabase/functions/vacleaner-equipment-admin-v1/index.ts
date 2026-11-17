@@ -41,18 +41,20 @@ Deno.serve(async request=>{
       db.from("vacleaner_equipment_units")
         .select("id,resource_code,unit_number,status,note,created_at,updated_at")
         .order("resource_code").order("unit_number"),
-      db.from("vacleaner_booking_resources")
-        .select("resource_code,quantity,vacleaner_bookings!inner(status)")
-        .eq("vacleaner_bookings.status","issued"),
+      db.from("vacleaner_bookings")
+        .select("id,vacleaner_booking_resources(resource_code,quantity)")
+        .eq("status","issued").limit(1000),
     ]);
     if(fleet.error||units.error||issued.error){
       console.error("equipment_list_failed",fleet.error?.code,units.error?.code,issued.error?.code);
       return json({error:"equipment_read_failed"},503);
     }
     const issuedCount:Record<string,number>={};
-    for(const row of issued.data||[]){
-      const code=String(row.resource_code||"");
-      issuedCount[code]=(issuedCount[code]||0)+Number(row.quantity||0);
+    for(const booking of issued.data||[]){
+      for(const row of booking.vacleaner_booking_resources||[]){
+        const code=String(row.resource_code||"");
+        issuedCount[code]=(issuedCount[code]||0)+Number(row.quantity||0);
+      }
     }
     return json({inventory:fleet.data||[],units:units.data||[],issued:issuedCount});
   }
