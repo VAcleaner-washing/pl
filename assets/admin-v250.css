@@ -7181,3 +7181,63 @@ html.glass-test .client-card-v245 .client-quick-actions-v245{display:grid;grid-t
 }
 html.keyboard-open #layer .modal .admin-screen-header{min-block-size:64px}
 html.keyboard-open #layer .modal .admin-screen-back{top:10px}
+
+
+/* v4.3.66 candidate — Physical Fleet workspace. Equipment serviceability never edits acquisition costs. */
+.equipment-section-tabs{display:flex;gap:8px;margin:0 0 14px;padding:4px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:#0c1317;overflow-x:auto;scrollbar-width:none}
+.equipment-section-tabs::-webkit-scrollbar{display:none}
+.equipment-section-tabs button{flex:1 0 auto;min-height:46px;padding:0 16px;border:1px solid transparent;border-radius:12px;background:transparent;color:#9fa8ab;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
+.equipment-section-tabs button.active{background:#191d1e;border-color:rgba(225,180,106,.36);color:#e8b665}
+.equipment-section-tabs button:focus-visible{outline:2px solid var(--gold-2);outline-offset:-3px}
+.equipment-fleet-intro{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:15px}
+.equipment-fleet-intro strong{display:block;color:#e6eaeb;font-size:18px}
+.equipment-fleet-intro p{max-width:650px;margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.45}
+.equipment-fleet-placeholder{padding:24px;border:1px dashed rgba(225,180,106,.3);border-radius:15px;color:#c9d0d2;background:#10171b}
+.equipment-fleet-placeholder p{color:var(--muted);font-size:13px}
+.equipment-fleet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.equipment-fleet-card{min-width:0;padding:17px;border:1px solid rgba(255,255,255,.10);border-radius:19px;background:linear-gradient(145deg,#141d22,#0c1317)}
+.equipment-fleet-card>header{display:flex;justify-content:space-between;align-items:start;gap:12px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.10)}
+.equipment-fleet-card>header small{display:block;margin-bottom:5px;color:var(--muted);font-size:11px}
+.equipment-fleet-card h3{margin:0;font-size:18px;line-height:1.2;color:var(--text)}
+.equipment-fleet-availability{display:inline-flex;align-items:center;flex-shrink:0;padding:6px 10px;border-radius:99px;border:1px solid rgba(107,190,138,.30);background:rgba(107,190,138,.10);color:#a1ddb5;font-size:11px;font-weight:650}
+.equipment-fleet-availability.unavailable{border-color:rgba(222,137,123,.28);background:rgba(222,137,123,.08);color:#efa99e}
+.equipment-fleet-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;margin:12px 0}
+.equipment-fleet-stats>span{display:grid;gap:4px;padding:9px 3px;border-radius:11px;background:rgba(255,255,255,.025);color:#8e9a9f;text-align:center;font-size:10.5px}
+.equipment-fleet-stats b{font-size:17px;color:#f0f1ef;font-variant-numeric:tabular-nums}
+.equipment-fleet-warning{color:#e8bc79;font-size:12px;line-height:1.45}
+.equipment-fleet-unit-list{display:grid;gap:8px}
+.equipment-fleet-unit{display:grid;grid-template-columns:minmax(0,1fr) minmax(130px,165px);align-items:center;gap:10px;min-height:62px;padding:10px 12px;border:1px solid rgba(255,255,255,.09);border-radius:12px}
+.equipment-fleet-unit>span{display:grid;gap:4px;min-width:0}
+.equipment-fleet-unit>span strong{font-size:13px;color:var(--text)}
+.equipment-fleet-unit>span small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.equipment-fleet-unit select{width:100%;height:44px;min-width:0;padding:0 12px;border:1px solid rgba(214,164,95,.25);border-radius:11px;background:#0b1115;color:#f0f1ee;font:inherit;font-size:13px}
+.equipment-fleet-unit select:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px}
+.equipment-fleet-card>footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:13px}
+.equipment-fleet-card>footer .btn{flex:0 0 auto;min-height:44px}
+.equipment-fleet-card>footer small{max-width:275px;color:var(--muted);font-size:10.5px;line-height:1.4;text-align:right}
+.equipment-finance-summary{max-width:1000px;padding:22px;border:1px solid rgba(214,164,95,.22);border-radius:18px;background:#11191c}
+.equipment-finance-summary h3{font-size:21px}
+.equipment-finance-summary>strong{font-size:32px;color:var(--gold-2)}
+.equipment-finance-summary>p{color:var(--muted);font-size:13px;line-height:1.5}
+.equipment-finance-summary>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.equipment-finance-summary>div>span{display:grid;gap:4px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:12px}
+.equipment-finance-summary>div small{color:var(--muted);font-size:11px}
+.equipment-finance-summary>div b{color:var(--text);font-size:14px}
+@media(max-width:900px){
+  .equipment-section-tabs{margin-bottom:12px;gap:4px;padding:4px}
+  .equipment-section-tabs button{flex:1 1 0;min-width:0;min-height:46px;padding:0 4px;font-size:11px;white-space:normal;text-align:center;line-height:1.25}
+  .equipment-fleet-intro{align-items:start}
+  .equipment-fleet-intro strong{font-size:17px}
+  .equipment-fleet-intro .btn{min-width:96px;min-height:44px}
+  .equipment-fleet-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  .equipment-fleet-card{padding:13px;border-radius:17px}
+  .equipment-fleet-card h3{font-size:17px}
+  .equipment-fleet-stats>span{font-size:9.5px}
+  .equipment-fleet-stats b{font-size:15px}
+  .equipment-fleet-unit{grid-template-columns:minmax(0,1fr) 138px;padding:9px}
+  .equipment-fleet-card>footer{align-items:stretch;flex-direction:column}
+  .equipment-fleet-card>footer .btn{width:100%}
+  .equipment-fleet-card>footer small{text-align:left;max-width:none}
+  .equipment-finance-summary{padding:15px}
+  .equipment-finance-summary>div{grid-template-columns:minmax(0,1fr)}
+}
