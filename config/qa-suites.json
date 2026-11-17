@@ -65,7 +65,8 @@
     "test:time-trigger-labels",
     "test:route-refresh-pending",
     "test:public-draft-bootstrap",
-    "test:equipment-fleet"
+    "test:equipment-fleet",
+    "test:booking-next-action"
   ],
   "browser": [
     "test:public-hydration",
@@ -117,7 +118,8 @@
     "test:admin-lab-browser",
     "test:admin-lab-forms",
     "test:admin-back-navigation",
-    "test:catalog-scroll-visual"
+    "test:catalog-scroll-visual",
+    "test:booking-next-action-browser"
   ],
   "currentContracts": [
     {

@@ -136,6 +136,8 @@
     "test:public-draft-bootstrap": "node scripts/test-public-booking-draft-bootstrap.mjs",
     "test:admin-back-navigation": "node scripts/build-admin-release-candidate.mjs && python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser chromium --artifacts pwa-test-results/back-navigation",
     "test:catalog-scroll-visual": "python scripts/admin_catalog_scroll_qa.py --root dist --browser webkit --artifacts catalog-scroll-test-results",
-    "test:equipment-fleet": "node scripts/test-v4-3-66-equipment-fleet.mjs"
+    "test:equipment-fleet": "node scripts/test-v4-3-66-equipment-fleet.mjs",
+    "test:booking-next-action": "node scripts/test-v4-3-67-booking-next-action-order.mjs",
+    "test:booking-next-action-browser": "python scripts/admin_booking_next_action_qa.py --root dist --browser chromium --artifacts booking-queue-qa-results/chromium && python scripts/admin_booking_next_action_qa.py --root dist --browser webkit --artifacts booking-queue-qa-results/webkit"
   }
 }
