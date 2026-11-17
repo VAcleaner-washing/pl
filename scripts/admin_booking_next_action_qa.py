@@ -43,6 +43,8 @@ def main():
             context.add_init_script(smoke.session_script())
             smoke.install_routes(context,base,handler)
             page=context.new_page()
+            # Keep today's 18:00 pickup in the future even when CI runs at night.
+            page.clock.set_fixed_time(datetime.now(ZoneInfo('Europe/Kyiv')).replace(hour=12,minute=0,second=0,microsecond=0))
             page.on('pageerror',lambda e:errors.append(str(e)))
             try:
                 page.goto(base+'/admin/bronuvannia/',wait_until='domcontentloaded')

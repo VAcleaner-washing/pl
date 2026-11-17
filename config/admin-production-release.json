@@ -11,7 +11,7 @@
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "b85f937a6b3506e9e941e63abf8006f80e90a4753806850d646ee7ad87d81867",
+      "sha256": "51ca46fd6a709d5a5d50e14e188e9a51adf1f7c39a4d53d58bbcbb6be8931f57",
       "reason": "Consistent Back anchor, scrollable catalog editor and bounded fleet tabs with explicit hidden-state styling."
     },
     {
@@ -31,9 +31,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "9a72bafa7fc90c4bafa77fc0ce17c1f2e0837dd8e58e01285c745ecc1de49a34",
+  "artifactTreeSha256": "530c53f7cfda18a0e57191497405cff8755dee6f0bace973c483ccc3d1a58bbe",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "6b3a7c2df22f7bd22d481f6cd4eabd9b56f4fce561b3bd2672fb7d33fced6ca4",
+  "reviewArchiveSha256": "61500b1134bff6b10eee43a36b6958d3477570cfb8e12f38f6cf0f817bed22fe",
   "baselineReviewRuns": {
     "production63": 43948184720
   },

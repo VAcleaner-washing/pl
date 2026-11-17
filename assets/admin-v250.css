@@ -7194,7 +7194,7 @@ html.keyboard-open #layer .modal .admin-screen-back{top:10px}
 #equipmentFleetHost[hidden],#equipmentFinanceHost[hidden],#equipmentPricingHost[hidden],#editPrices[hidden]{display:none}
 .equipment-section-tabs{display:flex;gap:8px;margin:0 0 14px;padding:4px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:#0c1317;overflow-x:auto;scrollbar-width:none}
 .equipment-section-tabs::-webkit-scrollbar{display:none}
-.equipment-section-tabs button{flex:1 0 auto;min-height:46px;padding:0 16px;border:1px solid transparent;border-radius:12px;background:transparent;color:#9fa8ab;font:inherit;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
+.equipment-section-tabs button{flex:1 0 auto;min-height:46px;padding:0 16px;border:1px solid transparent;border-radius:12px;background:transparent;color:#9fa8ab;font:inherit;font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer}
 .equipment-section-tabs button.active{background:#191d1e;border-color:rgba(225,180,106,.36);color:#e8b665}
 .equipment-section-tabs button:focus-visible{outline:2px solid var(--gold-2);outline-offset:-3px}
 .equipment-fleet-intro{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:15px}
