@@ -115,7 +115,8 @@
     "test:admin-audit-r1-browser",
     "test:admin-lab-browser",
     "test:admin-lab-forms",
-    "test:admin-back-navigation"
+    "test:admin-back-navigation",
+    "test:catalog-scroll-visual"
   ],
   "currentContracts": [
     {

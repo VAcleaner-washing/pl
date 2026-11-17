@@ -77,13 +77,21 @@ def fixtures(config, count, customers, forbidden):
 
 def navigate(page, view):
     nav = page.locator(f'.nav [data-view="{view}"]')
-    if not nav.is_visible():
+    if not nav.is_visible(timeout=3000):
         nav = page.locator(f'.mobile-nav [data-mobile-view="{view}"]')
-        if not nav.is_visible():
-            page.locator('.mobile-nav .more-nav').click()
+        if not nav.is_visible(timeout=3000):
+            more = page.locator('.mobile-nav .more-nav')
+            more.click(timeout=8000)
+            page.wait_for_function(
+                '()=>document.documentElement.classList.contains("mobile-more-open")',
+                timeout=8000,
+            )
             nav = page.locator(f'.mobile-more-menu [data-more-view="{view}"]')
-    nav.click()
-    page.wait_for_function('(v)=>document.documentElement.dataset.adminView===v', arg=view)
+    # A stalled WebKit renderer must fail promptly with the original click error,
+    # so the LAB wrapper can capture its DOM, cgroup and trace evidence instead
+    # of masking a broken navigation with an unbounded wait.
+    nav.click(timeout=8000)
+    page.wait_for_function('(v)=>document.documentElement.dataset.adminView===v', arg=view, timeout=8000)
 
 
 def main():

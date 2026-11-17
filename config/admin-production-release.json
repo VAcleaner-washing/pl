@@ -1,7 +1,7 @@
 {
   "version": "4.3.64",
   "build": 4364,
-  "reviewMode": "consistent-back-navigation",
+  "reviewMode": "consistent-back-navigation-and-catalog-scroll",
   "baselineApplicationSourceCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
   "applicationFixes": [
     {
@@ -11,8 +11,8 @@
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "ccc96a6311c91d7e37556dbc1e51d34539f17db03b726a1d41f197ae6c6aa5b6",
-      "reason": "One44px Back icon and top-left safe-area anchor across screen headers."
+      "sha256": "6f41d4c0acaec6d03fcf941de3aedd1b46cb1801ea43c27a72ec5a02755af340",
+      "reason": "Shared Back anchor retained; catalog editor has independently scrollable iOS body above sticky action bar, with regression coverage."
     },
     {
       "path": "sandbox/forms.js",
@@ -31,7 +31,7 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "4eddf98465e5fb5e5b6be92ac6f9dd54ba75f05ccddd479bcd83914a99f1baac",
+  "artifactTreeSha256": "8e08b86821060e9e3b02f8f5f47959835f9d22c8e9292edc91583c824e88e237",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
   "reviewArchiveSha256": "f51e049e789652c5ca4407e299fb3e523d182abbd79ee3cdd8d5e116f35e68d8",
   "baselineReviewRuns": {

@@ -5912,3 +5912,30 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 
 - The controlled comparison also retained an access-control failure in Playwright 1.65.1, so a runtime update alone is not called a complete fix. The public draft test now waits for a completed availability response matching its current product, dates, fulfillment, phone and delivery address, with no pending API reads and a measured 500ms quiet interval, before its deliberate reload. The application debounces this read by 320ms while draft save is 180ms. All pageerror/validation assertions remain active; this adds a readiness precondition rather than filtering an error or changing application behavior.
 - Record before/actual-reload request-ledger snapshots. Controlled diagnostics must compare the original scheduling and settled scheduling with identical instrumentation and preserved failures; full route coverage remains mandatory in CI.
+
+## CAT-SCROLL-001 — каталожні ціни у мобільній PWA (candidate 4.3.65)
+
+- Модальне вікно «Техніка → Редагувати ціни» є трирядковим grid: фіксований header, внутрішній незалежний scroll, фіксований footer. Відсутність скролу до «Пакетик хімії Puzzi» — UX-дефект, а не очікувана поведінка.
+- На iOS/standalone останнє поле можна прокрутити **над** кнопками «Скасувати»/«Зберегти ціни», включно зі зменшеним visual viewport після відкриття клавіатури. Нижня панель не перекриває ціни.
+- Єдиний back-control із кандидатного v4.3.64 лишається в лівому верхньому куті із safe area, існуючими parent routes, dirty/pending guard та без втрати введених значень.
+- На PWA WebKit перевіряти геометрію останнього поля на 320, 390, 440px та landscape 956px; якщо scroll заблокований, реліз заборонений.
+- Зміна CSS не торкається тарифів, замовлень, Supabase, збережених знижок чи доступності техніки.
+
+### ADDED
+- WebKit/Chromium перевірка досяжності останньої ціни та поведінки після зміни висоти екрана.
+
+### CHANGED
+- .catalog-form отримує відокремлений scroll-контейнер, зберігаючи header/footer.
+
+### FIXED
+- Зникає перекриття останньої ціни нижніми кнопками.
+
+### PRESERVED
+- Усі чинні ціни, каталожні форми, єдина Back-навігація 4.3.64, логіка збереження та системні контракти.
+
+### TESTS
+- test:catalog-scroll-visual, Chromium/PWA, WebKit, Static і release proof; production тільки після зелених результатів.
+
+
+### Browser QA runtime provisioning (2026-11-17)
+The aggregate browser QA workflow installs both Chromium and WebKit, because catalog-scroll and other cross-browser checks invoke WebKit from the aggregate gate. The browser cache key covers both runtimes. This is a CI-only correction; production booking behavior is unchanged.
