@@ -19,7 +19,7 @@ def main():
     with pages_server(Path(args.root).resolve()) as base,sync_playwright() as pw:
         browser=getattr(pw,args.browser).launch(headless=True,**({'args':['--no-sandbox']} if args.browser=='chromium' else {}))
         for width in [320,440,1440]:
-            forbidden=[];errors=[];calls=[];fail_next=[False]
+            forbidden=[];errors=[];calls=[];fail_next=[False];lost_add=[True];fail_read=[False]
             model={'inventory':[{'resource_code':'jimmy','label':'Jimmy','capacity':1,'active':True}],
                    'units':[{'id':'11111111-1111-4111-8111-111111111111','resource_code':'jimmy','unit_number':1,'status':'ready','note':''},
                             {'id':'22222222-2222-4222-8222-222222222222','resource_code':'jimmy','unit_number':2,'status':'repair','note':'Synthetic repair'}],
@@ -29,7 +29,17 @@ def main():
                 if '/vacleaner-equipment-admin-v1' not in r.request.url:return fallback(r)
                 body=r.request.post_data_json or {};calls.append(body)
                 data=copy.deepcopy(model);status=200
-                if body.get('action')=='set_status':
+                if body.get('action')=='list' and fail_read[0]:
+                    fail_read[0]=False;data={'error':'equipment_read_failed'};status=503
+                elif body.get('action')=='add_unit':
+                    if not any(u['id']==body['requestId'] for u in model['units']):
+                        model['units'].append({'id':body['requestId'],'resource_code':'jimmy','unit_number':3,'status':'ready','note':'Synthetic add'})
+                        model['inventory'][0]['capacity']+=1
+                    data={'result':{'changed':True}}
+                    if lost_add[0]:
+                        lost_add[0]=False;fail_read[0]=True
+                        return r.abort('failed')
+                elif body.get('action')=='set_status':
                     if fail_next[0]:data={'error':'equipment_reserved_overlap'};status=409;fail_next[0]=False
                     else:
                         unit=next(u for u in model['units'] if u['id']==body['unitId'])
@@ -58,6 +68,16 @@ def main():
                 repair=page.locator('[data-eq-unit="22222222-2222-4222-8222-222222222222"]')
                 repair.select_option('ready');expect(repair).to_have_value('ready')
                 expect(page.locator('.equipment-fleet-availability')).to_have_text('Вільно 1')
+                page.locator('[data-eq-add=jimmy]').click()
+                expect(page.locator('#fleetRetry')).to_be_visible()
+                page.locator('#fleetRetry').click()
+                expect(page.locator('.equipment-fleet-unit')).to_have_count(3)
+                page.locator('[data-eq-add=jimmy]').click()
+                page.wait_for_function("()=>localStorage.getItem('vac_equipment_add_request_jimmy')===null")
+                expect(page.locator('.equipment-fleet-unit')).to_have_count(3)
+                adds=[x for x in calls if x['action']=='add_unit']
+                assert len(adds)==2 and adds[0]['requestId']==adds[1]['requestId'],adds
+                assert model['inventory'][0]['capacity']==3
                 page.reload();page.wait_for_selector('.booking-card,.upcoming-row')
                 idle.navigate(page,'equipment');page.wait_for_selector('.equipment-fleet-unit')
                 expect(repair).to_have_value('ready')
@@ -67,7 +87,7 @@ def main():
                 assert [x['action'] for x in calls].count('set_status')==2,calls
                 page.screenshot(path=str(out/f'{args.browser}-{width}-fleet.png'))
                 results.append({'width':width,'passed':True,'requests':len(calls),'productionWrites':0})
-                print(f'PASS {args.browser}/{width}: tabs, unavailable stock, rejected change rollback, acknowledged save and reload',flush=True)
+                print(f'PASS {args.browser}/{width}: tabs, conflicts, save/reload, lost add response plus failed refresh and idempotent retry',flush=True)
             except Exception as error:
                 page.screenshot(path=str(out/f'{args.browser}-{width}-failure.png'))
                 results.append({'width':width,'passed':False,'error':str(error)})

@@ -147,7 +147,7 @@ end;
 $$;
 
 create or replace function public.vacleaner_admin_add_equipment_unit(
-  p_resource_code text,p_note text,p_actor_id uuid
+  p_resource_code text,p_note text,p_actor_id uuid,p_request_id uuid
 ) returns jsonb
 language plpgsql
 security definer
@@ -160,21 +160,29 @@ declare
   v_ready integer;
   v_note text := pg_catalog.left(pg_catalog.btrim(coalesce(p_note,'')),300);
 begin
-  if p_actor_id is null or p_resource_code is null or p_resource_code not in ('puzzi','sc2','jimmy','abir') then
+  if p_actor_id is null or p_request_id is null or p_resource_code is null or p_resource_code not in ('puzzi','sc2','jimmy','abir') then
     raise exception 'invalid_equipment_change';
   end if;
   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtext('vacleaner-slot-reservation-v1'));
   select * into v_inventory from public.vacleaner_inventory
     where resource_code=p_resource_code and active=true for update;
   if not found then raise exception 'equipment_inventory_missing'; end if;
+  -- The intent UUID is also the new unit's stable ID. A lost response can be
+  -- retried after reload without increasing stock twice or replaying its event.
+  select * into v_unit from public.vacleaner_equipment_units where id=p_request_id;
+  if found then
+    if v_unit.resource_code<>p_resource_code then raise exception 'invalid_equipment_change'; end if;
+    return jsonb_build_object('changed',false,'resourceCode',p_resource_code,
+      'unitId',v_unit.id,'unitNumber',v_unit.unit_number,'capacity',v_inventory.capacity);
+  end if;
   select count(*)::integer into v_ready from public.vacleaner_equipment_units
     where resource_code=p_resource_code and status='ready';
   if v_ready<>v_inventory.capacity then raise exception 'equipment_inventory_mismatch'; end if;
   select coalesce(max(unit_number),0)+1 into v_no from public.vacleaner_equipment_units
     where resource_code=p_resource_code;
   if v_no>999 then raise exception 'equipment_fleet_limit'; end if;
-  insert into public.vacleaner_equipment_units(resource_code,unit_number,status,note)
-    values(p_resource_code,v_no,'ready',v_note) returning * into v_unit;
+  insert into public.vacleaner_equipment_units(id,resource_code,unit_number,status,note)
+    values(p_request_id,p_resource_code,v_no,'ready',v_note) returning * into v_unit;
   update public.vacleaner_inventory set capacity=v_ready+1,updated_at=now()
     where resource_code=p_resource_code;
   insert into public.vacleaner_equipment_unit_events(
@@ -189,7 +197,9 @@ revoke all on function public.vacleaner_admin_set_equipment_unit_status(uuid,tex
   from public,anon,authenticated;
 grant execute on function public.vacleaner_admin_set_equipment_unit_status(uuid,text,text,uuid)
   to service_role;
-revoke all on function public.vacleaner_admin_add_equipment_unit(text,text,uuid)
+-- Remove the unreleased staging prototype that had no idempotency argument.
+drop function if exists public.vacleaner_admin_add_equipment_unit(text,text,uuid);
+revoke all on function public.vacleaner_admin_add_equipment_unit(text,text,uuid,uuid)
   from public,anon,authenticated;
-grant execute on function public.vacleaner_admin_add_equipment_unit(text,text,uuid)
+grant execute on function public.vacleaner_admin_add_equipment_unit(text,text,uuid,uuid)
   to service_role;

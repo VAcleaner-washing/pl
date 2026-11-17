@@ -83,9 +83,10 @@ Deno.serve(async request=>{
   }
   if(action==="add_unit"){
     const resourceCode=String(body.resourceCode||"");
-    if(!codes.has(resourceCode))return json({error:"invalid_equipment_change"},400);
+    const requestId=clean(body.requestId,40);
+    if(!codes.has(resourceCode)||!uuid.test(requestId))return json({error:"invalid_equipment_change"},400);
     const {data,error}=await db.rpc("vacleaner_admin_add_equipment_unit",{
-      p_resource_code:resourceCode,p_note:clean(body.note),p_actor_id:userData.user.id
+      p_resource_code:resourceCode,p_note:clean(body.note),p_actor_id:userData.user.id,p_request_id:requestId
     });
     if(error){
       const msg=String(error.message||"");

@@ -2,7 +2,7 @@
 begin;
 do $$
 declare
-  a uuid := gen_random_uuid(); u1 uuid; u2 uuid; b1 uuid; b2 uuid;
+  a uuid := gen_random_uuid(); request_id uuid := gen_random_uuid(); u1 uuid; u2 uuid; b1 uuid; b2 uuid;
   r jsonb; blocked boolean; before_events integer;
 begin
   if not exists(select 1 from vacleaner_stage.identity) then
@@ -11,7 +11,7 @@ begin
   if has_table_privilege('anon','public.vacleaner_equipment_units','SELECT')
      or has_table_privilege('authenticated','public.vacleaner_equipment_units','UPDATE')
      or has_function_privilege('authenticated','public.vacleaner_admin_set_equipment_unit_status(uuid,text,text,uuid)','EXECUTE')
-     or has_function_privilege('anon','public.vacleaner_admin_add_equipment_unit(text,text,uuid)','EXECUTE') then
+     or has_function_privilege('anon','public.vacleaner_admin_add_equipment_unit(text,text,uuid,uuid)','EXECUTE') then
     raise exception 'direct_client_privilege_leak';
   end if;
   -- Remove existing synthetic demand from this resource inside this transaction.
@@ -62,8 +62,15 @@ begin
   begin perform public.vacleaner_admin_set_equipment_unit_status(u2,'repair','QA',a);
   exception when others then if sqlerrm like 'equipment_reserved_overlap:%' then blocked:=true; else raise; end if; end;
   if not blocked then raise exception 'overdue_issued_ignored'; end if;
-  r:=public.vacleaner_admin_add_equipment_unit('abir','QA rollback',a);
+  r:=public.vacleaner_admin_add_equipment_unit('abir','QA rollback',a,request_id);
   if (r->>'capacity')::integer<>2 then raise exception 'add_unit_capacity_wrong'; end if;
+  select count(*) into before_events from public.vacleaner_equipment_unit_events;
+  r:=public.vacleaner_admin_add_equipment_unit('abir','QA lost-response retry',a,request_id);
+  if (r->>'changed')::boolean or (r->>'capacity')::integer<>2
+     or (select count(*) from public.vacleaner_equipment_unit_events)<>before_events
+     or (select count(*) from public.vacleaner_equipment_units where id=request_id)<>1 then
+    raise exception 'add_retry_created_duplicate_stock';
+  end if;
   -- The fleet and existing booking functions must use the same transaction mutex.
   if (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public'
       and p.proname in ('vacleaner_apply_reservation','vacleaner_admin_set_equipment_unit_status','vacleaner_admin_add_equipment_unit')

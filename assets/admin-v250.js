@@ -576,8 +576,8 @@ function equipmentFleetPanel(){
     <div class="equipment-fleet-stats"><span>Усього <b>${fleetUnits.length}</b></span><span>Справні <b>${active}</b></span><span>В оренді <b>${out}</b></span><span>Ремонт <b>${repairing}</b></span><span>Списано <b>${retired}</b></span></div>
     ${mismatch?'<p class="equipment-fleet-warning">Не збігається складська місткість. Редагування заблоковане до перевірки.</p>':''}
     <div class="equipment-fleet-unit-list">${fleetUnits.map(unit=>
-      `<label class="equipment-fleet-unit"><span><strong>Одиниця №${unit.unit_number}</strong><small>${h(unit.note||'Без примітки')}</small></span><select data-eq-unit="${h(unit.id)}" aria-label="${h(row.label)} №${unit.unit_number}, стан" ${mismatch?'disabled':''}>${statusOptions(unit)}</select></label>`).join('')}</div>
-    <footer><button type="button" class="btn" data-eq-add="${h(row.resource_code)}">+ Додати одиницю</button><small>Вільно зараз: справні мінус видані. Точні слоти — у календарі.</small></footer>
+      `<label class="equipment-fleet-unit"><span><strong>Одиниця №${unit.unit_number}</strong><small>${h(unit.note||'Без примітки')}</small></span><select data-eq-unit="${h(unit.id)}" aria-label="${h(row.label)} №${unit.unit_number}, стан" ${mismatch||fleetState.mutating||fleetState.loading?'disabled':''}>${statusOptions(unit)}</select></label>`).join('')}</div>
+    <footer><button type="button" class="btn" data-eq-add="${h(row.resource_code)}" ${mismatch||fleetState.mutating||fleetState.loading?'disabled':''}>+ Додати одиницю</button><small>Вільно зараз: справні мінус видані. Точні слоти — у календарі.</small></footer>
     </article>`;
   }).join('')}</div>`;
 }
@@ -612,6 +612,7 @@ function bindEquipmentWorkspace(){
     switchView('settings');
   };
   document.querySelectorAll('[data-eq-unit]').forEach(select=>select.onchange=async()=>{
+    if(fleetState.mutating)return;
     const unit=fleetState.data?.units?.find(x=>x.id===select.dataset.eqUnit);
     if(!unit||unit.status===select.value)return;
     const status=select.value;
@@ -619,7 +620,8 @@ function bindEquipmentWorkspace(){
     if(!confirm('Одиниця №'+unit.unit_number+': '+labels[status]+'? Стан вплине на доступність усіх комплектів.')){renderEquipment();return;}
     const note=status==='repair'?prompt('Опиши несправність (необов’язково)',unit.note||''):'';
     if(note===null){renderEquipment();return;}
-    select.disabled=true;
+    fleetState.mutating=true;
+    document.querySelectorAll('[data-eq-unit],[data-eq-add]').forEach(control=>control.disabled=true);
     try{
       await invokeAt(EQUIPMENT_API,{action:'set_status',unitId:unit.id,status,note});
       await loadEquipmentFleet();
@@ -627,15 +629,25 @@ function bindEquipmentWorkspace(){
     }catch(error){
       const reason=String(error.message||'');
       toast(reason.includes('equipment_reserved_overlap')?'Є накладення чинних бронювань. Спочатку перенеси їх.':reason);
-      renderEquipment();
+      if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment();
     }
+    finally{fleetState.mutating=false;if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment()}
   });
   document.querySelectorAll('[data-eq-add]').forEach(btn=>btn.onclick=async()=>{
+    if(fleetState.mutating)return;
     const code=btn.dataset.eqAdd;
     if(!confirm('Додати нову фізичну одиницю '+code+'? Це збільшить кількість доступної техніки, але не змінить бухгалтерські вкладення.'))return;
-    btn.disabled=true;
-    try{await invokeAt(EQUIPMENT_API,{action:'add_unit',resourceCode:code,note:'Додано через адмінку'});await loadEquipmentFleet();toast('Одиницю додано до парку','success')}
-    catch(error){btn.disabled=false;toast(error.message)}
+    const requestKey='vac_equipment_add_request_'+code,requestId=localStorage.getItem(requestKey)||crypto.randomUUID();
+    localStorage.setItem(requestKey,requestId);
+    fleetState.mutating=true;
+    document.querySelectorAll('[data-eq-unit],[data-eq-add]').forEach(control=>control.disabled=true);
+    try{await invokeAt(EQUIPMENT_API,{action:'add_unit',resourceCode:code,requestId,note:'Додано через адмінку'});localStorage.removeItem(requestKey);await loadEquipmentFleet();toast('Одиницю додано до парку','success')}
+    catch(error){
+      await loadEquipmentFleet();
+      if(fleetState.data?.units.some(unit=>unit.id===requestId)){localStorage.removeItem(requestKey);toast('Одиницю додано. Стан підтверджено повторним читанням.','success')}
+      else{btn.disabled=false;toast(error.message)}
+    }
+    finally{fleetState.mutating=false;if(state.view==='equipment'&&fleetState.tab==='fleet')renderEquipment()}
   });
   if(fleetState.tab==='fleet'&&!fleetState.data&&!fleetState.loading&&!fleetState.error)void loadEquipmentFleet();
 }

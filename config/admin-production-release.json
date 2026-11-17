@@ -6,7 +6,7 @@
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "1cb1cadffbf5cdb59f3eb0f06b35c0a1d17e57602672c4d98ff6c86abbbdd2ef",
+      "sha256": "890ab8a65a603671f657fba619ef38cffde7473275f3c7329d20ff6a9580920f",
       "reason": "Shared Back navigation, next-action booking order, authenticated per-unit fleet workspace; prices and financial calculation owners preserved."
     },
     {
@@ -31,9 +31,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "530c53f7cfda18a0e57191497405cff8755dee6f0bace973c483ccc3d1a58bbe",
+  "artifactTreeSha256": "51747e8fb965d80fedb09adb18e0d423defa5b963df0d71e38e42f3dd03f71a0",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "61500b1134bff6b10eee43a36b6958d3477570cfb8e12f38f6cf0f817bed22fe",
+  "reviewArchiveSha256": "1b54ad798fec09edc48796f3f94c8c8a6422653a9651561c6901e0bc9ac2813e",
   "baselineReviewRuns": {
     "production63": 43948184720
   },
@@ -49,11 +49,11 @@
   "backendFixes": [
     {
       "path": "supabase/migrations/20261117090000_vacleaner_equipment_units_v4366.sql",
-      "sha256": "8844eb48af276a9e2d4034e7eafa11ab97847496cb524400c8d9de4e8d51e41d"
+      "sha256": "3c0ae1bb176dc7beb9ba7e4791fb8d39cd641994de5b610e72387d294e6434f9"
     },
     {
       "path": "supabase/functions/vacleaner-equipment-admin-v1/index.ts",
-      "sha256": "662a29f782cb2c0ecc62f076802e8f1b92e54fbd503aafd57a097a79bcb92e97"
+      "sha256": "c6341e96c518ab10523fc816aad5738a2710ef38a4822c95471e3bebc4708a94"
     }
   ]
 }
