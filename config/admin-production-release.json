@@ -1,13 +1,13 @@
 {
   "version": "4.3.64",
   "build": 4364,
-  "reviewMode": "consistent-back-navigation",
+  "reviewMode": "consistent-back-navigation-and-next-action-order",
   "baselineApplicationSourceCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "1fc897c74397150642f1b63f8fdfdb90fd86cbc2ac2918dc30393d5e4649729f",
-      "reason": "Shared header Back control; existing parent callbacks, wizard steps and SMS one-level return remain the action owners."
+      "sha256": "37ff8e0a709ac8e5809969f32ff869e057d7f7f77ac933f1e148ee0451553c66",
+      "reason": "Preserved shared Back control and operational forms; Bookings card order follows next pickup/return action while overdue/pending and finished-booking rules stay unchanged."
     },
     {
       "path": "assets/admin-v250.css",
@@ -31,7 +31,7 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "4eddf98465e5fb5e5b6be92ac6f9dd54ba75f05ccddd479bcd83914a99f1baac",
+  "artifactTreeSha256": "bbe972b1b739a01f6327fec7f53552da177f012321abfef56ec3552881f00158",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
   "reviewArchiveSha256": "f51e049e789652c5ca4407e299fb3e523d182abbd79ee3cdd8d5e116f35e68d8",
   "baselineReviewRuns": {
