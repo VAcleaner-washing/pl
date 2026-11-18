@@ -40,7 +40,9 @@ def main():
             handler=idle.fixtures(config,2,2,forbidden)
             handler.bookings[:]=rows
             context=browser.new_context(viewport={'width':width,'height':860},service_workers='block',timezone_id='Europe/Kyiv',is_mobile=True,has_touch=True)
-            context.add_init_script(smoke.session_script())
+            # The clock is pinned to noon for deterministic pickup ordering. Give the
+            # synthetic session an expiry relative to that same browser clock.
+            context.add_init_script(smoke.session_script()+"\nconst qaSession=JSON.parse(localStorage.getItem('vacleaner_session'));qaSession.expires_at=Math.floor(Date.now()/1000)+86400;localStorage.setItem('vacleaner_session',JSON.stringify(qaSession));")
             smoke.install_routes(context,base,handler)
             page=context.new_page()
             # Keep today's 18:00 pickup in the future even when CI runs at night.
