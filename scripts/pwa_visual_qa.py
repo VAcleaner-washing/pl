@@ -444,12 +444,16 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 page.locator('.detail .back').first.click();page.wait_for_timeout(30)
             if view=='equipment':
                 qa.check(page.locator('.catalog-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: equipment toolbar stays inside its own width")
-                qa.check(page.locator('#equipmentBaselineForm .equipment-baseline-row').count()==4, f"{label}: equipment workspace owns four purchase-baseline rows")
-                qa.check(page.locator('[data-equipment-fleet-total]').count()==1, f"{label}: equipment workspace shows whole-fleet investment total")
-                single=page.locator('.equipment-image-1:visible img').first
-                qa.check(single.count()==1 and single.evaluate("el=>parseFloat(getComputedStyle(el).objectPosition.split(' ')[1])>=65"), f"{label}: visible single-equipment photography is vertically centered on the machine")
-                image_box=page.locator('.equipment-image-1:visible').first.bounding_box()
-                qa.check(image_box is not None and image_box['height']>=160, f"{label}: single-equipment photography keeps a useful mobile viewport (measured height={image_box['height'] if image_box else 'missing'}px, width={image_box['width'] if image_box else 'missing'}px)")
+                qa.check(page.locator('[data-eq-tab="fleet"][aria-selected="true"]').count()==1 or page.locator('[data-eq-tab][aria-selected="true"]').count()==1, f"{label}: equipment workspace has an active section")
+                page.locator('[data-eq-tab="finance"]').click();page.wait_for_timeout(40)
+                qa.check(page.locator('#equipmentFinanceHost:visible #equipmentBaselineForm .equipment-baseline-row').count()==4, f"{label}: equipment finance workspace owns four purchase-baseline rows")
+                qa.check(page.locator('#equipmentFinanceHost:visible [data-equipment-fleet-total]').count()==1, f"{label}: equipment finance workspace shows whole-fleet investment total")
+                page.locator('[data-eq-tab="pricing"]').click();page.wait_for_timeout(40)
+                single=page.locator('#equipmentPricingHost:visible .equipment-image-1 img').first
+                qa.check(single.count()==1 and single.evaluate("el=>parseFloat(getComputedStyle(el).objectPosition.split(' ')[1])>=65"), f"{label}: pricing section single-equipment photography is vertically centered on the machine")
+                image_box=page.locator('#equipmentPricingHost:visible .equipment-image-1').first.bounding_box()
+                qa.check(image_box is not None and image_box['height']>=160, f"{label}: pricing section photography keeps a useful mobile viewport (measured height={image_box['height'] if image_box else 'missing'}px)")
+                page.locator('[data-eq-tab="fleet"]').click();page.wait_for_timeout(30)
             if view=='analytics':
                 qa.check(page.locator('.analytics-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics toolbar stays inside its own width")
                 qa.check(page.locator('.analytics-periods').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics period controls never widen 320px viewport")
