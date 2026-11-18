@@ -53,8 +53,9 @@ def main():
             try:
                 page.goto(base+'/admin/bronuvannia/');page.wait_for_selector('.booking-card,.upcoming-row')
                 idle.navigate(page,'equipment')
-                expect(page.locator('#equipmentPricingHost')).to_be_visible()
+                # The equipment workspace opens on the fleet tab for new users.
                 page.locator('[data-eq-tab=fleet]').click()
+                expect(page.locator('#equipmentFleetHost')).to_be_visible()
                 expect(page.locator('.equipment-fleet-unit')).to_have_count(2)
                 expect(page.locator('#equipmentPricingHost')).to_be_hidden();expect(page.locator('#editPrices')).to_be_hidden()
                 expect(page.locator('.equipment-fleet-availability')).to_have_text('Немає вільних')
