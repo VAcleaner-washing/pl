@@ -27,5 +27,15 @@ try{
   assert.equal(summary.failed,1);
   assert.equal(summary.total,3);
   assert.ok(summary.skipped);
-  console.log('QA fail-fast regression passed');
+  writeFileSync(path.join(root,'config','qa-suites.json'),JSON.stringify({static:['pass'],browser:['browser-suite']}));
+  writeFileSync(fakeNpm,'#!/bin/sh\necho "$*" >> "$QA_CALL_LOG"\ncase "$*" in "run verify:artifact") exit 9;; esac\nexit 0\n',{mode:0o755});
+  writeFileSync(log,'');
+  const browser=spawnSync(process.execPath,['scripts/qa-full.mjs','browser'],{cwd:root,encoding:'utf8',env:{...process.env,PATH:bin+path.delimiter+process.env.PATH,QA_CALL_LOG:log}});
+  assert.equal(browser.status,1,browser.stdout+'\n'+browser.stderr);
+  const browserCalls=readFileSync(log,'utf8');
+  assert.match(browserCalls,/run verify:artifact/);
+  assert.doesNotMatch(browserCalls,/run browser-suite/);
+  const browserSummary=JSON.parse(readFileSync(path.join(root,'qa-release-summary.json'),'utf8'));
+  assert.equal(browserSummary.blockedBy,'verify:artifact');
+  console.log('QA fail-fast regression passed (static and browser prerequisite)');
 }finally{rmSync(root,{recursive:true,force:true});}
