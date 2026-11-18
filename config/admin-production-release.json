@@ -1,7 +1,7 @@
 {
   "version": "4.3.67",
   "build": 4367,
-  "reviewMode": "integrated-pr74-77-release",
+  "reviewMode": "pr79-reviewed-equipment-workspace-candidate",
   "baselineApplicationSourceCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
   "applicationFixes": [
     {
@@ -31,13 +31,13 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "85044172d20a92d55797be8eee9f4f2a998f111f36667a1a4520b16969913abf",
+  "artifactTreeSha256": "802a1185f0b8ca0a804745bbf5be4835587b71fa488432e75a8af452f732277c",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
   "reviewArchiveSha256": "f7ee74c0282fe6ea45d3edabb1f25168cd652781e9b2c4dcebf283172fe5e8dc",
   "baselineReviewRuns": {
     "production63": 43948184720
   },
-  "releaseGatePolicy": "All configured canonical, WebKit, operations and actual-worker gates must pass on the final publishing commit; baseline runs do not certify this fix.",
+  "releaseGatePolicy": "The exact candidate tree hash from CI build 9023129 is pinned; all static, browser, WebKit and production gates must pass on the final publishing commit. Any further asset change requires a new artifact review and receipt.",
   "privateLabOrR4OriginInstallation": "prohibited",
   "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner.",
   "integratedPullRequests": [
