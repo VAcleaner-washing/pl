@@ -1,0 +1,41 @@
+import assert from 'node:assert/strict';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,cpSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import path from 'node:path';
+import {spawnSync} from 'node:child_process';
+
+const root=mkdtempSync(path.join(tmpdir(),'vacleaner-qa-gate-'));
+try{
+  mkdirSync(path.join(root,'scripts'));
+  mkdirSync(path.join(root,'config'));
+  cpSync(new URL('./qa-full.mjs',import.meta.url),path.join(root,'scripts','qa-full.mjs'));
+  writeFileSync(path.join(root,'config','qa-suites.json'),JSON.stringify({static:['pass','fail','after-failure'],browser:['browser-suite']}));
+  writeFileSync(path.join(root,'package.json'),JSON.stringify({scripts:{stamp:'true',pass:'true',fail:'false','after-failure':'true',build:'true','verify:artifact':'true','browser-suite':'true'}}));
+  const bin=path.join(root,'bin');mkdirSync(bin);
+  const fakeNpm=path.join(bin,'npm');
+  writeFileSync(fakeNpm,'#!/bin/sh\necho "$*" >> "$QA_CALL_LOG"\ncase "$*" in "run fail") exit 9;; esac\nexit 0\n',{mode:0o755});
+  const log=path.join(root,'calls.log');
+  const run=spawnSync(process.execPath,['scripts/qa-full.mjs','full'],{cwd:root,encoding:'utf8',env:{...process.env,PATH:bin+path.delimiter+process.env.PATH,QA_CALL_LOG:log}});
+  assert.equal(run.status,1,run.stdout+'\n'+run.stderr);
+  const calls=readFileSync(log,'utf8');
+  assert.match(calls,/run stamp/);
+  assert.match(calls,/run pass/);
+  assert.match(calls,/run fail/);
+  for(const skipped of ['after-failure','build','verify:artifact','browser-suite'])assert.doesNotMatch(calls,new RegExp('run '+skipped));
+  const summary=JSON.parse(readFileSync(path.join(root,'qa-release-summary.json'),'utf8'));
+  assert.equal(summary.blockedBy,'fail');
+  assert.equal(summary.failed,1);
+  assert.equal(summary.total,3);
+  assert.ok(summary.skipped);
+  writeFileSync(path.join(root,'config','qa-suites.json'),JSON.stringify({static:['pass'],browser:['browser-suite']}));
+  writeFileSync(fakeNpm,'#!/bin/sh\necho "$*" >> "$QA_CALL_LOG"\ncase "$*" in "run verify:artifact") exit 9;; esac\nexit 0\n',{mode:0o755});
+  writeFileSync(log,'');
+  const browser=spawnSync(process.execPath,['scripts/qa-full.mjs','browser'],{cwd:root,encoding:'utf8',env:{...process.env,PATH:bin+path.delimiter+process.env.PATH,QA_CALL_LOG:log}});
+  assert.equal(browser.status,1,browser.stdout+'\n'+browser.stderr);
+  const browserCalls=readFileSync(log,'utf8');
+  assert.match(browserCalls,/run verify:artifact/);
+  assert.doesNotMatch(browserCalls,/run browser-suite/);
+  const browserSummary=JSON.parse(readFileSync(path.join(root,'qa-release-summary.json'),'utf8'));
+  assert.equal(browserSummary.blockedBy,'verify:artifact');
+  console.log('QA fail-fast regression passed (static and browser prerequisite)');
+}finally{rmSync(root,{recursive:true,force:true});}
