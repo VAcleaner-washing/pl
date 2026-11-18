@@ -44,6 +44,10 @@ def main():
                 if width <= 900:
                     page.evaluate("document.documentElement.style.setProperty('--pwa-safe-top','59px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px')")
                 idle.navigate(page, 'equipment')
+                # Pricing is a separate tab; the workspace defaults to fleet.
+                page.locator('[data-eq-tab="pricing"]').click()
+                expect(page.locator('#equipmentPricingHost')).to_be_visible()
+                expect(page.locator('#editPrices')).to_be_visible()
                 page.locator('#editPrices').click()
                 form = page.locator('#catalogForm')
                 expect(form).to_be_visible()
