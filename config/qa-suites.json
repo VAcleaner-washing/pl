@@ -1,5 +1,6 @@
 {
   "static": [
+    "test:qa-fail-fast",
     "check",
     "test:copy-integrity",
     "test:package-language",
