@@ -146,11 +146,14 @@ def main():
                     from datetime import date, timedelta
                     original=field.input_value()
                     value=(date.fromisoformat(original)+timedelta(days=1)).isoformat()
+                if action=='extend':
+                    # The LAB guard intentionally ignores synthetic input/change until
+                    # a trusted user interaction. Playwright fill alone is not a
+                    # reliable trusted pointer/focus interaction for WebKit date fields.
+                    field.click()
                 field.fill(value)
                 expect(field).to_have_value(value)
                 if action=='extend':
-                    field.dispatch_event('input')
-                    field.dispatch_event('change')
                     field.blur()
                     expect(field).to_have_value(value)
                 close(form)
