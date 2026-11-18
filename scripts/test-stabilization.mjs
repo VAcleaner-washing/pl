@@ -132,7 +132,7 @@ has(bookingEdge,'db.from("vacleaner_customers").select("phone")','public booking
 has(bookingEdge,'db.from("vacleaner_customers").insert','new public clients are persisted');
 has(bookingEdge,'db.from("vacleaner_customers").update(profilePatch)','repeat public clients update only safe profile fields');
 
-has(pwaQa,'settings uses five task-focused tabs','mobile settings tab architecture is gated');
+has(pwaQa,'settings has four focused tabs without duplicate equipment','mobile settings tab architecture is gated');
 has(pwaQa,'workspace uses mobile width without clipping','every active settings workspace is geometry-gated');
 has(e2e,'Selecting equipment does not auto-select dates','hidden auto-dates are forbidden');
 has(e2e,'ThreadingHTTPServer((\"127.0.0.1\", 0)','browser E2E uses an isolated local HTTP origin instead of blocked synthetic DNS');
