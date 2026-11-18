@@ -551,7 +551,7 @@ function bindUpcoming(){$$('.upcoming-row').forEach(row=>{const b=state.bookings
 const FLEET_SECTION_STORAGE='vac_admin_equipment_section';
 const EQUIPMENT_SECTION_NAMES={fleet:'Парк і стан',pricing:'Тарифи',finance:'Вартість і окупність'};
 const FLEET_UNCONFIRMED='Результат зміни не підтверджено. Оновіть парк перед повторною спробою.';
-let fleetState={tab:localStorage.getItem(FLEET_SECTION_STORAGE)||'pricing',data:null,error:'',loading:false};
+let fleetState={tab:localStorage.getItem(FLEET_SECTION_STORAGE)||'fleet',data:null,error:'',loading:false};
 if(!EQUIPMENT_SECTION_NAMES[fleetState.tab])fleetState.tab='pricing';
 function equipmentSectionTabs(){
   return `<nav class="equipment-section-tabs" role="tablist" aria-label="Розділи техніки">${Object.entries(EQUIPMENT_SECTION_NAMES).map(([key,label])=>
@@ -658,7 +658,7 @@ function renderEquipment(refresh=false){
 const c=getCatalog();
 const imageSet=code=>CORE.productImages(code);
 $('#view').innerHTML=`<div class="catalog-toolbar"><div><h2>Техніка та комплекти</h2><p>Ціни беруться з єдиного каталогу. В адмінці показуємо короткі робочі назви техніки.</p></div><button class="btn primary" id="editPrices" ${fleetState.tab==='pricing'?'':'hidden'}>Редагувати ціни</button></div>${equipmentSectionTabs()}<section id="equipmentFleetHost" ${fleetState.tab==='fleet'?'':'hidden'}>${equipmentFleetPanel()}</section><section id="equipmentFinanceHost" ${fleetState.tab==='finance'?'':'hidden'}>${equipmentFinancePanel()}</section><div class="equipment-grid" id="equipmentPricingHost" ${fleetState.tab==='pricing'?'':'hidden'}>${Object.entries(c.products).map(([code,item])=>{const meta=CORE.productMeta(code)||{},set=imageSet(code);return `<article class="card equipment-card ${set.length>1?'kit-card':''}"><div class="equipment-image equipment-image-${Math.min(set.length,4)} product-${safeToken(code)}">${set.map((src,i)=>`<img src="${src}" alt="${item.label}${set.length>1?` · фото ${i+1}`:''}" loading="lazy">`).join('')}</div><div class="equipment-body"><small>${meta.category||'Комплект'}</small><h3>${h(adminProductLabel(code,item.label))}</h3><p>${meta.description||'Готовий комплект техніки.'}</p><div class="price-grid"><div><small>Будні</small><strong>${money(item.weekday)}</strong></div><div><small>Вихідні</small><strong>${money(item.weekend)}</strong></div>${item.saturdaySunday?`<div><small>Сб + Нд</small><strong>${money(item.saturdaySunday)}</strong></div>`:''}</div></div></article>`}).join('')}</div>`;
-$('#editPrices').onclick=openCatalogEditor;
+const editPrices=$('#editPrices');if(editPrices)editPrices.onclick=openCatalogEditor;
 bindEquipmentWorkspace();
 if(refresh&&fleetState.tab==='fleet'&&!fleetState.loading&&!fleetState.mutating)void loadEquipmentFleet();
 }
