@@ -169,7 +169,7 @@ def main():
             expect(form.locator('[name=customerName]')).to_have_value('R3 редагування клієнта');close(form);discard()
             checks.check(True,f'{width}: client read-only close is clean; edited contact is protected')
 
-            navigate(page,'equipment');page.get_by_role('button',name='Редагувати ціни',exact=True).click();form=page.locator('#catalogForm')
+            navigate(page,'equipment');page.locator('[data-eq-tab="pricing"]').click();page.get_by_role('button',name='Редагувати ціни',exact=True).click();form=page.locator('#catalogForm')
             form.locator('[name=puzzi_weekday]').fill('701');close(form);expect(page.locator('#labLeaveDialog')).to_be_visible();keep()
             expect(form.locator('[name=puzzi_weekday]')).to_have_value('701');close(form);discard()
             checks.check(page.evaluate('VA_LAB.getState().settings.catalog.products.puzzi.weekday')==700,f'{width}: discarded catalog price never persists')
