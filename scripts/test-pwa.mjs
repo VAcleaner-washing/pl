@@ -80,7 +80,7 @@ ok(runtime.includes('window.VACLEANER_REFRESH_DATA=()=>refreshAllData({notify:tr
 ok(nativeRuntime.includes("className='native-data-refresh'")&&nativeRuntime.includes('Оновити дані')&&nativeRuntime.includes('Автоматично кожні 15 с'),'mobile More exposes an explicit data refresh action with truthful auto-sync copy');
 ok(nativeCss.includes('v4.3.3 — explicit manual data refresh in mobile More')&&nativeCss.includes('.native-data-refresh'),'manual data refresh has a production mobile visual contract');
 
-ok(runtime.includes('booking-finance-expenses')&&runtime.includes('Разом витрати')&&runtime.includes('booking-finance-received-summary')&&runtime.includes('<span>Отримано</span><strong>'),'booking cards explain expenses and received totals instead of showing an ambiguous finance amount');
+ok(runtime.includes('booking-finance-expenses')&&runtime.includes('Вартість послуг')&&runtime.includes('booking-finance-received-summary')&&runtime.includes('<span>Отримано коштів</span><strong>'),'booking cards explain expenses and received totals instead of showing an ambiguous finance amount');
 ok(runtime.includes('finance-flow-received')&&runtime.includes('finance-flow-expenses')&&runtime.includes('<small>Підсумок</small>')&&runtime.includes('До повернення клієнту'),'preliminary settlement is grouped into received, deducted and explicit final result');
 ok(!runtime.includes('Попередній взаєморозрахунок при поверненні'),'preliminary finance modal no longer renders a second duplicated settlement result');
 ok(nativeCss.includes('v4.3.4 — finance clarity + one-scroll SMS audience workflow')&&nativeCss.includes('.finance-flow-final')&&nativeCss.includes('.sms-recipient-step.active'),'v4.3.4 mobile finance and SMS scroll contract is present');
