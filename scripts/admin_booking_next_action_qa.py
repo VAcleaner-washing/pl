@@ -48,7 +48,10 @@ def main():
             page.on('pageerror',lambda e:errors.append(str(e)))
             try:
                 page.goto(base+'/admin/bronuvannia/',wait_until='domcontentloaded')
-                page.wait_for_selector('#view .booking-card,#view .upcoming-row')
+                # The default upcoming view may legitimately have no visible rows
+                # for these fixtures. Wait for navigation, then assert the bookings
+                # list explicitly rather than requiring an unrelated view's cards.
+                page.locator('.nav [data-view="bookings"],.mobile-nav [data-mobile-view="bookings"]').first.wait_for(state='attached')
                 idle.navigate(page,'bookings')
                 expect(page.locator('html')).to_have_attribute('data-admin-ui','operations')
                 page.locator('#labListMode [data-compact=false]').click()
