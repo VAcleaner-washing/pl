@@ -924,7 +924,7 @@ html.native-test{
   html.native-test .catalog-toolbar h2{font-size:17px!important;font-weight:660!important}
   html.native-test .catalog-toolbar p{margin-top:4px!important;font-size:11px!important;color:#92999d!important}
   html.native-test .catalog-toolbar .btn{padding-inline:13px!important}
-  html.native-test .equipment-grid{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
+  html.native-test .equipment-grid:not([hidden]){display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
   html.native-test .equipment-card{display:grid!important;grid-template-columns:104px minmax(0,1fr)!important;gap:0!important;padding:0!important;border-radius:18px!important;overflow:hidden!important}
   html.native-test .equipment-image{min-height:150px!important;height:100%!important;border:0!important;border-right:1px solid var(--nt-stroke-soft)!important;border-radius:0!important;background:#0b1013!important}
   html.native-test .equipment-body{padding:15px!important}

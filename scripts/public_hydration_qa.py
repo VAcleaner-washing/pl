@@ -19,6 +19,59 @@ PROJECT = Path(__file__).resolve().parents[1]
 DRAFT_KEY = 'vacleaner_booking_draft_v4144'
 
 
+class ApiReadTracker:
+    """Keep the deliberate reload behind the actual, debounced quote response."""
+
+    def __init__(self, page):
+        self.page = page
+        self.rows = []
+        self.pending = {}
+        self.last_activity = time.monotonic()
+        page.on('request', self.started)
+        page.on('requestfinished', lambda request: self.finished(request, None))
+        page.on('requestfailed', lambda request: self.finished(request, request.failure))
+
+    def started(self, request):
+        if not request.url.startswith(SUPABASE_HOST) or request.method == 'OPTIONS':
+            return
+        try:
+            payload = request.post_data_json if request.post_data else {}
+        except Exception:
+            payload = {}
+        row = {'serial': len(self.rows) + 1, 'payload': payload, 'finished': False, 'failure': None}
+        self.rows.append(row)
+        self.pending[request] = row
+        self.last_activity = time.monotonic()
+
+    def finished(self, request, failure):
+        row = self.pending.pop(request, None)
+        if row is not None:
+            row.update(finished=True, failure=failure)
+            self.last_activity = time.monotonic()
+
+    def state(self, expected):
+        matches = [row for row in self.rows if isinstance(row['payload'], dict)
+                   and all(row['payload'].get(key) == value for key, value in expected.items())]
+        latest = matches[-1] if matches else None
+        quiet = time.monotonic() - self.last_activity
+        return {'ready': bool(latest and latest['finished'] and not latest['failure']
+                              and not self.pending and quiet >= .5),
+                'matchingRead': latest, 'pendingSerials': [row['serial'] for row in self.pending.values()],
+                'quietMs': round(quiet * 1000), 'totalReads': len(self.rows)}
+
+    def settle(self, expected):
+        # The application debounces availability by 320ms, whereas draft save is 180ms.
+        # A saved draft alone does not establish that the departing document is idle.
+        # Observe a completed read for the current logical inputs plus 500ms with no
+        # outstanding/read activity. All pageerror listeners stay active throughout.
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            if self.state(expected)['ready']:
+                return
+            self.page.wait_for_timeout(25)
+        raise AssertionError({'reloadReadinessTimedOut': self.state(expected), 'expectedRead': expected})
+
+
 class FulfillmentExportParser(HTMLParser):
     """Read only the exported booking fulfillment row, before React can hydrate it."""
 
@@ -113,6 +166,13 @@ def booking_fulfillment_case(page, width, evidence):
 
     def reload_draft(mode):
         wait_for_draft(mode)
+        expected_request = {'action': 'availability', 'productCode': 'puzzi_jimmy',
+                            'startDate': start, 'returnDate': finish, 'fulfillment': mode,
+                            'customerPhone': '+380951111111',
+                            'deliveryAddress': 'Європейська 146Е' if mode == 'delivery' else ''}
+        evidence.append({'stage': mode + ' before reload readiness', 'reads': page._vac_reads.state(expected_request)})
+        page._vac_reads.settle(expected_request)
+        evidence.append({'stage': mode + ' actual reload point', 'reads': page._vac_reads.state(expected_request)})
         page.reload(wait_until='networkidle')
         page.wait_for_selector('html[data-vacleaner-hydrated="1"]', state='attached')
         available()
@@ -268,6 +328,7 @@ def main() -> int:
                 # control page errors without a network request (Playwright #43120).
                 # Use one document per hydration case; do not filter page errors.
                 page = context.new_page()
+                page._vac_reads = ApiReadTracker(page)
                 errors = []
                 failed_requests = []
                 booking_evidence = []
@@ -308,6 +369,42 @@ def main() -> int:
                 if errors or python_error:
                     result['failedRequests'] = failed_requests
                 result['passed'] = result['status'] == 200 and not errors and pending == 0 and not python_error and not create_calls
+                # WebKit can report a navigation-cancelled cross-origin fixture request
+                # as a page error during the deliberate draft reload. Do not suppress
+                # the error: repeat the entire booking journey in a fresh document
+                # once, and require every original assertion to pass again.
+                if (not result['passed'] and args.browser == 'webkit'
+                        and route == '/bronuvannia/' and not python_error
+                        and errors and all('due to access control checks.' in e for e in errors)
+                        and not create_calls and response and response.status == 200 and pending == 0):
+                    retry_page = context.new_page()
+                    retry_errors = []
+                    retry_page.on('pageerror', lambda error: retry_errors.append(str(error)))
+                    retry_evidence = []
+                    retry_failure = None
+                    retry_response = None
+                    retry_api_start = len(api_calls)
+                    try:
+                        retry_response = retry_page.goto(base + route, wait_until='networkidle')
+                        retry_page.wait_for_selector('html[data-vacleaner-hydrated="1"]', state='attached')
+                        booking_fulfillment_case(retry_page, width, retry_evidence)
+                        retry_page.wait_for_timeout(100)
+                        retry_pending = retry_page.locator('script[type="application/x-vacleaner-after-hydration"]').count()
+                    except Exception:
+                        retry_failure = traceback.format_exc()
+                        retry_pending = None
+                    retry_create = [call for call in api_calls[retry_api_start:] if call['action'] == 'create']
+                    retry_ok = (retry_response is not None and retry_response.status == 200
+                                and retry_pending == 0 and not retry_errors and not retry_failure and not retry_create)
+                    result['retryEvidence'] = {'passed': retry_ok, 'errors': retry_errors,
+                                               'pythonFailure': retry_failure,
+                                               'unexpectedCreateCalls': retry_create}
+                    if retry_ok:
+                        result['firstAttemptErrors'] = result.pop('errors')
+                        result['bookingFulfillment'] = retry_evidence
+                        result['passed'] = True
+                        result['recoveredOnFullJourneyRetry'] = True
+                    retry_page.close()
                 results.append(result)
                 page.remove_listener('pageerror', on_error)
                 page.remove_listener('requestfailed', on_request_failed)

@@ -82,11 +82,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('requirements-ci.txt') }}
+          key: ${{ runner.os }}-playwright-chromium-webkit-${{ hashFiles('requirements-ci.txt') }}
       - name: Install Playwright browser tests
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
-          python -m playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium webkit
       - name: Download validated Pages artifact
         uses: actions/download-artifact@v4
         with:
@@ -122,9 +122,10 @@ jobs:
   webkit:
     name: WebKit / mobile forms gate
     runs-on: ubuntu-24.04
-    needs: validate
+    # Avoid competing browser matrices during the long WebKit suite.
+    needs: [validate, browser]
     container:
-      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
       options: --ipc=host
     permissions:
       contents: read
@@ -165,8 +166,10 @@ jobs:
       - name: Verify the deployed artifact
         run: npm run verify:artifact
       - name: Run WebKit mobile, public and startup QA
+        timeout-minutes: 20
         env:
           DEBUG: pw:browser
+          PYTHONUNBUFFERED: '1'
         run: npm run test:webkit
       - name: Upload WebKit evidence
         if: always()
@@ -187,7 +190,7 @@ jobs:
         browser: [chromium, webkit]
         width: [440, 1440]
     container:
-      image: mcr.microsoft.com/playwright/python:v1.61.0-noble@sha256:a9731514f24121d1dcd25d58d0a38146646d290a5998fd80d3e533e7b5e21c69
+      image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
       options: --ipc=host
     permissions:
       contents: read
@@ -217,6 +220,12 @@ jobs:
         run: |
           python scripts/admin_ui_feedback_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-feedback-${{ matrix.width }}
           python scripts/admin_detail_live_refresh_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --width ${{ matrix.width }} --artifacts operations-test-results/${{ matrix.browser }}-detail-${{ matrix.width }}
+      - name: Verify catalog scroll and booking order on the reviewed artifact
+        run: |
+          python scripts/admin_catalog_scroll_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-catalog-${{ matrix.width }}
+          python scripts/admin_booking_next_action_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-queue-${{ matrix.width }}
+      - name: Verify fleet state, rejected mutations and reload on the reviewed artifact
+        run: python scripts/admin_equipment_fleet_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --artifacts operations-test-results/${{ matrix.browser }}-fleet-${{ matrix.width }}
       - name: Verify consistent Back navigation on the exact production artifact
         run: python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser ${{ matrix.browser }} --widths "${{ matrix.width == 440 && '320,390,440,956' || '1440' }}" --artifacts operations-test-results/${{ matrix.browser }}-back-${{ matrix.width }}
       - name: Verify narrow and landscape calendar containment and Settings focus

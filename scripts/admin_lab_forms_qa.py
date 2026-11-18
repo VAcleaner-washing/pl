@@ -139,7 +139,24 @@ def main():
                 if action=='issue':
                     trace=page.evaluate('qaScrollResetTrace')
                     checks.check(bool(trace) and all(t['count']>0 and t['before']==t['after'] for t in trace) and (width>900 or trace[0]['before']>0),f'{width}: late navigation reset preserves scroll and the intended issue action')
-                form.locator(f'[name="{field_name}"]').fill(value);close(form)
+                field=form.locator(f'[name="{field_name}"]')
+                if action=='extend':
+                    # Date inputs in WebKit may update the DOM without dispatching
+                    # the change event used by the dirty-form snapshot.
+                    from datetime import date, timedelta
+                    original=field.input_value()
+                    value=(date.fromisoformat(original)+timedelta(days=1)).isoformat()
+                if action=='extend':
+                    # The LAB guard intentionally ignores synthetic input/change until
+                    # a trusted user interaction. Playwright fill alone is not a
+                    # reliable trusted pointer/focus interaction for WebKit date fields.
+                    field.click()
+                field.fill(value)
+                expect(field).to_have_value(value)
+                if action=='extend':
+                    field.blur()
+                    expect(field).to_have_value(value)
+                close(form)
                 expect(page.locator('#labLeaveDialog')).to_be_visible();keep()
                 expect(form.locator(f'[name="{field_name}"]')).to_have_value(value)
                 close(form);discard();checks.check(True,f'{width}: {form_id} keeps and discards without saving')

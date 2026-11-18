@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.64
-**Baseline build:** 4364
-**Останнє оновлення:** 2026-11-16
+**Baseline version:** 4.3.67
+**Baseline build:** 4367
+**Останнє оновлення:** 2026-11-17
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -2409,6 +2409,18 @@ Modal має:
 Фінанси не будуються як card-inside-card-inside-card. Усередині основної фінансової секції метрики та рядки мають використовувати separators, compact rows і спокійну типографіку. Окрема важка card потрібна тільки при реальній зміні контексту.
 
 ---
+
+## BOOK-QUEUE-001 — сортування бронювань за найближчою реальною дією (candidate v4.3.67)
+
+- Основний список «Бронювання» (у звичайному й компактному вигляді) сортується за **часом наступної операції**, а не за історичним початком оренди.
+- Для `confirmed` та `waiting_payment` наступна планова дія — **видача** (`start_date + extras.pickup_time` або чинний часовий слот).
+- Для `issued` наступна планова дія — **повернення** (`return_date + extras.return_time` або чинний часовий слот).
+- Події в одній групі терміновості розміщуються у зростанні локальної дати й часу Полтави/України (ISO date + HH:mm); не порівнювати збережений `start_at` для вже виданого обладнання, бо це минула подія.
+- Існуючий пріоритет прострочених дій і необроблених заявок `pending` **зберігається**; нові заявки залишаються перед звичайними запланованими видачами/поверненнями. Між двома pending більш нова заявка йде вище.
+- Під час однакової дати/часу порядок стабільний за `booking_code`, без хаотичних перестановок після оновлення.
+- Фільтри статусів, пошук, дати, суми, статуси, prepayment, календар і розділ «Найближчі» не змінюються. Завершені та повернені записи залишаються відсортованими за фактичною датою завершення у зворотному порядку.
+- Приклад з production-скріну 17.11.2026: **VAC-261117-28D0A (видача сьогодні 18:00)** має йти **перед VAC-261117-246AC (повернення завтра 08:30)**, хоча остання оренда почалася раніше.
+- Гейт: `test:booking-next-action` перевіряє screenshot-fixture, обидва типи операцій, часові значення, прострочення, pending, status filters, completed і стабільність. Додатково `test:booking-next-action-browser` перевіряє реальний DOM PWA на 390/440 px у повному та компактному режимах Chromium/WebKit без серверних записів.
 
 # 20. CALENDAR / UPCOMING
 
@@ -5902,3 +5914,101 @@ Candidate4.3.62/build4362 prepares the following approved UI corrections:
 - Regression also checks a visibly painted Back icon and Close bounds/overlap with the title and Back, in addition to coordinate equality and actual return actions.
 - Route smoke and CRM regressions inspect the arrow's accessible name and exercise the shared Back control. Existing safe-area and short-desktop SMS density limits remain unchanged.
 - The full existing static/browser/WebKit/worker gates remain required. Physical iPhone behavior is not certified by emulation.
+
+### CI runtime follow-up for v4.3.64
+
+- A repeat main run recorded a native WebKit page crash during the LAB viewport sweep. Preserve that failed run and all diagnostics; do not treat it as an application assertion failure or bypass the release gates.
+- Evaluate matching Playwright 1.65.1 and the digest-pinned official Python image against the previous 1.61.0 runtime on unchanged 63/64 sources. Each controlled pair runs the existing public and LAB suites twice, with failures retained and no browser features disabled.
+- The runtime candidate changes CI requirements, the official image and its identity guard only. Every existing application assertion, timeout, canonical suite, exact-artifact operation gate and main-only deploy condition remains required. No delivered application file or release pin changes.
+- This QA-only follow-up retains version 4.3.64 / build 4364 and the reviewed 273-file artifact. Publication still requires all gates on the final main commit and actual live readback.
+
+- The controlled comparison also retained an access-control failure in Playwright 1.65.1, so a runtime update alone is not called a complete fix. The public draft test now waits for a completed availability response matching its current product, dates, fulfillment, phone and delivery address, with no pending API reads and a measured 500ms quiet interval, before its deliberate reload. The application debounces this read by 320ms while draft save is 180ms. All pageerror/validation assertions remain active; this adds a readiness precondition rather than filtering an error or changing application behavior.
+- Record before/actual-reload request-ledger snapshots. Controlled diagnostics must compare the original scheduling and settled scheduling with identical instrumentation and preserved failures; full route coverage remains mandatory in CI.
+
+## CAT-SCROLL-001 — каталожні ціни у мобільній PWA (candidate 4.3.65)
+
+- Модальне вікно «Техніка → Редагувати ціни» є трирядковим grid: фіксований header, внутрішній незалежний scroll, фіксований footer. Відсутність скролу до «Пакетик хімії Puzzi» — UX-дефект, а не очікувана поведінка.
+- На iOS/standalone останнє поле можна прокрутити **над** кнопками «Скасувати»/«Зберегти ціни», включно зі зменшеним visual viewport після відкриття клавіатури. Нижня панель не перекриває ціни.
+- Єдиний back-control із кандидатного v4.3.64 лишається в лівому верхньому куті із safe area, існуючими parent routes, dirty/pending guard та без втрати введених значень.
+- На PWA WebKit перевіряти геометрію останнього поля на 320, 390, 440px та landscape 956px; якщо scroll заблокований, реліз заборонений.
+- Зміна CSS не торкається тарифів, замовлень, Supabase, збережених знижок чи доступності техніки.
+
+### ADDED
+- WebKit/Chromium перевірка досяжності останньої ціни та поведінки після зміни висоти екрана.
+
+### CHANGED
+- .catalog-form отримує відокремлений scroll-контейнер, зберігаючи header/footer.
+
+### FIXED
+- Зникає перекриття останньої ціни нижніми кнопками.
+
+### PRESERVED
+- Усі чинні ціни, каталожні форми, єдина Back-навігація 4.3.64, логіка збереження та системні контракти.
+
+### TESTS
+- test:catalog-scroll-visual, Chromium/PWA, WebKit, Static і release proof; production тільки після зелених результатів.
+
+## FLEET-001 — фізичні одиниці техніки та доступність (candidate v4.3.66)
+
+- Головний розділ «Техніка» містить «Парк і стан», «Тарифи», «Вартість і окупність». Існуючі тарифи й форми редагування цін залишаються доступними; фінансова вкладка веде у наявні налаштування початкової вартості, не дублює їх.
+- Фізичні одиниці обліковуються окремо у vacleaner_equipment_units зі стабільними ID, порядковим номером і станом ready / repair / retired. Історію статусів зберігає vacleaner_equipment_unit_events.
+- Кількість у vacleaner_inventory.capacity — тільки кількість справних одиниць (ready). Фінансове поле equipment_baselines залишається історичною закупівельною вартістю, воно не керує місткістю.
+- Переведення справної одиниці у «Ремонт» або «Списана» атомарно зменшує capacity; повернення у «Справна» — збільшує. Нуль доступних одиниць дозволений і блокує бронювання, в тому числі в комплектах.
+- Спільне блокування vacleaner-slot-reservation-v1 з vacleaner_apply_reservation і перевірка пікового одночасного попиту не допускають перебронювання при зменшенні capacity. При накладенні підтверджених/виданих або активних hold-заявок операція відхиляється до вирішення конфлікту.
+- Оператор після автентифікації в admin_users використовує окрему Edge Function vacleaner-equipment-admin-v1. Тільки service_role має прямий доступ до таблиць та RPC, ані anon, ані authenticated — ні.
+- Додавання фізичної одиниці збільшує доступну кількість, але не змінює історичні фінансові вкладення автоматично.
+- Перший імпорт створює одиниці за чинною складською місткістю. Несправні одиниці потрібно явно позначити repair. Міграція не змінює історичні клієнтські бронювання або фінансові рядки.
+- Існуюча єдина навігація «Назад» v4.3.64, календар, тарифи, SMS, застави, реферали й розрахунки залишаються недоторканними.
+- Production тільки після окремих SQL/RLS/Edge перевірок, Static, Chromium/PWA, WebKit і підтвердженого Pages SUCCESS.
+
+### ADDED
+- Поштучний стан парку, журнал змін і ізольований адміністративний API.
+
+### CHANGED
+- Розділ «Техніка» має три підрозділи без дублювання бізнес-джерел.
+
+### FIXED
+- Відсутність механізму вимкнути несправний Jimmy із доступності бронювань.
+
+### PRESERVED
+- Історична вартість, клієнти, платежі, статуси, календарні правила та комбінації техніки.
+
+### TESTS
+- test:equipment-fleet, SQL/revoke/RLS/runtime, WebKit, Chromium і Static.
+
+
+### Browser QA runtime provisioning (2026-11-17)
+The aggregate browser QA workflow installs both Chromium and WebKit, because catalog-scroll and other cross-browser checks invoke WebKit from the aggregate gate. The browser cache key covers both runtimes. This is a CI-only correction; production booking behavior is unchanged.
+
+
+## Change record — v4.3.67
+
+### ADDED
+- Integrated PR #74–77 release: per-unit equipment state, protected fleet API and next-action booking order.
+
+### CHANGED
+- Matching pinned Playwright client/container, real API-read synchronization before deliberate draft reload; catalog body scrolls above its footer.
+- Issued bookings sort by return date/time; unissued bookings sort by pickup date/time, retaining urgency, new-request and completed-history rules.
+
+### FIXED
+- CI contract recognizes the explicit validated artifact dependency chain. Catalog final fields remain reachable at mobile sizes.
+- Null and malformed fleet requests fail explicitly before privileged mutations.
+
+### PRESERVED
+- PR #73 shared Back navigation, stable46 recovery, production63 recovery, original Supabase, payments, prices, referral and financial calculations. Owner-required pinch zoom blocking remains.
+- Fleet migration imports current capacity without changing bookings, customer rows or financial settings; old frontend remains compatible.
+
+### TESTS
+- All canonical static/browser, pinned WebKit and exact production artifact operation/worker gates remain mandatory.
+- qa-equipment-fleet-staging.sql requires isolated stage identity and rolls back every fixture; checks grants, atomic conflicts, adjacent slots, active/expired holds, overdue returns, actual booking RPC at zero capacity and shared mutex.
+- Production publication requires actual Pages deploy and live artifact/version verification; PR merge alone is not deployment.
+
+### Equipment mutation retry safety (4.3.67 integration)
+- Each add-unit intent owns a persistent client UUID that becomes the unit ID. The service-only RPC serializes creation and returns the existing unit for the same intent; retries cannot increase capacity or duplicate its event. Missing request IDs are rejected.
+- After a lost mutation response the UI reads authoritative fleet state. If that read also fails, the error remains visible and the retained intent UUID is reused on retry. Successful acknowledgement clears it.
+- Isolated SQL and actual UI tests cover a committed addition with lost response, failed refresh and retry. No existing booking or financial RPC is changed.
+- Fleet requests use the existing 15-second UI deadline. Entering or refreshing the equipment workspace re-reads stock; mutation controls wait for its authoritative refresh. Unknown mutation outcomes are shown as unconfirmed, never as proof that nothing changed.
+
+
+### Integrated release WebKit gate diagnostics (2026-11-17)
+The WebKit mobile forms CI step is bounded to 20 minutes and uses unbuffered Python output, so a stuck worker or browser check surfaces a specific diagnostic and terminates rather than occupying the release gate indefinitely. The mandatory gate remains enabled and cannot be skipped for production promotion.

@@ -1,7 +1,7 @@
 {
   "name": "vacleaner-static",
   "private": true,
-  "version": "4.3.64",
+  "version": "4.3.67",
   "scripts": {
     "stamp": "node scripts/stamp-build.mjs",
     "check": "node scripts/check-system-spec.mjs && node scripts/check-build.mjs",
@@ -53,7 +53,7 @@
     "test:ci-pipeline": "node scripts/test-ci-pipeline-contract.mjs",
     "test:e2e": "python scripts/e2e_smoke.py --root dist --artifacts test-results",
     "test:mobile-forms": "python scripts/mobile_forms_qa.py --root dist --artifacts pwa-test-results/mobile-forms",
-    "test:webkit": "node scripts/build-admin-lab.mjs && python scripts/mobile_forms_qa.py --browser webkit --root dist --artifacts webkit-test-results/forms && python scripts/public_hydration_qa.py --browser webkit --root dist --artifacts webkit-test-results/public && python scripts/admin_startup_qa.py --browser webkit --root dist --artifacts webkit-test-results/startup && python scripts/admin_read_performance_qa.py --browser webkit --artifacts webkit-test-results/read-performance && python scripts/admin_idle_qa.py --browser webkit --standalone --artifacts webkit-test-results/idle && python scripts/ui_reliability_qa.py --browser webkit --artifacts webkit-test-results/reliability && python scripts/admin_audit_r1_qa.py --browser webkit --artifacts webkit-test-results/audit-r1 && python scripts/admin_lab_qa.py --browser webkit --artifacts webkit-test-results/lab && python scripts/admin_lab_forms_qa.py --browser webkit --artifacts webkit-test-results/lab-forms && node scripts/build-admin-release-candidate.mjs && python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser webkit --artifacts webkit-test-results/back-navigation",
+    "test:webkit": "node scripts/build-admin-lab.mjs && python scripts/mobile_forms_qa.py --browser webkit --root dist --artifacts webkit-test-results/forms && python scripts/public_hydration_qa.py --browser webkit --root dist --artifacts webkit-test-results/public && python scripts/admin_startup_qa.py --browser webkit --root dist --artifacts webkit-test-results/startup && python scripts/admin_read_performance_qa.py --browser webkit --artifacts webkit-test-results/read-performance && python scripts/admin_idle_qa.py --browser webkit --standalone --artifacts webkit-test-results/idle && python scripts/ui_reliability_qa.py --browser webkit --artifacts webkit-test-results/reliability && python scripts/admin_audit_r1_qa.py --browser webkit --artifacts webkit-test-results/audit-r1 && python scripts/admin_lab_qa.py --browser webkit --artifacts webkit-test-results/lab && python scripts/admin_lab_forms_qa.py --browser webkit --artifacts webkit-test-results/lab-forms && node scripts/build-admin-release-candidate.mjs && python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser webkit --artifacts webkit-test-results/back-navigation && python scripts/admin_equipment_fleet_qa.py --root dist --browser webkit --artifacts equipment-fleet-test-results/webkit",
     "test:public-hydration": "python scripts/public_hydration_qa.py --root dist --artifacts hydration-test-results",
     "test:pwa": "python scripts/pwa_visual_qa_runner.py --artifacts pwa-test-results",
     "test:desktop-density": "python scripts/desktop_density_qa.py --artifacts density-test-results",
@@ -134,6 +134,11 @@
     "test:time-trigger-labels": "node scripts/test-admin-time-trigger-labels.mjs",
     "test:route-refresh-pending": "node scripts/test-admin-route-refresh-pending.mjs",
     "test:public-draft-bootstrap": "node scripts/test-public-booking-draft-bootstrap.mjs",
-    "test:admin-back-navigation": "node scripts/build-admin-release-candidate.mjs && python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser chromium --artifacts pwa-test-results/back-navigation"
+    "test:admin-back-navigation": "node scripts/build-admin-release-candidate.mjs && python scripts/admin_back_navigation_qa.py --root release-candidate-test-results/dist --browser chromium --artifacts pwa-test-results/back-navigation",
+    "test:catalog-scroll-visual": "python scripts/admin_catalog_scroll_qa.py --root dist --browser webkit --artifacts catalog-scroll-test-results",
+    "test:equipment-fleet": "node scripts/test-v4-3-66-equipment-fleet.mjs && node scripts/test-equipment-edge-runtime.mjs",
+    "test:booking-next-action": "node scripts/test-v4-3-67-booking-next-action-order.mjs",
+    "test:booking-next-action-browser": "node scripts/build-admin-release-candidate.mjs && python scripts/admin_booking_next_action_qa.py --root release-candidate-test-results/dist --browser chromium --artifacts booking-queue-qa-results/chromium && python scripts/admin_booking_next_action_qa.py --root release-candidate-test-results/dist --browser webkit --artifacts booking-queue-qa-results/webkit",
+    "test:equipment-fleet-browser": "python scripts/admin_equipment_fleet_qa.py --root dist --browser chromium --artifacts equipment-fleet-test-results/chromium"
   }
 }
