@@ -171,7 +171,7 @@ def modal_suite(page:Page,qa:QA,width:int):
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[2]["id"]}"] [data-action="issue"]').click();modal_check(page,qa,width,'issue','#issueForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="complete"]').click();modal_check(page,qa,width,'complete','#financeForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="finance"]').click();modal_check(page,qa,width,'finance','#financeForm')
-    page.locator('.nav button[data-view="equipment"]').click();page.wait_for_timeout(30);page.locator('#editPrices').click();modal_check(page,qa,width,'catalog','#catalogForm')
+    page.locator('.nav button[data-view="equipment"]').click();page.locator('[data-eq-tab="pricing"]').click();expect(page.locator('#editPrices')).to_be_visible();page.locator('#editPrices').click();modal_check(page,qa,width,'catalog','#catalogForm')
 
 def run_size(browser,qa,width,height):
     page=pwa.render_page(browser,width,height)
