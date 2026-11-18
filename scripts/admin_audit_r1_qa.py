@@ -139,7 +139,7 @@ def main():
                 checks.check(True,f'{width}: failed optional read is distinct from successful empty and can retry')
 
                 last_dom=dom_snapshot(page);phase='equipment-baseline-save-recovery'
-                idle.navigate(page,'settings');page.locator('[data-settings-tab="equipment"]').click()
+                idle.navigate(page,'equipment');page.locator('[data-eq-tab="finance"]').click();expect(page.locator('#equipmentBaselineForm')).to_be_visible()
                 form=page.locator('#equipmentBaselineForm');form.locator('[name="puzziUnitCost"]').fill('99999')
                 prior=page.evaluate("localStorage.getItem('vacleaner_equipment_baselines')")
                 form.locator('[type="submit"]').click();page.wait_for_function('()=>document.querySelector("#equipmentBaselineForm [type=submit]").disabled===false')
