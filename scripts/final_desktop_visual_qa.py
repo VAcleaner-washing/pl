@@ -74,9 +74,9 @@ def view_suite(page:Page,qa:QA,width:int):
             page_title=page.locator('#pageTitle').inner_text().strip(); sub_title=page.locator('.analytics-toolbar h2').inner_text().strip()
             qa.check(page_title!=sub_title and sub_title=='Показники',f'{width}: analytics hierarchy has no duplicated heading')
         if view=='settings':
-            qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==5,f'{width}: settings exposes five task-focused tabs')
+            qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==4 and page.locator('[data-settings-tab="equipment"]').count()==0,f'{width}: settings exposes four focused tabs without duplicate equipment')
             qa.check(page.locator('.settings-shell').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: settings shell stays inside main column')
-            for tab in ['rental','delivery','equipment','notifications','system']:
+            for tab in ['rental','delivery','notifications','system']:
                 page.locator(f'[data-settings-tab="{tab}"]').click();page.wait_for_timeout(20)
                 panel=page.locator(f'[data-settings-panel="{tab}"]:visible')
                 qa.check(page.locator('.settings-panel:visible').count()==1 and panel.count()==1,f'{width}: settings {tab} owns one visible workspace')
