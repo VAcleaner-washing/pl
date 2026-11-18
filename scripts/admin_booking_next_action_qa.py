@@ -54,6 +54,8 @@ def main():
                 page.locator('.nav [data-view="bookings"],.mobile-nav [data-mobile-view="bookings"]').first.wait_for(state='attached')
                 idle.navigate(page,'bookings')
                 expect(page.locator('html')).to_have_attribute('data-admin-ui','operations')
+                expect(page.locator('#view .booking-list .booking-card')).to_have_count(2,timeout=10000)
+                expect(page.locator('#labListMode [data-compact=false]')).to_be_visible(timeout=5000)
                 page.locator('#labListMode [data-compact=false]').click()
                 ids=lambda:page.locator('.booking-list .booking-card').evaluate_all('nodes=>nodes.map(n=>n.dataset.id)')
                 expected=[rows[1]['id'],rows[0]['id']]
@@ -70,7 +72,9 @@ def main():
                 results.append({'width':width,'passed':True,'ids':ids(),'writes':len(forbidden)})
                 print('PASS '+args.browser+' '+str(width)+'px: issued return tomorrow below confirmed issue today, both card modes',flush=True)
             except Exception as error:
-                results.append({'width':width,'passed':False,'error':str(error),'errors':errors,'writes':forbidden})
+                diagnostic=page.evaluate('''() => ({view:document.documentElement.dataset.adminView,lab:document.documentElement.dataset.adminLab,ui:document.documentElement.dataset.adminUi,viewText:document.querySelector('#view')?.innerText?.slice(0,1800),listCount:document.querySelectorAll('#view .booking-list').length,cardCount:document.querySelectorAll('#view .booking-card').length,toggleCount:document.querySelectorAll('#labListMode').length,bodyClasses:document.body.className})''')
+                print('DIAGNOSTIC '+args.browser+' '+str(width)+'px: '+json.dumps(diagnostic,ensure_ascii=False),flush=True)
+                results.append({'width':width,'passed':False,'error':str(error),'diagnostic':diagnostic,'errors':errors,'writes':forbidden})
                 page.screenshot(path=str(artifact/f'{args.browser}-{width}-failure.png'),full_page=True)
                 print('FAIL '+args.browser+' '+str(width)+'px: '+str(error),flush=True)
             finally:
