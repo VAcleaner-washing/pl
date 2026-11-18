@@ -446,9 +446,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 qa.check(page.locator('.catalog-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: equipment toolbar stays inside its own width")
                 qa.check(page.locator('#equipmentBaselineForm .equipment-baseline-row').count()==4, f"{label}: equipment workspace owns four purchase-baseline rows")
                 qa.check(page.locator('[data-equipment-fleet-total]').count()==1, f"{label}: equipment workspace shows whole-fleet investment total")
-                single=page.locator('.equipment-image-1 img').first
-                qa.check(single.count()==1 and single.evaluate("el=>parseFloat(getComputedStyle(el).objectPosition.split(' ')[1])>=65"), f"{label}: single-equipment photography is vertically centered on the machine")
-                image_box=page.locator('.equipment-image-1').first.bounding_box()
+                single=page.locator('.equipment-image-1:visible img').first
+                qa.check(single.count()==1 and single.evaluate("el=>parseFloat(getComputedStyle(el).objectPosition.split(' ')[1])>=65"), f"{label}: visible single-equipment photography is vertically centered on the machine")
+                image_box=page.locator('.equipment-image-1:visible').first.bounding_box()
                 qa.check(image_box is not None and image_box['height']>=160, f"{label}: single-equipment photography keeps a useful mobile viewport (measured height={image_box['height'] if image_box else 'missing'}px, width={image_box['width'] if image_box else 'missing'}px)")
             if view=='analytics':
                 qa.check(page.locator('.analytics-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics toolbar stays inside its own width")
