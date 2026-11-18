@@ -6012,3 +6012,10 @@ The aggregate browser QA workflow installs both Chromium and WebKit, because cat
 
 ### Integrated release WebKit gate diagnostics (2026-11-17)
 The WebKit mobile forms CI step is bounded to 20 minutes and uses unbuffered Python output, so a stuck worker or browser check surfaces a specific diagnostic and terminates rather than occupying the release gate indefinitely. The mandatory gate remains enabled and cannot be skipped for production promotion.
+
+
+### Equipment workspace and booking finance presentation (PR #79)
+
+- The **Техніка** workspace opens on **Парк і стан** for new sessions and groups physical unit status, rental tariffs and original purchase investment in its three tabs. The equipment purchase baseline editor belongs to **Вартість і окупність**, not **Налаштування**; saving it must preserve the existing global baseline persistence contract and must not change rental capacity or unit statuses.
+- Booking cards distinguish **Вартість послуг** (`calc().expenses`) from **Отримано коштів** (`calc().received`, currently prepayment plus received security deposit). The latter is not a full cash-flow ledger or final revenue. Refund and additional payment are separate settlement estimates; never describe received deposits as earned revenue or expenses as profit.
+- Tests must assert these current labels and routes alongside their data-preservation and mobile navigation behavior. Changes to visible admin behavior require a matching system-spec and regression-test update in the same pull request.
