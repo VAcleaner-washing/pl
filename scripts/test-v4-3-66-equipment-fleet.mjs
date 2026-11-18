@@ -34,7 +34,7 @@ check('existing booking resource capacity gate preserved',booking.includes('from
 check('public booking rejects overselling',booking.includes('if (minimum < Number(product.resources?.[code] || 0)) available = false'));
 check('all 3 equipment tabs in the same admin view',js.includes('Парк і стан')&&js.includes('Вартість і окупність')&&js.includes('Тарифи'));
 check('fleet client uses separate authenticated API',js.includes("EQUIPMENT_API=SUPABASE+'/functions/v1/vacleaner-equipment-admin-v1'")&&js.includes("invokeAt(EQUIPMENT_API,{action:'set_status'"));
-check('settings investment route intact',js.includes("localStorage.setItem('vac_admin_settings_tab','equipment')"));
+check('purchase baseline editor belongs to equipment finance, not settings',js.includes('function equipmentBaselineEditor()')&&js.includes('${equipmentBaselineEditor()}')&&!js.includes("settingsTabButton('equipment'"));
 check('no changes to financial baseline when changing unit status',!api.includes('equipment_baselines'));
 check('mobile has explicit unit controls',css.includes('.equipment-fleet-unit select')&&css.includes('@media(max-width:900px)'));
 check('spec explains inventory/finance separation',spec.includes('FLEET-001'));
@@ -61,7 +61,7 @@ const cx=vm.createContext({
  getEquipmentBaselines:()=>({puzzi:{qty:2,total:48000},sc2:{qty:2,total:13000},jimmy:{qty:1,total:4500},abir:{qty:2,total:10000}}),
  EQUIPMENT_SECTION_NAMES:{fleet:'Парк і стан',pricing:'Тарифи',finance:'Вартість і окупність'}
 });
-vm.runInContext(extract('equipmentFleetPanel')+'\n'+extract('equipmentFinancePanel')+'\n'+extract('equipmentSectionTabs'),cx);
+vm.runInContext(extract('equipmentFleetPanel')+'\n'+extract('equipmentBaselineEditor')+'\n'+extract('equipmentFinancePanel')+'\n'+extract('equipmentSectionTabs'),cx);
 const fleet=cx.equipmentFleetPanel(),finance=cx.equipmentFinancePanel(),tabs=cx.equipmentSectionTabs();
 check('Jimmy has physical total 2',fleet.includes('Усього <b>2</b>'));
 check('Jimmy has repair 1',fleet.includes('Ремонт <b>1</b>'));

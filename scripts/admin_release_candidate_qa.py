@@ -253,6 +253,10 @@ def main():
             expect(form).to_have_count(0)
             check('normal candidate preserves and explicitly discards a real unsaved form', True)
             navigate(page, 'equipment')
+            # The equipment workspace now opens on the fleet tab. Pricing actions
+            # are intentionally hidden until the user selects the pricing tab.
+            page.locator('[data-eq-tab="pricing"]').click()
+            expect(page.locator('#equipmentPricingHost')).to_be_visible()
             page.get_by_role('button', name='Редагувати ціни', exact=True).click()
             catalog = page.locator('#catalogForm')
             before = page.evaluate("localStorage.getItem('vacleaner_catalog')")

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse, json, os, sys
 from pathlib import Path
 from typing import Any
-from playwright.sync_api import sync_playwright, Page
+from playwright.sync_api import sync_playwright, Page, expect
 
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'scripts'))
@@ -74,9 +74,9 @@ def view_suite(page:Page,qa:QA,width:int):
             page_title=page.locator('#pageTitle').inner_text().strip(); sub_title=page.locator('.analytics-toolbar h2').inner_text().strip()
             qa.check(page_title!=sub_title and sub_title=='Показники',f'{width}: analytics hierarchy has no duplicated heading')
         if view=='settings':
-            qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==5,f'{width}: settings exposes five task-focused tabs')
+            qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==4 and page.locator('[data-settings-tab="equipment"]').count()==0,f'{width}: settings exposes four focused tabs without duplicate equipment')
             qa.check(page.locator('.settings-shell').evaluate('el=>el.scrollWidth<=el.clientWidth+1'),f'{width}: settings shell stays inside main column')
-            for tab in ['rental','delivery','equipment','notifications','system']:
+            for tab in ['rental','delivery','notifications','system']:
                 page.locator(f'[data-settings-tab="{tab}"]').click();page.wait_for_timeout(20)
                 panel=page.locator(f'[data-settings-panel="{tab}"]:visible')
                 qa.check(page.locator('.settings-panel:visible').count()==1 and panel.count()==1,f'{width}: settings {tab} owns one visible workspace')
@@ -171,7 +171,7 @@ def modal_suite(page:Page,qa:QA,width:int):
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[2]["id"]}"] [data-action="issue"]').click();modal_check(page,qa,width,'issue','#issueForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="complete"]').click();modal_check(page,qa,width,'complete','#financeForm')
     page.locator(f'.booking-card[data-id="{pwa.BOOKINGS[3]["id"]}"] [data-action="finance"]').click();modal_check(page,qa,width,'finance','#financeForm')
-    page.locator('.nav button[data-view="equipment"]').click();page.wait_for_timeout(30);page.locator('#editPrices').click();modal_check(page,qa,width,'catalog','#catalogForm')
+    page.locator('.nav button[data-view="equipment"]').click();page.locator('[data-eq-tab="pricing"]').click();expect(page.locator('#editPrices')).to_be_visible();page.locator('#editPrices').click();modal_check(page,qa,width,'catalog','#catalogForm')
 
 def run_size(browser,qa,width,height):
     page=pwa.render_page(browser,width,height)

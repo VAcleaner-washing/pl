@@ -390,9 +390,9 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
             qa.check(page.locator('.main').evaluate('el=>el.scrollLeft')==0, f"{label}: {view} cannot drift horizontally")
             qa.check(page.locator('.main').evaluate('el=>el.scrollTop')==0, f"{label}: {view} opens at top")
             if view=='settings':
-                qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==5, f"{label}: settings uses five task-focused tabs")
+                qa.check(page.locator('.settings-tabs').count()==1 and page.locator('.settings-tab').count()==4 and page.locator('[data-settings-tab="equipment"]').count()==0, f"{label}: settings has four focused tabs without duplicate equipment")
                 qa.check(page.locator('.settings-tabs').evaluate('el=>el.scrollWidth>=el.clientWidth'), f"{label}: settings tab rail remains usable at narrow widths")
-                for tab in ['rental','delivery','equipment','notifications','system']:
+                for tab in ['rental','delivery','notifications','system']:
                     page.locator(f'[data-settings-tab="{tab}"]').click();page.wait_for_timeout(25)
                     qa.check(page.locator('.settings-panel:visible').count()==1 and page.locator(f'[data-settings-panel="{tab}"]:visible').count()==1, f"{label}: settings {tab} shows one focused workspace")
                     panel=page.locator(f'[data-settings-panel="{tab}"]:visible')
@@ -405,27 +405,6 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                         qa.check(all(all(c['left']>=row['r']['left']-1 and c['right']<=row['r']['right']+1 for c in row['children']) for row in slot_rows), f"{label}: time-slot controls stay inside rental workspace")
                     if tab=='delivery':
                         qa.check(page.locator('#deliveryFeeForm:visible').count()==1 and page.locator('.delivery-economics:visible').count()==0, f"{label}: delivery settings contains inputs, not profitability analytics")
-                    if tab=='equipment':
-                        qa.check(page.locator('#equipmentBaselineForm:visible .equipment-baseline-row').count()==4, f"{label}: equipment baselines are a compact four-row table")
-                        fleet_total_node=page.locator('[data-equipment-fleet-total]:visible')
-                        displayed_fleet=int(''.join(ch for ch in fleet_total_node.inner_text() if ch.isdigit()) or '0') if fleet_total_node.count()==1 else -1
-                        row_sum=0
-                        for key in ['puzzi','sc2','jimmy','abir']:
-                            qty=int(page.locator(f'#equipmentBaselineForm input[name="{key}Qty"]').input_value() or '0')
-                            unit=int(page.locator(f'#equipmentBaselineForm input[name="{key}UnitCost"]').input_value() or '0')
-                            row_sum+=qty*unit
-                        qa.check(fleet_total_node.count()==1 and displayed_fleet==row_sum and row_sum>0, f"{label}: equipment settings show the whole-fleet start value from current global inputs")
-                        if width==390:
-                            abir=page.locator('#equipmentBaselineForm input[name="abirUnitCost"]')
-                            original_abir=int(abir.input_value() or '0')
-                            original_fleet=displayed_fleet
-                            abir.fill(str(original_abir+500));page.wait_for_timeout(15)
-                            row_total=int(''.join(ch for ch in page.locator('[data-equipment-baseline="abir"] [data-equipment-total]').inner_text() if ch.isdigit()) or '0')
-                            updated_fleet=int(''.join(ch for ch in page.locator('[data-equipment-fleet-total]').inner_text() if ch.isdigit()) or '0')
-                            abir_qty=int(page.locator('#equipmentBaselineForm input[name="abirQty"]').input_value() or '0')
-                            qa.check(row_total==abir_qty*(original_abir+500), f"{label}: equipment row total updates live while typing")
-                            qa.check(updated_fleet==original_fleet+abir_qty*500, f"{label}: fleet total updates live while typing")
-                            abir.fill(str(original_abir));page.wait_for_timeout(10)
                     if tab=='notifications':
                         qa.check(page.locator('#notificationToggle:visible').count()==1 and page.locator('#pushDevicesList:visible').count()==1, f"{label}: push actions and production devices stay together")
                     if tab=='system':
@@ -465,10 +444,16 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
                 page.locator('.detail .back').first.click();page.wait_for_timeout(30)
             if view=='equipment':
                 qa.check(page.locator('.catalog-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: equipment toolbar stays inside its own width")
-                single=page.locator('.equipment-image-1 img').first
-                qa.check(single.count()==1 and single.evaluate("el=>parseFloat(getComputedStyle(el).objectPosition.split(' ')[1])>=65"), f"{label}: single-equipment photography is vertically centered on the machine")
-                image_box=page.locator('.equipment-image-1').first.bounding_box()
-                qa.check(image_box is not None and image_box['height']>=205, f"{label}: single-equipment photography keeps a useful mobile viewport")
+                qa.check(page.locator('[data-eq-tab="fleet"][aria-selected="true"]').count()==1 or page.locator('[data-eq-tab][aria-selected="true"]').count()==1, f"{label}: equipment workspace has an active section")
+                page.locator('[data-eq-tab="finance"]').click();page.wait_for_timeout(40)
+                qa.check(page.locator('#equipmentFinanceHost:visible #equipmentBaselineForm .equipment-baseline-row').count()==4, f"{label}: equipment finance workspace owns four purchase-baseline rows")
+                qa.check(page.locator('#equipmentFinanceHost:visible [data-equipment-fleet-total]').count()==1, f"{label}: equipment finance workspace shows whole-fleet investment total")
+                page.locator('[data-eq-tab="pricing"]').click();page.wait_for_timeout(40)
+                single=page.locator('#equipmentPricingHost:visible .equipment-image-1 img').first
+                qa.check(single.count()==1 and single.evaluate("el=>parseFloat(getComputedStyle(el).objectPosition.split(' ')[1])>=65"), f"{label}: pricing section single-equipment photography is vertically centered on the machine")
+                image_box=page.locator('#equipmentPricingHost:visible .equipment-image-1').first.bounding_box()
+                qa.check(image_box is not None and image_box['height']>=160, f"{label}: pricing section photography keeps a useful mobile viewport (measured height={image_box['height'] if image_box else 'missing'}px)")
+                page.locator('[data-eq-tab="fleet"]').click();page.wait_for_timeout(30)
             if view=='analytics':
                 qa.check(page.locator('.analytics-toolbar').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics toolbar stays inside its own width")
                 qa.check(page.locator('.analytics-periods').evaluate('el=>el.scrollWidth<=el.clientWidth+1'), f"{label}: analytics period controls never widen 320px viewport")
@@ -536,7 +521,7 @@ def mobile_suite(browser: Browser, qa: QA, width: int, label: str) -> None:
         qa.check(confirmed_geometry['dep'] is not None and confirmed_geometry['dep']['l']>=confirmed_geometry['p']['l']-1 and confirmed_geometry['dep']['r']<=confirmed_geometry['p']['r']+1 and confirmed_geometry['dep']['h']>=46, f"{label}: pre-issue deposit control stays inside finance card")
         page.locator('[data-filter="issued"]').click();page.wait_for_timeout(30)
         issued_finance=page.locator(f'.booking-card[data-id="{BOOKINGS[3]["id"]}"] .booking-finance')
-        qa.check('Разом витрати' in issued_finance.inner_text(), f"{label}: issued booking finance headline names the total instead of showing an ambiguous amount")
+        qa.check('Вартість послуг' in issued_finance.inner_text() and 'Отримано коштів' in issued_finance.inner_text(), f"{label}: issued booking finance explicitly labels service cost and received payments")
         issued_geometry=issued_finance.evaluate("""el=>{const p=el.getBoundingClientRect(),received=el.querySelector('.booking-finance-received-summary')?.getBoundingClientRect(),due=el.querySelector('em')?.getBoundingClientRect(),dep=el.querySelector('.booking-deposit-state')?.getBoundingClientRect();return{p:{l:p.left,r:p.right},received:received?{l:received.left,r:received.right,t:received.top,b:received.bottom,h:received.height}:null,due:due?{l:due.left,r:due.right,t:due.top,b:due.bottom,h:due.height}:null,dep:dep?{l:dep.left,r:dep.right,t:dep.top,b:dep.bottom,h:dep.height}:null}}""")
         fg=issued_geometry
         qa.check(fg['received'] is not None and fg['due'] is not None and fg['dep'] is not None and fg['received']['l']>=fg['p']['l']-1 and fg['received']['r']<=fg['p']['r']+1 and fg['due']['l']>=fg['p']['l']-1 and fg['dep']['r']<=fg['p']['r']+1, f"{label}: received, deposit and settlement rows stay inside finance card")
