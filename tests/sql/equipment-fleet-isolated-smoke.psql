@@ -17,6 +17,10 @@ declare
   v_events bigint;
   v_result jsonb;
   v_actor uuid := '00000000-0000-4000-8000-000000000099';
+  v_request uuid := '00000000-0000-4000-8000-000000000098';
+  v_add_first jsonb;
+  v_add_retry jsonb;
+  v_after_add integer;
 begin
   select * into v_unit from public.vacleaner_equipment_units
     where status='ready' order by resource_code,unit_number limit 1;
@@ -49,7 +53,26 @@ begin
       where resource_code=v_unit.resource_code) is distinct from v_capacity then
     raise exception 'invalid_call_changed_capacity';
   end if;
-  raise notice 'PASS equipment RPC idempotency, invalid input and capacity invariants';
+  if (select count(*) from public.vacleaner_equipment_units where id=v_request)>0 then
+    raise exception 'fixture_request_uuid_already_used';
+  end if;
+  v_add_first := public.vacleaner_admin_add_equipment_unit(
+    v_unit.resource_code,'isolated add fixture',v_actor,v_request);
+  if v_add_first->>'changed' <> 'true' then raise exception 'first_add_failed: %',v_add_first; end if;
+  select capacity into v_after_add from public.vacleaner_inventory
+    where resource_code=v_unit.resource_code;
+  if v_after_add <> v_capacity+1 then raise exception 'add_capacity_not_incremented_once'; end if;
+  v_add_retry := public.vacleaner_admin_add_equipment_unit(
+    v_unit.resource_code,'isolated retry fixture',v_actor,v_request);
+  if v_add_retry->>'changed' <> 'false' then raise exception 'retry_was_not_idempotent'; end if;
+  if (select capacity from public.vacleaner_inventory where resource_code=v_unit.resource_code) <> v_after_add then
+    raise exception 'retry_incremented_capacity';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_unit_events
+      where unit_id=v_request and action='create') <> 1 then
+    raise exception 'retry_duplicated_create_event';
+  end if;
+  raise notice 'PASS equipment RPC idempotency, invalid input, duplicate add intent and capacity invariants';
 end
 $$;
 rollback;
