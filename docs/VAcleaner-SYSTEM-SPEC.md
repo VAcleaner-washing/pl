@@ -6023,3 +6023,8 @@ The WebKit mobile forms CI step is bounded to 20 minutes and uses unbuffered Pyt
 
 ### Admin PWA cache recovery (PR #82)
 The admin service worker fetches version-addressed JavaScript and CSS from the network first, including when a deployment unintentionally reuses the same build number. Successful responses refresh the offline cache; if the network is unavailable, the cached asset remains the fallback. This prevents an installed PWA from indefinitely serving outdated business logic after a same-build hotfix. The release pipeline must still assign a new build identifier for every normal production change, review the exact production artifact receipt, and test upgrades from the previously installed worker before promotion.
+
+
+## CI diagnostic inventory — 2026-11-19
+
+The CI validation job runs `node scripts/test-ci-diagnostics.mjs` followed by `node scripts/ci-diagnostics.mjs` after the canonical static QA gate. These are read-only checks of the QA suite registry, npm script ownership heuristics, identical command strings, and potential duplicated invocations. The diagnostics must not change application behavior, financial calculations, booking rules, or production data. The canonical static gate remains mandatory and fail-fast; no browser, WebKit, operations or deploy gate may be bypassed. A diagnostic report is not a substitute for passing canonical QA or production release verification. The fixture regression test must pass before this CI workflow change can be accepted.
