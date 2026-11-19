@@ -95,7 +95,32 @@ begin
       where unit_id=v_request and action='create') <> 1 then
     raise exception 'retry_duplicated_create_event';
   end if;
-  raise notice 'PASS equipment RPC idempotency, invalid input/actor, duplicate add intent and capacity invariants';
+  -- Exercise a real successful transition using only the newly created test unit.
+  -- Returning to the original capacity must remain safe for existing reservations.
+  v_result := public.vacleaner_admin_set_equipment_unit_status(
+    v_request,'repair','isolated repair fixture',v_actor);
+  if v_result->>'changed' <> 'true' or v_result->>'status' <> 'repair' then
+    raise exception 'repair_transition_failed: %',v_result;
+  end if;
+  if (select capacity from public.vacleaner_inventory where resource_code=v_unit.resource_code) <> v_capacity then
+    raise exception 'repair_did_not_restore_original_capacity';
+  end if;
+  if (select status from public.vacleaner_equipment_units where id=v_request) <> 'repair' then
+    raise exception 'repair_unit_status_not_saved';
+  end if;
+  v_result := public.vacleaner_admin_set_equipment_unit_status(
+    v_request,'ready','isolated restore fixture',v_actor);
+  if v_result->>'changed' <> 'true' or v_result->>'status' <> 'ready' then
+    raise exception 'restore_transition_failed: %',v_result;
+  end if;
+  if (select capacity from public.vacleaner_inventory where resource_code=v_unit.resource_code) <> v_capacity+1 then
+    raise exception 'restore_did_not_increase_capacity';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_unit_events
+      where unit_id=v_request and action='status_change') <> 2 then
+    raise exception 'repair_restore_audit_events_missing';
+  end if;
+  raise notice 'PASS equipment RPC idempotency, invalid input/actor, duplicate add intent and capacity and repair/restore invariants';
 end
 $$;
 rollback;
