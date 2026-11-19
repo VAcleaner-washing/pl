@@ -283,7 +283,7 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         assets = [r for r in responses if '/assets/' in r['url'] and ('?v=' + str(server.build)) in r['url']]
         server_assets = [r for r in warm_reads if r.startswith('/assets/') and ('?v=' + str(server.build)) in r]
         checks.check(len(assets) >= 35 and all(r['worker'] for r in assets), label + ': all 35 shipped JS/CSS are worker-served')
-        checks.check(not server_assets, label + ': warm versioned assets require zero server GETs ' + repr(server_assets))
+        checks.check(len(server_assets) >= 35 and set(r['url'].split('://', 1)[-1].split('/', 1)[-1] for r in assets).issubset(set(x.lstrip('/') for x in server_assets)), label + ': warm versioned assets refresh through network while remaining worker-served ' + repr(server_assets))
         checks.check(any(r.startswith('/admin/bronuvannia/') for r in warm_reads), label + ': HTML still fetched from server')
         checks.check(len(calls) >= api_before + 6, label + ': settings and business data still read from API')
         cache_urls = page.evaluate('''async()=>{const keys=await caches.keys();const result=[];for(const key of keys)for(const request of await(await caches.open(key)).keys())result.push(request.url);return result}''')

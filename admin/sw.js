@@ -18,10 +18,9 @@ self.addEventListener('fetch',event=>{
   const managed=documentRequest||url.pathname.startsWith('/admin/')||url.pathname.startsWith('/assets/')||url.pathname.startsWith('/_next/static/');
   if(!managed)return;
   event.respondWith((async()=>{
-    if(!documentRequest&&isBuildAsset(url)){
-      const cached=await readCached(request);
-      if(cached)return cached;
-    }
+    // Network-first even for release-addressed assets: a hotfix may be deployed
+    // under an unchanged build number. Cache-first would pin obsolete JS forever.
+    // Offline requests still fall back to the last successfully fetched asset.
     try{
       const response=await fetch(request,{cache:'no-store'});
       if(response?.ok)event.waitUntil(storeResponse(request,response));

@@ -121,10 +121,10 @@ function swHarness(){
     const result=await response;await Promise.all(waiting.splice(0));return result;
   },seed:(path,text)=>entries.set(key(path),new Response(text))};
 }
-await test('warm current-build JS and CSS use exact cached bytes without network',async()=>{
+await test('warm current-build JS and CSS refresh from network to recover same-build deployments',async()=>{
   const h=swHarness();for(const file of ['admin-v250.js','admin-v430.css']){
     const path=`/assets/${file}?v=${build}`;await h.request(path);const count=h.network.length;
-    assert.match(await (await h.request(path)).text(),/network/);assert.equal(h.network.length,count);
+    assert.match(await (await h.request(path)).text(),/network/);assert.equal(h.network.length,count+1);
   }
 });
 await test('HTML always attempts network and offline navigation uses the current shell',async()=>{
