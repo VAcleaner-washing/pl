@@ -31,6 +31,10 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Run canonical static / regression QA
         run: npm run qa:static
+      - name: Verify CI diagnostic fixtures and inspect suite inventory
+        run: |
+          node scripts/test-ci-diagnostics.mjs
+          node scripts/ci-diagnostics.mjs
       - name: Build and verify the reviewed normal production artifact
         run: |
           npm run test:release-candidate
