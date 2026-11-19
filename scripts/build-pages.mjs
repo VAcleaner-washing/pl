@@ -18,7 +18,7 @@ const excludedDeployPaths=new Set([
 function copy(src,dst,depth=0,relative=''){
  for(const entry of fs.readdirSync(src,{withFileTypes:true})){
    const rel=relative?`${relative}/${entry.name}`:entry.name;
-   if(excludedDeployPaths.has(rel))continue;
+   if(excludedDeployPaths.has(rel)||(!entry.isDirectory()&&entry.name.endsWith('.psql')))continue;
    if(depth===0&&(excludedTop.has(entry.name)||isGeneratedTop(entry.name)||(entry.name.startsWith('.')&&entry.name!=='.nojekyll')||excludedRoot.has(entry.name)||entry.name.endsWith('.md')))continue;
    const from=path.join(src,entry.name),to=path.join(dst,entry.name);
    if(entry.isDirectory()){fs.mkdirSync(to,{recursive:true});copy(from,to,depth+1,rel)}
@@ -32,7 +32,7 @@ const sourceRelease=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'u
 const distRelease=JSON.parse(fs.readFileSync(deployedRelease,'utf8'));
 if(distRelease.version!==sourceRelease.version||String(distRelease.build)!==String(sourceRelease.build))throw new Error('Pages release.json does not match source release');
 const files=[];const walk=d=>fs.readdirSync(d,{withFileTypes:true}).forEach(e=>e.isDirectory()?walk(path.join(d,e.name)):files.push(path.join(d,e.name)));walk(dist);
-if(files.some(f=>/\.(?:ts|md|map)$/.test(f)))throw new Error('Development files leaked into Pages artifact');
+if(files.some(f=>/\.(?:ts|md|map|psql)$/.test(f)))throw new Error('Development files leaked into Pages artifact');
 for(const rel of excludedDeployPaths)if(fs.existsSync(path.join(dist,rel)))throw new Error(`Obsolete deploy path leaked into Pages artifact: ${rel}`);
 for(const name of excludedRoot)if(fs.existsSync(path.join(dist,name)))throw new Error(`Development root file leaked into Pages artifact: ${name}`);
 const leakedTop=fs.readdirSync(dist).filter(name=>isGeneratedTop(name)||name.startsWith('tmp-')||(name.startsWith('.')&&name!=='.nojekyll'));
