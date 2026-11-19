@@ -53,6 +53,29 @@ begin
       where resource_code=v_unit.resource_code) is distinct from v_capacity then
     raise exception 'invalid_call_changed_capacity';
   end if;
+  -- A missing actor must fail before any inventory or audit-log mutation.
+  begin
+    perform public.vacleaner_admin_set_equipment_unit_status(
+      v_unit.id,'repair','missing actor fixture',null);
+    raise exception 'missing_actor_status_was_accepted';
+  exception when others then
+    if sqlerrm <> 'invalid_equipment_change' then raise; end if;
+  end;
+  begin
+    perform public.vacleaner_admin_add_equipment_unit(
+      v_unit.resource_code,'missing actor fixture',null,v_request);
+    raise exception 'missing_actor_add_was_accepted';
+  exception when others then
+    if sqlerrm <> 'invalid_equipment_change' then raise; end if;
+  end;
+  if (select capacity from public.vacleaner_inventory
+      where resource_code=v_unit.resource_code) is distinct from v_capacity then
+    raise exception 'missing_actor_changed_capacity';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_unit_events
+      where unit_id=v_unit.id) <> v_events then
+    raise exception 'missing_actor_created_event';
+  end if;
   if (select count(*) from public.vacleaner_equipment_units where id=v_request)>0 then
     raise exception 'fixture_request_uuid_already_used';
   end if;
@@ -72,7 +95,7 @@ begin
       where unit_id=v_request and action='create') <> 1 then
     raise exception 'retry_duplicated_create_event';
   end if;
-  raise notice 'PASS equipment RPC idempotency, invalid input, duplicate add intent and capacity invariants';
+  raise notice 'PASS equipment RPC idempotency, invalid input/actor, duplicate add intent and capacity invariants';
 end
 $$;
 rollback;
