@@ -36,6 +36,7 @@ jobs:
           node scripts/test-ci-diagnostics.mjs
           node scripts/ci-diagnostics.mjs
           node scripts/test-qa-timing-report.mjs
+          node scripts/test-pwa-worker-monitor.mjs
       - name: Report measured static QA bottlenecks
         if: always()
         run: |
