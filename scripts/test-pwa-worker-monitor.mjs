@@ -21,7 +21,7 @@ const context = {
   cancelAnimationFrame: () => {},
 };
 vm.runInNewContext('(' + match[1] + ')', context)({phase: 'ready', build: 4367});
-const settle = async () => {for (let i=0; i<8; i++) await Promise.resolve();};
+const settle = async () => {for (let i=0; i<120; i++) await Promise.resolve();};
 await settle();
 assert.equal(context.window.__vacPwaWorkerMonitor.ready, false, 'activating is not activated');
 assert.ok(frames.length, 'monitor must retry a transitional worker state');
