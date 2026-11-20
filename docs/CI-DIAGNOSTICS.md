@@ -112,6 +112,22 @@ remains intact. Do not skip tests for System Spec, workflows, configuration,
 product code, mixed or renamed changes. Validate branch/merge-base interactions
 before enabling any selective PR behavior. No before/after speedup exists yet.
 
+**Observed WebKit 440 intermittent failure (2026-11-20, P1):**
+[PR #85 run 44690977306](https://github.com/VAcleaner-washing/pl/actions/runs/44690977306)
+failed on attempt 1 in `Production operations / webkit / 440`, step
+`Test actual production worker offline, update and rollback`. Its diagnostic
+reported `Worker readiness deadline`: the 4346 service worker was still
+`activating`, while the 35 required assets were present in cache and the
+stable artifact's hashes matched. Six other test jobs passed. A **failed-job-only
+rerun**, attempt 2, passed the same WebKit 440 job in **5m57s**
+(08:40:21–08:46:18 UTC); the run now concludes `success`. This is evidence
+of an intermittent failure, **not** proof that the service worker is correct
+under all timing conditions or that the test is safe to relax. Keep the
+readiness assertion and full release coverage; investigate worker activation
+lifecycle and bounded waiting with a reproducible regression fixture before
+changing the test or runtime. The original first-attempt failure must remain
+visible in flakiness metrics even though the final run conclusion is green.
+
 **Merge-order dependency:** #87 explicitly depends on #86's roadmap; #85 is an
 independent CI-measurement PR. All remain Draft pending explicit merge-readiness
 review. Do not merge #87 ahead of #86; check for concurrent branch changes and
