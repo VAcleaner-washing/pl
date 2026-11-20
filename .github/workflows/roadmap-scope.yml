@@ -15,8 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test scope policy
-        run: node scripts/test-roadmap-scope.mjs
+      - name: Test scope policy and docs-only classifier fixtures
+        run: |
+          node scripts/test-roadmap-scope.mjs
+          node scripts/test-classify-pr-changes.mjs
       - name: Fetch changed file paths from GitHub API
         env:
           GH_TOKEN: ${{ github.token }}
