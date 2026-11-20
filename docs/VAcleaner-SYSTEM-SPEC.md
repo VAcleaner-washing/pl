@@ -6035,3 +6035,8 @@ The CI validation job runs `node scripts/test-ci-diagnostics.mjs` followed by `n
 - A separate PR-only workflow validates roadmap phase/bullet and test evidence for newly created PRs; historical PRs #84–86 are exempt to avoid retroactive failures.
 - Process roadmap PRs must not modify product/runtime or Supabase files; P3 is documentation/backlog only.
 - This metadata/path check does not prove semantic scope or user approval and cannot replace release regression gates.
+
+
+### CI-SCOPE-002 — Process-only enforcement
+
+The roadmap scope guard enforces process-modernization metadata and forbids product/runtime changes only for PRs labeled `Initiative: process-modernization` or touching protected process-audit files. Ordinary product PRs are not blocked by this temporary process policy. Mixed process/product PRs are rejected; regression fixtures verify both cases. This check does not authorize product changes or replace release QA.
