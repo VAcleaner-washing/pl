@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {validateScope} from './check-roadmap-scope.mjs';
+const good = {number:87,body:'Roadmap: P2 — modernize CI gates\nTests: node scripts/test-roadmap-scope.mjs',files:['scripts/check-roadmap-scope.mjs','.github/workflows/roadmap-scope.yml']};
+assert.deepEqual(validateScope(good), []);
+assert.deepEqual(validateScope({...good,number:86,body:'',files:['src/app.js']}), []);
+assert.match(validateScope({...good,body:''})[0],/Roadmap/);
+assert.match(validateScope({...good,body:'Roadmap: P2 — modernize CI gates'})[0],/Tests/);
+assert.match(validateScope({...good,files:['supabase/migrations/change.sql']})[0],/Product/);
+assert.match(validateScope({...good,files:['release.json']})[0],/Product/);
+assert.match(validateScope({...good,body:'Roadmap: P3 — backlog\nTests: documentation review'})[0],/backlog/);
+assert.deepEqual(validateScope({...good,body:'Roadmap: P3 — backlog\nTests: documentation review',files:['docs/BACKLOG.md']}),[]);
+console.log('Roadmap scope guard fixture tests passed');
