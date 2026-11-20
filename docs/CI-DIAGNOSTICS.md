@@ -44,3 +44,19 @@ gates based on file extensions alone.
 **Next step:** use these measurements and per-job GitHub Actions durations to
 identify duplicated work and design a fast PR feedback lane; preserve complete
 release acceptance until change-impact mapping is behaviorally validated.
+
+## Observed workflow topology (2026-11-20, P1 inventory)
+
+Inspected `.github/workflows/pages.yml` on main and the in-progress PR runs
+#85 (44661270471), #86 (44660968293), #87 (44661278759).
+
+- Every PR targeting main triggers the same Pages workflow, regardless of changed-file type.
+- `validate` performs canonical static regression and builds/uploads both reviewed artifacts.
+- After `validate`, `browser` runs the canonical browser/PWA suite; four `operations` matrix jobs (Chromium/WebKit × 440/1440) run in parallel.
+- `webkit` depends on **both** `validate` and `browser`, creating a serial critical-path segment.
+- The Browser QA job executes a standalone session-recovery smoke before `qa:browser`; check whether the latter already covers identical assertions before removing any invocation.
+- The three observed documentation/process PRs each triggered the heavy browser and operations jobs. This is evidence of potentially unnecessary work, **not** proof that skipping it is safe.
+
+**Measured status at inspection:** all three static gates passed; browser suites were still in progress. No completed end-to-end run duration or statistically useful before/after baseline was available. Do not report a speedup yet.
+
+**Proposed P2 design, not implemented:** an early changed-file classification with explicit allowlist for documentation-only PRs, plus a small metadata/static check; retain complete canonical QA for release/main, workflow changes, System Spec contracts, and all product-affecting paths. Test classification with adversarial fixtures (mixed changes, renamed paths, generated assets, dependency/config changes) before any conditional gate is added. Never let PR-only selection weaken the release acceptance gate.
