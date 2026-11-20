@@ -6046,3 +6046,12 @@ The roadmap scope guard enforces process-modernization metadata and forbids prod
 - Static QA timing reporting reads the existing `qa-release-summary.json` results, reports slowest executed suites and the blocking test, and must not treat partial runs as complete baseline.
 - Workflow prints timings even after static QA fails. No acceptance gates are skipped or weakened.
 - Fixture tests cover missing/invalid timing input and ordering; baseline is diagnostic only.
+
+
+## CI-P2-SELECTIVE-001 — docs-only PR feedback (process-only)
+
+- On pull requests, a separate classification job obtains the complete changed-file list from the GitHub API (including pagination). Only ordinary `docs/**/*.md` changes may qualify for fast docs-only feedback; System Spec, roadmap, CI diagnostics, renames, source/config/workflow files never qualify.
+- Missing, malformed, inaccessible or oversized change metadata fails the classifier job; it must not silently mark the PR docs-only.
+- For confirmed ordinary docs-only PRs, the full static/browser/WebKit/operations jobs are skipped **on the PR only**, and the classification fixture/contract checks remain mandatory. This is fast feedback, **not release approval**.
+- Every other PR retains the complete static, Chromium, WebKit and production operations matrix. On `main` push, classification always reports non-docs-only, all full QA jobs must succeed and Pages deployment still depends on their success. No product or backend behavior is changed.
+- Regression protection: `scripts/test-classify-pr-changes.mjs`, `scripts/test-selective-pr-ci.mjs`, `scripts/check-build.mjs`. Release checklist: require full GREEN on the exact merge commit and verify deployed artifact/version/PWA separately. Do not infer full coverage from a docs-only PR check.
