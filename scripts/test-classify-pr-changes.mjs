@@ -17,5 +17,7 @@ for (const changes of [
 assert.equal(classify(Array.from({length: 201}, (_, i) => file(`docs/guide-${i}.md`))).docsOnly, true);
 assert.equal(classify([...Array.from({length: 200}, (_, i) => file(`docs/guide-${i}.md`)), file('scripts/unsafe.mjs')]).docsOnly, false);
 assert.equal(classify([file('docs/FAQ.md', 'removed')]).docsOnly, true);
+assert.deepEqual(classify(Array.from({length: 3000}, (_, i) => file(`docs/guide-${i}.md`))), {docsOnly: false, reason: 'github-file-list-limit'});
+assert.equal(classify(Array.from({length: 2999}, (_, i) => file(`docs/guide-${i}.md`))).docsOnly, true);
 assert.equal(classify([{...file('docs/FAQ.md'), previous_filename: 'docs/old.md'}]).docsOnly, false);
 console.log('P2 docs-only classifier fixtures passed (including multi-page and mixed-file cases)');
