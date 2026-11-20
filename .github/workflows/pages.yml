@@ -17,8 +17,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  classify:
+    name: PR change classification
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      docs_only: ${{ steps.files.outputs.docs_only }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify docs-only classification fixtures
+        run: node scripts/test-classify-pr-changes.mjs
+      - name: Classify complete PR file list (fail closed)
+        id: files
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: node scripts/ci-classify-pr.mjs
+
   validate:
     name: Static / build gate
+    needs: classify
+    if: needs.classify.outputs.docs_only != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +101,8 @@ jobs:
   browser:
     name: Browser QA aggregate gate
     runs-on: ubuntu-latest
-    needs: validate
+    needs: [classify, validate]
+    if: needs.classify.outputs.docs_only != 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -133,7 +158,8 @@ jobs:
     name: WebKit / mobile forms gate
     runs-on: ubuntu-24.04
     # Avoid competing browser matrices during the long WebKit suite.
-    needs: [validate, browser]
+    needs: [classify, validate, browser]
+    if: needs.classify.outputs.docs_only != 'true'
     container:
       image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
       options: --ipc=host
@@ -193,7 +219,8 @@ jobs:
   operations:
     name: Production operations / ${{ matrix.browser }} / ${{ matrix.width }}
     runs-on: ubuntu-24.04
-    needs: validate
+    needs: [classify, validate]
+    if: needs.classify.outputs.docs_only != 'true'
     strategy:
       fail-fast: false
       matrix:
