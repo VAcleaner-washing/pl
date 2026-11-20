@@ -77,12 +77,40 @@ production deployment.
 
 PR #87's independent [Roadmap scope workflow](https://github.com/VAcleaner-washing/pl/actions/runs/44669036138) also passed.
 
-**Timing evidence gap:** the available connector job records expose job names,
-status and conclusion, but no started/completed timestamps. These successful
-runs are three examples of full coverage, **not three numeric timing baselines**.
-Do not invent wall-clock or per-job durations, calculate a speedup, or claim
-duplicate assertions based only on these results. Obtain timestamped workflow/job
-metadata or trustworthy CI artifacts before P1 timing exit and P2 optimization.
+**Timestamped baseline (GitHub Actions API, 2026-11-20):** GitHub job metadata
+includes `started_at` and `completed_at`; run metadata includes
+`run_started_at` and `updated_at`. The prior statement that timestamps were
+unavailable is superseded by the following measured results. Full workflow
+wall-clock is calculated from run start to last update; this includes queueing,
+coordination and any post-job bookkeeping, so it is not the sum of job durations.
+
+| PR / run | Head | Workflow wall-clock | Static | Browser aggregate | WebKit mobile |
+| --- | --- | ---: | ---: | ---: | ---: |
+| #85 / [44682255473](https://github.com/VAcleaner-washing/pl/actions/runs/44682255473) | `afd5742` | 31m 57s | 41s | 22m 00s | 9m 05s |
+| #86 / [44660968293](https://github.com/VAcleaner-washing/pl/actions/runs/44660968293) | `2800719` | 26m 33s | 35s | 16m 25s | 9m 23s |
+| #87 / [44669036040](https://github.com/VAcleaner-washing/pl/actions/runs/44669036040) | `ea17f88` | 47m 06s | 42s | 15m 05s | 8m 36s |
+
+All three are successful full test runs; the Pages deployment job was skipped
+on PRs. #87's wall-clock exceeds its job execution window, so **do not** treat
+that number as browser-test time or extrapolate a per-suite speedup from it.
+The critical path is static → browser aggregate → WebKit mobile. The four
+production-operations jobs (Chromium/WebKit × 440/1440) run in parallel after
+static and all passed. Their respective durations for #85 were 3m56s, 6m38s,
+1m16s, and 1m51s (Chromium 440, WebKit 440, Chromium 1440, WebKit 1440).
+
+**Repeat-run classification:** #85 has 4 Pages runs on 4 distinct SHAs:
+3 successes, 1 early failure. #87 has 15 runs on 7 distinct SHAs:
+7 Pages runs (5 success, 1 failure, 1 cancelled) and 8 independent roadmap-scope
+runs (2 success, 5 failure, 1 cancelled). These are separate workflows, not
+15 full browser runs. A run on a changed SHA is not automatically redundant;
+no defensible percentage of avoidable runs is established yet. Scope guard
+failures are rapid (~8–17 seconds), while Pages success can take tens of minutes.
+
+**P2 candidate, not yet implemented:** prove a fail-closed docs-only classifier
+with positive/negative fixtures; ensure the full main/release acceptance gate
+remains intact. Do not skip tests for System Spec, workflows, configuration,
+product code, mixed or renamed changes. Validate branch/merge-base interactions
+before enabling any selective PR behavior. No before/after speedup exists yet.
 
 **Merge-order dependency:** #87 explicitly depends on #86's roadmap; #85 is an
 independent CI-measurement PR. All remain Draft pending explicit merge-readiness
