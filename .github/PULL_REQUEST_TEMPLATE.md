@@ -1,3 +1,4 @@
+<!-- For process modernization PRs only, include Initiative: process-modernization. Ordinary product PRs should not use this marker. -->
 ## Roadmap scope
 Roadmap: P2 — <exact approved roadmap bullet>
 
