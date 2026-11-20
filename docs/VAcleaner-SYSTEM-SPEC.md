@@ -6051,7 +6051,7 @@ The roadmap scope guard enforces process-modernization metadata and forbids prod
 ## CI-P2-SELECTIVE-001 — docs-only PR feedback (process-only)
 
 - On pull requests, a separate classification job obtains the complete changed-file list from the GitHub API (including pagination). Only ordinary `docs/**/*.md` changes may qualify for fast docs-only feedback; System Spec, roadmap, CI diagnostics, renames, source/config/workflow files never qualify.
-- Missing, malformed, inaccessible or oversized change metadata fails the classifier job; it must not silently mark the PR docs-only.
+- Missing, malformed or inaccessible change metadata fails the classifier job; it must not silently mark the PR docs-only. GitHub's pull-request files API has a 3000-file cap: at 3000 or more listed files, classification fails closed to `docs_only=false` (full PR QA), because the list may be truncated. Regression fixtures cover 2999/3000 boundaries.
 - For confirmed ordinary docs-only PRs, the full static/browser/WebKit/operations jobs are skipped **on the PR only**, and the classification fixture/contract checks remain mandatory. This is fast feedback, **not release approval**.
 - Every other PR retains the complete static, Chromium, WebKit and production operations matrix. On `main` push, classification always reports non-docs-only, all full QA jobs must succeed and Pages deployment still depends on their success. No product or backend behavior is changed.
 - Regression protection: `scripts/test-classify-pr-changes.mjs`, `scripts/test-selective-pr-ci.mjs`, `scripts/check-build.mjs`. Release checklist: require full GREEN on the exact merge commit and verify deployed artifact/version/PWA separately. Do not infer full coverage from a docs-only PR check.
