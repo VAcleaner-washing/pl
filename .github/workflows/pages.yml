@@ -31,7 +31,9 @@ jobs:
         with:
           node-version: 22
       - name: Verify docs-only classification fixtures
-        run: node scripts/test-classify-pr-changes.mjs
+        run: |
+          node scripts/test-classify-pr-changes.mjs
+          node scripts/test-selective-pr-ci.mjs
       - name: Classify complete PR file list (fail closed)
         id: files
         env:
