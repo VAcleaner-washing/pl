@@ -6028,3 +6028,10 @@ The admin service worker fetches version-addressed JavaScript and CSS from the n
 ## CI diagnostic inventory — 2026-11-19
 
 The CI validation job runs `node scripts/test-ci-diagnostics.mjs` followed by `node scripts/ci-diagnostics.mjs` after the canonical static QA gate. These are read-only checks of the QA suite registry, npm script ownership heuristics, identical command strings, and potential duplicated invocations. The diagnostics must not change application behavior, financial calculations, booking rules, or production data. The canonical static gate remains mandatory and fail-fast; no browser, WebKit, operations or deploy gate may be bypassed. A diagnostic report is not a substitute for passing canonical QA or production release verification. The fixture regression test must pass before this CI workflow change can be accepted.
+
+
+## CI-BASELINE-001 — QA duration instrumentation (PR #85)
+
+- Static QA timing reporting reads the existing `qa-release-summary.json` results, reports slowest executed suites and the blocking test, and must not treat partial runs as complete baseline.
+- Workflow prints timings even after static QA fails. No acceptance gates are skipped or weakened.
+- Fixture tests cover missing/invalid timing input and ordering; baseline is diagnostic only.
