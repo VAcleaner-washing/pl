@@ -1,0 +1,32 @@
+name: Roadmap PR scope
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: read
+jobs:
+  roadmap-scope:
+    name: Roadmap scope guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test scope policy and docs-only classifier fixtures
+        run: |
+          node scripts/test-roadmap-scope.mjs
+          node scripts/test-classify-pr-changes.mjs
+      - name: Fetch changed file paths from GitHub API
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_REPO: ${{ github.repository }}
+        run: gh api --paginate "repos/$GH_REPO/pulls/$PR_NUMBER/files?per_page=100" --jq '.[].filename' > pr-changed-files.txt
+      - name: Enforce scope metadata and product boundaries
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: node scripts/check-roadmap-scope.mjs

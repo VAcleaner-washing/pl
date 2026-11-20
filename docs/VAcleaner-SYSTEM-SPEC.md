@@ -6028,3 +6028,15 @@ The admin service worker fetches version-addressed JavaScript and CSS from the n
 ## CI diagnostic inventory — 2026-11-19
 
 The CI validation job runs `node scripts/test-ci-diagnostics.mjs` followed by `node scripts/ci-diagnostics.mjs` after the canonical static QA gate. These are read-only checks of the QA suite registry, npm script ownership heuristics, identical command strings, and potential duplicated invocations. The diagnostics must not change application behavior, financial calculations, booking rules, or production data. The canonical static gate remains mandatory and fail-fast; no browser, WebKit, operations or deploy gate may be bypassed. A diagnostic report is not a substitute for passing canonical QA or production release verification. The fixture regression test must pass before this CI workflow change can be accepted.
+
+
+## CI-SCOPE-001 — Roadmap PR scope metadata (PR #87)
+
+- A separate PR-only workflow validates roadmap phase/bullet and test evidence for newly created PRs; historical PRs #84–86 are exempt to avoid retroactive failures.
+- Process roadmap PRs must not modify product/runtime or Supabase files; P3 is documentation/backlog only.
+- This metadata/path check does not prove semantic scope or user approval and cannot replace release regression gates.
+
+
+### CI-SCOPE-002 — Process-only enforcement
+
+The roadmap scope guard enforces process-modernization metadata and forbids product/runtime changes only for PRs labeled `Initiative: process-modernization` or touching protected process-audit files. Ordinary product PRs are not blocked by this temporary process policy. Mixed process/product PRs are rejected; regression fixtures verify both cases. This check does not authorize product changes or replace release QA.
