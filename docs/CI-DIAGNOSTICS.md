@@ -60,3 +60,31 @@ Inspected `.github/workflows/pages.yml` on main and the in-progress PR runs
 **Measured status at inspection:** all three static gates passed; browser suites were still in progress. No completed end-to-end run duration or statistically useful before/after baseline was available. Do not report a speedup yet.
 
 **Proposed P2 design, not implemented:** an early changed-file classification with explicit allowlist for documentation-only PRs, plus a small metadata/static check; retain complete canonical QA for release/main, workflow changes, System Spec contracts, and all product-affecting paths. Test classification with adversarial fixtures (mixed changes, renamed paths, generated assets, dependency/config changes) before any conditional gate is added. Never let PR-only selection weaken the release acceptance gate.
+
+## Completed baseline evidence (2026-11-20, P1)
+
+The following **latest-head** PR workflow runs finished successfully; all seven
+required test jobs were `success` (static/build, browser aggregate, WebKit/mobile,
+and four production-operations matrix variants). The Pages deployment job was
+`skipped` as expected for pull requests, so these runs do **not** verify a
+production deployment.
+
+| PR | Head SHA | Full Pages workflow run | Result |
+| --- | --- | --- | --- |
+| #85 | `3a397c989bfe9c1c871c521a197e6c0febc93d3f` | [44661901684](https://github.com/VAcleaner-washing/pl/actions/runs/44661901684) | success |
+| #86 | `280071974d26d4160bb53f1b484a17ee9845bcbc` | [44660968293](https://github.com/VAcleaner-washing/pl/actions/runs/44660968293) | success |
+| #87 | `ea17f8824083a68d6eefeec68491c087d2fbadcf` | [44669036040](https://github.com/VAcleaner-washing/pl/actions/runs/44669036040) | success |
+
+PR #87's independent [Roadmap scope workflow](https://github.com/VAcleaner-washing/pl/actions/runs/44669036138) also passed.
+
+**Timing evidence gap:** the available connector job records expose job names,
+status and conclusion, but no started/completed timestamps. These successful
+runs are three examples of full coverage, **not three numeric timing baselines**.
+Do not invent wall-clock or per-job durations, calculate a speedup, or claim
+duplicate assertions based only on these results. Obtain timestamped workflow/job
+metadata or trustworthy CI artifacts before P1 timing exit and P2 optimization.
+
+**Merge-order dependency:** #87 explicitly depends on #86's roadmap; #85 is an
+independent CI-measurement PR. All remain Draft pending explicit merge-readiness
+review. Do not merge #87 ahead of #86; check for concurrent branch changes and
+rerun required checks after any rebase or merge-base change.
