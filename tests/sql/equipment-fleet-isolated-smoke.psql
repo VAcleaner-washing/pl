@@ -5,7 +5,10 @@ select (current_database() ~ '^vacleaner_test_')::integer as safe_database \gset
 \if :safe_database
 \else
   \echo 'REFUSING: requires an isolated vacleaner_test_* database'
-  \quit 3
+  -- ON_ERROR_STOP makes this intentional SQL error exit psql nonzero.
+  -- Do not rely on an argument to \\quit: psql does not accept an exit code there.
+  select 1 / 0 as refuse_unsafe_database;
+  \quit
 \endif
 
 begin;
