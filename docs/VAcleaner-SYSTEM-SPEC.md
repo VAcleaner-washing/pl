@@ -6040,3 +6040,9 @@ The CI validation job runs `node scripts/test-ci-diagnostics.mjs` followed by `n
 ### CI-SCOPE-002 — Process-only enforcement
 
 The roadmap scope guard enforces process-modernization metadata and forbids product/runtime changes only for PRs labeled `Initiative: process-modernization` or touching protected process-audit files. Ordinary product PRs are not blocked by this temporary process policy. Mixed process/product PRs are rejected; regression fixtures verify both cases. This check does not authorize product changes or replace release QA.
+
+## CI-BASELINE-001 — QA duration instrumentation (PR #85)
+
+- Static QA timing reporting reads the existing `qa-release-summary.json` results, reports slowest executed suites and the blocking test, and must not treat partial runs as complete baseline.
+- Workflow prints timings even after static QA fails. No acceptance gates are skipped or weakened.
+- Fixture tests cover missing/invalid timing input and ordering; baseline is diagnostic only.

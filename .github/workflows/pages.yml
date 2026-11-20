@@ -35,6 +35,12 @@ jobs:
         run: |
           node scripts/test-ci-diagnostics.mjs
           node scripts/ci-diagnostics.mjs
+          node scripts/test-qa-timing-report.mjs
+          node scripts/test-pwa-worker-monitor.mjs
+      - name: Report measured static QA bottlenecks
+        if: always()
+        run: |
+          if test -f qa-release-summary.json; then node scripts/qa-timing-report.mjs; fi
       - name: Build and verify the reviewed normal production artifact
         run: |
           npm run test:release-candidate
