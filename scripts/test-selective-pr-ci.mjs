@@ -6,7 +6,10 @@ assert.match(workflow, /node scripts\/test-classify-pr-changes\.mjs/);
 assert.match(workflow, /node scripts\/ci-classify-pr\.mjs/);
 for (const job of ['validate', 'browser', 'webkit', 'operations']) {
   const start = workflow.indexOf('\n  ' + job + ':');
-  const end = workflow.indexOf('\n  ', start + 4);
+  const nextJob = /^  [a-z][a-z-]*:\s*$/gm;
+  nextJob.lastIndex = start + ('\n  ' + job + ':').length;
+  const next = nextJob.exec(workflow);
+  const end = next ? next.index : -1;
   assert.ok(start > -1, job + ' missing');
   const section = workflow.slice(start, end < 0 ? undefined : end);
   assert.match(section, /if: needs\.classify\.outputs\.docs_only != 'true'/, job + ' must be guarded');
