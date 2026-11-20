@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {validateScope} from './check-roadmap-scope.mjs';
+const good = {number:87,body:'Initiative: process-modernization\nRoadmap: P2 — modernize CI gates\nTests: node scripts/test-roadmap-scope.mjs',files:['scripts/check-roadmap-scope.mjs','.github/workflows/roadmap-scope.yml']};
+assert.deepEqual(validateScope(good), []);
+assert.deepEqual(validateScope({...good,number:86,body:'',files:['src/app.js']}), []);
+assert.deepEqual(validateScope({...good,body:'Product: fix bookings\nTests: regression',files:['src/app.js','supabase/migrations/change.sql']}), []);
+assert.match(validateScope({...good,body:''})[0],/Initiative/);
+assert.match(validateScope({...good,body:'Initiative: process-modernization\nTests: fixtures'})[0],/Roadmap/);
+assert.match(validateScope({...good,body:'Initiative: process-modernization\nRoadmap: P2 — CI'})[0],/Tests/);
+assert.match(validateScope({...good,files:['src/app.js']})[0],/Process PR/);
+assert.match(validateScope({...good,files:['release.json']})[0],/Process PR/);
+assert.match(validateScope({...good,body:'Initiative: process-modernization\nRoadmap: P3 — backlog\nTests: docs'})[0],/backlog/);
+assert.deepEqual(validateScope({...good,body:'Initiative: process-modernization\nRoadmap: P3 — backlog\nTests: docs',files:['docs/BACKLOG.md']}),[]);
+console.log('Roadmap scope guard fixture tests passed');
