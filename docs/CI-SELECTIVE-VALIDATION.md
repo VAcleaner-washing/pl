@@ -78,3 +78,19 @@ Roadmap: P2 — compare real CI timing and failure modes before/after while pres
 | Pages deployment | 7s GREEN | skipped by classification |
 
 **Important:** these runs have different event/scope (full main push vs docs-only PR); the 99.3% wall-clock difference is the **observed reduction in checks for docs-only changes**, not a claim that full regression became 99.3% faster. The full main push release gate remains intact and was observed GREEN. End-to-end installed-device PWA state is not inferred from either workflow.
+
+## P2 — release acceptance checklist (reviewed against main `.github/workflows/pages.yml`)
+
+Roadmap: P2 — document the release checklist, preserve full regression, browser/WebKit, artifact provenance and deployment gates. Use this checklist for every future code PR and main release; a docs-only PR cannot stand in for release acceptance.
+
+- [ ] Confirm the intended commit SHA and scope against `docs/DEVELOPMENT-ROADMAP.md` and `docs/VAcleaner-SYSTEM-SPEC.md`; record test changes alongside behavior changes.
+- [ ] For any code/config/contract PR, verify **Static / build gate** succeeded, including canonical static regression, artifact build and production provenance checks. Do not treat `skipped` as success for a code PR.
+- [ ] Verify **Browser QA aggregate gate** and **WebKit / mobile forms gate** succeeded on the same commit.
+- [ ] Verify all **four production operations** combinations (Chromium and WebKit × 440 and 1440) succeeded on the same reviewed production artifact.
+- [ ] Confirm `production-pages` artifact and provenance are produced by the reviewed static gate; deployment must reuse this artifact **without rebuilding**.
+- [ ] On the intended `main` push, confirm `Deploy GitHub Pages` succeeded after validate/browser/WebKit/operations succeeded; the workflow explicitly requires all four results to be `success`.
+- [ ] Record `release.json` version/build and deployment SHA; separately verify live production HTTP version/manifest/worker, and installed-PWA worker/cache where available. Mark unobserved runtime checks **blocked**, not GREEN.
+- [ ] Capture job timestamps and compare against P1 baseline. If a required check fails, do not merge or deploy by bypassing it.
+- [ ] Docs-only exception: ordinary Markdown-only PR may have static/browser/WebKit/operations skipped **only when the fail-closed classifier confirms the complete diff**; the scope guard must still pass. A later main push still receives full release checks.
+
+**Evidence boundary:** this is a documented acceptance checklist, not evidence that a new release has been shipped. Current production main workflow `44871327797` passed all listed CI gates, while independent installed-PWA runtime confirmation remains open.
