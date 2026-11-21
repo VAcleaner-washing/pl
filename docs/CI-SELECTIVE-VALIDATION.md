@@ -45,3 +45,15 @@ Concrete examples:
 - Deploy VAcleaner Pages, SHA `8fc7260f`, push event: four runs `44040278236`, `44063393982`, `44064151835`, `44072869412`.
 
 **Decision:** Do not delete or suppress any workflow based solely on this grouping. First distinguish reruns, explicit dispatches, failed attempts, concurrency and intended release/deployment repetition, and assess coverage equivalence. No change to CI triggers is authorized by this inventory alone.
+
+## P0 — PWA configuration and production verification boundary
+
+Roadmap: P0 — verify main release/version, Pages artifact and PWA/service-worker behavior, distinguishing verified from blocked.
+
+- Main `release.json` and `package.json` identify **v4.3.67 / build 4367**.
+- Main `admin/manifest.webmanifest` specifies `id: /admin/`, `scope: /admin/`, `start_url: /admin/bronuvannia/`, and `display: standalone`.
+- Main `admin/sw.js` uses cache name `vacleaner-manager-4367` and an explicit asset list. Main root `sw.js` is a retirement sentinel for old root-scope workers; the public site is not the supported PWA scope.
+- Main deployment workflow [44871327797](https://github.com/VAcleaner-washing/pl/actions/runs/44871327797) completed successfully, including Pages deployment, at commit `8a47b80d48f219476950054f198294b5a387e525`.
+- **Not verified:** direct live HTTP responses for `/admin/manifest.webmanifest`, `/admin/sw.js`, installed-client cache migration, and whether a specific phone is controlling the app with worker/cache 4367. Attempts to retrieve live files from `https://vacleaner.pp.ua` were unavailable from the execution environment. Repository source and successful deployment alone cannot establish these runtime facts.
+
+P0 remains **partially verified**. Do not label installed PWA GREEN without independent runtime evidence.
