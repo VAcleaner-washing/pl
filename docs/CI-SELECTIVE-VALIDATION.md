@@ -94,3 +94,17 @@ Roadmap: P2 — document the release checklist, preserve full regression, browse
 - [ ] Docs-only exception: ordinary Markdown-only PR may have static/browser/WebKit/operations skipped **only when the fail-closed classifier confirms the complete diff**; the scope guard must still pass. A later main push still receives full release checks.
 
 **Evidence boundary:** this is a documented acceptance checklist, not evidence that a new release has been shipped. Current production main workflow `44871327797` passed all listed CI gates, while independent installed-PWA runtime confirmation remains open.
+
+## P2 — WebKit retry regression contract (design only; not yet executed)
+
+Roadmap: P2 — replace fragile checks with deterministic behavioral regression while retaining the full WebKit release gate. The existing `scripts/public_hydration_qa.py` retries only a WebKit `/bronuvannia/` case when the initial page has exclusively access-control page errors, HTTP 200, no Python exception, no unexpected create call and no pending enhancement. It reruns the full fulfillment/draft-restoration journey in a new page and stores `retryEvidence`.
+
+| Injected case | Required result |
+| --- | --- |
+| First attempt: eligible access-control page error; fresh-page full journey passes | PASS, `recoveredOnFullJourneyRetry=true`, original errors in `firstAttemptErrors`, successful `retryEvidence` |
+| Eligible first failure; second journey has a page error or assertion failure | FAIL, `retryEvidence.passed=false`, nonzero exit |
+| First failure is non-qualifying page error, HTTP != 200, Python exception, pending enhancement or unexpected create | FAIL, **no retry**, nonzero exit |
+| Same failure in Chromium or on a non-booking route | FAIL, **no retry**, nonzero exit |
+| Eligible first failure and repeated failure | Exactly one retry; never loop or silently suppress the second failure |
+
+**Evidence boundary:** this matrix is an acceptance specification, not an executed test. Do not mark the retry branch verified until deterministic fault injection exercises both recovery and fail-closed cases and the same commit passes the required full Static/Browser/WebKit/production-operations gates. The existing clean full run [44871327797](https://github.com/VAcleaner-washing/pl/actions/runs/44871327797) proves the normal journey only, not the injected-failure branch. No product behavior, API, fixtures or release gate may be weakened to make this pass.
