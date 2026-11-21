@@ -1,0 +1,110 @@
+# P2 selective CI — docs-only validation
+
+Roadmap: P2 — compare real CI timing and failure modes before/after while preserving the full main release gate. This document-only PR verifies the behavior introduced in merged PR #88. It changes no application code, tests, deployment configuration, or product contracts.
+
+## Observed docs-only PR #89
+
+- Commit: `eff83c09dc880a487ac603e3f6bde9667e124af7` (initial measurement).
+- Pages workflow: https://github.com/VAcleaner-washing/pl/actions/runs/44876571843 — completed, success; run 06:39:27–06:39:37 UTC (10 s workflow-level elapsed).
+- PR change classification: success, 06:39:30–06:39:36 UTC (6 s job elapsed).
+- Static/build, Browser QA aggregate, WebKit/mobile forms, production operations matrix, Pages deploy: **skipped**, as intended for an ordinary `docs/*.md`-only PR.
+- Roadmap scope guard: https://github.com/VAcleaner-washing/pl/actions/runs/44876571857 — success, 06:39:27–06:39:38 UTC (11 s workflow-level elapsed).
+- The two PR workflows ran concurrently; combined elapsed from first start to last finish was **11 s**. This is not the sum of both workflow durations.
+
+## Full regression baseline and main gate
+
+All durations below are calculated from GitHub Actions job timestamps; jobs in a matrix run in parallel. Full QA wall-clock means first started job through completed WebKit gate, excluding skipped PR deployment and queue time.
+
+| PR | Run | Static | Browser aggregate | WebKit/mobile | Full QA wall-clock |
+| --- | --- | ---: | ---: | ---: | ---: |
+| #85 | [44732460987](https://github.com/VAcleaner-washing/pl/actions/runs/44732460987) | 41 s | 14m 20s | 9m 30s | 24m 37s |
+| #86 | [44660968293](https://github.com/VAcleaner-washing/pl/actions/runs/44660968293) | 35 s | 16m 25s | 9m 23s | 26m 29s |
+| #87 | [44693516249](https://github.com/VAcleaner-washing/pl/actions/runs/44693516249) | 38 s | 17m 14s | 9m 24s | 27m 23s |
+
+Each of those runs completed successfully, including four production-operations jobs (Chromium/WebKit × 440/1440).
+
+Main push after #88 merge: https://github.com/VAcleaner-washing/pl/actions/runs/44871327797 — completed, success. Classification, static/build, browser aggregate, WebKit/mobile forms, all four production operations and Pages deployment were successful. First job 05:32:11 UTC, last job 05:58:15 UTC = **26m 04s job-span**; workflow run 05:32:08–05:58:16 UTC = **26m 08s workflow-span**. These are different measurement boundaries.
+
+## Interpretation and remaining evidence
+
+Compared with full PR QA baseline 24m37s–27m23s, the 10-second docs-only Pages workflow is about **99.32%–99.39% shorter**. This improvement applies **only to ordinary docs-only PRs**; no speedup is established for code changes. Comparing full QA with the combined two-workflow 11-second span yields a different metric; do not mix definitions.
+
+No browser, WebKit or production regression tests were removed for code PRs or main pushes. A green workflow and successful Pages deploy do not alone prove that a user's installed PWA is refreshed or that service-worker caches are current.
+
+**Open items:** verify deployed production version and service-worker behavior independently; quantify redundant/duplicate run share from a complete run inventory rather than guessing; review release checklist against the System Spec. Keep PR #89 Draft as a measurement fixture; do not merge it just to demonstrate the skip path.
+
+## P1 — complete workflow-run duplicate inventory (2026-11-21)
+
+Roadmap: P1 — inventory duplicate invocations and measure actual workflow-run counts. GitHub Actions REST `/actions/runs?per_page=100&page=N` was inspected across **all 18 pages**, including the final five runs: **1,705 runs total**.
+
+Grouping by `workflow_id + head_sha + event` gives **1,639 distinct groups**, **59 groups containing more than one run**, and **66 excess runs beyond the first** (**3.87% of all recorded runs**). This is a **candidate repeated-run share**, not a verified unnecessary-run share or a compute-minutes estimate: a workflow may legitimately run again for the same commit after a PR synchronization, a manual dispatch, an earlier failure, or a fresh deployment.
+
+Concrete examples:
+- Roadmap PR scope, SHA `88b89014`: runs `44814139663` and `44871320391`, both successful, many hours apart.
+- Roadmap PR scope, SHA `f6573089`: runs `44665345219` and `44665350429`, both failures, three seconds apart.
+- Deploy VAcleaner Pages, SHA `8fc7260f`, push event: four runs `44040278236`, `44063393982`, `44064151835`, `44072869412`.
+
+**Decision:** Do not delete or suppress any workflow based solely on this grouping. First distinguish reruns, explicit dispatches, failed attempts, concurrency and intended release/deployment repetition, and assess coverage equivalence. No change to CI triggers is authorized by this inventory alone.
+
+## P0 — PWA configuration and production verification boundary
+
+Roadmap: P0 — verify main release/version, Pages artifact and PWA/service-worker behavior, distinguishing verified from blocked.
+
+- Main `release.json` and `package.json` identify **v4.3.67 / build 4367**.
+- Main `admin/manifest.webmanifest` specifies `id: /admin/`, `scope: /admin/`, `start_url: /admin/bronuvannia/`, and `display: standalone`.
+- Main `admin/sw.js` uses cache name `vacleaner-manager-4367` and an explicit asset list. Main root `sw.js` is a retirement sentinel for old root-scope workers; the public site is not the supported PWA scope.
+- Main deployment workflow [44871327797](https://github.com/VAcleaner-washing/pl/actions/runs/44871327797) completed successfully, including Pages deployment, at commit `8a47b80d48f219476950054f198294b5a387e525`.
+- **Not verified:** direct live HTTP responses for `/admin/manifest.webmanifest`, `/admin/sw.js`, installed-client cache migration, and whether a specific phone is controlling the app with worker/cache 4367. Attempts to retrieve live files from `https://vacleaner.pp.ua` were unavailable from the execution environment. Repository source and successful deployment alone cannot establish these runtime facts.
+
+P0 remains **partially verified**. Do not label installed PWA GREEN without independent runtime evidence.
+
+## P2 — measured full-release versus docs-only PR gate (2026-11-21)
+
+Roadmap: P2 — compare real CI timing and failure modes before/after while preserving full release checks.
+
+**Measured complete runs, GitHub Actions timestamps (not estimates):**
+
+| Evidence | Full main push run [44871327797](https://github.com/VAcleaner-washing/pl/actions/runs/44871327797) | Docs-only PR run [44882629645](https://github.com/VAcleaner-washing/pl/actions/runs/44882629645) |
+| --- | --- | --- |
+| Workflow started → last update | 26m 08s (05:32:08–05:58:16 UTC) | 11s (07:57:51–07:58:02 UTC) |
+| Classification job | 13s GREEN | 7s GREEN |
+| Static / build gate | 38s GREEN | skipped by classification |
+| Browser aggregate | 14m 31s GREEN | skipped by classification |
+| WebKit/mobile forms | 10m 21s GREEN | skipped by classification |
+| Production operations: chromium 1440 | 1m 23s GREEN | skipped by classification |
+| Production operations: chromium 440 | 4m 06s GREEN | skipped by classification |
+| Production operations: webkit 1440 | 1m 57s GREEN | skipped by classification |
+| Production operations: webkit 440 | 5m 15s GREEN | skipped by classification |
+| Pages deployment | 7s GREEN | skipped by classification |
+
+**Important:** these runs have different event/scope (full main push vs docs-only PR); the 99.3% wall-clock difference is the **observed reduction in checks for docs-only changes**, not a claim that full regression became 99.3% faster. The full main push release gate remains intact and was observed GREEN. End-to-end installed-device PWA state is not inferred from either workflow.
+
+## P2 — release acceptance checklist (reviewed against main `.github/workflows/pages.yml`)
+
+Roadmap: P2 — document the release checklist, preserve full regression, browser/WebKit, artifact provenance and deployment gates. Use this checklist for every future code PR and main release; a docs-only PR cannot stand in for release acceptance.
+
+- [ ] Confirm the intended commit SHA and scope against `docs/DEVELOPMENT-ROADMAP.md` and `docs/VAcleaner-SYSTEM-SPEC.md`; record test changes alongside behavior changes.
+- [ ] For any code/config/contract PR, verify **Static / build gate** succeeded, including canonical static regression, artifact build and production provenance checks. Do not treat `skipped` as success for a code PR.
+- [ ] Verify **Browser QA aggregate gate** and **WebKit / mobile forms gate** succeeded on the same commit.
+- [ ] Verify all **four production operations** combinations (Chromium and WebKit × 440 and 1440) succeeded on the same reviewed production artifact.
+- [ ] Confirm `production-pages` artifact and provenance are produced by the reviewed static gate; deployment must reuse this artifact **without rebuilding**.
+- [ ] On the intended `main` push, confirm `Deploy GitHub Pages` succeeded after validate/browser/WebKit/operations succeeded; the workflow explicitly requires all four results to be `success`.
+- [ ] Record `release.json` version/build and deployment SHA; separately verify live production HTTP version/manifest/worker, and installed-PWA worker/cache where available. Mark unobserved runtime checks **blocked**, not GREEN.
+- [ ] Capture job timestamps and compare against P1 baseline. If a required check fails, do not merge or deploy by bypassing it.
+- [ ] Docs-only exception: ordinary Markdown-only PR may have static/browser/WebKit/operations skipped **only when the fail-closed classifier confirms the complete diff**; the scope guard must still pass. A later main push still receives full release checks.
+
+**Evidence boundary:** this is a documented acceptance checklist, not evidence that a new release has been shipped. Current production main workflow `44871327797` passed all listed CI gates, while independent installed-PWA runtime confirmation remains open.
+
+## P2 — WebKit retry regression contract (design only; not yet executed)
+
+Roadmap: P2 — replace fragile checks with deterministic behavioral regression while retaining the full WebKit release gate. The existing `scripts/public_hydration_qa.py` retries only a WebKit `/bronuvannia/` case when the initial page has exclusively access-control page errors, HTTP 200, no Python exception, no unexpected create call and no pending enhancement. It reruns the full fulfillment/draft-restoration journey in a new page and stores `retryEvidence`.
+
+| Injected case | Required result |
+| --- | --- |
+| First attempt: eligible access-control page error; fresh-page full journey passes | PASS, `recoveredOnFullJourneyRetry=true`, original errors in `firstAttemptErrors`, successful `retryEvidence` |
+| Eligible first failure; second journey has a page error or assertion failure | FAIL, `retryEvidence.passed=false`, nonzero exit |
+| First failure is non-qualifying page error, HTTP != 200, Python exception, pending enhancement or unexpected create | FAIL, **no retry**, nonzero exit |
+| Same failure in Chromium or on a non-booking route | FAIL, **no retry**, nonzero exit |
+| Eligible first failure and repeated failure | Exactly one retry; never loop or silently suppress the second failure |
+
+**Evidence boundary:** this matrix is an acceptance specification, not an executed test. Do not mark the retry branch verified until deterministic fault injection exercises both recovery and fail-closed cases and the same commit passes the required full Static/Browser/WebKit/production-operations gates. The existing clean full run [44871327797](https://github.com/VAcleaner-washing/pl/actions/runs/44871327797) proves the normal journey only, not the injected-failure branch. No product behavior, API, fixtures or release gate may be weakened to make this pass.
