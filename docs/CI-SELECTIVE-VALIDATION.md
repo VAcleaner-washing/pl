@@ -57,3 +57,24 @@ Roadmap: P0 — verify main release/version, Pages artifact and PWA/service-work
 - **Not verified:** direct live HTTP responses for `/admin/manifest.webmanifest`, `/admin/sw.js`, installed-client cache migration, and whether a specific phone is controlling the app with worker/cache 4367. Attempts to retrieve live files from `https://vacleaner.pp.ua` were unavailable from the execution environment. Repository source and successful deployment alone cannot establish these runtime facts.
 
 P0 remains **partially verified**. Do not label installed PWA GREEN without independent runtime evidence.
+
+## P2 — measured full-release versus docs-only PR gate (2026-11-21)
+
+Roadmap: P2 — compare real CI timing and failure modes before/after while preserving full release checks.
+
+**Measured complete runs, GitHub Actions timestamps (not estimates):**
+
+| Evidence | Full main push run [44871327797](https://github.com/VAcleaner-washing/pl/actions/runs/44871327797) | Docs-only PR run [44882629645](https://github.com/VAcleaner-washing/pl/actions/runs/44882629645) |
+| --- | --- | --- |
+| Workflow started → last update | 26m 08s (05:32:08–05:58:16 UTC) | 11s (07:57:51–07:58:02 UTC) |
+| Classification job | 13s GREEN | 7s GREEN |
+| Static / build gate | 38s GREEN | skipped by classification |
+| Browser aggregate | 14m 31s GREEN | skipped by classification |
+| WebKit/mobile forms | 10m 21s GREEN | skipped by classification |
+| Production operations: chromium 1440 | 1m 23s GREEN | skipped by classification |
+| Production operations: chromium 440 | 4m 06s GREEN | skipped by classification |
+| Production operations: webkit 1440 | 1m 57s GREEN | skipped by classification |
+| Production operations: webkit 440 | 5m 15s GREEN | skipped by classification |
+| Pages deployment | 7s GREEN | skipped by classification |
+
+**Important:** these runs have different event/scope (full main push vs docs-only PR); the 99.3% wall-clock difference is the **observed reduction in checks for docs-only changes**, not a claim that full regression became 99.3% faster. The full main push release gate remains intact and was observed GREEN. End-to-end installed-device PWA state is not inferred from either workflow.
