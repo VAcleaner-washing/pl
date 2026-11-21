@@ -32,3 +32,16 @@ Compared with full PR QA baseline 24m37s–27m23s, the 10-second docs-only Pages
 No browser, WebKit or production regression tests were removed for code PRs or main pushes. A green workflow and successful Pages deploy do not alone prove that a user's installed PWA is refreshed or that service-worker caches are current.
 
 **Open items:** verify deployed production version and service-worker behavior independently; quantify redundant/duplicate run share from a complete run inventory rather than guessing; review release checklist against the System Spec. Keep PR #89 Draft as a measurement fixture; do not merge it just to demonstrate the skip path.
+
+## P1 — complete workflow-run duplicate inventory (2026-11-21)
+
+Roadmap: P1 — inventory duplicate invocations and measure actual workflow-run counts. GitHub Actions REST `/actions/runs?per_page=100&page=N` was inspected across **all 18 pages**, including the final five runs: **1,705 runs total**.
+
+Grouping by `workflow_id + head_sha + event` gives **1,639 distinct groups**, **59 groups containing more than one run**, and **66 excess runs beyond the first** (**3.87% of all recorded runs**). This is a **candidate repeated-run share**, not a verified unnecessary-run share or a compute-minutes estimate: a workflow may legitimately run again for the same commit after a PR synchronization, a manual dispatch, an earlier failure, or a fresh deployment.
+
+Concrete examples:
+- Roadmap PR scope, SHA `88b89014`: runs `44814139663` and `44871320391`, both successful, many hours apart.
+- Roadmap PR scope, SHA `f6573089`: runs `44665345219` and `44665350429`, both failures, three seconds apart.
+- Deploy VAcleaner Pages, SHA `8fc7260f`, push event: four runs `44040278236`, `44063393982`, `44064151835`, `44072869412`.
+
+**Decision:** Do not delete or suppress any workflow based solely on this grouping. First distinguish reruns, explicit dispatches, failed attempts, concurrency and intended release/deployment repetition, and assess coverage equivalence. No change to CI triggers is authorized by this inventory alone.
