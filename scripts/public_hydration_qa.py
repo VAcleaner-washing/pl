@@ -259,6 +259,15 @@ def booking_fulfillment_case(page, width, evidence):
     snapshot('delivery draft restores React state and input data')
 
 
+def should_retry_webkit_booking(*, browser, route, result, response, pending, python_error, errors, create_calls):
+    """Only a clean booking journey with transient WebKit access-control errors qualifies."""
+    return (not result['passed'] and browser == 'webkit'
+            and route == '/bronuvannia/' and not python_error
+            and bool(errors) and all('due to access control checks.' in e for e in errors)
+            and not create_calls and response is not None and response.status == 200
+            and pending == 0)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', default='dist')
@@ -373,10 +382,10 @@ def main() -> int:
                 # as a page error during the deliberate draft reload. Do not suppress
                 # the error: repeat the entire booking journey in a fresh document
                 # once, and require every original assertion to pass again.
-                if (not result['passed'] and args.browser == 'webkit'
-                        and route == '/bronuvannia/' and not python_error
-                        and errors and all('due to access control checks.' in e for e in errors)
-                        and not create_calls and response and response.status == 200 and pending == 0):
+                if should_retry_webkit_booking(browser=args.browser, route=route, result=result,
+                                               response=response, pending=pending,
+                                               python_error=python_error, errors=errors,
+                                               create_calls=create_calls):
                     retry_page = context.new_page()
                     retry_errors = []
                     retry_page.on('pageerror', lambda error: retry_errors.append(str(error)))
