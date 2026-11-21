@@ -13,4 +13,11 @@ for (const changes of [
   [file('docs/FAQ.md'), file('release.json')], [file('docs/FAQ.md'), file('dist/app.js')],
   [file('docs/FAQ.md', 'unknown')], [{}]
 ]) assert.equal(classify(changes).docsOnly, false, JSON.stringify(changes));
-console.log('P2 docs-only classifier fixtures passed (prototype; no CI gating enabled)');
+// A real PR may span several GitHub API pages. Classification must use every file.
+assert.equal(classify(Array.from({length: 201}, (_, i) => file(`docs/guide-${i}.md`))).docsOnly, true);
+assert.equal(classify([...Array.from({length: 200}, (_, i) => file(`docs/guide-${i}.md`)), file('scripts/unsafe.mjs')]).docsOnly, false);
+assert.equal(classify([file('docs/FAQ.md', 'removed')]).docsOnly, true);
+assert.deepEqual(classify(Array.from({length: 3000}, (_, i) => file(`docs/guide-${i}.md`))), {docsOnly: false, reason: 'github-file-list-limit'});
+assert.equal(classify(Array.from({length: 2999}, (_, i) => file(`docs/guide-${i}.md`))).docsOnly, true);
+assert.equal(classify([{...file('docs/FAQ.md'), previous_filename: 'docs/old.md'}]).docsOnly, false);
+console.log('P2 docs-only classifier fixtures passed (including multi-page and mixed-file cases)');
