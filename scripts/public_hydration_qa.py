@@ -268,6 +268,12 @@ def should_retry_webkit_booking(*, browser, route, result, response, pending, py
             and pending == 0)
 
 
+def retry_journey_passed(*, response, pending, errors, python_failure, create_calls):
+    """The fresh retry must pass every original safety gate, not merely load."""
+    return (response is not None and response.status == 200 and pending == 0
+            and not errors and not python_failure and not create_calls)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', default='dist')
@@ -403,8 +409,9 @@ def main() -> int:
                         retry_failure = traceback.format_exc()
                         retry_pending = None
                     retry_create = [call for call in api_calls[retry_api_start:] if call['action'] == 'create']
-                    retry_ok = (retry_response is not None and retry_response.status == 200
-                                and retry_pending == 0 and not retry_errors and not retry_failure and not retry_create)
+                    retry_ok = retry_journey_passed(response=retry_response, pending=retry_pending,
+                                                    errors=retry_errors, python_failure=retry_failure,
+                                                    create_calls=retry_create)
                     result['retryEvidence'] = {'passed': retry_ok, 'errors': retry_errors,
                                                'pythonFailure': retry_failure,
                                                'unexpectedCreateCalls': retry_create}
