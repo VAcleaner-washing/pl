@@ -108,3 +108,14 @@ Roadmap: P2 — replace fragile checks with deterministic behavioral regression 
 | Eligible first failure and repeated failure | Exactly one retry; never loop or silently suppress the second failure |
 
 **Evidence boundary:** this matrix is an acceptance specification, not an executed test. Do not mark the retry branch verified until deterministic fault injection exercises both recovery and fail-closed cases and the same commit passes the required full Static/Browser/WebKit/production-operations gates. The existing clean full run [44871327797](https://github.com/VAcleaner-washing/pl/actions/runs/44871327797) proves the normal journey only, not the injected-failure branch. No product behavior, API, fixtures or release gate may be weakened to make this pass.
+
+## P2 — WebKit retry execution update (2026-11-22)
+
+The preceding retry matrix was a **design-only snapshot at the time of writing**. It has since been implemented and verified in PR #90, merged into `main` as commit `56bd9019946fc0b96654edd9e1df0a4a13a1a148`.
+
+- PR #90 full gate: [45003937943](https://github.com/VAcleaner-washing/pl/actions/runs/45003937943) — completed successfully on head `109c920a82ff362d07cf0c5f9999f1f44ab4eec1`. Static/build, Browser QA aggregate, WebKit/mobile forms and all four Chromium/WebKit production-operations jobs succeeded. PR deployment was correctly skipped.
+- WebKit fault injection now exercises the full second journey for both `recover` (expected recovery) and `fail-second` (expected failure); the retry page initializes its own `ApiReadTracker`. Scope guard also passed.
+- **Not yet verified:** full `main` push workflow and Pages deployment for merge SHA `56bd901` from a push-run record, live service-worker response, and installed-device cache state. Do not infer production success or a code-PR speedup from the PR checks.
+- Historical P1 full QA wall-clock baseline remains 24m37s / 26m29s / 27m23s for #85/#86/#87. Docs-only ~10–11s is a different, selective PR workload; the 66/1705 repeated-run candidates are not verified wasted runs.
+
+This evidence update is documentation-only and does not change release gates, product code or production data.
