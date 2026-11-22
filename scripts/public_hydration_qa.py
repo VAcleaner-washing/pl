@@ -280,7 +280,11 @@ def main() -> int:
     parser.add_argument('--artifacts', default='hydration-test-results')
     parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromium')
     parser.add_argument('--booking-only', action='store_true', help='Run the three booking cases; default keeps the complete public-route sweep.')
+    parser.add_argument('--retry-injection', choices=['none', 'recover', 'fail-second'], default='none',
+                        help='QA-only: inject a synthetic WebKit page error after the real booking journey.')
     args = parser.parse_args()
+    if args.retry_injection != 'none' and (args.browser != 'webkit' or not args.booking_only):
+        parser.error('--retry-injection requires --browser webkit --booking-only')
     root = Path(args.root).resolve()
     artifacts = Path(args.artifacts).resolve()
     artifacts.mkdir(parents=True, exist_ok=True)
@@ -370,6 +374,10 @@ def main() -> int:
                 except Exception:
                     pending = None
                     python_error = python_error or traceback.format_exc()
+                # Deterministic fault injection AFTER the actual browser journey; no
+                # production API or application JavaScript is modified.
+                if args.retry_injection != 'none' and route == '/bronuvannia/' and not python_error:
+                    errors.append('injected WebKit navigation due to access control checks.')
                 case_api = api_calls[api_start:]
                 create_calls = [call for call in case_api if call['action'] == 'create']
                 result = {'route': route, 'width': width, 'slowScripts': slow,
@@ -408,6 +416,8 @@ def main() -> int:
                     except Exception:
                         retry_failure = traceback.format_exc()
                         retry_pending = None
+                    if args.retry_injection == 'fail-second' and not retry_failure:
+                        retry_errors.append('injected second-journey TypeError')
                     retry_create = [call for call in api_calls[retry_api_start:] if call['action'] == 'create']
                     retry_ok = retry_journey_passed(response=retry_response, pending=retry_pending,
                                                     errors=retry_errors, python_failure=retry_failure,
@@ -436,8 +446,20 @@ def main() -> int:
     summary = {'browser': args.browser, 'passed': sum(r['passed'] for r in results),
                'failed': [r for r in results if not r['passed']], 'results': results}
     (artifacts / 'result.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))
+    if args.retry_injection != 'none':
+        injected = [r for r in results if r.get('route') == '/bronuvannia/' and 'width' in r]
+        expected_pass = args.retry_injection == 'recover'
+        injection_ok = len(injected) == 3 and all(
+            r['passed'] == expected_pass and r.get('retryEvidence', {}).get('passed') == expected_pass
+            and (r.get('recoveredOnFullJourneyRetry') is True) == expected_pass
+            and len(r.get('firstAttemptErrors', r.get('errors', []))) >= 1
+            for r in injected)
+        summary['retryInjectionVerified'] = injection_ok
+        (artifacts / 'result.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2))
+        if not injection_ok:
+            raise AssertionError('WebKit injected full-journey retry contract failed')
     print(json.dumps({'passed': summary['passed'], 'failed': len(summary['failed'])}))
-    return 1 if summary['failed'] else 0
+    return 0 if args.retry_injection == 'fail-second' and summary['retryInjectionVerified'] else (1 if summary['failed'] else 0)
 
 
 if __name__ == '__main__':
