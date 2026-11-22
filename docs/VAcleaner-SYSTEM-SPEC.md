@@ -6055,3 +6055,15 @@ The roadmap scope guard enforces process-modernization metadata and forbids prod
 - For confirmed ordinary docs-only PRs, the full static/browser/WebKit/operations jobs are skipped **on the PR only**, and the classification fixture/contract checks remain mandatory. This is fast feedback, **not release approval**.
 - Every other PR retains the complete static, Chromium, WebKit and production operations matrix. On `main` push, classification always reports non-docs-only, all full QA jobs must succeed and Pages deployment still depends on their success. No product or backend behavior is changed.
 - Regression protection: `scripts/test-classify-pr-changes.mjs`, `scripts/test-selective-pr-ci.mjs`, `scripts/check-build.mjs`. Release checklist: require full GREEN on the exact merge commit and verify deployed artifact/version/PWA separately. Do not infer full coverage from a docs-only PR check.
+
+
+## QA-WEBKIT-RETRY — process-only regression contract (P2)
+
+- Public hydration WebKit may repeat the **entire** `/bronuvannia/` journey once in a fresh document only when the first journey returned HTTP 200, has no Python assertion failure, no pending enhancements, no unexpected create calls, and **all** page errors match the known access-control cancellation signature.
+- Other browsers/routes, unrelated or mixed page errors, HTTP failures, failed assertions, pending enhancements, or create attempts must remain hard failures without a retry.
+- The second journey must satisfy every original assertion; its errors and result are retained in `retryEvidence`. A second failure must fail CI, never be silently accepted.
+- The fresh retry page must initialize its own `ApiReadTracker` before running the booking journey; draft-reload readiness assertions depend on `page._vac_reads`. The WebKit recovery and fail-second integration fixtures verify this instrumentation in the real second journey (regression from CI run #44998041816).
+- Controlled browser journey injection (QA-only, local fixture server; never live bookings): `python scripts/public_hydration_qa.py --root dist --browser webkit --booking-only --retry-injection recover --artifacts /tmp/webkit-retry-recover` and the same command with `--retry-injection fail-second --artifacts /tmp/webkit-retry-fail`. Both commands must exit 0 only when the expected retry contract is observed; `fail-second` intentionally records failed route cases and checks that they remain failed. Injection occurs after the real booking journey and cannot mask a prior assertion failure. These are additional integration checks, not substitutes for the unmodified full release QA.
+
+- Deterministic predicate regression: `python -m unittest discover -s scripts -p 'test_public_hydration_retry.py'`. This runs as a dedicated step in the WebKit workflow before expensive browser suites; it does not replace the full Static, Browser, WebKit and Production Operations release gate.
+- This contract changes only QA eligibility logic; it does not authorize booking, finance, database, or product behavior changes.
