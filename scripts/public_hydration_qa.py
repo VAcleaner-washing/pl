@@ -401,6 +401,9 @@ def main() -> int:
                                                python_error=python_error, errors=errors,
                                                create_calls=create_calls):
                     retry_page = context.new_page()
+                    # The complete retry journey needs the same API-read instrumentation
+                    # as the first page; booking_fulfillment_case checks it on reload.
+                    retry_page._vac_reads = ApiReadTracker(retry_page)
                     retry_errors = []
                     retry_page.on('pageerror', lambda error: retry_errors.append(str(error)))
                     retry_evidence = []
