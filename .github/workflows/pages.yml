@@ -205,6 +205,13 @@ jobs:
           tar -xf .pages-artifact/artifact.tar -C dist
       - name: Verify the deployed artifact
         run: npm run verify:artifact
+      - name: Verify real WebKit full-journey retry recovery and fail-closed injection
+        timeout-minutes: 12
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          python scripts/public_hydration_qa.py --root dist --browser webkit --booking-only --retry-injection recover --artifacts webkit-test-results/retry-recover
+          python scripts/public_hydration_qa.py --root dist --browser webkit --booking-only --retry-injection fail-second --artifacts webkit-test-results/retry-fail-second
       - name: Run WebKit mobile, public and startup QA
         timeout-minutes: 20
         env:
