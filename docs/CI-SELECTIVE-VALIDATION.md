@@ -31,7 +31,7 @@ Compared with full PR QA baseline 24m37s–27m23s, the 10-second docs-only Pages
 
 No browser, WebKit or production regression tests were removed for code PRs or main pushes. A green workflow and successful Pages deploy do not alone prove that a user's installed PWA is refreshed or that service-worker caches are current.
 
-**Open items:** verify deployed production version and service-worker behavior independently; quantify redundant/duplicate run share from a complete run inventory rather than guessing; review release checklist against the System Spec. Keep PR #89 Draft as a measurement fixture; do not merge it just to demonstrate the skip path.
+**Open items:** verify deployed production version and service-worker behavior independently; quantify redundant/duplicate run share from a complete run inventory rather than guessing; review release checklist against the System Spec. PR #89 is currently open and marked ready for review (not Draft) as of 2026-11-22; its docs-only GREEN checks do not independently authorize merge. Keep merge blocked pending review and explicit disposition; do not merge solely to demonstrate the skip path.
 
 ## P1 — complete workflow-run duplicate inventory (2026-11-21)
 
