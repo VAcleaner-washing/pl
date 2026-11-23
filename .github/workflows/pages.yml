@@ -100,6 +100,74 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  worker-reproduction:
+    name: Diagnostic WebKit rollback / 10 fresh runs
+    if: startsWith(github.ref, 'refs/heads/qa/p2-worker-repro-')
+    needs: [classify, validate]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify diagnostic failure aggregation
+        run: node scripts/test-worker-reproduction.mjs
+      - name: Install the exact CI Playwright client
+        run: python -m pip install --disable-pip-version-check -r requirements-ci.txt
+      - name: Download reviewed production artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-pages
+          path: .pages-artifact
+      - name: Extract and verify the exact reviewed artifact
+        run: |
+          test ! -e release-candidate-test-results/dist
+          mkdir -p release-candidate-test-results/dist
+          tar -xf .pages-artifact/artifact.tar -C release-candidate-test-results/dist
+          npm run verify:production-artifact
+      - name: Check out immutable stable46 source
+        uses: actions/checkout@v4
+        with:
+          ref: 15bf61dc4da4cf63405a25887353e6ec7178dce8
+          path: stable-reference-test-results/source
+          persist-credentials: false
+      - name: Build immutable stable46 reference
+        working-directory: stable-reference-test-results/source
+        run: |
+          npm run stamp
+          node scripts/build-pages.mjs
+      - name: Repeat unmodified worker test with fresh processes and retain every failure
+        shell: bash
+        timeout-minutes: 15
+        run: |
+          mkdir -p worker-repro-results
+          overall=0
+          for iteration in {1..10}; do
+            if PYTHONUNBUFFERED=1 python scripts/pwa_cache_qa.py --root release-candidate-test-results/dist --browser webkit --width 440 --stable-root stable-reference-test-results/source/dist --artifacts "worker-repro-results/run-$iteration" >"worker-repro-results/run-$iteration.log" 2>&1; then
+              result=0
+            else
+              result=$?
+              overall=1
+              cat "worker-repro-results/run-$iteration.log"
+            fi
+            printf '%s\t%s\n' "$iteration" "$result" >> worker-repro-results/exit-status.tsv
+            tail -n 1 "worker-repro-results/run-$iteration.log"
+          done
+          exit "$overall"
+      - name: Preserve every diagnostic trace and result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vacleaner-worker-reproduction
+          path: worker-repro-results
+          if-no-files-found: error
+          retention-days: 14
+
   browser:
     name: Browser QA aggregate gate
     runs-on: ubuntu-latest
