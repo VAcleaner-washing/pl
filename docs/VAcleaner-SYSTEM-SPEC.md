@@ -6071,5 +6071,5 @@ The roadmap scope guard enforces process-modernization metadata and forbids prod
 ## QA-WORKER-REPRO — bounded process diagnostic (P2)
 
 - The temporary `qa/p2-worker-repro-*` branch may add a diagnostic job on the exact pinned CI WebKit image, using the reviewed artifact and immutable stable46 source. All normal Static, Browser, WebKit and Operations gates remain unchanged.
-- Run the existing worker test ten times with fresh processes, retain every exit status and trace, and fail the diagnostic job if any iteration fails. Never use repetition to turn a failed iteration into GREEN.
+- Run ten bounded fresh-process iterations, optionally pairing passive observation with a controller-event timing control; retain every exit status and trace, and fail the diagnostic job if any iteration fails. The timing control is diagnostic only and cannot establish release acceptance. Never use repetition to turn a failed iteration into GREEN.
 - This diagnostic does not deploy: Pages deployment remains restricted to a fully accepted main push. Ten successful runs establish only that the historical rollback failure was not reproduced in those ten runs; they do not prove its native cause or elimination.

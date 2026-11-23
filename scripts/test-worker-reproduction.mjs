@@ -7,7 +7,7 @@ import {spawnSync} from 'node:child_process';
 // Exercise the actual workflow shell with an inert Python substitute. This
 // checks aggregation behavior; it never launches a browser or accesses an API.
 const workflow = fs.readFileSync(new URL('../.github/workflows/pages.yml', import.meta.url), 'utf8');
-const section = workflow.split('      - name: Repeat unmodified worker test with fresh processes and retain every failure\n')[1];
+const section = workflow.split('      - name: Compare observed and deferred lifecycle with fresh processes and retain every failure\n')[1];
 assert.ok(section, 'diagnostic step exists');
 const block = section.match(/        run: \|\n((?:          .*\n)+)/)?.[1];
 assert.ok(block, 'diagnostic command exists');
@@ -35,12 +35,14 @@ printf '%s\\n' '{"fixture":true,"passed":true}'
     assert.equal(result.error, undefined);
     assert.equal(result.status, failedIteration ? 1 : 0, result.stderr);
     const statuses = fs.readFileSync(path.join(directory, 'worker-repro-results/exit-status.tsv'), 'utf8').trim().split('\n');
-    assert.equal(statuses.length, 10, 'all attempts retained, including attempts after failure');
+    assert.equal(statuses.length, 30, 'all grouped attempts retained, including attempts after failure');
     for (let index = 0; index < 10; index++) {
-      assert.equal(statuses[index], `${index + 1}\t${index + 1 === failedIteration ? 7 : 0}`);
-      assert.ok(fs.existsSync(path.join(directory, `worker-repro-results/run-${index + 1}.log`)));
+      for (const [offset, mode] of ['baseline', 'observe', 'defer'].entries()) {
+        assert.equal(statuses[3 * index + offset], `${index + 1}\t${mode}\t${index + 1 === failedIteration ? 7 : 0}`);
+        assert.ok(fs.existsSync(path.join(directory, `worker-repro-results/${mode}/run-${index + 1}.log`)));
+      }
     }
-    console.log(`PASS diagnostic aggregation: ${failedIteration ? 'failure 3 remains failure after seven later successes' : 'ten successes'}`);
+    console.log(`PASS diagnostic aggregation: ${failedIteration ? 'failed group 3 remains failure after seven later successful groups' : 'thirty successful grouped executions'}`);
   } finally {
     fs.rmSync(directory, {recursive: true, force: true});
   }

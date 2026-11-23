@@ -101,7 +101,7 @@ jobs:
           retention-days: 14
 
   worker-reproduction:
-    name: Diagnostic WebKit rollback / 10 fresh runs
+    name: Diagnostic WebKit rollback / 10 baseline-observed-control triples
     if: startsWith(github.ref, 'refs/heads/qa/p2-worker-repro-')
     needs: [classify, validate]
     runs-on: ubuntu-24.04
@@ -141,22 +141,27 @@ jobs:
         run: |
           npm run stamp
           node scripts/build-pages.mjs
-      - name: Repeat unmodified worker test with fresh processes and retain every failure
+      - name: Compare observed and deferred lifecycle with fresh processes and retain every failure
         shell: bash
         timeout-minutes: 15
         run: |
           mkdir -p worker-repro-results
           overall=0
           for iteration in {1..10}; do
-            if PYTHONUNBUFFERED=1 python scripts/pwa_cache_qa.py --root release-candidate-test-results/dist --browser webkit --width 440 --stable-root stable-reference-test-results/source/dist --artifacts "worker-repro-results/run-$iteration" >"worker-repro-results/run-$iteration.log" 2>&1; then
-              result=0
-            else
-              result=$?
-              overall=1
-              cat "worker-repro-results/run-$iteration.log"
-            fi
-            printf '%s\t%s\n' "$iteration" "$result" >> worker-repro-results/exit-status.tsv
-            tail -n 1 "worker-repro-results/run-$iteration.log"
+            for mode in baseline observe defer; do
+              mkdir -p "worker-repro-results/$mode"
+              runner=(python scripts/pwa_cache_qa.py)
+              if [[ "$mode" != baseline ]]; then runner=(python scripts/worker_lifecycle_diagnostic.py --mode "$mode"); fi
+              if PYTHONUNBUFFERED=1 "${runner[@]}" --root release-candidate-test-results/dist --browser webkit --width 440 --stable-root stable-reference-test-results/source/dist --artifacts "worker-repro-results/$mode/run-$iteration" >"worker-repro-results/$mode/run-$iteration.log" 2>&1; then
+                result=0
+              else
+                result=$?
+                overall=1
+                cat "worker-repro-results/$mode/run-$iteration.log"
+              fi
+              printf '%s\t%s\t%s\n' "$iteration" "$mode" "$result" >> worker-repro-results/exit-status.tsv
+              tail -n 1 "worker-repro-results/$mode/run-$iteration.log"
+            done
           done
           exit "$overall"
       - name: Preserve every diagnostic trace and result
