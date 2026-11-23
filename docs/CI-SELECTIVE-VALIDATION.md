@@ -2,6 +2,47 @@
 
 Roadmap: P2 — compare real CI timing and failure modes before/after while preserving the full main release gate. This document-only PR verifies the behavior introduced in merged PR #88. It changes no application code, tests, deployment configuration, or product contracts.
 
+## Current reviewed evidence — 2026-11-23 (supersedes historical open items below)
+
+Roadmap: P0 production baseline; P1 existing audit and measurements; P2 selective regression/release acceptance. This review changes documentation only; the approved phase order and product behavior remain unchanged.
+
+- Main reviewed: `56bd9019946fc0b96654edd9e1df0a4a13a1a148`; production **4.3.67 / 4367**. PR #84 remains Draft and was not changed. PR #89 was synchronized by merging current main without force push or conflicts; its net diff contains only these two ordinary Markdown documents.
+- Actual main push [45018790842](https://github.com/VAcleaner-washing/pl/actions/runs/45018790842): classification, Static/build, Browser aggregate, WebKit (including injected recovery and second-attempt failure), four operations variants and Pages deployment all succeeded on `56bd901`, attempt 1. Workflow timestamps 2026-11-22 **11:44:29–12:12:26 UTC = 1,677 s (27:57)**.
+- Downloaded deployed `production-pages` artifact **14752388608**, verified GitHub ZIP digest `1c6ced46861396beccbba693c8c487bac1c392d092dd4c95246d9c150b16771b`. Its 273 files match the locally reproduced source artifact byte-for-byte; tree digest `970bba1fd97a2270365f5b9d435c5252e5a7d9f8bfb96432f01d824ca701cc1f` matches the production receipt. The older `reviewArchiveSha256` in that receipt is historical and is **not** used as proof of the current tree.
+- Independent live HTTP verification on 2026-11-23 compared all **273** files: **268** same-path exact matches, four documented alias redirects and the Cloudflare-managed robots prefix with exact artifact suffix; **zero unexplained differences**. Plain `/release.json` matches the artifact. `/admin/sw.js` and `/admin/manifest.webmanifest` therefore match the deployed artifact, not just repository source. No business API calls or mutations were used.
+- Manifest identity: `/admin/`, scope `/admin/`, start URL `/admin/bronuvannia/`, standalone. Worker cache identity is `vacleaner-manager-4367`; PR #82's network-first versioned assets and offline fallback remain unchanged. Same-build cache recovery is a compatibility safeguard, not authorization to reuse build IDs for future product changes.
+- Local checks after main synchronization: **70/70** canonical static/build groups, **19/19** normal-candidate contracts and exact production artifact verification passed. Configuration inventory: **68 static suites + 52 browser suites**, excluding runner setup/verification commands. No missing scripts or identical npm commands. Existing browser, WebKit and operations gates remain required for code PRs and every main push.
+
+### P1 architecture and confirmed bottlenecks
+
+| Layer | Current ownership / evidence | Process implication |
+| --- | --- | --- |
+| Public static export | HTML/RSC/Next chunks; deterministic stamp/build and hydration QA | Public behavior changes require hydration and exported-copy contracts together |
+| Admin/PWA | Vanilla `assets/admin-v250.js`, layered CSS, normal presentation compiled from `sandbox/ui.*` and `sandbox/forms.*`; `admin/sw.js` | Canonical and promoted normal artifacts are distinct; test the visible controls of the intended artifact |
+| Backend boundary | Existing Supabase Edge Functions/migrations and pure calculation helpers | Inventory only in this initiative; no backend deployment or business-data change |
+| Regression registry | `config/qa-suites.json`, npm scripts, `qa-full.mjs`, `ci-diagnostics.mjs`, `qa-timing-report.mjs` | Reuse measured suite durations; do not confuse 70 runner groups with 68 registered static suites |
+| Release provenance | Static gate creates canonical and reviewed normal artifacts; operations/deploy consume the reviewed artifact | No rebuild between acceptance and deployment; exact tree pin remains mandatory |
+
+Confirmed critical path remains static → browser aggregate → WebKit. The measured browser and WebKit durations in the baseline tables explain most full-run latency. The standalone session-recovery invocation overlaps registry membership, but equivalent setup/assertions have not been demonstrated: **nothing was removed**. The 66/1705 candidate repeated runs remain leads, not verified waste. The recorded WebKit4346 activation stall remains an intermittent-risk observation; a later successful run does not erase its first failure. PR #90 adds deterministic eligibility and full-journey fail-closed retry coverage, not a claim that every native WebKit failure is fixed.
+
+### P2 measurement boundary and merge disposition
+
+Reconfirmed docs-only run [45041810014](https://github.com/VAcleaner-washing/pl/actions/runs/45041810014), head `7c04ea1`: **16:04:53–16:05:05 UTC = 12 s workflow span**, success. Against the measured 1,677-second full main workflow, this is **99.2844% shorter for this docs-only workload** (`100 × (1 − 12/1677)`). Different workloads are intentionally identified: this does **not** measure a speedup of code PRs or of the full release suite. The earlier 10-second observation is retained below as a separate historical run.
+
+The user-authorized completion review permits PR #89 to merge after synchronization, semantic review, scope and fail-closed classification checks. Docs-only skips are the approved PR exception; they do not certify a release. The resulting main commit must still pass full static/browser/WebKit/four-variant operations and deployment, followed by an independent live readback. Record final main SHA, run and timings in the completion report; do not pre-mark this post-merge acceptance complete.
+
+### Physical-device acceptance — NOT CONFIRMED
+
+An installed iPhone PWA cannot be certified from Linux automation or static HTTP. Before closing device acceptance, the administrator must record iOS version, time and app build, then:
+
+1. Open the existing installed PWA online; finish or explicitly discard drafts, choose the normal update prompt, and reopen. Confirm build4367 in the app; do not delete storage or reinstall to conceal an update defect.
+2. With Safari remote inspection, confirm `/admin/` registration, controller **activated**, no unexpected waiting/installing worker, cache `vacleaner-manager-4367`, and versioned assets from this release. Same build numbers alone do not identify bytes; compare worker response with the reviewed deployed worker.
+3. Enable airplane mode, relaunch and verify cached shell, preserved remembered session, and honest network/unavailable business-data state. Do not create or mutate bookings, clients, payments or equipment to test offline behavior.
+4. Restore connectivity, background/resume, and confirm recovery without duplicate prompts or lost input. Open an unsaved form, verify update/exit protection, then discard without saving. Check keyboard, bottom controls and safe areas in portrait/landscape.
+5. Record pass/failure evidence. Test a future update from this installed baseline against the next separately versioned release; do not manufacture a production deployment solely for the test.
+
+This is the explicit remaining physical-device acceptance boundary, not GREEN. Automated worker upgrade/offline/rollback evidence comes from isolated browser fixtures, not a physical phone.
+
 ## Observed docs-only PR #89
 
 - Commit: `eff83c09dc880a487ac603e3f6bde9667e124af7` (initial measurement).
