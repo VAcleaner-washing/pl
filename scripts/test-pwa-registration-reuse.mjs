@@ -9,7 +9,7 @@ let passed=0;
 async function check(name,run){await run();passed++;console.log('PASS',name)}
 function harness({activeUrl=origin+'/admin/sw.js?v=4346',scope=origin+'/admin/',existing=true,offline=false,registrationSource=source}={}){
   let updates=0,activations=0,rootRemovals=0,foreignRemovals=0,update=deferred();
-  const registers=[],prompts=[],warnings=[],events={},online=[];
+  const registers=[],prompts=[],warnings=[],events={},online=[],serviceEvents={},reloads=[];
   const worker=(url,state='activated')=>({scriptURL:url,state,listeners:[],
     addEventListener(name,fn){if(name==='statechange')this.listeners.push(fn)},
     postMessage(){activations++},emit(){for(const fn of this.listeners)fn()}});
@@ -20,15 +20,16 @@ function harness({activeUrl=origin+'/admin/sw.js?v=4346',scope=origin+'/admin/',
   const list=existing?[legacyRoot,foreign,registration]:[legacyRoot,foreign];
   const context={URL,console:{warn:(...args)=>warnings.push(args)},location:{origin},pwaRegistration:null,pwaUpdateRequested:false,
     navigator:{serviceWorker:{controller:registration.active,getRegistrations:async()=>list,
-      async register(url,options){registers.push({url,scope:options.scope});if(offline)throw new TypeError('offline');return registration},addEventListener(){}}},
+      async register(url,options){registers.push({url,scope:options.scope});if(offline)throw new TypeError('offline');return registration},addEventListener(name,callback){serviceEvents[name]=callback}}},
     window:{addEventListener:(name,fn)=>{if(name==='online')online.push(fn)}},document:{visibilityState:'visible',addEventListener(){}},
-    showPwaUpdatePrompt:w=>prompts.push(w),reloadPwaAfterUpdate(){throw Error('Unexpected automatic reload')}};
+    showPwaUpdatePrompt:w=>prompts.push(w),reloadPwaAfterUpdate(){if(!context.pwaUpdateRequested)throw Error('Unexpected automatic reload');reloads.push(context.navigator.serviceWorker.controller?.state)}};
   const boot=async build=>{
     vm.createContext(context);
     vm.runInContext(registrationSource.replace(/\/admin\/sw\.js\?v=\d+/, '/admin/sw.js?v='+build)+';globalThis.run=registerPwa;',context);
     await context.run();
   };
-  return{boot,registration,registers,prompts,warnings,online,worker,
+  return{boot,registration,registers,prompts,warnings,online,worker,reloads,context,
+    controllerChange(){serviceEvents.controllerchange()},
     get updates(){return updates},get activations(){return activations},get rootRemovals(){return rootRemovals},get foreignRemovals(){return foreignRemovals},
     set offline(value){offline=value},
     install(build){
@@ -39,6 +40,27 @@ function harness({activeUrl=origin+'/admin/sw.js?v=4346',scope=origin+'/admin/',
     activate(){registration.active=registration.waiting;registration.active.state='activated';registration.waiting=null;registration.installing=null;update=deferred();}
   };
 }
+
+await check('baseline controllerchange reproduces reload while the controller is still activating',async()=>{
+  const before=fs.readFileSync('scripts/fixtures/pwa-register-before-activation-guard.js','utf8').match(/^async function registerPwa\(.*$/m)[0];
+  const h=harness({registrationSource:before});await h.boot(4367);
+  h.context.pwaUpdateRequested=true;h.registration.active.state='activating';h.controllerChange();
+  assert.deepEqual(h.reloads,['activating']);
+});
+for(const state of ['installing','installed','activating','redundant']){
+  await check('requested controllerchange cannot reload a '+state+' controller',async()=>{
+    const h=harness();await h.boot(4368);h.context.pwaUpdateRequested=true;
+    h.registration.active.state=state;h.controllerChange();assert.deepEqual(h.reloads,[]);
+    h.registration.active.state='activated';h.controllerChange();assert.deepEqual(h.reloads,['activated']);
+  });
+}
+await check('an unrequested controllerchange cannot reload an activated controller',async()=>{
+  const h=harness();await h.boot(4368);h.controllerChange();assert.deepEqual(h.reloads,[]);
+});
+await check('a controllerchange without a controller cannot reload or throw',async()=>{
+  const h=harness({activeUrl:null});await h.boot(4368);h.context.pwaUpdateRequested=true;
+  h.controllerChange();assert.deepEqual(h.reloads,[]);
+});
 
 await check('actual pre-fix source recreates registration on both stamped app boots',async()=>{
   const before=fs.readFileSync('scripts/fixtures/pwa-register-before-reuse.js','utf8').match(/^async function registerPwa\(.*$/m)[0];

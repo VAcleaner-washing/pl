@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.67
-**Baseline build:** 4367
-**Останнє оновлення:** 2026-11-17
+**Baseline version:** 4.3.68
+**Baseline build:** 4368
+**Останнє оновлення:** 2026-11-23
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -6067,3 +6067,39 @@ The roadmap scope guard enforces process-modernization metadata and forbids prod
 
 - Deterministic predicate regression: `python -m unittest discover -s scripts -p 'test_public_hydration_retry.py'`. This runs as a dedicated step in the WebKit workflow before expensive browser suites; it does not replace the full Static, Browser, WebKit and Production Operations release gate.
 - This contract changes only QA eligibility logic; it does not authorize booking, finance, database, or product behavior changes.
+
+
+## PWA-ACTIVATION-001 — activation-safe controller reload (v4.3.68)
+
+Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separate PWA fix and its release after full QA. It does not expand or reorder the process-modernization roadmap.
+
+- A requested PWA update may reload on `controllerchange` only when the current controller is `activated`. An `activating` controller is insufficient; an unrequested event or missing controller cannot reload.
+- Preserve the existing waiting-worker `statechange` handler, explicit update choice, dirty/pending form protection, Later behavior, bounded fallback, registration identity, offline cache and session behavior.
+- The CI WebKit reproduction observed activation in the outgoing document while a document navigated too early retained `activating` until the strict readiness deadline. Controller-event deferral passed ten isolated control runs; this sample is not proof that all native/browser failures are eliminated.
+- Regression: `scripts/test-pwa-registration-reuse.mjs` executes the actual callback with transitional/activated/missing controllers and retains the 4.3.67 failing callback fixture. `scripts/pwa_cache_qa.py` retains all existing checks and adds a journal asserting activated-before-reload for the outgoing current candidate in the immutable 4346 → candidate → 4346 scenario. Full Browser, WebKit and four Operations gates remain mandatory.
+
+# Change record — v4.3.68
+
+### ADDED
+
+- Historical 4.3.67 controller callback fixture and lifecycle-event behavioral cases; migration artifacts retain outgoing-document controller states.
+
+### CHANGED
+
+- Owner-authorized PWA controllerchange reload requires an activated current controller. Version/build and generic cache-busted references advance together to 4.3.68/4368.
+
+### FIXED
+
+- Requested updates cannot reload immediately from an activating controllerchange event, the ordering observed in the isolated WebKit rollback failure.
+
+### PRESERVED
+
+- Waiting-worker activation listener, bounded fallback, update/Later controls, dirty/pending draft protection, original registration identity, session/offline behavior and immutable stable46 recovery.
+- All booking, customer, finance, pricing, discount, deposit, delivery and equipment rules; all release gates. No backend deployment or production business-data mutation.
+
+### TESTS
+
+- `test:pwa-registration-reuse`: baseline failure plus transitional/activated/missing controller cases and existing reuse/offline contracts.
+- `test:pwa-worker-wait`, canonical static QA, normal-candidate and production-promotion contracts.
+- Full Browser/PWA and WebKit gates; all four Operations variants, including immutable 4346 → 4368 → 4346 update/rollback, retained strict readiness and activated-before-reload journal.
+- Source/artifact/version coherence and independent post-deployment HTTP readback remain required before reporting release completion.
