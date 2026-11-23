@@ -1,7 +1,8 @@
 """Normal-path candidate acceptance, with every remote request intercepted.
 
-This is a remote-CI fixture test. It does not connect to production or stage,
-install a physical PWA, send a message, or prove native iPhone behavior.
+CI runs in the pinned remote runtime. --local-fixtures explicitly marks a
+supplementary local run. Neither mode connects to production or stage,
+installs a physical PWA, sends a message, or proves native iPhone behavior.
 """
 import argparse
 import datetime
@@ -24,8 +25,9 @@ def main():
     parser.add_argument('--browser', choices=['chromium', 'webkit'], required=True)
     parser.add_argument('--width', type=int, choices=[440, 1440], required=True)
     parser.add_argument('--artifacts', required=True)
+    parser.add_argument('--local-fixtures', action='store_true', help='Supplementary local run; all APIs remain intercepted, not native iPhone acceptance')
     args = parser.parse_args()
-    if os.environ.get('GITHUB_ACTIONS') != 'true':
+    if os.environ.get('GITHUB_ACTIONS') != 'true' and not args.local_fixtures:
         parser.error('Run in the existing remote CI browser environment only')
     out = Path(args.artifacts).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -39,6 +41,8 @@ def main():
                                for key in ['abir', 'jimmy', 'puzzi', 'sc2']}}
                 for i in range(14)]
     results, calls, unexpected, errors = [], [], [], []
+    baseline_saves, reject_baseline_once = [], [True]
+    settings_without_baseline = {key: value for key, value in fixture['settings'].items() if key != 'equipmentBaselines'}
 
     def check(name, passed, **evidence):
         results.append({'name': name, 'passed': bool(passed), **evidence})
@@ -72,9 +76,19 @@ def main():
         elif url.path == '/auth/v1/user':
             body = {'id': '00000000-0000-4000-8000-000000000061', 'email': 'fixture-only@invalid.example'}
         elif url.path.endswith('/vacleaner-settings'):
-            body = fixture['settings'] if req.method == 'GET' else {'error': 'service_error'}
-            if req.method != 'GET':
-                status = 503
+            if req.method == 'GET':
+                body = fixture['settings']
+            elif isinstance(payload.get('equipmentBaselines'), dict):
+                assert set(payload) == {'equipmentBaselines'}, 'Purchase save must not include unrelated settings'
+                baseline_saves.append(payload['equipmentBaselines'])
+                if reject_baseline_once[0]:
+                    reject_baseline_once[0] = False
+                    body, status = {'error': 'service_error'}, 503
+                else:
+                    fixture['settings']['equipmentBaselines'] = payload['equipmentBaselines']
+                    body = {'equipmentBaselines': payload['equipmentBaselines']}
+            else:
+                body, status = {'error': 'service_error'}, 503
         elif action == 'list':
             body = {'bookings': fixture['bookings'], 'expenses': []}
         elif action == 'clients':
@@ -188,6 +202,22 @@ def main():
             navigate(page, 'bookings')
             expect(page.locator('#labListMode')).to_be_visible()
             expect(page.locator('.booking-list')).to_have_class('booking-list lab-compact')
+            for booking in fixture['bookings']:
+                card = page.locator(f'.booking-card[data-id="{booking["id"]}"]')
+                compact = card.locator('.lab-booking-money')
+                amount = lambda n: f'{int(n):,}'.replace(',', ' ') + ' грн'
+                received = (booking['prepayment_amount'] if booking['prepayment_paid'] else 0) + (booking['deposit_amount'] if booking['deposit_paid'] else 0)
+                expect(compact.locator('.lab-service-total strong')).to_have_text(amount(booking['total_amount']))
+                expect(compact.locator('.lab-received-total strong')).to_have_text(amount(received))
+                expect(compact.locator('.lab-deposit-total strong')).to_have_text(amount(booking['deposit_amount']))
+                expect(compact.locator('.lab-service-total')).to_be_visible()
+                if booking['status'] == 'issued':
+                    expect(compact.locator('.lab-balance strong')).to_have_text(amount(received - booking['total_amount']))
+                else:
+                    expect(compact.locator('.lab-balance')).to_have_count(0)
+                check(f'compact {booking["status"]} separates service cost, received funds and deposit',
+                      compact.locator('.lab-service-total strong').inner_text() == card.locator('.booking-finance-expenses b').inner_text())
+            capture(page, 'normal-compact-finance')
             page.locator('#labListMode [data-compact=false]').click()
             expect(page.locator('.booking-list')).not_to_have_class('booking-list lab-compact')
             page.locator('#labListMode [data-compact=true]').click()
@@ -253,6 +283,40 @@ def main():
             expect(form).to_have_count(0)
             check('normal candidate preserves and explicitly discards a real unsaved form', True)
             navigate(page, 'equipment')
+            page.locator('[data-eq-tab="finance"]').click()
+            baseline = page.locator('#equipmentBaselineForm')
+            save = baseline.get_by_role('button', name='Зберегти вартість', exact=True)
+            save.scroll_into_view_if_needed()
+            geometry = save.evaluate('''button=>{
+              const range=document.createRange();range.selectNodeContents(button);
+              return {button:button.getBoundingClientRect().toJSON(),actions:button.parentElement.getBoundingClientRect().toJSON(),lines:range.getClientRects().length};
+            }''')
+            check('purchase baseline save is full width, one line and touch accessible',
+                  geometry['button']['width'] >= geometry['actions']['width'] - 1 and geometry['button']['height'] >= 48 and geometry['lines'] == 1,
+                  geometry=geometry)
+            capture(page, 'normal-purchase-save')
+            baseline_before = page.evaluate("localStorage.getItem('vacleaner_equipment_baselines')")
+            old_cost = int(baseline.locator('[name=puzziUnitCost]').input_value())
+            new_cost = str(old_cost + 1)
+            baseline.locator('[name=puzziUnitCost]').fill(new_cost)
+            save.click()
+            expect(save).to_be_enabled()
+            expect(page.locator('.toast').last).to_contain_text('Не вдалося зберегти налаштування')
+            expect(baseline.locator('[name=puzziUnitCost]')).to_have_value(new_cost)
+            check('rejected purchase save retains its input and acknowledged cache',
+                  page.evaluate("localStorage.getItem('vacleaner_equipment_baselines')") == baseline_before and len(baseline_saves) == 1)
+            save.click()
+            expect(page.locator('.toast').last).to_contain_text('Стартову вартість техніки збережено')
+            expect(baseline.locator('[name=puzziUnitCost]')).to_have_value(new_cost)
+            check('purchase save retries the same payload once without changing other settings',
+                  len(baseline_saves) == 2 and baseline_saves[0] == baseline_saves[1] and
+                  {key: value for key, value in fixture['settings'].items() if key != 'equipmentBaselines'} == settings_without_baseline)
+            page.reload()
+            page.wait_for_selector('.booking-card,.upcoming-row')
+            navigate(page, 'equipment')
+            page.locator('[data-eq-tab="finance"]').click()
+            expect(page.locator('#equipmentBaselineForm [name=puzziUnitCost]')).to_have_value(new_cost)
+            check('acknowledged purchase baseline survives a reload from fixture storage', True)
             # The equipment workspace now opens on the fleet tab. Pricing actions
             # are intentionally hidden until the user selects the pricing tab.
             page.locator('[data-eq-tab="pricing"]').click()
@@ -282,7 +346,8 @@ def main():
     summary = {'browser': args.browser, 'width': args.width, 'passed': sum(r['passed'] for r in results),
                'failed': sum(not r['passed'] for r in results), 'checks': results, 'requests': calls,
                'network': 'All remote requests intercepted; no production/stage forwarding',
-               'productionWrites': 0, 'physicalDevice': False, 'serviceWorkers': 'blocked in fixture browser'}
+               'productionWrites': 0, 'physicalDevice': False, 'serviceWorkers': 'blocked in fixture browser',
+               'supplementaryLocalRun': args.local_fixtures}
     (out / 'result.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({k: summary[k] for k in ['browser', 'width', 'passed', 'failed']}), flush=True)
     return int(bool(summary['failed']))

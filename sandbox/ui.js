@@ -43,8 +43,16 @@ function listUI(){
   const summary=el('div','lab-booking-summary'),name=el('strong','lab-booking-client',text(card.querySelector('.booking-person strong')).replace(/›$/,''));
   const period=el('div','lab-booking-period',text(card.querySelector('.booking-time strong')));
   const money=el('div','lab-booking-money');
-  for(const selector of ['.booking-finance-received-summary','.booking-finance>em','.booking-deposit-state']){
-   const source=card.querySelector(selector);if(!source)continue;const value=selector.includes('received')?'Отримано '+text(source.querySelector('strong')):selector.includes('deposit')?'Залог '+text(source.querySelector('strong'))+' '+text(source.querySelector('small')):[...source.children].map(text).join(' · ');money.append(el('span',selector.includes('>em')?'lab-balance':'',value));
+  const service=card.querySelector('.booking-finance-expenses');
+  if(service){
+   const row=el('div','lab-money-row lab-service-total');
+   row.append(el('span','',text(service.querySelector('span'))),el('strong','',text(service.querySelector('b'))));
+   money.append(row);
+  }
+  for(const [selector,className] of [['.booking-finance-received-summary','lab-received-total'],['.booking-deposit-state','lab-deposit-total'],['.booking-finance>em','lab-balance']]){
+   const source=card.querySelector(selector);if(!source)continue;
+   const row=el('div','lab-money-row '+className),label=className==='lab-deposit-total'?'Застава '+text(source.querySelector('small')):text(source.querySelector('span'));
+   row.append(el('span','',label),el('strong','',text(source.querySelector('strong'))));money.append(row);
   }
   const delivery=el('span','lab-booking-delivery',text(card.querySelector('.booking-delivery-head strong'))),timing=card.querySelector('.schedule-badge');summary.append(name,period,delivery);
   if(text(timing))summary.append(el('span','lab-booking-timing'+(timing.classList.contains('danger')?' danger':''),text(timing)));

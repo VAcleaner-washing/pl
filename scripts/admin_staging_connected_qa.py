@@ -371,7 +371,7 @@ class ConnectedRun:
                    row['deposit_paid'] is False and float(row['deposit_amount']) == 1000)
         card_b = self.card(page_b, booking_id, refresh=True)
         expect(card_b.locator('.status')).to_contain_text('Очікує')
-        received = card_b.locator('.lab-booking-money>span').first
+        received = card_b.locator('.lab-booking-money .lab-received-total')
         expect(received).to_contain_text('Отримано')
         self.check('other manager actual UI displays zero received before any payment',
                    int(re.sub(r'\D', '', received.inner_text())) == 0)
@@ -430,7 +430,7 @@ class ConnectedRun:
                    row['deposit_paid'] is True and row['deposit_amount'] == 1000)
         card_b = self.card(page_b, booking_id, refresh=True)
         expect(card_b.locator('.status')).to_contain_text('Видана')
-        received = card_b.locator('.lab-booking-money>span').first
+        received = card_b.locator('.lab-booking-money .lab-received-total')
         expect(received).to_contain_text('Отримано')
         self.check('other manager actual card shows paid 200 plus deposit 1000',
                    int(re.sub(r'\D', '', received.inner_text())) == 1200)
