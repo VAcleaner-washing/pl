@@ -201,6 +201,18 @@ WORKER_FLAG_JS = r'''()=>{
   return state?.ready===true;
 }'''
 
+RELOAD_JOURNAL_JS = r'''(()=>{
+  addEventListener('beforeunload',()=>{
+    const asset=document.querySelector('script[src^="/assets/"]')?.src;
+    if(!asset)return;
+    const key='vac_pwa_qa_reload_events';
+    const events=JSON.parse(sessionStorage.getItem(key)||'[]');
+    events.push({build:new URL(asset).searchParams.get('v'),
+      controllerState:navigator.serviceWorker.controller?.state||null});
+    sessionStorage.setItem(key,JSON.stringify(events));
+  });
+})();'''
+
 
 def wait_worker_state(page, phase, build):
     # Playwright's waitForFunction tests predicate truthiness before awaiting its
@@ -364,6 +376,7 @@ def exercise_release_migration(browser, server, base, candidate_root, stable_roo
     candidate_build = json.loads((candidate_root / 'release.json').read_text())['build']
     context = browser.new_context(**context_options(width, devices))
     context.add_init_script(FETCH_PROXY)
+    context.add_init_script(RELOAD_JOURNAL_JS)
     if width == 440:
         context.add_init_script("Object.defineProperty(navigator,'standalone',{value:true})")
     unexpected, errors = [], []
@@ -444,6 +457,10 @@ def exercise_release_migration(browser, server, base, candidate_root, stable_roo
         ready(4346, False)
         transition(candidate_root, candidate_build)
         transition(stable_root, 4346)
+        reloads = page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]')")
+        candidate_reloads = [entry for entry in reloads if entry['build'] == str(candidate_build)]
+        checks.check(bool(candidate_reloads) and all(entry['controllerState'] == 'activated' for entry in candidate_reloads),
+                     label + ': outgoing candidate reload waits for activated controller ' + repr(candidate_reloads))
         checks.check(not errors, label + ': no uncaught errors during real upgrade/rollback ' + repr(errors))
         checks.check(not unexpected, label + ': no external request forwarded ' + repr(unexpected))
         reads = {'list', 'clients', 'campaigns', 'calendar', 'referrals_expiring', 'referral_analytics', 'lookup_customer', 'pending_bonus', 'health', 'audit_log'}
@@ -460,6 +477,11 @@ def exercise_release_migration(browser, server, base, candidate_root, stable_roo
         server.disconnected = False
         checks.artifacts.mkdir(parents=True, exist_ok=True)
         (checks.artifacts / (label + '-workers.json')).write_text(json.dumps(worker_reads, indent=2) + '\n')
+        try:
+            reloads = page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]')")
+        except Exception as error:
+            reloads = {'captureError': str(error)}
+        (checks.artifacts / (label + '-reloads.json')).write_text(json.dumps(reloads, indent=2) + '\n')
         context.tracing.stop(path=str(checks.artifacts / (label + '-trace.zip')))
         context.close()
 

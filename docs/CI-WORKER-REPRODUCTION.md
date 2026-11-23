@@ -9,3 +9,7 @@ Preserved failed run 44690977306, attempt 1, artifact 14608213659 (ZIP SHA-256 `
 Local Playwright is 1.62.0 and available disk is insufficient for the complete CI image. Use the existing GitHub Actions runtime pinned by digest. This diagnostic branch adds one job, with ten fresh-process executions of the unmodified production worker test. It uses local API fixtures, aborts external page requests, and must perform zero production writes.
 
 Each iteration retains its own result, trace, full log and exit status. Any failure fails the diagnostic job even if later iterations pass. A timeout is a failure and an incomplete ten-run sample. Existing full QA is retained; the QA branch cannot deploy Pages. This is a reproduction experiment, not a release or proof that the historical flake was fixed. Do not merge diagnostic instrumentation merely to publish a GREEN result.
+
+## Owner-authorized patched validation — 4.3.68
+
+This branch now incorporates the separately approved product release commit c1b6dd476d422cc7c0ecce86b61b070e546529cc. Run ten fresh executions of the unmodified strict worker acceptance script, with the 4.3.68 candidate and original immutable stable46 reference. There is no event-timing control or deferred callback wrapper in this run. The only additional observation is the production PR's passive activated-before-reload journal. Every failed iteration remains a failed job. Production deployment is still prohibited from this QA branch.

@@ -1,13 +1,13 @@
 {
-  "version": "4.3.67",
-  "build": 4367,
-  "reviewMode": "pr82-network-first-worker-candidate-awaiting-full-ci",
-  "baselineApplicationSourceCommit": "e76f8a133032eb09ac739d12b49711729101e0a7",
+  "version": "4.3.68",
+  "build": 4368,
+  "reviewMode": "owner-authorized-pwa-activation-4368-awaiting-full-qa",
+  "baselineApplicationSourceCommit": "3c6ef8eaa8e8838ce408d22f4afffa5c91e15499",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "fb3f307e7625a283c9dcecdc696e8e8f640ef1facc6d946bd41560f104f759a8",
-      "reason": "Shared Back navigation, next-action booking order, authenticated per-unit fleet workspace; prices and financial calculation owners preserved."
+      "sha256": "c94788e06e41e7b5c0af4ae66d7bceb8677af9059404af3ca48da3348111dedd",
+      "reason": "Preserve the accepted operational UI; requested controllerchange reload requires an activated controller to avoid the reproduced WebKit navigation-state race."
     },
     {
       "path": "assets/admin-v250.css",
@@ -31,13 +31,14 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "970bba1fd97a2270365f5b9d435c5252e5a7d9f8bfb96432f01d824ca701cc1f",
+  "artifactTreeSha256": "9996428d6e85c767f2a01a4322113f00956b2649bb69605d9b04f2b955d4f6b7",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "f7ee74c0282fe6ea45d3edabb1f25168cd652781e9b2c4dcebf283172fe5e8dc",
+  "reviewArchiveSha256": "7ff06b304934dc5099e1e5269a8e4efe80ff7ffedff54a64faac75bbe6194bf2",
   "baselineReviewRuns": {
-    "production63": 43948184720
+    "production63": 43948184720,
+    "production67": 45121509239
   },
-  "releaseGatePolicy": "Candidate tree digest captured from static-green CI run 44468697830; this is not approval to publish by itself. All browser, WebKit, production artifact and deployment gates must pass on the final commit before promotion. Review deployed production separately.",
+  "releaseGatePolicy": "Owner-authorized PWA activation guard. The reproducible local candidate tree and ZIP are pinned here; this is not publication approval by itself. Full Static, Browser, WebKit, four Production Operations and main deployment must succeed on the final source; verify deployed HTTP bytes separately.",
   "privateLabOrR4OriginInstallation": "prohibited",
   "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner.",
   "integratedPullRequests": [
