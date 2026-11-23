@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.68
-**Baseline build:** 4368
+**Baseline version:** 4.3.69
+**Baseline build:** 4369
 **Останнє оновлення:** 2026-11-23
 **Власник логіки:** VAcleaner  
 
@@ -6102,4 +6102,29 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 - `test:pwa-registration-reuse`: baseline failure plus transitional/activated/missing controller cases and existing reuse/offline contracts.
 - `test:pwa-worker-wait`, canonical static QA, normal-candidate and production-promotion contracts.
 - Full Browser/PWA and WebKit gates; all four Operations variants, including immutable 4346 → 4368 → 4346 update/rollback, retained strict readiness and activated-before-reload journal.
+
+## BOOKING-FINANCE-VISIBILITY-001 — compact amounts and purchase save (v4.3.69 candidate)
+
+- Separately requested product follow-up to the P3 finance/UX backlog; the approved process-modernization roadmap remains unchanged.
+- Compact bookings expose the canonical **Вартість послуг** (`calc().expenses`) as their primary amount, separately from **Отримано коштів** (`calc().received`), the security-deposit state and the preliminary/final settlement. The compact and full modes must show the same service amount. Received funds include a received deposit; neither this total nor the deposit is profit. Service charges exclude the deposit and are not net profit after operating expenses.
+- Pending/confirmed bookings do not acquire a final refund/due merely because a service amount is visible. Issued bookings retain preliminary settlement labels. Actual payment, cancellation, discount, chemistry and settlement rules are unchanged.
+- The purchase-baseline editor has one full-width **Зберегти вартість** action, at least48px high, with an unbroken label at supported mobile widths. It retains the existing global persistence contract. A rejected save preserves entered values and the last acknowledged cache; a successful retry survives reloading from server state and changes no unrelated settings.
+- Regression coverage: `scripts/admin_release_candidate_qa.py` checks all four fixture booking states and rejected/successful/reloaded purchase saves on the exact normal artifact in the existing four Operations jobs. Explicit supplementary local fixture mode preserves complete request interception and does not certify native iPhone behavior.
+
+# Change record — v4.3.69
+
+### ADDED
+- Visible compact service total, separate received/deposit/settlement rows, and behavioral coverage of purchase-save retry/reload.
+
+### CHANGED
+- Single purchase-baseline action spans its form and uses a concise label. Generic release/cache metadata advances to4.3.69/4369 for this candidate.
+
+### FIXED
+- Compact mode omitted the service amount even though the full booking card contained it. The lone purchase-save button inherited a two-column action grid and wrapped its long label.
+
+### PRESERVED
+- Canonical finance calculations, prices, deposits, discounts, status transitions, financial persistence, equipment capacity, PWA activation guard, recovery46 and every mandatory release gate. No backend deployment or production-data mutation is included.
+
+### TESTS
+- Canonical static/build and finance regressions; normal artifact contracts/provenance; Browser/PWA, pinned WebKit and four Operations gates; visual inspection of compact bookings and purchase-save action at320/390/430/768/1440. Record actual execution results before accepting this candidate; this change record does not assert publication.
 - Source/artifact/version coherence and independent post-deployment HTTP readback remain required before reporting release completion.

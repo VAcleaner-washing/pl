@@ -4,6 +4,9 @@ import {settlementFromBooking} from '../supabase/functions/vacleaner-admin-booki
 import {settlementFromBooking as extendSettlement} from '../supabase/functions/vacleaner-extend-rental-v1/settlement.mjs';
 
 const catalog={puzziPacketPrice:50,products:{puzzi:{resources:{puzzi:1}},sc2:{resources:{sc2:1}}}};
+const pickupExample=settlementFromBooking({product_code:'sc2',base_amount:500,delivery_amount:0,prepayment_paid:true,prepayment_amount:200,deposit_paid:true,deposit_amount:1000,extras:{}},catalog,catalog);
+assert.deepEqual({services:pickupExample.totalAmount,received:pickupExample.receivedAmount,refund:pickupExample.refundAmount,due:pickupExample.dueAmount},
+ {services:500,received:1200,refund:700,due:0},'SC2 service charges exclude the deposit; received funds and refundable balance remain separate');
 const base={product_code:'puzzi',base_amount:700,delivery_amount:250,prepayment_paid:true,prepayment_amount:200,deposit_paid:true,deposit_amount:1000};
 const booking={...base,extras:{chemistry:{used_packets:10,story_mention:true},manual_charge:{amount:150,reason:'Продовження на 2 години'}}};
 const finance=settlementFromBooking(booking,catalog,catalog);

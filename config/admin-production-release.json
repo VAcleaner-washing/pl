@@ -1,18 +1,18 @@
 {
-  "version": "4.3.68",
-  "build": 4368,
-  "reviewMode": "owner-authorized-pwa-activation-4368-awaiting-full-qa",
-  "baselineApplicationSourceCommit": "3c6ef8eaa8e8838ce408d22f4afffa5c91e15499",
+  "version": "4.3.69",
+  "build": 4369,
+  "reviewMode": "finance-visibility-and-purchase-action-candidate-awaiting-full-qa",
+  "baselineApplicationSourceCommit": "4991f1a327d5bfb96f4c85d3f34033fd301a0348",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "c94788e06e41e7b5c0af4ae66d7bceb8677af9059404af3ca48da3348111dedd",
-      "reason": "Preserve the accepted operational UI; requested controllerchange reload requires an activated controller to avoid the reproduced WebKit navigation-state race."
+      "sha256": "0d445bf274bb5563966400223af9cacf4ad7c1bc1d9c2f3c0ee4af1d54a6a3f5",
+      "reason": "Purchase-baseline editor owns one primary save action with a concise label; preserve all existing financial formulas, persistence and the activated-controller PWA guard."
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "51ca46fd6a709d5a5d50e14e188e9a51adf1f7c39a4d53d58bbcbb6be8931f57",
-      "reason": "Consistent Back anchor, scrollable catalog editor and bounded fleet tabs with explicit hidden-state styling."
+      "sha256": "7208dee3d8fa897856ce2e6c55a1c3d6d97013475820b5e46b03ff957e0b011b",
+      "reason": "Component-scoped full-width 48px purchase-save control, independent of legacy two-column Settings layouts."
     },
     {
       "path": "sandbox/forms.js",
@@ -28,17 +28,28 @@
       "path": "assets/admin-v4321.css",
       "sha256": "70648a190266fde8b8f5d9a9d34b5ce50c16571de4bef0be2d85d5072fa38f65",
       "reason": "Legacy booking-detail header rules explicitly exclude the shared component."
+    },
+    {
+      "path": "sandbox/ui.js",
+      "sha256": "50fbf298bf327a8a2cf1974e7966b9e0c2bc1c38c87cbbc47bf790c5c50b0483",
+      "reason": "Compact finance projects the canonical service amount separately from received funds, deposit state and existing settlement; no duplicate financial calculation."
+    },
+    {
+      "path": "sandbox/ui.css",
+      "sha256": "f1987156c6de7b6dd4dc57f2c49b4bc5c0a6262b476a932dea7613b45fec1201",
+      "reason": "Aligned compact financial rows with an emphasized service amount, bounded labels and tabular money values."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "9996428d6e85c767f2a01a4322113f00956b2649bb69605d9b04f2b955d4f6b7",
+  "artifactTreeSha256": "4109bb6e7124ea3cad9a67e60e710574d893a9d39a8ac482f53ed36963139063",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "7ff06b304934dc5099e1e5269a8e4efe80ff7ffedff54a64faac75bbe6194bf2",
+  "reviewArchiveSha256": "39b19a59f79aa373c0912b02d84fd9117f59b06479bed719b1c4cdc6732455ac",
   "baselineReviewRuns": {
     "production63": 43948184720,
-    "production67": 45121509239
+    "production67": 45121509239,
+    "production68": 45192405992
   },
-  "releaseGatePolicy": "Owner-authorized PWA activation guard. The reproducible local candidate tree and ZIP are pinned here; this is not publication approval by itself. Full Static, Browser, WebKit, four Production Operations and main deployment must succeed on the final source; verify deployed HTTP bytes separately.",
+  "releaseGatePolicy": "Reviewed local candidate with a pinned tree and deterministic ZIP. Publication is not approved by this receipt. Full Static, Browser, WebKit and four Operations gates on the final source remain mandatory; an authorized main deployment and separate live HTTP readback are required for production acceptance.",
   "privateLabOrR4OriginInstallation": "prohibited",
   "preservedProductDecision": "Two-finger pinch zoom remains blocked as explicitly required by the owner.",
   "integratedPullRequests": [
