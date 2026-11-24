@@ -40,6 +40,8 @@ Full main [run 45373663445](https://github.com/VAcleaner-washing/pl/actions/runs
 
 Виявлені суперечності часу: CI documents містять історичні «current/open/not implemented» записи, хоча #88–94 вже інтегровані; додано dated entry points, історію не стерто. `reviewMode` receipt — історія candidate review, а не live deployment state; runtime receipt не редагується цим аудитом. Старий P3 backlog уже містить triage реалізованих функцій; новий backlog не дублює ці вимоги.
 
+У System Spec синхронізовано застарілі TECH-002 назви з config/CAT-001 та SET-003 з фактичними чотирма Settings tabs і вже реалізованим PR #79 перенесенням purchase editor. Це документація наявної поведінки, не нова зміна UX, тарифів або persistence; існуючі regression suites збережені.
+
 1. [Architecture & Data Ownership Inventory](2026-11-24-architecture-data-ownership.md).
 2. [Professional Tooling Assessment](../TOOLING.md) — єдине місце оцінки інструментів.
 3. [Gap Analysis](2026-11-24-gap-analysis.md) — рекомендації з повним набором полів.
