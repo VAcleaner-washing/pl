@@ -17,7 +17,7 @@ Priority high/normal/low describes scheduling; severity describes impact if real
 
 ## G02 — reconcile backend provenance
 
-- Current state/evidence: committed Edge snapshot dated 2026-10-20, expected DB inventory lists 21 tables; live lists 23 including fleet. Local/live fleet migration timestamps differ. `check:backend` explicitly tests snapshot consistency only.
+- Current state/evidence: committed Edge snapshot dated 2026-10-20, expected DB inventory lists 21 tables; live lists 23 including fleet. Local/live fleet migration timestamps differ. `check:backend` tests snapshot consistency only. Fresh bundle check finds bookings config release-marker-only drift (4.3.37 vs4.3.69, same business config/source hash); fleet checker assumes verify_jwt=false although deployed fleet has true.
 - Problem/impact: green static inventory can conceal version/source drift and make rollback/migration replay unsafe.
 - Proposed solution: documented source/live hash and migration mapping, preserving original applied history; extend inventory validation only in a later approved PR. Do not replay or rename applied migrations to force equality.
 - Priority: high; severity: high for unverified backend release; phase: P1 inventory.
