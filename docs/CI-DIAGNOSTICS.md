@@ -153,3 +153,11 @@ The install logs show Ubuntu26.04 (`resolute`) APT downloads and gaps of68.059s 
 Verification commands: `node scripts/test-ci-pipeline-contract.mjs`, `node scripts/test-selective-pr-ci.mjs`, `python -m unittest discover -s scripts -p 'test_ci_browser_runtime.py'`; the real startup command requires the pinned image. Local fixtures cannot certify container usability. The implementation PR must run full non-docs QA and main must pass full QA/deploy separately.
 
 After-run comparison must include container initialization/image pull, client install, failure fixtures and real startup. Record full Browser/WebKit/workflow timestamps, first-attempt failures and exact source SHA. Compute `(baseline - observed) / baseline * 100` only for like-for-like intervals and label a single-run observation accordingly. No measured after-change result or speedup is asserted by this entry.
+
+### P2 first-attempt failure retained — PR #93 follow-up
+
+PR#93 head`7fbeede6cf48e59109af017befa714a4ea246071` passed full QA in run45362481484 attempt1 (28m25s; Browser14m32s, WebKit12m55s). The merged main`041a55bbd5f25bbdf3e17a270b7e0b9f1ca77a87` run45367294251 attempt1 failed Browser at `test:admin-route-smoke`: 21/22 original route checks passed, desktop waiting-update deferral failed. The partial failed run is not a full after-change speed measurement and must not be erased by a later GREEN run.
+
+Browser preparation itself passed on both heads:37s in the PR and30s on main, including container initialization, client install, failure fixtures and both-engine startup. Both main/PR production artifacts have273 files exactly matching the reviewed4369 tree. These observations do not make the failed full main gate acceptable.
+
+Root cause reproduced from unchanged `assets/admin-v250.css`: visibility intentionally becomes hidden after120ms, while pointer events stop immediately. The smoke sampled visibility immediately after the form appeared. The P2 follow-up in `CI-P2-PROMPT-TRANSITION-001` preserves immediate pointer safety and waits at most1000ms for all prompts to be hidden. Controlled positive/negative browser fixtures execute in the same canonical suite; no product code, suite, journey or release gate is removed or retried. Full PR and merged-main QA remain required.

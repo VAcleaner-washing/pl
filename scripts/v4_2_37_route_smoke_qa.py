@@ -2,7 +2,7 @@
 from __future__ import annotations
 import os
 from pathlib import Path
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 from pwa_visual_qa import render_page
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -14,6 +14,57 @@ def check(ok,label):
         passed+=1; print('PASS:',label)
     else:
         failed.append(label); print('FAIL:',label)
+
+PROMPT_STATES = """()=>Array.from(document.querySelectorAll('.pwa-update-prompt'),el=>({
+    visibility:getComputedStyle(el).visibility,pointerEvents:getComputedStyle(el).pointerEvents
+}))"""
+DEFERRED_PROMPTS = """()=>{const nodes=Array.from(document.querySelectorAll('.pwa-update-prompt'));
+    return nodes.length>0&&nodes.every(el=>getComputedStyle(el).visibility==='hidden'&&getComputedStyle(el).pointerEvents==='none')}
+"""
+
+def prompts_deferred(page,timeout=1000):
+    # Pointer interception must stop immediately. Visibility may finish the
+    # existing CSS transition; wait for its state, never retry the journey.
+    initial=page.evaluate(PROMPT_STATES)
+    if not initial or any(row['pointerEvents']!='none' for row in initial):
+        return False
+    try:
+        page.wait_for_function(DEFERRED_PROMPTS,timeout=timeout)
+    except PlaywrightTimeoutError:
+        print('Prompt deferral deadline:',page.evaluate(PROMPT_STATES))
+        return False
+    return True
+
+def verify_prompt_wait_contract(browser):
+    # Isolated timing fixtures own their CSS. Product journeys below continue
+    # to use the real, unchanged application styles and controls.
+    page=browser.new_page()
+    try:
+        page.set_content('''<style>
+          .pwa-update-prompt{visibility:visible;pointer-events:auto}
+          html.modal-open .pwa-update-prompt{visibility:hidden;pointer-events:none;
+            transition:visibility 0s linear .12s}
+          </style><aside class="pwa-update-prompt">Fixture update</aside>''')
+        immediate=page.evaluate('''async()=>{
+          await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+          document.documentElement.classList.add('modal-open');
+          const el=document.querySelector('.pwa-update-prompt');
+          return {visibility:getComputedStyle(el).visibility,pointerEvents:getComputedStyle(el).pointerEvents}
+        }''')
+        check(immediate['visibility']=='visible' and immediate['pointerEvents']=='none',
+              'prompt contract: old immediate assertion rejects a valid CSS transition')
+        check(prompts_deferred(page),'prompt contract: bounded wait accepts the completed transition')
+        page.add_style_tag(content='.pwa-update-prompt{transition:none!important;visibility:visible!important;pointer-events:none!important}')
+        check(not prompts_deferred(page,timeout=250),'prompt contract: permanently visible prompt still fails')
+        page.add_style_tag(content='.pwa-update-prompt{visibility:hidden!important;pointer-events:auto!important}')
+        check(not prompts_deferred(page),'prompt contract: hidden but interactive prompt still fails immediately')
+        page.add_style_tag(content='.pwa-update-prompt{pointer-events:none!important}.bad-prompt{pointer-events:auto!important}')
+        page.evaluate("document.body.insertAdjacentHTML('beforeend','<aside class=\"pwa-update-prompt bad-prompt\">Second prompt</aside>')")
+        check(not prompts_deferred(page),'prompt contract: every prompt must be non-interactive')
+        page.evaluate("document.querySelectorAll('.pwa-update-prompt').forEach(el=>el.remove())")
+        check(not prompts_deferred(page),'prompt contract: missing prompt never counts as deferral')
+    finally:
+        page.close()
 
 def run(browser,width,standalone):
     page=render_page(browser,width,844 if width<=900 else 900,True,standalone)
@@ -31,9 +82,7 @@ def run(browser,width,standalone):
         check(page.locator('#clientEditor>header .admin-screen-back').is_visible() and 'До бронювання' in (page.locator('#clientEditor>header .admin-screen-back').get_attribute('aria-label') or ''),f'{tag}: client opened from booking exposes an explicit route back')
         page.locator('#clientCreateBooking').click(); page.wait_for_selector('#bookingForm')
         # A waiting service-worker prompt is already present in the fixture. While work is active it must be deferred.
-        prompts=page.locator('.pwa-update-prompt')
-        deferred=prompts.count()>=1 and all(prompts.nth(i).evaluate("el=>getComputedStyle(el).visibility")=='hidden' and prompts.nth(i).evaluate("el=>getComputedStyle(el).pointerEvents")=='none' for i in range(prompts.count()))
-        check(deferred,f'{tag}: update prompt defers while new-booking modal is active')
+        check(prompts_deferred(page),f'{tag}: update prompt defers while new-booking modal is active')
         page.locator('.booking-cancel').click(); page.wait_for_selector('#clientEditor')
         check(page.locator('#clientEditor').count()==1,f'{tag}: cancelling new booking returns to client card')
         page.locator('#clientEditor>header .admin-screen-back').click(); page.wait_for_selector('.detail')
@@ -64,6 +113,7 @@ def main():
         elif Path('/usr/bin/chromium').exists(): options.update(executable_path='/usr/bin/chromium',args=['--no-sandbox','--disable-gpu'])
         browser=p.chromium.launch(**options)
         try:
+            verify_prompt_wait_contract(browser)
             run(browser,390,True)
             run(browser,1440,False)
         finally:
