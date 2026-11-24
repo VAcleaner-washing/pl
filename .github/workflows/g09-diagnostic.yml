@@ -1,0 +1,75 @@
+name: G09 isolated WebKit diagnostic
+on:
+  push:
+    branches: ['diag/g09-*']
+    paths: ['.github/workflows/g09-diagnostic.yml', '.github/diagnostics/g09_*']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
+      options: --ipc=host
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [plain, passive, active-toast, scroll-toast]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: diagnostic
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 0b4c5c680f4a4b8de95d246306a5e583f3173782
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install unchanged pinned client
+        run: |
+          python -m pip install --disable-pip-version-check -r source/requirements-ci.txt
+          python -m playwright --version
+          python -m pip freeze
+      - name: Download original failed-main production artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: production-pages
+          run-id: 45482260765
+          github-token: ${{ github.token }}
+          path: original-artifact
+      - name: Verify exact original artifact without rebuilding
+        working-directory: source
+        run: |
+          mkdir -p release-candidate-test-results/dist
+          tar -xf ../original-artifact/artifact.tar -C release-candidate-test-results/dist
+          npm run verify:production-artifact
+      - name: Controlled G09 samples, preserving every failure
+        env:
+          G09_SOURCE: ${{ github.workspace }}/source
+          G09_SCENARIO: ${{ matrix.scenario }}
+        run: |
+          mkdir -p evidence/${{ matrix.scenario }}
+          for sample in 1 2 3; do
+            if python diagnostic/.github/diagnostics/g09_probe.py "evidence/${{ matrix.scenario }}/sample-$sample" > "evidence/${{ matrix.scenario }}/sample-$sample.log" 2>&1; then
+              echo "sample-$sample exit=0"
+            else
+              code=$?
+              echo "sample-$sample exit=$code"
+              echo "$code" > "evidence/${{ matrix.scenario }}/sample-$sample.exit"
+            fi
+          done
+          python diagnostic/.github/diagnostics/g09_summarize.py evidence/${{ matrix.scenario }}
+      - name: Preserve complete diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: g09-${{ matrix.scenario }}
+          path: evidence
+          retention-days: 14
+          if-no-files-found: error
