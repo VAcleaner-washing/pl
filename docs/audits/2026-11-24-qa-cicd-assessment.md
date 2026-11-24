@@ -1,5 +1,7 @@
 # QA & CI/CD Assessment — 2026-11-24
 
+> Post-merge update: standard/audit PR #95 merged as `0b4c5c6` after full exact-head PR GREEN. Main run45482260765 attempt1 then failed WebKit440 purchase-save retry acceptance. See [first-failure evidence and G09](2026-11-24-postmerge-acceptance.md). The baseline success below remains historical evidence; merged-main deployment is not accepted. No test/runtime fix or rerun is part of this audit.
+
 Historical measurements/contracts remain in [CI diagnostics](../CI-DIAGNOSTICS.md) and [selective validation](../CI-SELECTIVE-VALIDATION.md). This is P1 inventory/P0 evidence, no test/workflow changes.
 
 ## Current main and deployment
