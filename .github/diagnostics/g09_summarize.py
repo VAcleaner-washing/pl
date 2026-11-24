@@ -10,4 +10,4 @@ for out in sorted(root.glob('sample-*')):
 print(json.dumps(rows,ensure_ascii=False,indent=2))
 # Diagnostic workflow GREEN means evidence capture, never release acceptance.
 # Missing/crashed captures fail orchestration; application failures remain explicit.
-raise SystemExit(int(len(rows)!=3 or any(r.get('missing_result') for r in rows)))
+raise SystemExit(int(len(rows)!=int(sys.argv[2] if len(sys.argv)>2 else 3) or any(r.get('missing_result') for r in rows)))

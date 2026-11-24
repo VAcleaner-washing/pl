@@ -11,9 +11,9 @@ from playwright.sync_api import Browser, BrowserContext, Page, Locator
 import admin_release_candidate_qa as suite
 OUT=pathlib.Path(sys.argv[1]).resolve(); OUT.mkdir(parents=True,exist_ok=True)
 SCENARIO=os.environ.get('G09_SCENARIO','plain')
-assert SCENARIO in ['plain','passive','active-toast','scroll-toast']
+assert SCENARIO in ['plain','passive','active-toast','scroll-toast','lean-passive','entering-toast']
 INSTRUMENTED=SCENARIO!='plain'
-INIT=(pathlib.Path(__file__).with_name('g09_events.js')).read_text()
+INIT=(pathlib.Path(__file__).with_name('g09_lean_events.js' if SCENARIO in ['lean-passive','entering-toast'] else 'g09_events.js')).read_text()
 network=[]
 new_context,context_close,page_reload,locator_click=Browser.new_context,BrowserContext.close,Page.reload,Locator.click
 def dump(page,label):
@@ -45,15 +45,16 @@ def click(self,*a,**kw):
     global clicks
     if '#equipmentBaselineForm' in self._impl_obj._selector and 'Зберегти вартість' in self._impl_obj._selector:
         clicks+=1
-        if clicks==2 and SCENARIO in ['active-toast','scroll-toast']:
+        if clicks==2 and SCENARIO in ['active-toast','scroll-toast','entering-toast']:
             # Defined diagnostic condition, within the original5s expectation budget.
             # No acceptance assertion is replaced and no timeout is increased.
-            self.page.wait_for_function("()=>{const t=document.querySelector('.toast.show');return t&&getComputedStyle(t).opacity==='1'&&t.getAnimations().every(a=>a.playState==='finished')}",timeout=5000)
+            condition="()=>{const t=document.querySelector('.toast.show');return t&&Number(getComputedStyle(t).opacity)>0&&Number(getComputedStyle(t).opacity)<1}" if SCENARIO=='entering-toast' else "()=>{const t=document.querySelector('.toast.show');return t&&getComputedStyle(t).opacity==='1'&&t.getAnimations().every(a=>a.playState==='finished')}"
+            self.page.wait_for_function(condition,timeout=5000)
             if SCENARIO=='scroll-toast':
                 self.page.evaluate("()=>{const m=document.querySelector('.main');m.scrollTop=Math.max(0,m.scrollTop-48)}")
     return locator_click(self,*a,**kw)
 Browser.new_context=new
 if INSTRUMENTED:BrowserContext.close=close;Page.reload=reload
-if SCENARIO in ['active-toast','scroll-toast']:Locator.click=click
+if SCENARIO in ['active-toast','scroll-toast','entering-toast']:Locator.click=click
 sys.argv=['admin_release_candidate_qa.py','--browser','webkit','--width','440','--artifacts',str(OUT)]
 raise SystemExit(suite.main())

@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        scenario: [plain, passive, active-toast, scroll-toast]
+        scenario: [lean-passive, entering-toast]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,7 +55,7 @@ jobs:
           G09_SCENARIO: ${{ matrix.scenario }}
         run: |
           mkdir -p evidence/${{ matrix.scenario }}
-          for sample in 1 2 3; do
+          for sample in $(seq 1 10); do
             if python diagnostic/.github/diagnostics/g09_probe.py "evidence/${{ matrix.scenario }}/sample-$sample" > "evidence/${{ matrix.scenario }}/sample-$sample.log" 2>&1; then
               echo "sample-$sample exit=0"
             else
@@ -64,7 +64,7 @@ jobs:
               echo "$code" > "evidence/${{ matrix.scenario }}/sample-$sample.exit"
             fi
           done
-          python diagnostic/.github/diagnostics/g09_summarize.py evidence/${{ matrix.scenario }}
+          python diagnostic/.github/diagnostics/g09_summarize.py evidence/${{ matrix.scenario }} 10
       - name: Preserve complete diagnostic evidence
         if: always()
         uses: actions/upload-artifact@v4
