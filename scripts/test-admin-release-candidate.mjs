@@ -21,6 +21,10 @@ if(!fs.existsSync('dist/admin/bronuvannia/index.html')){
   assert.equal(build.status,0,build.stderr);
 }
 const before=hashTree('dist');
+check('isolated PostgreSQL fixtures stay out of Pages artifact',()=>{
+  assert(fs.existsSync('tests/sql/equipment-fleet-isolated-smoke.psql'));
+  assert(!Object.keys(before).some(name=>name.endsWith('.psql')));
+});
 const built=run();assert.equal(built.status,0,built.stderr||built.stdout);
 const manifest=JSON.parse(fs.readFileSync(path.join(candidateRoot,'manifest.json'),'utf8'));
 const out=manifest.output;

@@ -1,0 +1,129 @@
+-- Run ONLY with psql against an isolated migrated PostgreSQL test database.
+-- Database name must start with vacleaner_test_ (hard stop otherwise).
+\set ON_ERROR_STOP on
+select (current_database() ~ '^vacleaner_test_')::integer as safe_database \gset
+\if :safe_database
+\else
+  \echo 'REFUSING: requires an isolated vacleaner_test_* database'
+  -- ON_ERROR_STOP makes this intentional SQL error exit psql nonzero.
+  -- Do not rely on an argument to \\quit: psql does not accept an exit code there.
+  select 1 / 0 as refuse_unsafe_database;
+  \quit
+\endif
+
+begin;
+set local statement_timeout = '10s';
+do $$
+declare
+  v_unit public.vacleaner_equipment_units%rowtype;
+  v_capacity integer;
+  v_events bigint;
+  v_result jsonb;
+  v_actor uuid := '00000000-0000-4000-8000-000000000099';
+  v_request uuid := '00000000-0000-4000-8000-000000000098';
+  v_add_first jsonb;
+  v_add_retry jsonb;
+  v_after_add integer;
+begin
+  select * into v_unit from public.vacleaner_equipment_units
+    where status='ready' order by resource_code,unit_number limit 1;
+  if not found then raise exception 'fixture_missing_ready_unit'; end if;
+  select capacity into v_capacity from public.vacleaner_inventory
+    where resource_code=v_unit.resource_code;
+  select count(*) into v_events from public.vacleaner_equipment_unit_events
+    where unit_id=v_unit.id;
+  v_result := public.vacleaner_admin_set_equipment_unit_status(
+    v_unit.id,'ready','idempotent fixture',v_actor);
+  if v_result->>'changed' <> 'false' then
+    raise exception 'same_status_not_idempotent: %',v_result;
+  end if;
+  if (select capacity from public.vacleaner_inventory
+      where resource_code=v_unit.resource_code) is distinct from v_capacity then
+    raise exception 'idempotent_call_changed_capacity';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_unit_events
+      where unit_id=v_unit.id) <> v_events then
+    raise exception 'idempotent_call_created_event';
+  end if;
+  begin
+    perform public.vacleaner_admin_set_equipment_unit_status(
+      v_unit.id,'not_a_status','invalid fixture',v_actor);
+    raise exception 'invalid_status_was_accepted';
+  exception when others then
+    if sqlerrm <> 'invalid_equipment_change' then raise; end if;
+  end;
+  if (select capacity from public.vacleaner_inventory
+      where resource_code=v_unit.resource_code) is distinct from v_capacity then
+    raise exception 'invalid_call_changed_capacity';
+  end if;
+  -- A missing actor must fail before any inventory or audit-log mutation.
+  begin
+    perform public.vacleaner_admin_set_equipment_unit_status(
+      v_unit.id,'repair','missing actor fixture',null);
+    raise exception 'missing_actor_status_was_accepted';
+  exception when others then
+    if sqlerrm <> 'invalid_equipment_change' then raise; end if;
+  end;
+  begin
+    perform public.vacleaner_admin_add_equipment_unit(
+      v_unit.resource_code,'missing actor fixture',null,v_request);
+    raise exception 'missing_actor_add_was_accepted';
+  exception when others then
+    if sqlerrm <> 'invalid_equipment_change' then raise; end if;
+  end;
+  if (select capacity from public.vacleaner_inventory
+      where resource_code=v_unit.resource_code) is distinct from v_capacity then
+    raise exception 'missing_actor_changed_capacity';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_unit_events
+      where unit_id=v_unit.id) <> v_events then
+    raise exception 'missing_actor_created_event';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_units where id=v_request)>0 then
+    raise exception 'fixture_request_uuid_already_used';
+  end if;
+  v_add_first := public.vacleaner_admin_add_equipment_unit(
+    v_unit.resource_code,'isolated add fixture',v_actor,v_request);
+  if v_add_first->>'changed' <> 'true' then raise exception 'first_add_failed: %',v_add_first; end if;
+  select capacity into v_after_add from public.vacleaner_inventory
+    where resource_code=v_unit.resource_code;
+  if v_after_add <> v_capacity+1 then raise exception 'add_capacity_not_incremented_once'; end if;
+  v_add_retry := public.vacleaner_admin_add_equipment_unit(
+    v_unit.resource_code,'isolated retry fixture',v_actor,v_request);
+  if v_add_retry->>'changed' <> 'false' then raise exception 'retry_was_not_idempotent'; end if;
+  if (select capacity from public.vacleaner_inventory where resource_code=v_unit.resource_code) <> v_after_add then
+    raise exception 'retry_incremented_capacity';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_unit_events
+      where unit_id=v_request and action='create') <> 1 then
+    raise exception 'retry_duplicated_create_event';
+  end if;
+  -- Exercise a real successful transition using only the newly created test unit.
+  -- Returning to the original capacity must remain safe for existing reservations.
+  v_result := public.vacleaner_admin_set_equipment_unit_status(
+    v_request,'repair','isolated repair fixture',v_actor);
+  if v_result->>'changed' <> 'true' or v_result->>'status' <> 'repair' then
+    raise exception 'repair_transition_failed: %',v_result;
+  end if;
+  if (select capacity from public.vacleaner_inventory where resource_code=v_unit.resource_code) <> v_capacity then
+    raise exception 'repair_did_not_restore_original_capacity';
+  end if;
+  if (select status from public.vacleaner_equipment_units where id=v_request) <> 'repair' then
+    raise exception 'repair_unit_status_not_saved';
+  end if;
+  v_result := public.vacleaner_admin_set_equipment_unit_status(
+    v_request,'ready','isolated restore fixture',v_actor);
+  if v_result->>'changed' <> 'true' or v_result->>'status' <> 'ready' then
+    raise exception 'restore_transition_failed: %',v_result;
+  end if;
+  if (select capacity from public.vacleaner_inventory where resource_code=v_unit.resource_code) <> v_capacity+1 then
+    raise exception 'restore_did_not_increase_capacity';
+  end if;
+  if (select count(*) from public.vacleaner_equipment_unit_events
+      where unit_id=v_request and action='status_change') <> 2 then
+    raise exception 'repair_restore_audit_events_missing';
+  end if;
+  raise notice 'PASS equipment RPC idempotency, invalid input/actor, duplicate add intent and capacity and repair/restore invariants';
+end
+$$;
+rollback;
