@@ -9,4 +9,4 @@ Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR
 http://127.0.0.1:<dynamic-port>/bronuvannia/
 ```
 
-This is a browser policy of the current execution environment, not an application assertion failure. The GitHub workflow installs a clean Playwright Chromium build on `ubuntu-latest` and must produce the authoritative browser result before Pages deploys.
+This was a browser policy of that managed environment, not an application assertion failure. The current GitHub Browser aggregate, WebKit and Operations jobs use the same digest-pinned official Playwright 1.65.1 Noble image on `ubuntu-24.04`. The Browser aggregate verifies the matching Python client and launches both Chromium and WebKit before canonical QA. Full GitHub QA on the exact commit remains authoritative before Pages deploys; a local runtime or fixture result alone is insufficient.

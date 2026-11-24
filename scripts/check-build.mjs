@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import vm from 'node:vm';
 import {execFileSync} from 'node:child_process';
+import {browserRuntimePolicyErrors} from './ci-browser-runtime-policy.mjs';
 const root=process.cwd(),release=JSON.parse(fs.readFileSync('release.json','utf8')),build=String(release.build);
 const businessConfig=JSON.parse(fs.readFileSync(path.join(root,'config','vacleaner.json'),'utf8'));
 const seoMap=JSON.parse(fs.readFileSync(path.join(root,'config','seo-map.json'),'utf8'));
@@ -154,13 +155,13 @@ try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','e2e_smoke
 try{execFileSync('python',['-m','py_compile',path.join(root,'scripts','public_booking_resilience_qa.py')],{stdio:'pipe'})}catch{errors.push('public booking resilience source does not compile')}
 const workflow=fs.readFileSync(path.join(root,'.github','workflows','pages.yml'),'utf8');
 const qaRunner=fs.readFileSync(path.join(root,'scripts','qa-full.mjs'),'utf8');
-const playwrightInstall=workflow.indexOf('python -m playwright install --with-deps chromium');
+errors.push(...browserRuntimePolicyErrors(workflow,fs.readFileSync(path.join(root,'requirements-ci.txt'),'utf8')));
 const canonicalStatic=workflow.includes('npm run qa:static');
 const canonicalBrowser=workflow.includes('npm run qa:browser');
 const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
 const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&/^\s*webkit:/m.test(workflow)&&/^\s*operations:/m.test(workflow)&&workflow.includes('needs: [classify, validate]')&&workflow.includes("if: needs.classify.outputs.docs_only != 'true'")&&workflow.includes('needs: [validate, browser, webkit, operations]')&&workflow.includes('npm run test:webkit')&&workflow.includes('artifact_name: production-pages');
 const hasAggregateGate=qaRunner.includes('config/qa-suites.json')&&qaRunner.includes('qa-release-summary.json')&&qaRunner.includes('FULL QA NOT GREEN');
-if(playwrightInstall<0||!canonicalStatic||!canonicalBrowser||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by canonical split static/browser QA with aggregate failure handling');
+if(!canonicalStatic||!canonicalBrowser||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by canonical split static/browser QA with aggregate failure handling');
 if(!qaSuites.browser.includes('test:e2e'))errors.push('Canonical browser QA does not include E2E smoke');
 if(!qaSuites.browser.includes('test:public-booking'))errors.push('Canonical browser QA does not include public booking resilience');
 if(!qaSuites.static.includes('test:retention'))errors.push('Canonical static QA does not gate retention rules');
