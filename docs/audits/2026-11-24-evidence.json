@@ -1,0 +1,718 @@
+{
+  "capturedAt": "2026-11-24",
+  "baseline": "68c274f49690e9844c468ef46e68cb78c70584ce",
+  "openPullRequests": [
+    {
+      "number": 95,
+      "title": "docs: VA Engineering & Product Standard v1.1",
+      "draft": true,
+      "head": "2cdda0b49dc808a8eb96d459a3ef23b8709caea0"
+    },
+    {
+      "number": 84,
+      "title": "test(p0): isolated PostgreSQL equipment RPC smoke (rollback only)",
+      "draft": true,
+      "head": "e1586d87f594807e1d7ed6f1026eb8bd8836c4db"
+    },
+    {
+      "number": 77,
+      "title": "Bookings: sort by next operational action instead of rental start",
+      "draft": false,
+      "head": "7045bd679b1a4e664ec0bc30d5bf4138f99ea1b3"
+    },
+    {
+      "number": 76,
+      "title": "Equipment fleet: physical-unit repair statuses and booking-safe availability",
+      "draft": false,
+      "head": "d799dc9991f82eefd7f5d8a3d662ebb6775833b4"
+    },
+    {
+      "number": 75,
+      "title": "Admin iOS: unblock catalog price scrolling without changing business rules",
+      "draft": false,
+      "head": "c0914c496e436370c462b1a63016de22156531d3"
+    },
+    {
+      "number": 74,
+      "title": "Update the pinned browser QA runtime while preserving the 4.3.64 artifact",
+      "draft": true,
+      "head": "5ae7f38e3c8e7bc6695affd9cc92724003a0c0a6"
+    },
+    {
+      "number": 69,
+      "title": "4.3.61: preserve manual booking edits and verify isolated admin release candidate",
+      "draft": true,
+      "head": "4cfc1ba41756eecfd1798f3786e58f2c66fbd867"
+    },
+    {
+      "number": 68,
+      "title": "R4: restore no-prepayment confirmation and verify admin recovery",
+      "draft": true,
+      "head": "66efc53630bb94ad39744eb1a2825584aff15f5a"
+    },
+    {
+      "number": 67,
+      "title": "R4 4.3.59: align Details and More across booking card statuses",
+      "draft": true,
+      "head": "2996a04d5c91c46f4edeb7fa891b82532a55f702"
+    },
+    {
+      "number": 66,
+      "title": "R4 4.3.58: prevent detail, form and calendar content from sliding under controls",
+      "draft": true,
+      "head": "0f47b7af17a687ff2cbc76a73c8e634cc1bb49df"
+    },
+    {
+      "number": 65,
+      "title": "R4 4.3.57: match stable46 navigation controls and labels",
+      "draft": true,
+      "head": "dbd85e1dff7cf56a0d755a6a7ded4f688ce9c1c0"
+    },
+    {
+      "number": 64,
+      "title": "R4 4.3.56: match stable46 mobile navigation and contain booking content",
+      "draft": true,
+      "head": "e4583538bd7079e1933156acd9604524d2d7a8c5"
+    },
+    {
+      "number": 63,
+      "title": "R4 UI55: isolated hosted admin entrypoint",
+      "draft": true,
+      "head": "29feb46946867e28baefc823c65879ca354d7cd8"
+    },
+    {
+      "number": 62,
+      "title": "R4: verify isolated hosted staging backend",
+      "draft": true,
+      "head": "3748fa66c6a57155d27eb7b586bcb640666d015c"
+    },
+    {
+      "number": 61,
+      "title": "R4 preflight + LAB 4.3.54: card actions and compact time choices",
+      "draft": true,
+      "head": "92431cc4be7771d8fac9c7d645dc151c799e5b75"
+    },
+    {
+      "number": 60,
+      "title": "Admin LAB 4.3.50: захист чернеток і мобільні форми",
+      "draft": true,
+      "head": "4c2637fcd8e345bb6fd34f7d0ab40d08ecea8f22"
+    },
+    {
+      "number": 59,
+      "title": "Admin LAB 4.3.48: ізольована нова версія та повернення на стабільну 46",
+      "draft": true,
+      "head": "b171fa984bf790eee9a7ee7e699f6c61636c0b4d"
+    },
+    {
+      "number": 58,
+      "title": "fix(admin): reliable saves and truthful metrics — v4.3.47 R1",
+      "draft": true,
+      "head": "50232c8c3b22aa193d4fb0cc0b8ffc7beeb94e98"
+    },
+    {
+      "number": 53,
+      "title": "v4.3.46 — apply a friend code to an existing first booking",
+      "draft": true,
+      "head": "82757aace6c13c51d7ddfc9a40110160b4dfca97"
+    },
+    {
+      "number": 39,
+      "title": "v4.3.32 — contextual links inside advice",
+      "draft": false,
+      "head": "f12550eacedf174eefc2f0ccd3e673d2d8bdf73d"
+    },
+    {
+      "number": 25,
+      "title": "v4.3.21 — фінанси всередині бронювання",
+      "draft": false,
+      "head": "33842d8d437dd65a30e17f9e2e18807c55c9f433"
+    },
+    {
+      "number": 24,
+      "title": "v4.3.21 — фінанси всередині бронювання",
+      "draft": false,
+      "head": "4a59d5ca6ee0c3a2f41a5b885a04366b3faf934a"
+    }
+  ],
+  "mainRun": [
+    {
+      "id": 45373663445,
+      "sha": "68c274f49690e9844c468ef46e68cb78c70584ce",
+      "status": "completed",
+      "conclusion": "success",
+      "attempt": 1,
+      "start": "2026-11-24T10:19:19Z",
+      "end": "2026-11-24T10:44:35Z"
+    }
+  ],
+  "mainJobs": [
+    {
+      "name": "PR change classification",
+      "id": 138374053918,
+      "result": "success",
+      "start": "2026-11-24T10:19:22Z",
+      "end": "2026-11-24T10:19:29Z"
+    },
+    {
+      "name": "Static / build gate",
+      "id": 138374134677,
+      "result": "success",
+      "start": "2026-11-24T10:19:32Z",
+      "end": "2026-11-24T10:20:02Z"
+    },
+    {
+      "name": "Browser QA aggregate gate",
+      "id": 138374449839,
+      "result": "success",
+      "start": "2026-11-24T10:20:06Z",
+      "end": "2026-11-24T10:32:42Z"
+    },
+    {
+      "name": "Production operations / chromium / 440",
+      "id": 138374449943,
+      "result": "success",
+      "start": "2026-11-24T10:20:05Z",
+      "end": "2026-11-24T10:24:21Z"
+    },
+    {
+      "name": "Production operations / webkit / 440",
+      "id": 138374449980,
+      "result": "success",
+      "start": "2026-11-24T10:20:05Z",
+      "end": "2026-11-24T10:25:24Z"
+    },
+    {
+      "name": "Production operations / webkit / 1440",
+      "id": 138374449996,
+      "result": "success",
+      "start": "2026-11-24T10:20:05Z",
+      "end": "2026-11-24T10:21:48Z"
+    },
+    {
+      "name": "Production operations / chromium / 1440",
+      "id": 138374450119,
+      "result": "success",
+      "start": "2026-11-24T10:20:06Z",
+      "end": "2026-11-24T10:21:35Z"
+    },
+    {
+      "name": "WebKit / mobile forms gate",
+      "id": 138381608093,
+      "result": "success",
+      "start": "2026-11-24T10:32:46Z",
+      "end": "2026-11-24T10:44:17Z"
+    },
+    {
+      "name": "Deploy GitHub Pages",
+      "id": 138387915126,
+      "result": "success",
+      "start": "2026-11-24T10:44:23Z",
+      "end": "2026-11-24T10:44:34Z"
+    }
+  ],
+  "backend": {
+    "functions": [
+      {
+        "slug": "vacleaner-equipment-admin-v1",
+        "version": 1,
+        "verify_jwt": true,
+        "adminAllowlist": "admin_users",
+        "status": "ACTIVE"
+      },
+      {
+        "slug": "vacleaner-admin-bookings-v4",
+        "version": 12,
+        "verify_jwt": false,
+        "adminAllowlist": "admin_users",
+        "status": "ACTIVE"
+      }
+    ]
+  },
+  "boundaries": {
+    "productionBusinessRowsRead": false,
+    "productionWrites": false,
+    "deviceVerification": "not available",
+    "independentReview": "not obtained"
+  },
+  "static": {
+    "mode": "static",
+    "startedAt": "2026-11-24T19:48:48.354Z",
+    "finishedAt": "2026-11-24T19:49:13.821Z",
+    "total": 70,
+    "passed": 70,
+    "failed": 0,
+    "blockedBy": null,
+    "skipped": null,
+    "results": [
+      {
+        "name": "stamp",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 1070
+      },
+      {
+        "name": "test:qa-fail-fast",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 271
+      },
+      {
+        "name": "check",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 2230
+      },
+      {
+        "name": "test:copy-integrity",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 191
+      },
+      {
+        "name": "test:package-language",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 186
+      },
+      {
+        "name": "test:delivery-settings",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 176
+      },
+      {
+        "name": "test:public-seo",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 184
+      },
+      {
+        "name": "test:growth-content",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 194
+      },
+      {
+        "name": "check:backend",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 165
+      },
+      {
+        "name": "test:backend-logistics",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 630
+      },
+      {
+        "name": "test:deposit-policy",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 197
+      },
+      {
+        "name": "test:stabilization",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 217
+      },
+      {
+        "name": "test:css-architecture",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 188
+      },
+      {
+        "name": "test:public-visual-contract",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 218
+      },
+      {
+        "name": "test:retention",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 198
+      },
+      {
+        "name": "test:booking-cta",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 177
+      },
+      {
+        "name": "test:process-metadata",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 197
+      },
+      {
+        "name": "test:peer-admin-push",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 192
+      },
+      {
+        "name": "test:issue-workflow",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 215
+      },
+      {
+        "name": "test:financial-control",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 198
+      },
+      {
+        "name": "test:operational-health",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 195
+      },
+      {
+        "name": "test:analytics",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 204
+      },
+      {
+        "name": "test:smart-guide-logic",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 199
+      },
+      {
+        "name": "test:booking-date-default",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 173
+      },
+      {
+        "name": "test:pwa-static",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 924
+      },
+      {
+        "name": "test:pwa-startup",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 240
+      },
+      {
+        "name": "test:sms-campaigns",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 279
+      },
+      {
+        "name": "test:auth-refresh",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 462
+      },
+      {
+        "name": "test:booking-extras",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 187
+      },
+      {
+        "name": "test:density",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 173
+      },
+      {
+        "name": "test:finance",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 168
+      },
+      {
+        "name": "test:finance-additions",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 173
+      },
+      {
+        "name": "test:status-waiver-correction",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 171
+      },
+      {
+        "name": "test:rental-status-guards",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 665
+      },
+      {
+        "name": "test:session",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 172
+      },
+      {
+        "name": "test:ux",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 175
+      },
+      {
+        "name": "test:final-desktop-static",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 167
+      },
+      {
+        "name": "test:admin-labels",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 211
+      },
+      {
+        "name": "test:client-promo-regression",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 183
+      },
+      {
+        "name": "test:referral-editor",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 187
+      },
+      {
+        "name": "test:calendar-live",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 170
+      },
+      {
+        "name": "test:booking-gifts",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 179
+      },
+      {
+        "name": "test:current-contracts",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 1108
+      },
+      {
+        "name": "test:ci-pipeline",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 191
+      },
+      {
+        "name": "test:admin-audit-r1",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 229
+      },
+      {
+        "name": "test:admin-lab",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 509
+      },
+      {
+        "name": "test:admin-staging-preflight",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 690
+      },
+      {
+        "name": "test:admin-staging-ui",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 392
+      },
+      {
+        "name": "test:admin-staging-readiness",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 225
+      },
+      {
+        "name": "test:settings-tabs-lifecycle",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 195
+      },
+      {
+        "name": "test:admin-settings-errors",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 189
+      },
+      {
+        "name": "test:admin-margin-label",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 169
+      },
+      {
+        "name": "test:report-dates",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 608
+      },
+      {
+        "name": "test:allocation-reconciliation",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 177
+      },
+      {
+        "name": "test:focus-intent",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 178
+      },
+      {
+        "name": "test:campaign-metrics",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 370
+      },
+      {
+        "name": "test:ci-identity-boundary",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 449
+      },
+      {
+        "name": "test:process-profile-race",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 191
+      },
+      {
+        "name": "test:stable-4346",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 1377
+      },
+      {
+        "name": "test:pwa-worker-wait",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 188
+      },
+      {
+        "name": "test:pwa-registration-reuse",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 182
+      },
+      {
+        "name": "test:calendar-business-clock",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 2934
+      },
+      {
+        "name": "test:detail-live-refresh",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 348
+      },
+      {
+        "name": "test:ui-feedback",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 217
+      },
+      {
+        "name": "test:time-trigger-labels",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 182
+      },
+      {
+        "name": "test:route-refresh-pending",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 248
+      },
+      {
+        "name": "test:public-draft-bootstrap",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 191
+      },
+      {
+        "name": "test:equipment-fleet",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 346
+      },
+      {
+        "name": "test:booking-next-action",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 193
+      },
+      {
+        "name": "build",
+        "status": "success",
+        "exitCode": 0,
+        "durationMs": 239
+      }
+    ]
+  },
+  "artifact": {
+    "files": 273,
+    "local_differences": [],
+    "zip_sha256": "89ebf687e6469d71d011377e52a03b2b2ba924fab739ab5e76358235d81bb998"
+  },
+  "liveStaticReadback": {
+    "checkedAt": "2026-11-24T19:50:40.737422+00:00",
+    "counts": {
+      "exact": 268,
+      "redirect": 4,
+      "robots-prefix": 1
+    },
+    "aliases": [
+      {
+        "path": "abir-wd8.html",
+        "result": "redirect",
+        "status": "200",
+        "url": "https://vacleaner.pp.ua/rishennia/windows/",
+        "expected_sha256": "6db9c3b40efd242c0c9091a89b406f8ec7812a5969328363f8e60a307f87a0ba",
+        "observed_sha256": "bca54468e93e162d451aca3f2b01a26c4e6f17525e30a27f1345699fe81acda5"
+      },
+      {
+        "path": "jimmy-jv35.html",
+        "result": "redirect",
+        "status": "200",
+        "url": "https://vacleaner.pp.ua/rishennia/mattress/",
+        "expected_sha256": "9e926a62db904b93f81da06bacc67465b813d15dc2ee4430d04c99c9cb259d0e",
+        "observed_sha256": "a36236a70a8938b5482350550d79bc01fb995c08589d4f81f9baabc3548169dc"
+      },
+      {
+        "path": "karcher-puzzi.html",
+        "result": "redirect",
+        "status": "200",
+        "url": "https://vacleaner.pp.ua/rishennia/textile/",
+        "expected_sha256": "131591d1ab98739652a5101012dfe49231c50f267791e217c754bf9760f681cd",
+        "observed_sha256": "6f813b4550842ad09f165dc05d41ab5e74b79ec89bb42deaf2b1bfc21cf1ed2b"
+      },
+      {
+        "path": "karcher-sc2.html",
+        "result": "redirect",
+        "status": "200",
+        "url": "https://vacleaner.pp.ua/rishennia/steam/",
+        "expected_sha256": "cf5d2344d79a53dbc38dc32a5f2696b5bdfa1834b97fc6830202bedac7b6bb30",
+        "observed_sha256": "fe24fc3f7ed7c5eef6d9ea8fefc214081dfb2cb0edff6740562630cab5e586cb"
+      }
+    ],
+    "aliasDestinationBytes": "all four match target index.html exactly"
+  }
+}
