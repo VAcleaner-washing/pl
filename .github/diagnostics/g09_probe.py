@@ -11,9 +11,11 @@ from playwright.sync_api import Browser, BrowserContext, Page, Locator
 import admin_release_candidate_qa as suite
 OUT=pathlib.Path(sys.argv[1]).resolve(); OUT.mkdir(parents=True,exist_ok=True)
 SCENARIO=os.environ.get('G09_SCENARIO','plain')
-assert SCENARIO in ['plain','passive','active-toast','scroll-toast','lean-passive','entering-toast']
-INSTRUMENTED=SCENARIO!='plain'
-INIT=(pathlib.Path(__file__).with_name('g09_lean_events.js' if SCENARIO in ['lean-passive','entering-toast'] else 'g09_events.js')).read_text()
+assert SCENARIO in ['plain','passive','active-toast','scroll-toast','lean-passive','entering-toast','single-cpu-plain','single-cpu-lean']
+if SCENARIO.startswith('single-cpu-'):
+    os.sched_setaffinity(0,{min(os.sched_getaffinity(0))})
+INSTRUMENTED=SCENARIO not in ['plain','single-cpu-plain']
+INIT=(pathlib.Path(__file__).with_name('g09_lean_events.js' if SCENARIO in ['lean-passive','entering-toast','single-cpu-lean'] else 'g09_events.js')).read_text()
 network=[]
 new_context,context_close,page_reload,locator_click=Browser.new_context,BrowserContext.close,Page.reload,Locator.click
 def dump(page,label):
@@ -29,7 +31,7 @@ def new(self,*a,**kw):
         if '/functions/v1/vacleaner-settings' in r.url:
             network.append({'kind':'response','host_monotonic':time.monotonic(),'status':r.status,'method':r.request.method})
     if INSTRUMENTED:c.on('request',request);c.on('response',response)
-    (OUT/'context.json').write_text(json.dumps({'scenario':SCENARIO,'instrumented':INSTRUMENTED,'webkit':c.browser.version,'context':kw},ensure_ascii=False,indent=2))
+    (OUT/'context.json').write_text(json.dumps({'scenario':SCENARIO,'instrumented':INSTRUMENTED,'webkit':c.browser.version,'cpu_affinity':sorted(os.sched_getaffinity(0)),'context':kw},ensure_ascii=False,indent=2))
     return c
 def close(self,*a,**kw):
     for i,p in enumerate(self.pages):
