@@ -1,5 +1,7 @@
 # PR #95 post-merge acceptance — first failure retained
 
+> Authorized G09 follow-up: [Root Cause Analysis and reproduction blocker](2026-11-24-g09-root-cause-analysis.md). Exact image downloaded, but Docker VFS container creation failed with ENOSPC before any new scenario started. Root cause remains BLOCKED/unresolved; original event/POST evidence, conditional fix and regression plan are separated. No runtime/test repair or rerun applied.
+
 Status: audit evidence, not implementation. [PR #95](https://github.com/VAcleaner-washing/pl/pull/95) integrated the standard/audit as squash `0b4c5c680f4a4b8de95d246306a5e583f3173782`. Exact-head PR run [45476683795](https://github.com/VAcleaner-washing/pl/actions/runs/45476683795) passed all full gates, attempt1. That does not certify merged-main production acceptance.
 
 ## Observed failure
