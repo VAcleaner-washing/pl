@@ -1,5 +1,7 @@
 # P2 selective CI — docs-only validation
 
+> Current-state entry point (2026-11-24): [Professional Audit QA assessment](audits/2026-11-24-qa-cicd-assessment.md). Main `68c274f` and production4.3.69/4369 supersede older version/open-PR/design-only statements below. #88–94 are integrated; historical evidence/failures stay intact. Physical iPhone acceptance remains unconfirmed. Existing classifier and release checklist remain authoritative; this banner adds no exception.
+
 Roadmap: P2 — compare real CI timing and failure modes before/after while preserving the full main release gate. This document-only PR verifies the behavior introduced in merged PR #88. It changes no application code, tests, deployment configuration, or product contracts.
 
 ## Current reviewed evidence — 2026-11-23 (supersedes historical open items below)

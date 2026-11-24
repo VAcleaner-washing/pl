@@ -1,5 +1,7 @@
 # CI diagnostics — process audit
 
+> Current-state entry point (2026-11-24): [Professional Audit QA assessment](audits/2026-11-24-qa-cicd-assessment.md) verifies main `68c274f`, full run45373663445 and production4.3.69/4369. References below to open #85–94 or unimplemented P2 work are dated historical observations, not current pending status. The original failures and measurements remain preserved.
+
 The inventory commands are read-only diagnostics for the P0–P3 development audit. They do not change
 runtime behavior, business rules, CI gates, or the normative product contract in
 [VAcleaner-SYSTEM-SPEC.md](VAcleaner-SYSTEM-SPEC.md).
