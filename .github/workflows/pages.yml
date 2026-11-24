@@ -102,28 +102,26 @@ jobs:
 
   browser:
     name: Browser QA aggregate gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [classify, validate]
     if: needs.classify.outputs.docs_only != 'true'
+    container:
+      image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-          cache: pip
-          cache-dependency-path: requirements-ci.txt
-      - name: Cache Playwright browser
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-webkit-${{ hashFiles('requirements-ci.txt') }}
-      - name: Install Playwright browser tests
+      - name: Install client for the pinned official browser runtime
+        timeout-minutes: 5
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
-          python -m playwright install --with-deps chromium webkit
+      - name: Verify browser runtime failure contracts
+        run: python -m unittest discover -s scripts -p 'test_ci_browser_runtime.py'
+      - name: Verify pinned Chromium and WebKit startup
+        timeout-minutes: 2
+        run: python scripts/verify_ci_browser_runtime.py
       - name: Download validated Pages artifact
         uses: actions/download-artifact@v4
         with:

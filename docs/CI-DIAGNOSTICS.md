@@ -1,6 +1,6 @@
 # CI diagnostics — process audit
 
-This is a read-only inventory for the P0–P3 development audit. It does not change
+The inventory commands are read-only diagnostics for the P0–P3 development audit. They do not change
 runtime behavior, business rules, CI gates, or the normative product contract in
 [VAcleaner-SYSTEM-SPEC.md](VAcleaner-SYSTEM-SPEC.md).
 
@@ -132,3 +132,24 @@ visible in flakiness metrics even though the final run conclusion is green.
 independent CI-measurement PR. All remain Draft pending explicit merge-readiness
 review. Do not merge #87 ahead of #86; check for concurrent branch changes and
 rerun required checks after any rebase or merge-base change.
+
+## P2 browser preparation — 2026-11-24
+
+The earlier proposed selective lane is now implemented (PR #88) and its verification/backlog follow-up merged (PR #89); the historical observations above are retained as measurements, not current pending work. Main is `b54afe4d03ea7bb7864b472d0db13c9df1af13d1`, application4.3.69/build4369 at this change's baseline.
+
+Baseline: successful first-attempt main run [45238142446](https://github.com/VAcleaner-washing/pl/actions/runs/45238142446), 2026-11-23:
+
+| Measurement | UTC interval | Duration |
+| --- | --- | ---: |
+| Full workflow | 18:25:01–18:59:23 | 34m22s |
+| Browser aggregate job | 18:25:58–18:48:08 | 22m10s |
+| Install Playwright browser tests | 18:26:35–18:34:35 | 8m00s |
+| Subsequent WebKit job | 18:48:12–18:59:03 | 10m51s |
+
+The install logs show Ubuntu26.04 (`resolute`) APT downloads and gaps of68.059s and64.911s between consecutive dependency-download log lines. These are timestamp gaps, not CPU profiling or proof of exactly that much idle time. Another successful main install took94s; the slow preparation is variable, not a stable eight-minute minimum.
+
+`CI-P2-BROWSER-RUNTIME-001` moves only the Browser aggregate preparation to the immutable official Noble runtime already used by WebKit/Operations. It removes host APT/browser downloads and the obsolete host-browser cache/setup-python steps, installs the exact matching Python client, and adds fail-closed both-engine startup verification. All existing application suites, artifact verification and release gates remain intact, including the standalone recovery smoke whose equivalence has not been proven.
+
+Verification commands: `node scripts/test-ci-pipeline-contract.mjs`, `node scripts/test-selective-pr-ci.mjs`, `python -m unittest discover -s scripts -p 'test_ci_browser_runtime.py'`; the real startup command requires the pinned image. Local fixtures cannot certify container usability. The implementation PR must run full non-docs QA and main must pass full QA/deploy separately.
+
+After-run comparison must include container initialization/image pull, client install, failure fixtures and real startup. Record full Browser/WebKit/workflow timestamps, first-attempt failures and exact source SHA. Compute `(baseline - observed) / baseline * 100` only for like-for-like intervals and label a single-run observation accordingly. No measured after-change result or speedup is asserted by this entry.
