@@ -34,6 +34,7 @@ jobs:
         run: |
           node scripts/test-classify-pr-changes.mjs
           node scripts/test-selective-pr-ci.mjs
+          node scripts/test-merge-readiness.mjs
       - name: Classify complete PR file list (fail closed)
         id: files
         env:
@@ -316,6 +317,34 @@ jobs:
           path: operations-test-results
           if-no-files-found: warn
           retention-days: 14
+
+  readiness:
+    name: Release readiness
+    if: ${{ always() }}
+    needs: [classify, validate, browser, webkit, operations]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify the actual event, classified lane and all gate results
+        id: decision
+        if: ${{ !cancelled() && success() }}
+        env:
+          READINESS_NEEDS: '${{ toJSON(needs) }}'
+          READINESS_CANCELLED: 'false'
+        run: node scripts/check-merge-readiness.mjs
+      - name: Reject cancellation or an absent successful decision
+        if: ${{ always() && (cancelled() || steps.decision.outcome != 'success') }}
+        run: |
+          echo 'Release readiness rejected: cancelled or decision did not succeed' >&2
+          exit 1
 
   deploy:
     name: Deploy GitHub Pages
