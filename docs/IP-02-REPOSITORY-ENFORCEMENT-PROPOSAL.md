@@ -106,3 +106,5 @@ Direct requirements for the four expanded operations names deadlock docs-only, w
 Rollback IP-02A via reviewed revert of its5 process files, retaining pre-existing gates. If a future Ruleset requires readiness, remove/disable that separately approved dependency before reverting its producer to avoid a missing-context deadlock. IP-02B rollback restores the settings export and manual exact-head/full-release controls, never production data. Emergency policy edits need owner decision, actor/time/reason and evidence; no standing bypass.
 
 IP03/IP04 need separate review. G09 remains unresolved with its bounded diagnosis closed; no runtime/test repair. Keep implementation/review/CI distinct from Ruleset activation and production/device acceptance. No speedup claim.
+
+<!-- IP02A docs-only CI rehearsal; no runtime change; never merge this probe. -->
