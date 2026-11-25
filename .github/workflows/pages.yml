@@ -5,7 +5,7 @@ on:
       - main
       - 'qa/**'
   pull_request:
-    branches: [main]
+    branches: [main, ip02a-rehearsal-base]
   workflow_dispatch:
 permissions:
   contents: read
