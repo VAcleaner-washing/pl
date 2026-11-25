@@ -1,15 +1,66 @@
 # G09 — WebKit 440 save-retry investigation
 
-**Status: diagnostic environment UNBLOCKED; root cause unresolved / repair BLOCKED.** Diagnostic scope only; no runtime/test repair approved or applied. Roadmap P1 — inventory flaky/stale assertions and preserve actual failure evidence. No G01–G08 implementation, full-CI rerun, PR merge or production acceptance.
+**Status: technical release acceptance (CI/deployment/live HTTP) PASSED after one controlled recovery attempt. G09 remains an unreproduced intermittent failure with open/unresolved RCA; no runtime/test fix applied. Ready for Independent Review, not independently approved.** Physical-device acceptance remains unverified. Initial diagnostic work is Roadmap P1; this owner-authorized recovery records P0 production evidence/P2 release-checklist gates without changing the approved roadmap or implementing G01–G08.
 
 ## Verified baseline
 
 - Current main: `0b4c5c680f4a4b8de95d246306a5e583f3173782`; PR #95 merged. PR #96 remained Draft/evidence-only at investigation start, head `3962e0ffe5965e6eb22e191bf3cf6fba4dcdfd64`.
-- Main [run45482260765](https://github.com/VAcleaner-washing/pl/actions/runs/45482260765) attempt1 is complete: only required Operations WebKit440 failed; classification/static/browser/WebKit and the other three Operations variants passed; Pages deployment skipped. These successes do not clear the failed gate.
+- Main [run45482260765](https://github.com/VAcleaner-washing/pl/actions/runs/45482260765) attempt1 is complete: only required Operations WebKit440 failed; classification/static/browser/WebKit and the other three Operations variants passed; Pages deployment skipped. At initial inspection these successes did not clear the failed gate; the subsequent controlled recovery below is recorded separately and does not erase attempt1.
 - [Failed job138758815898](https://github.com/VAcleaner-washing/pl/actions/runs/45482260765/job/138758815898), failed step22:36:19–22:36:42 Kyiv time (20:36:19–20:36:42 UTC),24 November2026.
 - [Failure artifact14962087847](https://github.com/VAcleaner-washing/pl/actions/runs/45482260765/artifacts/14962087847) downloaded/read; ZIP SHA256 verified: `b341b4747b192a3a362b33e354eff6da12c3a936c074b97fd168341daab33197`.
 - result.json, failure.png, normal-purchase-save.png, trace.zip network/API logs and screencast frames reviewed. Local runtime/business/test inputs have zero diff from main. Local normal artifact verification:273 files,4.3.69/4369, tree `4109bb6e7124ea3cad9a67e60e710574d893a9d39a8ac482f53ed36963139063`.
 - Existing [first-failure report](2026-11-24-postmerge-acceptance.md) remains historical evidence; this document records the authorized follow-up investigation.
+
+## Controlled release recovery — 25 November2026
+
+The owner accepted RCA commit30345f9 and the42-sample stage as complete, stopped unbounded diagnosis and authorized at most **one** failed-jobs-only recovery of the original main workflow, subject to existing policy. No CSS/runtime/test repair was authorized.
+
+### Policy and unchanged-input checks
+
+Reviewed AGENTS, Engineering Standard v1.1, System Spec REL-001…005, pages.yml and existing release checklist. The standard requires diagnostic work before rerun, retaining first failures and no bypass of required gates; the completed/accepted diagnosis and explicit bounded recovery decision satisfy this action without claiming root-cause resolution. CI-DIAGNOSTICS also records a previous failed-job-only recovery while retaining intermittent-risk evidence. No new retry entitlement or relaxed release rule is introduced.
+
+Main remains `0b4c5c680f4a4b8de95d246306a5e583f3173782`. Diff against the previously verified application baseline68c274f is zero for assets/admin/sandbox/staging/scripts/config/Supabase/package/requirements/release and release workflows. Local artifact verification again passes273 files/tree4109bb6e7124ea3cad9a67e60e710574d893a9d39a8ac482f53ed36963139063. Canonical tests, suite membership, application bytes, pages.yml and mandatory gates are unchanged. PR#96 remains unmerged.
+
+### One attempt and complete gates
+
+Called GitHub **rerun failed jobs** once for run45482260765. No full-workflow dispatch and no second recovery request. Result: [attempt2](https://github.com/VAcleaner-washing/pl/actions/runs/45482260765/attempts/2) completed success on the same source SHA.
+
+| Evidence | Actual outcome |
+| --- | --- |
+|WebKit440 retry [job139030778158](https://github.com/VAcleaner-washing/pl/actions/runs/45482260765/job/139030778158)|08:45:22–08:50:44 Kyiv /06:45:22–06:50:44 UTC,5m22s; success|
+|G09 purchase path inside that job|All29 acceptance checks passed; first rejected save retains input/cache, same-payload retry and reload readback pass|
+|Carried-forward jobs|Classification, Static/build, Browser aggregate, separate WebKit/mobile and three other Operations variants remain success; original started_at/completed_at timestamps exactly unchanged|
+|Required test acceptance|Static/build + Browser + WebKit + all4 Operations variants success; no required test job skipped|
+|Pages deployment [job139032980898](https://github.com/VAcleaner-washing/pl/actions/runs/45482260765/job/139032980898)|08:50:53–08:51:04 Kyiv /06:50:53–06:51:04 UTC; success|
+
+GitHub emits new job-record IDs for some carried outcomes in attempt2; identical original execution timestamps prove these successful jobs were not executed again. Only failed WebKit440 and its previously skipped deployment dependency executed during recovery. First attempt remains failure; attempt2 success is release recovery, not a G09 fix or proof of future reliability.
+
+### Commit/artifact provenance and independent live readback
+
+Deployment log explicitly submits artifact_id14962177277 and records creation for commit0b4c5c680f4a4b8de95d246306a5e583f3173782. This is the original reviewed production-pages artifact, not a rebuild:
+
+- ZIP SHA256 `3582dd1964f3a4223acd9e5846132314a9086d73d0c345ea2bef0f75dbb2eb94`, re-downloaded and verified.
+- Exactly273 files equal the locally reproduced/pinned artifact byte-for-byte; tree digest remains `4109bb6e7124ea3cad9a67e60e710574d893a9d39a8ac482f53ed36963139063`.
+- Recovery Operations evidence artifact14998818316, ZIP SHA256 `7a52ead5a602889c7379f7f5679a8ae636a3a64dcd5d7d7d2afc603eb0acd7b3`; downloaded digest and29/29 result verified.
+- Independent read-only HTTP comparison completed08:52:05 Kyiv /06:52:05 UTC:268 same-path exact byte matches,4 expected alias redirects whose destination index.html bytes match exactly,1 Cloudflare-managed robots prefix with exact artifact suffix; **zero unexplained differences**.
+- Live release.json4.3.69/4369, manifest id/scope/admin start URL and actual worker match the deployed artifact. Worker SHA256 `0f1bda03f281d131086dc26ab2c2b485a159fff0f4da09057fb0f1099e6fe661`, cache identity vacleaner-manager-4369.
+
+HTTP bytes establish artifact identity; source commit identity comes from the deployment log and Actions metadata, not an invented commit field in release.json. Identical documentation-only source commits can legitimately serve identical artifact bytes. No customer/business API calls or mutations used for live verification.
+
+### Preserved evidence and handoff
+
+Before rerun, archived the original failed artifact plus all8 full diagnostic archives, accepted RCA snapshot and evidence bundles, with per-file SHA256 manifest. Archive `G09-preserved-first-failure-and-diagnostics.zip`,269,329,121 bytes, SHA256 `7dbfcb083a218f93a6040846fdc402bffc9b353bc887cd1a4d781d0579b23dcd`. Original failure artifact14962087847 also remains listed by GitHub after recovery. No evidence was deleted or overwritten by this task. Final recovery metadata, logs and per-path live hashes are retained separately.
+
+| Verification layer | Status |
+| --- | --- |
+|Self-review/input/provenance checks|Performed; unchanged artifact/tests/gates and one-attempt limit verified|
+|Diagnostic stage|Accepted by owner;42/42 passing samples; further unbounded investigation stopped|
+|Release technical acceptance|PASS: complete required gates, Pages deploy and independent static HTTP readback|
+|G09 root cause resolution|UNRESOLVED; intermittent/unreproduced, original first failure preserved; no repair|
+|Independent Review|READY for next stage; not yet performed or approved|
+|Physical-device/installed iPhone acceptance|NOT VERIFIED; Linux fixtures/HTTP do not certify a particular phone/controller/session|
+
+Independent reviewer should examine the first failure alongside the42 samples and recovery, the unchanged tree/gate evidence, deployment→artifact chain and residual intermittent-risk decision. No policy, Roadmap, dependencies, Supabase, business behavior or pages.yml changes are part of this recovery.
 
 ## Original failure timeline
 
@@ -125,7 +176,7 @@ Filesystem total7.9G, used7.5G, available0 at failure. No Docker container exist
 |Rapid retry / active toast / entering transition / scrolling /440px|Executed with plain, detailed, lean and CPU-affinity controls; no matching failure|
 |No duplicate purchase writes or false success in executed scenarios|Canonical strict assertions pass; broader pending/double-tap/concurrency cases below remain future regression scope|
 |Pinned diagnostic environment|UNBLOCKED and working on GitHub Actions|
-|Complete G09 root cause / production acceptance|UNRESOLVED / NOT COMPLETE|
+|Complete G09 root cause / technical release recovery|UNRESOLVED / PASS after the single controlled attempt above; physical-device acceptance separate|
 
 ## Conditional minimal fix proposal — not applied
 
@@ -148,4 +199,4 @@ This is a scoped proposal for later approval, not a repair. No force-click, slee
 
 Primary risk is mistaking a real missed interaction for flaky assertion timing. Extra waiting could hide it; instrumentation may alter scheduling; global pointer rules could affect interactive notifications. No evidence currently warrants Supabase, financial or deployment edits.
 
-Diagnostic rollback: stop using/delete only the isolated diag/g09-runner branch and its temporary workflow after retaining evidence; discard external scripts/output as desired. No diagnostic code was merged into main, pages.yml was untouched, and application/canonical test files are unchanged. The earlier local image was removed after ENOSPC. A future CSS/UI repair would require its own versioned release, exact artifact and compatible known-good frontend rollback while preserving all orders/payments; any test-only repair must preserve the strict negative contract. Production acceptance remains **NOT COMPLETE**.
+Diagnostic rollback: stop using/delete only the isolated diag/g09-runner branch and its temporary workflow after retaining evidence; discard external scripts/output as desired. No diagnostic code was merged into main, pages.yml was untouched, and application/canonical test files are unchanged. The earlier local image was removed after ENOSPC. A future CSS/UI repair would require its own versioned release, exact artifact and compatible known-good frontend rollback while preserving all orders/payments; any test-only repair must preserve the strict negative contract. Technical CI/deploy/live acceptance passed in the controlled recovery above. G09 root cause remains open; Independent Review and physical-device acceptance are not claimed complete.

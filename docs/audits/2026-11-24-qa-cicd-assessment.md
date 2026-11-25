@@ -1,6 +1,6 @@
 # QA & CI/CD Assessment — 2026-11-24
 
-> Post-merge update: standard/audit PR #95 merged as `0b4c5c6` after full exact-head PR GREEN. Main run45482260765 attempt1 then failed WebKit440 purchase-save retry acceptance. See [first-failure evidence and G09](2026-11-24-postmerge-acceptance.md). The baseline success below remains historical evidence; merged-main deployment is not accepted. No test/runtime fix or rerun is part of this audit.
+> Current recovery status (25 November2026): one owner-authorized failed-jobs-only attempt2 of run45482260765 passed WebKit440 and Pages deployment; complete gates and273-path independent live readback verified. See the existing [RCA recovery record](2026-11-24-g09-root-cause-analysis.md). G09 remains unresolved/intermittent; original first-failure evidence below is preserved. PR#96 is unmerged, and Independent Review/physical-device acceptance are separate.
 
 Historical measurements/contracts remain in [CI diagnostics](../CI-DIAGNOSTICS.md) and [selective validation](../CI-SELECTIVE-VALIDATION.md). This is P1 inventory/P0 evidence, no test/workflow changes.
 
