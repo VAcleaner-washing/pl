@@ -1,6 +1,6 @@
 # G09 — WebKit 440 save-retry investigation
 
-**Status: BLOCKED / root cause unresolved.** Diagnostic scope only; no runtime/test repair approved or applied. Roadmap P1 — inventory flaky/stale assertions and preserve actual failure evidence. No G01–G08 implementation, full-CI rerun, PR merge or production acceptance.
+**Status: diagnostic environment UNBLOCKED; root cause unresolved / repair BLOCKED.** Diagnostic scope only; no runtime/test repair approved or applied. Roadmap P1 — inventory flaky/stale assertions and preserve actual failure evidence. No G01–G08 implementation, full-CI rerun, PR merge or production acceptance.
 
 ## Verified baseline
 
@@ -51,19 +51,57 @@ The POST contains only `equipmentBaselines`: Puzzi qty2/unitCost1/total2; SC2,Ji
 
 The compiled form policy originates in `sandbox/forms.js`. It tracks submitted/clicked state and disables/inerts fields while busy via MutationObserver; it removes saving notice/unfreezes fields when no longer busy. It observes only a local field snapshot for dirty state; the canonical onsubmit handler remains write owner. Save is not a leave-navigation control. No generic double-click suppression was found in the inspected admin/form sources. This source review does not establish which handler, if any, received the failed retry's actual events. The16px shift is observed, but its precise cause is not proven.
 
+## Pinned GitHub Actions follow-up — 25 November2026 (Kyiv)
+
+The earlier local ENOSPC blocker is superseded: isolated GitHub-hosted runners executed42 samples successfully. No local Docker image was downloaded again. This is diagnostic evidence, not release acceptance.
+
+- Isolated branch: `diag/g09-runner`; diagnostic-only commits `55e9c70f5f7c5e5f9831018f23cb8af1bb000b20`, `1df62cd814f4d7c4e0eba8f2b42fd127d91b2523`, `0e7c43acd9aa7ca5f796677d1ac5888c8762199e`. [Temporary workflow](https://github.com/VAcleaner-washing/pl/blob/0e7c43acd9aa7ca5f796677d1ac5888c8762199e/.github/workflows/g09-diagnostic.yml) and drivers remain outside main/PR#96.
+- Exact immutable1.65.1 Noble image above, client Playwright1.65.1/greenlet3.5.6 verified in job logs; engine reports WebKit27.2. Viewport440×956, device scale3, mobile/touch enabled, Europe/Kyiv, standalone fixture, service workers blocked, matching original harness.
+- Application checkout fixed to main0b4c5c6. Original production-pages artifact14962177277 from run45482260765 downloaded without rebuilding; ZIP digest `3582dd1964f3a4223acd9e5846132314a9086d73d0c345ea2bef0f75dbb2eb94`; existing273-file tree verifier passed before each job.
+- Workflow has contents:read/actions:read only, no deployment job, environment binding or production secrets. The read-only repository token is used for repository checkout and the original Actions artifact download. Application requests remain intercepted by the unchanged synthetic fixture. Existing pages.yml/release gates and canonical tests/assertions/timeouts are unchanged. No PR was opened for diagnostic code, avoiding release CI; only branch-restricted diagnostic push runs executed.
+- The accepted evidence-bundle wrapper was adapted to the runner source path. Detailed passive journals record actual targets, hit-test stacks, toast transitions/geometry, scrolling, submit/defaultPrevented and disabled/inert state; they are flushed before reload as well as close. Lean journals deliberately omit geometry/style/hit-test reads to check instrumentation sensitivity. These journals do not cancel events, change styles or own a save.
+
+| Scenario | Samples | Result | Run / artifact |
+| --- | ---: | --- | --- |
+|Original sequence, no DOM instrumentation|3|29/29 checks in each|[45496995226](https://github.com/VAcleaner-washing/pl/actions/runs/45496995226),14970125487|
+|Same sequence, detailed passive journal|3|29/29 each|same run,14970200434|
+|Fully visible active toast before retry|3|29/29 each|same run,14969925884|
+|Active toast plus48px main-scroll adjustment|3|29/29 each|same run,14970245372|
+|Same sequence, lean passive journal|10|29/29 each|[45497843228](https://github.com/VAcleaner-washing/pl/actions/runs/45497843228),14968728772|
+|Click requested during entering-toast transition, lean journal|10|29/29 each|same run,14969302069|
+|Single-CPU affinity, no DOM instrumentation|5|29/29 each|[45498824725](https://github.com/VAcleaner-washing/pl/actions/runs/45498824725),14969981696|
+|Single-CPU affinity, lean journal|5|29/29 each|same run,14970177390|
+
+Total42 completed samples:8 without DOM instrumentation,34 instrumented;0 observed lost retries. The controlled active/entering states use explicit observable conditions within the existing5s budget, not sleeps or increased timeouts. Single-CPU controls record affinity[0] and change scheduling only. Samples are bounded experiments; this is not an estimate of production defect probability.
+
+### Causal findings from new evidence
+
+1. Every sample retains the strict first-rejection input/cache assertion, two identical purchase-save payloads,503→200 acknowledgement, unchanged unrelated settings and successful reload from updated authoritative **fixture** storage. All34 instrumented request journals independently confirm exactly two equipmentBaselines POSTs. A third settings POST is the canonical suite's separate catalog rejection scenario, not a duplicate purchase save. No production writes.
+2. Detailed passive sample1, run45496995226: first submit17868ms; second pointerdown18137ms and click/submit18138ms reach the actual Save button/form. At retry, disabled=false, button/ancestor inert absent. Bubble-phase submit defaultPrevented=true is the expected canonical handler preventing navigation, followed by the settings POST; it is not evidence that the save was suppressed.
+3. Main scrollTop1042→1026 and Save y792.171875→808.171875 reproduce the16px movement. The document-relative button position remains1834.171875 in this sample: the viewport movement accompanies main scrolling. This observation does not prove the trigger of every original layout change.
+4. Retry pointer y832 has only about2px clearance below the visible toast bottom830; entering transform can vary its boundary. Detailed journals record pointer-events:auto and both hidden/entering/visible states. In successful samples the hit stack at actual dispatch has the button first.
+5. Crucially, second-purchase-click traces in29 of the first32 samples report toast interception too (all except scroll-toast), then still submit and save. This includes uninstrumented controls with149–191ms click durations, close to the original195.691ms failed action. Entering-toast sample2 records five intercepted actionability attempts, then succeeds; its retry duration is997.7ms. Thus interception/16px movement alone are **not sufficient** to explain a lost retry.
+6. No matching missed-submit failure occurred with either detailed or lean instrumentation, entering/active toast, scroll control or one-CPU scheduling. This fails to establish a new causal chain. It does not prove the original failure impossible, certify browser stability, justify retries to GREEN or establish a test-only synchronization defect.
+
+### Current decision and missing causal evidence
+
+Environment access is no longer blocked. The original inference “toast interception caused the missing second POST” is **not confirmed**; the simple sufficiency claim has direct successful counterexamples. A narrower transient input/compositor/retargeting race remains possible. No evidence currently supports approving a runtime/test repair as the verified G09 fix.
+
+What is still missing is one **matching failed execution** carrying actual pointerdown/up/click recipient and submit/disabled/inert timeline. The original CI trace cannot retroactively supply those DOM events; successful new journals cannot stand in for the missing failed path. Preserve the prepared lean journal for a future captured recurrence or separately bounded reproduction budget. Do not run full release CI to search for it.
+
 ## Classification and confidence
 
 | Candidate explanation | Evidence / conclusion |
 | --- | --- |
-|Runtime UX overlay/hit-testing race|Strongest hypothesis. Pointer interception and visual overlap are directly observed, with geometry changing before dispatch. Full lost-submit causality unproven.|
-|Form busy/inert or handler suppression race|Must remain open until actual event/submit/defaultPrevented/inert timeline exists. Enabled/stable checks narrow the problem but do not prove event delivery.|
+|Runtime UX overlay/hit-testing race|Interception/overlap observed, but42 passing controls and successful intercepted retries disprove its sufficiency as a complete explanation. A narrower timing race remains unconfirmed.|
+|Form busy/inert or handler suppression race|Successful journals show enabled/non-inert Save, real submit and expected handler defaultPrevented. No failed journal exists, so the original path remains open.|
 |Wrong test synchronization|Text assertions do not wait for compositor/hit-target stability. However expected second POST, success acknowledgement and reload persistence are correct behavioral contracts. No evidence justifies weakening them or merely waiting longer.|
 |Original CI environment instability|No original engine crash/library/network-setup failure observed. Not established as root cause. Pinned image and other successful runs do not eliminate timing sensitivity.|
 |Backend/payload/finance defect|Original503 deliberately injected; first payload correct; second request absent. No evidence of server rejection of a retry or altered financial calculation.|
 
-Proven partial defect: a passive status toast can intercept the Save pointer area in this mobile journey. Complete G09 classification remains unresolved until pinned execution records the missing input/submit chain. The new local Docker failure below is an investigation blocker, not an explanation for the original CI failure.
+Proven partial defect: a passive status toast can intercept the Save pointer area in this mobile journey. Complete G09 classification remains unresolved until a matching failure records the missing input/submit chain. The historical local Docker failure below has been bypassed with Actions; it never explained the original CI failure.
 
-## Exact-runtime reproduction attempt and blocker
+## Historical local attempt — environment blocker superseded by Actions
 
 Verified Docker daemon29.9.2, VFS storage driver, linux/amd64 manifest. Pulled the exact existing workflow image:
 
@@ -77,20 +115,21 @@ Container creation failed **before Python/client/browser/scenario startup**:
 
 Filesystem total7.9G, used7.5G, available0 at failure. No Docker container existed after failed creation. Removed only the image pulled by this investigation; no system prune/daemon/config changes. Afterwards disk has2.9G free and Docker lists no images/containers. No dependency installation or new browser run occurred. Host Playwright1.62.0 was not substituted for1.65.1. The read-only original artifact analysis remains valid.
 
-**Missing evidence to unblock:** a runnable exact-image container with enough writable-layer/artifact space (or an already provisioned equivalent pinned diagnostic runtime), then passive logs of pointerdown/up/click recipient, hit-test stack, defaultPrevented, submit dispatch, Save disabled/inert state, toast geometry/lifecycle, scroll and settings request/response/persisted readback. Provision capacity or a reviewed appropriate storage driver through the environment owner; do not alter deployment configuration or restart shared daemons to force this task through.
+**Historical capacity requirement:** a runnable exact-image environment was missing at the earlier stage. This requirement is now satisfied by the isolated Actions runs above; local storage changes are unnecessary. The remaining blocker is causal evidence, not Docker capacity.
 
 | Acceptance/scenario | Current evidence |
 | --- | --- |
-|First rejected save retains input and previous acknowledged cache|PASS in original failed CI artifact|
-|Retry emits correct second POST|FAIL in original; new pinned reproduction blocked|
-|Successful response then authoritative reload readback|NOT REACHED in original; new verification blocked|
-|Rapid retry / active toast / scrolling /440px|One original trace covers all jointly; independently controlled variations NOT RUN|
-|No duplicate records/false success|Original has only one rejected POST and no success toast; broader negative/concurrency proof NOT RUN|
-|New pinned reproduction|BLOCKED before startup,0 scenarios executed|
+|First rejected save retains input and previous acknowledged cache|PASS in original and42 new samples|
+|Retry emits correct second POST|FAIL in original; PASS in42 new samples, matching payloads independently checked in34 request journals|
+|Successful response then authoritative reload readback|NOT REACHED in original; PASS in42 isolated fixture runs|
+|Rapid retry / active toast / entering transition / scrolling /440px|Executed with plain, detailed, lean and CPU-affinity controls; no matching failure|
+|No duplicate purchase writes or false success in executed scenarios|Canonical strict assertions pass; broader pending/double-tap/concurrency cases below remain future regression scope|
+|Pinned diagnostic environment|UNBLOCKED and working on GitHub Actions|
+|Complete G09 root cause / production acceptance|UNRESOLVED / NOT COMPLETE|
 
 ## Conditional minimal fix proposal — not applied
 
-If event logs confirm toast retargeting/occlusion causes the lost submit, the smallest candidate is to exclude **passive, non-interactive status toasts** from pointer hit-testing in their canonical CSS for entering, visible and exiting states. Preserve text, visual timing, role/status and aria-live semantics. All application saves remain owned by the same handler; no pricing, settings payload, persistence or financial changes.
+This is not yet an evidence-backed G09 repair recommendation. If a matching failed event log confirms toast retargeting/occlusion causes the lost submit, the smallest candidate is to exclude **passive, non-interactive status toasts** from pointer hit-testing in their canonical CSS for entering, visible and exiting states. Preserve text, visual timing, role/status and aria-live semantics. All application saves remain owned by the same handler; no pricing, settings payload, persistence or financial changes.
 
 Do not apply a blanket rule to future interactive notifications/actions without reviewing their interaction contract. If reproduction instead identifies busy-state/submit ownership as the cause, repair that narrow transition and keep notification styling unchanged. If only a test scheduling fault is proven, synchronize the diagnostic/test to an explicit observable state while preserving the same user action and every request/persistence assertion; do not accept a missed click as success.
 
@@ -109,4 +148,4 @@ This is a scoped proposal for later approval, not a repair. No force-click, slee
 
 Primary risk is mistaking a real missed interaction for flaky assertion timing. Extra waiting could hide it; instrumentation may alter scheduling; global pointer rules could affect interactive notifications. No evidence currently warrants Supabase, financial or deployment edits.
 
-Diagnostic rollback: discard external diagnostic scripts/output; working application/test files are unchanged. The downloaded image was already removed after ENOSPC. A future CSS/UI repair would require its own versioned release, exact artifact and compatible known-good frontend rollback while preserving all orders/payments; any test-only repair must preserve the strict negative contract. Production acceptance remains **NOT COMPLETE**.
+Diagnostic rollback: stop using/delete only the isolated diag/g09-runner branch and its temporary workflow after retaining evidence; discard external scripts/output as desired. No diagnostic code was merged into main, pages.yml was untouched, and application/canonical test files are unchanged. The earlier local image was removed after ENOSPC. A future CSS/UI repair would require its own versioned release, exact artifact and compatible known-good frontend rollback while preserving all orders/payments; any test-only repair must preserve the strict negative contract. Production acceptance remains **NOT COMPLETE**.
