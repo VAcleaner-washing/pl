@@ -126,6 +126,8 @@ Roadmap: P2 — compare real CI timing and failure modes before/after while pres
 
 Roadmap: P2 — document the release checklist, preserve full regression, browser/WebKit, artifact provenance and deployment gates. Use this checklist for every future code PR and main release; a docs-only PR cannot stand in for release acceptance.
 
+Before costly CI, prepare the source → behavior → Spec → positive/negative regression → artifact evidence using the [single change-impact mapping](CHANGE-IMPACT-MAPPING.md), then record it in the existing PR template. Targeted validation is early feedback; this mapping does not change classifier eligibility, required checks or the full release checklist below.
+
 - [ ] Confirm the intended commit SHA and scope against `docs/DEVELOPMENT-ROADMAP.md` and `docs/VAcleaner-SYSTEM-SPEC.md`; record test changes alongside behavior changes.
 - [ ] For any code/config/contract PR, verify **Static / build gate** succeeded, including canonical static regression, artifact build and production provenance checks. Do not treat `skipped` as success for a code PR.
 - [ ] Verify **Browser QA aggregate gate** and **WebKit / mobile forms gate** succeeded on the same commit.
