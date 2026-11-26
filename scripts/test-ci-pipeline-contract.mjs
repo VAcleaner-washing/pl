@@ -15,6 +15,29 @@ const pythonSources=fs.readdirSync('scripts').filter(name=>name.endsWith('.py'))
 const checks=[];
 const ok=(label,value)=>checks.push({label,ok:Boolean(value)});
 
+// Ownership is scoped to this job: another job's valid consumer must not
+// conceal a missing Browser invocation. Suite membership stays in the registry.
+const authSuite='test:auth-recovery-browser';
+function authOwnershipErrors(candidate, browserSuites){
+  const errors=[];
+  const job=candidate.match(/^  browser:\n([\s\S]*?)(?=^  [\w-]+:\n|$(?![\s\S]))/m)?.[1];
+  if(!job)errors.push('missing Browser job');
+  if(!Array.isArray(browserSuites))errors.push('missing browser registry');
+  else{
+    if(browserSuites.filter(name=>name===authSuite).length!==1)errors.push('auth must occur exactly once in registry');
+    if(browserSuites[0]!==authSuite)errors.push('auth must be first browser suite');
+  }
+  if(job){
+    if((job.match(/\bnpm\s+run\s+qa:browser\b/g)||[]).length!==1||
+       !/^        run: npm run qa:browser\s*$/m.test(job))errors.push('one unconditional canonical browser consumer required');
+    if(/\bnpm\s+run\s+test:auth-recovery-browser\b|\bpython\s+scripts\/admin_session_recovery_qa\.py\b/.test(job))errors.push('standalone auth invocation is forbidden');
+    const consumer=job.split(/(?=^      - )/m).find(step=>step.includes('run: npm run qa:browser'));
+    if(consumer&&/^\s+if:/m.test(consumer))errors.push('conditional canonical browser consumer is forbidden');
+  }
+  return errors;
+}
+ok('auth recovery has one early registry owner and one unconditional Browser consumer',authOwnershipErrors(workflow,suites.browser).length===0);
+
 ok('canonical regression artifact remains separate from the production artifact',/name: github-pages\n\s+path: dist/.test(workflow)&&/name: production-pages\n\s+path: release-candidate-test-results\/dist/.test(workflow));
 ok('browser downloads the validated Pages artifact',workflow.includes('uses: actions/download-artifact@v4')&&workflow.includes('name: github-pages'));
 ok('browser extracts artifact.tar into dist',workflow.includes('tar -xf .pages-artifact/artifact.tar -C dist'));
@@ -61,6 +84,22 @@ const failed=checks.filter(item=>!item.ok);
 const browserStart=workflow.indexOf('\n  browser:\n');
 const browserEnd=workflow.indexOf('\n  webkit:\n',browserStart);
 const mutateBrowser=transform=>workflow.slice(0,browserStart)+transform(workflow.slice(browserStart,browserEnd))+workflow.slice(browserEnd);
+assert.deepEqual(authOwnershipErrors(workflow,suites.browser),[],'valid early registry ownership');
+assert.deepEqual(authOwnershipErrors(workflow+'\n  unrelated:\n    run: npm run test:auth-recovery-browser\n',suites.browser),[],'ownership guard stays Browser-scoped');
+for(const [label,candidate,registry,reason] of [
+  ['missing auth',workflow,suites.browser.filter(name=>name!==authSuite),'auth must occur exactly once in registry'],
+  ['duplicate auth',workflow,[...suites.browser,authSuite],'auth must occur exactly once in registry'],
+  ['late auth',workflow,[...suites.browser.slice(1),authSuite],'auth must be first browser suite'],
+  ['missing registry',workflow,undefined,'missing browser registry'],
+  ['standalone npm auth',mutateBrowser(job=>job.replace('run: npm run qa:browser','run: npm run test:auth-recovery-browser\n      - run: npm run qa:browser')),suites.browser,'standalone auth invocation is forbidden'],
+  ['standalone Python auth',mutateBrowser(job=>job.replace('run: npm run qa:browser','run: python scripts/admin_session_recovery_qa.py\n      - run: npm run qa:browser')),suites.browser,'standalone auth invocation is forbidden'],
+  ['missing consumer despite another job',mutateBrowser(job=>job.replace('npm run qa:browser','true'))+'\n  unrelated:\n    run: npm run qa:browser\n',suites.browser,'one unconditional canonical browser consumer required'],
+  ['duplicate consumer',mutateBrowser(job=>job.replace('run: npm run qa:browser','run: npm run qa:browser\n      - run: npm run qa:browser')),suites.browser,'one unconditional canonical browser consumer required'],
+  ['conditional consumer',mutateBrowser(job=>job.replace('run: npm run qa:browser','if: false\n        run: npm run qa:browser')),suites.browser,'conditional canonical browser consumer is forbidden'],
+  ['no-op consumer',mutateBrowser(job=>job.replace('run: npm run qa:browser','run: echo npm run qa:browser')),suites.browser,'one unconditional canonical browser consumer required'],
+  ['missing Browser job',workflow.slice(0,browserStart)+workflow.slice(browserEnd),suites.browser,'missing Browser job'],
+]) assert.ok(authOwnershipErrors(candidate,registry).includes(reason),`${label} must reject its specific ownership defect`);
+console.log('PASS auth ownership accepts 2 valid and rejects 11 invalid configuration fixtures');
 for(const [label,broken] of [
   ['floating runner',mutateBrowser(job=>job.replace('runs-on: ubuntu-24.04','runs-on: ubuntu-latest'))],
   ['mutable image tag',mutateBrowser(job=>job.replace(BROWSER_IMAGE,BROWSER_IMAGE.split('@')[0]))],

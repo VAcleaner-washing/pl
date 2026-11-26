@@ -70,6 +70,7 @@
     "test:booking-next-action"
   ],
   "browser": [
+    "test:auth-recovery-browser",
     "test:public-hydration",
     "test:public-visual-parity",
     "test:analytics-visual",
@@ -108,7 +109,6 @@
     "test:client-card-visual",
     "test:process-contact-v4311",
     "test:admin-booking-flex",
-    "test:auth-recovery-browser",
     "test:admin-startup-browser",
     "test:admin-read-performance",
     "test:pwa-cache-browser",
