@@ -20,7 +20,7 @@ function parseMarkup(html){
     if(value.startsWith('<')){
       const tag=value.match(/^<([\w-]+)/)[1];
       const props={};
-      for(const attr of value.slice(tag.length+1,-1).matchAll(/([\w:-]+)(?:="([^"]*)"|='([^']*)')?/g))props[propName(attr[1])]=decode(attr[2]??attr[3]??'');
+      for(const attr of value.slice(tag.length+1,-1).matchAll(/([\w:-]+)(?:="([^"]*)"|='([^']*)')?/g))props[propName(attr[1])]=attr[1]==='open'?true:decode(attr[2]??attr[3]??'');
       const node={tag,props,children:[]};stack.at(-1).children.push(node);
       if(!['img','input','br','hr','link','meta','source'].includes(tag))stack.push(node);
     }else stack.at(-1).children.push(decode(value));
@@ -135,6 +135,9 @@ function files(dir){return fs.readdirSync(dir,{withFileTypes:true}).flatMap(entr
 });}
 for(const file of files(root).filter(file=>file.endsWith('.html'))){
   let html=fs.readFileSync(file,'utf8');
+  // SSR, retained client components and fallback repair share the one markup
+  // authority above; no second mobile/desktop footer or post-paint rewrite.
+  html=html.replace(/<footer class="v4-footer">[\s\S]*?<\/footer>/g,()=>`<footer class="v4-footer">${footerMatch[1]}</footer>`);
   const ownsHydration=html.includes('self.__next_f')&&['01pb0x0z72e41.js','146ntlcv_t6~w-v4041.js','0x2bx8kerxrmz.js'].some(chunk=>html.includes(chunk));
   if(!ownsHydration){
     // Standalone quiz/landings may reuse Next CSS but have no React root.

@@ -1,29 +1,34 @@
 {
-  "version": "4.3.70",
-  "build": 4370,
-  "reviewMode": "ux01-candidate-awaiting-independent-visual-exact-head-review",
-  "baselineApplicationSourceCommit": "83c480ec127a67065fe13b198ede0b6d668e9289",
+  "version": "4.3.71",
+  "build": 4371,
+  "reviewMode": "ux02-stacked-candidate-awaiting-ux01-integration-and-independent-visual-exact-head-review",
+  "baselineApplicationSourceCommit": "411832a398a4c44dfc1f74279f61ade35efade2e",
   "applicationFixes": [
     {
-      "path": "assets/admin-v250.js",
-      "sha256": "17847453fc25cdbb78e70f6d0e8e8de5522f7e684f8ccc52e03f8591646cb5a0",
-      "reason": "Expose existing canonical expense/completed markers and render actual mobile trend points as the approved line/area; financial calculations and native handlers remain unchanged."
+      "path": "assets/site-v400.js",
+      "sha256": "dc62670848478a1fee62093016b81b9764a5d259fa66beda85834ba970fcf710",
+      "reason": "Canonical approved footer and idempotent native mobile disclosures; preserve existing contact analytics owner, add footer-only adapter where standalone exports have none."
     },
     {
-      "path": "sandbox/ui.js",
-      "sha256": "2200cd8794e02fe09af32f275a9cdad63499cdf14a48f526cb0064ab273a0fa0",
-      "reason": "Project native Analytics/Finance nodes into the approved compact dashboard; delegate period/expense actions, preserve disclosures/focus/search and keep every detailed section."
+      "path": "assets/site-v400.css",
+      "sha256": "b8845dc2414e888caf4569bc04bfc7237227ee8c0179cacbc6d6a66ceb30b3a3",
+      "reason": "Footer-scoped approved contact/navigation composition, compact native categories and responsive ecosystem banner; preserve global navigation and CTA thresholds."
     },
     {
-      "path": "sandbox/ui.css",
-      "sha256": "0fba0ca87cc590a1017add5ac7893507870b094fde3de6298c75bd2875b2dc64",
-      "reason": "Component-scoped approved gold outlines, profit summary, compact KPI grid, period dropdown and responsive spacing; no global navigation changes."
+      "path": "assets/va-home-footer-art.svg",
+      "sha256": "28ee683505fdc6ce641e891138bc799f30233b185ae13b4b0fb529337fa6f155",
+      "reason": "Exact reuse of the previously approved decorative diffuser illustration, without a product claim."
+    },
+    {
+      "path": "scripts/sync-public-hydration.mjs",
+      "sha256": "62db4147f5a2b4b17ee1bf0967b968bb1e64d3e0583fcf34d46be93295d41c71",
+      "reason": "Derive SSR and retained client footers from the same canonical markup, including the native open boolean."
     }
   ],
-  "artifactFiles": 273,
-  "artifactTreeSha256": "54e8e3b5a20558d50ac25369dcc2f018794ab41b97bce3b827c7ee8c3997e0a4",
+  "artifactFiles": 274,
+  "artifactTreeSha256": "62f60a8f8dcf1c04547e9f2fdd9dec330fe8ff207fd67007234393e74e796c04",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "7efc5c808a8ac2faa4fec248cc5db3e3f4e8952c617527040345899fdb9a1af7",
+  "reviewArchiveSha256": "1b7367647a6875716ea69b8224078c2b152a3626c190bd6c208053be99752ee0",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,
@@ -39,5 +44,5 @@
     77
   ],
   "backendFixes": [],
-  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from 4.3.69 to 4.3.70 in ten generated config.ts/config.deploy.js files. No configuration values, handlers, database operations or backend deployment."
+  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from 4.3.70 to 4.3.71 in ten generated config.ts/config.deploy.js files. No configuration values, handlers, database operations or backend deployment."
 }
