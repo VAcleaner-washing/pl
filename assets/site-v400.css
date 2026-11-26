@@ -220,3 +220,65 @@ main>footer:not(.v4-footer){visibility:hidden}
 .mobile-booking a,.mobile-booking a:last-child{font-size:12px}
 .timeline p{font-size:12px;line-height:1.5}
 .final-cta>small{font-size:12px;line-height:1.5;color:#77736c}
+
+/* UX-02 — one approved black/gold footer, shared by SSR and hydration. */
+footer.v4-footer{background:#080b0b;color:#dce0dd;padding:38px 32px 22px!important}
+footer.v4-footer .footer-main.v4-footer-grid{display:grid!important;grid-template-columns:minmax(280px,.95fr) minmax(0,1.8fr)!important;gap:48px!important;max-width:1280px;margin:0 auto!important;padding:0!important;align-items:start}
+footer.v4-footer .v4-footer-brand{display:flex;flex-direction:column;gap:12px;grid-column:auto;min-width:0}
+footer.v4-footer .footer-brand{align-self:flex-start;opacity:1}
+footer.v4-footer .v4-footer-brand p{max-width:32ch;margin:0;color:#b3bbb6;font-size:13px;line-height:1.5}
+footer.v4-footer .v4-footer-contact{display:flex;flex-direction:column;gap:0;margin-top:2px}
+footer.v4-footer .v4-footer-contact>a{display:flex;align-items:center;gap:11px;min-height:44px;min-width:0;padding:0;color:#c4cdc7;text-decoration:none;font-size:13px;line-height:1.4;opacity:1}
+footer.v4-footer .v4-footer-contact>.v4-footer-phone{min-height:48px;font-size:23px;font-weight:600;letter-spacing:-.3px;color:#f1e6ce}
+footer.v4-footer .v4-footer-contact svg{width:19px;height:19px;flex:0 0 19px;fill:none;stroke:var(--gold,#d8b56d);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+footer.v4-footer .v4-footer-navigation{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;min-width:0}
+footer.v4-footer .v4-footer-navigation details{min-width:0;margin:0;padding:0;border:0;background:none;box-shadow:none}
+footer.v4-footer .v4-footer-navigation summary{display:flex;align-items:center;min-height:44px;list-style:none;color:#e1bd7b;font-size:11px;line-height:1.4;text-transform:uppercase;letter-spacing:.08em;font-weight:600;cursor:pointer}
+footer.v4-footer .v4-footer-navigation summary::-webkit-details-marker{display:none}
+footer.v4-footer .v4-footer-links{display:grid;gap:0}
+footer.v4-footer .v4-footer-links>a{display:flex;align-items:center;min-height:40px;padding:4px 0;color:#c4cdc7;text-decoration:none;font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+footer.v4-footer a:hover{color:#efcf8d}
+footer.v4-footer :is(a,summary):focus-visible{outline:2px solid var(--gold,#d8b56d);outline-offset:3px;border-radius:3px}
+footer.v4-footer .v4-footer-ecosystem{display:block;max-width:1280px;margin:24px auto 0;padding:0;grid-column:auto}
+footer.v4-footer .v4-vahome-banner{position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;gap:30px;min-height:104px;padding:18px 190px 18px 24px;color:#f0eade;text-decoration:none;border:1px solid #4b422f;border-radius:13px;background:radial-gradient(ellipse at 100% 70%,#71562966,transparent 35%),linear-gradient(100deg,#171c19,#0d1314 65%)}
+footer.v4-footer .v4-vahome-brand{display:grid;gap:5px;min-width:190px;flex-shrink:0}
+footer.v4-footer .v4-vahome-brand>small{color:#e1bd7b;font-size:10px;font-weight:600;line-height:1.4;letter-spacing:.15em;opacity:1}
+footer.v4-footer .v4-vahome-brand>strong{color:#f1ecdf;font-size:28px;font-weight:550;line-height:1.2;letter-spacing:.015em}
+footer.v4-footer .v4-vahome-brand svg{display:inline-block;width:21px;height:21px;margin-left:6px;fill:none;stroke:#e1bd7b;stroke-width:1.5;vertical-align:baseline}
+footer.v4-footer .v4-vahome-message{padding-left:28px;border-left:1px solid #5c574580;max-width:42ch;color:#c4cdc7;font-size:14px;line-height:1.5}
+footer.v4-footer .v4-vahome-art{position:absolute;right:10px;bottom:-2px;z-index:-1;width:160px;height:110px;max-width:none;object-fit:contain;pointer-events:none}
+footer.v4-footer .footer-bottom{display:flex;max-width:1280px;margin:0 auto!important;padding:18px 0 0!important;border:0;color:#a4afa7;font-size:12px;line-height:1.5}
+@media(max-width:1050px){
+ footer.v4-footer .footer-main.v4-footer-grid{grid-template-columns:1fr!important;gap:22px!important}
+ footer.v4-footer .v4-footer-brand{grid-column:1/-1}
+ footer.v4-footer .v4-footer-navigation{gap:24px}
+}
+@media(max-width:620px){
+ footer.v4-footer{padding:26px 20px calc(20px + env(safe-area-inset-bottom,0px))!important}
+ footer.v4-footer .footer-main.v4-footer-grid{gap:20px!important}
+ footer.v4-footer .v4-footer-brand{gap:10px}
+ footer.v4-footer .v4-footer-brand p{max-width:35ch}
+ footer.v4-footer .v4-footer-contact>.v4-footer-phone{font-size:23px;min-height:48px}
+ footer.v4-footer .v4-footer-navigation{display:block;border-top:1px solid #ffffff26}
+ footer.v4-footer .v4-footer-navigation details{border-bottom:1px solid #ffffff26}
+ footer.v4-footer .v4-footer-navigation summary{min-height:46px;justify-content:space-between;gap:12px;color:#e2e5e2;font-size:14px;text-transform:none;letter-spacing:0}
+ footer.v4-footer .v4-footer-navigation summary:after{content:"";width:7px;height:7px;margin-right:4px;border-right:1.5px solid #d8b56d;border-bottom:1.5px solid #d8b56d;transform:rotate(45deg) translateY(-2px);transition:transform .15s}
+ footer.v4-footer .v4-footer-navigation details[open]>summary:after{transform:rotate(225deg) translate(-2px,-2px)}
+ footer.v4-footer .v4-footer-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:0 18px;padding:0 0 10px}
+ footer.v4-footer .v4-footer-links>a{min-height:44px;font-size:13px}
+ footer.v4-footer .v4-footer-ecosystem{margin-top:18px}
+ footer.v4-footer .v4-vahome-banner{display:block;min-height:118px;padding:17px 108px 17px 16px}
+ footer.v4-footer .v4-vahome-brand{min-width:0}
+ footer.v4-footer .v4-vahome-brand>small{font-size:9px}
+ footer.v4-footer .v4-vahome-brand>strong{font-size:25px;white-space:nowrap}
+ footer.v4-footer .v4-vahome-brand svg{width:18px;height:18px;margin-left:3px}
+ footer.v4-footer .v4-vahome-message{display:block;max-width:24ch;margin-top:9px;padding:0;border:0;font-size:11px;line-height:1.4}
+ footer.v4-footer .v4-vahome-art{right:-5px;bottom:-2px;width:118px;height:110px}
+ footer.v4-footer .footer-bottom{padding-top:17px!important;font-size:11px}
+}
+@media(max-width:350px){
+ footer.v4-footer{padding-inline:16px!important}
+ footer.v4-footer .v4-vahome-banner{padding-right:88px}
+ footer.v4-footer .v4-vahome-art{width:100px;right:-10px}
+}
+@media(prefers-reduced-motion:reduce){footer.v4-footer .v4-footer-navigation summary:after{transition:none}}

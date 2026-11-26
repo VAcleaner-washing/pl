@@ -13,6 +13,7 @@ from urllib.parse import urlparse
 from xml.etree import ElementTree
 
 from playwright.sync_api import expect, sync_playwright
+from ux02_footer_qa import check_footer
 from e2e_smoke import SUPABASE_HOST, choose_booking_slot, iso, make_api_handler, static_server
 
 PROJECT = Path(__file__).resolve().parents[1]
@@ -351,6 +352,7 @@ def main() -> int:
                 errors = []
                 failed_requests = []
                 booking_evidence = []
+                footer_evidence = None
                 response = None
                 python_error = None
                 api_start = len(api_calls)
@@ -364,6 +366,8 @@ def main() -> int:
                     response = page.goto(base + route, wait_until='networkidle')
                     if page.locator('script[src*="/assets/public-hydration.js"]').count():
                         page.wait_for_selector('html[data-vacleaner-hydrated="1"]', state='attached')
+                    if route in ('/', '/kontakty/', '/tekhnika/karcher-puzzi-8-1/'):
+                        footer_evidence = check_footer(page, width)
                     if route == '/bronuvannia/':
                         booking_fulfillment_case(page, width, booking_evidence)
                     page.wait_for_timeout(100)
@@ -383,6 +387,8 @@ def main() -> int:
                 result = {'route': route, 'width': width, 'slowScripts': slow,
                           'status': response.status if response else None, 'errors': [str(e) for e in errors],
                           'pendingEnhancements': pending}
+                if footer_evidence:
+                    result['footer'] = footer_evidence
                 if booking_evidence:
                     result['bookingFulfillment'] = booking_evidence
                 if python_error:

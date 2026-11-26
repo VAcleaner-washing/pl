@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.70
-**Baseline build:** 4370
-**Останнє оновлення:** 2026-11-23
+**Baseline version:** 4.3.71
+**Baseline build:** 4371
+**Останнє оновлення:** 2026-11-26
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -394,6 +394,16 @@ Footer додатково містить:
 - Політика конфіденційності.
 
 Навігація не повинна мати дубльованих пунктів, dead links, різних URL для однієї canonical сторінки або кнопок із однаковим текстом і різною логікою.
+
+## WEB-002A — approved shared footer (UX-02)
+
+- One adaptive footer: the original VA / CLEANER / POLTAVA logo, current description and verified contacts on the left, four navigation categories on the right at desktop widths. Preserve all existing destinations and copy; `Інформація` contains the existing rental terms/privacy links. No commercial or legal claims are added.
+- The prominent phone, Instagram and delivery/pickup contact links use the existing verified destinations. Hydrated pages retain their existing delegated `contact_click` owner, with one event per click and the original method/URL/attribution. Standalone exports have no React ContactAnalytics owner: only their footer gets one idempotent, same-schema contact adapter; it must never also bind on hydrated routes. VA HOME remains an ordinary external link, without an invented analytics event.
+- Mobile uses four native `details/summary` disclosures. Their opened links form two balanced columns; keyboard toggling and focus remain native. Categories start open in server HTML for no-JS accessibility/SEO and initialize closed only after hydration at ≤620px. Repeated enhancement/mutations preserve user disclosure state; breakpoint transitions restore the appropriate default. Desktop/tablet exposes all groups without a duplicated footer.
+- VA HOME is a separate linked premium horizontal banner, compact on mobile, with the previously approved decorative diffuser illustration (decorative empty alt, no synthetic product claim). Keep the existing VA HOME URL/target/rel and tagline. Copyright is unchanged.
+- `assets/site-v400.js` owns the canonical markup. The existing `scripts/sync-public-hydration.mjs` derives all public SSR footers and the three retained React footer components from it; cache-busted chunks preserve hydration/client-navigation parity. No alternate device tree or delayed footer repaint.
+- Black background, gold outline icons, restrained gradient/borders and compact proportions follow the owner's final attached reference. Scope is the footer: public/PWA header, global navigation, booking visibility thresholds, product selection and commercial text remain unchanged. The final copyright/banner must scroll clear of the existing mobile booking bar, including safe-area clearance.
+- Regression: `npm run test:public-visual-contract` checks server/client ownership and all public routes; the existing Chromium/WebKit public hydration command invokes `ux02_footer_qa.py` for native disclosure, real contact analytics, link/image integrity, containment and final-content clearance. Existing slow-JS, booking, CTA, SEO, attribution and full release gates remain mandatory. Actual N screenshots at mobile/tablet/desktop are required for independent visual review. Physical iPhone evidence remains separate.
 
 ## WEB-003 — canonical public routes
 
@@ -6199,3 +6209,25 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 ### TESTS
 - Existing finance/deposit/analytics/date and presentation-isolation contracts; canonical Analytics visual regression plus scripts/ux01_dashboard_qa.py through the existing four normal Operations variants. Positive and negative fixtures cover unknown/investment-only/loss/zero-revenue states, native search/filter/edit access, focus, SVG stroke, disclosure state and a deliberately invalid touch target.
 - Actual normal-artifact screenshots at phone/tablet/desktop widths are required for independent visual/exact-head review. Full static/build, pinned Browser/WebKit, all four Operations, Release readiness and separate post-merge provenance/live/device acceptance remain mandatory; this record does not claim those pending results.
+
+
+# Change record — v4.3.71
+
+### ADDED
+- WEB-002A: the owner's approved black/gold public footer, actionable verified contacts, four native navigation categories and separate VA HOME banner. The decorative diffuser SVG reuses the approved illustration, without product/price claims.
+
+### CHANGED
+- One canonical markup source now generates the retained SSR exports and all three React footer components. Mobile categories initialize closed after hydration and open their links in two columns; desktop/tablet retains four columns. Footer-scoped CSS preserves the original logo, typography hierarchy and compact reference proportions.
+- Standalone exports without a retained React contact-event owner receive one idempotent footer-only same-schema adapter. Hydrated pages keep the original owner. CTA thresholds, booking controls and global navigation remain unchanged.
+
+### FIXED
+- Contact information is available as actual clickable phone/Instagram/delivery links in the footer, rather than an unclickable bottom-line number. The ecosystem is its own compact linked banner instead of a fifth navigation column.
+
+### PRESERVED
+- All thirteen original navigation links/texts, brand description, copyright, verified phone/Instagram/VA HOME destinations and external link attributes. No invented address, opening hours, legal claim or commercial term.
+- UX-01 is an explicit unmerged dependency for this stacked review candidate. No further Analytics/Finance behavior changes; financial/deposit/auth/PWA logic and all canonical sources remain unchanged apart from the ordinary coherent release/version stamp.
+- CI/CD, registry membership, Ruleset, required contexts, Roadmap and dependencies are unchanged. No Supabase operation/deployment, no G09 repair and no PR96 change. This is not production/device acceptance.
+
+### TESTS
+- Existing public visual contract checks exact canonical SSR footer parity across all listed routes; existing Chromium/WebKit hydration QA invokes the UX-02 footer helper for native click/keyboard disclosures, preserved links, contact events without duplicates, art loading, containment and final-content clearance. Existing slow hydration/booking assertions are retained.
+- Local responsive evidence covers 320/390/430/620/768/1024/1280/1440/1648, no-JS and a declared CSS simulation of a 34px bottom safe inset. Physical iPhone/WebKit acceptance and full native main-target CI remain separate requirements; screenshots do not certify them.
