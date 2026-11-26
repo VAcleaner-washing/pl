@@ -5,11 +5,16 @@ import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {evaluateMergeReadiness} from './check-merge-readiness.mjs';
+import {browserRuntimePolicyErrors, engineOutcomeErrors, ENGINE_REQUIRED_STEPS} from './ci-browser-runtime-policy.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const evaluator = path.join(root, 'scripts/check-merge-readiness.mjs');
 const repository = 'VAcleaner-washing/pl';
-const gates = ['validate', 'browser', 'webkit', 'operations'];
+const gates = ['validate', 'engines', 'operations'];
+// Retain the old named canonical/WebKit failure domains while their native
+// job results are now aggregated. Producer outcome tests remain lane-specific.
+const failureDomains = ['validate', 'canonical', 'webkit', 'operations'];
+const aggregateKey = name => ['canonical', 'webkit'].includes(name) ? 'engines' : name;
 function fixture(eventName = 'pull_request', docsOnly = false) {
   const event = {repository: {full_name: repository}};
   let ref = 'refs/pull/101/merge', baseRef = 'main';
@@ -41,16 +46,18 @@ for (const event of ['schedule', 'pull_request_target', 'merge_group', '', null,
 for (const flag of [true, false, '', 'TRUE', ' false', null, undefined, 0]) reject('unknown classifier output ' + String(flag), x => { x.needs.classify.outputs.docs_only = flag; });
 reject('missing classifier outputs', x => { delete x.needs.classify.outputs; });
 for (const result of ['failure', 'cancelled', 'skipped', 'neutral', '', null, undefined]) reject('classifier result ' + String(result), x => { x.needs.classify.result = result; });
-for (const gate of ['classify', ...gates]) {
-  reject('missing dependency ' + gate, x => { delete x.needs[gate]; });
-  reject('invalid dependency object ' + gate, x => { x.needs[gate] = null; });
-  reject('unknown result ' + gate, x => { x.needs[gate].result = 'neutral'; });
+for (const domain of ['classify', ...failureDomains]) {
+  const gate = aggregateKey(domain);
+  reject('missing dependency ' + domain, x => { delete x.needs[gate]; });
+  reject('invalid dependency object ' + domain, x => { x.needs[gate] = null; });
+  reject('unknown result ' + domain, x => { x.needs[gate].result = 'neutral'; });
 }
 reject('unknown extra dependency requires policy update', x => { x.needs.extra = {result: 'success'}; });
 for (const value of [null, undefined, [], 'success']) reject('invalid needs object', x => { x.needs = value; });
-for (const gate of gates) {
-  for (const result of ['failure', 'cancelled', 'skipped', 'neutral', null, undefined]) reject('full ' + gate + ':' + String(result), x => { x.needs[gate].result = result; });
-  for (const result of ['success', 'failure', 'cancelled', 'neutral', null, undefined]) reject('docs ' + gate + ':' + String(result), x => { x.needs[gate].result = result; }, fixture('pull_request', true));
+for (const domain of failureDomains) {
+  const gate = aggregateKey(domain);
+  for (const result of ['failure', 'cancelled', 'skipped', 'neutral', null, undefined]) reject('full ' + domain + ':' + String(result), x => { x.needs[gate].result = result; });
+  for (const result of ['success', 'failure', 'cancelled', 'neutral', null, undefined]) reject('docs ' + domain + ':' + String(result), x => { x.needs[gate].result = result; }, fixture('pull_request', true));
 }
 for (const f of [fixture(), fixture('pull_request', true), fixture('push'), fixture('workflow_dispatch')]) reject('explicit cancellation overrides otherwise green lane ' + f.eventName, x => { x.workflowCancelled = 'true'; }, f);
 for (const value of [true, false, '', undefined, null, 'False']) reject('missing/unknown cancellation state', x => { x.workflowCancelled = value; });
@@ -72,6 +79,17 @@ reject('push cannot masquerade as PR', x => { x.event.pull_request = {}; }, fixt
 reject('dispatch cannot masquerade as PR', x => { x.event.pull_request = {}; }, fixture('workflow_dispatch'));
 reject('dispatch ref mismatch', x => { x.event.ref = 'another-branch'; }, fixture('workflow_dispatch'));
 reject('missing runner ref', x => { delete x.ref; });
+
+// A stale independent-engine schema cannot be accepted by the new aggregate.
+for (const old of ['browser', 'webkit']) reject('old extra gate ' + old, x => { x.needs[old] = {result: 'success'}; });
+for (const lane of ['canonical', 'webkit']) {
+  for (const outcome of ['failure', 'cancelled', 'skipped', 'neutral', undefined]) {
+    const steps = Object.fromEntries(ENGINE_REQUIRED_STEPS[lane].map(id => [id, {outcome: 'success', conclusion: 'success'}]));
+    steps[lane === 'canonical' ? 'canonical_qa' : 'webkit_qa'] = {outcome, conclusion: 'success'};
+    assert.ok(engineOutcomeErrors({lane, jobStatus: 'success', steps}).length, lane + ' actual producer failure must reject despite conclusion success');
+    reject(lane + ' producer ' + String(outcome) + ' cannot admit release', x => { x.needs.engines.result = outcome; });
+  }
+}
 
 function assertDecisions(evaluate) {
   for (const row of cases) {
@@ -97,6 +115,7 @@ function job(source, name) {
 }
 function assertWorkflow(source) {
   const classify = job(source, 'classify'), ready = job(source, 'readiness');
+  assert.deepEqual(browserRuntimePolicyErrors(source, fs.readFileSync(path.join(root, 'requirements-ci.txt'), 'utf8')), [], 'both required engine producers and actual-outcome binding');
   const fixtures = classify.indexOf('node scripts/test-merge-readiness.mjs');
   assert.ok(fixtures >= 0 && fixtures < classify.indexOf('node scripts/ci-classify-pr.mjs'), 'negative fixtures must run before classification/full CI');
   assert.match(ready, /^    name: Release readiness\s*$/m);
@@ -122,8 +141,8 @@ assertWorkflow(workflow);
 const mutations = [
   s => s.replace('node scripts/test-merge-readiness.mjs', 'node scripts/missing-fixtures.mjs'),
   s => s.replace('    name: Release readiness', '    name: Conditional readiness'),
-  s => s.replace('if: ${{ always() }}\n    needs: [classify, validate, browser, webkit, operations]', 'if: ${{ !cancelled() }}\n    needs: [classify, validate, browser, webkit, operations]'),
-  s => s.replace('needs: [classify, validate, browser, webkit, operations]', 'needs: [classify, validate, browser, operations]'),
+  s => s.replace('if: ${{ always() }}\n    needs: [classify, validate, engines, operations]', 'if: ${{ !cancelled() }}\n    needs: [classify, validate, engines, operations]'),
+  s => s.replace('needs: [classify, validate, engines, operations]', 'needs: [classify, validate, operations]'),
   s => s.replace('    name: Release readiness', '    name: Release readiness\n    continue-on-error: true'),
   s => s.replace('    name: Release readiness', '    name: Release readiness\n    strategy:\n      matrix:\n        probe: [1, 2]'),
   s => s.replace("READINESS_NEEDS: '${{ toJSON(needs) }}'", "READINESS_NEEDS: '${{ toJSON(inputs) }}'"),

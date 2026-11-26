@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-const gates = ['validate', 'browser', 'webkit', 'operations'];
+// Native engines aggregate succeeds only when both required matrix lanes pass.
+const gates = ['validate', 'engines', 'operations'];
 const results = new Set(['success', 'failure', 'cancelled', 'skipped']);
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 function requireState(condition, message) {

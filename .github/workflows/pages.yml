@@ -101,42 +101,132 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  browser:
-    name: Browser QA aggregate gate
+  engines:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-24.04
     needs: [classify, validate]
     if: needs.classify.outputs.docs_only != 'true'
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - lane: canonical
+            name: Browser QA aggregate gate
+          - lane: webkit
+            name: WebKit / mobile forms gate
     container:
       image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
       options: --ipc=host
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
+        id: checkout
       - uses: actions/setup-node@v4
+        id: setup_node
         with:
           node-version: 22
       - name: Install client for the pinned official browser runtime
+        id: canonical_client
+        if: matrix.lane == 'canonical'
         timeout-minutes: 5
         run: |
           python -m pip install --disable-pip-version-check -r requirements-ci.txt
       - name: Verify browser runtime failure contracts
+        id: canonical_contracts
+        if: matrix.lane == 'canonical'
         run: python -m unittest discover -s scripts -p 'test_ci_browser_runtime.py'
       - name: Verify pinned Chromium and WebKit startup
+        id: canonical_startup
+        if: matrix.lane == 'canonical'
         timeout-minutes: 2
         run: python scripts/verify_ci_browser_runtime.py
+      - name: Install client for the pinned official WebKit runtime
+        id: webkit_client
+        if: matrix.lane == 'webkit'
+        timeout-minutes: 15
+        run: |
+          python -m pip install --disable-pip-version-check -r requirements-ci.txt
+          python -m playwright --version
+      - name: Verify deterministic WebKit retry contracts before browser suites
+        id: webkit_contracts
+        if: matrix.lane == 'webkit'
+        run: python -m unittest discover -s scripts -p 'test_public_hydration_retry.py'
+      - name: Diagnose WebKit browser startup
+        id: webkit_startup
+        if: matrix.lane == 'webkit'
+        run: |
+          mkdir -p webkit-test-results
+          python - <<'PY' 2>&1 | tee webkit-test-results/browser-startup.log
+          import platform
+          from playwright.sync_api import sync_playwright
+          print('Pinned runtime Python:', platform.python_version())
+          with sync_playwright() as p:
+              browser = p.webkit.launch(headless=True)
+              page = browser.new_page()
+              page.goto("about:blank")
+              print("WebKit startup smoke: OK")
+              browser.close()
+          PY
       - name: Download validated Pages artifact
+        id: download_artifact
         uses: actions/download-artifact@v4
         with:
           name: github-pages
           path: .pages-artifact
       - name: Extract validated Pages artifact
+        id: extract_artifact
         run: |
           test ! -e dist
           mkdir dist
           tar -xf .pages-artifact/artifact.tar -C dist
       - name: Run canonical browser / PWA QA
+        id: canonical_qa
+        if: matrix.lane == 'canonical'
         run: npm run qa:browser
+      - name: Verify the deployed artifact
+        id: webkit_artifact
+        if: matrix.lane == 'webkit'
+        run: npm run verify:artifact
+      - name: Verify real WebKit full-journey retry recovery and fail-closed injection
+        id: webkit_retry
+        if: matrix.lane == 'webkit'
+        timeout-minutes: 12
+        env:
+          PYTHONUNBUFFERED: '1'
+        run: |
+          python scripts/public_hydration_qa.py --root dist --browser webkit --booking-only --retry-injection recover --artifacts webkit-test-results/retry-recover
+          python scripts/public_hydration_qa.py --root dist --browser webkit --booking-only --retry-injection fail-second --artifacts webkit-test-results/retry-fail-second
+      - name: Run WebKit mobile, public and startup QA
+        id: webkit_qa
+        if: matrix.lane == 'webkit'
+        timeout-minutes: 20
+        env:
+          DEBUG: pw:browser
+          PYTHONUNBUFFERED: '1'
+        run: npm run test:webkit
+      - name: Verify actual engine step outcomes
+        id: engine_witness
+        if: ${{ always() }}
+        env:
+          ENGINE_LANE: ${{ matrix.lane }}
+          ENGINE_JOB_STATUS: ${{ job.status }}
+          ENGINE_STEPS: '${{ toJSON(steps) }}'
+        run: |
+          node --input-type=module <<'JS'
+          import {engineOutcomeErrors} from './scripts/ci-browser-runtime-policy.mjs';
+          try {
+            const lane = process.env.ENGINE_LANE;
+            const errors = engineOutcomeErrors({lane, jobStatus: process.env.ENGINE_JOB_STATUS, steps: JSON.parse(process.env.ENGINE_STEPS)});
+            if (errors.length) throw new Error(errors.join('; '));
+            console.log(JSON.stringify({accepted: true, lane}));
+          } catch (error) {
+            console.error(JSON.stringify({accepted: false, error: error.message}));
+            process.exitCode = 1;
+          }
+          JS
       - name: Upload browser evidence
-        if: always()
+        if: ${{ always() && matrix.lane == 'canonical' }}
         uses: actions/upload-artifact@v4
         with:
           name: vacleaner-browser-test-results
@@ -152,71 +242,8 @@ jobs:
             equipment-density-test-results
           if-no-files-found: ignore
           retention-days: 14
-
-  webkit:
-    name: WebKit / mobile forms gate
-    runs-on: ubuntu-24.04
-    # Avoid competing browser matrices during the long WebKit suite.
-    needs: [classify, validate, browser]
-    if: needs.classify.outputs.docs_only != 'true'
-    container:
-      image: mcr.microsoft.com/playwright/python:v1.65.1-noble@sha256:0ab41a37431309d72b7a26f40ef1fdb464a62740196b2143965a2f59dc090409
-      options: --ipc=host
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Install client for the pinned official WebKit runtime
-        timeout-minutes: 15
-        run: |
-          python -m pip install --disable-pip-version-check -r requirements-ci.txt
-          python -m playwright --version
-      - name: Verify deterministic WebKit retry contracts before browser suites
-        run: python -m unittest discover -s scripts -p 'test_public_hydration_retry.py'
-      - name: Diagnose WebKit browser startup
-        run: |
-          mkdir -p webkit-test-results
-          python - <<'PY' 2>&1 | tee webkit-test-results/browser-startup.log
-          import platform
-          from playwright.sync_api import sync_playwright
-          print('Pinned runtime Python:', platform.python_version())
-          with sync_playwright() as p:
-              browser = p.webkit.launch(headless=True)
-              page = browser.new_page()
-              page.goto("about:blank")
-              print("WebKit startup smoke: OK")
-              browser.close()
-          PY
-      - name: Download validated Pages artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: github-pages
-          path: .pages-artifact
-      - name: Extract validated Pages artifact
-        run: |
-          test ! -e dist
-          mkdir dist
-          tar -xf .pages-artifact/artifact.tar -C dist
-      - name: Verify the deployed artifact
-        run: npm run verify:artifact
-      - name: Verify real WebKit full-journey retry recovery and fail-closed injection
-        timeout-minutes: 12
-        env:
-          PYTHONUNBUFFERED: '1'
-        run: |
-          python scripts/public_hydration_qa.py --root dist --browser webkit --booking-only --retry-injection recover --artifacts webkit-test-results/retry-recover
-          python scripts/public_hydration_qa.py --root dist --browser webkit --booking-only --retry-injection fail-second --artifacts webkit-test-results/retry-fail-second
-      - name: Run WebKit mobile, public and startup QA
-        timeout-minutes: 20
-        env:
-          DEBUG: pw:browser
-          PYTHONUNBUFFERED: '1'
-        run: npm run test:webkit
       - name: Upload WebKit evidence
-        if: always()
+        if: ${{ always() && matrix.lane == 'webkit' }}
         uses: actions/upload-artifact@v4
         with:
           name: vacleaner-webkit-test-results
@@ -319,7 +346,7 @@ jobs:
   readiness:
     name: Release readiness
     if: ${{ always() }}
-    needs: [classify, validate, browser, webkit, operations]
+    needs: [classify, validate, engines, operations]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -346,7 +373,7 @@ jobs:
 
   deploy:
     name: Deploy GitHub Pages
-    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.validate.result == 'success' && needs.browser.result == 'success' && needs.webkit.result == 'success' && needs.operations.result == 'success' }}
+    if: ${{ always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.validate.result == 'success' && needs.engines.result == 'success' && needs.operations.result == 'success' }}
     permissions:
       contents: read
       pages: write
@@ -355,7 +382,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: [validate, browser, webkit, operations]
+    needs: [validate, engines, operations]
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
