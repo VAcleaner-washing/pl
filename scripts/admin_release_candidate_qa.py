@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 from playwright.sync_api import expect, sync_playwright
 from admin_entrypoint_finance_qa import pages_server
 from admin_idle_qa import navigate
+from ux01_dashboard_qa import verify_dashboard, verify_financial_states
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTION_ORIGIN = 'https://yweluzclearwrazdkahu.supabase.co'
@@ -42,6 +43,7 @@ def main():
                 for i in range(14)]
     results, calls, unexpected, errors = [], [], [], []
     baseline_saves, reject_baseline_once = [], [True]
+    dashboard_fixture = [None]
     settings_without_baseline = {key: value for key, value in fixture['settings'].items() if key != 'equipmentBaselines'}
 
     def check(name, passed, **evidence):
@@ -90,7 +92,7 @@ def main():
             else:
                 body, status = {'error': 'service_error'}, 503
         elif action == 'list':
-            body = {'bookings': fixture['bookings'], 'expenses': []}
+            body = dashboard_fixture[0] or {'bookings': fixture['bookings'], 'expenses': []}
         elif action == 'clients':
             body = {'customers': []}
         elif action == 'campaigns':
@@ -134,6 +136,8 @@ def main():
         options = {'headless': True}
         if args.browser == 'chromium':
             options['args'] = ['--no-sandbox']
+            if args.local_fixtures and os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE'):
+                options['executable_path'] = os.environ['PLAYWRIGHT_CHROMIUM_EXECUTABLE']
         browser = getattr(pw, args.browser).launch(**options)
         device = {k: v for k, v in pw.devices['iPhone 17 Pro Max'].items() if k != 'default_browser_type'} if args.width == 440 else {}
         device.update(viewport={'width': args.width, 'height': 956}, timezone_id='Europe/Kyiv', service_workers='block')
@@ -199,6 +203,14 @@ def main():
             for name in ['upcoming', 'bookings', 'calendar', 'equipment', 'clients', 'campaigns', 'finances', 'analytics', 'chemistry', 'settings']:
                 navigate(page, name)
                 surface(page, name)
+                if name in ('finances', 'analytics'):
+                    verify_dashboard(page, name, args.width, check)
+            def dashboard_state(expenses, no_revenue):
+                dashboard_fixture[0] = {'expenses': expenses, 'bookings': [b for b in fixture['bookings'] if not no_revenue or b['status'] != 'completed']}
+            def restore_dashboard_chrome_fixture():
+                if args.width == 440:
+                    page.evaluate("()=>{document.documentElement.style.setProperty('--pwa-safe-top','59px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px')}")
+            verify_financial_states(page, args.width, check, dashboard_state, lambda: dashboard_fixture.__setitem__(0, None), first_day.isoformat(), restore_dashboard_chrome_fixture, lambda name: capture(page, 'ux01-' + name))
             navigate(page, 'bookings')
             expect(page.locator('#labListMode')).to_be_visible()
             expect(page.locator('.booking-list')).to_have_class('booking-list lab-compact')

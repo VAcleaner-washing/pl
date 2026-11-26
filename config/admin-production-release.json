@@ -1,49 +1,29 @@
 {
-  "version": "4.3.69",
-  "build": 4369,
-  "reviewMode": "finance-visibility-and-purchase-action-candidate-awaiting-full-qa",
-  "baselineApplicationSourceCommit": "4991f1a327d5bfb96f4c85d3f34033fd301a0348",
+  "version": "4.3.70",
+  "build": 4370,
+  "reviewMode": "ux01-candidate-awaiting-independent-visual-exact-head-review",
+  "baselineApplicationSourceCommit": "83c480ec127a67065fe13b198ede0b6d668e9289",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "0d445bf274bb5563966400223af9cacf4ad7c1bc1d9c2f3c0ee4af1d54a6a3f5",
-      "reason": "Purchase-baseline editor owns one primary save action with a concise label; preserve all existing financial formulas, persistence and the activated-controller PWA guard."
-    },
-    {
-      "path": "assets/admin-v250.css",
-      "sha256": "7208dee3d8fa897856ce2e6c55a1c3d6d97013475820b5e46b03ff957e0b011b",
-      "reason": "Component-scoped full-width 48px purchase-save control, independent of legacy two-column Settings layouts."
-    },
-    {
-      "path": "sandbox/forms.js",
-      "sha256": "34095dff0f5db4e8b3e9f62b3e5b8d113550585bd56743e01c9e17365935c146",
-      "reason": "Include new screen-exit Back in the existing dirty/pending policy; internal step Back retains the form."
-    },
-    {
-      "path": "assets/admin-v430.css",
-      "sha256": "4962912946c7dceba0e9ca1ce0399e682f4a55b57245296212aeb737c6dfc460",
-      "reason": "Legacy header/Back rules explicitly exclude the shared component; no new specificity overrides."
-    },
-    {
-      "path": "assets/admin-v4321.css",
-      "sha256": "70648a190266fde8b8f5d9a9d34b5ce50c16571de4bef0be2d85d5072fa38f65",
-      "reason": "Legacy booking-detail header rules explicitly exclude the shared component."
+      "sha256": "17847453fc25cdbb78e70f6d0e8e8de5522f7e684f8ccc52e03f8591646cb5a0",
+      "reason": "Expose existing canonical expense/completed markers and render actual mobile trend points as the approved line/area; financial calculations and native handlers remain unchanged."
     },
     {
       "path": "sandbox/ui.js",
-      "sha256": "50fbf298bf327a8a2cf1974e7966b9e0c2bc1c38c87cbbc47bf790c5c50b0483",
-      "reason": "Compact finance projects the canonical service amount separately from received funds, deposit state and existing settlement; no duplicate financial calculation."
+      "sha256": "2200cd8794e02fe09af32f275a9cdad63499cdf14a48f526cb0064ab273a0fa0",
+      "reason": "Project native Analytics/Finance nodes into the approved compact dashboard; delegate period/expense actions, preserve disclosures/focus/search and keep every detailed section."
     },
     {
       "path": "sandbox/ui.css",
-      "sha256": "f1987156c6de7b6dd4dc57f2c49b4bc5c0a6262b476a932dea7613b45fec1201",
-      "reason": "Aligned compact financial rows with an emphasized service amount, bounded labels and tabular money values."
+      "sha256": "0fba0ca87cc590a1017add5ac7893507870b094fde3de6298c75bd2875b2dc64",
+      "reason": "Component-scoped approved gold outlines, profit summary, compact KPI grid, period dropdown and responsive spacing; no global navigation changes."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "4109bb6e7124ea3cad9a67e60e710574d893a9d39a8ac482f53ed36963139063",
+  "artifactTreeSha256": "54e8e3b5a20558d50ac25369dcc2f018794ab41b97bce3b827c7ee8c3997e0a4",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "39b19a59f79aa373c0912b02d84fd9117f59b06479bed719b1c4cdc6732455ac",
+  "reviewArchiveSha256": "7efc5c808a8ac2faa4fec248cc5db3e3f4e8952c617527040345899fdb9a1af7",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,
@@ -58,14 +38,6 @@
     76,
     77
   ],
-  "backendFixes": [
-    {
-      "path": "supabase/migrations/20261117090000_vacleaner_equipment_units_v4366.sql",
-      "sha256": "3c0ae1bb176dc7beb9ba7e4791fb8d39cd641994de5b610e72387d294e6434f9"
-    },
-    {
-      "path": "supabase/functions/vacleaner-equipment-admin-v1/index.ts",
-      "sha256": "c6341e96c518ab10523fc816aad5738a2710ef38a4822c95471e3bebc4708a94"
-    }
-  ]
+  "backendFixes": [],
+  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from 4.3.69 to 4.3.70 in ten generated config.ts/config.deploy.js files. No configuration values, handlers, database operations or backend deployment."
 }
