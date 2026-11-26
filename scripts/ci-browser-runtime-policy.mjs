@@ -6,9 +6,9 @@ export const ENGINE_REQUIRED_STEPS = Object.freeze({
   webkit: Object.freeze(['checkout', 'setup_node', 'webkit_client', 'webkit_contracts', 'webkit_startup', 'download_artifact', 'extract_artifact', 'webkit_artifact', 'webkit_retry', 'webkit_qa']),
 });
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
-export function engineOutcomeErrors({lane, cancelled, steps}) {
+export function engineOutcomeErrors({lane, jobStatus, steps}) {
   const errors = [];
-  if (cancelled !== 'false') errors.push('Engine cancelled or cancellation state missing/unknown');
+  if (jobStatus !== 'success') errors.push('Engine job status must be success; failure/cancelled/missing/unknown is rejected');
   if (!Object.hasOwn(ENGINE_REQUIRED_STEPS, lane)) return [...errors, 'Missing or unknown engine lane'];
   if (!object(steps)) return [...errors, 'Missing engine step outcomes'];
   for (const id of ENGINE_REQUIRED_STEPS[lane]) {
@@ -103,9 +103,9 @@ export function browserRuntimePolicyErrors(workflow, requirements) {
   if (!byId.get('webkit_retry')?.includes("PYTHONUNBUFFERED: '1'") || !byId.get('webkit_qa')?.includes("PYTHONUNBUFFERED: '1'") || !byId.get('webkit_qa')?.includes('DEBUG: pw:browser')) errors.push('WebKit diagnostic environment must remain intact');
 
   const witness = byId.get('engine_witness') || '';
-  if (field(witness, 'if') !== '${{ always() }}' || !witness.includes('ENGINE_LANE: ${{ matrix.lane }}') || !witness.includes("ENGINE_CANCELLED: '${{ cancelled() }}'") || !witness.includes("ENGINE_STEPS: '${{ toJSON(steps) }}'")) errors.push('Witness must unconditionally bind actual lane/cancellation/step outcomes');
+  if (field(witness, 'if') !== '${{ always() }}' || !witness.includes('ENGINE_LANE: ${{ matrix.lane }}') || !witness.includes('ENGINE_JOB_STATUS: ${{ job.status }}') || !witness.includes("ENGINE_STEPS: '${{ toJSON(steps) }}'")) errors.push('Witness must unconditionally bind actual lane/job status/step outcomes');
   const witnessRun = stepRun(witness);
-  if (!witnessRun.includes('engineOutcomeErrors({lane, cancelled: process.env.ENGINE_CANCELLED, steps: JSON.parse(process.env.ENGINE_STEPS)})') || !witnessRun.includes('process.exitCode = 1;') || /\|\| true|exit 0|\.conclusion/.test(witnessRun)) errors.push('Witness must fail closed on actual outcomes');
+  if (!witnessRun.includes('engineOutcomeErrors({lane, jobStatus: process.env.ENGINE_JOB_STATUS, steps: JSON.parse(process.env.ENGINE_STEPS)})') || !witnessRun.includes('process.exitCode = 1;') || /\|\| true|exit 0|\.conclusion/.test(witnessRun)) errors.push('Witness must fail closed on actual outcomes');
   if (steps.indexOf(witness) <= Math.max(...Object.keys(rules).map(id => steps.indexOf(byId.get(id))))) errors.push('Witness must follow both complete QA paths');
   const uploads = steps.filter(step => !field(step, 'id'));
   if (uploads.length !== 2) errors.push('Only the two owned evidence uploads may omit an engine step ID');

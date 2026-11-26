@@ -138,7 +138,8 @@ const engineMutations=[
   ['no-op checkout',job=>job.replace('uses: actions/checkout@v4','run: true')],
   ['wrong Node runtime',job=>job.replace('node-version: 22','node-version: 20')],
   ['conditional witness',job=>job.replace('if: ${{ always() }}','if: ${{ success() }}')],
-  ['unbound cancellation',job=>job.replace("ENGINE_CANCELLED: '${{ cancelled() }}'","ENGINE_CANCELLED: 'false'")],
+  ['unbound job status',job=>job.replace('ENGINE_JOB_STATUS: ${{ job.status }}','ENGINE_JOB_STATUS: success')],
+  ['unsupported status function in env',job=>job.replace('ENGINE_JOB_STATUS: ${{ job.status }}',"ENGINE_JOB_STATUS: '${{ cancelled() }}'")],
   ['unbound step outcomes',job=>job.replace("ENGINE_STEPS: '${{ toJSON(steps) }}'","ENGINE_STEPS: '${{ toJSON(inputs) }}'")],
   ['witness success fallback',job=>job.replace('process.exitCode = 1;','process.exitCode = 0;')],
   ['missing witness',job=>job.replace('id: engine_witness','id: unowned_witness')],
@@ -175,12 +176,12 @@ let pureOutcomeCases=0;
 const witnessCases=[];
 for(const lane of Object.keys(ENGINE_REQUIRED_STEPS)){
   const good=successfulSteps(lane);
-  assert.deepEqual(engineOutcomeErrors({lane,cancelled:'false',steps:good}),[]);
+  assert.deepEqual(engineOutcomeErrors({lane,jobStatus:'success',steps:good}),[]);
   witnessCases.push({name:lane+' complete',lane,steps:good,accepted:true});
   for(const id of ENGINE_REQUIRED_STEPS[lane]){
     for(const outcome of ['failure','cancelled','skipped','neutral','',null,undefined]){
       const steps=structuredClone(good);steps[id]={outcome,conclusion:'success'};
-      assert.ok(engineOutcomeErrors({lane,cancelled:'false',steps}).length,`${lane}/${id}/${outcome} must reject actual failure despite successful conclusion`);pureOutcomeCases++;
+      assert.ok(engineOutcomeErrors({lane,jobStatus:'success',steps}).length,`${lane}/${id}/${outcome} must reject actual failure despite successful conclusion`);pureOutcomeCases++;
     }
     const steps=structuredClone(good);delete steps[id];
     witnessCases.push({name:lane+' missing '+id,lane,steps,accepted:false});
@@ -191,15 +192,15 @@ for(const lane of Object.keys(ENGINE_REQUIRED_STEPS)){
       witnessCases.push({name:lane+'/'+id+'/'+outcome,lane,steps,accepted:false});
     }
   }
-  for(const cancelled of ['true','',undefined])witnessCases.push({name:lane+' cancellation '+cancelled,lane,steps:good,cancelled,accepted:false});
+  for(const jobStatus of ['failure','cancelled','neutral','',undefined,'success '])witnessCases.push({name:lane+' job status '+jobStatus,lane,steps:good,jobStatus,accepted:false});
 }
 for(const lane of ['', 'other', 'toString'])witnessCases.push({name:'unknown lane '+lane,lane,steps:successfulSteps('canonical'),accepted:false});
 for(const value of ['{broken','', 'null','[]'])witnessCases.push({name:'invalid outcomes '+value,lane:'canonical',stepsJson:value,accepted:false});
 const witnessRun=stepRun(engineStep('engine_witness'));
 function assertWitnessCorpus(script){
   for(const row of witnessCases){
-    const env={...process.env,ENGINE_LANE:row.lane,ENGINE_CANCELLED:Object.hasOwn(row,'cancelled')?row.cancelled:'false',ENGINE_STEPS:row.stepsJson??JSON.stringify(row.steps)};
-    if(env.ENGINE_CANCELLED===undefined)delete env.ENGINE_CANCELLED;
+    const env={...process.env,ENGINE_LANE:row.lane,ENGINE_JOB_STATUS:Object.hasOwn(row,'jobStatus')?row.jobStatus:'success',ENGINE_STEPS:row.stepsJson??JSON.stringify(row.steps)};
+    if(env.ENGINE_JOB_STATUS===undefined)delete env.ENGINE_JOB_STATUS;
     const result=spawnSync('sh',['-e','-c',script],{cwd:process.cwd(),env,encoding:'utf8'});
     assert.ifError(result.error);assert.equal(result.signal,null,row.name);
     assert.equal(result.status,row.accepted?0:1,row.name+'\n'+result.stdout+'\n'+result.stderr);

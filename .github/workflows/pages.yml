@@ -210,14 +210,14 @@ jobs:
         if: ${{ always() }}
         env:
           ENGINE_LANE: ${{ matrix.lane }}
-          ENGINE_CANCELLED: '${{ cancelled() }}'
+          ENGINE_JOB_STATUS: ${{ job.status }}
           ENGINE_STEPS: '${{ toJSON(steps) }}'
         run: |
           node --input-type=module <<'JS'
           import {engineOutcomeErrors} from './scripts/ci-browser-runtime-policy.mjs';
           try {
             const lane = process.env.ENGINE_LANE;
-            const errors = engineOutcomeErrors({lane, cancelled: process.env.ENGINE_CANCELLED, steps: JSON.parse(process.env.ENGINE_STEPS)});
+            const errors = engineOutcomeErrors({lane, jobStatus: process.env.ENGINE_JOB_STATUS, steps: JSON.parse(process.env.ENGINE_STEPS)});
             if (errors.length) throw new Error(errors.join('; '));
             console.log(JSON.stringify({accepted: true, lane}));
           } catch (error) {

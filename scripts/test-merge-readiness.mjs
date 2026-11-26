@@ -86,7 +86,7 @@ for (const lane of ['canonical', 'webkit']) {
   for (const outcome of ['failure', 'cancelled', 'skipped', 'neutral', undefined]) {
     const steps = Object.fromEntries(ENGINE_REQUIRED_STEPS[lane].map(id => [id, {outcome: 'success', conclusion: 'success'}]));
     steps[lane === 'canonical' ? 'canonical_qa' : 'webkit_qa'] = {outcome, conclusion: 'success'};
-    assert.ok(engineOutcomeErrors({lane, cancelled: 'false', steps}).length, lane + ' actual producer failure must reject despite conclusion success');
+    assert.ok(engineOutcomeErrors({lane, jobStatus: 'success', steps}).length, lane + ' actual producer failure must reject despite conclusion success');
     reject(lane + ' producer ' + String(outcome) + ' cannot admit release', x => { x.needs.engines.result = outcome; });
   }
 }
