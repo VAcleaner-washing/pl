@@ -159,9 +159,9 @@ errors.push(...browserRuntimePolicyErrors(workflow,fs.readFileSync(path.join(roo
 const canonicalStatic=workflow.includes('npm run qa:static');
 const canonicalBrowser=workflow.includes('npm run qa:browser');
 const pagesUpload=workflow.indexOf('actions/upload-pages-artifact@v3');
-const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*browser:/m.test(workflow)&&/^\s*webkit:/m.test(workflow)&&/^\s*operations:/m.test(workflow)&&workflow.includes('needs: [classify, validate]')&&workflow.includes("if: needs.classify.outputs.docs_only != 'true'")&&workflow.includes('needs: [validate, browser, webkit, operations]')&&workflow.includes('npm run test:webkit')&&workflow.includes('artifact_name: production-pages');
+const hasSplitGates=/^\s*validate:/m.test(workflow)&&/^\s*engines:/m.test(workflow)&&/^\s*operations:/m.test(workflow)&&workflow.includes('needs: [classify, validate]')&&workflow.includes("if: needs.classify.outputs.docs_only != 'true'")&&workflow.includes('needs: [validate, engines, operations]')&&workflow.includes("needs.engines.result == 'success'")&&workflow.includes('npm run test:webkit')&&workflow.includes('artifact_name: production-pages');
 const hasAggregateGate=qaRunner.includes('config/qa-suites.json')&&qaRunner.includes('qa-release-summary.json')&&qaRunner.includes('FULL QA NOT GREEN');
-if(!canonicalStatic||!canonicalBrowser||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by canonical split static/browser QA with aggregate failure handling');
+if(!canonicalStatic||!canonicalBrowser||pagesUpload<0||!hasSplitGates||!hasAggregateGate)errors.push('GitHub Pages deploy is not gated by canonical split static/engine-matrix QA with aggregate failure handling');
 if(!qaSuites.browser.includes('test:e2e'))errors.push('Canonical browser QA does not include E2E smoke');
 if(!qaSuites.browser.includes('test:public-booking'))errors.push('Canonical browser QA does not include public booking resilience');
 if(!qaSuites.static.includes('test:retention'))errors.push('Canonical static QA does not gate retention rules');
