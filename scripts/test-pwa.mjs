@@ -47,6 +47,8 @@ ok(runtime.includes("requestAnimationFrame(()=>openDetail(b))"),'deep-link opens
 ok(runtime.includes('function modal(html,options={}){'),'modal shell helper exists with optional return context');
 ok(runtime.includes("$('.mobile-more-close')||$('.modal-close')"),'Escape closes mobile More sheet cleanly');
 ok(runtime.includes('data-mobile-logout'),'mobile More contains the logout action');
+ok(runtime.includes('data-pwa-version="${h(CORE.VERSION)}"')&&runtime.includes('data-pwa-build="${h(PWA_BUILD)}"'),'More version label uses the loaded canonical core version and runtime build');
+ok(css.includes('.mobile-more-menu .pwa-app-version{'),'More version has contained readable styling without changing existing controls');
 ok(runtime.includes("/auth/v1/logout?scope=local"),'PWA logout is isolated to the current device session');
 ok(runtime.includes("const logout=$('.top-logout');if(logout)logout.onclick=()=>logoutCurrentDevice(logout)"),'desktop logout uses the same server-revoking flow as mobile logout');
 ok(css.includes('.mobile-more-logout{width:100%'),'mobile logout has an explicit contained visual contract');
@@ -112,6 +114,6 @@ ok(!css.includes('.app{position:fixed}\n  .topbar,.main{position:absolute}'),'st
 ok(runtime.includes("document.documentElement.classList.add('pwa-update-transition')"),'PWA update hides the outgoing mobile chrome before controller reload');
 ok(runtime.includes('PWA_UPDATE_FALLBACK_MS=8000'),'PWA update has a bounded iOS fallback instead of an endless loading state');
 ok(runtime.includes("worker.state==='activated'"),'PWA update reloads when the waiting worker activates even if controllerchange is missed');
-ok(runtime.includes('window.setTimeout(reloadPwaAfterUpdate,PWA_UPDATE_FALLBACK_MS)'),'PWA update forces a recovery reload after the activation timeout');
+ok(!runtime.includes('window.setTimeout(reloadPwaAfterUpdate,PWA_UPDATE_FALLBACK_MS)')&&runtime.includes('window.setTimeout(()=>{reloadWhenActivated();if(!pwaReloading)recover()},PWA_UPDATE_FALLBACK_MS)'),'PWA deadline checks activation and restores retry instead of forcing an unconfirmed reload');
 ok(runtime.includes('later.disabled=true;now.disabled=true'),'PWA update prevents duplicate activation taps');
 console.log(`PWA static tests passed ${passed} assertions.`);

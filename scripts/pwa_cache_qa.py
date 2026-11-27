@@ -6,6 +6,7 @@ import os
 import socket
 import threading
 from contextlib import contextmanager
+from datetime import date, timedelta
 from functools import partial
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -84,6 +85,18 @@ class WorkerHandler(PagesHandler):
             text = candidate.read_text()
             if path == '/admin/sw.js':
                 text = text.replace(str(self.server.build), str(self.server.next_build))
+                if self.server.defer_activation:
+                    # Controlled waiting-worker fault, served only by this local
+                    # fixture. The shipped worker/cache algorithm is unchanged.
+                    original = "self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();});"
+                    assert text.count(original) == 1, 'worker activation fixture integration drift'
+                    text = text.replace(original, '''let qaHoldActivation=true,qaActivationRequests=0;
+self.addEventListener('message',event=>{
+ if(event.data?.type==='QA_ACTIVATION_STATE')event.ports[0].postMessage({requests:qaActivationRequests,held:qaHoldActivation});
+ if(event.data?.type==='QA_ALLOW_ACTIVATION')qaHoldActivation=false;
+ if(event.data?.type==='QA_ACTIVATE_LATE'){qaHoldActivation=false;self.skipWaiting()}
+ if(event.data?.type==='SKIP_WAITING'){qaActivationRequests++;if(!qaHoldActivation)self.skipWaiting()}
+});''')
             else:
                 text = text.replace('?v=' + str(self.server.build), '?v=' + str(self.server.next_build)).replace("PWA_BUILD='" + str(self.server.build) + "'", "PWA_BUILD='" + str(self.server.next_build) + "'")
             body = text.encode()
@@ -103,6 +116,7 @@ def worker_server(root, config):
     server.root = root
     server.build = json.loads((root / 'release.json').read_text())['build']
     server.next_build = None
+    server.defer_activation = False
     server.disconnected = False
     server.reads = []
     server.api_calls = []
@@ -235,6 +249,27 @@ def wait_worker_state(page, phase, build):
             pass
 
 
+def verify_visible_version(page, checks, label, version, build):
+    trigger = page.locator('.mobile-nav .more-nav')
+    if not trigger.is_visible():
+        return  # Desktop sidebar has no mobile More sheet.
+    trigger.click()
+    item = page.locator('.mobile-more-menu .pwa-app-version')
+    expect(item).to_have_count(1)
+    item.scroll_into_view_if_needed()
+    expect(item).to_be_visible()
+    expect(item).to_have_text(f'Версія {version} · build {build}')
+    expect(item).to_have_attribute('data-pwa-version', str(version))
+    expect(item).to_have_attribute('data-pwa-build', str(build))
+    box = item.bounding_box()
+    nav = page.locator('.mobile-nav').bounding_box()
+    checks.check(box['x'] >= 0 and box['x'] + box['width'] <= page.viewport_size['width'] + 1 and box['y'] >= 0 and box['y'] + box['height'] <= nav['y'] + 1 and item.evaluate('e=>parseFloat(getComputedStyle(e).fontSize)>=12'),
+                 label + ': one readable running version/build in More, clear of navigation')
+    checks.screenshot(page, label + '-version.png')
+    trigger.click()
+    expect(page.locator('.mobile-more-menu')).to_have_count(0)
+
+
 def exercise(browser, server, base, config, checks, width, browser_name='chromium', devices=None):
     context = browser.new_context(**context_options(width, devices))
     context.add_init_script(FETCH_PROXY)
@@ -302,6 +337,8 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         checks.check(not any('/functions/' in url or '/auth/' in url for url in cache_urls), label + ': no API/Auth response in Cache Storage')
         checks.check(smoke.no_horizontal_overflow(page), label + ': no overflow')
         checks.check(page.locator('#view .booking-card,#view .upcoming-row').count() >= 2, label + ': real fixture rentals rendered')
+        version = json.loads((server.root / 'release.json').read_text())['version']
+        verify_visible_version(page, checks, label + '-online', version, server.build)
         checks.screenshot(page, label + '-warm.png')
 
         # Offline app shell must load; business data must fail explicitly.
@@ -310,6 +347,7 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         expect(page.locator('#retryLoad')).to_be_visible()
         checks.check(page.evaluate("!!localStorage.getItem('vacleaner_session')"), label + ': offline preserves remembered session')
         checks.check(page.locator('.booking-card').count() == 0, label + ': offline never fabricates cached rentals')
+        verify_visible_version(page, checks, label + '-offline', version, server.build)
         checks.screenshot(page, label + '-offline.png')
         set_transport(context, server, browser_name, False)
         # Online recovery may run automatically; click retry only if still needed.
@@ -343,6 +381,7 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         with page.expect_navigation(wait_until='domcontentloaded'):
             page.locator('.pwa-update-now').click()
         wait_worker_state(page, 'settled', server.next_build)
+        verify_visible_version(page, checks, label + '-updated', version, server.next_build)
         checks.check(True, label + ': explicit update activates and reloads')
         checks.check(page.evaluate('''build=>[...document.querySelectorAll('script[src^="/assets/"],link[href^="/assets/"]')].every(el=>new URL(el.src||el.href).searchParams.get('v')===String(build))''', server.next_build), label + ': updated HTML references only the next build')
         checks.check(not errors, label + ': no runtime errors ' + repr(errors))
@@ -486,6 +525,123 @@ def exercise_release_migration(browser, server, base, candidate_root, stable_roo
         context.close()
 
 
+def activation_state(page):
+    page.evaluate('''async()=>{
+      const registration=await navigator.serviceWorker.getRegistration('/admin/');
+      if(!registration?.waiting)throw Error('controlled waiting worker missing');
+      window.__qaActivationReply=null;const channel=new MessageChannel();
+      channel.port1.onmessage=event=>{window.__qaActivationReply=event.data;channel.port1.close()};
+      registration.waiting.postMessage({type:'QA_ACTIVATION_STATE'},[channel.port2]);
+    }''')
+    page.wait_for_function('()=>window.__qaActivationReply!==null')
+    return page.evaluate('()=>window.__qaActivationReply')
+
+
+def exercise_update_recovery(browser, server, base, checks, width, devices=None):
+    """Actual native worker withholding SKIP_WAITING; all APIs stay local."""
+    context = browser.new_context(**context_options(width, devices))
+    context.add_init_script(FETCH_PROXY)
+    context.add_init_script(RELOAD_JOURNAL_JS)
+    unexpected, errors, navigations = [], [], []
+    block_external_requests(context, base, unexpected)
+    context.tracing.start(screenshots=True, snapshots=True, sources=True)
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    page.on('framenavigated', lambda frame: navigations.append(frame.url) if frame == page.main_frame else None)
+    label = f'{width}-update-recovery'
+    starting_actions = len(server.api_actions)
+    try:
+        page.goto(base + '/__qa-bootstrap/')
+        page.evaluate('()=>{' + smoke.session_script() + '}')
+        page.goto(base + '/admin/bronuvannia/')
+        page.wait_for_selector('.booking-card,.upcoming-row')
+        wait_worker_state(page, 'ready', server.build)
+        server.defer_activation = True
+        server.next_build = server.build + 1
+        page.evaluate("navigator.serviceWorker.getRegistration('/admin/').then(reg=>reg.update())")
+        wait_worker_state(page, 'waiting', server.next_build)
+        expect(page.locator('.pwa-update-now')).to_be_visible()
+        before = len(navigations)
+        attempts_before = page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]').length")
+        page.locator('.pwa-update-now').dblclick()
+        expect(page.locator('#layer form')).to_have_count(0)
+        checks.check(True, label + ': pending panel shields underlying actions from the second click')
+        page.wait_for_function("()=>document.querySelector('.pwa-update-now')?.disabled===false && [...document.querySelectorAll('.toast')].some(n=>n.textContent.includes('Оновлення не завершено'))")
+        assert len(navigations) == before, 'activation timeout caused unconfirmed navigation'
+        assert page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]').length") == attempts_before, 'beforeunload blocked an unconfirmed reload attempt'
+        held = activation_state(page)
+        assert held == {'requests': 1, 'held': True}, held
+        checks.check(True, label + ': actual waiting worker ignores activation; timeout does not reload and rapid taps dispatch once')
+        page.locator('.pwa-update-later').click()
+        expect(page.locator('.pwa-update-prompt')).to_have_count(0)
+        assert activation_state(page)['held']
+        checks.check(True, label + ': Later still dismisses without activating the waiting worker')
+        # Explicitly reopen the deferred prompt, as in the existing upgrade test.
+        page.evaluate("sessionStorage.removeItem('vac_pwa_update_later')")
+        page.reload()
+        expect(page.locator('.pwa-update-now')).to_be_visible()
+        page.evaluate("navigator.serviceWorker.getRegistration('/admin/').then(reg=>reg.waiting.postMessage({type:'QA_ALLOW_ACTIVATION'}))")
+        with page.expect_navigation(wait_until='domcontentloaded'):
+            page.locator('.pwa-update-now').click()
+        wait_worker_state(page, 'settled', server.next_build)
+        checks.check(True, label + ': explicit retry activates the actual target controller and reads back the next build')
+
+        # A second native update activates only after the timeout and an edited
+        # booking form has opened; that late event must not discard the draft.
+        server.next_build = server.build + 2
+        page.evaluate("navigator.serviceWorker.getRegistration('/admin/').then(reg=>reg.update())")
+        wait_worker_state(page, 'waiting', server.next_build)
+        expect(page.locator('.pwa-update-now')).to_be_visible()
+        before = len(navigations)
+        attempts_before = page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]').length")
+        page.locator('.pwa-update-now').click()
+        page.wait_for_function("()=>document.querySelector('.pwa-update-now')?.disabled===false && [...document.querySelectorAll('.toast')].some(n=>n.textContent.includes('Оновлення не завершено'))")
+        assert len(navigations) == before
+        mobile_new = page.locator('#mobileNewBooking')
+        (mobile_new if mobile_new.is_visible() else page.locator('#newBooking')).click()
+        form = page.locator('#bookingForm')
+        expect(form).to_be_visible()
+        start_date = form.locator('[name=startDate]')
+        initial_date = start_date.input_value()
+        edited_date = ((date.fromisoformat(initial_date) if initial_date else date.today()) + timedelta(days=1)).isoformat()
+        start_date.fill(edited_date)
+        retained_form = form.element_handle()
+        page.evaluate('''async()=>{
+          const reg=await navigator.serviceWorker.getRegistration('/admin/');
+          window.__qaLateTarget=reg.waiting;reg.waiting.postMessage({type:'QA_ACTIVATE_LATE'});
+        }''')
+        page.wait_for_function("()=>window.__qaLateTarget?.state==='activated' && navigator.serviceWorker.controller===window.__qaLateTarget")
+        assert len(navigations) == before, 'late activation discarded the active document'
+        assert page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]').length") == attempts_before, 'dirty-form protection masked a late reload attempt'
+        assert retained_form.evaluate('form=>form.isConnected')
+        expect(start_date).to_have_value(edited_date)
+        checks.check(True, label + ': late native activation preserves the original edited booking form')
+        form.locator('header [data-close]').click()
+        if page.locator('#labLeaveDialog').count():
+            page.locator('#labLeaveDialog [data-lab-discard]').click()
+        expect(form).to_have_count(0)
+        expect(page.locator('.pwa-update-now')).to_be_visible()
+        with page.expect_navigation(wait_until='domcontentloaded'):
+            page.locator('.pwa-update-now').click()
+        wait_worker_state(page, 'settled', server.next_build)
+        checks.check(True, label + ': an already-activated target still needs explicit acceptance before reload')
+        allowed = {None, 'list', 'calendar', 'clients', 'campaigns', 'referrals_expiring', 'referral_analytics', 'lookup_customer', 'audit_log', 'health'}
+        assert all(call['action'] in allowed for call in server.api_actions[starting_actions:]), server.api_actions[starting_actions:]
+        assert not errors and not unexpected, (errors, unexpected)
+        checks.check(True, label + ': no business mutation, external request or runtime error')
+        checks.screenshot(page, label + '-complete.png')
+    except Exception as error:
+        checks.check(False, label + ': ' + str(error))
+        checks.capture_failure(page, label)
+    finally:
+        server.next_build = None
+        server.defer_activation = False
+        checks.artifacts.mkdir(parents=True, exist_ok=True)
+        (checks.artifacts / (label + '-navigation.json')).write_text(json.dumps(navigations, indent=2))
+        context.tracing.stop(path=str(checks.artifacts / (label + '-trace.zip')))
+        context.close()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', default='dist')
@@ -510,6 +666,7 @@ def main():
         browser = getattr(playwright, args.browser).launch(**options)
         for width in widths:
             exercise(browser, server, base, config, checks, width, args.browser, playwright.devices)
+            exercise_update_recovery(browser, server, base, checks, width, playwright.devices)
             if stable_root:
                 exercise_release_migration(browser, server, base, candidate_root, stable_root, checks, width, playwright.devices)
         browser.close()

@@ -1,18 +1,18 @@
 {
-  "version": "4.3.69",
-  "build": 4369,
-  "reviewMode": "finance-visibility-and-purchase-action-candidate-awaiting-full-qa",
-  "baselineApplicationSourceCommit": "4991f1a327d5bfb96f4c85d3f34033fd301a0348",
+  "version": "4.3.73",
+  "build": 4373,
+  "reviewMode": "pwa-activation-retry-local-candidate-awaiting-independent-exact-head-review",
+  "baselineApplicationSourceCommit": "83c480ec127a67065fe13b198ede0b6d668e9289",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "0d445bf274bb5563966400223af9cacf4ad7c1bc1d9c2f3c0ee4af1d54a6a3f5",
-      "reason": "Purchase-baseline editor owns one primary save action with a concise label; preserve all existing financial formulas, persistence and the activated-controller PWA guard."
+      "sha256": "185bbb558c6abf4527ac61473a24b4858e75e68c6d71ec179336b7e2d5e26350",
+      "reason": "Owner-approved update recovery, target-controller acknowledgement, rapid-tap shielding and visible running CORE.VERSION/PWA_BUILD in More; business handlers unchanged."
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "7208dee3d8fa897856ce2e6c55a1c3d6d97013475820b5e46b03ff957e0b011b",
-      "reason": "Component-scoped full-width 48px purchase-save control, independent of legacy two-column Settings layouts."
+      "sha256": "3e06bbb480b4b815f4c66bc0f4479831c2ba9866f99eee0c7e40b9126e87c256",
+      "reason": "Component-scoped full-width 48px purchase-save control, independent of legacy two-column Settings layouts. Owner-requested contained12px running-version label after existing More controls; no navigation/layout redesign."
     },
     {
       "path": "sandbox/forms.js",
@@ -41,9 +41,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "4109bb6e7124ea3cad9a67e60e710574d893a9d39a8ac482f53ed36963139063",
+  "artifactTreeSha256": "b631f27e3e1fff69795f9914a1bb80bfa5014c13a30a8bb4b6553815a959d52e",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "39b19a59f79aa373c0912b02d84fd9117f59b06479bed719b1c4cdc6732455ac",
+  "reviewArchiveSha256": "8011b6867239ccef19c72d277af4befda00cf0fb6ec399ec5e14268b83856464",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,

@@ -75,17 +75,22 @@ await check('late send acknowledgement keeps its success notice without invoking
   assert.equal(writes,1);assert.equal(callbacks,0);assert.equal(nextStatus.innerHTML,'Current customer has not sent');assert(h.messages.some(row=>row.text==='Відправлення підтверджено'));
 });
 
-function menuHarness(){
+function menuHarness({version='9.8.7',build='9876'}={}){
   const document=new Target();document.activeElement=null;document.documentElement=new Element(document,'HTML');document.body=new Element(document,'BODY');const layer=new Element(document,'DIV',{id:'layer'}),trigger=new Element(document,'BUTTON',{class:'more-nav'}),mount=new Element(document,'DIV',{id:'adminMount'});document.body.appendChild(layer);document.body.appendChild(trigger);document.body.appendChild(mount);const frames=[],routes=[],logouts=[];
   document.querySelector=selector=>selector==='#layer'?layer:selector==='#adminMount'?mount:selector==='.mobile-nav .more-nav'?trigger:document.body.querySelector(selector);document.querySelectorAll=selector=>document.body.querySelectorAll(selector);document.contains=node=>document.body.contains(node);document.activeElement=trigger;
-  const context=vm.createContext({document,window:{matchMedia:()=>({matches:true})},HTMLElement:Element,requestAnimationFrame:fn=>{frames.push(fn);return frames.length;},cancelAnimationFrame(){},
+  const context=vm.createContext({document,CORE:{VERSION:version},PWA_BUILD:build,window:{matchMedia:()=>({matches:true})},HTMLElement:Element,requestAnimationFrame:fn=>{frames.push(fn);return frames.length;},cancelAnimationFrame(){},
     $:(selector,root)=>root?root.querySelector(selector):document.querySelector(selector),$$:(selector,root)=>root?root.querySelectorAll(selector):document.querySelectorAll(selector),
     ico:{tech:'',clients:'',campaign:'',wallet:'',chart:'',chem:'',gear:''},state:{view:'bookings'},syncMobileNavActive(){},switchView:view=>routes.push(view),logoutCurrentDevice:button=>logouts.push(button),AbortController});
-  vm.runInContext('let mobileMoreState=null;\n'+extract('closeMobileMore')+'\n'+extract('openMobileMore'),context);
+  vm.runInContext(source.match(/^const escapeHtml=.*$/m)[0]+'\nconst h=escapeHtml;\nlet mobileMoreState=null;\n'+extract('closeMobileMore')+'\n'+extract('openMobileMore'),context);
   const flush=()=>{while(frames.length)frames.shift()();};
   return {document,layer,trigger,context,routes,logouts,flush,open(){context.openMobileMore();flush();},close(options){context.closeMobileMore(options);flush();},items:()=>layer.querySelectorAll('[role="menuitem"]')};
 }
 await check('More repeated toggle-close cycles clean document listeners and open class',()=>{const h=menuHarness();for(let i=0;i<5;i++){h.open();assert.equal(h.document.count('pointerdown'),1);h.open();assert.equal(h.document.count('pointerdown'),0);assert.equal(h.document.count('keydown'),0);assert.equal(h.document.documentElement.classList.contains('mobile-more-open'),false);}assert.equal(h.document.activeElement,h.trigger);});
+await check('More reports loaded version/build without adding a keyboard action or a hardcoded release',()=>{
+  for(const [version,build] of [['9.8.7','9876'],['9.8.8','9877']]){
+    const h=menuHarness({version,build});h.open();assert(h.layer.innerHTML.includes(`Версія ${version} · build ${build}`));assert(h.layer.innerHTML.includes(`data-pwa-version="${version}"`));assert(h.layer.innerHTML.includes(`data-pwa-build="${build}"`));assert.equal(h.items().length,8);h.close();assert.equal(h.document.count('keydown'),0);
+  }
+});
 await check('More Escape closes through the owner, cleans handlers and restores trigger focus',()=>{const h=menuHarness();h.open();assert.notEqual(h.document.activeElement,h.trigger);h.document.dispatch('keydown',{key:'Escape'});h.flush();assert.equal(h.layer.querySelector('.mobile-more-menu'),null);assert.equal(h.document.count('pointerdown'),0);assert.equal(h.document.count('keydown'),0);assert.equal(h.document.activeElement,h.trigger);});
 await check('More inside pointer stays open but outside pointer closes and cleans listeners',()=>{const h=menuHarness();h.open();h.document.dispatch('pointerdown',{target:h.items()[0]});assert(h.layer.querySelector('.mobile-more-menu'));h.document.dispatch('pointerdown',{target:h.document.body});h.flush();assert.equal(h.layer.querySelector('.mobile-more-menu'),null);assert.equal(h.document.count('pointerdown'),0);});
 await check('More selecting a destination closes before navigating without leaving stale handlers',()=>{const h=menuHarness();h.open();const item=h.layer.querySelector('[data-more-view="clients"]');assert(item);item.onclick();h.flush();assert.deepEqual(h.routes,['clients']);assert.equal(h.document.count('pointerdown'),0);assert.equal(h.document.count('keydown'),0);assert.equal(h.layer.querySelector('.mobile-more-menu'),null);});
