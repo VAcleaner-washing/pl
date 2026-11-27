@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.69
-**Baseline build:** 4369
-**Останнє оновлення:** 2026-11-23
+**Baseline version:** 4.3.73
+**Baseline build:** 4373
+**Останнє оновлення:** 2026-11-27
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -6073,8 +6073,9 @@ The roadmap scope guard enforces process-modernization metadata and forbids prod
 
 Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separate PWA fix and its release after full QA. It does not expand or reorder the process-modernization roadmap.
 
-- A requested PWA update may reload on `controllerchange` only when the current controller is `activated`. An `activating` controller is insufficient; an unrequested event or missing controller cannot reload.
-- Preserve the existing waiting-worker `statechange` handler, explicit update choice, dirty/pending form protection, Later behavior, bounded fallback, registration identity, offline cache and session behavior.
+- A requested PWA update may reload only after its requested target worker is `activated` and is the current controller. A different activated controller, an `activating`/missing/redundant target or an unrequested event cannot acknowledge the attempt. The waiting-worker state event and controllerchange use the same target identity condition; an already-activated target can be accepted by a new explicit click.
+- Preserve the explicit update choice, dirty/pending form protection, Later behavior, registration identity, offline cache and session behavior. Owner-authorized v4.3.73 repair changes the bounded8000ms fallback: check activation acknowledgement, then restore retry/Later with an honest error if not acknowledged. Never force navigation solely because the deadline elapsed or postMessage threw. This supersedes the historical forced-reload static assertion in the same change as the behavior/Spec/regression contract; the deadline is not increased.
+- Each attempt disables duplicate activation taps and cleans its waiting-worker listener on recovery. A late activation after failed attempt must not unexpectedly reload or discard a newly edited form; explicit retry can accept the now-activated target. Retain the old controller-transition negative fixture and all original registration/upgrade/offline/rollback scenarios.
 - The CI WebKit reproduction observed activation in the outgoing document while a document navigated too early retained `activating` until the strict readiness deadline. Controller-event deferral passed ten isolated control runs; this sample is not proof that all native/browser failures are eliminated.
 - Regression: `scripts/test-pwa-registration-reuse.mjs` executes the actual callback with transitional/activated/missing controllers and retains the 4.3.67 failing callback fixture. `scripts/pwa_cache_qa.py` retains all existing checks and adds a journal asserting activated-before-reload for the outgoing current candidate in the immutable 4346 → candidate → 4346 scenario. Full Browser, WebKit and four Operations gates remain mandatory.
 
@@ -6165,3 +6166,21 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 - This is a test synchronization correction, not permission to change the application or hide a failed journey. Do not add whole-journey retries, remove the deferral assertion or accept an absent/permanently visible/interactive prompt. Other exceptions remain hard failures.
 - The same canonical script executes browser fixtures before the original mobile/desktop journeys: reproduce the obsolete immediate assertion, accept a completed controlled transition, and reject permanently visible, pointer-active, partially active multiple and missing prompts. All22 original route checks, suite membership and release gates remain intact.
 - Evidence: main run45367294251 attempt1 failed on the desktop deferral assertion after PR#93 passed full QA. Its skipped downstream WebKit/deployment is not GREEN; preserve this first failure in timing/flakiness records. A source-CSS reproduction records `visible/none` immediately and `hidden/none` after the120ms transition. Revalidate the correction with full PR and main QA before accepting deployment.
+
+
+# Change record — v4.3.73 (PWA update repair candidate, not deployed)
+
+### ADDED
+- Virtual-deadline behavioral fixtures for target acknowledgement, timeout/retry, duplicate taps, postMessage failure, Later and late/redundant/foreign worker events. Native local-worker regression with controlled withheld activation and an edited form across late activation.
+
+### CHANGED
+- PWA-ACTIVATION-001 now requires the requested target to be the activated current controller for every update reload path. The existing8s deadline returns a usable error/retry state instead of an unconfirmed reload. Standard coherent version/cache metadata and reviewed C/N receipt advance together; generated backend config changes are VERSION metadata only, not backend deployment authorization.
+
+### FIXED
+- Current-source controlled reproduction: withholding activation while the8s fallback reloads brings back the same prompt indefinitely. Correct that conditional reload loop; the precise cause of the reported physical iPhone activation failure remains unproven. Do not claim installed-device or production acceptance from a synthetic/local run.
+
+### PRESERVED
+- Waiting-worker registration identity and explicit consent, session/offline/cache algorithms, dirty/pending form protection, business logic, financial methodology, data sources, tariffs, booking/inventory/referral/delivery contracts and every release gate. No admin/sw.js algorithm, dependency, Supabase behavior, CI/CD, Ruleset, Roadmap, G09 or PR96 change. Existing UX PRs remain separate and require current-base/version reconciliation before integration.
+
+### TESTS
+- `test:pwa-registration-reuse`, `test:pwa-static`, `test:pwa-worker-wait`, `test:pwa-startup` and `pwa_cache_qa.py`; preserve all original cases and68 static/52 browser membership. The forced-unconfirmed-reload mutation must fail the new acknowledgement contract. Run targeted fixtures and affected C/N browser cases before full hosted acceptance, with existing native C/N/S upgrade/offline/rollback and all four Operations variants retained. Separate local runtime, pinned CI, independent exact-head review, deployment/live and physical iPhone results.
