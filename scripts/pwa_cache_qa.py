@@ -539,6 +539,8 @@ def exercise_update_recovery(browser, server, base, checks, width, devices=None)
         before = len(navigations)
         attempts_before = page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]').length")
         page.locator('.pwa-update-now').dblclick()
+        expect(page.locator('#layer form')).to_have_count(0)
+        checks.check(True, label + ': pending panel shields underlying actions from the second click')
         page.wait_for_function("()=>document.querySelector('.pwa-update-now')?.disabled===false && [...document.querySelectorAll('.toast')].some(n=>n.textContent.includes('Оновлення не завершено'))")
         assert len(navigations) == before, 'activation timeout caused unconfirmed navigation'
         assert page.evaluate("JSON.parse(sessionStorage.getItem('vac_pwa_qa_reload_events')||'[]').length") == attempts_before, 'beforeunload blocked an unconfirmed reload attempt'

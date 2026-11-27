@@ -70,13 +70,14 @@ function showPwaUpdatePrompt(worker=pwaWaitingWorker){
  now.onclick=()=>{
   if(document.querySelector('#layer form')){toast('Закрийте або збережіть відкриту форму перед оновленням застосунку');return}
   if(pwaUpdateRequested)return;
-  pwaUpdateRequested=true;clearPwaUpdateFallback();document.documentElement.classList.add('pwa-update-transition');node.classList.add('is-updating');later.disabled=true;now.disabled=true;now.textContent='Оновлюємо…';
+  // Keep the pending panel hit-testable: disabling its controls must not send a second tap to a business action underneath.
+  pwaUpdateRequested=true;clearPwaUpdateFallback();document.documentElement.classList.add('pwa-update-transition');node.classList.add('is-updating');node.style.pointerEvents='auto';later.disabled=true;now.disabled=true;now.textContent='Оновлюємо…';
   const cleanup=()=>{clearPwaUpdateFallback();worker.removeEventListener?.('statechange',reloadWhenActivated)};
   const reloadWhenActivated=()=>{
    if(pwaUpdateRequested&&pwaWaitingWorker===worker&&worker.state==='activated'&&navigator.serviceWorker.controller===worker){cleanup();reloadPwaAfterUpdate()}
   };
   const recover=()=>{
-   cleanup();pwaUpdateRequested=false;document.documentElement.classList.remove('pwa-update-transition');node.classList.remove('is-updating');later.disabled=false;now.disabled=false;now.textContent='Оновити зараз';
+   cleanup();pwaUpdateRequested=false;document.documentElement.classList.remove('pwa-update-transition');node.classList.remove('is-updating');node.style.pointerEvents='';later.disabled=false;now.disabled=false;now.textContent='Оновити зараз';
    toast('Оновлення не завершено. Спробуйте ще раз.');
   };
   worker.addEventListener?.('statechange',reloadWhenActivated);

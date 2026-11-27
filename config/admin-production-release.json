@@ -6,8 +6,8 @@
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "0ac8c4ff3ace90de5c447492d247fe604b79d0a17e9c2d72790cd13cff9d75fe",
-      "reason": "Owner-authorized PWA repair: require activated requested target/current controller; bounded error/retry instead of unconfirmed deadline reload. Business handlers and SW/cache algorithm unchanged; normal build metadata stamped."
+      "sha256": "91441a1888d9b384ad06f487a8634631af0b2ea8a0465f27609570ec7597f63e",
+      "reason": "Owner-authorized PWA repair: require activated requested target/current controller; bounded error/retry instead of unconfirmed deadline reload. Business handlers and SW/cache algorithm unchanged; normal build metadata stamped. Pending panel shields underlying actions during rapid taps; first hosted failure retained."
     },
     {
       "path": "assets/admin-v250.css",
@@ -41,9 +41,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "705d1cf1a46df0d07bf33ec0bf92b975ec9d807658d2456d35f7855949d37c6a",
+  "artifactTreeSha256": "16c778094785cf28c16cef3b87199f5715852080535f569d09539a9b2c77788f",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "009f9210ab8e69f1b49422fedb316aa35c624b6ae3ec154ca2aa090d42fb5246",
+  "reviewArchiveSha256": "6f68263b1f459269faf6f210094d90fff955646666692e1379e7caebfb94a797",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,

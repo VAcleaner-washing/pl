@@ -134,7 +134,7 @@ async function promptHarness({legacyTimeout=false}={}){
   Object.assign(h.context.document,{
     documentElement:{classList:classes()},
     querySelector:selector=>selector==='.pwa-update-prompt'?current:selector==='#layer form'&&formOpen?{}:null,
-    createElement:()=>{const later={disabled:false,textContent:'Пізніше'},now={disabled:false,textContent:'Оновити зараз'},node={classList:classes(),isConnected:false,setAttribute(){},querySelector:selector=>selector==='.pwa-update-later'?later:now,remove(){node.isConnected=false;if(current===node)current=null}};return node},
+    createElement:()=>{const later={disabled:false,textContent:'Пізніше'},now={disabled:false,textContent:'Оновити зараз'},node={classList:classes(),style:{},isConnected:false,setAttribute(){},querySelector:selector=>selector==='.pwa-update-later'?later:now,remove(){node.isConnected=false;if(current===node)current=null}};return node},
     body:{appendChild:node=>{current=node;node.isConnected=true}}
   });
   let promptSource=fs.readFileSync('assets/admin-v250.js','utf8');
@@ -163,11 +163,12 @@ await check('Later dismisses without activation and suppresses the same waiting-
 });
 await check('rapid duplicate update callbacks dispatch one activation and reload once after target acknowledgement',async()=>{
   const h=await promptHarness();h.now.onclick();h.now.onclick();assert.equal(h.messages.length,1);assert.equal(h.messages[0].type,'SKIP_WAITING');assert.equal(h.now.disabled,true);assert.equal(h.later.disabled,true);
+  assert.equal(h.node.style.pointerEvents,'auto','pending panel must shield underlying business actions from the next tap');
   h.target.state='activating';h.controlTarget();h.target.emit();h.controllerChange();assert.equal(h.navigation.length,0);
   h.target.state='activated';h.target.emit();h.controllerChange();assert.equal(h.navigation.length,1);assert.equal(h.timers.size,0);assert.equal(h.target.listeners.length,0);
 });
 await check('missing activation at the unchanged deadline restores a usable prompt without navigation',async()=>{
-  const h=await promptHarness();h.now.onclick();h.expire();h.assertRecovered();h.later.onclick();assert.equal(h.node,null);assert.equal(h.navigation.length,0);
+  const h=await promptHarness();h.now.onclick();h.expire();h.assertRecovered();assert.equal(h.node.style.pointerEvents,'');h.later.onclick();assert.equal(h.node,null);assert.equal(h.navigation.length,0);
 });
 await check('an explicit retry after timeout succeeds without accumulating activation listeners',async()=>{
   const h=await promptHarness();h.now.onclick();h.expire();h.assertRecovered();h.now.onclick();h.now.onclick();assert.equal(h.messages.length,2);assert.equal(h.target.listeners.length,1);
