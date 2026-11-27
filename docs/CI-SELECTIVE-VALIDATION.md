@@ -164,3 +164,25 @@ The preceding retry matrix was a **design-only snapshot at the time of writing**
 - Historical P1 full QA wall-clock baseline remains 24m37s / 26m29s / 27m23s for #85/#86/#87. Docs-only ~10–11s is a different, selective PR workload; the 66/1705 repeated-run candidates are not verified wasted runs.
 
 This evidence update is documentation-only and does not change release gates, product code or production data.
+
+## Current production integration execution tracker — 2026-11-27
+
+This is the single execution-status tracker for the owner's Production Integration & PWA Visual Refinement task. It does not replace the System Spec, change-impact mapping, Roadmap or release policy. Update the same table after each accepted integration; GREEN PR CI alone is not VERIFIED production.
+
+Observed baseline: main `83c480ec127a67065fe13b198ede0b6d668e9289`; [live release](https://vacleaner.pp.ua/release.json) **4.3.69 / 4369**. [Main run 45852417206](https://github.com/VAcleaner-washing/pl/actions/runs/45852417206) and Pages deployment 8090140638 succeeded for that SHA; Pages uses workflow deployment and the existing HTTPS domain. Native main rules retain three Actions/App 15368 contexts, strict freshness, conversation resolution and squash-only admission. Solo Owner native approval count 0 does not waive the required separate exact-head review.
+
+| Stage / package | Execution status | Current facts / next acceptance |
+| --- | --- | --- |
+| A — current-state verification | VERIFIED | Main/live/deployment/rules and PR #102–106 heads, base dependencies and overlaps checked; approved private design package available. This verifies inventory, not a new product release. |
+| B — integration sequence | IN PROGRESS | Preserve order #102 → #103 → #104 → #105 → #106; shared release metadata/Spec/admin inputs require sequential reconciliation and post-merge acceptance. |
+| B / [PR #102](https://github.com/VAcleaner-washing/pl/pull/102) — governance | BLOCKED | Product & Design Governance plus this owner-requested tracker; documentation only, no version/build or application change. No separate reviewer has yet been identified through the available integration; obtain independent exact-head review and required checks before squash merge; main still requires its full release gates. |
+| B / [PR #103](https://github.com/VAcleaner-washing/pl/pull/103) — Analytics/Finance | NOT STARTED | Integration pending #102. Implementation head `c0a542d4` has [GREEN run 46030748961](https://github.com/VAcleaner-washing/pl/actions/runs/46030748961); rebase/receipt/check/review must match the then-current main. No production acceptance yet. |
+| B / [PR #104](https://github.com/VAcleaner-washing/pl/pull/104) — footer | NOT STARTED | Integration pending #103. Head `706b9a39` has stale stacked base `411832a3` and conflicts; reconcile the existing PR with integrated UX-01, preserving contacts/links/CTA and approved design. |
+| B / [PR #105](https://github.com/VAcleaner-washing/pl/pull/105) — Equipment tabs | NOT STARTED | Integration pending #104. Existing head `4c75302e` and its geometry/functional evidence retained; rebase, exact review and full acceptance on current main required. |
+| B / [PR #106](https://github.com/VAcleaner-washing/pl/pull/106) — PWA update/version | NOT STARTED | Integration pending #105. Head `0f8c0beb` has [GREEN run 46031835167](https://github.com/VAcleaner-washing/pl/actions/runs/46031835167), including native offline/update/version cases; not deployed. Original physical-device activation cause remains unproven. |
+| C1–C8 — approved PWA Visual Refinement | NOT STARTED | Start only after B acceptance; retain approved 10 mobile / 9 desktop concepts, boards and before/after. Preserve existing functionality; small integrated packages, no alternative concept/framework. |
+| D — product performance / sustained CI / G09 | NOT STARTED | Preserve historical, PR and main baselines separately. Sustained acceptance remains open; G09 remains unresolved with original evidence retained. Neither closes from GREEN CI or invented measurements. |
+| E — final regression | NOT STARTED | Existing complete gates and synthetic write fixtures; no destructive production-data tests. |
+| F — final release/live acceptance | NOT STARTED | Requires accepted B/C/D/E, exact artifact/deployment/live verification. Physical iPhone verification is performed with the owner and recorded separately. |
+
+Review blocker, if no separate reviewer/capability is available: record BLOCKED with the missing exact-head review; do not substitute the implementation agent's self-review, bypass native rules, or advance dependent product integration. No repository settings, runtime, Supabase, dependencies or Roadmap are changed by this tracker.
