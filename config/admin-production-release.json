@@ -6,13 +6,13 @@
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "91441a1888d9b384ad06f487a8634631af0b2ea8a0465f27609570ec7597f63e",
-      "reason": "Owner-authorized PWA repair: require activated requested target/current controller; bounded error/retry instead of unconfirmed deadline reload. Business handlers and SW/cache algorithm unchanged; normal build metadata stamped. Pending panel shields underlying actions during rapid taps; first hosted failure retained."
+      "sha256": "185bbb558c6abf4527ac61473a24b4858e75e68c6d71ec179336b7e2d5e26350",
+      "reason": "Owner-approved update recovery, target-controller acknowledgement, rapid-tap shielding and visible running CORE.VERSION/PWA_BUILD in More; business handlers unchanged."
     },
     {
       "path": "assets/admin-v250.css",
-      "sha256": "7208dee3d8fa897856ce2e6c55a1c3d6d97013475820b5e46b03ff957e0b011b",
-      "reason": "Component-scoped full-width 48px purchase-save control, independent of legacy two-column Settings layouts."
+      "sha256": "3e06bbb480b4b815f4c66bc0f4479831c2ba9866f99eee0c7e40b9126e87c256",
+      "reason": "Component-scoped full-width 48px purchase-save control, independent of legacy two-column Settings layouts. Owner-requested contained12px running-version label after existing More controls; no navigation/layout redesign."
     },
     {
       "path": "sandbox/forms.js",
@@ -41,9 +41,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "16c778094785cf28c16cef3b87199f5715852080535f569d09539a9b2c77788f",
+  "artifactTreeSha256": "b631f27e3e1fff69795f9914a1bb80bfa5014c13a30a8bb4b6553815a959d52e",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "6f68263b1f459269faf6f210094d90fff955646666692e1379e7caebfb94a797",
+  "reviewArchiveSha256": "8011b6867239ccef19c72d277af4befda00cf0fb6ec399ec5e14268b83856464",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,

@@ -6172,6 +6172,7 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 
 ### ADDED
 - Virtual-deadline behavioral fixtures for target acknowledgement, timeout/retry, duplicate taps, postMessage failure, Later and late/redundant/foreign worker events. Native local-worker regression with controlled withheld activation and an edited form across late activation.
+- Owner-requested visible version/build at the bottom of mobile «Ще», after the existing logout control. Read `CORE.VERSION` and the running `PWA_BUILD` directly; no new version authority, network request or online dependency. Opening/reopening, offline shell and actual update/readback preserve a single accurate label. Existing menu item order, focus behavior and actions are unchanged; the label is not an interactive menu item.
 
 ### CHANGED
 - PWA-ACTIVATION-001 now requires the requested target to be the activated current controller for every update reload path. The existing8s deadline returns a usable error/retry state instead of an unconfirmed reload. Standard coherent version/cache metadata and reviewed C/N receipt advance together; generated backend config changes are VERSION metadata only, not backend deployment authorization.

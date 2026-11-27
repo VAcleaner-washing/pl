@@ -249,6 +249,27 @@ def wait_worker_state(page, phase, build):
             pass
 
 
+def verify_visible_version(page, checks, label, version, build):
+    trigger = page.locator('.mobile-nav .more-nav')
+    if not trigger.is_visible():
+        return  # Desktop sidebar has no mobile More sheet.
+    trigger.click()
+    item = page.locator('.mobile-more-menu .pwa-app-version')
+    expect(item).to_have_count(1)
+    item.scroll_into_view_if_needed()
+    expect(item).to_be_visible()
+    expect(item).to_have_text(f'Версія {version} · build {build}')
+    expect(item).to_have_attribute('data-pwa-version', str(version))
+    expect(item).to_have_attribute('data-pwa-build', str(build))
+    box = item.bounding_box()
+    nav = page.locator('.mobile-nav').bounding_box()
+    checks.check(box['x'] >= 0 and box['x'] + box['width'] <= page.viewport_size['width'] + 1 and box['y'] >= 0 and box['y'] + box['height'] <= nav['y'] + 1 and item.evaluate('e=>parseFloat(getComputedStyle(e).fontSize)>=12'),
+                 label + ': one readable running version/build in More, clear of navigation')
+    checks.screenshot(page, label + '-version.png')
+    trigger.click()
+    expect(page.locator('.mobile-more-menu')).to_have_count(0)
+
+
 def exercise(browser, server, base, config, checks, width, browser_name='chromium', devices=None):
     context = browser.new_context(**context_options(width, devices))
     context.add_init_script(FETCH_PROXY)
@@ -316,6 +337,8 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         checks.check(not any('/functions/' in url or '/auth/' in url for url in cache_urls), label + ': no API/Auth response in Cache Storage')
         checks.check(smoke.no_horizontal_overflow(page), label + ': no overflow')
         checks.check(page.locator('#view .booking-card,#view .upcoming-row').count() >= 2, label + ': real fixture rentals rendered')
+        version = json.loads((server.root / 'release.json').read_text())['version']
+        verify_visible_version(page, checks, label + '-online', version, server.build)
         checks.screenshot(page, label + '-warm.png')
 
         # Offline app shell must load; business data must fail explicitly.
@@ -324,6 +347,7 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         expect(page.locator('#retryLoad')).to_be_visible()
         checks.check(page.evaluate("!!localStorage.getItem('vacleaner_session')"), label + ': offline preserves remembered session')
         checks.check(page.locator('.booking-card').count() == 0, label + ': offline never fabricates cached rentals')
+        verify_visible_version(page, checks, label + '-offline', version, server.build)
         checks.screenshot(page, label + '-offline.png')
         set_transport(context, server, browser_name, False)
         # Online recovery may run automatically; click retry only if still needed.
@@ -357,6 +381,7 @@ def exercise(browser, server, base, config, checks, width, browser_name='chromiu
         with page.expect_navigation(wait_until='domcontentloaded'):
             page.locator('.pwa-update-now').click()
         wait_worker_state(page, 'settled', server.next_build)
+        verify_visible_version(page, checks, label + '-updated', version, server.next_build)
         checks.check(True, label + ': explicit update activates and reloads')
         checks.check(page.evaluate('''build=>[...document.querySelectorAll('script[src^="/assets/"],link[href^="/assets/"]')].every(el=>new URL(el.src||el.href).searchParams.get('v')===String(build))''', server.next_build), label + ': updated HTML references only the next build')
         checks.check(not errors, label + ': no runtime errors ' + repr(errors))

@@ -487,7 +487,7 @@ function openMobileMore(){
   if(layer.children.length)return;
   const trigger=$('.mobile-nav .more-nav');
   document.documentElement.classList.add('mobile-more-open');syncMobileNavActive({moreOpen:true});
-  layer.innerHTML=`<div class="mobile-more-menu" id="mobileMoreMenu" role="menu" aria-label="Ще"><div class="mobile-more-grid">${items.map(([id,label,icon])=>`<button type="button" role="menuitem" tabindex="-1" data-more-view="${id}" class="${state.view===id?'active':''}">${icon}<span>${label}</span></button>`).join('')}</div><button class="mobile-more-logout" type="button" role="menuitem" tabindex="-1" data-mobile-logout><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg><span>Вийти з акаунта</span></button></div>`;
+  layer.innerHTML=`<div class="mobile-more-menu" id="mobileMoreMenu" role="menu" aria-label="Ще"><div class="mobile-more-grid">${items.map(([id,label,icon])=>`<button type="button" role="menuitem" tabindex="-1" data-more-view="${id}" class="${state.view===id?'active':''}">${icon}<span>${label}</span></button>`).join('')}</div><button class="mobile-more-logout" type="button" role="menuitem" tabindex="-1" data-mobile-logout><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></svg><span>Вийти з акаунта</span></button><p class="pwa-app-version" data-pwa-version="${h(CORE.VERSION)}" data-pwa-build="${h(PWA_BUILD)}">Версія ${h(CORE.VERSION)} · build ${h(PWA_BUILD)}</p></div>`;
   const menu=layer.querySelector('.mobile-more-menu'),menuButtons=()=>$$('button:not(:disabled)',menu);
   const outside=event=>{if(event.target.closest?.('.mobile-more-menu,.more-nav'))return;closeMobileMore({restoreFocus:false})};
   const keydown=event=>{
