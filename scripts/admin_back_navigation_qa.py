@@ -189,7 +189,7 @@ def main():
                     expect(page.locator('#' + form_id)).not_to_be_attached()
 
                 idle.navigate(page, 'finances')
-                page.locator('#addExpense').click()
+                page.locator('#dashboardAddExpense').click()
                 expect(page.locator('#expenseForm')).to_be_visible()
                 back('expense', '#expenseForm>header').click()
                 expect(page.locator('#expenseForm')).not_to_be_attached()

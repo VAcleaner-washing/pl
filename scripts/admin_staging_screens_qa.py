@@ -336,15 +336,19 @@ def main():
 
     def finance(page):
         navigate(page, 'finances')
-        numbers = page.locator('.finance-kpis>.kpi>strong').all_text_contents()
+        expect(page.locator('.ux01-finance-summary')).to_be_visible()
+        numbers = [page.locator(selector).text_content() for selector in [
+            '.ux01-finance-components>.kpi:first-child>strong',
+            '.ux01-finance-components>.finance-cost>strong',
+            '.ux01-finance-profit>strong', '.ux01-finance-margin>strong']]
         clean = lambda value: ''.join(c for c in value if c.isdigit() or c == '-')
         check('finance shows exact fixture revenue / operating cost / profit',
               [clean(x) for x in numbers[:3]] ==
               [str(expected_revenue), '123', str(expected_revenue - 123)], values=numbers)
         for period in ['7', '30', 'month', 'year', 'all']:
-            page.locator(f'[data-analytics-period="{period}"]').click()
+            page.locator('#dashboardPeriod').select_option(period)
             expect(page.locator('.finance-kpis')).to_be_visible()
-        page.locator('#addExpense').click()
+        page.locator('#dashboardAddExpense').click()
         form = page.locator('#expenseForm')
         form.locator('[type=submit]').click()
         expect(form.locator('[aria-invalid=true]').first).to_be_visible()
@@ -357,7 +361,7 @@ def main():
     def analytics(page):
         navigate(page, 'analytics')
         for period in ['7', '30', 'month', 'year', 'all']:
-            page.locator(f'[data-analytics-period="{period}"]').click()
+            page.locator('#dashboardPeriod').select_option(period)
             expect(page.locator('.analytics-trend-panel')).to_be_visible()
             if period in ['month', 'year']:
                 prefix = 'Month' if period == 'month' else 'Year'
@@ -368,6 +372,9 @@ def main():
                 expect(popover).not_to_be_visible()
         page.locator('[data-trend-metric=rentals]').click()
         page.locator('[data-trend-metric=revenue]').click()
+        referral = page.locator('.ux01-detail:has(.referral-analytics-panel)')
+        if referral.get_attribute('open') is None:
+            referral.locator(':scope>summary').click()
         expect(page.locator('.referral-analytics-panel')).to_be_visible()
         text = page.locator('#view').inner_text()
         check('analytics contains no NaN/undefined or fabricated referral successes',

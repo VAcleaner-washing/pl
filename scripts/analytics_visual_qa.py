@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-import json, sys
+import json, math, sys
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 sys.path.insert(0,str(Path(__file__).resolve().parent))
@@ -38,8 +38,10 @@ with sync_playwright() as p:
    check(all('k' not in x.lower() for x in rev_labels),f'{label}: revenue axis uses full values instead of k-abbreviations')
    if w<=700:
     check(len(rev_labels)==0,f'{label}: mobile chart removes squeezed Y-axis labels from the plot')
-    check(page.locator('.analytics-trend-bar').count()>=1,f'{label}: PWA uses readable bars instead of a squeezed line spike')
-    check(page.locator('.analytics-trend-line').count()==0,f'{label}: PWA does not render the desktop line chart')
+    check(page.locator('.analytics-trend-line').count()==1,f'{label}: approved mobile trend uses the real line plot')
+    check(page.locator('.analytics-trend-bar').count()==0,f'{label}: mobile does not retain the superseded bar presentation')
+    points=page.locator('.analytics-trend-line').get_attribute('points').split()
+    check(len(points)>1 and all(len(point.split(','))==2 and all(math.isfinite(float(x)) for x in point.split(',')) for point in points),f'{label}: compact line contains finite actual data points')
     check(page.locator('.analytics-trend-mobile-scale').is_visible(),f'{label}: mobile chart keeps a compact readable scale label')
     check('0–' in page.locator('.analytics-trend-mobile-scale b').inner_text(),f'{label}: mobile scale clearly states the chart range')
     check(page.locator('.analytics-trend-mobile-scale').evaluate('el=>getComputedStyle(el).backgroundColor') in ('rgba(0, 0, 0, 0)','transparent'),f'{label}: mobile scale is not rendered as a nested card')

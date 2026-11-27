@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.69
-**Baseline build:** 4369
+**Baseline version:** 4.3.70
+**Baseline build:** 4370
 **Останнє оновлення:** 2026-11-23
 **Власник логіки:** VAcleaner  
 
@@ -2462,6 +2462,17 @@ Finance відповідає за фінансову правду.
 ## ANA-002 — completed
 
 Метрики завершених оренд мають однаково визначати completed booking у всіх модулях.
+
+## ANA-003 — approved UX-01 dashboard presentation
+
+- Product Owner's final attached visual reference takes precedence over the earlier UX-01/R2 proposals. Preserve the existing global header, navigation, search and business actions.
+- Analytics emphasizes the existing operating-profit result, with compact revenue, recorded operating expenses, completed-rental count and utilization surfaces, the real revenue/rentals trend, and access to every existing metric/report. Average check and comparisons remain available. Never invent a profit comparison or copy the reference's demonstration values/graph.
+- The compact mobile/desktop period dropdown exposes the same7/30/month/year/all periods and preserves the existing month/year pickers, step controls and synchronization with Finance. Both reports use the same dropdown geometry and touch targets of at least44px.
+- Finance presents one summary: operating profit, revenue, operating expenses and margin; the incomplete-expense warning remains visible. Unknown is not zero, negative profit must not look positive, and deposits/investments retain their existing accounting meaning.
+- Expense creation/editing/category filters, equipment payback, delivery detail, expense structure and explanatory data remain accessible. Disclosures retain existing controls/handlers and user open state across report rerenders; they do not create a second calculator, save path or data authority.
+- Mobile uses the actual canonical line/area trend with actual points, scales, revenue/rental toggle and readable date labels. Desktop keeps a real line plot. This replaces the former mobile-bars visual assertion in the same change; trend calculations/data selection and fail-closed financial contracts are unchanged.
+- UI projection runs through the existing finite scheduled presentation pass. Preserve PWA-007 idle quiescence, keyboard/focus, safe scrolling and all unaffected views.
+- Regression: Back-navigation, route-recovery, LAB forms and R4 section checks exercise the newly visible controls (including native referral disclosure); financial assertions retain their exact fixture values. Existing analytics visual QA plus the UX-01 dashboard helper invoked by the current normal-candidate Operations suite; current registry membership, CI engines/variants/gates and deployment policy are unchanged. Visual acceptance additionally requires actual N screenshots against the approved reference, not green tests alone. Footer is a separate UX-02 package.
 
 ---
 
@@ -6165,3 +6176,26 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 - This is a test synchronization correction, not permission to change the application or hide a failed journey. Do not add whole-journey retries, remove the deferral assertion or accept an absent/permanently visible/interactive prompt. Other exceptions remain hard failures.
 - The same canonical script executes browser fixtures before the original mobile/desktop journeys: reproduce the obsolete immediate assertion, accept a completed controlled transition, and reject permanently visible, pointer-active, partially active multiple and missing prompts. All22 original route checks, suite membership and release gates remain intact.
 - Evidence: main run45367294251 attempt1 failed on the desktop deferral assertion after PR#93 passed full QA. Its skipped downstream WebKit/deployment is not GREEN; preserve this first failure in timing/flakiness records. A source-CSS reproduction records `visible/none` immediately and `hidden/none` after the120ms transition. Revalidate the correction with full PR and main QA before accepting deployment.
+
+
+# Change record — v4.3.70
+
+### ADDED
+- UX-01 / ANA-003: one accessible compact period dropdown per report, gold outline icons and native disclosures retaining every existing Analytics/Finance section. The approved final visual reference owns composition; fixture numbers are not runtime defaults.
+
+### CHANGED
+- Analytics emphasizes the existing operating profit above a compact secondary KPI grid and actual revenue/rental trend; mobile uses real line/area points. Finance groups profit, revenue, operating expenses and margin into one summary, with the incomplete-accounting warning always visible.
+- Release/cache metadata advances to4.3.70/4370. The normal stamp includes only the release-version constant in ten generated backend configuration files; configuration values, source hash, handlers and deployed Supabase remain unchanged.
+
+### FIXED
+- Owner-requested mobile refinements: the two report sections use one existing safe-top inset plus8px content padding (previously26px), tighter section/search spacing with44px controls, a120px plot (previously150px,20% reduction) and compact finance summary. The complete default390×844 trend must be above native bottom navigation at scrollTop0; accounting warning, chart controls/labels, search/filters and all disclosure functions remain. Desktop composition and global header/navigation are unchanged.
+- The same mobile overview bound covers absent-cost onboarding and existing loss/zero-revenue fixtures. Preserve the native «Додайте витрати» row; compact the trend card padding/header/summary spacing rather than removing onboarding, warnings, controls or financial values. Retain the first hosted unknown-cost overflow evidence and unchanged geometry thresholds.
+- Oversized and uneven dashboard surfaces and repeated explanatory headings. UI disclosures preserve open state, the dropdown preserves keyboard focus, and section actions do not leak into native global search.
+
+### PRESERVED
+- Financial formulas, recorded-cost/unknown distinction, real negative profit, deposits, investment separation, prices, data sources and business writes. Native expense creation/edit/archive access, category filters, search/return, period/calendar selectors, payback and delivery detail retain their original handlers.
+- Global PWA header/navigation, public footer (separate UX-02), registry membership, dependencies, CI/CD, release gates, Ruleset and Roadmap. G09 remains unresolved; this package does not repair or close it.
+
+### TESTS
+- Existing finance/deposit/analytics/date and presentation-isolation contracts; canonical Analytics visual regression plus scripts/ux01_dashboard_qa.py through the existing four normal Operations variants. Positive and negative fixtures cover unknown/investment-only/loss/zero-revenue states, native search/filter/edit access, focus, SVG stroke, disclosure state and a deliberately invalid touch target.
+- Actual normal-artifact screenshots at phone/tablet/desktop widths are required for independent visual/exact-head review. Full static/build, pinned Browser/WebKit, all four Operations, Release readiness and separate post-merge provenance/live/device acceptance remain mandatory; this record does not claim those pending results.

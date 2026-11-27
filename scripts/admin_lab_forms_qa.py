@@ -175,7 +175,7 @@ def main():
             checks.check(page.evaluate('VA_LAB.getState().settings.catalog.products.puzzi.weekday')==700,f'{width}: discarded catalog price never persists')
 
             # Failed, pending and successful expense saves use the real synthetic adapter.
-            navigate(page,'finances');page.locator('#addExpense').click();form=page.locator('#expenseForm')
+            navigate(page,'finances');page.locator('#dashboardAddExpense').click();form=page.locator('#expenseForm')
             form.locator('[type=submit]').click();invalid=form.locator('[aria-invalid=true]').first
             expect(invalid).to_be_visible();expect(form.locator('.lab-field-error').first).to_be_visible()
             checks.check(bool(invalid.get_attribute('aria-describedby')),f'{width}: invalid native fields have persistent accessible feedback')
