@@ -9,6 +9,27 @@ import admin_idle_qa as idle
 from admin_entrypoint_finance_qa import pages_server
 
 
+EQUIPMENT_TAB_GEOMETRY = '''({tab,width})=>{
+  const el=document.querySelector('.equipment-section-tabs');
+  if(innerWidth!==width||!el?.isConnected||!el.getClientRects().length||
+     getComputedStyle(el).visibility==='hidden'||
+     el.querySelector('[aria-selected="true"]')?.dataset.eqTab!==tab)return false;
+  return {y:el.getBoundingClientRect().top,scroll:el.scrollWidth,client:el.clientWidth,
+    root:document.documentElement.scrollWidth,width:innerWidth,
+    buttons:[...el.querySelectorAll('button')].map(b=>({height:b.getBoundingClientRect().height,left:b.getBoundingClientRect().left,right:b.getBoundingClientRect().right}))};
+}'''
+
+
+def equipment_tab_geometry(page, tab, width):
+    # Query and snapshot the currently connected, visible tab bar atomically.
+    # Locator.evaluate can otherwise hold a detached node across a re-render.
+    snapshot = page.wait_for_function(EQUIPMENT_TAB_GEOMETRY, arg={'tab': tab, 'width': width})
+    try:
+        return snapshot.json_value()
+    finally:
+        snapshot.dispose()
+
+
 def assert_tab_alignment(positions):
     delta = max(positions.values()) - min(positions.values())
     assert delta <= 1, f'equipment tabs moved by {delta:.2f}px: {positions}'
@@ -39,11 +60,7 @@ def verify_equipment_tabs(page, widths, out=None, prefix='equipment'):
                   await Promise.all(document.getAnimations().filter(a=>Number.isFinite(a.effect.getComputedTiming().endTime)).map(a=>a.finished.catch(()=>{})));
                   window.scrollTo(0,0);document.querySelector('.main').scrollTop=0;
                 }''')
-                geometry = page.locator('.equipment-section-tabs').evaluate('''el=>({
-                  y:el.getBoundingClientRect().top, scroll:el.scrollWidth,client:el.clientWidth,
-                  root:document.documentElement.scrollWidth,width:innerWidth,
-                  buttons:[...el.querySelectorAll('button')].map(b=>({height:b.getBoundingClientRect().height,left:b.getBoundingClientRect().left,right:b.getBoundingClientRect().right}))
-                })''')
+                geometry = equipment_tab_geometry(page, tab, width)
                 assert geometry['root'] <= width + 1 and geometry['scroll'] <= geometry['client'] + 1, geometry
                 assert all(b['height'] >= 44 and b['left'] >= -1 and b['right'] <= width + 1 for b in geometry['buttons']), geometry
                 positions[tab] = geometry['y']
@@ -52,21 +69,30 @@ def verify_equipment_tabs(page, widths, out=None, prefix='equipment'):
             assert_tab_alignment(positions)
             # A real displaced DOM tab bar must fail the very same geometry
             # assertion. Restore the element before exercising real controls.
-            tabs = page.locator('.equipment-section-tabs')
-            previous_style = tabs.get_attribute('style')
+            probe = page.wait_for_function('''state=>{
+              const measure=(''' + EQUIPMENT_TAB_GEOMETRY + ''');
+              if(!measure(state))return false;
+              const tabs=document.querySelector('.equipment-section-tabs'),style=tabs.getAttribute('style');
+              try{
+                tabs.style.transform='translateY(12px)';const displaced=measure(state);
+                tabs.style.display='none';const hidden=measure(state);
+                return {displaced,hidden};
+              }finally{style===null?tabs.removeAttribute('style'):tabs.setAttribute('style',style)}
+            }''', arg={'tab': 'finance', 'width': width})
             try:
-                tabs.evaluate("el=>el.style.transform='translateY(12px)'")
-                wrong = {**positions, 'finance': tabs.bounding_box()['y']}
-                rejected = False
-                try:
-                    assert_tab_alignment(wrong)
-                except AssertionError:
-                    rejected = True
-                assert rejected, 'tab geometry assertion accepted a displaced tab bar'
+                mutation = probe.json_value()
             finally:
-                tabs.evaluate('(el,value)=>value===null?el.removeAttribute("style"):el.setAttribute("style",value)', previous_style)
-            assert_tab_alignment({**positions, 'finance': tabs.bounding_box()['y']})
-            results.append({'width': width, 'positions': positions, 'delta': max(positions.values()) - min(positions.values()), 'displacedTabsRejected': True})
+                probe.dispose()
+            wrong = {**positions, 'finance': mutation['displaced']['y']}
+            rejected = False
+            try:
+                assert_tab_alignment(wrong)
+            except AssertionError:
+                rejected = True
+            assert rejected, 'tab geometry assertion accepted a displaced tab bar'
+            assert mutation['hidden'] is False, 'hidden zero-size tab bar accepted as a live measurement'
+            assert_tab_alignment({**positions, 'finance': equipment_tab_geometry(page, 'finance', width)['y']})
+            results.append({'width': width, 'positions': positions, 'delta': max(positions.values()) - min(positions.values()), 'displacedTabsRejected': True, 'hiddenTabsRejected': True})
         page.set_viewport_size(viewport)
         page.locator('[data-eq-tab=pricing]').click()
         page.locator('#editPrices').click()
