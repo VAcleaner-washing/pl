@@ -16,14 +16,14 @@
     },
     {
       "path": "sandbox/ui.css",
-      "sha256": "223d9e26a4fa4ddcd7e17a47a67e598e23f5e79b2850a5747593fcbed30d6372",
-      "reason": "Approved UX-01 presentation plus owner mobile refinements: one existing safe-top inset, compact chart/KPI/summary geometry, preserved desktop/global shell and all functions."
+      "sha256": "c89a0bd1276578293295426903619664f9f81a129222daaf3cac51463569b629",
+      "reason": "Approved UX-01 compact presentation; owner mobile spacing refinements, including preserved absent-cost onboarding and loss-state geometry. Desktop, global shell and all functions retained."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "c84212142cdefeb47798fe57b318ee6bf666c0f7bc8fbc4464a4bb1dfe5ab5d1",
+  "artifactTreeSha256": "559f30d7e139a23d27e13174d36838f405f13b2912d5d34176400640f22ffcc1",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "d2c4da0f678331fd1aa19ccedcc57d6c73bd53587c1fb1b76704d34ec73c4013",
+  "reviewArchiveSha256": "066090223559032968d37c8a526d729bf43986f51e877acfd5c56c620257ffd6",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,

@@ -151,6 +151,8 @@ def verify_financial_states(page, width, check, set_fixture, reset_fixture, spen
         expect(page.locator('#dashboardPeriod')).to_be_visible()
         page.locator('#dashboardPeriod').select_option('30')
         expect(page.locator('#dashboardPeriod')).to_have_value('30')
+        if width <= 440:
+            verify_mobile_overview(page, 'analytics', check)
         analytics = {
             'profit':page.locator('.ux01-profit-hero>strong').text_content(),
             'revenue':page.locator('.ux01-mini-kpi.kpi-revenue>strong').text_content(),
@@ -159,6 +161,8 @@ def verify_financial_states(page, width, check, set_fixture, reset_fixture, spen
         idle.navigate(page, 'finances')
         expect(page.locator('.ux01-finance-summary')).to_be_visible()
         summary = page.locator('.ux01-finance-summary')
+        if width <= 440:
+            verify_mobile_overview(page, 'finances', check)
         # Compare to the unmodified native method detail; no duplicate formula.
         canonical = page.locator('.finance-method>div>strong').all_text_contents()
         check(f'UX01/{name}/{width}: promoted profit and costs equal canonical method',
