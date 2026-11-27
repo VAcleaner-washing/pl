@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 from playwright.sync_api import expect, sync_playwright
 from admin_entrypoint_finance_qa import pages_server
 from admin_idle_qa import navigate
+from admin_equipment_fleet_qa import verify_equipment_tabs
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTION_ORIGIN = 'https://yweluzclearwrazdkahu.supabase.co'
@@ -283,6 +284,8 @@ def main():
             expect(form).to_have_count(0)
             check('normal candidate preserves and explicitly discards a real unsaved form', True)
             navigate(page, 'equipment')
+            geometry = verify_equipment_tabs(page, [320,375,390,430,768,1024,1440,1648] if args.width == 440 else [1440], out, 'normal')
+            check('normal equipment tabs stay aligned across contexts and preserve pricing actions', True, tabGeometry=geometry)
             page.locator('[data-eq-tab="finance"]').click()
             baseline = page.locator('#equipmentBaselineForm')
             save = baseline.get_by_role('button', name='Зберегти вартість', exact=True)

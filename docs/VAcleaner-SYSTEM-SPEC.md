@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.69
-**Baseline build:** 4369
-**Останнє оновлення:** 2026-11-23
+**Baseline version:** 4.3.72
+**Baseline build:** 4372
+**Останнє оновлення:** 2026-11-27
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -6165,3 +6165,27 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 - This is a test synchronization correction, not permission to change the application or hide a failed journey. Do not add whole-journey retries, remove the deferral assertion or accept an absent/permanently visible/interactive prompt. Other exceptions remain hard failures.
 - The same canonical script executes browser fixtures before the original mobile/desktop journeys: reproduce the obsolete immediate assertion, accept a completed controlled transition, and reject permanently visible, pointer-active, partially active multiple and missing prompts. All22 original route checks, suite membership and release gates remain intact.
 - Evidence: main run45367294251 attempt1 failed on the desktop deferral assertion after PR#93 passed full QA. Its skipped downstream WebKit/deployment is not GREEN; preserve this first failure in timing/flakiness records. A source-CSS reproduction records `visible/none` immediately and `hidden/none` after the120ms transition. Revalidate the correction with full PR and main QA before accepting deployment.
+
+
+## UI-EQUIPMENT-TABS-001 — stable shared equipment navigation (UX-03)
+
+- The Equipment page keeps its existing shell heading, subtitle and search, followed by the shared fleet/pricing/finance tabs. The existing catalog toolbar and its pricing-only `Редагувати ціни` action follow the tabs. Contextual text wrapping or button visibility must not move shared navigation: at identical viewport, scroll and shell state, tab-bar top positions across all three tabs differ by at most1 CSS px.
+- Preserve all three views, selected-tab persistence, original product photos/descriptions/prices, catalog editor/open/close, fleet Refresh and unit actions, purchase editing and every financial warning. Do not clone handlers, insert empty spacers, hide overflow to mask the defect or change business calculations/data access. This bounded fix does not restyle the full equipment workspace or global shell.
+- `admin_equipment_fleet_qa.py` exercises actual tab clicks, selection/visibility, touch bounds, no horizontal overflow, unchanged acknowledged caches and pricing open/close; geometry covers320/375/390/430/768/1024/1440/1648. A reversible12px DOM displacement must be rejected by the same assertion. The existing conflict/lost-response/idempotent-retry/reload cases remain intact. `admin_release_candidate_qa.py` reuses this geometry/action contract on normal N in all four existing Operations variants, without changing registry membership or CI selection. Existing pricing rejection and purchase acknowledgement/reload scenarios remain required.
+
+# Change record — v4.3.72 (UX-03 candidate, not deployed)
+
+### ADDED
+- Shared C/N tab-position regression with a displaced-DOM negative control; no new product function.
+
+### CHANGED
+- Existing equipment markup order and standard release/cache metadata for the local candidate.
+
+### FIXED
+- Shared Equipment tabs precede contextual catalog actions. Previously the pricing button narrowed/wrapped the toolbar above the tabs, shifting their vertical position. Only existing markup order changes; no CSS padding compensation or architecture refactor.
+
+### PRESERVED
+- All functions, navigation, financial methodology, tariffs, data sources, inventory status/capacity and access rules. UX-01/UX-02/Governance remain separate PRs; this candidate must be reconciled with the accepted release baseline before merge. Standard version/cache stamping, including generated backend config VERSION metadata, is not backend logic change or deployment authorization.
+
+### TESTS
+- Same-change C/N geometry/action regressions and displaced-DOM negative control; old-artifact failure evidence; existing equipment/static/artifact and full release gates. Local browser results, hosted pinned CI, independent exact-head visual review, deployment/live readback and physical iPhone verification remain separate evidence. No production acceptance is asserted by this change record.

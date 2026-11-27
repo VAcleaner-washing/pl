@@ -9,6 +9,78 @@ import admin_idle_qa as idle
 from admin_entrypoint_finance_qa import pages_server
 
 
+def assert_tab_alignment(positions):
+    delta = max(positions.values()) - min(positions.values())
+    assert delta <= 1, f'equipment tabs moved by {delta:.2f}px: {positions}'
+
+
+def verify_equipment_tabs(page, widths, out=None, prefix='equipment'):
+    """Same real controls on C and N; no pricing/inventory/settings write."""
+    viewport = dict(page.viewport_size)
+    cache_before = page.evaluate("[localStorage.getItem('vacleaner_catalog'),localStorage.getItem('vacleaner_equipment_baselines')]")
+    results = []
+    try:
+        for width in widths:
+            page.set_viewport_size({'width': width, 'height': viewport['height']})
+            positions = {}
+            for tab, host in [('fleet', '#equipmentFleetHost'), ('pricing', '#equipmentPricingHost'), ('finance', '#equipmentFinanceHost')]:
+                page.locator(f'[data-eq-tab={tab}]').click()
+                expect(page.locator(host)).to_be_visible()
+                expect(page.locator(f'[data-eq-tab={tab}]')).to_have_attribute('aria-selected', 'true')
+                for other in ['fleet', 'pricing', 'finance']:
+                    if other != tab:
+                        expect(page.locator(f'[data-eq-tab={other}]')).to_have_attribute('aria-selected', 'false')
+                if tab == 'pricing':
+                    expect(page.locator('#editPrices')).to_be_visible()
+                else:
+                    expect(page.locator('#editPrices')).to_be_hidden()
+                page.evaluate('''async()=>{
+                  await document.fonts.ready;
+                  await Promise.all(document.getAnimations().filter(a=>Number.isFinite(a.effect.getComputedTiming().endTime)).map(a=>a.finished.catch(()=>{})));
+                  window.scrollTo(0,0);document.querySelector('.main').scrollTop=0;
+                }''')
+                geometry = page.locator('.equipment-section-tabs').evaluate('''el=>({
+                  y:el.getBoundingClientRect().top, scroll:el.scrollWidth,client:el.clientWidth,
+                  root:document.documentElement.scrollWidth,width:innerWidth,
+                  buttons:[...el.querySelectorAll('button')].map(b=>({height:b.getBoundingClientRect().height,left:b.getBoundingClientRect().left,right:b.getBoundingClientRect().right}))
+                })''')
+                assert geometry['root'] <= width + 1 and geometry['scroll'] <= geometry['client'] + 1, geometry
+                assert all(b['height'] >= 44 and b['left'] >= -1 and b['right'] <= width + 1 for b in geometry['buttons']), geometry
+                positions[tab] = geometry['y']
+                if out:
+                    page.screenshot(path=str(Path(out) / f'{prefix}-{width}-{tab}.png'))
+            assert_tab_alignment(positions)
+            # A real displaced DOM tab bar must fail the very same geometry
+            # assertion. Restore the element before exercising real controls.
+            tabs = page.locator('.equipment-section-tabs')
+            previous_style = tabs.get_attribute('style')
+            try:
+                tabs.evaluate("el=>el.style.transform='translateY(12px)'")
+                wrong = {**positions, 'finance': tabs.bounding_box()['y']}
+                rejected = False
+                try:
+                    assert_tab_alignment(wrong)
+                except AssertionError:
+                    rejected = True
+                assert rejected, 'tab geometry assertion accepted a displaced tab bar'
+            finally:
+                tabs.evaluate('(el,value)=>value===null?el.removeAttribute("style"):el.setAttribute("style",value)', previous_style)
+            assert_tab_alignment({**positions, 'finance': tabs.bounding_box()['y']})
+            results.append({'width': width, 'positions': positions, 'delta': max(positions.values()) - min(positions.values()), 'displacedTabsRejected': True})
+        page.set_viewport_size(viewport)
+        page.locator('[data-eq-tab=pricing]').click()
+        page.locator('#editPrices').click()
+        expect(page.locator('#catalogForm')).to_be_visible()
+        page.locator('#catalogForm header [data-close]').click()
+        expect(page.locator('#catalogForm')).to_have_count(0)
+        page.locator('[data-eq-tab=fleet]').click()
+        assert page.evaluate("[localStorage.getItem('vacleaner_catalog'),localStorage.getItem('vacleaner_equipment_baselines')]") == cache_before
+        print(f'PASS {prefix}: stable tabs, displaced-DOM negative control, contextual pricing open/close, unchanged acknowledged caches', flush=True)
+        return results
+    finally:
+        page.set_viewport_size(viewport)
+
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument('--root',required=True)
@@ -53,6 +125,7 @@ def main():
             try:
                 page.goto(base+'/admin/bronuvannia/');page.wait_for_selector('.booking-card,.upcoming-row')
                 idle.navigate(page,'equipment')
+                tab_geometry = verify_equipment_tabs(page, [320,375,390,430,768,1024,1440,1648] if width == 440 else [width], out, args.browser)
                 # The equipment workspace opens on the fleet tab for new users.
                 page.locator('[data-eq-tab=fleet]').click()
                 expect(page.locator('#equipmentFleetHost')).to_be_visible()
@@ -91,7 +164,7 @@ def main():
                 assert not errors,errors
                 assert [x['action'] for x in calls].count('set_status')==2,calls
                 page.screenshot(path=str(out/f'{args.browser}-{width}-fleet.png'))
-                results.append({'width':width,'passed':True,'requests':len(calls),'productionWrites':0})
+                results.append({'width':width,'passed':True,'requests':len(calls),'productionWrites':0,'tabGeometry':tab_geometry})
                 print(f'PASS {args.browser}/{width}: tabs, conflicts, save/reload, lost add response plus failed refresh and idempotent retry',flush=True)
             except Exception as error:
                 page.screenshot(path=str(out/f'{args.browser}-{width}-failure.png'))

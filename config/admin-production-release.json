@@ -1,13 +1,13 @@
 {
-  "version": "4.3.69",
-  "build": 4369,
-  "reviewMode": "finance-visibility-and-purchase-action-candidate-awaiting-full-qa",
-  "baselineApplicationSourceCommit": "4991f1a327d5bfb96f4c85d3f34033fd301a0348",
+  "version": "4.3.72",
+  "build": 4372,
+  "reviewMode": "equipment-tabs-local-candidate-awaiting-independent-exact-head-review",
+  "baselineApplicationSourceCommit": "83c480ec127a67065fe13b198ede0b6d668e9289",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "0d445bf274bb5563966400223af9cacf4ad7c1bc1d9c2f3c0ee4af1d54a6a3f5",
-      "reason": "Purchase-baseline editor owns one primary save action with a concise label; preserve all existing financial formulas, persistence and the activated-controller PWA guard."
+      "sha256": "0fcecdd204deea76abd5b7877273d19c88c515ba95a2956929abeeb44981278b",
+      "reason": "UX-03: existing equipment tabs precede contextual catalog toolbar; unchanged handlers, data, pricing and financial methodology. PWA build metadata stamped normally."
     },
     {
       "path": "assets/admin-v250.css",
@@ -41,9 +41,9 @@
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "4109bb6e7124ea3cad9a67e60e710574d893a9d39a8ac482f53ed36963139063",
+  "artifactTreeSha256": "29b670f3c2f469ffc6edea2c0f9d1e3e3e7fb57c5189aa31c791922d98f4e1f5",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "39b19a59f79aa373c0912b02d84fd9117f59b06479bed719b1c4cdc6732455ac",
+  "reviewArchiveSha256": "d7920d4c79b58641db6e5bfab11bf988105d902f3c9dda8a11bcbc74854400d5",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,
