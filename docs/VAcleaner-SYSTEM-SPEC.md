@@ -6188,6 +6188,7 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 - Release/cache metadata advances to4.3.70/4370. The normal stamp includes only the release-version constant in ten generated backend configuration files; configuration values, source hash, handlers and deployed Supabase remain unchanged.
 
 ### FIXED
+- Owner-requested mobile refinements: the two report sections use one existing safe-top inset plus8px content padding (previously26px), tighter section/search spacing with44px controls, a125px plot (previously150px) and compact finance summary. The complete default390×844 trend must be above native bottom navigation at scrollTop0; accounting warning, chart controls/labels, search/filters and all disclosure functions remain. Desktop composition and global header/navigation are unchanged.
 - Oversized and uneven dashboard surfaces and repeated explanatory headings. UI disclosures preserve open state, the dropdown preserves keyboard focus, and section actions do not leak into native global search.
 
 ### PRESERVED

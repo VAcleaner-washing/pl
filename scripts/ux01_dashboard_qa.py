@@ -16,6 +16,40 @@ def accessible_period(control):
     return bool(box and box['height'] >= 44 and control.evaluate('e=>parseFloat(getComputedStyle(e).fontSize)') >= 16)
 
 
+def verify_mobile_overview(page, view, check):
+    """Owner's 390x844 case; safe-area simulation is not a device certificate."""
+    check(f'UX01/{view}: compact overview fixture uses the installed PWA shell', page.evaluate('navigator.standalone === true'))
+    viewport = page.viewport_size
+    saved = page.evaluate("() => Object.fromEntries(['--pwa-safe-top','--pwa-safe-bottom'].map(k=>[k,[document.documentElement.style.getPropertyValue(k),document.documentElement.style.getPropertyPriority(k)]]))")
+    try:
+        page.set_viewport_size({'width': 390, 'height': 844})
+        page.evaluate("() => {document.documentElement.style.setProperty('--pwa-safe-top','59px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px');document.querySelector('.main').scrollTop=0}")
+        page.evaluate('() => new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        def geometry():
+            return page.evaluate("""() => {
+                const rect=s=>{const e=document.querySelector(s);return e?.getBoundingClientRect().toJSON()};
+                return {main:rect('.main'),heading:rect('.page-head h1'),trend:rect('.ux01-trend'),summary:rect('.ux01-finance-summary'),nav:rect('.mobile-nav')};
+            }""")
+        initial = geometry()
+        check(f'UX01/{view}: mobile title has one 59px safe inset plus compact content padding', 0 <= initial['heading']['y'] - initial['main']['y'] - 59 <= 12, geometry=initial)
+        selector = '.ux01-trend' if view == 'analytics' else '.ux01-finance-summary'
+        def accepts(g):
+            return (g['trend']['bottom'] <= g['nav']['y'] - 8 if view == 'analytics'
+                    else g['summary']['height'] <= 235)
+        check(f'UX01/{view}: 390x844 overview meets the approved compact geometry', accepts(initial), geometry=initial)
+        target = page.locator(selector)
+        old_style = target.get_attribute('style')
+        try:
+            target.evaluate("e=>e.style.setProperty('padding-block','100px','important')")
+            check(f'UX01/{view}: oversized overview is rejected by the same assertion', not accepts(geometry()))
+        finally:
+            target.evaluate("(e,s)=>s===null?e.removeAttribute('style'):e.setAttribute('style',s)", old_style)
+        check(f'UX01/{view}: compact overview is restored after negative control', accepts(geometry()))
+    finally:
+        page.evaluate("saved=>{for(const [k,[v,p]] of Object.entries(saved))v?document.documentElement.style.setProperty(k,v,p):document.documentElement.style.removeProperty(k)}", saved)
+        page.set_viewport_size(viewport)
+
+
 def verify_dashboard(page, view, width, check, exercise=True):
     root = page.locator('#view > .ux01-dashboard')
     expect(root).to_be_visible()
@@ -30,6 +64,8 @@ def verify_dashboard(page, view, width, check, exercise=True):
     check(f'UX01/{view}: gold outline icons are real SVG', root.locator('.ux01-icon svg path,.ux01-icon svg rect').count() >= 5)
     colors = root.locator('.ux01-icon svg path,.ux01-icon svg rect').evaluate_all("els=>els.map(e=>getComputedStyle(e).stroke.match(/\\d+/g)?.slice(0,3).map(Number))")
     check(f'UX01/{view}: native KPI text styles cannot mute the gold SVG stroke', all(c and c[0]>c[1]>c[2] and c[0]>=190 and c[1]>=140 for c in colors))
+    if width <= 440:
+        verify_mobile_overview(page, view, check)
     if view == 'analytics':
         check('UX01/analytics: four canonical KPI owners retained', root.locator('.analytics-kpis .kpi').count() == 4)
         # Canonical source remains in a closed disclosure; innerText is empty there.

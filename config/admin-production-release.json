@@ -16,14 +16,14 @@
     },
     {
       "path": "sandbox/ui.css",
-      "sha256": "0fba0ca87cc590a1017add5ac7893507870b094fde3de6298c75bd2875b2dc64",
-      "reason": "Component-scoped approved gold outlines, profit summary, compact KPI grid, period dropdown and responsive spacing; no global navigation changes."
+      "sha256": "223d9e26a4fa4ddcd7e17a47a67e598e23f5e79b2850a5747593fcbed30d6372",
+      "reason": "Approved UX-01 presentation plus owner mobile refinements: one existing safe-top inset, compact chart/KPI/summary geometry, preserved desktop/global shell and all functions."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "54e8e3b5a20558d50ac25369dcc2f018794ab41b97bce3b827c7ee8c3997e0a4",
+  "artifactTreeSha256": "c84212142cdefeb47798fe57b318ee6bf666c0f7bc8fbc4464a4bb1dfe5ab5d1",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "7efc5c808a8ac2faa4fec248cc5db3e3f4e8952c617527040345899fdb9a1af7",
+  "reviewArchiveSha256": "d2c4da0f678331fd1aa19ccedcc57d6c73bd53587c1fb1b76704d34ec73c4013",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,
