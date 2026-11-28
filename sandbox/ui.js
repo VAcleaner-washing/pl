@@ -152,7 +152,7 @@ function dashboardUI(){
   const operating=root.querySelector('[data-analytics-operating-amount]'),count=revenue.querySelector('[data-analytics-completed-count]');
   if(!operating||!count)return;
   const expense=el('article','ux01-mini-kpi ux01-projected-expense'),completed=el('article','ux01-mini-kpi ux01-projected-completed');
-  expense.append(dashboardIcon('expense'),el('span','', 'Операційні витрати'),el('strong','',operating.dataset.analyticsOperatingEstablished==='true'?operating.textContent:'—'));
+  expense.append(dashboardIcon('expense'),el('span','', 'Операційні витрати'),el('strong','',operating.textContent));
   completed.append(dashboardIcon('completed'),el('span','', 'Завершені оренди'),el('strong','',text(count)));
   average.classList.add('ux01-average-kpi');
   for(const card of [revenue,average,utilization]){const context=el('div','ux01-metric-context');context.append(el('b','',text(card.querySelector('span:not(.ux01-icon)'))));for(const detail of card.querySelectorAll(':scope>small'))context.append(detail);notes.append(context)}
@@ -172,10 +172,10 @@ function dashboardUI(){
   for(const card of [revenue,cost,margin]){const context=el('div','ux01-metric-context');context.append(el('b','',text(card.querySelector('span:not(.ux01-icon)'))));for(const detail of card.querySelectorAll(':scope>small'))context.append(detail);notes.append(context)}
   const shown=text(margin.querySelector('strong')),percent=/^\d+(?:[.,]\d+)?%$/.test(shown)?Number(shown.slice(0,-1).replace(',','.')):NaN;
   if(Number.isFinite(percent)&&percent>=0&&percent<=100){const meter=el('div','ux01-margin-meter'),bar=el('i','');meter.setAttribute('aria-hidden','true');bar.style.width=percent+'%';meter.append(bar);primary.after(meter)}
-  const onboarding=root.querySelector('.finance-onboarding'),panels=[root.querySelector('.finance-ledger'),root.querySelector('.equipment-payback-card'),root.querySelector('.delivery-map-card'),root.querySelector('.finance-breakdown'),root.querySelector('.finance-method')].filter(Boolean),details=el('div','ux01-finance-details');
+  const panels=[root.querySelector('.finance-ledger'),root.querySelector('.equipment-payback-card'),root.querySelector('.delivery-map-card'),root.querySelector('.finance-breakdown'),root.querySelector('.finance-method')].filter(Boolean),details=el('div','ux01-finance-details');
   panels.forEach((surface,index)=>details.append(dashboardDisclosure(surface,view,index,['ledger','revenue','delivery','expense','investment'][index])));
   const native=el('div','ux01-native-actions');native.hidden=true;native.append(toolbar);
-  workspace.append(summary);if(onboarding)workspace.append(onboarding);workspace.append(details,notes,native);
+  workspace.append(summary,details,notes,native);
  }
  root.replaceChildren(workspace);document.documentElement.setAttribute('data-ux01-ready','true');dashboardExpenseAction(view,root);
  if(dashboardPeriodFocus===view){dashboardPeriodFocus=null;workspace.querySelector('#dashboardPeriod')?.focus({preventScroll:true})}

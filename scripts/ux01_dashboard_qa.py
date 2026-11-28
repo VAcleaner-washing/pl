@@ -2,6 +2,7 @@
 import argparse
 import json
 import math
+import re
 import os
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -50,6 +51,36 @@ def verify_mobile_overview(page, view, check):
         page.set_viewport_size(viewport)
 
 
+def verify_ledger_filter(page, check):
+    ledger = page.locator('.ux01-detail:has(.finance-ledger)')
+    was_open = ledger.get_attribute('open') is not None
+    if not was_open:
+        ledger.locator(':scope>summary').click()
+    select = page.locator('#expenseCategoryFilter')
+    expect(select).to_be_visible()
+    def fits():
+        return select.evaluate("""e=>{const s=getComputedStyle(e),c=document.createElement('canvas').getContext('2d');c.font=s.font;return parseFloat(s.fontSize)>=16&&e.getBoundingClientRect().height>=44&&e.clientWidth-parseFloat(s.paddingLeft)-parseFloat(s.paddingRight)>=c.measureText('Усі категорії').width+24&&e.getBoundingClientRect().right<=innerWidth+1}""")
+    check('UX01/finance: category text and native arrow fit without shrinking text', fits())
+    saved = select.get_attribute('style')
+    try:
+        select.evaluate("e=>{e.style.setProperty('width','138px','important');e.style.setProperty('max-width','138px','important')}")
+        check('UX01/finance: narrow category selector is rejected', not fits())
+    finally:
+        select.evaluate('(e,s)=>s===null?e.removeAttribute(\'style\'):e.setAttribute(\'style\',s)', saved)
+    check('UX01/finance: category selector restores after negative control', fits())
+    if not was_open:
+        ledger.locator(':scope>summary').click()
+
+
+def profit_presentation(page, selector):
+    return page.locator(selector).evaluate("""e=>({text:e.querySelector(':scope>strong').textContent,tone:[...e.classList].find(c=>['finance-profit','finance-loss','finance-neutral','finance-unknown'].includes(c)),color:getComputedStyle(e.querySelector(':scope>strong')).color})""")
+
+
+def profit_color_matches(presentation):
+    expected={'finance-profit':'rgb(143, 224, 176)','finance-loss':'rgb(255, 157, 151)','finance-neutral':'rgb(237, 242, 248)','finance-unknown':'rgb(179, 192, 205)'}
+    return presentation['tone'] in expected and presentation['color']==expected[presentation['tone']]
+
+
 def verify_dashboard(page, view, width, check, exercise=True):
     root = page.locator('#view > .ux01-dashboard')
     expect(root).to_be_visible()
@@ -70,13 +101,21 @@ def verify_dashboard(page, view, width, check, exercise=True):
         check('UX01/analytics: four canonical KPI owners retained', root.locator('.analytics-kpis .kpi').count() == 4)
         # Canonical source remains in a closed disclosure; innerText is empty there.
         native_expense = root.locator('[data-analytics-operating-amount]')
-        expected = native_expense.text_content() if native_expense.get_attribute('data-analytics-operating-established') == 'true' else '—'
+        expected = native_expense.text_content()
         check('UX01/analytics: expense is the canonical acknowledged display, unknown stays unknown', root.locator('.ux01-projected-expense strong').text_content() == expected, expected=repr(expected), actual=repr(root.locator('.ux01-projected-expense strong').text_content()))
         check('UX01/analytics: completed count comes from the existing metric', root.locator('.ux01-projected-completed strong').inner_text() == root.locator('[data-analytics-completed-count]').text_content())
-        expect(root.locator('.ux01-profit-hero').get_by_text('За внесеними витратами · облік може бути неповним', exact=True)).to_be_visible()
+        expect(native_expense).to_have_attribute('data-analytics-operating-available', re.compile('^(true|false)$'))
+        expect(native_expense).to_have_attribute('data-analytics-operating-preliminary', re.compile('^(true|false)$'))
+        available = native_expense.get_attribute('data-analytics-operating-available') == 'true'
+        preliminary = native_expense.get_attribute('data-analytics-operating-preliminary') == 'true'
+        warning = ('Фінансові дані недоступні. Результат не розраховано' if not available else
+                   'Витрати не внесено. Прибуток і маржинальність попередні' if preliminary else
+                   'За внесеними витратами · облік може бути неповним')
+        expect(root.locator('.ux01-profit-hero').get_by_text(warning, exact=True)).to_be_visible()
         check('UX01/analytics: trend uses actual finite points', len(root.locator('.analytics-trend-line').get_attribute('points').split()) > 1 and all(math.isfinite(float(n)) for point in root.locator('.analytics-trend-line').get_attribute('points').split() for n in point.split(',')))
     else:
         expect(root.locator('.ux01-finance-warning')).to_be_visible()
+        verify_ledger_filter(page, check)
         check('UX01/finance: one summary retains all four metrics', root.locator('.finance-kpis').count() == 1 and root.locator('.finance-kpis .kpi').count() == 4)
         check('UX01/finance: one original expense action plus one delegated visible control', page.locator('#view #addExpense').count() == 1 and page.locator('#dashboardAddExpense').count() == 1)
         page.locator('#dashboardAddExpense').click()
@@ -90,6 +129,11 @@ def verify_dashboard(page, view, width, check, exercise=True):
         page.locator('#dashboardPeriod').select_option(period)
         expect(page.locator('#dashboardPeriod')).to_have_value(period)
         expect(page.locator(f'#view .admin-periods [data-analytics-period="{period}"]')).to_have_class('chip active')
+        if period == 'month':
+            check(f'UX01/{view}: month caption is not duplicated', page.locator('.analytics-picker-field>span').count() == 0)
+            expect(page.locator('#analyticsMonthPicker')).to_have_attribute('aria-label','Місяць звіту')
+            expect(page.locator('.analytics-calendar-picker .analytics-step')).to_have_count(2)
+            expect(page.locator('#dashboardPeriod')).to_be_visible()
         if period in ('month', 'year'):
             trigger = page.locator('#view .analytics-picker-trigger')
             expect(trigger).to_be_visible()
@@ -138,6 +182,10 @@ def verify_financial_states(page, width, check, set_fixture, reset_fixture, spen
     """Change only the intercepted read response, never submit a business write."""
     scenarios = [
         ('unknown', [], False),
+        ('zero-result', [], True),
+        ('confirmed-zero', [{'id':'ux01-confirmed-zero', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':0}], False),
+        ('positive', [{'id':'ux01-positive', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':100}], False),
+        ('unavailable', None, False),
         ('investment-only', [{'id':'ux01-investment', 'spent_on':spent_on, 'category':'equipment', 'cost_type':'investment', 'amount':1200}], False),
         ('loss', [{'id':'ux01-loss', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':1000000}], False),
         ('zero-revenue-loss', [{'id':'ux01-zero', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':100}], True),
@@ -153,6 +201,8 @@ def verify_financial_states(page, width, check, set_fixture, reset_fixture, spen
         expect(page.locator('#dashboardPeriod')).to_have_value('30')
         if width <= 440:
             verify_mobile_overview(page, 'analytics', check)
+        analytics_style = profit_presentation(page, '.ux01-profit-hero')
+        check(f'UX01/{name}/{width}: Analytics amount has the semantic color', profit_color_matches(analytics_style))
         analytics = {
             'profit':page.locator('.ux01-profit-hero>strong').text_content(),
             'revenue':page.locator('.ux01-mini-kpi.kpi-revenue>strong').text_content(),
@@ -171,24 +221,65 @@ def verify_financial_states(page, width, check, set_fixture, reset_fixture, spen
               and summary.locator('.ux01-finance-components>.kpi').first.locator('strong').text_content() == canonical[0])
         check(f'UX01/{name}/{width}: both reports preserve the same source values',
               analytics == {'profit':canonical[2], 'revenue':canonical[0], 'cost':canonical[1]})
+        expected_profit = {'unknown':1500, 'investment-only':1500, 'confirmed-zero':1500, 'positive':1400, 'loss':-998500, 'zero-revenue-loss':-100, 'zero-result':0}
+        if name in expected_profit:
+            check(f'UX01/{name}/{width}: explicit recorded fixture result is preserved', int(re.sub(r'[^0-9-]', '', canonical[2])) == expected_profit[name])
         expect(summary.locator('.ux01-finance-warning')).to_be_visible()
         check(f'UX01/{name}/{width}: no viewport or summary overflow', page.evaluate('document.documentElement.scrollWidth<=innerWidth+1') and summary.evaluate('e=>e.scrollWidth<=e.clientWidth+1'))
-        if name == 'unknown':
+        finance_style = profit_presentation(page, '.ux01-finance-profit')
+        check(f'UX01/{name}/{width}: Finance and Analytics share semantic colors', profit_color_matches(finance_style) and finance_style == analytics_style)
+        target = summary.locator('.ux01-finance-profit>strong')
+        saved_color_style = target.get_attribute('style')
+        try:
+            target.evaluate("(e,c)=>e.style.setProperty('color',c,'important')", '#ff0000' if finance_style['tone']=='finance-profit' else '#00ff00')
+            check(f'UX01/{name}/{width}: incorrect amount color is rejected', not profit_color_matches(profit_presentation(page, '.ux01-finance-profit')))
+        finally:
+            target.evaluate("(e,s)=>s===null?e.removeAttribute('style'):e.setAttribute('style',s)", saved_color_style)
+        check(f'UX01/{name}/{width}: amount color restored', profit_color_matches(profit_presentation(page, '.ux01-finance-profit')))
+        if name in ('unknown', 'investment-only', 'zero-result'):
+            expect(summary.locator('.finance-cost>strong')).to_have_text('0 грн')
+            check(f'UX01/{name}/{width}: empty recorded costs show provisional canonical profit, not a hidden dash', canonical[2] != '—')
+            expect(summary.locator('.ux01-finance-profit>span:not(.ux01-icon)')).to_have_text('Попередній операційний прибуток')
+            expect(summary.locator('.ux01-finance-margin>span')).to_have_text('Попередня маржинальність')
+            expect(page.locator('.finance-onboarding')).to_have_count(0)
+            expect(summary.locator('.ux01-finance-warning')).to_have_text('Витрати не внесено. Прибуток і маржинальність попередні')
+            if name == 'investment-only':
+                check(f'UX01/{name}/{width}: investment remains separate', page.locator('.finance-investment-note>strong').text_content() != canonical[1])
+            if name == 'unknown':
+                page.locator('#dashboardAddExpense').click()
+                expect(page.locator('#expenseForm')).to_be_visible()
+                page.locator('#expenseForm [data-close]').first.click()
+        elif name == 'unavailable':
             expect(summary.locator('.ux01-finance-profit>strong')).to_have_text('—')
             expect(summary.locator('.finance-cost>strong')).to_have_text('—')
-            expect(page.locator('.finance-onboarding')).to_be_visible()
+            expect(summary.locator('.ux01-finance-margin>strong')).to_have_text('—')
+            expect(summary.locator('.ux01-finance-warning')).to_contain_text('Фінансові дані недоступні')
             expect(page.locator('.ux01-margin-meter')).to_have_count(0)
-            page.locator('#addFirstExpense').click()
-            expect(page.locator('#expenseForm')).to_be_visible()
-            page.locator('#expenseForm [data-close]').first.click()
         elif 'loss' in name:
-            check(f'UX01/{name}/{width}: real loss retains negative amount and loss styling', canonical[2].startswith('-') and summary.locator('.finance-loss').count() == 1)
+            check(f'UX01/{name}/{width}: real loss retains negative amount and loss styling', canonical[2].startswith('-') and summary.locator('.ux01-finance-profit.finance-loss').count() == 1 and summary.locator('.finance-loss').count() == (1 if name == 'zero-revenue-loss' else 2))
             expect(page.locator('.ux01-margin-meter')).to_have_count(0)
             if name == 'zero-revenue-loss':
                 expect(summary.locator('.ux01-finance-margin>strong')).to_have_text('—')
         else:
-            expect(summary.locator('.finance-cost>strong')).to_have_text('0 грн')
-            check(f'UX01/{name}/{width}: investment remains separate', page.locator('.finance-investment-note>strong').text_content() != canonical[1])
+            check(f'UX01/{name}/{width}: confirmed/positive records retain their explicit canonical result', canonical[2] != '—' and not canonical[2].startswith('-'))
+            expect(summary.locator('.ux01-finance-profit>span:not(.ux01-icon)')).to_have_text('Операційний прибуток')
+            if name == 'confirmed-zero':
+                expect(summary.locator('.finance-cost>strong')).to_have_text('0 грн')
+            expect(page.locator('.ux01-margin-meter')).to_have_count(1)
+        if expenses == []:
+            ledger = page.locator('.ux01-detail:has(.finance-ledger)')
+            if ledger.get_attribute('open') is None:ledger.locator(':scope>summary').click()
+            expect(page.locator('.expense-empty')).to_have_text('Витрати за цей період не зафіксовані')
+            expect(page.locator('.expense-table.card')).to_have_count(0)
+            empty = page.locator('.expense-table-empty')
+            check(f'UX01/{name}/{width}: empty ledger is a compact row', empty.bounding_box()['height'] <= 72)
+            saved_empty_style = empty.get_attribute('style')
+            try:
+                empty.evaluate("e=>e.style.setProperty('min-height','240px','important')")
+                check(f'UX01/{name}/{width}: oversized empty ledger is rejected', empty.bounding_box()['height'] > 72)
+            finally:
+                empty.evaluate("(e,s)=>s===null?e.removeAttribute('style'):e.setAttribute('style',s)", saved_empty_style)
+            expect(page.locator('#expenseCategoryFilter')).to_be_visible()
         capture_state(name)
         if expenses:
             ledger = page.locator('.ux01-detail:has(.finance-ledger)')
@@ -201,7 +292,11 @@ def verify_financial_states(page, width, check, set_fixture, reset_fixture, spen
             page.locator('.expense-row').first.evaluate("e=>e.addEventListener('click',()=>{window.__ux01ExpenseReturnFocus=document.activeElement},{capture:true,once:true})")
             page.locator('.expense-row').first.click()
             return_focus = page.evaluate_handle('window.__ux01ExpenseReturnFocus')
-            expect(page.locator('#expenseForm [name=amount]')).to_have_value(str(expenses[0]['amount']))
+            expected_form_amount = str(expenses[0]['amount']) if expenses[0]['amount'] else ''
+            expect(page.locator('#expenseForm [name=amount]')).to_have_value(expected_form_amount)
+            if expenses[0]['amount'] == 0:
+                expect(page.locator('#expenseForm [name=amount]')).to_have_attribute('min','1')
+                check(f'UX01/{name}/{width}: explicit zero read does not relax the native positive-expense write contract', page.locator('#expenseForm [name=amount]').evaluate('e=>!e.validity.valid'))
             expect(page.locator('#archiveExpense')).to_be_visible()
             page.locator('#expenseForm [data-close]').first.click()
             expect(page.locator('#expenseForm')).not_to_be_attached()
@@ -220,7 +315,11 @@ def verify_financial_states(page, width, check, set_fixture, reset_fixture, spen
             expect(page.locator('#dashboardAddExpense')).to_have_count(0)
             expect(page.locator('html')).not_to_have_attribute('data-ux01-ready', 'true')
             page.locator(f'[data-search-expense="{expenses[0]["id"]}"]').click()
-            expect(page.locator('#expenseForm [name=amount]')).to_have_value(str(expenses[0]['amount']))
+            expected_form_amount = str(expenses[0]['amount']) if expenses[0]['amount'] else ''
+            expect(page.locator('#expenseForm [name=amount]')).to_have_value(expected_form_amount)
+            if expenses[0]['amount'] == 0:
+                expect(page.locator('#expenseForm [name=amount]')).to_have_attribute('min','1')
+                check(f'UX01/{name}/{width}: explicit zero read does not relax the native positive-expense write contract', page.locator('#expenseForm [name=amount]').evaluate('e=>!e.validity.valid'))
             page.locator('#expenseForm [data-close]').first.click()
             expect(page.locator('#expenseForm')).not_to_be_attached()
             expect(page.locator('#globalSearch')).to_be_focused()

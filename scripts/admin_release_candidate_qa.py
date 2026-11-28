@@ -206,7 +206,19 @@ def main():
                 if name in ('finances', 'analytics'):
                     verify_dashboard(page, name, args.width, check)
             def dashboard_state(expenses, no_revenue):
-                dashboard_fixture[0] = {'expenses': expenses, 'bookings': [b for b in fixture['bookings'] if not no_revenue or b['status'] != 'completed']}
+                # The base Operations fixture is active work, not completed revenue.
+                # Supply one explicit recorded completion only inside these read fixtures.
+                bookings = [dict(b) for b in fixture['bookings'] if b['status'] != 'completed']
+                if not no_revenue:
+                    completed = dict(fixture['bookings'][0])
+                    completed.update(id='00000000-0000-4000-8000-000000000090', booking_code='VAC-UX01-COMPLETED',
+                        status='completed', customer_name='Синтетичний клієнт', customer_phone='+380950000099',
+                        start_date=(first_day-datetime.timedelta(days=2)).isoformat(), return_date=first_day.isoformat(),
+                        completed_at=first_day.isoformat()+'T08:00:00Z', returned_at=first_day.isoformat()+'T08:00:00Z',
+                        total_amount=1500, base_amount=1500, delivery_amount=0, extras_amount=0,
+                        deposit_amount=0, deposit_paid=False, extras={})
+                    bookings.append(completed)
+                dashboard_fixture[0] = {'expenses': expenses, 'bookings': bookings}
             def restore_dashboard_chrome_fixture():
                 if args.width == 440:
                     page.evaluate("()=>{document.documentElement.style.setProperty('--pwa-safe-top','59px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px')}")

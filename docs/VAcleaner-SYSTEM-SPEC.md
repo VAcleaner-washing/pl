@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.70
-**Baseline build:** 4370
-**Останнє оновлення:** 2026-11-23
+**Baseline version:** 4.3.71
+**Baseline build:** 4371
+**Останнє оновлення:** 2026-11-28
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -2262,6 +2262,10 @@ Inference із тексту `vendor/note` допускається лише дл
 Якщо метрика використовує середній cost або неповні route/vehicle data, назва повинна бути `Оцінка` / `Попередня оцінка`.
 
 `Фактична` / `Реальна` допускається лише при достатніх фактичних даних.
+
+## FINTRUTH-003 — owner-approved provisional UX-01 reporting
+
+A successful empty expense read has a recorded operating-expense total of 0 грн. It does not confirm the absence of actual expenses or a complete period. Both Finance and Analytics use the single canonical `financialSummary`: show provisional operating profit (completed revenue minus recorded operating costs), and provisional margin only when revenue is positive, with explicit incomplete-accounting caveats. Investment-only records do not establish operating costs. Unavailable/unloaded financial data is not an empty ledger: costs/profit/margin remain unknown. Preserve genuine losses; zero-revenue margin remains undefined. Keep booking-margin estimates, rental/deposit calculations, data sources and write contracts unchanged. This is the owner's explicit Functional Freeze exception for report presentation, not confirmation of period completeness or a second calculator.
 
 ---
 
@@ -6199,3 +6203,24 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 ### TESTS
 - Existing finance/deposit/analytics/date and presentation-isolation contracts; canonical Analytics visual regression plus scripts/ux01_dashboard_qa.py through the existing four normal Operations variants. Positive and negative fixtures cover unknown/investment-only/loss/zero-revenue states, native search/filter/edit access, focus, SVG stroke, disclosure state and a deliberately invalid touch target.
 - Actual normal-artifact screenshots at phone/tablet/desktop widths are required for independent visual/exact-head review. Full static/build, pinned Browser/WebKit, all four Operations, Release readiness and separate post-merge provenance/live/device acceptance remain mandatory; this record does not claim those pending results.
+
+
+# Change record — v4.3.71
+
+### ADDED
+- Owner-approved physical-iPhone corrective scope; the five visual refinements preserve the existing UX-01 composition.
+
+### CHANGED
+- FINTRUTH-003: a successful empty expense read shows recorded operating costs0 грн and explicitly provisional profit/margin from the single canonical financialSummary. Unknown/unavailable financial data remains unknown; investment-only records do not confirm operating costs; losses and undefined zero-revenue percentages remain honest. Booking-margin estimates and rental/deposit/pricing formulas are unchanged.
+- The owner approved this narrow report-presentation exception to Functional Freeze. Finance/Analytics and their existing weekly report use the same canonical values/status. No second calculator, new source or API/write change.
+
+### FIXED
+- Replace the large no-expense onboarding card with the summary warning «Витрати не внесено. Прибуток і маржинальність попередні». Retain the existing + Витрата action; remove repeated no-expense messages. The empty ledger is one compact information row while its counter/category filter remain usable.
+- Category selector retains16px text, native disclosure arrow and44px target with sufficient width; narrow screens may use a separate row. Remove the redundant visible Місяць caption while preserving the period dropdown, month picker, previous/next controls and accessible name.
+- Finance and Analytics use one semantic class from the canonical summary: positive green, loss red, zero neutral, unavailable neutral. Provisional status remains explicit regardless of amount color. Preserve the approved dashboard composition, every detail section and period/search/filter behavior.
+
+### TESTS
+- Same-change regression extends existing financial control and browser helpers with empty/explicit-zero/positive/loss/zero-revenue/unavailable cases, canonical equality, color/filter/empty-row negative controls and month-control access. Preserve all current registry membership/release gates. Before/after screenshots use identical synthetic read-only fixtures; browser WebKit/emulation is not physical iPhone acceptance.
+
+### PRESERVED
+- Standard release/cache stamping4.3.70/4370→4.3.71/4371 includes generated backend VERSION constants only, no backend deployment. Footer#104 and Equipment#105 remain separate; persistent-update-banner diagnosis/repair remains exclusively#106. No Ruleset, CI, dependency or Roadmap change. Independent exact-head review and production/device acceptance remain required.

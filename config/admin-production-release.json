@@ -1,29 +1,29 @@
 {
-  "version": "4.3.70",
-  "build": 4370,
-  "reviewMode": "ux01-candidate-awaiting-independent-visual-exact-head-review",
-  "baselineApplicationSourceCommit": "83c480ec127a67065fe13b198ede0b6d668e9289",
+  "version": "4.3.71",
+  "build": 4371,
+  "reviewMode": "ux01-iphone-corrective-awaiting-independent-exact-head-review",
+  "baselineApplicationSourceCommit": "5713268d97609d994bb9a4fa449332dd9de5354d",
   "applicationFixes": [
     {
       "path": "assets/admin-v250.js",
-      "sha256": "17847453fc25cdbb78e70f6d0e8e8de5522f7e684f8ccc52e03f8591646cb5a0",
-      "reason": "Expose existing canonical expense/completed markers and render actual mobile trend points as the approved line/area; financial calculations and native handlers remain unchanged."
+      "sha256": "0ea7fac017d29637fd439004b05df68e7e1aa70c5a99286c8334a450685253c0",
+      "reason": "Owner-approved provisional report status and native financial presentation from one canonical summary; preserve booking estimates/write/rental/deposit methodology."
     },
     {
       "path": "sandbox/ui.js",
-      "sha256": "2200cd8794e02fe09af32f275a9cdad63499cdf14a48f526cb0064ab273a0fa0",
-      "reason": "Project native Analytics/Finance nodes into the approved compact dashboard; delegate period/expense actions, preserve disclosures/focus/search and keep every detailed section."
+      "sha256": "6a0c2ce99df624638aaaef89acd4e02007f86e7b5da8527e5cf9b945f28a6647",
+      "reason": "Keep the approved report projection and existing + expense delegation; remove oversized onboarding projection and copy canonical recorded costs."
     },
     {
       "path": "sandbox/ui.css",
-      "sha256": "c89a0bd1276578293295426903619664f9f81a129222daaf3cac51463569b629",
-      "reason": "Approved UX-01 compact presentation; owner mobile spacing refinements, including preserved absent-cost onboarding and loss-state geometry. Desktop, global shell and all functions retained."
+      "sha256": "a0470c45073a601aeae34b763cb1a7434c2c4f704e3230359ed4d605e897f23d",
+      "reason": "Bounded iPhone corrections: readable category selector, compact empty ledger and identical profit/margin semantic colors; no new composition."
     }
   ],
   "artifactFiles": 273,
-  "artifactTreeSha256": "559f30d7e139a23d27e13174d36838f405f13b2912d5d34176400640f22ffcc1",
+  "artifactTreeSha256": "0e8dd4e8be611f94d0f83d219ec2d79dd6f759c2d264a78eabca08d4cf7c2595",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "066090223559032968d37c8a526d729bf43986f51e877acfd5c56c620257ffd6",
+  "reviewArchiveSha256": "392ea6966f48278c9c62283fa0ece464a63baf99f6d4e3f19a8b866090190d49",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,
@@ -39,5 +39,5 @@
     77
   ],
   "backendFixes": [],
-  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from 4.3.69 to 4.3.70 in ten generated config.ts/config.deploy.js files. No configuration values, handlers, database operations or backend deployment."
+  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from4.3.70 to4.3.71 in ten generated configs; no handler/configuration/schema/RLS/data changes or backend deployment."
 }
