@@ -1,34 +1,19 @@
 {
-  "version": "4.3.72",
-  "build": 4372,
-  "reviewMode": "ux02-footer-on-accepted-main-awaiting-independent-exact-head-review",
-  "baselineApplicationSourceCommit": "b06aadf3d5b3a3aa3cee22636cad29173b09af17",
+  "version": "4.3.73",
+  "build": 4373,
+  "reviewMode": "ux03-equipment-tabs-awaiting-independent-exact-head-review",
+  "baselineApplicationSourceCommit": "7dfa06ac6f6b3388ab51903b5858fa156813752a",
   "applicationFixes": [
     {
-      "path": "assets/site-v400.js",
-      "sha256": "dc62670848478a1fee62093016b81b9764a5d259fa66beda85834ba970fcf710",
-      "reason": "Canonical approved footer and idempotent native mobile disclosures; preserve existing contact analytics owner, add footer-only adapter where standalone exports have none."
-    },
-    {
-      "path": "assets/site-v400.css",
-      "sha256": "b8845dc2414e888caf4569bc04bfc7237227ee8c0179cacbc6d6a66ceb30b3a3",
-      "reason": "Footer-scoped approved contact/navigation composition, compact native categories and responsive ecosystem banner; preserve global navigation and CTA thresholds."
-    },
-    {
-      "path": "assets/va-home-footer-art.svg",
-      "sha256": "28ee683505fdc6ce641e891138bc799f30233b185ae13b4b0fb529337fa6f155",
-      "reason": "Exact reuse of the previously approved decorative diffuser illustration, without a product claim."
-    },
-    {
-      "path": "scripts/sync-public-hydration.mjs",
-      "sha256": "62db4147f5a2b4b17ee1bf0967b968bb1e64d3e0583fcf34d46be93295d41c71",
-      "reason": "Derive SSR and retained client footers from the same canonical markup, including the native open boolean."
+      "path": "assets/admin-v250.js",
+      "sha256": "74521b75dd6307495828d884ad5fe84cbf7b728318e7cd34a0d2a82559d5c0f8",
+      "reason": "UX-03: shared equipment tabs precede the contextual action toolbar. Existing actions, data and financial methodology are preserved."
     }
   ],
   "artifactFiles": 274,
-  "artifactTreeSha256": "3c3fd0a1eea533592aecdae381cfc28cffd5ed17d8a6cb25a080e2201bd8b6af",
+  "artifactTreeSha256": "95a33d4afb553f046c7f4a68bc901c0dac55babeb67c97d1e2a083cd3f824d72",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "0689b54abc0cf962e262d4fba8620a7b839230ee8e182d3b06c7fe5ed2073918",
+  "reviewArchiveSha256": "fab4df7d6e536268550d6b776208ff2f9abce6aacfbb7faf8547ad7221745518",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,
@@ -44,5 +29,5 @@
     77
   ],
   "backendFixes": [],
-  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from 4.3.71 to 4.3.72 in ten generated config.ts/config.deploy.js files. No configuration values, handlers, database operations or backend deployment."
+  "generatedBackendVersionStamp": "Generated VACLEANER_RELEASE_VERSION only: 4.3.72 to 4.3.73. No backend deployment."
 }

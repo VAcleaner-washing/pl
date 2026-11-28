@@ -1,8 +1,8 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.72
-**Baseline build:** 4372
+**Baseline version:** 4.3.73
+**Baseline build:** 4373
 **Останнє оновлення:** 2026-11-28
 **Власник логіки:** VAcleaner  
 
@@ -6256,3 +6256,26 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 ### TESTS
 - Existing public visual contract checks exact canonical SSR footer parity across all listed routes; existing Chromium/WebKit hydration QA invokes the UX-02 footer helper for native click/keyboard disclosures, preserved links, contact events without duplicates, art loading, containment and final-content clearance. Existing slow hydration/booking assertions are retained.
 - Local responsive evidence covers 320/390/430/620/768/1024/1280/1440/1648, no-JS and a declared CSS simulation of a 34px bottom safe inset. Physical iPhone/WebKit acceptance and full native main-target CI remain separate requirements; screenshots do not certify them.
+
+## UI-EQUIPMENT-TABS-001 — stable shared equipment navigation (UX-03)
+
+- The Equipment page keeps its existing shell heading, subtitle and search, followed by the shared fleet/pricing/finance tabs. The existing catalog toolbar and its pricing-only `Редагувати ціни` action follow the tabs. Contextual text wrapping or button visibility must not move shared navigation: at identical viewport, scroll and shell state, tab-bar top positions across all three tabs differ by at most1 CSS px.
+- Preserve all three views, selected-tab persistence, original product photos/descriptions/prices, catalog editor/open/close, fleet Refresh and unit actions, purchase editing and every financial warning. Do not clone handlers, insert empty spacers, hide overflow to mask the defect or change business calculations/data access. This bounded fix does not restyle the full equipment workspace or global shell.
+- `admin_equipment_fleet_qa.py` exercises actual tab clicks, selection/visibility, touch bounds, no horizontal overflow, unchanged acknowledged caches and pricing open/close; geometry covers320/375/390/430/768/1024/1440/1648. Snapshot the live connected, visible, selected tab bar atomically after responsive rendering; a detached/hidden zero-size node is not geometry evidence. Retain the existing bounded wait deadline and every geometry assertion. A reversible12px DOM displacement must fail alignment, and hidden tabs must not be accepted as a live measurement. The existing conflict/lost-response/idempotent-retry/reload cases remain intact. `admin_release_candidate_qa.py` reuses this geometry/action contract on normal N in all four existing Operations variants, without changing registry membership or CI selection. Existing pricing rejection and purchase acknowledgement/reload scenarios remain required.
+
+# Change record — v4.3.73 (UX-03 candidate, not deployed)
+
+### ADDED
+- Shared C/N tab-position regression with a displaced-DOM negative control; no new product function.
+
+### CHANGED
+- Existing equipment markup order and standard release/cache metadata for the local candidate.
+
+### FIXED
+- Shared Equipment tabs precede contextual catalog actions. Previously the pricing button narrowed/wrapped the toolbar above the tabs, shifting their vertical position. Only existing markup order changes; no CSS padding compensation or architecture refactor.
+
+### PRESERVED
+- All functions, navigation, financial methodology, tariffs, data sources, inventory status/capacity and access rules. Accepted UX-01, UX-02 and Governance are preserved.
+
+### TESTS
+- Same-change C/N geometry/action regressions and displaced-DOM negative control; old-artifact failure evidence; existing equipment/static/artifact and full release gates. Local browser results, hosted pinned CI, independent exact-head visual review, deployment/live readback and physical iPhone verification remain separate evidence. No production acceptance is asserted by this change record.
