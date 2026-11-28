@@ -34,10 +34,15 @@ def footer_geometry(page):
 
 
 def check_geometry(page):
-    page.evaluate('scrollTo(0, document.documentElement.scrollHeight)')
-    # Wait on the actual CSS transition, not an arbitrary screenshot delay.
-    if page.locator('html.v4-mobile-cta-visible').count():
-        page.wait_for_function("getComputedStyle(document.querySelector('.mobile-booking')).opacity === '1'")
+    # Measure the end of the page, not a frame of the site's smooth scroll.
+    page.wait_for_function('''() => {
+        const root = document.scrollingElement;
+        const bottom = () => root.scrollHeight - root.clientHeight - root.scrollTop <= 1;
+        if (!bottom()) scrollTo({top: root.scrollHeight, behavior: 'instant'});
+        const bar = document.querySelector('.mobile-booking');
+        const visible = bar && document.documentElement.classList.contains('v4-mobile-cta-visible');
+        return bottom() && (!visible || getComputedStyle(bar).opacity === '1');
+    }''')
     result = footer_geometry(page)
     assert result['scrollWidth'] <= result['documentWidth'] + 1, result
     assert not result['overflow'], result
