@@ -42,6 +42,12 @@ for(const route of routes){
   check(!/(>\s*Процес\s*<|>\s*FAQ\s*<)/.test((html.match(/<nav[^>]*class="desktop-nav"[\s\S]*?<\/nav>/)||[''])[0]||''),`${label} has no stale header labels`);
   check(!html.includes('↗'),`${label} contains no browser/emoji external-arrow glyph`);
   check((html.match(/<footer[^>]*class="v4-footer"/g)||[]).length===1,`${label} has exactly one canonical footer`);
+  const footer=html.match(/<footer class="v4-footer">([\s\S]*?)<\/footer>/)?.[1]||'';
+  const canonical=read('assets/site-v400.js').match(/footer\.innerHTML='([^']+)';/)?.[1];
+  check(footer===canonical,`${label} server footer matches its single runtime/client markup authority`);
+  check((footer.match(/<details open="">/g)||[]).length===4,`${label} exposes every footer category without JavaScript`);
+  check(footer.includes('href="tel:+380953919569"') && footer.includes('href="https://www.instagram.com/vacleaner_washing.pl/"'),`${label} has verified actionable contact links`);
+  check(footer.includes('class="v4-vahome-banner" href="https://vahome.com.ua/" rel="noreferrer" target="_blank"') && footer.includes('src="/assets/va-home-footer-art.svg"'),`${label} has one independent VA HOME banner with the approved decorative art`);
 }
 
 const experienceCss=read('assets/public-experience.css');

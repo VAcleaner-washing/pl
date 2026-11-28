@@ -1,0 +1,399 @@
+"""UX-01 browser assertions on the supplied normal artifact; no live API calls."""
+import argparse
+import json
+import math
+import re
+import os
+from pathlib import Path
+from urllib.parse import urlsplit
+from playwright.sync_api import expect, sync_playwright
+import e2e_smoke as smoke
+import admin_idle_qa as idle
+from admin_entrypoint_finance_qa import pages_server
+
+
+def accessible_period(control):
+    box = control.bounding_box()
+    return bool(box and box['height'] >= 44 and control.evaluate('e=>parseFloat(getComputedStyle(e).fontSize)') >= 16)
+
+
+def verify_mobile_overview(page, view, check):
+    """Owner's 390x844 case; safe-area simulation is not a device certificate."""
+    check(f'UX01/{view}: compact overview fixture uses the installed PWA shell', page.evaluate('navigator.standalone === true'))
+    viewport = page.viewport_size
+    saved = page.evaluate("() => Object.fromEntries(['--pwa-safe-top','--pwa-safe-bottom'].map(k=>[k,[document.documentElement.style.getPropertyValue(k),document.documentElement.style.getPropertyPriority(k)]]))")
+    try:
+        page.set_viewport_size({'width': 390, 'height': 844})
+        page.evaluate("() => {document.documentElement.style.setProperty('--pwa-safe-top','59px');document.documentElement.style.setProperty('--pwa-safe-bottom','34px');document.querySelector('.main').scrollTop=0}")
+        page.evaluate('() => new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))')
+        def geometry():
+            return page.evaluate("""() => {
+                const rect=s=>{const e=document.querySelector(s);return e?.getBoundingClientRect().toJSON()};
+                return {main:rect('.main'),heading:rect('.page-head h1'),trend:rect('.ux01-trend'),summary:rect('.ux01-finance-summary'),nav:rect('.mobile-nav')};
+            }""")
+        initial = geometry()
+        check(f'UX01/{view}: mobile title has one 59px safe inset plus compact content padding', 0 <= initial['heading']['y'] - initial['main']['y'] - 59 <= 12, geometry=initial)
+        selector = '.ux01-trend' if view == 'analytics' else '.ux01-finance-summary'
+        def accepts(g):
+            return (g['trend']['bottom'] <= g['nav']['y'] - 8 if view == 'analytics'
+                    else g['summary']['height'] <= 235)
+        check(f'UX01/{view}: 390x844 overview meets the approved compact geometry', accepts(initial), geometry=initial)
+        target = page.locator(selector)
+        old_style = target.get_attribute('style')
+        try:
+            target.evaluate("e=>e.style.setProperty('padding-block','100px','important')")
+            check(f'UX01/{view}: oversized overview is rejected by the same assertion', not accepts(geometry()))
+        finally:
+            target.evaluate("(e,s)=>s===null?e.removeAttribute('style'):e.setAttribute('style',s)", old_style)
+        check(f'UX01/{view}: compact overview is restored after negative control', accepts(geometry()))
+    finally:
+        page.evaluate("saved=>{for(const [k,[v,p]] of Object.entries(saved))v?document.documentElement.style.setProperty(k,v,p):document.documentElement.style.removeProperty(k)}", saved)
+        page.set_viewport_size(viewport)
+
+
+def verify_ledger_filter(page, check):
+    ledger = page.locator('.ux01-detail:has(.finance-ledger)')
+    was_open = ledger.get_attribute('open') is not None
+    if not was_open:
+        ledger.locator(':scope>summary').click()
+    select = page.locator('#expenseCategoryFilter')
+    expect(select).to_be_visible()
+    def fits():
+        return select.evaluate("""e=>{const s=getComputedStyle(e),c=document.createElement('canvas').getContext('2d');c.font=s.font;return parseFloat(s.fontSize)>=16&&e.getBoundingClientRect().height>=44&&e.clientWidth-parseFloat(s.paddingLeft)-parseFloat(s.paddingRight)>=c.measureText('Усі категорії').width+24&&e.getBoundingClientRect().right<=innerWidth+1}""")
+    check('UX01/finance: category text and native arrow fit without shrinking text', fits())
+    saved = select.get_attribute('style')
+    try:
+        select.evaluate("e=>{e.style.setProperty('width','138px','important');e.style.setProperty('max-width','138px','important')}")
+        check('UX01/finance: narrow category selector is rejected', not fits())
+    finally:
+        select.evaluate('(e,s)=>s===null?e.removeAttribute(\'style\'):e.setAttribute(\'style\',s)', saved)
+    check('UX01/finance: category selector restores after negative control', fits())
+    if not was_open:
+        ledger.locator(':scope>summary').click()
+
+
+def profit_presentation(page, selector):
+    return page.locator(selector).evaluate("""e=>({text:e.querySelector(':scope>strong').textContent,tone:[...e.classList].find(c=>['finance-profit','finance-loss','finance-neutral','finance-unknown'].includes(c)),color:getComputedStyle(e.querySelector(':scope>strong')).color})""")
+
+
+def profit_color_matches(presentation):
+    expected={'finance-profit':'rgb(143, 224, 176)','finance-loss':'rgb(255, 157, 151)','finance-neutral':'rgb(237, 242, 248)','finance-unknown':'rgb(179, 192, 205)'}
+    return presentation['tone'] in expected and presentation['color']==expected[presentation['tone']]
+
+
+def verify_dashboard(page, view, width, check, exercise=True):
+    root = page.locator('#view > .ux01-dashboard')
+    expect(root).to_be_visible()
+    select = root.locator('#dashboardPeriod')
+    expect(select).to_be_visible()
+    check(f'UX01/{view}: all canonical periods remain selectable', select.locator('option').evaluate_all('els=>els.map(e=>e.value)') == ['7', '30', 'month', 'year', 'all'])
+    box = select.bounding_box()
+    check(f'UX01/{view}: accessible compact period dropdown', accessible_period(select))
+    check(f'UX01/{view}: no document overflow', page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'))
+    check(f'UX01/{view}: native periods delegate from one visible select', not root.locator('.admin-periods').is_visible() and page.locator('#dashboardPeriod').count() == 1)
+    check(f'UX01/{view}: every detailed section remains', root.locator('.ux01-detail').count() == (13 if view == 'analytics' else 5))
+    check(f'UX01/{view}: gold outline icons are real SVG', root.locator('.ux01-icon svg path,.ux01-icon svg rect').count() >= 5)
+    colors = root.locator('.ux01-icon svg path,.ux01-icon svg rect').evaluate_all("els=>els.map(e=>getComputedStyle(e).stroke.match(/\\d+/g)?.slice(0,3).map(Number))")
+    check(f'UX01/{view}: native KPI text styles cannot mute the gold SVG stroke', all(c and c[0]>c[1]>c[2] and c[0]>=190 and c[1]>=140 for c in colors))
+    if width <= 440:
+        verify_mobile_overview(page, view, check)
+    if view == 'analytics':
+        check('UX01/analytics: four canonical KPI owners retained', root.locator('.analytics-kpis .kpi').count() == 4)
+        # Canonical source remains in a closed disclosure; innerText is empty there.
+        native_expense = root.locator('[data-analytics-operating-amount]')
+        expected = native_expense.text_content()
+        check('UX01/analytics: expense is the canonical acknowledged display, unknown stays unknown', root.locator('.ux01-projected-expense strong').text_content() == expected, expected=repr(expected), actual=repr(root.locator('.ux01-projected-expense strong').text_content()))
+        check('UX01/analytics: completed count comes from the existing metric', root.locator('.ux01-projected-completed strong').inner_text() == root.locator('[data-analytics-completed-count]').text_content())
+        expect(native_expense).to_have_attribute('data-analytics-operating-available', re.compile('^(true|false)$'))
+        expect(native_expense).to_have_attribute('data-analytics-operating-preliminary', re.compile('^(true|false)$'))
+        available = native_expense.get_attribute('data-analytics-operating-available') == 'true'
+        preliminary = native_expense.get_attribute('data-analytics-operating-preliminary') == 'true'
+        warning = ('Фінансові дані недоступні. Результат не розраховано' if not available else
+                   'Витрати не внесено. Прибуток і маржинальність попередні' if preliminary else
+                   'За внесеними витратами · облік може бути неповним')
+        expect(root.locator('.ux01-profit-hero').get_by_text(warning, exact=True)).to_be_visible()
+        check('UX01/analytics: trend uses actual finite points', len(root.locator('.analytics-trend-line').get_attribute('points').split()) > 1 and all(math.isfinite(float(n)) for point in root.locator('.analytics-trend-line').get_attribute('points').split() for n in point.split(',')))
+    else:
+        expect(root.locator('.ux01-finance-warning')).to_be_visible()
+        verify_ledger_filter(page, check)
+        check('UX01/finance: one summary retains all four metrics', root.locator('.finance-kpis').count() == 1 and root.locator('.finance-kpis .kpi').count() == 4)
+        check('UX01/finance: one original expense action plus one delegated visible control', page.locator('#view #addExpense').count() == 1 and page.locator('#dashboardAddExpense').count() == 1)
+        page.locator('#dashboardAddExpense').click()
+        expect(page.locator('#expenseForm')).to_be_visible()
+        page.locator('#expenseForm [data-close]').first.click()
+        expect(page.locator('#expenseForm')).not_to_be_attached()
+    if not exercise:
+        return box
+    # Each choice must survive the canonical rerender, not just change a label.
+    for period in ['7', 'month', 'year', 'all', '30']:
+        page.locator('#dashboardPeriod').select_option(period)
+        expect(page.locator('#dashboardPeriod')).to_have_value(period)
+        expect(page.locator(f'#view .admin-periods [data-analytics-period="{period}"]')).to_have_class('chip active')
+        if period == 'month':
+            check(f'UX01/{view}: month caption is not duplicated', page.locator('.analytics-picker-field>span').count() == 0)
+            expect(page.locator('#analyticsMonthPicker')).to_have_attribute('aria-label','Місяць звіту')
+            expect(page.locator('.analytics-calendar-picker .analytics-step')).to_have_count(2)
+            expect(page.locator('#dashboardPeriod')).to_be_visible()
+        if period in ('month', 'year'):
+            trigger = page.locator('#view .analytics-picker-trigger')
+            expect(trigger).to_be_visible()
+            trigger.click()
+            expect(page.locator('#view .analytics-picker-popover:visible')).to_have_count(1)
+            page.locator('#view .analytics-picker-close:visible').click()
+    if width <= 900:
+        page.locator('.native-search-options').click()
+        sheet = page.locator('.v43-filter-sheet')
+        expect(sheet).to_be_visible()
+        expect(sheet.locator('.native-v2-sheet-action')).to_have_count(5)
+        sheet.locator('.native-v2-sheet-action').first.click()
+        expect(page.locator('#dashboardPeriod')).to_have_value('7')
+        expect(sheet).not_to_be_attached()
+        page.locator('#dashboardPeriod').select_option('30')
+        check(f'UX01/{view}: existing mobile filter sheet still delegates all canonical period actions', True)
+    page.locator('#dashboardPeriod').focus()
+    page.locator('#dashboardPeriod').select_option('7')
+    expect(page.locator('#dashboardPeriod')).to_be_focused()
+    page.locator('#dashboardPeriod').select_option('30')
+    expect(page.locator('#dashboardPeriod')).to_be_focused()
+    page.locator('#dashboardPeriod').press('Tab')
+    check(f'UX01/{view}: period rerender preserves keyboard focus and Tab reaches the next control', page.evaluate("document.activeElement.matches('button,summary,input,select') && document.activeElement.id!=='dashboardPeriod'"))
+    first = page.locator('.ux01-detail').first
+    if not first.get_attribute('open') == '':
+        first.locator(':scope > summary').click()
+    expect(first).to_have_attribute('open', '')
+    page.locator('#dashboardPeriod').select_option('7')
+    expect(page.locator('.ux01-detail').first).to_have_attribute('open', '')
+    page.locator('#dashboardPeriod').select_option('30')
+    check(f'UX01/{view}: disclosure choice survives period rerenders', page.locator('.ux01-detail').first.get_attribute('open') == '')
+    if view == 'analytics':
+        page.locator('[data-trend-metric="rentals"]').click()
+        expect(page.locator('.analytics-trend-chart')).to_have_attribute('aria-label', 'Динаміка завершених оренд')
+        expect(page.locator('#dashboardPeriod')).to_have_value('30')
+        page.locator('[data-trend-metric="revenue"]').click()
+    # Meaningful wrong-layout control: a too-small dropdown must be rejected.
+    original_style = page.locator('#dashboardPeriod').get_attribute('style')
+    page.locator('#dashboardPeriod').evaluate("e=>{for(const [k,v] of Object.entries({'min-height':'10px','height':'10px','padding':'0','line-height':'10px','font-size':'10px'}))e.style.setProperty(k,v,'important')}")
+    check(f'UX01/{view}: a shrunken touch target is detected', not accessible_period(page.locator('#dashboardPeriod')))
+    page.locator('#dashboardPeriod').evaluate("(e,s)=>s===null?e.removeAttribute('style'):e.setAttribute('style',s)", original_style)
+    return box
+
+
+def verify_financial_states(page, width, check, set_fixture, reset_fixture, spent_on, after_reload=lambda: None, capture_state=lambda name: None):
+    """Change only the intercepted read response, never submit a business write."""
+    scenarios = [
+        ('unknown', [], False),
+        ('zero-result', [], True),
+        ('confirmed-zero', [{'id':'ux01-confirmed-zero', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':0}], False),
+        ('positive', [{'id':'ux01-positive', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':100}], False),
+        ('unavailable', None, False),
+        ('investment-only', [{'id':'ux01-investment', 'spent_on':spent_on, 'category':'equipment', 'cost_type':'investment', 'amount':1200}], False),
+        ('loss', [{'id':'ux01-loss', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':1000000}], False),
+        ('zero-revenue-loss', [{'id':'ux01-zero', 'spent_on':spent_on, 'category':'chemistry', 'cost_type':'operating', 'amount':100}], True),
+    ]
+    for name, expenses, no_revenue in scenarios:
+        set_fixture(expenses, no_revenue)
+        page.reload()
+        page.wait_for_selector('#view .booking-card,#view .upcoming-row,#view .empty')
+        after_reload()
+        idle.navigate(page, 'analytics')
+        expect(page.locator('#dashboardPeriod')).to_be_visible()
+        page.locator('#dashboardPeriod').select_option('30')
+        expect(page.locator('#dashboardPeriod')).to_have_value('30')
+        if width <= 440:
+            verify_mobile_overview(page, 'analytics', check)
+        analytics_style = profit_presentation(page, '.ux01-profit-hero')
+        check(f'UX01/{name}/{width}: Analytics amount has the semantic color', profit_color_matches(analytics_style))
+        analytics = {
+            'profit':page.locator('.ux01-profit-hero>strong').text_content(),
+            'revenue':page.locator('.ux01-mini-kpi.kpi-revenue>strong').text_content(),
+            'cost':page.locator('.ux01-projected-expense>strong').text_content(),
+        }
+        idle.navigate(page, 'finances')
+        expect(page.locator('.ux01-finance-summary')).to_be_visible()
+        summary = page.locator('.ux01-finance-summary')
+        if width <= 440:
+            verify_mobile_overview(page, 'finances', check)
+        # Compare to the unmodified native method detail; no duplicate formula.
+        canonical = page.locator('.finance-method>div>strong').all_text_contents()
+        check(f'UX01/{name}/{width}: promoted profit and costs equal canonical method',
+              summary.locator('.ux01-finance-profit>strong').text_content() == canonical[2]
+              and summary.locator('.finance-cost>strong').text_content() == canonical[1]
+              and summary.locator('.ux01-finance-components>.kpi').first.locator('strong').text_content() == canonical[0])
+        check(f'UX01/{name}/{width}: both reports preserve the same source values',
+              analytics == {'profit':canonical[2], 'revenue':canonical[0], 'cost':canonical[1]})
+        expected_profit = {'unknown':1500, 'investment-only':1500, 'confirmed-zero':1500, 'positive':1400, 'loss':-998500, 'zero-revenue-loss':-100, 'zero-result':0}
+        if name in expected_profit:
+            check(f'UX01/{name}/{width}: explicit recorded fixture result is preserved', int(re.sub(r'[^0-9-]', '', canonical[2])) == expected_profit[name])
+        expect(summary.locator('.ux01-finance-warning')).to_be_visible()
+        check(f'UX01/{name}/{width}: no viewport or summary overflow', page.evaluate('document.documentElement.scrollWidth<=innerWidth+1') and summary.evaluate('e=>e.scrollWidth<=e.clientWidth+1'))
+        finance_style = profit_presentation(page, '.ux01-finance-profit')
+        check(f'UX01/{name}/{width}: Finance and Analytics share semantic colors', profit_color_matches(finance_style) and finance_style == analytics_style)
+        target = summary.locator('.ux01-finance-profit>strong')
+        saved_color_style = target.get_attribute('style')
+        try:
+            target.evaluate("(e,c)=>e.style.setProperty('color',c,'important')", '#ff0000' if finance_style['tone']=='finance-profit' else '#00ff00')
+            check(f'UX01/{name}/{width}: incorrect amount color is rejected', not profit_color_matches(profit_presentation(page, '.ux01-finance-profit')))
+        finally:
+            target.evaluate("(e,s)=>s===null?e.removeAttribute('style'):e.setAttribute('style',s)", saved_color_style)
+        check(f'UX01/{name}/{width}: amount color restored', profit_color_matches(profit_presentation(page, '.ux01-finance-profit')))
+        if name in ('unknown', 'investment-only', 'zero-result'):
+            expect(summary.locator('.finance-cost>strong')).to_have_text('0 грн')
+            check(f'UX01/{name}/{width}: empty recorded costs show provisional canonical profit, not a hidden dash', canonical[2] != '—')
+            expect(summary.locator('.ux01-finance-profit>span:not(.ux01-icon)')).to_have_text('Попередній операційний прибуток')
+            expect(summary.locator('.ux01-finance-margin>span')).to_have_text('Попередня маржинальність')
+            expect(page.locator('.finance-onboarding')).to_have_count(0)
+            expect(summary.locator('.ux01-finance-warning')).to_have_text('Витрати не внесено. Прибуток і маржинальність попередні')
+            if name == 'investment-only':
+                check(f'UX01/{name}/{width}: investment remains separate', page.locator('.finance-investment-note>strong').text_content() != canonical[1])
+            if name == 'unknown':
+                page.locator('#dashboardAddExpense').click()
+                expect(page.locator('#expenseForm')).to_be_visible()
+                page.locator('#expenseForm [data-close]').first.click()
+        elif name == 'unavailable':
+            expect(summary.locator('.ux01-finance-profit>strong')).to_have_text('—')
+            expect(summary.locator('.finance-cost>strong')).to_have_text('—')
+            expect(summary.locator('.ux01-finance-margin>strong')).to_have_text('—')
+            expect(summary.locator('.ux01-finance-warning')).to_contain_text('Фінансові дані недоступні')
+            expect(page.locator('.ux01-margin-meter')).to_have_count(0)
+        elif 'loss' in name:
+            check(f'UX01/{name}/{width}: real loss retains negative amount and loss styling', canonical[2].startswith('-') and summary.locator('.ux01-finance-profit.finance-loss').count() == 1 and summary.locator('.finance-loss').count() == (1 if name == 'zero-revenue-loss' else 2))
+            expect(page.locator('.ux01-margin-meter')).to_have_count(0)
+            if name == 'zero-revenue-loss':
+                expect(summary.locator('.ux01-finance-margin>strong')).to_have_text('—')
+        else:
+            check(f'UX01/{name}/{width}: confirmed/positive records retain their explicit canonical result', canonical[2] != '—' and not canonical[2].startswith('-'))
+            expect(summary.locator('.ux01-finance-profit>span:not(.ux01-icon)')).to_have_text('Операційний прибуток')
+            if name == 'confirmed-zero':
+                expect(summary.locator('.finance-cost>strong')).to_have_text('0 грн')
+            expect(page.locator('.ux01-margin-meter')).to_have_count(1)
+        if expenses == []:
+            ledger = page.locator('.ux01-detail:has(.finance-ledger)')
+            if ledger.get_attribute('open') is None:ledger.locator(':scope>summary').click()
+            expect(page.locator('.expense-empty')).to_have_text('Витрати за цей період не зафіксовані')
+            expect(page.locator('.expense-table.card')).to_have_count(0)
+            empty = page.locator('.expense-table-empty')
+            check(f'UX01/{name}/{width}: empty ledger is a compact row', empty.bounding_box()['height'] <= 72)
+            saved_empty_style = empty.get_attribute('style')
+            try:
+                empty.evaluate("e=>e.style.setProperty('min-height','240px','important')")
+                check(f'UX01/{name}/{width}: oversized empty ledger is rejected', empty.bounding_box()['height'] > 72)
+            finally:
+                empty.evaluate("(e,s)=>s===null?e.removeAttribute('style'):e.setAttribute('style',s)", saved_empty_style)
+            expect(page.locator('#expenseCategoryFilter')).to_be_visible()
+        capture_state(name)
+        if expenses:
+            ledger = page.locator('.ux01-detail:has(.finance-ledger)')
+            if ledger.get_attribute('open') is None:
+                ledger.locator(':scope>summary').click()
+            page.locator('#expenseCategoryFilter').select_option('repair')
+            expect(page.locator('.expense-row')).to_have_count(0)
+            page.locator('#expenseCategoryFilter').select_option('all')
+            expect(page.locator('.expense-row')).to_have_count(len(expenses))
+            page.locator('.expense-row').first.evaluate("e=>e.addEventListener('click',()=>{window.__ux01ExpenseReturnFocus=document.activeElement},{capture:true,once:true})")
+            page.locator('.expense-row').first.click()
+            return_focus = page.evaluate_handle('window.__ux01ExpenseReturnFocus')
+            expected_form_amount = str(expenses[0]['amount']) if expenses[0]['amount'] else ''
+            expect(page.locator('#expenseForm [name=amount]')).to_have_value(expected_form_amount)
+            if expenses[0]['amount'] == 0:
+                expect(page.locator('#expenseForm [name=amount]')).to_have_attribute('min','1')
+                check(f'UX01/{name}/{width}: explicit zero read does not relax the native positive-expense write contract', page.locator('#expenseForm [name=amount]').evaluate('e=>!e.validity.valid'))
+            expect(page.locator('#archiveExpense')).to_be_visible()
+            page.locator('#expenseForm [data-close]').first.click()
+            expect(page.locator('#expenseForm')).not_to_be_attached()
+            # Observe the actual focus owner captured before the native handler.
+            # Mouse focus differs by engine; do not assume the row owns it.
+            # Finish closeLayer's scheduled handoff before starting text input.
+            page.wait_for_function('(owner)=>document.activeElement===owner', arg=return_focus, timeout=5000)
+            return_focus.dispose()
+            page.evaluate('delete window.__ux01ExpenseReturnFocus')
+            check(f'UX01/{name}/{width}: category filter and native edit form remain usable without writes', True)
+            page.locator('#globalSearch').click()
+            expect(page.locator('#globalSearch')).to_be_focused()
+            page.locator('#globalSearch').fill(str(expenses[0]['amount']))
+            expect(page.locator('#globalSearch')).to_have_value(str(expenses[0]['amount']))
+            expect(page.locator('.global-search-layout')).to_be_visible()
+            expect(page.locator('#dashboardAddExpense')).to_have_count(0)
+            expect(page.locator('html')).not_to_have_attribute('data-ux01-ready', 'true')
+            page.locator(f'[data-search-expense="{expenses[0]["id"]}"]').click()
+            expected_form_amount = str(expenses[0]['amount']) if expenses[0]['amount'] else ''
+            expect(page.locator('#expenseForm [name=amount]')).to_have_value(expected_form_amount)
+            if expenses[0]['amount'] == 0:
+                expect(page.locator('#expenseForm [name=amount]')).to_have_attribute('min','1')
+                check(f'UX01/{name}/{width}: explicit zero read does not relax the native positive-expense write contract', page.locator('#expenseForm [name=amount]').evaluate('e=>!e.validity.valid'))
+            page.locator('#expenseForm [data-close]').first.click()
+            expect(page.locator('#expenseForm')).not_to_be_attached()
+            expect(page.locator('#globalSearch')).to_be_focused()
+            expect(page.locator('#globalSearch')).to_have_value(str(expenses[0]['amount']))
+            page.locator('#clearSearch').click()
+            expect(page.locator('#dashboardPeriod')).to_be_visible()
+            check(f'UX01/{name}/{width}: global expense search and return preserve native behavior without a leaked dashboard action', True)
+
+    reset_fixture()
+    page.reload()
+    page.wait_for_selector('#view .booking-card,#view .upcoming-row,#view .empty')
+    after_reload()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--root', required=True)
+    parser.add_argument('--browser', choices=['chromium', 'webkit'], default='chromium')
+    parser.add_argument('--widths', default='320,390,430,440,768,1024,1280,1440,1648')
+    parser.add_argument('--artifacts', required=True)
+    parser.add_argument('--local-fixtures', action='store_true')
+    args = parser.parse_args()
+    if os.environ.get('GITHUB_ACTIONS') != 'true' and not args.local_fixtures:
+        parser.error('Local evidence must be explicitly marked --local-fixtures')
+    out = Path(args.artifacts).resolve(); out.mkdir(parents=True, exist_ok=True)
+    config = json.loads((smoke.PROJECT_ROOT / 'config/vacleaner.json').read_text())
+    results, forbidden, errors = [], [], []
+    def check(name, ok, **extra):
+        results.append({'name': name, 'passed': bool(ok), **extra})
+        print(('PASS ' if ok else 'FAIL ') + name + ((' ' + json.dumps(extra, ensure_ascii=False)) if extra else ''), flush=True)
+        if not ok and not page.is_closed():
+            page.screenshot(path=str(out/'failure.png'))
+        assert ok, name
+    with pages_server(Path(args.root).resolve()) as base, sync_playwright() as pw:
+        opts = {'headless': True}
+        if args.browser == 'chromium':
+            opts['args'] = ['--no-sandbox']
+            opts['executable_path'] = os.environ.get('PLAYWRIGHT_CHROMIUM_EXECUTABLE', '/usr/bin/chromium')
+        browser = getattr(pw, args.browser).launch(**opts)
+        for width in map(int, args.widths.split(',')):
+            context = browser.new_context(viewport={'width': width, 'height': 956 if width <= 440 else 1000}, service_workers='block', timezone_id='Europe/Kyiv')
+            context.add_init_script(smoke.session_script() + ("Object.defineProperty(navigator,'standalone',{value:true})" if width <= 440 else ''))
+            api = idle.fixtures(config, 414, 322, forbidden)
+            def route_request(route):
+                req = route.request
+                if req.url.startswith(base + '/'):
+                    return route.continue_()
+                if req.url.startswith(smoke.SUPABASE_HOST):
+                    if req.method == 'OPTIONS':
+                        return route.fulfill(status=204, headers={'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*'})
+                    if urlsplit(req.url).path.startswith('/auth/v1/'):
+                        return route.fulfill(status=200, content_type='application/json', headers={'Access-Control-Allow-Origin': '*'}, body='{"id":"00000000-0000-4000-8000-000000000099"}')
+                    return api(route)
+                return route.abort()
+            context.route('**/*', route_request)
+            page = context.new_page(); page.on('pageerror', lambda error: errors.append(str(error)))
+            page.goto(base + '/admin/bronuvannia/')
+            page.wait_for_selector('#view .booking-card,#view .upcoming-row')
+            previous = None
+            for view in ['analytics', 'finances']:
+                idle.navigate(page, view)
+                box = verify_dashboard(page, view, width, check)
+                if previous:
+                    check(f'UX01/{width}: both period controls have identical dimensions', abs(box['width'] - previous['width']) <= 1 and abs(box['height'] - previous['height']) <= 1, analytics=previous, finances=box)
+                previous = box
+                page.locator('.main').evaluate('e=>e.scrollTop=0')
+                page.screenshot(path=str(out/f'{view}-{width}.png'))
+            idle.navigate(page, 'bookings')
+            check(f'UX01/{width}: section action does not leak into global navigation', page.locator('#dashboardAddExpense').count() == 0)
+            context.close()
+        browser.close()
+    check('UX01: no unintended writes', not forbidden, writes=forbidden)
+    check('UX01: no browser errors', not errors, errors=errors)
+    (out/'results.json').write_text(json.dumps({'checks': results, 'browser': args.browser, 'localFixtures': args.local_fixtures, 'pinnedAcceptance': os.environ.get('GITHUB_ACTIONS') == 'true'}, ensure_ascii=False, indent=2)+'\n')
+
+if __name__ == '__main__':
+    main()

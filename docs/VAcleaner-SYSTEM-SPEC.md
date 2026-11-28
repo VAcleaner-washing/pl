@@ -1,9 +1,9 @@
 # VAcleaner — SYSTEM SPEC / SOURCE OF TRUTH
 
 **Статус:** нормативний документ продукту.  
-**Baseline version:** 4.3.72
-**Baseline build:** 4372
-**Останнє оновлення:** 2026-11-27
+**Baseline version:** 4.3.73
+**Baseline build:** 4373
+**Останнє оновлення:** 2026-11-28
 **Власник логіки:** VAcleaner  
 
 > Якщо поведінка коду суперечить цьому документу, це вважається regression, доки зміна не була окремо погоджена, внесена сюди та захищена тестом.
@@ -394,6 +394,16 @@ Footer додатково містить:
 - Політика конфіденційності.
 
 Навігація не повинна мати дубльованих пунктів, dead links, різних URL для однієї canonical сторінки або кнопок із однаковим текстом і різною логікою.
+
+## WEB-002A — approved shared footer (UX-02)
+
+- One adaptive footer: the original VA / CLEANER / POLTAVA logo, current description and verified contacts on the left, four navigation categories on the right at desktop widths. Preserve all existing destinations and copy; `Інформація` contains the existing rental terms/privacy links. No commercial or legal claims are added.
+- The prominent phone, Instagram and delivery/pickup contact links use the existing verified destinations. Hydrated pages retain their existing delegated `contact_click` owner, with one event per click and the original method/URL/attribution. Standalone exports have no React ContactAnalytics owner: only their footer gets one idempotent, same-schema contact adapter; it must never also bind on hydrated routes. VA HOME remains an ordinary external link, without an invented analytics event.
+- Mobile uses four native `details/summary` disclosures. Their opened links form two balanced columns; keyboard toggling and focus remain native. Categories start open in server HTML for no-JS accessibility/SEO and initialize closed only after hydration at ≤620px. Repeated enhancement/mutations preserve user disclosure state; breakpoint transitions restore the appropriate default. Desktop/tablet exposes all groups without a duplicated footer.
+- VA HOME is a separate linked premium horizontal banner, compact on mobile, with the previously approved decorative diffuser illustration (decorative empty alt, no synthetic product claim). Keep the existing VA HOME URL/target/rel and tagline. Copyright is unchanged.
+- `assets/site-v400.js` owns the canonical markup. The existing `scripts/sync-public-hydration.mjs` derives all public SSR footers and the three retained React footer components from it; cache-busted chunks preserve hydration/client-navigation parity. No alternate device tree or delayed footer repaint.
+- Black background, gold outline icons, restrained gradient/borders and compact proportions follow the owner's final attached reference. Scope is the footer: public/PWA header, global navigation, booking visibility thresholds, product selection and commercial text remain unchanged. The final copyright/banner must scroll clear of the existing mobile booking bar, including safe-area clearance.
+- Regression: `npm run test:public-visual-contract` checks server/client ownership and all public routes; the existing Chromium/WebKit public hydration command invokes `ux02_footer_qa.py` for native disclosure, real contact analytics, link/image integrity, containment and final-content clearance. Existing slow-JS, booking, CTA, SEO, attribution and full release gates remain mandatory. Actual N screenshots at mobile/tablet/desktop are required for independent visual review. Physical iPhone evidence remains separate.
 
 ## WEB-003 — canonical public routes
 
@@ -2263,6 +2273,10 @@ Inference із тексту `vendor/note` допускається лише дл
 
 `Фактична` / `Реальна` допускається лише при достатніх фактичних даних.
 
+## FINTRUTH-003 — owner-approved provisional UX-01 reporting
+
+A successful empty expense read has a recorded operating-expense total of 0 грн. It does not confirm the absence of actual expenses or a complete period. Both Finance and Analytics use the single canonical `financialSummary`: show provisional operating profit (completed revenue minus recorded operating costs), and provisional margin only when revenue is positive, with explicit incomplete-accounting caveats. Investment-only records do not establish operating costs. Unavailable/unloaded financial data is not an empty ledger: costs/profit/margin remain unknown. Preserve genuine losses; zero-revenue margin remains undefined. Keep booking-margin estimates, rental/deposit calculations, data sources and write contracts unchanged. This is the owner's explicit Functional Freeze exception for report presentation, not confirmation of period completeness or a second calculator.
+
 ---
 
 # 17. PUSH
@@ -2462,6 +2476,17 @@ Finance відповідає за фінансову правду.
 ## ANA-002 — completed
 
 Метрики завершених оренд мають однаково визначати completed booking у всіх модулях.
+
+## ANA-003 — approved UX-01 dashboard presentation
+
+- Product Owner's final attached visual reference takes precedence over the earlier UX-01/R2 proposals. Preserve the existing global header, navigation, search and business actions.
+- Analytics emphasizes the existing operating-profit result, with compact revenue, recorded operating expenses, completed-rental count and utilization surfaces, the real revenue/rentals trend, and access to every existing metric/report. Average check and comparisons remain available. Never invent a profit comparison or copy the reference's demonstration values/graph.
+- The compact mobile/desktop period dropdown exposes the same7/30/month/year/all periods and preserves the existing month/year pickers, step controls and synchronization with Finance. Both reports use the same dropdown geometry and touch targets of at least44px.
+- Finance presents one summary: operating profit, revenue, operating expenses and margin; the incomplete-expense warning remains visible. Unknown is not zero, negative profit must not look positive, and deposits/investments retain their existing accounting meaning.
+- Expense creation/editing/category filters, equipment payback, delivery detail, expense structure and explanatory data remain accessible. Disclosures retain existing controls/handlers and user open state across report rerenders; they do not create a second calculator, save path or data authority.
+- Mobile uses the actual canonical line/area trend with actual points, scales, revenue/rental toggle and readable date labels. Desktop keeps a real line plot. This replaces the former mobile-bars visual assertion in the same change; trend calculations/data selection and fail-closed financial contracts are unchanged.
+- UI projection runs through the existing finite scheduled presentation pass. Preserve PWA-007 idle quiescence, keyboard/focus, safe scrolling and all unaffected views.
+- Regression: Back-navigation, route-recovery, LAB forms and R4 section checks exercise the newly visible controls (including native referral disclosure); financial assertions retain their exact fixture values. Existing analytics visual QA plus the UX-01 dashboard helper invoked by the current normal-candidate Operations suite; current registry membership, CI engines/variants/gates and deployment policy are unchanged. Visual acceptance additionally requires actual N screenshots against the approved reference, not green tests alone. Footer is a separate UX-02 package.
 
 ---
 
@@ -6167,13 +6192,78 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 - Evidence: main run45367294251 attempt1 failed on the desktop deferral assertion after PR#93 passed full QA. Its skipped downstream WebKit/deployment is not GREEN; preserve this first failure in timing/flakiness records. A source-CSS reproduction records `visible/none` immediately and `hidden/none` after the120ms transition. Revalidate the correction with full PR and main QA before accepting deployment.
 
 
+# Change record — v4.3.70
+
+### ADDED
+- UX-01 / ANA-003: one accessible compact period dropdown per report, gold outline icons and native disclosures retaining every existing Analytics/Finance section. The approved final visual reference owns composition; fixture numbers are not runtime defaults.
+
+### CHANGED
+- Analytics emphasizes the existing operating profit above a compact secondary KPI grid and actual revenue/rental trend; mobile uses real line/area points. Finance groups profit, revenue, operating expenses and margin into one summary, with the incomplete-accounting warning always visible.
+- Release/cache metadata advances to4.3.70/4370. The normal stamp includes only the release-version constant in ten generated backend configuration files; configuration values, source hash, handlers and deployed Supabase remain unchanged.
+
+### FIXED
+- Owner-requested mobile refinements: the two report sections use one existing safe-top inset plus8px content padding (previously26px), tighter section/search spacing with44px controls, a120px plot (previously150px,20% reduction) and compact finance summary. The complete default390×844 trend must be above native bottom navigation at scrollTop0; accounting warning, chart controls/labels, search/filters and all disclosure functions remain. Desktop composition and global header/navigation are unchanged.
+- The same mobile overview bound covers absent-cost onboarding and existing loss/zero-revenue fixtures. Preserve the native «Додайте витрати» row; compact the trend card padding/header/summary spacing rather than removing onboarding, warnings, controls or financial values. Retain the first hosted unknown-cost overflow evidence and unchanged geometry thresholds.
+- Oversized and uneven dashboard surfaces and repeated explanatory headings. UI disclosures preserve open state, the dropdown preserves keyboard focus, and section actions do not leak into native global search.
+
+### PRESERVED
+- Financial formulas, recorded-cost/unknown distinction, real negative profit, deposits, investment separation, prices, data sources and business writes. Native expense creation/edit/archive access, category filters, search/return, period/calendar selectors, payback and delivery detail retain their original handlers.
+- Global PWA header/navigation, public footer (separate UX-02), registry membership, dependencies, CI/CD, release gates, Ruleset and Roadmap. G09 remains unresolved; this package does not repair or close it.
+
+### TESTS
+- Existing finance/deposit/analytics/date and presentation-isolation contracts; canonical Analytics visual regression plus scripts/ux01_dashboard_qa.py through the existing four normal Operations variants. Positive and negative fixtures cover unknown/investment-only/loss/zero-revenue states, native search/filter/edit access, focus, SVG stroke, disclosure state and a deliberately invalid touch target.
+- Actual normal-artifact screenshots at phone/tablet/desktop widths are required for independent visual/exact-head review. Full static/build, pinned Browser/WebKit, all four Operations, Release readiness and separate post-merge provenance/live/device acceptance remain mandatory; this record does not claim those pending results.
+
+
+# Change record — v4.3.71
+
+### ADDED
+- Owner-approved physical-iPhone corrective scope; the five visual refinements preserve the existing UX-01 composition.
+
+### CHANGED
+- FINTRUTH-003: a successful empty expense read shows recorded operating costs0 грн and explicitly provisional profit/margin from the single canonical financialSummary. Unknown/unavailable financial data remains unknown; investment-only records do not confirm operating costs; losses and undefined zero-revenue percentages remain honest. Booking-margin estimates and rental/deposit/pricing formulas are unchanged.
+- The owner approved this narrow report-presentation exception to Functional Freeze. Finance/Analytics and their existing weekly report use the same canonical values/status. No second calculator, new source or API/write change.
+
+### FIXED
+- Replace the large no-expense onboarding card with the summary warning «Витрати не внесено. Прибуток і маржинальність попередні». Retain the existing + Витрата action; remove repeated no-expense messages. The empty ledger is one compact information row while its counter/category filter remain usable.
+- Category selector retains16px text, native disclosure arrow and44px target with sufficient width; narrow screens may use a separate row. Remove the redundant visible Місяць caption while preserving the period dropdown, month picker, previous/next controls and accessible name.
+- Finance and Analytics use one semantic class from the canonical summary: positive green, loss red, zero neutral, unavailable neutral. Provisional status remains explicit regardless of amount color. Preserve the approved dashboard composition, every detail section and period/search/filter behavior.
+
+### TESTS
+- Same-change regression extends existing financial control and browser helpers with empty/explicit-zero/positive/loss/zero-revenue/unavailable cases, canonical equality, color/filter/empty-row negative controls and month-control access. Preserve all current registry membership/release gates. Before/after screenshots use identical synthetic read-only fixtures; browser WebKit/emulation is not physical iPhone acceptance.
+
+### PRESERVED
+- Standard release/cache stamping4.3.70/4370→4.3.71/4371 includes generated backend VERSION constants only, no backend deployment. Footer#104 and Equipment#105 remain separate; persistent-update-banner diagnosis/repair remains exclusively#106. No Ruleset, CI, dependency or Roadmap change. Independent exact-head review and production/device acceptance remain required.
+
+
+# Change record — v4.3.72
+
+### ADDED
+- WEB-002A: the owner's approved black/gold public footer, actionable verified contacts, four native navigation categories and separate VA HOME banner. The decorative diffuser SVG reuses the approved illustration, without product/price claims.
+
+### CHANGED
+- One canonical markup source now generates the retained SSR exports and all three React footer components. Mobile categories initialize closed after hydration and open their links in two columns; desktop/tablet retains four columns. Footer-scoped CSS preserves the original logo, typography hierarchy and compact reference proportions.
+- Standalone exports without a retained React contact-event owner receive one idempotent footer-only same-schema adapter. Hydrated pages keep the original owner. CTA thresholds, booking controls and global navigation remain unchanged.
+
+### FIXED
+- Contact information is available as actual clickable phone/Instagram/delivery links in the footer, rather than an unclickable bottom-line number. The ecosystem is its own compact linked banner instead of a fifth navigation column.
+
+### PRESERVED
+- All thirteen original navigation links/texts, brand description, copyright, verified phone/Instagram/VA HOME destinations and external link attributes. No invented address, opening hours, legal claim or commercial term.
+- UX-01 #103 and its owner-approved iPhone corrective #107 are accepted in baseline main b06aadf3. No additional Analytics/Finance behavior changes; financial/deposit/auth/PWA logic and all canonical sources remain unchanged apart from the ordinary coherent release/version stamp.
+- CI/CD, registry membership, Ruleset, required contexts, Roadmap and dependencies are unchanged. No Supabase operation/deployment, no G09 repair and no PR96 change. This is not production/device acceptance.
+
+### TESTS
+- Existing public visual contract checks exact canonical SSR footer parity across all listed routes; existing Chromium/WebKit hydration QA invokes the UX-02 footer helper for native click/keyboard disclosures, preserved links, contact events without duplicates, art loading, containment and final-content clearance. Existing slow hydration/booking assertions are retained.
+- Local responsive evidence covers 320/390/430/620/768/1024/1280/1440/1648, no-JS and a declared CSS simulation of a 34px bottom safe inset. Physical iPhone/WebKit acceptance and full native main-target CI remain separate requirements; screenshots do not certify them.
+
 ## UI-EQUIPMENT-TABS-001 — stable shared equipment navigation (UX-03)
 
 - The Equipment page keeps its existing shell heading, subtitle and search, followed by the shared fleet/pricing/finance tabs. The existing catalog toolbar and its pricing-only `Редагувати ціни` action follow the tabs. Contextual text wrapping or button visibility must not move shared navigation: at identical viewport, scroll and shell state, tab-bar top positions across all three tabs differ by at most1 CSS px.
 - Preserve all three views, selected-tab persistence, original product photos/descriptions/prices, catalog editor/open/close, fleet Refresh and unit actions, purchase editing and every financial warning. Do not clone handlers, insert empty spacers, hide overflow to mask the defect or change business calculations/data access. This bounded fix does not restyle the full equipment workspace or global shell.
 - `admin_equipment_fleet_qa.py` exercises actual tab clicks, selection/visibility, touch bounds, no horizontal overflow, unchanged acknowledged caches and pricing open/close; geometry covers320/375/390/430/768/1024/1440/1648. Snapshot the live connected, visible, selected tab bar atomically after responsive rendering; a detached/hidden zero-size node is not geometry evidence. Retain the existing bounded wait deadline and every geometry assertion. A reversible12px DOM displacement must fail alignment, and hidden tabs must not be accepted as a live measurement. The existing conflict/lost-response/idempotent-retry/reload cases remain intact. `admin_release_candidate_qa.py` reuses this geometry/action contract on normal N in all four existing Operations variants, without changing registry membership or CI selection. Existing pricing rejection and purchase acknowledgement/reload scenarios remain required.
 
-# Change record — v4.3.72 (UX-03 candidate, not deployed)
+# Change record — v4.3.73 (UX-03 candidate, not deployed)
 
 ### ADDED
 - Shared C/N tab-position regression with a displaced-DOM negative control; no new product function.
@@ -6185,7 +6275,7 @@ Change record 4.3.68 / 4368, 2026-11-23: owner explicitly authorized this separa
 - Shared Equipment tabs precede contextual catalog actions. Previously the pricing button narrowed/wrapped the toolbar above the tabs, shifting their vertical position. Only existing markup order changes; no CSS padding compensation or architecture refactor.
 
 ### PRESERVED
-- All functions, navigation, financial methodology, tariffs, data sources, inventory status/capacity and access rules. UX-01/UX-02/Governance remain separate PRs; this candidate must be reconciled with the accepted release baseline before merge. Standard version/cache stamping, including generated backend config VERSION metadata, is not backend logic change or deployment authorization.
+- All functions, navigation, financial methodology, tariffs, data sources, inventory status/capacity and access rules. Accepted UX-01, UX-02 and Governance are preserved.
 
 ### TESTS
 - Same-change C/N geometry/action regressions and displaced-DOM negative control; old-artifact failure evidence; existing equipment/static/artifact and full release gates. Local browser results, hosted pinned CI, independent exact-head visual review, deployment/live readback and physical iPhone verification remain separate evidence. No production acceptance is asserted by this change record.

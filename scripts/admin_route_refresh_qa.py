@@ -79,6 +79,11 @@ def main():
             page.goto(base + '/admin/bronuvannia/')
             page.wait_for_selector('#view .booking-card,#view .upcoming-row')
             idle.navigate(page, 'finances')
+            delivery = page.locator('.ux01-detail:has(.delivery-map-card)')
+            expect(delivery).to_be_visible()
+            if delivery.get_attribute('open') is None:
+                delivery.locator(':scope>summary').click()
+            expect(delivery).to_have_attribute('open', '')
             buttons = page.locator('.delivery-route-backfill')
             expect(buttons.first).to_be_visible()
             page.clock.install()
@@ -109,6 +114,8 @@ def main():
             expect(page.locator('[data-delivery-route-status]').first).to_contain_text('підтверджено')
             check('explicit reconciliation reads the canonical result without repeating the save', len(writes) == 1)
             check('route recovery leaves all financial/status fields intact', original == {key: booking.get(key) for key in original})
+            expect(page.locator('.ux01-detail:has(.delivery-map-card)')).to_have_attribute('open', '')
+            check('delivery disclosure remains open after authoritative route reconciliation', True)
             page.screenshot(path=str(out / 'save-confirmed-by-read.png'))
             check('all traffic stayed synthetic with no runtime errors or unrecognized actions', not errors and not forbidden and not external)
         except Exception as error:
