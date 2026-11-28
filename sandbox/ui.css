@@ -220,3 +220,15 @@ html[data-admin-lab][data-ux01-ready] #view .ux01-detail-title:focus-visible,htm
 html[data-admin-lab][data-ux01-ready] #view .ux01-average-kpi>*{flex:0 0 auto!important;width:auto!important;max-width:100%;display:inline!important}
 html[data-admin-lab][data-ux01-ready] #view .ux01-metric-context{display:flex;flex-wrap:wrap;gap:4px 10px;padding:6px 0}
 html[data-admin-lab][data-ux01-ready] #view .ux01-metric-context>small{font-size:12px!important;line-height:1.5!important}
+
+/* UX-01 iPhone corrections: existing report composition and native controls. */
+html[data-admin-lab][data-ux01-ready] #view :is(.ux01-profit-hero,.ux01-finance-profit,.ux01-finance-margin).finance-profit>strong{color:#8fe0b0!important}
+html[data-admin-lab][data-ux01-ready] #view :is(.ux01-profit-hero,.ux01-finance-profit,.ux01-finance-margin).finance-loss>strong{color:#ff9d97!important}
+html[data-admin-lab][data-ux01-ready] #view :is(.ux01-profit-hero,.ux01-finance-profit,.ux01-finance-margin).finance-neutral>strong{color:var(--lab-text,#edf2f8)!important}
+html[data-admin-lab][data-ux01-ready] #view :is(.ux01-profit-hero,.ux01-finance-profit,.ux01-finance-margin).finance-unknown>strong{color:var(--lab-muted,#b3c0cd)!important}
+html[data-admin-lab][data-ux01-ready] #view .finance-ledger-head{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px}
+html[data-admin-lab][data-ux01-ready] #view .finance-ledger-head>label{flex:0 1 240px;min-width:0;max-width:100%;font-size:12px;text-transform:none;letter-spacing:normal}
+html[data-admin-lab][data-ux01-ready] #view #expenseCategoryFilter{width:100%;max-width:100%;min-width:0;min-height:44px!important;font-size:16px!important;padding-inline:12px 38px!important;text-transform:none;letter-spacing:normal;appearance:auto}
+html[data-admin-lab][data-ux01-ready] #view .expense-table-empty{min-height:0!important;margin:10px 0 0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;overflow:visible}
+html[data-admin-lab][data-ux01-ready] #view .expense-empty{margin:0;padding:8px 0;color:var(--lab-muted,#b3c0cd);font-size:14px;line-height:1.45}
+@media(max-width:600px){html[data-admin-lab][data-ux01-ready] #view .finance-ledger-head{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important}html[data-admin-lab][data-ux01-ready] #view .finance-ledger-head>label{width:100%!important;max-width:360px}}

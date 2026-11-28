@@ -1,8 +1,8 @@
 {
-  "version": "4.3.71",
-  "build": 4371,
-  "reviewMode": "ux02-main-synchronized-candidate-awaiting-independent-visual-exact-head-review",
-  "baselineApplicationSourceCommit": "5713268d97609d994bb9a4fa449332dd9de5354d",
+  "version": "4.3.72",
+  "build": 4372,
+  "reviewMode": "ux02-footer-on-accepted-main-awaiting-independent-exact-head-review",
+  "baselineApplicationSourceCommit": "b06aadf3d5b3a3aa3cee22636cad29173b09af17",
   "applicationFixes": [
     {
       "path": "assets/site-v400.js",
@@ -26,9 +26,9 @@
     }
   ],
   "artifactFiles": 274,
-  "artifactTreeSha256": "62f60a8f8dcf1c04547e9f2fdd9dec330fe8ff207fd67007234393e74e796c04",
+  "artifactTreeSha256": "3c3fd0a1eea533592aecdae381cfc28cffd5ed17d8a6cb25a080e2201bd8b6af",
   "artifactTreeFormat": "sorted-relative-path-nul-file-bytes-nul",
-  "reviewArchiveSha256": "1b7367647a6875716ea69b8224078c2b152a3626c190bd6c208053be99752ee0",
+  "reviewArchiveSha256": "0689b54abc0cf962e262d4fba8620a7b839230ee8e182d3b06c7fe5ed2073918",
   "baselineReviewRuns": {
     "production63": 43948184720,
     "production67": 45121509239,
@@ -44,5 +44,5 @@
     77
   ],
   "backendFixes": [],
-  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from 4.3.70 to 4.3.71 in ten generated config.ts/config.deploy.js files. No configuration values, handlers, database operations or backend deployment."
+  "generatedBackendVersionStamp": "Only VACLEANER_RELEASE_VERSION changes from 4.3.71 to 4.3.72 in ten generated config.ts/config.deploy.js files. No configuration values, handlers, database operations or backend deployment."
 }
